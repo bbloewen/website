@@ -1893,6 +1893,10 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
   .footer-bottom-donate-btn { grid-column: 1; margin-top: 6px; }
   .footer-donate-lines { text-align: center; }
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  /* Über-uns: Soziale Sportidee + Werte sollen mobil einspaltig stehen (die
+     globale 2-Spalten-Regel oben ist für andere .grid-4 wie das Partner-Logo-
+     Raster auf der Startseite gedacht) — deshalb hier gezielt überschrieben. */
+  #soziale-sportidee .grid-4, #werte .grid-4 { grid-template-columns: 1fr; }
   /* Die Desktop-Regel für die 4er-Reihe (width: 25%) greift rechnerisch auch
      hier, sobald die Positions-/Teileranzahl zufällig passt — bei 2 Spalten
      muss die Lücke aber die Hälfte statt ein Viertel der Breite bekommen,
