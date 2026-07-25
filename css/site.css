@@ -1741,7 +1741,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .footer-leagues-right { grid-column: 3 / 5; display: flex; justify-content: center; }
 .footer-leagues-right img { display: block; width: 100%; max-width: 320px; height: auto; border-radius: var(--radius-sm); }
 .footer-leagues-label {
-  font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #fff;
+  font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: rgba(0,18,45,.6);
 }
 .footer-leagues-logos-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .league-chip {
