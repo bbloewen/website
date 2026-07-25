@@ -10,8 +10,8 @@
 
   var current = 0;
   toggle.addEventListener('click', function () {
-    widgets[current].style.display = 'none';
+    widgets[current].classList.add('hidden');
     current = (current + 1) % widgets.length;
-    widgets[current].style.display = '';
+    widgets[current].classList.remove('hidden');
   });
 })();
