@@ -986,9 +986,10 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   background: var(--color-orange-50); color: var(--color-brand-orange);
   display: flex; align-items: center; justify-content: center;
 }
-.info-tile-row-head { display: flex; align-items: center; gap: 12px; }
+.info-tile-row-head { display: flex; align-items: flex-start; gap: 12px; }
 .info-tile-row-head .tile-icon { flex-shrink: 0; }
 .info-tile-row-head h3 { margin: 0; }
+.info-tile-row-divided .info-tile-row-head { padding-bottom: 12px; border-bottom: 1px solid var(--border); margin-bottom: 2px; }
 
 /* =====================================================================
    HERO
