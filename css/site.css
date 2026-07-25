@@ -614,6 +614,14 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   .history-content-bottom { width: auto; margin: 0 0 0 32px; text-align: left; }
 }
 
+/* Helle Variante von .history-timeline (LÖWENPARK-Geschichte auf bg-subtle,
+   wie das Geschichte-Grau bei Über uns) — die Basisfarben oben sind für den
+   dunklen Verlauf gebaut, hier nur die Text-/Linienfarben überschrieben. */
+.history-timeline-light .history-item h3 { color: var(--text-primary); }
+.history-timeline-light .history-item p { color: var(--text-secondary); }
+.history-timeline-light::before { background: var(--border-strong); }
+.history-timeline-light::after { border-bottom-color: var(--color-brand-orange); }
+
 /* Über-uns-Geschichte: horizontale Variante auf hellem bg-subtle-Grund
    (eigene Klassen statt .history-timeline, da diese für dunklen Hintergrund
    mit weißer Schrift gebaut ist und auch auf der Löwenpark-Seite läuft). */
