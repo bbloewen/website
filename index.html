@@ -18,8 +18,11 @@
 
 <main id="main">
 
-  <!-- HERO — größer auf der Startseite, Platz für eine Top-News-Box; Unterseiten bleiben kompakt -->
-  <section class="hero-photo hero-lg">
+  <!-- HERO — größer auf der Startseite, Platz für eine Top-News-Box; Unterseiten bleiben kompakt.
+       hero-slider: automatischer Bild-Slider (5s-Intervall, js/home-hero-slider.js).
+       Weitere Bilder ergänzen: einfach weitere .hero-slide-Divs einfügen. -->
+  <section class="hero-photo hero-lg hero-slider" data-hero-slider>
+    <div class="hero-slide active" style="background-image:url('/assets/img/hero-startseite-alt.jpg')"></div>
     <div class="container">
       <div class="hero-lg-grid">
         <div>
@@ -208,6 +211,7 @@
 <script src="/js/home-next-game.js?v=1784976885"></script>
 <script src="/js/home-news-feed.js?v=1784976885"></script>
 <script src="/js/home-hero-widget-toggle.js?v=1784976885"></script>
+<script src="/js/home-hero-slider.js?v=1784976885"></script>
 <script src="/js/partner-tile.js?v=1784976885"></script>
 <script src="/js/home-hauptpartner.js?v=1784976885"></script>
 </body>
