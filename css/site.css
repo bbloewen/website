@@ -1967,7 +1967,8 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
   transition: opacity var(--dur-fast) var(--ease-out);
 }
 .panini-photo-frame > i { color: rgba(255,255,255,.55); }
-.panini-photo-frame-0 img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+.panini-photo-frame-0 img,
+.panini-photo-frame-1 img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
 .panini-photo-frame-0 { opacity: 1; }
 .panini-photo-frame-1 span { font-size: 10px; color: rgba(255,255,255,.65); }
 .panini-photo-frame-2 { align-items: stretch; justify-content: center; padding: 14px; }
