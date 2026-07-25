@@ -849,7 +849,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 }
 .contact-person-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .contact-person-photo span { font-size: 10px; text-align: center; line-height: 1.2; }
-.contact-person-card-centered { flex-direction: column; justify-content: center; text-align: center; }
+.contact-person-card-centered { justify-content: center; }
 
 /* Sponsoren-Wand (partner/sponsoring.html) — Filter-Chips + eine Kachel-Wand,
    Kachelgröße markiert die Ebene (Top-Partner/Wirkungspartner größer als
@@ -981,8 +981,6 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   padding: 24px; display: flex; flex-direction: column; gap: 10px;
 }
 #ansprechperson .info-tile { align-items: center; text-align: center; }
-.baskidball-contact-avatar { width: 88px; height: 88px; border-radius: 50%; overflow: hidden; }
-.baskidball-contact-avatar img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
 .info-tile .tile-icon {
   width: 44px; height: 44px; border-radius: var(--radius-md);
   background: var(--color-orange-50); color: var(--color-brand-orange);
