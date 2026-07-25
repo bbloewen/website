@@ -1983,6 +1983,7 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
   display: block; font-size: clamp(8.5px, 2.4vw, 10px); font-weight: var(--weight-bold);
   text-transform: uppercase; letter-spacing: .04em; color: var(--color-brand-orange); margin-bottom: 1px;
 }
+.panini-steckbrief li:first-child { font-weight: var(--weight-bold); font-size: 1.08em; }
 .panini-wrap[data-step="1"] .panini-photo-frame-0,
 .panini-wrap[data-step="2"] .panini-photo-frame-0 { opacity: 0; }
 .panini-wrap[data-step="1"] .panini-photo-frame-1 { opacity: 1; }
