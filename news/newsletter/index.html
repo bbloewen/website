@@ -50,9 +50,9 @@
   <section class="section bg-subtle">
     <div class="container">
       <span class="eyebrow">Archiv</span>
-      <h2 class="t-h2" style="margin-bottom:20px">Vergangene Ausgaben</h2>
+      <h2 class="t-h2 mb-5">Vergangene Ausgaben</h2>
       <div id="newsletter-archiv-list"></div>
-      <p class="t-body" id="newsletter-archiv-empty" style="display:none">Die erste Ausgabe ist in Vorbereitung — melde dich oben an, um sie direkt zu bekommen.</p>
+      <p class="t-body hidden" id="newsletter-archiv-empty">Die erste Ausgabe ist in Vorbereitung — melde dich oben an, um sie direkt zu bekommen.</p>
     </div>
   </section>
 </main>
@@ -101,7 +101,7 @@
       return '<a class="card hoverable" href="' + a.url + '" style="display:block;padding:20px;margin-bottom:14px">' +
         '<span class="card-label">' + a.datum + '</span>' +
         '<h3 style="font-size:18px">' + a.titel + '</h3>' +
-        '<p class="t-body-sm" style="margin-top:4px">' + a.teaser + '</p>' +
+        '<p class="t-body-sm mt-1">' + a.teaser + '</p>' +
       '</a>';
     }).join('');
     if (window.lucide) lucide.createIcons();

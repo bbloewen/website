@@ -25,7 +25,7 @@
           <span class="eyebrow">Heimspiel Basketball Löwen Erfurt</span>
           <h1 style="font-size:clamp(20px,5vw,56px);white-space:nowrap"><span class="kw">Porsche BBA Ludwigsburg<span class="swoosh" aria-hidden="true"></span></span>.</h1>
           <p class="lead">11. Oktober 2026 · 17:00 Uhr</p>
-          <a class="hero-location" href="https://www.google.com/maps/search/?api=1&query=Riethsporthalle+Erfurt+Essener+Stra%C3%9Fe+20+99089+Erfurt" target="_blank" rel="noopener"><i data-lucide="map-pin" style="width:16px;height:16px"></i> Riethsporthalle, Essener Straße 20, 99089 Erfurt</a>
+          <a class="hero-location" href="https://www.google.com/maps/search/?api=1&query=Riethsporthalle+Erfurt+Essener+Stra%C3%9Fe+20+99089+Erfurt" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Riethsporthalle, Essener Straße 20, 99089 Erfurt</a>
         </div>
         <div><!-- reserviert für künftiges CTA/Element auf dem Herobild --></div>
       </div>
@@ -38,7 +38,7 @@
       <div class="card" style="padding:24px">
         <div class="buy-grid">
           <div class="buy-prices-col">
-            <h3 class="t-h4" style="margin-bottom:12px">Preise</h3>
+            <h3 class="t-h4 mb-3">Preise</h3>
             <div class="price-row"><span>Kategorie 1</span><strong>16,00 €</strong></div>
             <div class="price-row"><span>Kategorie 1 (ermäßigt)</span><strong>14,00 €</strong></div>
             <div class="price-row"><span>Kategorie 2</span><strong>12,00 €</strong></div>
@@ -48,11 +48,11 @@
           <div class="buy-thumb-col">
             <button type="button" class="buy-thumb-btn" id="seatplan-modal-trigger" aria-label="Blockwahl öffnen">
               <img src="/assets/img/riethsporthalle-blockplan.png" alt="Blockplan der Riethsporthalle mit Blöcken A–F, Kategorien und Spielfeld" />
-              <span class="buy-thumb-cta"><i data-lucide="expand" style="width:16px;height:16px"></i> Block wählen</span>
+              <span class="buy-thumb-cta"><i data-lucide="expand" class="icon-16"></i> Block wählen</span>
             </button>
           </div>
           <div class="buy-cart-col">
-            <h3 class="t-h4" style="margin-bottom:4px">Deine Auswahl</h3>
+            <h3 class="t-h4 mb-1">Deine Auswahl</h3>
             <p class="t-caption" style="color:var(--text-muted);margin-bottom:14px">Einzelticket für Basketball Löwen Erfurt – Porsche BBA Ludwigsburg, 11. Oktober 2026.</p>
             <div id="seatplan-cart"></div>
             <div class="seatplan-cart-total"><span>Gesamt</span><span id="seatplan-total">0 €</span></div>
@@ -66,7 +66,7 @@
       <div class="modal-backdrop" id="seatplan-modal-backdrop">
         <div class="modal-box modal-box-blockplan" role="dialog" aria-modal="true" aria-label="Blockwahl">
           <button class="modal-close" aria-label="Schließen" id="seatplan-modal-close"><i data-lucide="x"></i></button>
-          <h3 class="t-h4" style="margin-bottom:12px">Block wählen</h3>
+          <h3 class="t-h4 mb-3">Block wählen</h3>
           <div style="flex:1;min-height:0;overflow-y:auto">
             <div id="seatplan-root"></div>
           </div>
@@ -75,18 +75,18 @@
       </div>
 
       <div class="card" style="margin-top:32px;padding:20px 24px">
-        <h3 class="t-h4" style="margin-bottom:12px">Dein Ticket</h3>
+        <h3 class="t-h4 mb-3">Dein Ticket</h3>
         <div class="grid-3">
           <div style="display:flex;gap:10px;align-items:flex-start">
-            <i data-lucide="smartphone" style="width:18px;height:18px;color:var(--color-brand-orange);flex-shrink:0;margin-top:2px"></i>
+            <i data-lucide="smartphone" class="icon-18" style="color:var(--color-brand-orange);flex-shrink:0;margin-top:2px"></i>
             <p class="t-body-sm">Digital als QR-Code per E-Mail — zum Einlass einfach aufs Handy holen oder ausdrucken.</p>
           </div>
           <div style="display:flex;gap:10px;align-items:flex-start">
-            <i data-lucide="armchair" style="width:18px;height:18px;color:var(--color-brand-orange);flex-shrink:0;margin-top:2px"></i>
+            <i data-lucide="armchair" class="icon-18" style="color:var(--color-brand-orange);flex-shrink:0;margin-top:2px"></i>
             <p class="t-body-sm">Gültig für die gewählte Kategorie, freie Platzwahl innerhalb des Blocks.</p>
           </div>
           <div style="display:flex;gap:10px;align-items:flex-start">
-            <i data-lucide="ticket" style="width:18px;height:18px;color:var(--color-brand-orange);flex-shrink:0;margin-top:2px"></i>
+            <i data-lucide="ticket" class="icon-18" style="color:var(--color-brand-orange);flex-shrink:0;margin-top:2px"></i>
             <p class="t-body-sm">Gilt ausschließlich für dieses eine Spiel.</p>
           </div>
         </div>
@@ -127,7 +127,7 @@
       </div>
 
       <div class="dauerkarte-callout">
-        <i data-lucide="armchair" style="width:28px;height:28px;color:var(--color-brand-orange);flex-shrink:0"></i>
+        <i data-lucide="armchair" class="icon-28" style="color:var(--color-brand-orange);flex-shrink:0"></i>
         <p class="t-body-sm">Du kannst dir, auch wenn die Saison schon begonnen hat, noch deine Dauerkarte sichern.</p>
         <a class="btn btn-primary btn-sm" href="/tickets/dauerkarte.html">Zur Dauerkarte</a>
       </div>

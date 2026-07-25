@@ -4,6 +4,60 @@
    Load order: colors_and_type.css, then site.css.
    ===================================================================== */
 
+/* =====================================================================
+   UTILITY-KLASSEN — ersetzen die häufigsten wiederkehrenden Inline-Styles
+   (Icon-Größen, Abstände, Flex-Layouts). Werte für Margin/Gap kommen aus der
+   --space-Skala in colors_and_type.css (4px-Raster), die vorher definiert,
+   aber nirgends benutzt wurde. Bei der Umstellung wurden ein paar krumme
+   Inline-Werte (3px/6px/10px/14px) aufs nächste 4px-Raster gerundet — das
+   sind maximal 2px Unterschied, site-weit beim Seitencheck mit im Blick behalten.
+   ===================================================================== */
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.inline-flex { display: inline-flex; }
+.items-center { align-items: center; }
+.items-start { align-items: flex-start; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.flex-wrap { flex-wrap: wrap; }
+.text-center { text-align: center; }
+.block { display: block; }
+.hidden { display: none; }
+.gap-1 { gap: var(--space-1); }
+.gap-2 { gap: var(--space-2); }
+.gap-3 { gap: var(--space-3); }
+.gap-4 { gap: var(--space-4); }
+.gap-5 { gap: var(--space-5); }
+.gap-6 { gap: var(--space-6); }
+.mt-1 { margin-top: var(--space-1); }
+.mt-2 { margin-top: var(--space-2); }
+.mt-3 { margin-top: var(--space-3); }
+.mt-4 { margin-top: var(--space-4); }
+.mt-5 { margin-top: var(--space-5); }
+.mt-6 { margin-top: var(--space-6); }
+.mt-8 { margin-top: var(--space-8); }
+.mb-1 { margin-bottom: var(--space-1); }
+.mb-2 { margin-bottom: var(--space-2); }
+.mb-3 { margin-bottom: var(--space-3); }
+.mb-4 { margin-bottom: var(--space-4); }
+.mb-5 { margin-bottom: var(--space-5); }
+.mb-6 { margin-bottom: var(--space-6); }
+/* Icon-Größen (Lucide-Icons, <i data-lucide>) — exakte, im Repo vorkommende
+   Werte, bewusst NICHT aufs Spacing-Raster gerundet (das würde die
+   Symbolgröße sichtbar verändern). */
+.icon-12 { width: 12px; height: 12px; }
+.icon-14 { width: 14px; height: 14px; }
+.icon-15 { width: 15px; height: 15px; }
+.icon-16 { width: 16px; height: 16px; }
+.icon-18 { width: 18px; height: 18px; }
+.icon-20 { width: 20px; height: 20px; }
+.icon-22 { width: 22px; height: 22px; }
+.icon-26 { width: 26px; height: 26px; }
+.icon-28 { width: 28px; height: 28px; }
+.icon-30 { width: 30px; height: 30px; }
+.icon-32 { width: 32px; height: 32px; }
+.icon-36 { width: 36px; height: 36px; }
+
 /* ---------- Reset ---------- */
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
@@ -386,7 +440,7 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
   border-top: 1px solid var(--border); text-decoration: none;
 }
 .insta-sidebar-block .insta-sidebar-item:first-of-type { border-top: none; }
-.insta-sidebar-item img { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+.insta-sidebar-item img { width: 48px; height: 48px; border-radius: var(--radius-md); object-fit: cover; flex-shrink: 0; }
 .insta-sidebar-item span {
   font-size: 13px; line-height: 1.4; color: var(--text-primary);
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;
@@ -493,7 +547,7 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .partner-flip-card { height: 150px; perspective: 1200px; }
 .partner-flip-inner {
   position: relative; width: 100%; height: 100%;
-  transition: transform .6s var(--ease-out); transform-style: preserve-3d;
+  transition: transform var(--dur-flip) var(--ease-out); transform-style: preserve-3d;
 }
 .partner-flip-card:hover .partner-flip-inner { transform: rotateY(180deg); }
 .partner-flip-front, .partner-flip-back {
@@ -542,7 +596,7 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
   aspect-ratio: 9 / 16;
 }
 .insta-detail-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
-@media (max-width: 720px) {
+@media (max-width: 719px) {
   .insta-detail-grid { grid-template-columns: 1fr; }
   .insta-detail-media { max-width: 260px; margin: 0 auto; }
 }
@@ -604,8 +658,8 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .news-slider-mobile { display: none; }
 /* Fortschrittsbalken statt Einzel-Punkte — bei 15 Kacheln wären 15 Punkte zu
    viel, der schmale Balken deutet nur an, wie weit man ist und dass es weitergeht. */
-.news-mobile-progress { height: 3px; border-radius: 999px; background: var(--border); margin: 14px 4px 0; overflow: hidden; }
-.news-mobile-progress-thumb { height: 100%; width: 20%; border-radius: 999px; background: var(--color-brand-orange); transform: translateX(0); }
+.news-mobile-progress { height: 3px; border-radius: var(--radius-full); background: var(--border); margin: 14px 4px 0; overflow: hidden; }
+.news-mobile-progress-thumb { height: 100%; width: 20%; border-radius: var(--radius-full); background: var(--color-brand-orange); transform: translateX(0); }
 @media (max-width: 1023px) {
   .news-slider-desktop { display: none; }
   .news-slider-mobile { display: block; }
@@ -709,7 +763,7 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .partner-tile-top, .partner-tile-wirkungspartner, .partner-tile.is-enlarged { grid-column: span 2; }
 .partner-tile-inner {
   position: relative; width: 100%; height: 100%;
-  transition: transform .6s var(--ease-out); transform-style: preserve-3d;
+  transition: transform var(--dur-flip) var(--ease-out); transform-style: preserve-3d;
 }
 /* Hover-Flip nur bei echten Zeigegeräten (Maus) — auf Touch/iPad hat :hover
    keinen zuverlässigen "nur ansehen"-Zustand, ein Tap löst Flip UND sofortige
@@ -769,7 +823,7 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .investor-tile { perspective: 1200px; }
 .investor-tile-inner {
   position: relative; width: 100%; padding-top: 125%;
-  transition: transform .6s var(--ease-out); transform-style: preserve-3d;
+  transition: transform var(--dur-flip) var(--ease-out); transform-style: preserve-3d;
 }
 @media (hover: hover) and (pointer: fine) {
   .investor-tile:hover .investor-tile-inner { transform: rotateY(180deg); }
@@ -925,7 +979,7 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .hero-badge-stack { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
 .hero-league-badge {
   display: inline-flex; flex-shrink: 0; border: none; cursor: pointer; font: inherit;
-  background: rgba(255,255,255,.92); padding: 6px 14px; border-radius: 10px;
+  background: rgba(255,255,255,.92); padding: 6px 14px; border-radius: var(--radius-md);
   transition: background var(--dur-fast) var(--ease-out);
 }
 .hero-league-badge:hover { background: #fff; }
@@ -936,7 +990,7 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
   display: inline-flex; flex-shrink: 0; border: none; background: none; padding: 0; cursor: pointer;
 }
 .hero-badge-plain img {
-  width: 108px; height: auto; display: block; border-radius: 8px;
+  width: 108px; height: auto; display: block; border-radius: var(--radius-md);
   transition: transform var(--dur-fast) var(--ease-out);
 }
 .hero-badge-plain:hover img, .hero-badge-plain:focus-visible img { transform: scale(1.05); }
@@ -1187,7 +1241,7 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .news-slides { display: grid; overflow: hidden; }
 .news-slide {
   grid-area: 1 / 1; opacity: 0; transform: translateY(100%);
-  transition: transform .5s var(--ease-out), opacity .5s var(--ease-out);
+  transition: transform var(--dur-slow) var(--ease-out), opacity var(--dur-slow) var(--ease-out);
 }
 .news-slide.is-active { opacity: 1; transform: translateY(0); }
 .news-slide.is-leaving { opacity: 0; transform: translateY(-100%); }
@@ -1291,7 +1345,7 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .freundeskreis-star::after {
   content: attr(data-tooltip); position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
   background: var(--text-primary); color: #fff; font-size: 11px; font-weight: var(--weight-semibold);
-  padding: 4px 9px; border-radius: 6px; white-space: nowrap; opacity: 0; visibility: hidden;
+  padding: 4px 9px; border-radius: var(--radius-sm); white-space: nowrap; opacity: 0; visibility: hidden;
   transition: opacity var(--dur-fast) var(--ease-out); pointer-events: none; z-index: 5;
 }
 .freundeskreis-star:hover::after, .freundeskreis-star:focus-visible::after { opacity: 1; visibility: visible; }
@@ -1425,7 +1479,7 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
   background: var(--color-brand-orange-text); color: #fff; border: none;
   transform: rotate(-45deg); font-family: var(--font-base);
   font-weight: var(--weight-bold); font-size: 13px; letter-spacing: .02em;
-  cursor: pointer; box-shadow: 0 -2px 8px rgba(0,18,45,.2); pointer-events: auto;
+  cursor: pointer; box-shadow: var(--shadow-ribbon-up); pointer-events: auto;
   transition: background var(--dur-fast) var(--ease-out);
 }
 .discount-corner-fixed .ribbon-inner:hover { background: var(--action-primary-hover); }
@@ -1491,7 +1545,7 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
   background: var(--color-brand-orange-text); color: #fff;
   padding: 7px 52px; transform: rotate(45deg);
   font-size: 13px; font-weight: var(--weight-bold); letter-spacing: .02em;
-  cursor: pointer; border: none; box-shadow: 0 2px 8px rgba(0,18,45,.2);
+  cursor: pointer; border: none; box-shadow: var(--shadow-ribbon);
   transition: background var(--dur-fast) var(--ease-out);
 }
 .discount-ribbon:hover { background: var(--action-primary-hover); }
@@ -1562,14 +1616,14 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 }
 .footer-leagues-left { grid-column: 1 / 3; display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
 .footer-leagues-right { grid-column: 3 / 5; display: flex; justify-content: center; }
-.footer-leagues-right img { display: block; width: 100%; max-width: 320px; height: auto; border-radius: 4px; }
+.footer-leagues-right img { display: block; width: 100%; max-width: 320px; height: auto; border-radius: var(--radius-sm); }
 .footer-leagues-label {
   font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: rgba(0,18,45,.6);
 }
 .footer-leagues-logos-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .league-chip {
   display: inline-flex; align-items: center; justify-content: center;
-  height: 44px; padding: 6px 16px; border-radius: 8px;
+  height: 44px; padding: 6px 16px; border-radius: var(--radius-md);
   background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14);
   transition: background var(--dur-fast) var(--ease-out);
 }
@@ -1630,11 +1684,20 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
   font-size: 13px; color: rgba(255,255,255,.55); font-weight: var(--weight-light); line-height: 1.5;
 }
 .footer-badge-btn { background: none; border: none; padding: 0; cursor: pointer; display: block; line-height: 0; }
-.footer-badge-btn img { height: 72px; width: auto; border-radius: var(--radius-sm); display: block; transition: transform .2s var(--ease-out); }
+.footer-badge-btn img { height: 72px; width: auto; border-radius: var(--radius-sm); display: block; transition: transform var(--dur-med) var(--ease-out); }
 .footer-badge-btn:hover img, .footer-badge-btn:focus-visible img { transform: scale(1.06); }
 
 /* =====================================================================
-   RESPONSIVE — 3 breakpoints (Laptop >=1024 / Tablet 600-1023 / Mobile <=599)
+   RESPONSIVE — 3 Standard-Breakpoints (Laptop >=1024 / Tablet 600-1023 /
+   Mobile <=599), site-weit als max-width:599px / max-width:1023px /
+   min-width:600px / min-width:1024px verwendet. CSS Custom Properties
+   funktionieren nicht innerhalb @media-Bedingungen (Browser-Limitierung),
+   deshalb hier als Kommentar statt als --token dokumentiert.
+   Einzelne Komponenten (Freundeskreis-Sterne, Sponsoring-Hero, Insta-Detail,
+   Buy-Grid, Fanshop-Produktraster, Tablet-Nav-Schwelle) haben bewusst eigene,
+   engere Breakpoints (700/719/860/899/900px) für ihren jeweiligen Inhalt —
+   das sind keine Tippfehler, sondern Reflow-Punkte für die jeweilige
+   Komponente, unabhängig von den 3 Standard-Stufen.
    ===================================================================== */
 
 /* --- Tablet + Mobile shared (max-width: 1023px) --- */
@@ -1819,7 +1882,7 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
    ===================================================================== */
 .flip-card { perspective: 1200px; cursor: pointer; }
 .flip-card-inner {
-  position: relative; width: 100%; min-height: 110px; transition: transform .5s var(--ease-out);
+  position: relative; width: 100%; min-height: 110px; transition: transform var(--dur-slow) var(--ease-out);
   transform-style: preserve-3d;
 }
 .flip-card.is-flipped .flip-card-inner { transform: rotateY(180deg); }

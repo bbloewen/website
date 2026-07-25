@@ -49,7 +49,7 @@
                 <option value="keine_angabe">Keine Angabe</option>
               </select>
             </div>
-            <div class="field" id="mw-erm-field" style="display:none">
+            <div class="field hidden" id="mw-erm-field">
               <label class="sr-only" for="mw-ermaessigung">Ermäßigungskategorie</label>
               <select id="mw-ermaessigung" name="ermaessigungKategorie">
                 <option value="">– keine Ermäßigung –</option>
@@ -64,11 +64,11 @@
               <input type="date" id="mw-geburtsdatum" name="geburtsdatum" required placeholder="Geburtsdatum *" />
               <p class="hint">Bei minderjährigen Mitgliedern ist zusätzlich die Unterschrift der gesetzlichen Vertreter nötig — wir melden uns dazu bei dir.</p>
             </div>
-            <div class="field" id="mw-erzieh-vorname-field" style="display:none">
+            <div class="field hidden" id="mw-erzieh-vorname-field">
               <label class="sr-only" for="mw-erzieh-vorname">Vorname Erziehungsberechtigte:r</label>
               <input type="text" id="mw-erzieh-vorname" name="erziehVorname" placeholder="Vorname Erziehungsberechtigte:r *" />
             </div>
-            <div class="field" id="mw-erzieh-nachname-field" style="display:none">
+            <div class="field hidden" id="mw-erzieh-nachname-field">
               <label class="sr-only" for="mw-erzieh-nachname">Nachname Erziehungsberechtigte:r</label>
               <input type="text" id="mw-erzieh-nachname" name="erziehNachname" placeholder="Nachname Erziehungsberechtigte:r *" />
             </div>
@@ -100,7 +100,7 @@
               <button type="button" class="btn btn-ghost btn-block" id="mw-family-add-btn">+ Familienmitglied hinzufügen</button>
             </div>
 
-            <div class="field" style="margin-top:8px">
+            <div class="field mt-2">
               <span style="display:block;font-weight:var(--weight-semibold);margin-bottom:8px">Deine Bankverbindung</span>
             </div>
             <div class="field">
@@ -113,15 +113,15 @@
             </div>
 
             <div class="field-checkbox" style="align-items:flex-start;margin:16px 0 8px">
-              <input type="checkbox" id="mw-consent-beitrag" name="consentBeitrag" required style="margin-top:3px" />
+              <input type="checkbox" id="mw-consent-beitrag" name="consentBeitrag" required class="mt-1" />
               <label for="mw-consent-beitrag" class="t-body-sm">Ich melde mich für die gewählte Mitgliedschaft an und akzeptiere die <a href="/assets/docs/satzung.pdf" target="_blank" rel="noopener">Satzung</a> sowie den damit verbundenen Mitgliedsbeitrag gemäß <a href="/assets/docs/beitragsordnung.pdf" target="_blank" rel="noopener">Beitragsordnung</a>.</label>
             </div>
             <div class="field-checkbox" style="align-items:flex-start;margin:0 0 8px">
-              <input type="checkbox" id="mw-consent-sepa" name="consentSepa" required style="margin-top:3px" />
+              <input type="checkbox" id="mw-consent-sepa" name="consentSepa" required class="mt-1" />
               <label for="mw-consent-sepa" class="t-body-sm">Ich ermächtige die Basketball Löwen e.V. (Gläubiger-ID DE46ZZZ00002312785), Zahlungen von meinem Konto mittels SEPA-Lastschrift einzuziehen, und weise mein Kreditinstitut an, diese Lastschriften einzulösen.</label>
             </div>
             <div class="field-checkbox" style="align-items:flex-start;margin:0 0 16px">
-              <input type="checkbox" id="mw-consent-daten" name="consentDaten" required style="margin-top:3px" />
+              <input type="checkbox" id="mw-consent-daten" name="consentDaten" required class="mt-1" />
               <label for="mw-consent-daten" class="t-body-sm">Ich willige in die Verarbeitung meiner Daten gemäß der <a href="/datenschutz.html">Datenschutzerklärung</a> ein. Diese Einwilligung kann ich jederzeit widerrufen.</label>
             </div>
 

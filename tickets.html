@@ -23,7 +23,7 @@
         <div>
           <span class="eyebrow">Saison 2026/2027</span>
           <h1>Hol dir dein <span class="kw">Ticket<span class="swoosh" aria-hidden="true"></span></span>.</h1>
-          <a class="hero-location" href="https://www.google.com/maps/search/?api=1&query=Riethsporthalle+Erfurt+Essener+Stra%C3%9Fe+20+99089+Erfurt" target="_blank" rel="noopener"><i data-lucide="map-pin" style="width:16px;height:16px"></i> Riethsporthalle, Essener Straße 20, 99089 Erfurt</a>
+          <a class="hero-location" href="https://www.google.com/maps/search/?api=1&query=Riethsporthalle+Erfurt+Essener+Stra%C3%9Fe+20+99089+Erfurt" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Riethsporthalle, Essener Straße 20, 99089 Erfurt</a>
         </div>
         <div><!-- reserviert für künftiges CTA/Element auf dem Herobild --></div>
       </div>
@@ -47,7 +47,7 @@
           <div class="ticket-sidebar" style="position:static">
             <span class="eyebrow">Preis pro Spiel</span>
             <h2 class="t-h4" style="margin:6px 0 14px">Einzelpreistickets</h2>
-            <p class="t-body-sm" style="margin-bottom:12px">Bei Einzeltickets wählst du deine Kategorie, nicht mehr deinen festen Platz — den sicherst du dir mit der Dauerkarte.</p>
+            <p class="t-body-sm mb-3">Bei Einzeltickets wählst du deine Kategorie, nicht mehr deinen festen Platz — den sicherst du dir mit der Dauerkarte.</p>
             <p class="t-caption" style="margin-bottom:12px;color:var(--text-muted)">Ermäßigt gilt für Studierende, Azubis, FSJ, Menschen mit Behinderung, Rentner*innen und Mitglieder von Kooperationsvereinen (jeweils mit Nachweis beim Einlass).</p>
             <div class="price-row"><span>Kategorie 1</span><strong>16,00 €</strong></div>
             <div class="price-row"><span>Kategorie 1 (ermäßigt)</span><strong>14,00 €</strong></div>
@@ -62,10 +62,10 @@
               </div>
               <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;margin-left:auto">
                 <button type="button" class="badge badge-orange" id="overview-member-badge" style="border:none;cursor:pointer;font-family:inherit">
-                  <i data-lucide="percent" style="width:12px;height:12px"></i> -30 % Vereinsmitglieder
+                  <i data-lucide="percent" class="icon-12"></i> -30 % Vereinsmitglieder
                 </button>
                 <button type="button" class="badge badge-orange" id="overview-discount-badge" style="border:none;cursor:pointer;font-family:inherit">
-                  <i data-lucide="percent" style="width:12px;height:12px"></i> -20 % Frühbucher bis 31.08.
+                  <i data-lucide="percent" class="icon-12"></i> -20 % Frühbucher bis 31.08.
                 </button>
               </div>
             </div>
@@ -89,7 +89,7 @@
           <span class="eyebrow" id="overview-discount-modal-title">Frühbucherrabatt</span>
           <h3 class="t-h3" style="margin:8px 0 12px">Je früher, desto günstiger.</h3>
           <p class="t-body-sm">Bestellst du bis zum 31.08.2026, sparst du 20&nbsp;%. Ab dem 01.09.2026 gilt der reguläre Preis.</p>
-          <p class="t-body-sm" style="margin-top:10px">Die hier angezeigten Preise enthalten den Rabatt noch nicht — er wird automatisch bei der Bestellung bis zum Stichtag abgezogen.</p>
+          <p class="t-body-sm mt-3">Die hier angezeigten Preise enthalten den Rabatt noch nicht — er wird automatisch bei der Bestellung bis zum Stichtag abgezogen.</p>
         </div>
       </div>
 
@@ -100,8 +100,8 @@
           <span class="eyebrow" id="overview-member-modal-title">Vereinsmitgliedsrabatt</span>
           <h3 class="t-h3" style="margin:8px 0 12px">Dauerhaft 30 % für Vereinsmitglieder.</h3>
           <p class="t-body-sm">Mitglieder von BC Erfurt, USV Erfurt, BIG Gotha und der Basketball Löwen Erfurt erhalten dauerhaft 30&nbsp;% Rabatt auf die Dauerkarte.</p>
-          <p class="t-body-sm" style="margin-top:10px">Bis zum 31.08.2026 lässt sich dieser Rabatt mit dem Frühbucherrabatt kombinieren — macht zusammen 50&nbsp;% Rabatt. Ab dem 01.09.2026 gilt nur noch der Vereinsmitgliedsrabatt von 30&nbsp;%.</p>
-          <p class="t-body-sm" style="margin-top:10px">Nachweis der Mitgliedschaft beim Kauf erforderlich.</p>
+          <p class="t-body-sm mt-3">Bis zum 31.08.2026 lässt sich dieser Rabatt mit dem Frühbucherrabatt kombinieren — macht zusammen 50&nbsp;% Rabatt. Ab dem 01.09.2026 gilt nur noch der Vereinsmitgliedsrabatt von 30&nbsp;%.</p>
+          <p class="t-body-sm mt-3">Nachweis der Mitgliedschaft beim Kauf erforderlich.</p>
         </div>
       </div>
     </div>
@@ -151,13 +151,13 @@
         '<div>' +
           '<div class="ticket-row-title"><strong>' + formatLong(gameDate) + '</strong> · Basketball Löwen – ' + s.gegner + '</div>' +
           '<div class="ticket-row-meta">' +
-            '<a href="https://www.google.com/maps/search/?api=1&query=Riethsporthalle+Erfurt+Essener+Stra%C3%9Fe+20+99089+Erfurt" target="_blank" rel="noopener"><i data-lucide="map-pin" style="width:14px;height:14px"></i> Riethsporthalle</a>' +
-            '<span><i data-lucide="clock" style="width:14px;height:14px"></i> ' + s.zeit + ' Uhr</span>' +
-            '<a class="cal-link" href="' + calendarLink(gameDate, s.zeit, s.gegner) + '" target="_blank" rel="noopener" title="Ins Kalender eintragen"><i data-lucide="calendar-plus" style="width:14px;height:14px"></i></a>' +
+            '<a href="https://www.google.com/maps/search/?api=1&query=Riethsporthalle+Erfurt+Essener+Stra%C3%9Fe+20+99089+Erfurt" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-14"></i> Riethsporthalle</a>' +
+            '<span><i data-lucide="clock" class="icon-14"></i> ' + s.zeit + ' Uhr</span>' +
+            '<a class="cal-link" href="' + calendarLink(gameDate, s.zeit, s.gegner) + '" target="_blank" rel="noopener" title="Ins Kalender eintragen"><i data-lucide="calendar-plus" class="icon-14"></i></a>' +
           '</div>' +
           (s.ticketUrl ? '' : '<div class="ticket-row-vvk"><span class="badge badge-info">Vorverkaufsstart: ' + formatShort(vvkDate) + '</span></div>') +
         '</div>' +
-        (s.ticketUrl ? '<div class="tactions"><a class="btn btn-primary btn-sm" href="' + s.ticketUrl + '">Tickets <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a></div>' : '') +
+        (s.ticketUrl ? '<div class="tactions"><a class="btn btn-primary btn-sm" href="' + s.ticketUrl + '">Tickets <i data-lucide="arrow-right" class="icon-14"></i></a></div>' : '') +
       '</div>';
     }).join('');
     if (window.lucide) window.lucide.createIcons();

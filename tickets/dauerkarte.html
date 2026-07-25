@@ -40,10 +40,10 @@
               <h3 class="t-h4" style="margin-bottom:0">Preise</h3>
               <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;margin-left:auto">
                 <button type="button" class="badge badge-orange" id="dk-member-badge" style="border:none;cursor:pointer;font-family:inherit">
-                  <i data-lucide="percent" style="width:12px;height:12px"></i> -30 % Vereinsmitglieder
+                  <i data-lucide="percent" class="icon-12"></i> -30 % Vereinsmitglieder
                 </button>
                 <button type="button" class="badge badge-orange" id="dk-discount-badge" style="border:none;cursor:pointer;font-family:inherit">
-                  <i data-lucide="percent" style="width:12px;height:12px"></i> -20 % Frühbucher bis 31.08.
+                  <i data-lucide="percent" class="icon-12"></i> -20 % Frühbucher bis 31.08.
                 </button>
               </div>
             </div>
@@ -57,11 +57,11 @@
           <div class="buy-thumb-col">
             <button type="button" class="buy-thumb-btn" id="seatplan-modal-trigger" aria-label="Sitzplatzwahl öffnen">
               <img src="/assets/img/riethsporthalle-blockplan.png" alt="Blockplan der Riethsporthalle mit Blöcken A–F, Kategorien und Spielfeld" />
-              <span class="buy-thumb-cta"><i data-lucide="expand" style="width:16px;height:16px"></i> Sitzplatz wählen</span>
+              <span class="buy-thumb-cta"><i data-lucide="expand" class="icon-16"></i> Sitzplatz wählen</span>
             </button>
           </div>
           <div class="buy-cart-col">
-            <h3 class="t-h4" style="margin-bottom:4px">Deine Auswahl</h3>
+            <h3 class="t-h4 mb-1">Deine Auswahl</h3>
             <p class="t-caption" style="color:var(--text-muted);margin-bottom:14px">Dauerkarte für alle Heimspiele der Hin- und Rückrunde, außer Playoffs.</p>
             <div id="seatplan-cart"></div>
             <div class="seatplan-cart-total"><span>Gesamt</span><span id="seatplan-total">0 €</span></div>
@@ -75,7 +75,7 @@
       <div class="modal-backdrop" id="seatplan-modal-backdrop">
         <div class="modal-box modal-box-blockplan" role="dialog" aria-modal="true" aria-label="Sitzplatzwahl">
           <button class="modal-close" aria-label="Schließen" id="seatplan-modal-close"><i data-lucide="x"></i></button>
-          <h3 class="t-h4" style="margin-bottom:12px">Sitzplatz wählen</h3>
+          <h3 class="t-h4 mb-3">Sitzplatz wählen</h3>
           <div style="flex:1;min-height:0;overflow-y:auto">
             <div id="seatplan-root"></div>
           </div>
@@ -90,7 +90,7 @@
           <span class="eyebrow" id="dk-discount-modal-title">Frühbucherrabatt</span>
           <h3 class="t-h3" style="margin:8px 0 12px">Je früher, desto günstiger.</h3>
           <p class="t-body-sm">Bestellst du bis zum 31.08.2026, sparst du 20&nbsp;%. Ab dem 01.09.2026 gilt der reguläre Preis.</p>
-          <p class="t-body-sm" style="margin-top:10px">Die hier angezeigten Preise enthalten den Rabatt noch nicht — er wird automatisch bei der Bestellung bis zum Stichtag abgezogen.</p>
+          <p class="t-body-sm mt-3">Die hier angezeigten Preise enthalten den Rabatt noch nicht — er wird automatisch bei der Bestellung bis zum Stichtag abgezogen.</p>
         </div>
       </div>
 
@@ -101,24 +101,24 @@
           <span class="eyebrow" id="dk-member-modal-title">Vereinsmitgliedsrabatt</span>
           <h3 class="t-h3" style="margin:8px 0 12px">Dauerhaft 30 % für Vereinsmitglieder.</h3>
           <p class="t-body-sm">Mitglieder von BC Erfurt, USV Erfurt, BIG Gotha und der Basketball Löwen Erfurt erhalten dauerhaft 30&nbsp;% Rabatt auf die Dauerkarte.</p>
-          <p class="t-body-sm" style="margin-top:10px">Bis zum 31.08.2026 lässt sich dieser Rabatt mit dem Frühbucherrabatt kombinieren — macht zusammen 50&nbsp;% Rabatt. Ab dem 01.09.2026 gilt nur noch der Vereinsmitgliedsrabatt von 30&nbsp;%.</p>
-          <p class="t-body-sm" style="margin-top:10px">Nachweis der Mitgliedschaft beim Kauf erforderlich.</p>
+          <p class="t-body-sm mt-3">Bis zum 31.08.2026 lässt sich dieser Rabatt mit dem Frühbucherrabatt kombinieren — macht zusammen 50&nbsp;% Rabatt. Ab dem 01.09.2026 gilt nur noch der Vereinsmitgliedsrabatt von 30&nbsp;%.</p>
+          <p class="t-body-sm mt-3">Nachweis der Mitgliedschaft beim Kauf erforderlich.</p>
         </div>
       </div>
 
       <div class="card" style="margin-top:32px;padding:20px 24px">
-        <h3 class="t-h4" style="margin-bottom:12px">Deine Dauerkarte</h3>
+        <h3 class="t-h4 mb-3">Deine Dauerkarte</h3>
         <div class="grid-3">
           <div style="display:flex;gap:10px;align-items:flex-start">
-            <i data-lucide="armchair" style="width:18px;height:18px;color:var(--color-brand-orange);flex-shrink:0;margin-top:2px"></i>
+            <i data-lucide="armchair" class="icon-18" style="color:var(--color-brand-orange);flex-shrink:0;margin-top:2px"></i>
             <p class="t-body-sm">Dein Sitzplatz gilt für die komplette Hin- und Rückrunde der Saison, außer Playoffs.</p>
           </div>
           <div style="display:flex;gap:10px;align-items:flex-start">
-            <i data-lucide="smartphone" style="width:18px;height:18px;color:var(--color-brand-orange);flex-shrink:0;margin-top:2px"></i>
+            <i data-lucide="smartphone" class="icon-18" style="color:var(--color-brand-orange);flex-shrink:0;margin-top:2px"></i>
             <p class="t-body-sm">Ein Ticket, ein QR-Code — gültig bei jedem Heimspiel der Saison.</p>
           </div>
           <div style="display:flex;gap:10px;align-items:flex-start">
-            <i data-lucide="percent" style="width:18px;height:18px;color:var(--color-brand-orange);flex-shrink:0;margin-top:2px"></i>
+            <i data-lucide="percent" class="icon-18" style="color:var(--color-brand-orange);flex-shrink:0;margin-top:2px"></i>
             <p class="t-body-sm">Ermäßigt für Studierende, Azubis, Menschen mit Behinderung, Rentner*innen und Mitglieder von Kooperationsvereinen.</p>
           </div>
         </div>

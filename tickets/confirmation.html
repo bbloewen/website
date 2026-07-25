@@ -46,7 +46,7 @@
 <main id="main">
 
   <section class="section-sm bg-subtle" style="padding-bottom:28px">
-    <div class="container" style="text-align:center">
+    <div class="container text-center">
       <span class="eyebrow">Warenkorb</span>
       <h1 class="t-h2" style="margin:6px 0 20px">Bestätigung</h1>
       <div class="process-chain">
@@ -68,9 +68,9 @@
         <p class="t-body-sm">Es liegt keine abgeschlossene Bestellung vor. <a href="/tickets.html">Zurück zu den Tickets</a>.</p>
       </div>
 
-      <div id="confirmation-content" style="display:none">
+      <div id="confirmation-content" class="hidden">
         <div class="card confirmation-hero">
-          <div class="confirmation-check"><i data-lucide="check" style="width:28px;height:28px"></i></div>
+          <div class="confirmation-check"><i data-lucide="check" class="icon-28"></i></div>
           <h2 class="t-h3">Vielen Dank für deine Bestellung!</h2>
           <p class="t-body-sm" id="confirmation-lead" style="color:var(--text-muted);max-width:420px">Wir haben deine Bestellung erhalten und schicken dir deine Tickets in Kürze per E-Mail.</p>
           <div class="confirmation-meta">
@@ -81,7 +81,7 @@
         </div>
 
         <div class="card" style="padding:24px;margin-top:20px">
-          <h3 class="t-h4" style="margin-bottom:4px">Deine Bestellung</h3>
+          <h3 class="t-h4 mb-1">Deine Bestellung</h3>
           <p class="t-caption" style="color:var(--text-muted);margin-bottom:14px" id="confirmation-event-label"></p>
           <div id="confirmation-lines"></div>
           <div class="seatplan-cart-total"><span>Gesamt</span><span><span id="confirmation-lines-total">0,00 €</span> <span id="confirmation-vat-note" style="font-weight:400;font-size:12px;color:var(--text-muted);display:none"></span></span></div>
@@ -89,7 +89,7 @@
 
         <div class="card" style="padding:20px 24px;margin-top:20px">
           <div style="display:flex;gap:10px;align-items:flex-start">
-            <span id="confirmation-fulfillment-icon"><i data-lucide="mail" style="width:18px;height:18px;color:var(--color-brand-orange);flex-shrink:0;margin-top:2px"></i></span>
+            <span id="confirmation-fulfillment-icon"><i data-lucide="mail" class="icon-18" style="color:var(--color-brand-orange);flex-shrink:0;margin-top:2px"></i></span>
             <p class="t-body-sm" id="confirmation-fulfillment-text"></p>
           </div>
         </div>
