@@ -104,6 +104,16 @@ a.no-underline:hover { text-decoration: none; }
 .bg-navy { background: var(--color-brand-navy); color: rgba(255,255,255,.85); }
 .bg-gradient-blue { background: var(--gradient-blue); color: #fff; }
 .bg-gradient-violet { background: var(--gradient-violet); color: #fff; }
+/* Schwarz/Orange-Glow als dunkler Sektionshintergrund abseits von Hero/Footer
+   (z.B. "Mehr als Basketball", Vereinsgeschichte) — reduziert die Farbanzahl
+   auf der Seite (ersetzt Blau/Violett-Verläufe) und nutzt denselben Verlauf
+   wie der Footer, damit dunkle Flächen site-weit konsistent wirken. */
+.section-glow-dark {
+  background: radial-gradient(140% 620px at 50% 0%, var(--color-footer-glow-bright) 0%, var(--color-brand-orange) 25%, var(--color-footer-glow-deep) 65%, var(--color-footer-glow-end) 100%);
+  color: rgba(255,255,255,.78);
+}
+.section-glow-dark h2 { color: #fff; }
+.section-glow-dark .card-label { color: rgba(255,255,255,.85); }
 
 /* ---------- Skip link ---------- */
 .skip-link {
@@ -492,8 +502,10 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .impact-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; }
 .impact-stat {
   background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg);
-  padding: 20px; text-align: center;
+  padding: 20px; text-align: center; display: block; text-decoration: none;
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
 }
+a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(--shadow-sm); }
 .impact-stat strong {
   display: block; font-size: 36px; line-height: 1.1; font-variant-numeric: tabular-nums;
   color: var(--color-brand-orange-text); font-weight: var(--weight-extrabold);
@@ -896,7 +908,6 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
   font-size: clamp(38px, 6vw, 74px); margin: 14px 0 20px; color: #fff;
 }
 .hero p.lead { font-size: 18px; color: rgba(255,255,255,.85); max-width: 46ch; font-weight: var(--weight-light); margin-bottom: 26px; }
-.hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
 
 .next-game-card {
   background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.15);
@@ -1119,6 +1130,10 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 /* Hero-Variante für die Löwen-Unterstützer-Seite — Erfurter Dom/Severikirche
    (Stockfoto, niedrige Auflösung als Platzhalter bis zum echten Lizenzkauf). */
 .hero-photo.hero-loewen-unterstuetzer { --hero-photo-url: url('/assets/img/hero-loewen-unterstuetzer.jpg'); background-position: center 55%; }
+
+/* Hero-Variante für die Über-uns-Seite — Kinder und Profis gemeinsam am Korb
+   auf dem Petersberg, Domspitzen im Hintergrund. */
+.hero-photo.hero-ueberuns { --hero-photo-url: url('/assets/img/hero-ueberuns.jpg'); background-position: center 30%; }
 
 /* Hero-Variante für die Investoren-Seite — Maskottchen mit Vereinsflagge vor
    voller, jubelnder Halle ("INVESTORS" auf der Anzeigetafel). */

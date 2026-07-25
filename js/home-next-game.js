@@ -13,13 +13,17 @@
   function gameSlideHTML(g, i) {
     var dateStr = g.date.getDate() + '. ' + MONATE[g.date.getMonth()] + ' ' + g.date.getFullYear();
     return '<div class="next-game-slide' + (i === 0 ? ' is-active' : '') + '">' +
+      '<span class="eyebrow">' + (i + 1) + '. Heimspiel</span>' +
       '<h3 class="t-h4" style="margin:10px 0 6px">Basketball Löwen – ' + g.s.gegner + '</h3>' +
       '<p class="t-body-sm" style="margin-bottom:16px;display:flex;flex-direction:column;gap:4px">' +
         '<span style="display:inline-flex;align-items:center;gap:6px"><i data-lucide="calendar" style="width:14px;height:14px"></i>' + dateStr + '</span>' +
         '<span style="display:inline-flex;align-items:center;gap:6px"><i data-lucide="clock" style="width:14px;height:14px"></i>' + g.s.zeit + ' Uhr · Riethsporthalle</span>' +
       '</p>' +
+      /* Vorerst "Dauerkarte kaufen" statt "Tickets kaufen" (Saison noch nicht
+         gestartet) — sobald der Spielbetrieb läuft, wieder auf Einzelticket-
+         Verlinkung (g.s.ticketUrl || /tickets.html) umstellen. */
       '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
-        '<a class="btn btn-outline-orange btn-sm" href="' + (g.s.ticketUrl || '/tickets.html') + '">Tickets kaufen <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>' +
+        '<a class="btn btn-outline-orange btn-sm" href="/tickets/dauerkarte.html">Dauerkarte kaufen <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>' +
         '<a class="btn btn-ghost btn-sm" href="/teams-saison/spielplan.html">Zum Spielplan</a>' +
       '</div>' +
     '</div>';
@@ -47,7 +51,6 @@
       : '';
 
     card.innerHTML =
-      '<span class="eyebrow">Nächstes Heimspiel</span>' +
       '<div class="next-game-slides">' + upcoming.map(gameSlideHTML).join('') + '</div>' +
       dotsHTML;
 
