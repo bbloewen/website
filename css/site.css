@@ -114,6 +114,11 @@ a.no-underline:hover { text-decoration: none; }
 }
 .section-glow-dark h2 { color: #fff; }
 .section-glow-dark .card-label { color: rgba(255,255,255,.85); }
+/* Flaches Dunkelnavy/Schwarz ohne Orange-Glow — für dunkle Sektionen, die
+   NICHT direkt an den Footer grenzen (der Glow-Effekt markiert dort bewusst
+   den Footer-Beginn; mitten auf der Seite wäre er unmotiviert). */
+.section-dark { background: var(--color-brand-navy); color: rgba(255,255,255,.78); }
+.section-dark h2 { color: #fff; }
 
 /* ---------- Skip link ---------- */
 .skip-link {
