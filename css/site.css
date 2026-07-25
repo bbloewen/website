@@ -978,6 +978,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg);
   padding: 24px; display: flex; flex-direction: column; gap: 10px;
 }
+#ansprechperson .info-tile { align-items: center; text-align: center; }
 .info-tile .tile-icon {
   width: 44px; height: 44px; border-radius: var(--radius-md);
   background: var(--color-orange-50); color: var(--color-brand-orange);
