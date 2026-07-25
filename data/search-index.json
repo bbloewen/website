@@ -3,253 +3,307 @@
     "title": "Startseite",
     "url": "/index.html",
     "category": "Startseite",
+    "description": "Basketball Löwen Erfurt e.V. — Profis, Damen und Nachwuchs aus Thüringen. Trainingszeiten, Spielplan, Tickets, Probetraining und Mitgliedschaft.",
     "keywords": "Basketball Löwen Erfurt Home"
   },
   {
     "title": "Über uns",
     "url": "/verein/ueber-uns.html",
-    "category": "Club"
+    "category": "Club",
+    "description": "Gegründet 2018 in Erfurt: Vision, soziale Sportidee, Werte und Geschichte der Basketball Löwen."
   },
   {
     "title": "Organisation",
     "url": "/verein/organisation.html",
-    "category": "Club"
+    "category": "Club",
+    "description": "Die drei Säulen der Basketball Löwen und alle Verantwortlichen — alphabetisch, filterbar nach Organisation."
   },
   {
     "title": "Kinderschutz",
     "url": "/verein/kinderschutz.html",
-    "category": "Club"
+    "category": "Club",
+    "description": "Kinderschutz bei den Basketball Löwen — unsere Grundhaltung, das Kinderschutzkonzept und der Kontaktweg für Anliegen."
   },
   {
     "title": "Jobs",
     "url": "/verein/jobs.html",
-    "category": "Club"
+    "category": "Club",
+    "description": "Offene Stellen und Mitarbeit bei den Basketball Löwen Erfurt.",
+    "keywords": "Karriere Stellenangebote"
   },
   {
     "title": "Mitglied werden",
     "url": "/mitglied-werden.html",
-    "category": "Club"
+    "category": "Club",
+    "description": "Werde Mitglied bei den Basketball Löwen Erfurt — wähle deine Mitgliedschaftsart und melde dich direkt online an."
   },
   {
     "title": "Profis",
     "url": "/teams-saison/profis.html",
-    "category": "Teams & Saison"
+    "category": "Teams & Saison",
+    "description": "Die Basketball Löwen Erfurt in der Pro B: Kader, Trainerteam und Heimspielstätte der Profimannschaft."
   },
   {
     "title": "Damen",
     "url": "/teams-saison/damen.html",
-    "category": "Teams & Saison"
+    "category": "Teams & Saison",
+    "description": "Die Basketball Löwinnen Erfurt in der Regionalliga Südost: Kader, Trainerteam und Tabelle."
   },
   {
     "title": "U19",
     "url": "/teams-saison/u19.html",
     "category": "Teams & Saison",
+    "description": "Die Basketball Löwen U19 in der NBBL: Kader, Trainerteam und die Kooperationen des Nachwuchsteams.",
     "keywords": "NBBL Nachwuchs Basketball Bundesliga"
   },
   {
     "title": "Nachwuchs",
     "url": "/teams-saison/nachwuchs.html",
-    "category": "Teams & Saison"
+    "category": "Teams & Saison",
+    "description": "Der Nachwuchs der Basketball Löwen Erfurt — von den jüngeren Jahrgängen bis zur U19."
   },
   {
     "title": "Spielplan und Berichte",
     "url": "/teams-saison/spielplan.html",
-    "category": "Teams & Saison"
+    "category": "Teams & Saison",
+    "description": "Alle Spieltermine der Profis, Damen und U19 sowie Spielberichte der Basketball Löwen Erfurt im Überblick."
   },
   {
     "title": "Tabelle",
     "url": "/teams-saison/tabelle.html",
-    "category": "Teams & Saison"
+    "category": "Teams & Saison",
+    "description": "Die aktuellen Tabellenstände der Damen in der Regionalliga Südost und der U19 in der NBBL."
   },
   {
     "title": "LÖWENPARK",
     "url": "/trainieren/loewenpark.html",
-    "category": "Trainieren"
+    "category": "Trainieren",
+    "description": "Der LÖWENPARK: neuer Trainingsstandort für den Basketball-Nachwuchs, Programm, Baufortschritt, Zeiten anfragen und die ganze Geschichte der Halle am Südpark."
   },
   {
     "title": "BasKIDball",
     "url": "/trainieren/baskidball.html",
-    "category": "Trainieren"
+    "category": "Trainieren",
+    "description": "BasKIDball — Teil der sozialen Sportidee der Basketball Löwen Erfurt."
   },
   {
     "title": "SPORT VERNETZT",
     "url": "/trainieren/sportvernetzt.html",
-    "category": "Trainieren"
+    "category": "Trainieren",
+    "description": "SPORT VERNETZT — die soziale Sportidee der Basketball Löwen Erfurt."
   },
   {
     "title": "Schultour",
     "url": "/trainieren/schultour.html",
-    "category": "Trainieren"
+    "category": "Trainieren",
+    "description": "Schultour der Basketball Löwen Erfurt — Basketball an Schulen in der Region."
   },
   {
     "title": "Schul-AGs",
     "url": "/trainieren/schul-ags.html",
-    "category": "Trainieren"
+    "category": "Trainieren",
+    "description": "Schul-AGs der Basketball Löwen Erfurt — Basketball direkt in die Schulen der Region.",
+    "keywords": "Schul AG AGs"
   },
   {
     "title": "Camps & Anmeldung",
     "url": "/trainieren/camps.html",
-    "category": "Trainieren"
+    "category": "Trainieren",
+    "description": "Ferien-Basketballcamps der Basketball Löwen Erfurt — nächste Termine, gut zu wissen und Rückblick.",
+    "keywords": "Feriencamps Ferien Camp"
   },
   {
     "title": "Waid-Löwen",
     "url": "/trainieren/inklusion.html",
-    "category": "Trainieren"
+    "category": "Trainieren",
+    "description": "Die Waid-Löwen — unser inklusives Special-Olympics-Team bei den Basketball Löwen Erfurt."
   },
   {
     "title": "Probetraining",
     "url": "/trainieren/probetraining.html",
-    "category": "Trainieren"
+    "category": "Trainieren",
+    "description": "Unverbindlich beim Training vorbeischauen — wir finden die passende Gruppe für dein Kind."
   },
   {
     "title": "Unsere Sponsoren",
     "url": "/partner/sponsoring.html",
-    "category": "Partner"
+    "category": "Partner",
+    "description": "Die Partner und Sponsoren der Basketball Löwen Erfurt im Überblick — nach Kategorien filterbar."
   },
   {
     "title": "Löwen-Club der 100",
     "url": "/partner/loewen-unterstuetzer.html",
-    "category": "Partner"
+    "category": "Partner",
+    "description": "Regionale Unternehmen aus Erfurt und der Region zeigen mit uns Präsenz und werden Teil des wachsenden Löwen-Clubs der 100 der Basketball Löwen.",
+    "keywords": "Club der 100 Business Club"
   },
   {
     "title": "Investoren",
     "url": "/partner/investoren.html",
-    "category": "Partner"
+    "category": "Partner",
+    "description": "Investitionsmöglichkeiten bei den Basketball Löwen Erfurt."
   },
   {
     "title": "Freundeskreis",
     "url": "/partner/freundeskreis.html",
-    "category": "Partner"
+    "category": "Partner",
+    "description": "Der Freundeskreis der Basketball Löwen Erfurt."
   },
   {
     "title": "Netzwerk-Treffen",
     "url": "/partner/netzwerktreffen.html",
-    "category": "Partner"
+    "category": "Partner",
+    "description": "Alley-Oop und Sponsorenturnier — die Netzwerk-Treffen der Basketball Löwen Erfurt für Unternehmer:innen und Geschäftspartner."
   },
   {
     "title": "Aktuelles",
     "url": "/news/aktuelles.html",
-    "category": "News"
+    "category": "News",
+    "description": "Alle News der Basketball Löwen Erfurt."
   },
   {
     "title": "Newsletter",
     "url": "/news/newsletter/",
     "category": "News",
+    "description": "Der Digitale Löwen Fastbreak, der Newsletter der Basketball Löwen Erfurt — melde dich an und lies vergangene Ausgaben.",
     "keywords": "Digitaler Löwen Fastbreak"
   },
   {
     "title": "Media Kit",
     "url": "/news/presse.html",
-    "category": "News"
+    "category": "News",
+    "description": "Media Kit und Medienkontakt der Basketball Löwen Erfurt."
   },
   {
     "title": "Fanclub — Löwenrudel",
     "url": "/fans/fanclub-kontakte.html",
-    "category": "Fans"
+    "category": "Fans",
+    "description": "Das Löwenrudel — der offizielle Fanclub der Basketball Löwen Erfurt."
   },
   {
     "title": "Ehrenamt",
     "url": "/fans/ehrenamt.html",
-    "category": "Fans"
+    "category": "Fans",
+    "description": "Werde ehrenamtlich bei den Basketball Löwen aktiv — von Hallenaufbau bis Livestream-Kamera."
   },
   {
     "title": "Community-Events",
     "url": "/fans/community-events.html",
-    "category": "Fans"
+    "category": "Fans",
+    "description": "Saisoneröffnung, Fanstammtische und mehr — die Community-Events der Basketball Löwen Erfurt."
   },
   {
     "title": "Tickets",
     "url": "/tickets.html",
-    "category": "Tickets"
+    "category": "Tickets",
+    "description": "Tickets für Heimspiele der Basketball Löwen Erfurt."
   },
   {
     "title": "Dauerkarte 2026/2027",
     "url": "/tickets/dauerkarte.html",
-    "category": "Tickets"
+    "category": "Tickets",
+    "description": "Dauerkarte für die Heimspiele der Basketball Löwen Erfurt — deinen festen Sitzplatz für die ganze Saison sichern."
   },
   {
     "title": "Fanshop",
     "url": "/fanshop.html",
-    "category": "Sonstiges"
+    "category": "Sonstiges",
+    "description": "Der Fanshop der Basketball Löwen Erfurt — Trikots, Merchandise und mehr."
   },
   {
     "title": "Spenden",
     "url": "/spenden.html",
-    "category": "Sonstiges"
+    "category": "Sonstiges",
+    "description": "Unterstütze die Basketball Löwen Erfurt mit einer Spende."
   },
   {
     "title": "Kontakt",
     "url": "/kontakt.html",
-    "category": "Sonstiges"
+    "category": "Sonstiges",
+    "description": "Kontaktiere die Basketball Löwen Erfurt — Adresse, Telefon, E-Mail und Kontaktformular."
   },
   {
     "title": "Impressum",
     "url": "/impressum.html",
-    "category": "Sonstiges"
+    "category": "Sonstiges",
+    "description": "Impressum der Basketball Löwen Erfurt."
   },
   {
     "title": "Datenschutz",
     "url": "/datenschutz.html",
-    "category": "Sonstiges"
+    "category": "Sonstiges",
+    "description": "Datenschutzerklärung der Basketball Löwen Erfurt."
   },
   {
     "title": "Playoff-Heimspiel am Freitagabend",
     "url": "/news/artikel/2025-04-22_verein_playoff-heimspiel-freitag.html",
-    "category": "News"
+    "category": "News",
+    "description": "Nach knapper Auswärtsniederlage im ersten Playoff-Spiel geht es am Freitag in der Riethsporthalle weiter."
   },
   {
     "title": "CATL Basketball Löwen scheiden im Achtelfinale aus",
     "url": "/news/artikel/2025-04-29_verein_achtelfinale-aus.html",
-    "category": "News"
+    "category": "News",
+    "description": "Knappe 82:84-Heimniederlage gegen Paderborn beendet die Playoff-Saison der Löwen."
   },
   {
     "title": "Löwen-Kaderplanung für die nächste Saison",
     "url": "/news/artikel/2025-05-19_verein_kaderplanung-naechste-saison.html",
-    "category": "News"
+    "category": "News",
+    "description": "Vier langjährige Spieler verlassen den Verein — Sportdirektor Florian Gut über die Kaderplanung."
   },
   {
     "title": "Sommerinterview Teil 1: Kaderplanung",
     "url": "/news/artikel/2025-07-21_verein_sommerinterview-teil1.html",
-    "category": "News"
+    "category": "News",
+    "description": "Sportdirektor Florian Gut im Interview über Abgänge, Neuzugänge und den Sommer von Musa Abra."
   },
   {
     "title": "Sommerinterview Teil 2: Neue Damenmannschaft",
     "url": "/news/artikel/2025-08-01_verein_sommerinterview-teil2.html",
-    "category": "News"
+    "category": "News",
+    "description": "Sportdirektor Florian Gut über die langfristigen Vereinsziele und den Start der Basketball Löwinnen in der Regionalliga."
   },
   {
     "title": "Sommerinterview Teil 3: LÖWENPARK und Vorbereitung",
     "url": "/news/artikel/2025-08-08_verein_sommerinterview-teil3.html",
-    "category": "News"
+    "category": "News",
+    "description": "Sportdirektor Florian Gut über den LÖWENPARK, dessen Finanzierung und die Vorbereitung der Profimannschaft."
   },
   {
     "title": "CATL verlängert Partnerschaft",
     "url": "/news/artikel/2025-08-26_verein_catl-verlaengert.html",
-    "category": "News"
+    "category": "News",
+    "description": "Der Batteriezellen-Hersteller bleibt Namenssponsor der Profimannschaft — schon die vierte gemeinsame Saison."
   },
   {
     "title": "Löwen-Saisonstart und Dauerkartenverkauf",
     "url": "/news/artikel/2025-09-25_verein_saisonstart-dauerkarten.html",
-    "category": "News"
+    "category": "News",
+    "description": "Nach dem Testspiel startet die Saison zu Hause gegen die BBC Coburg — der Dauerkartenverkauf für die neue Spielzeit läuft."
   },
   {
     "title": "Vier wichtige Spiele in Folge und ein sportlicher Abgang",
     "url": "/news/artikel/2026-03-04_verein_mitchell-abgang.html",
-    "category": "News"
+    "category": "News",
+    "description": "Vor vier richtungsweisenden Spielen verlässt Mike Mitchell aus persönlichen Gründen das Team."
   },
   {
     "title": "Saisonrückblick 2025/2026",
     "url": "/news/artikel/2026-03-31_verein_spielbericht-saisonrueckblick-2025-26.html",
-    "category": "News"
+    "category": "News",
+    "description": "Platz 12 in der Pro B — Coach Florian Gut zieht Bilanz und blickt nach vorn."
   },
   {
     "title": "Wichtige Meilensteine für den LÖWENPARK",
     "url": "/news/artikel/2026-06-19_verein_loewenpark-meilenstein.html",
-    "category": "News"
+    "category": "News",
+    "description": "Der Stadtrat hat die Kostensteigerung gedeckt — nach dem Richtfest im April ist die Eröffnung des LÖWENPARKS greifbar nah."
   },
   {
     "title": "SWE Sommercamp startet mit Besuch zweier U20-Nationalspieler",
     "url": "/news/artikel/2026-07-06_verein_swe-sommercamp.html",
-    "category": "News"
+    "category": "News",
+    "description": "Musa Abra und Léonar Fliege besuchen vor der EM-Vorbereitung das SWE Sommercamp der Basketball Löwen."
   }
 ]

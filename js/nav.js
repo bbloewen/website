@@ -74,13 +74,16 @@ window.initNav = function initNav() {
   }
 
   /* Seitensuche: Panel unter dem Header, durchsucht data/search-index.json
-     client-seitig (kein Backend auf einer statischen GitHub-Pages-Seite). */
-  var searchToggleBtn = document.getElementById('search-toggle-btn');
+     client-seitig (kein Backend auf einer statischen GitHub-Pages-Seite).
+     Zwei Auslöser teilen sich [data-search-toggle]: das Icon in der
+     Utility-Leiste (Desktop/Tablet) und der Eintrag im Mobile-Drawer
+     (Utility-Leiste ist dort per CSS ausgeblendet). */
+  var searchToggleBtns = document.querySelectorAll('[data-search-toggle]');
   var searchPanel = document.getElementById('site-search-panel');
   var searchInput = document.getElementById('site-search-input');
   var searchResults = document.getElementById('site-search-results');
   var searchClose = document.getElementById('site-search-close');
-  if (searchToggleBtn && searchPanel && searchInput && searchResults) {
+  if (searchToggleBtns.length && searchPanel && searchInput && searchResults) {
     var searchIndex = null;
     var searchActiveIndex = -1;
 
@@ -94,13 +97,14 @@ window.initNav = function initNav() {
     function renderResults(query) {
       var q = query.trim().toLowerCase();
       if (!q) {
-        searchResults.innerHTML = '<div class="site-search-hint">Seitentitel eingeben, z. B. „Tickets" oder „Camps" …</div>';
+        searchResults.innerHTML = '';
         searchActiveIndex = -1;
         return;
       }
       var matches = (searchIndex || []).filter(function (entry) {
         return entry.title.toLowerCase().indexOf(q) !== -1 ||
-          (entry.keywords && entry.keywords.toLowerCase().indexOf(q) !== -1);
+          (entry.keywords && entry.keywords.toLowerCase().indexOf(q) !== -1) ||
+          (entry.description && entry.description.toLowerCase().indexOf(q) !== -1);
       }).slice(0, 8);
       if (!matches.length) {
         searchResults.innerHTML = '<div class="site-search-empty">Keine Treffer für „' + query + '".</div>';
@@ -115,24 +119,27 @@ window.initNav = function initNav() {
     }
 
     function openSearch() {
+      closeDrawer();
       searchPanel.hidden = false;
-      searchToggleBtn.setAttribute('aria-expanded', 'true');
+      searchToggleBtns.forEach(function (btn) { btn.setAttribute('aria-expanded', 'true'); });
       loadSearchIndex().then(function () { renderResults(searchInput.value); });
       searchInput.focus();
     }
     function closeSearch() {
       searchPanel.hidden = true;
-      searchToggleBtn.setAttribute('aria-expanded', 'false');
+      searchToggleBtns.forEach(function (btn) { btn.setAttribute('aria-expanded', 'false'); });
     }
 
-    searchToggleBtn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      if (searchPanel.hidden) openSearch(); else closeSearch();
+    searchToggleBtns.forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (searchPanel.hidden) openSearch(); else closeSearch();
+      });
     });
     if (searchClose) searchClose.addEventListener('click', closeSearch);
     searchInput.addEventListener('input', function () { renderResults(searchInput.value); });
     document.addEventListener('click', function (e) {
-      if (!searchPanel.hidden && !e.target.closest('.site-search-panel') && !e.target.closest('#search-toggle-btn')) closeSearch();
+      if (!searchPanel.hidden && !e.target.closest('.site-search-panel') && !e.target.closest('[data-search-toggle]')) closeSearch();
     });
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && !searchPanel.hidden) closeSearch();

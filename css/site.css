@@ -307,11 +307,12 @@ a.no-underline:hover { text-decoration: none; }
 .drawer-utility-section {
   margin-top: 16px; padding-top: 16px; border-top: 2px solid var(--bg-muted);
 }
-.drawer-utility-section a {
-  display: block; padding: 10px 4px; font-size: var(--text-body);
+.drawer-utility-section a, .drawer-utility-section button {
+  display: block; width: 100%; padding: 10px 4px; font-size: var(--text-body);
   font-weight: var(--weight-medium); color: var(--text-primary);
+  background: none; border: none; text-align: left; font-family: inherit; cursor: pointer;
 }
-.drawer-utility-section a:hover { color: var(--color-brand-orange); text-decoration: none; }
+.drawer-utility-section a:hover, .drawer-utility-section button:hover { color: var(--color-brand-orange); text-decoration: none; }
 
 .nav-actions .mobile-cta {
   display: none;
