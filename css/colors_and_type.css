@@ -40,6 +40,15 @@
   --color-orange-900: #41210A;
   --color-brand-orange-text: #B55709; /* A11y: brand orange darkened for text/white-on-orange pairs — 4.5:1+ AA vs white */
 
+  /* ---------- Footer-Glow (Schwarz/Orange-Redesign 25.07.2026) ----------
+     Eigene, hellere/dunklere Werte als die normale Orange-Skala — hier geht
+     es um ein "Leuchten", das oben heller als --color-orange-500 beginnt und
+     unten dunkler als --color-orange-900 endet, bevor es in Schwarz übergeht. */
+  --color-footer-glow-start:  #FFB067;
+  --color-footer-glow-bright: #FF8A2E;
+  --color-footer-glow-deep:   #4A2205;
+  --color-footer-glow-end:    #000000;
+
   /* ---------- Blue scale ---------- */
   --color-blue-50:  #E7ECFB;
   --color-blue-100: #C3D0F4;

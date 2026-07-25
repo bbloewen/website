@@ -1541,16 +1541,16 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
    für den gesamten Footer. */
 .site-footer {
   background:
-    radial-gradient(140% 620px at 50% 0%, #FF8A2E 0%, var(--color-brand-orange) 25%, #4A2205 65%, #000 100%);
+    radial-gradient(140% 620px at 50% 0%, var(--color-footer-glow-bright) 0%, var(--color-brand-orange) 25%, var(--color-footer-glow-deep) 65%, var(--color-footer-glow-end) 100%);
   color: rgba(255,255,255,.7);
 }
 /* Nur auf der Startseite, direkt vor dem eigentlichen <footer> — statt eines
    flachen Farbtons ein eigener kurzer Verlauf, dessen untere Kante GENAU im
-   Ton endet, mit dem .site-footer oben beginnt (#FF8A2E). So lesen sich
-   beide Blöcke als ein durchgehendes Leuchten statt als zwei getrennte
-   Flächen mit sichtbarer Kante. */
+   Ton endet, mit dem .site-footer oben beginnt (--color-footer-glow-bright).
+   So lesen sich beide Blöcke als ein durchgehendes Leuchten statt als zwei
+   getrennte Flächen mit sichtbarer Kante. */
 .footer-leagues-top {
-  background: linear-gradient(180deg, #FFB067 0%, #FF8A2E 100%);
+  background: linear-gradient(180deg, var(--color-footer-glow-start) 0%, var(--color-footer-glow-bright) 100%);
   color: rgba(0,18,45,.75);
   padding: 20px 0;
 }
@@ -1578,9 +1578,15 @@ a.league-chip:hover { background: rgba(255,255,255,.16); text-decoration: none; 
 a.league-chip-light:hover { background: var(--bg-subtle); }
 .footer-leagues-logos-row img { height: 26px; width: auto; display: block; }
 .footer-social { display: flex; gap: 16px; margin-top: 21px; }
-.footer-social a { display: inline-flex; align-items: center; justify-content: center; color: #fff; }
+.footer-social a {
+  display: inline-flex; align-items: center; justify-content: center; color: #fff;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
 .footer-social a svg { width: 22px; height: 22px; }
-.footer-social a:hover { color: var(--color-brand-orange); }
+/* Kein Orange auf Hover: der Footer geht oben in helles Orange über (s.
+   .site-footer-Verlauf) — Orange-Text/Icons wären dort unsichtbar. Skalierung
+   statt Farbwechsel funktioniert unabhängig vom Hintergrundton. */
+.footer-social a:hover { transform: scale(1.15); }
 .footer-address { font-size: 14px; line-height: 1.6; margin-bottom: 12px; }
 .footer-grid {
   display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 32px;
@@ -1602,7 +1608,10 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
   text-transform: uppercase; letter-spacing: .1em; margin-bottom: 16px;
 }
 .footer-col a { display: block; font-size: 14px; margin-bottom: 10px; color: rgba(255,255,255,.7); }
-.footer-col a:hover { color: var(--color-brand-orange); text-decoration: none; }
+/* Weiß + Unterstrich statt Orange auf Hover: der Footer geht oben in helles
+   Orange über, Orange-Text wäre dort unsichtbar. Volles Weiß + Unterstrich
+   funktioniert unabhängig davon, ob der Link gerade auf Orange oder Schwarz sitzt. */
+.footer-col a:hover { color: #fff; text-decoration: underline; }
 .footer-donate-btn { display: inline-flex; align-items: center; color: #fff; }
 .footer-donate-btn:hover { color: #fff; }
 .footer-donate-btn-icon { display: none; }
