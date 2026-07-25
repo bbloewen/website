@@ -1053,7 +1053,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
    (siehe --hero-photo-url) als Fallback sichtbar. */
 .hero-slider .hero-slide {
   position: absolute; inset: 0; z-index: 0;
-  background-size: cover; background-position: center;
+  background-size: cover; background-position: center 20%;
   opacity: 0; transition: opacity var(--dur-slow, .5s) ease;
 }
 .hero-slider .hero-slide.active { opacity: 1; }
@@ -1700,18 +1700,17 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
    Schwarz verrechnet sich automatisch zu einem trüben Braun statt zu
    leuchten, deshalb vorher der "schmutzige" Eindruck. Eine Standardversion
    für den gesamten Footer. */
-/* Basis ist ein LINEARER Verlauf (über die volle Breite exakt einheitlich) —
-   nicht radial: ein radialer Verlauf ist an der Kante nur exakt in der Mitte
-   (50%) so hell wie --color-footer-glow-bright, an den Rändern liegt der
-   Farbverlauf durch die Ellipsen-Geometrie schon weiter fortgeschritten
-   (dunkler). Das erzeugte genau am Übergang zu .footer-leagues-top (dessen
-   Kante flach/einheitlich endet) eine sichtbare Naht. Der zusätzliche
-   dezente weiße Radial-Layer sorgt weiterhin fürs "Leuchten" in der Mitte,
-   ohne die einheitliche Kante zu stören. */
+/* Rein LINEARER Verlauf (180deg) — über die volle Breite exakt einheitlich.
+   Ein radialer Verlauf (auch als zusätzlicher, dezenter "Leuchten"-Layer
+   obendrüber) ist entlang der Kante nur an einer x-Position exakt auf dem
+   Referenzwert der Ellipse — überall sonst liegt der Verlauf durch die
+   Ellipsen-Geometrie schon weiter fortgeschritten. Das erzeugte am Übergang
+   zu .footer-leagues-top (dessen Kante flach endet) je nach Radius mal an
+   den Rändern, mal (bei einem zusätzlichen weißen Radial-Leuchten in der
+   Mitte zentriert) genau in der Bildmitte eine sichtbare Naht. Ein einzelner
+   180°-Verlauf hat dieses Problem strukturell nicht — keine x-Abhängigkeit. */
 .site-footer {
-  background:
-    radial-gradient(70% 420px at 50% 0%, rgba(255,255,255,.22) 0%, rgba(255,255,255,0) 70%),
-    linear-gradient(180deg, var(--color-footer-glow-bright) 0%, var(--color-brand-orange) 20%, var(--color-footer-glow-deep) 60%, var(--color-footer-glow-end) 100%);
+  background: linear-gradient(180deg, var(--color-footer-glow-bright) 0%, var(--color-brand-orange) 20%, var(--color-footer-glow-deep) 60%, var(--color-footer-glow-end) 100%);
   color: rgba(255,255,255,.7);
 }
 /* Nur auf der Startseite, direkt vor dem eigentlichen <footer> — statt eines
@@ -1737,7 +1736,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .footer-leagues-right { grid-column: 3 / 5; display: flex; justify-content: center; }
 .footer-leagues-right img { display: block; width: 100%; max-width: 320px; height: auto; border-radius: var(--radius-sm); }
 .footer-leagues-label {
-  font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: rgba(0,18,45,.6);
+  font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #fff;
 }
 .footer-leagues-logos-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .league-chip {
