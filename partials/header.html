@@ -80,6 +80,9 @@
       </nav>
 
       <div class="nav-actions">
+        <button class="icon-btn" id="search-toggle-btn" aria-label="Suche öffnen" aria-haspopup="true" aria-expanded="false">
+          <i data-lucide="search" class="icon-18"></i>
+        </button>
         <button class="more-btn" id="more-btn" aria-haspopup="true" aria-expanded="false">
           Mehr <i data-lucide="chevron-down" class="icon-14"></i>
         </button>
@@ -88,6 +91,19 @@
           <i data-lucide="menu"></i>
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- Seitensuche: Panel klappt unter dem Header auf, durchsucht
+       data/search-index.json client-seitig (js/nav.js). -->
+  <div class="site-search-panel" id="site-search-panel" hidden>
+    <div class="container">
+      <div class="site-search-input-wrap">
+        <i data-lucide="search" class="icon-18"></i>
+        <input type="text" id="site-search-input" placeholder="Seite suchen — z. B. Tickets, Camps, Newsletter …" autocomplete="off" />
+        <button type="button" class="icon-btn" id="site-search-close" aria-label="Suche schließen"><i data-lucide="x" class="icon-16"></i></button>
+      </div>
+      <div class="site-search-results" id="site-search-results"></div>
     </div>
   </div>
 </header>

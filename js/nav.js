@@ -73,6 +73,88 @@ window.initNav = function initNav() {
     if (lastFocusedBeforeDrawer) lastFocusedBeforeDrawer.focus();
   }
 
+  /* Seitensuche: Panel unter dem Header, durchsucht data/search-index.json
+     client-seitig (kein Backend auf einer statischen GitHub-Pages-Seite). */
+  var searchToggleBtn = document.getElementById('search-toggle-btn');
+  var searchPanel = document.getElementById('site-search-panel');
+  var searchInput = document.getElementById('site-search-input');
+  var searchResults = document.getElementById('site-search-results');
+  var searchClose = document.getElementById('site-search-close');
+  if (searchToggleBtn && searchPanel && searchInput && searchResults) {
+    var searchIndex = null;
+    var searchActiveIndex = -1;
+
+    function loadSearchIndex() {
+      if (searchIndex) return Promise.resolve(searchIndex);
+      return fetch('/data/search-index.json').then(function (res) { return res.json(); })
+        .then(function (data) { searchIndex = data; return data; })
+        .catch(function () { searchIndex = []; return []; });
+    }
+
+    function renderResults(query) {
+      var q = query.trim().toLowerCase();
+      if (!q) {
+        searchResults.innerHTML = '<div class="site-search-hint">Seitentitel eingeben, z. B. „Tickets" oder „Camps" …</div>';
+        searchActiveIndex = -1;
+        return;
+      }
+      var matches = (searchIndex || []).filter(function (entry) {
+        return entry.title.toLowerCase().indexOf(q) !== -1 ||
+          (entry.keywords && entry.keywords.toLowerCase().indexOf(q) !== -1);
+      }).slice(0, 8);
+      if (!matches.length) {
+        searchResults.innerHTML = '<div class="site-search-empty">Keine Treffer für „' + query + '".</div>';
+        searchActiveIndex = -1;
+        return;
+      }
+      searchResults.innerHTML = matches.map(function (entry, i) {
+        return '<a class="site-search-result" href="' + entry.url + '" data-index="' + i + '">' +
+          '<span class="cat">' + entry.category + '</span><span>' + entry.title + '</span></a>';
+      }).join('');
+      searchActiveIndex = -1;
+    }
+
+    function openSearch() {
+      searchPanel.hidden = false;
+      searchToggleBtn.setAttribute('aria-expanded', 'true');
+      loadSearchIndex().then(function () { renderResults(searchInput.value); });
+      searchInput.focus();
+    }
+    function closeSearch() {
+      searchPanel.hidden = true;
+      searchToggleBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    searchToggleBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (searchPanel.hidden) openSearch(); else closeSearch();
+    });
+    if (searchClose) searchClose.addEventListener('click', closeSearch);
+    searchInput.addEventListener('input', function () { renderResults(searchInput.value); });
+    document.addEventListener('click', function (e) {
+      if (!searchPanel.hidden && !e.target.closest('.site-search-panel') && !e.target.closest('#search-toggle-btn')) closeSearch();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !searchPanel.hidden) closeSearch();
+    });
+    searchInput.addEventListener('keydown', function (e) {
+      var items = searchResults.querySelectorAll('.site-search-result');
+      if (!items.length) return;
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        items[searchActiveIndex] && items[searchActiveIndex].classList.remove('active');
+        searchActiveIndex = e.key === 'ArrowDown'
+          ? Math.min(searchActiveIndex + 1, items.length - 1)
+          : Math.max(searchActiveIndex - 1, 0);
+        items[searchActiveIndex].classList.add('active');
+        items[searchActiveIndex].scrollIntoView({ block: 'nearest' });
+      } else if (e.key === 'Enter' && searchActiveIndex >= 0) {
+        e.preventDefault();
+        window.location.href = items[searchActiveIndex].getAttribute('href');
+      }
+    });
+  }
+
   if (moreBtn) moreBtn.addEventListener('click', function (e) { e.stopPropagation(); openDrawer(moreBtn); });
   if (hamburgerBtn) hamburgerBtn.addEventListener('click', function (e) { e.stopPropagation(); openDrawer(hamburgerBtn); });
   if (drawerClose) drawerClose.addEventListener('click', closeDrawer);

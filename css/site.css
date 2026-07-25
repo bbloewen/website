@@ -316,6 +316,34 @@ a.no-underline:hover { text-decoration: none; }
   display: none;
   border-color: var(--color-brand-orange-text); color: var(--color-brand-orange-text);
 }
+
+/* -- Seitensuche (Panel klappt unter dem Header auf) -- */
+#search-toggle-btn[aria-expanded="true"] { border-color: var(--color-brand-orange); color: var(--color-brand-orange); }
+.site-search-panel {
+  position: absolute; top: 100%; left: 0; right: 0; z-index: 49;
+  background: #fff; border-bottom: 1px solid var(--border); box-shadow: var(--shadow-card);
+  padding: 16px 0 20px;
+}
+.site-search-input-wrap {
+  display: flex; align-items: center; gap: 10px;
+  border: 1.5px solid var(--border-strong); border-radius: var(--radius-md);
+  padding: 0 8px 0 14px; background: var(--bg-muted);
+}
+.site-search-input-wrap i { color: var(--text-secondary); flex-shrink: 0; }
+.site-search-input-wrap input {
+  flex: 1; border: none; background: none; outline: none;
+  font-family: var(--font-base); font-size: var(--text-body); padding: 12px 0;
+  color: var(--text-primary);
+}
+.site-search-results { margin-top: 10px; max-height: 60vh; overflow-y: auto; }
+.site-search-result {
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 10px 12px; border-radius: var(--radius-sm);
+  color: var(--text-primary);
+}
+.site-search-result:hover, .site-search-result.active { background: var(--bg-muted); text-decoration: none; }
+.site-search-result .cat { font-size: var(--text-caption); color: var(--color-brand-orange); font-weight: var(--weight-semibold); flex-shrink: 0; }
+.site-search-hint, .site-search-empty { padding: 10px 12px; font-size: var(--text-body-sm); color: var(--text-secondary); }
 .nav-actions .mobile-cta:hover { background: var(--color-orange-100); border-color: var(--color-brand-orange); }
 body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 

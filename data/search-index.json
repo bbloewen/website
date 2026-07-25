@@ -1,0 +1,255 @@
+[
+  {
+    "title": "Startseite",
+    "url": "/index.html",
+    "category": "Startseite",
+    "keywords": "Basketball Löwen Erfurt Home"
+  },
+  {
+    "title": "Über uns",
+    "url": "/verein/ueber-uns.html",
+    "category": "Club"
+  },
+  {
+    "title": "Organisation",
+    "url": "/verein/organisation.html",
+    "category": "Club"
+  },
+  {
+    "title": "Kinderschutz",
+    "url": "/verein/kinderschutz.html",
+    "category": "Club"
+  },
+  {
+    "title": "Jobs",
+    "url": "/verein/jobs.html",
+    "category": "Club"
+  },
+  {
+    "title": "Mitglied werden",
+    "url": "/mitglied-werden.html",
+    "category": "Club"
+  },
+  {
+    "title": "Profis",
+    "url": "/teams-saison/profis.html",
+    "category": "Teams & Saison"
+  },
+  {
+    "title": "Damen",
+    "url": "/teams-saison/damen.html",
+    "category": "Teams & Saison"
+  },
+  {
+    "title": "U19",
+    "url": "/teams-saison/u19.html",
+    "category": "Teams & Saison",
+    "keywords": "NBBL Nachwuchs Basketball Bundesliga"
+  },
+  {
+    "title": "Nachwuchs",
+    "url": "/teams-saison/nachwuchs.html",
+    "category": "Teams & Saison"
+  },
+  {
+    "title": "Spielplan und Berichte",
+    "url": "/teams-saison/spielplan.html",
+    "category": "Teams & Saison"
+  },
+  {
+    "title": "Tabelle",
+    "url": "/teams-saison/tabelle.html",
+    "category": "Teams & Saison"
+  },
+  {
+    "title": "LÖWENPARK",
+    "url": "/trainieren/loewenpark.html",
+    "category": "Trainieren"
+  },
+  {
+    "title": "BasKIDball",
+    "url": "/trainieren/baskidball.html",
+    "category": "Trainieren"
+  },
+  {
+    "title": "SPORT VERNETZT",
+    "url": "/trainieren/sportvernetzt.html",
+    "category": "Trainieren"
+  },
+  {
+    "title": "Schultour",
+    "url": "/trainieren/schultour.html",
+    "category": "Trainieren"
+  },
+  {
+    "title": "Schul-AGs",
+    "url": "/trainieren/schul-ags.html",
+    "category": "Trainieren"
+  },
+  {
+    "title": "Camps & Anmeldung",
+    "url": "/trainieren/camps.html",
+    "category": "Trainieren"
+  },
+  {
+    "title": "Waid-Löwen",
+    "url": "/trainieren/inklusion.html",
+    "category": "Trainieren"
+  },
+  {
+    "title": "Probetraining",
+    "url": "/trainieren/probetraining.html",
+    "category": "Trainieren"
+  },
+  {
+    "title": "Unsere Sponsoren",
+    "url": "/partner/sponsoring.html",
+    "category": "Partner"
+  },
+  {
+    "title": "Löwen-Club der 100",
+    "url": "/partner/loewen-unterstuetzer.html",
+    "category": "Partner"
+  },
+  {
+    "title": "Investoren",
+    "url": "/partner/investoren.html",
+    "category": "Partner"
+  },
+  {
+    "title": "Freundeskreis",
+    "url": "/partner/freundeskreis.html",
+    "category": "Partner"
+  },
+  {
+    "title": "Netzwerk-Treffen",
+    "url": "/partner/netzwerktreffen.html",
+    "category": "Partner"
+  },
+  {
+    "title": "Aktuelles",
+    "url": "/news/aktuelles.html",
+    "category": "News"
+  },
+  {
+    "title": "Newsletter",
+    "url": "/news/newsletter/",
+    "category": "News",
+    "keywords": "Digitaler Löwen Fastbreak"
+  },
+  {
+    "title": "Media Kit",
+    "url": "/news/presse.html",
+    "category": "News"
+  },
+  {
+    "title": "Fanclub — Löwenrudel",
+    "url": "/fans/fanclub-kontakte.html",
+    "category": "Fans"
+  },
+  {
+    "title": "Ehrenamt",
+    "url": "/fans/ehrenamt.html",
+    "category": "Fans"
+  },
+  {
+    "title": "Community-Events",
+    "url": "/fans/community-events.html",
+    "category": "Fans"
+  },
+  {
+    "title": "Tickets",
+    "url": "/tickets.html",
+    "category": "Tickets"
+  },
+  {
+    "title": "Dauerkarte 2026/2027",
+    "url": "/tickets/dauerkarte.html",
+    "category": "Tickets"
+  },
+  {
+    "title": "Fanshop",
+    "url": "/fanshop.html",
+    "category": "Sonstiges"
+  },
+  {
+    "title": "Spenden",
+    "url": "/spenden.html",
+    "category": "Sonstiges"
+  },
+  {
+    "title": "Kontakt",
+    "url": "/kontakt.html",
+    "category": "Sonstiges"
+  },
+  {
+    "title": "Impressum",
+    "url": "/impressum.html",
+    "category": "Sonstiges"
+  },
+  {
+    "title": "Datenschutz",
+    "url": "/datenschutz.html",
+    "category": "Sonstiges"
+  },
+  {
+    "title": "Playoff-Heimspiel am Freitagabend",
+    "url": "/news/artikel/2025-04-22_verein_playoff-heimspiel-freitag.html",
+    "category": "News"
+  },
+  {
+    "title": "CATL Basketball Löwen scheiden im Achtelfinale aus",
+    "url": "/news/artikel/2025-04-29_verein_achtelfinale-aus.html",
+    "category": "News"
+  },
+  {
+    "title": "Löwen-Kaderplanung für die nächste Saison",
+    "url": "/news/artikel/2025-05-19_verein_kaderplanung-naechste-saison.html",
+    "category": "News"
+  },
+  {
+    "title": "Sommerinterview Teil 1: Kaderplanung",
+    "url": "/news/artikel/2025-07-21_verein_sommerinterview-teil1.html",
+    "category": "News"
+  },
+  {
+    "title": "Sommerinterview Teil 2: Neue Damenmannschaft",
+    "url": "/news/artikel/2025-08-01_verein_sommerinterview-teil2.html",
+    "category": "News"
+  },
+  {
+    "title": "Sommerinterview Teil 3: LÖWENPARK und Vorbereitung",
+    "url": "/news/artikel/2025-08-08_verein_sommerinterview-teil3.html",
+    "category": "News"
+  },
+  {
+    "title": "CATL verlängert Partnerschaft",
+    "url": "/news/artikel/2025-08-26_verein_catl-verlaengert.html",
+    "category": "News"
+  },
+  {
+    "title": "Löwen-Saisonstart und Dauerkartenverkauf",
+    "url": "/news/artikel/2025-09-25_verein_saisonstart-dauerkarten.html",
+    "category": "News"
+  },
+  {
+    "title": "Vier wichtige Spiele in Folge und ein sportlicher Abgang",
+    "url": "/news/artikel/2026-03-04_verein_mitchell-abgang.html",
+    "category": "News"
+  },
+  {
+    "title": "Saisonrückblick 2025/2026",
+    "url": "/news/artikel/2026-03-31_verein_spielbericht-saisonrueckblick-2025-26.html",
+    "category": "News"
+  },
+  {
+    "title": "Wichtige Meilensteine für den LÖWENPARK",
+    "url": "/news/artikel/2026-06-19_verein_loewenpark-meilenstein.html",
+    "category": "News"
+  },
+  {
+    "title": "SWE Sommercamp startet mit Besuch zweier U20-Nationalspieler",
+    "url": "/news/artikel/2026-07-06_verein_swe-sommercamp.html",
+    "category": "News"
+  }
+]
