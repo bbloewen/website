@@ -849,6 +849,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 }
 .contact-person-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .contact-person-photo span { font-size: 10px; text-align: center; line-height: 1.2; }
+.contact-person-card-centered { flex-direction: column; justify-content: center; text-align: center; }
 
 /* Sponsoren-Wand (partner/sponsoring.html) — Filter-Chips + eine Kachel-Wand,
    Kachelgröße markiert die Ebene (Top-Partner/Wirkungspartner größer als
