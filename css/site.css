@@ -1629,8 +1629,11 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
    Ton endet, mit dem .site-footer oben beginnt (--color-footer-glow-bright).
    So lesen sich beide Blöcke als ein durchgehendes Leuchten statt als zwei
    getrennte Flächen mit sichtbarer Kante. */
+/* Startet bei Weiß (statt direkt beim hellen Orange) — sonst entsteht genau
+   an der Kante zur weißen Seite darüber ein harter Schnitt statt eines
+   Einblendens. Ab dort wie gehabt weiter zum Footer-Verlauf. */
 .footer-leagues-top {
-  background: linear-gradient(180deg, var(--color-footer-glow-start) 0%, var(--color-footer-glow-bright) 100%);
+  background: linear-gradient(180deg, #fff 0%, var(--color-footer-glow-start) 45%, var(--color-footer-glow-bright) 100%);
   color: rgba(0,18,45,.75);
   padding: 20px 0;
 }
