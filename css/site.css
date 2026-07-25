@@ -1371,11 +1371,17 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 }
 .field select:required:invalid { color: var(--text-muted); }
 .field select option { color: var(--text-primary); }
-/* iOS/Safari rendert type="date" sonst mit eigener Intrinsic-Höhe/-Breite größer als Geschwister-Felder */
+/* Mobile Browser rendern type="date" mit einer eigenen Intrinsic-Höhe statt
+   der Padding/Line-Height-Berechnung der Geschwister-Felder — je nach OS/
+   Browser-Version mal größer, mal (wie zuletzt auf iOS gemeldet) nur noch
+   halb so hoch. Feste height statt nur min-height macht das unabhängig von
+   dieser Berechnung. Placeholder wird von type="date" nicht angezeigt,
+   deshalb hier (als einzige Ausnahme im Formular) ein sichtbares <label>
+   statt sr-only. */
 .field input[type="date"] {
   -webkit-appearance: none;
   appearance: none;
-  min-height: 0;
+  height: 45px;
   text-align: left;
 }
 .field input[type="date"]::-webkit-date-and-time-value { text-align: left; }

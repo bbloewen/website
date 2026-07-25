@@ -60,8 +60,8 @@
               </select>
             </div>
             <div class="field">
-              <label class="sr-only" for="mw-geburtsdatum">Geburtsdatum</label>
-              <input type="date" id="mw-geburtsdatum" name="geburtsdatum" required placeholder="Geburtsdatum *" />
+              <label for="mw-geburtsdatum">Geburtsdatum *</label>
+              <input type="date" id="mw-geburtsdatum" name="geburtsdatum" required />
               <p class="hint">Bei minderjährigen Mitgliedern ist zusätzlich die Unterschrift der gesetzlichen Vertreter nötig — wir melden uns dazu bei dir.</p>
             </div>
             <div class="field hidden" id="mw-erzieh-vorname-field">
@@ -276,7 +276,7 @@
       '<button type="button" class="remove-btn" data-remove-fam="' + idx + '" title="Entfernen">&times;</button>' +
       '<div class="field"><label class="sr-only">Vorname</label><input type="text" data-fam="' + idx + '" data-field="vorname" placeholder="Vorname *" /></div>' +
       '<div class="field"><label class="sr-only">Nachname</label><input type="text" data-fam="' + idx + '" data-field="nachname" placeholder="Nachname *" /></div>' +
-      '<div class="field"><label class="sr-only">Geburtsdatum</label><input type="date" data-fam="' + idx + '" data-field="geburtsdatum" placeholder="Geburtsdatum *" /></div>' +
+      '<div class="field"><label>Geburtsdatum *</label><input type="date" data-fam="' + idx + '" data-field="geburtsdatum" /></div>' +
       '<div class="field" style="margin-bottom:0"><label class="sr-only">Geschlecht</label><select data-fam="' + idx + '" data-field="geschlecht"><option value="">Geschlecht (optional)</option><option value="weiblich">Weiblich</option><option value="maennlich">Männlich</option><option value="keine_angabe">Keine Angabe</option></select></div>';
     familyCardsEl.appendChild(card);
     card.querySelector('[data-remove-fam="' + idx + '"]').addEventListener('click', function () {
