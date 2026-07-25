@@ -1296,6 +1296,8 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 
 .hero-photo.hero-kinderschutz { --hero-photo-url: url('/assets/img/hero-kinderschutz.jpg'); background-position: center 20%; }
 
+.hero-photo.hero-baskidball { --hero-photo-url: url('/assets/img/hero-baskidball.jpg'); background-position: center 60%; }
+
 /* Hero-Variante für die Freundeskreis-Seite — Kinder mit Maskottchen beim BasKIDball,
    Motiv sitzt rechts im Bild, deshalb Bildausschnitt nach rechts verschoben. */
 .hero-photo.hero-freundeskreis { --hero-photo-url: url('/assets/img/hero-freundeskreis.jpg'); background-position: 80% 42%; }
