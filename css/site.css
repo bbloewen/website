@@ -611,7 +611,11 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   background: var(--color-brand-orange); border-radius: var(--radius-full);
 }
 .history-h-item .card-label { color: var(--color-brand-orange); }
-.history-h-item h3 { font-family: var(--font-base); font-weight: var(--weight-extrabold); font-size: 15px; margin: 6px 0 6px; }
+/* min-height reserviert Platz für 2 Zeilen, damit der Absatztext bei jeder
+   Kachel auf gleicher Höhe beginnt, egal ob der Titel 1 oder 2 Zeilen braucht
+   — sonst wirkt die Reihe unruhig. text-wrap:balance verteilt zweizeilige
+   Titel gleichmäßiger statt mit einem kurzen Rest-Wort in Zeile 2. */
+.history-h-item h3 { font-family: var(--font-base); font-weight: var(--weight-extrabold); font-size: 15px; margin: 6px 0 6px; min-height: 2.6em; text-wrap: balance; }
 .history-h-item p { font-size: 13px; line-height: 1.5; color: var(--text-secondary); margin: 0; }
 @media (max-width: 899px) {
   .history-row { flex-wrap: wrap; }
