@@ -21,6 +21,15 @@
 .justify-between { justify-content: space-between; }
 .flex-wrap { flex-wrap: wrap; }
 .text-center { text-align: center; }
+/* Für lange Überschriften, die auf Desktop bewusst einzeilig bleiben sollen
+   (kein Umbruch mitten im Wort/Satz) — auf Mobil aber normal umbrechen dürfen,
+   sonst läuft die Zeile über den Viewport-Rand hinaus. Ersetzt inline
+   style="white-space:nowrap" (das die mobile Sicherheitsregel für Hero-H1s
+   überstimmen würde, da Inline-Styles immer höchste Priorität haben). */
+.nowrap-lg { white-space: nowrap; }
+@media (max-width: 599px) {
+  .nowrap-lg { white-space: normal; }
+}
 .block { display: block; }
 .hidden { display: none; }
 .gap-1 { gap: var(--space-1); }
@@ -119,6 +128,12 @@ a.no-underline:hover { text-decoration: none; }
    den Footer-Beginn; mitten auf der Seite wäre er unmotiviert). */
 .section-dark { background: var(--color-brand-navy); color: rgba(255,255,255,.78); }
 .section-dark h2 { color: #fff; }
+/* .t-body/.t-body-lg setzen selbst eine dunkle color (--text-secondary) direkt
+   auf dem <p> — das schlägt die geerbte helle color von .section-dark/
+   .section-glow-dark, weil ein direkter Treffer Vererbung immer gewinnt,
+   unabhängig von der Reihenfolge im Stylesheet. Deshalb hier explizit erneut. */
+.section-dark .t-body, .section-dark .t-body-lg,
+.section-glow-dark .t-body, .section-glow-dark .t-body-lg { color: rgba(255,255,255,.85); }
 
 /* ---------- Skip link ---------- */
 .skip-link {
@@ -558,6 +573,26 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   .history-content-bottom { width: auto; margin: 0 0 0 32px; text-align: left; }
 }
 
+/* Über-uns-Geschichte: horizontale Variante auf hellem bg-subtle-Grund
+   (eigene Klassen statt .history-timeline, da diese für dunklen Hintergrund
+   mit weißer Schrift gebaut ist und auch auf der Löwenpark-Seite läuft). */
+.history-row { display: flex; gap: 22px; }
+.history-h-item { flex: 1 1 0; position: relative; padding-top: 22px; }
+.history-h-item::before {
+  content: ''; position: absolute; top: 0; left: 0; width: 32px; height: 3px;
+  background: var(--color-brand-orange); border-radius: var(--radius-full);
+}
+.history-h-item .card-label { color: var(--color-brand-orange); }
+.history-h-item h3 { font-family: var(--font-base); font-weight: var(--weight-extrabold); font-size: 15px; margin: 6px 0 6px; }
+.history-h-item p { font-size: 13px; line-height: 1.5; color: var(--text-secondary); margin: 0; }
+@media (max-width: 899px) {
+  .history-row { flex-wrap: wrap; }
+  .history-h-item { flex: 1 1 45%; }
+}
+@media (max-width: 599px) {
+  .history-h-item { flex: 1 1 100%; }
+}
+
 /* Partner-Flipcards (Löwen-Unterstützer-Seite): Mouseover dreht die Karte um die
    Y-Achse (rechts nach links) und zeigt auf der Rückseite den Web-Claim der
    jeweiligen Firma. */
@@ -982,6 +1017,24 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .hero-media::after {
   content: ''; position: absolute; inset: 0;
   background: var(--hero-overlay);
+}
+/* Homepage-Hero: automatischer Bild-Slider statt eines einzelnen Fotos.
+   Slides liegen als gestapelte, sich überblendende Layer hinter dem
+   Overlay-Gradient; js/home-hero-slider.js schaltet .active reihum um.
+   Fällt JS aus, bleibt .hero-photo.hero-lg's eigenes Hintergrundbild
+   (siehe --hero-photo-url) als Fallback sichtbar. */
+.hero-slider .hero-slide {
+  position: absolute; inset: 0; z-index: 0;
+  background-size: cover; background-position: center;
+  opacity: 0; transition: opacity var(--dur-slow, .5s) ease;
+}
+.hero-slider .hero-slide.active { opacity: 1; }
+.hero-slider::after {
+  content: ''; position: absolute; inset: 0; z-index: 1;
+  background: var(--hero-overlay);
+}
+@media (max-width: 599px) {
+  .hero-slider::after { background: var(--hero-overlay-mobile); }
 }
 .hero-photo .container { position: relative; z-index: 2; width: 100%; padding-top: 24px; padding-bottom: 24px; }
 /* Eyebrow in Markenorange statt Navy: hebt sich klar vom jetzt dunklen
@@ -1619,9 +1672,18 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
    Schwarz verrechnet sich automatisch zu einem trüben Braun statt zu
    leuchten, deshalb vorher der "schmutzige" Eindruck. Eine Standardversion
    für den gesamten Footer. */
+/* Basis ist ein LINEARER Verlauf (über die volle Breite exakt einheitlich) —
+   nicht radial: ein radialer Verlauf ist an der Kante nur exakt in der Mitte
+   (50%) so hell wie --color-footer-glow-bright, an den Rändern liegt der
+   Farbverlauf durch die Ellipsen-Geometrie schon weiter fortgeschritten
+   (dunkler). Das erzeugte genau am Übergang zu .footer-leagues-top (dessen
+   Kante flach/einheitlich endet) eine sichtbare Naht. Der zusätzliche
+   dezente weiße Radial-Layer sorgt weiterhin fürs "Leuchten" in der Mitte,
+   ohne die einheitliche Kante zu stören. */
 .site-footer {
   background:
-    radial-gradient(140% 620px at 50% 0%, var(--color-footer-glow-bright) 0%, var(--color-brand-orange) 25%, var(--color-footer-glow-deep) 65%, var(--color-footer-glow-end) 100%);
+    radial-gradient(70% 420px at 50% 0%, rgba(255,255,255,.22) 0%, rgba(255,255,255,0) 70%),
+    linear-gradient(180deg, var(--color-footer-glow-bright) 0%, var(--color-brand-orange) 20%, var(--color-footer-glow-deep) 60%, var(--color-footer-glow-end) 100%);
   color: rgba(255,255,255,.7);
 }
 /* Nur auf der Startseite, direkt vor dem eigentlichen <footer> — statt eines
