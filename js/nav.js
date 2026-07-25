@@ -146,8 +146,8 @@ window.initNav = function initNav() {
     });
     searchInput.addEventListener('keydown', function (e) {
       var items = searchResults.querySelectorAll('.site-search-result');
-      if (!items.length) return;
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        if (!items.length) return;
         e.preventDefault();
         items[searchActiveIndex] && items[searchActiveIndex].classList.remove('active');
         searchActiveIndex = e.key === 'ArrowDown'
@@ -155,9 +155,15 @@ window.initNav = function initNav() {
           : Math.max(searchActiveIndex - 1, 0);
         items[searchActiveIndex].classList.add('active');
         items[searchActiveIndex].scrollIntoView({ block: 'nearest' });
-      } else if (e.key === 'Enter' && searchActiveIndex >= 0) {
+      } else if (e.key === 'Enter' && searchActiveIndex >= 0 && items.length) {
+        /* Pfeiltasten-Auswahl: direkt zu dieser Seite springen. */
         e.preventDefault();
         window.location.href = items[searchActiveIndex].getAttribute('href');
+      } else if (e.key === 'Enter' && searchInput.value.trim()) {
+        /* Enter ohne Pfeiltasten-Auswahl: vollständige Ergebnisseite statt
+           nur der auf 8 Treffer gedeckelten Dropdown-Vorschau. */
+        e.preventDefault();
+        window.location.href = '/suche.html?q=' + encodeURIComponent(searchInput.value.trim());
       }
     });
   }

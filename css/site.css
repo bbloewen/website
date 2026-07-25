@@ -346,6 +346,14 @@ a.no-underline:hover { text-decoration: none; }
 .site-search-result:hover, .site-search-result.active { background: var(--bg-muted); text-decoration: none; }
 .site-search-result .cat { font-size: var(--text-caption); color: var(--color-brand-orange); font-weight: var(--weight-semibold); flex-shrink: 0; }
 .site-search-hint, .site-search-empty { padding: 10px 12px; font-size: var(--text-body-sm); color: var(--text-secondary); }
+
+/* -- Suchergebnisseite (/suche.html) -- */
+.search-result-row { display: block; padding: 18px 0; border-bottom: 1px solid var(--border); color: var(--text-primary); }
+.search-result-row:hover { text-decoration: none; }
+.search-result-row:hover h3 { color: var(--color-brand-orange); }
+.search-result-row .card-label { margin-bottom: 4px; }
+.search-result-row h3 { font-size: 17px; margin: 0 0 4px; transition: color var(--dur-fast) var(--ease-out); }
+.search-result-row p { font-size: 14px; color: var(--text-secondary); margin: 0; }
 .nav-actions .mobile-cta:hover { background: var(--color-orange-100); border-color: var(--color-brand-orange); }
 body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 
