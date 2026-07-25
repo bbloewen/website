@@ -248,7 +248,9 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .btn:hover { text-decoration: none; }
 .btn-sm { font-size: 13px; padding: 8px 16px; }
 .btn-lg { font-size: 16px; padding: 18px 32px; }
-.btn-primary { background: var(--action-primary); color: #fff; }
+/* Dunkler statt weißer Text: echtes, leuchtendes Marken-Orange als Füllung
+   hat mit Weiß zu wenig Kontrast für AA (~3,1:1) — Navy schafft satte 6:1+. */
+.btn-primary { background: var(--action-primary); color: var(--color-brand-navy); }
 .btn-primary:hover { background: var(--action-primary-hover); }
 .btn-ghost { border-color: var(--border-strong); color: var(--text-primary); background: #fff; }
 .btn-ghost:hover { border-color: var(--text-primary); }
@@ -266,7 +268,7 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
    ===================================================================== */
 .eyebrow {
   display: block; font-weight: var(--weight-semibold); text-transform: uppercase;
-  letter-spacing: var(--tracking-label); font-size: 12px; color: var(--color-brand-orange-text);
+  letter-spacing: var(--tracking-label); font-size: 12px; color: var(--color-brand-orange);
   margin-bottom: 8px;
 }
 .eyebrow.on-dark { color: #fff; }
@@ -327,7 +329,7 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .card-body { padding: 20px; }
 .card-label {
   font-size: 12px; text-transform: uppercase; letter-spacing: .12em;
-  color: var(--color-brand-orange-text); font-weight: var(--weight-semibold);
+  color: var(--color-brand-orange); font-weight: var(--weight-semibold);
   display: block; margin-bottom: 6px;
 }
 .card-body h3 {
@@ -862,13 +864,18 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
    begrenzt den Containing Block des Sticky-Elements, damit es sich löst statt für den
    Rest der Seite angeheftet zu bleiben (sonst blitzt es bei kurzen Sections durch). */
 .hero-sticky-wrap { position: relative; }
+/* Standard-Verlauf für alle Hero-Fotos: ein einziges dunkles Navy/Schwarz
+   (--color-brand-navy, "fast schwarz" wie im Logo) statt des früheren
+   cremefarbenen Verlaufs mit orangem Zwischenton — Teil der Schwarz/Orange-
+   Optik. Jede Seiten-Variante setzt nur noch --hero-photo-url + die eigene
+   background-position (Bildausschnitt) und referenziert diesen einen
+   Standard-Verlauf, keine abweichenden Prozentwerte mehr pro Seite. */
 .hero-photo {
+  --hero-overlay: linear-gradient(90deg, rgba(0,18,45,.92) 0%, rgba(0,18,45,.55) 38%, rgba(0,18,45,0) 62%);
+  --hero-overlay-mobile: linear-gradient(180deg, rgba(0,18,45,.92) 0%, rgba(0,18,45,.75) 45%, rgba(0,18,45,.25) 75%, rgba(0,18,45,0) 100%);
   position: sticky; top: 74px; z-index: 0;
   border-radius: 0 0 28px 28px;
-  background:
-    radial-gradient(120% 140% at 85% 0%, rgba(255,255,255,.5) 0%, rgba(255,255,255,0) 55%),
-    linear-gradient(120deg, rgba(253,241,230,.85) 0%, rgba(246,190,134,.6) 45%, rgba(236,238,242,.78) 100%),
-    url('/assets/img/hero-basketball.jpg');
+  background-image: var(--hero-overlay), var(--hero-photo-url, url('/assets/img/hero-basketball.jpg'));
   background-size: cover; background-position: center;
   min-height: 480px; display: flex; align-items: center;
 }
@@ -904,12 +911,12 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .hero-media video, .hero-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .hero-media::after {
   content: ''; position: absolute; inset: 0;
-  background:
-    radial-gradient(120% 140% at 85% 0%, rgba(255,255,255,.5) 0%, rgba(255,255,255,0) 55%),
-    linear-gradient(120deg, rgba(253,241,230,.85) 0%, rgba(246,190,134,.6) 45%, rgba(236,238,242,.78) 100%);
+  background: var(--hero-overlay);
 }
 .hero-photo .container { position: relative; z-index: 2; width: 100%; padding-top: 24px; padding-bottom: 24px; }
-.hero-photo .eyebrow { color: var(--color-brand-navy); }
+/* Eyebrow in Markenorange statt Navy: hebt sich klar vom jetzt dunklen
+   Verlauf ab und zieht die Schwarz/Orange-Optik bis in den Hero-Bereich. */
+.hero-photo .eyebrow { color: var(--color-brand-orange); }
 .hero-photo .photo-note {
   position: absolute; right: clamp(20px,5vw,40px); bottom: 10px; z-index: 2;
   font-size: 11px; color: rgba(0,18,45,.4);
@@ -936,14 +943,15 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .hero-photo h1 {
   font-family: var(--font-display); font-weight: var(--weight-black);
   letter-spacing: var(--tracking-display); line-height: 1.02; white-space: nowrap;
-  font-size: clamp(24px, 3.6vw, 42px); margin: 8px 0 0.5em; color: var(--text-primary);
+  font-size: clamp(24px, 3.6vw, 42px); margin: 8px 0 0.5em; color: #fff;
 }
 /* margin-bottom in em statt px, damit der Abstand zum Swoosh (ebenfalls in
    em) bei jeder Hero-Variante gleich proportioniert bleibt, auch bei
    deutlich größerer Schrift wie bei .hero-lg. */
-/* Nur der Lead-Text (nicht Eyebrow/Überschrift) wechselt zwischen Hero-Fotos:
-   Standard weiß ohne Halo (dunkle/kontrastreiche Fotos), .hero-text-dark
-   kehrt für einzelne Seiten mit hellem Foto auf dunkel + Halo um. */
+/* Seit dem Umstieg auf den dunklen Standard-Verlauf ist Weiß auf jedem
+   Hero-Foto die einzige Variante (Eyebrow: Orange) — das frühere Umschalten
+   auf dunklen Text + Halo (.hero-text-dark, für Seiten mit hellem Foto) ist
+   damit entfallen. */
 .hero-photo p.lead {
   font-size: 16px; color: #fff; max-width: 46ch; font-weight: var(--weight-light); margin-bottom: 6px;
 }
@@ -1032,201 +1040,78 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .hero-location:hover { color: var(--color-brand-orange); text-decoration: underline; }
 @media (max-width: 599px) {
   .hero-photo h1 { white-space: normal; }
-  .hero-photo { min-height: 340px; }
+  .hero-photo {
+    min-height: 340px;
+    /* Auf schmalen Screens bricht die Überschrift auf volle Breite um statt
+       in eine linke Spalte — der links-rechts-Verlauf allein reicht dann
+       nicht mehr über die ganze Textzeile, daher zusätzlich ein Verlauf von
+       oben (--hero-overlay-mobile), site-weit einheitlich für jede Variante. */
+    background-image: var(--hero-overlay-mobile), var(--hero-overlay), var(--hero-photo-url, url('/assets/img/hero-basketball.jpg'));
+    background-size: cover, cover, cover;
+  }
+  .hero-media::after { background: var(--hero-overlay-mobile), var(--hero-overlay); }
 }
-
-/* Opt-in für Seiten mit hellem Hero-Foto — Lead-Text (+ Location-Link)
-   zurück auf dunkel + Halo, pro Seite auf .hero-photo zusätzlich setzen
-   (z.B. class="hero-photo hero-sponsoring hero-text-dark"). Eyebrow und
-   Überschrift sind immer dunkel, unabhängig vom Hero-Foto. */
-.hero-photo.hero-text-dark p.lead {
-  color: var(--text-secondary);
-  text-shadow:
-    0 0 2px rgba(253,246,238,1),
-    0 0 6px rgba(253,246,238,1),
-    0 0 12px rgba(253,246,238,1),
-    0 0 20px rgba(253,246,238,.95),
-    0 0 30px rgba(253,246,238,.85),
-    0 0 42px rgba(253,246,238,.65);
-}
-.hero-photo.hero-text-dark .hero-location { color: var(--text-secondary); }
 
 /* Hero-Variante für die Ticketseiten — Foto der vollen Halle */
-.hero-photo.hero-tickets {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%),
-    url('/assets/img/hero-tickets-halle.jpg');
-  background-size: cover; background-position: center 35%;
-}
-.hero-photo.hero-tickets .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%);
-}
+.hero-photo.hero-tickets { --hero-photo-url: url('/assets/img/hero-tickets-halle.jpg'); background-position: center 35%; }
 
 /* Hero-Variante für den Fanshop — freies Stockfoto (Platzhalter, wird später gegen echtes Foto getauscht) */
-.hero-photo.hero-fanshop {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.6) 38%, rgba(253,246,238,.1) 62%),
-    url('/assets/img/stock-fanshop.jpg');
-  background-size: cover; background-position: center 60%;
-}
-.hero-photo.hero-fanshop .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%);
-}
+.hero-photo.hero-fanshop { --hero-photo-url: url('/assets/img/stock-fanshop.jpg'); background-position: center 60%; }
 
 /* Hero-Variante für die LÖWENPARK-Seite — echtes Baustellenfoto (Luftaufnahme
    Dach), bereits für die Meilenstein-News verwendet. */
-.hero-photo.hero-loewenpark {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%),
-    url('/assets/img/news/loewenpark-dach.jpg');
-  background-size: cover; background-position: center 60%;
-}
-.hero-photo.hero-loewenpark .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%);
-}
+.hero-photo.hero-loewenpark { --hero-photo-url: url('/assets/img/news/loewenpark-dach.jpg'); background-position: center 60%; }
 
 /* Hero-Variante für die Löwen-Unterstützer-Seite — Erfurter Dom/Severikirche
    (Stockfoto, niedrige Auflösung als Platzhalter bis zum echten Lizenzkauf). */
-.hero-photo.hero-loewen-unterstuetzer {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.96) 0%, rgba(253,246,238,.82) 45%, rgba(253,246,238,.25) 78%, rgba(253,246,238,0) 92%),
-    url('/assets/img/hero-loewen-unterstuetzer.jpg');
-  background-size: cover; background-position: center 55%;
-}
-.hero-photo.hero-loewen-unterstuetzer .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.96) 0%, rgba(253,246,238,.82) 45%, rgba(253,246,238,.25) 78%, rgba(253,246,238,0) 92%);
-}
+.hero-photo.hero-loewen-unterstuetzer { --hero-photo-url: url('/assets/img/hero-loewen-unterstuetzer.jpg'); background-position: center 55%; }
 
 /* Hero-Variante für die Investoren-Seite — Maskottchen mit Vereinsflagge vor
    voller, jubelnder Halle ("INVESTORS" auf der Anzeigetafel). */
-.hero-photo.hero-investoren {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.94) 0%, rgba(253,246,238,.65) 38%, rgba(253,246,238,.15) 65%, rgba(253,246,238,0) 85%),
-    url('/assets/img/hero-investoren.jpg');
-  background-size: cover; background-position: center 40%;
-}
-.hero-photo.hero-investoren .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.94) 0%, rgba(253,246,238,.65) 38%, rgba(253,246,238,.15) 65%, rgba(253,246,238,0) 85%);
-}
+.hero-photo.hero-investoren { --hero-photo-url: url('/assets/img/hero-investoren.jpg'); background-position: center 40%; }
 
 /* Hero-Variante für die Löwenrudel/Fanclub-Seite — Gruppenfoto mit "Ich bin
    ein Löwe"-T-Shirts vor dem Petersberg, Motiv über die ganze Breite verteilt.
    Höhe kommt jetzt vom vereinheitlichten .hero-photo-Basiswert. */
-.hero-photo.hero-loewenrudel {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.9) 0%, rgba(253,246,238,.5) 30%, rgba(253,246,238,.15) 60%, rgba(253,246,238,0) 85%),
-    url('/assets/img/hero-loewenrudel.jpg');
-  background-size: cover; background-position: center 10%;
-}
-.hero-photo.hero-loewenrudel .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.9) 0%, rgba(253,246,238,.5) 30%, rgba(253,246,238,.15) 60%, rgba(253,246,238,0) 85%);
-}
+.hero-photo.hero-loewenrudel { --hero-photo-url: url('/assets/img/hero-loewenrudel.jpg'); background-position: center 10%; }
 /* Auf schmalen Screens bricht die Überschrift auf volle Breite um (statt der
-   linken Spalte bei breiten Screens) — der links-rechts-Verlauf reicht dann
-   nicht mehr über die ganze Textzeile. Zusätzlicher Verlauf von oben deckt
-   den Kopfbereich der Gruppe unabhängig von der Zeilenbreite ab. */
+   linken Spalte bei breiten Screens) — Bildausschnitt daher etwas tiefer,
+   der Verlauf selbst kommt bereits einheitlich vom .hero-photo-Basiswert. */
 @media (max-width: 599px) {
-  .hero-photo.hero-loewenrudel {
-    background:
-      linear-gradient(180deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.75) 45%, rgba(253,246,238,.25) 75%, rgba(253,246,238,0) 100%),
-      linear-gradient(90deg, rgba(253,246,238,.9) 0%, rgba(253,246,238,.5) 30%, rgba(253,246,238,.15) 60%, rgba(253,246,238,0) 85%),
-      url('/assets/img/hero-loewenrudel.jpg');
-    background-size: cover, cover, cover; background-position: center 68%;
-  }
-  .hero-photo.hero-loewenrudel .hero-media::after {
-    background:
-      linear-gradient(180deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.75) 45%, rgba(253,246,238,.25) 75%, rgba(253,246,238,0) 100%),
-      linear-gradient(90deg, rgba(253,246,238,.9) 0%, rgba(253,246,238,.5) 30%, rgba(253,246,238,.15) 60%, rgba(253,246,238,0) 85%);
-  }
+  .hero-photo.hero-loewenrudel { background-position: center 68%; }
 }
 
 /* Hero-Variante für die Ehrenamt-Seite — Team- und Helfer:innen-Gruppenfoto
    auf dem Spielfeld, Logo mittig unten im Bild. Höhe kommt vom
    vereinheitlichten .hero-photo-Basiswert. */
-.hero-photo.hero-ehrenamt {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.97) 0%, rgba(253,246,238,.85) 32%, rgba(253,246,238,.4) 58%, rgba(253,246,238,0) 82%),
-    url('/assets/img/hero-ehrenamt.jpg');
-  background-size: cover; background-position: center 45%;
-}
-.hero-photo.hero-ehrenamt .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.97) 0%, rgba(253,246,238,.85) 32%, rgba(253,246,238,.4) 58%, rgba(253,246,238,0) 82%);
-}
+.hero-photo.hero-ehrenamt { --hero-photo-url: url('/assets/img/hero-ehrenamt.jpg'); background-position: center 45%; }
 /* Überschrift ist länger als die üblichen kurzen Taglines — normal umbrechen
    und auf den geschützten (helleren) linken Bildbereich begrenzen. */
 .hero-photo.hero-ehrenamt h1 { white-space: normal; max-width: 23ch; }
 
 /* Hero-Variante für die Community-Events-Seite — gestaltete Festival-Szene
    mit Löwen-Maskottchen und "Community Stage". */
-.hero-photo.hero-community-events {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%),
-    url('/assets/img/hero-community-events.jpg');
-  background-size: cover; background-position: center 55%;
-}
-.hero-photo.hero-community-events .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%);
-}
+.hero-photo.hero-community-events { --hero-photo-url: url('/assets/img/hero-community-events.jpg'); background-position: center 55%; }
 
 /* Hero-Variante für die Netzwerk-Treffen-Seite — Bühnenmoment beim
    Alley-Oop 2025, Basketball-Löwen/CATL-Wandlogo links, Publikum unten. */
-.hero-photo.hero-netzwerktreffen {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.94) 0%, rgba(253,246,238,.6) 35%, rgba(253,246,238,.15) 60%, rgba(253,246,238,0) 82%),
-    url('/assets/img/hero-netzwerktreffen.jpg');
-  background-size: cover; background-position: center 22%;
-}
-.hero-photo.hero-netzwerktreffen .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.94) 0%, rgba(253,246,238,.6) 35%, rgba(253,246,238,.15) 60%, rgba(253,246,238,0) 82%);
-}
+.hero-photo.hero-netzwerktreffen { --hero-photo-url: url('/assets/img/hero-netzwerktreffen.jpg'); background-position: center 22%; }
 
 /* Hero-Variante für die Media-Kit-Seite — gestaltete Grafik "Medienportal"
    mit Download-Icons für Pressematerial/Vereinsprofile/Fotos. */
-.hero-photo.hero-mediakit {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.94) 0%, rgba(253,246,238,.62) 35%, rgba(253,246,238,.15) 60%, rgba(253,246,238,0) 80%),
-    url('/assets/img/hero-mediakit.jpg');
-  background-size: cover; background-position: center;
-}
-.hero-photo.hero-mediakit .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.94) 0%, rgba(253,246,238,.62) 35%, rgba(253,246,238,.15) 60%, rgba(253,246,238,0) 80%);
-}
+.hero-photo.hero-mediakit { --hero-photo-url: url('/assets/img/hero-mediakit.jpg'); background-position: center; }
 .hero-photo.hero-mediakit h1 { white-space: normal; max-width: 28ch; }
 
 /* Hero-Variante für die Mitgliedschafts-Seiten (Übersicht + Fan-Formular) —
    feiernde Fans mit Maskottchen im Bus auf dem Weg zum Auswärtsspiel. */
-.hero-photo.hero-mitglied-werden {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.94) 0%, rgba(253,246,238,.6) 35%, rgba(253,246,238,.15) 60%, rgba(253,246,238,0) 82%),
-    url('/assets/img/hero-mitglied-werden.jpg');
-  background-size: cover; background-position: center 40%;
-}
-.hero-photo.hero-mitglied-werden .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 60%);
-}
+.hero-photo.hero-mitglied-werden { --hero-photo-url: url('/assets/img/hero-mitglied-werden.jpg'); background-position: center 40%; }
 
 /* Hero-Variante für die Newsletter-Seite. */
-.hero-photo.hero-newsletter {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%),
-    url('/assets/img/hero-newsletter.jpg');
-  background-size: cover; background-position: center 40%;
-}
-.hero-photo.hero-newsletter .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%);
-}
+.hero-photo.hero-newsletter { --hero-photo-url: url('/assets/img/hero-newsletter.jpg'); background-position: center 40%; }
 
 /* Hero-Variante für die Freundeskreis-Seite — Kinder mit Maskottchen beim BasKIDball,
    Motiv sitzt rechts im Bild, deshalb Bildausschnitt nach rechts verschoben. */
-.hero-photo.hero-freundeskreis {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.94) 0%, rgba(253,246,238,.62) 40%, rgba(253,246,238,.1) 70%, rgba(253,246,238,0) 90%),
-    url('/assets/img/hero-freundeskreis.jpg');
-  background-size: cover; background-position: 80% 42%;
-}
-.hero-photo.hero-freundeskreis .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.94) 0%, rgba(253,246,238,.62) 40%, rgba(253,246,238,.1) 70%, rgba(253,246,238,0) 90%);
-}
+.hero-photo.hero-freundeskreis { --hero-photo-url: url('/assets/img/hero-freundeskreis.jpg'); background-position: 80% 42%; }
 /* Lead-Text auf dieser Seite ist kurz genug, um im Desktop-Format in eine Zeile
    zu passen (siehe Kommentar oben) — auf Mobil aber wieder normal umbrechen
    lassen, sonst läuft die feste Zeile über den Viewport-Rand hinaus und über
@@ -1238,48 +1123,19 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 @media (max-width: 599px) {
   /* Schmalerer Umbruch (3 statt 2 Zeilen) hält den Text im deckenden linken
      Bereich des Verlaufs, statt auf das Foto rechts überzulaufen (Kontrast-
-     Problem, gemeldet 23.07.2026). */
+     Problem, gemeldet 23.07.2026). Bildausschnitt zusätzlich etwas nach
+     rechts verschoben, aus dem gleichen Grund. */
   .hero-photo.hero-freundeskreis p.lead { max-width: 27ch; }
-  /* Die Verlauf-Stops oben sind in % der Container-Breite definiert — auf
-     schmalen Mobil-Viewports liegt "70%" schon fast am Textrand, das Foto
-     scheint dort also trotz kürzerer Zeilen fast ungedämpft durch. Deckender
-     Bereich deshalb auf Mobil nach rechts verschoben, statt den Text noch
-     weiter zu verschmälern. */
-  .hero-photo.hero-freundeskreis {
-    background:
-      linear-gradient(90deg, rgba(253,246,238,.96) 0%, rgba(253,246,238,.85) 55%, rgba(253,246,238,.4) 80%, rgba(253,246,238,0) 98%),
-      url('/assets/img/hero-freundeskreis.jpg');
-    background-size: cover; background-position: 85% 42%;
-  }
-  .hero-photo.hero-freundeskreis .hero-media::after {
-    background: linear-gradient(90deg, rgba(253,246,238,.96) 0%, rgba(253,246,238,.85) 55%, rgba(253,246,238,.4) 80%, rgba(253,246,238,0) 98%);
-  }
+  .hero-photo.hero-freundeskreis { background-position: 85% 42%; }
 }
 
 /* Hero-Variante für die Sponsoren-Seite — Maskottchen klatscht mit Fans in der Kurve,
    Motiv sitzt rechts im Bild, links freie Wand für den Text. */
-.hero-photo.hero-sponsoring {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.94) 0%, rgba(253,246,238,.65) 42%, rgba(253,246,238,.15) 65%, rgba(253,246,238,0) 85%),
-    url('/assets/img/hero-sponsoring.jpg');
-  background-size: cover; background-position: 68% 38%;
-}
-.hero-photo.hero-sponsoring .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.94) 0%, rgba(253,246,238,.65) 42%, rgba(253,246,238,.15) 65%, rgba(253,246,238,0) 85%);
-}
+.hero-photo.hero-sponsoring { --hero-photo-url: url('/assets/img/hero-sponsoring.jpg'); background-position: 68% 38%; }
 @media (max-width: 599px) {
-  /* Gleiches Prinzip wie beim Freundeskreis-Hero: Verlauf-Stops sind % der
-     Container-Breite, auf schmalen Viewports reicht die Textbox sonst schon
-     in den transparenten Bereich hinein und läuft übers Maskottchen-Foto. */
-  .hero-photo.hero-sponsoring {
-    background:
-      linear-gradient(90deg, rgba(253,246,238,.97) 0%, rgba(253,246,238,.92) 60%, rgba(253,246,238,.55) 82%, rgba(253,246,238,0) 98%),
-      url('/assets/img/hero-sponsoring.jpg');
-    background-size: cover; background-position: 82% 34%;
-  }
-  .hero-photo.hero-sponsoring .hero-media::after {
-    background: linear-gradient(90deg, rgba(253,246,238,.97) 0%, rgba(253,246,238,.92) 60%, rgba(253,246,238,.55) 82%, rgba(253,246,238,0) 98%);
-  }
+  /* Gleiches Prinzip wie beim Freundeskreis-Hero: Bildausschnitt auf Mobil
+     etwas verschoben, damit die Textbox nicht übers Maskottchen-Foto läuft. */
+  .hero-photo.hero-sponsoring { background-position: 82% 34%; }
   /* Überschrift ist lang ("Unsere Sponsoren & Förderpartner.") — ohne
      Breitenbegrenzung würde jede umgebrochene Zeile die volle Containerbreite
      nutzen und dabei übers Foto rechts laufen. */
@@ -1288,119 +1144,23 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 }
 
 /* Hero-Variante für die Profi-Team-Seite — echtes Mannschaftsfoto */
-.hero-photo.hero-profis {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%),
-    url('/assets/img/team-prob.jpg');
-  background-size: cover; background-position: center 20%;
-}
-.hero-photo.hero-profis .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%);
-}
-.hero-photo.hero-damen {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%),
-    url('/assets/img/team-damen.jpg');
-  background-size: cover; background-position: center 20%;
-}
-.hero-photo.hero-damen .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%);
-}
-.hero-photo.hero-u19 {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%),
-    url('/assets/img/team-nbbl.jpg');
-  background-size: cover; background-position: center 20%;
-}
-.hero-photo.hero-u19 .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%);
-}
+.hero-photo.hero-profis { --hero-photo-url: url('/assets/img/team-prob.jpg'); background-position: center 20%; }
+.hero-photo.hero-damen { --hero-photo-url: url('/assets/img/team-damen.jpg'); background-position: center 20%; }
+.hero-photo.hero-u19 { --hero-photo-url: url('/assets/img/team-nbbl.jpg'); background-position: center 20%; }
 
 /* Hero-Varianten für einzelne News-Artikel mit echtem Pressefoto */
-.hero-photo.hero-news-saisonstart-2025 {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%),
-    url('/assets/img/news/saisonstart-2025.jpg');
-  background-size: cover; background-position: center 30%;
-}
-.hero-photo.hero-news-saisonstart-2025 .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%);
-}
-.hero-photo.hero-news-mitchell-abgang {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%),
-    url('/assets/img/news/mitchell-abgang.jpg');
-  background-size: cover; background-position: center 25%;
-}
-.hero-photo.hero-news-mitchell-abgang .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%);
-}
-.hero-photo.hero-news-loewenpark-dach {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%),
-    url('/assets/img/news/loewenpark-dach.jpg');
-  background-size: cover; background-position: center 55%;
-}
-.hero-photo.hero-news-loewenpark-dach .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%);
-}
-.hero-photo.hero-news-swe-sommercamp {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%),
-    url('/assets/img/news/swe-sommercamp.jpg');
-  background-size: cover; background-position: center 40%;
-}
-.hero-photo.hero-news-swe-sommercamp .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%);
-}
-.hero-photo.hero-news-damen-regionalliga {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%),
-    url('/assets/img/news/damen-regionalliga.jpg');
-  background-size: cover; background-position: center 25%;
-}
-.hero-photo.hero-news-damen-regionalliga .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%);
-}
-.hero-photo.hero-news-achtelfinale {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%),
-    url('/assets/img/news/achtelfinale.jpg');
-  background-size: cover; background-position: center 35%;
-}
-.hero-photo.hero-news-achtelfinale .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%);
-}
-.hero-photo.hero-news-playoff-heimspiel {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%),
-    url('/assets/img/news/playoff-heimspiel.jpg');
-  background-size: cover; background-position: center 35%;
-}
-.hero-photo.hero-news-playoff-heimspiel .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%);
-}
-.hero-photo.hero-news-raumtextilienshop {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%),
-    url('/assets/img/news/raumtextilienshop.jpg');
-  background-size: cover; background-position: center 50%;
-}
-.hero-photo.hero-news-raumtextilienshop .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%);
-}
+.hero-photo.hero-news-saisonstart-2025 { --hero-photo-url: url('/assets/img/news/saisonstart-2025.jpg'); background-position: center 30%; }
+.hero-photo.hero-news-mitchell-abgang { --hero-photo-url: url('/assets/img/news/mitchell-abgang.jpg'); background-position: center 25%; }
+.hero-photo.hero-news-loewenpark-dach { --hero-photo-url: url('/assets/img/news/loewenpark-dach.jpg'); background-position: center 55%; }
+.hero-photo.hero-news-swe-sommercamp { --hero-photo-url: url('/assets/img/news/swe-sommercamp.jpg'); background-position: center 40%; }
+.hero-photo.hero-news-damen-regionalliga { --hero-photo-url: url('/assets/img/news/damen-regionalliga.jpg'); background-position: center 25%; }
+.hero-photo.hero-news-achtelfinale { --hero-photo-url: url('/assets/img/news/achtelfinale.jpg'); background-position: center 35%; }
+.hero-photo.hero-news-playoff-heimspiel { --hero-photo-url: url('/assets/img/news/playoff-heimspiel.jpg'); background-position: center 35%; }
+.hero-photo.hero-news-raumtextilienshop { --hero-photo-url: url('/assets/img/news/raumtextilienshop.jpg'); background-position: center 50%; }
 
 /* Hero-Variante für die Startseite — Platz für eine Seiten-Box (Top-News/Heimspiel).
    Höhe kommt vom vereinheitlichten .hero-photo-Basiswert, hier nur noch Layout/Typo. */
-.hero-photo.hero-lg {
-  background:
-    linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%),
-    url('/assets/img/hero-startseite-alt.jpg');
-  background-size: cover; background-position: center 20%;
-}
-.hero-photo.hero-lg .hero-media::after {
-  background: linear-gradient(90deg, rgba(253,246,238,.92) 0%, rgba(253,246,238,.55) 38%, rgba(253,246,238,0) 62%);
-}
+.hero-photo.hero-lg { --hero-photo-url: url('/assets/img/hero-startseite-alt.jpg'); background-position: center 20%; }
 .hero-photo.hero-lg .container { padding-top: 56px; padding-bottom: 56px; }
 .hero-lg-grid { display: grid; grid-template-columns: 1.3fr .8fr; gap: 40px; align-items: center; }
 .hero-photo.hero-lg h1 { white-space: normal; font-size: clamp(32px, 5vw, 60px); }
@@ -1773,13 +1533,26 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 /* =====================================================================
    FOOTER
    ===================================================================== */
+/* Schwarz/Orange-Optik: oben ein wirklich leuchtendes Orange, das erst nach
+   und nach in Schwarz übergeht. Wichtig: die Farbstops sind volldeckend
+   (kein rgba(...) Richtung Schwarz) — ein halbtransparentes Orange über
+   Schwarz verrechnet sich automatisch zu einem trüben Braun statt zu
+   leuchten, deshalb vorher der "schmutzige" Eindruck. Eine Standardversion
+   für den gesamten Footer. */
 .site-footer {
-  background: linear-gradient(180deg, var(--color-blue-500) 0%, var(--color-blue-900) 100%);
+  background:
+    radial-gradient(140% 620px at 50% 0%, #FF8A2E 0%, var(--color-brand-orange) 25%, #4A2205 65%, #000 100%);
   color: rgba(255,255,255,.7);
 }
+/* Nur auf der Startseite, direkt vor dem eigentlichen <footer> — statt eines
+   flachen Farbtons ein eigener kurzer Verlauf, dessen untere Kante GENAU im
+   Ton endet, mit dem .site-footer oben beginnt (#FF8A2E). So lesen sich
+   beide Blöcke als ein durchgehendes Leuchten statt als zwei getrennte
+   Flächen mit sichtbarer Kante. */
 .footer-leagues-top {
-  background: var(--color-blue-500); color: rgba(255,255,255,.7);
-  border-bottom: 1px solid rgba(255,255,255,.14); padding: 20px 0;
+  background: linear-gradient(180deg, #FFB067 0%, #FF8A2E 100%);
+  color: rgba(0,18,45,.75);
+  padding: 20px 0;
 }
 .footer-leagues-top .container {
   display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap;
@@ -1791,7 +1564,7 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .footer-leagues-right { grid-column: 3 / 5; display: flex; justify-content: center; }
 .footer-leagues-right img { display: block; width: 100%; max-width: 320px; height: auto; border-radius: 4px; }
 .footer-leagues-label {
-  font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,.55);
+  font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: rgba(0,18,45,.6);
 }
 .footer-leagues-logos-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .league-chip {

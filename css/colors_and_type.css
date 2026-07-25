@@ -81,8 +81,8 @@
   --text-secondary: var(--color-neutral-600);
   --text-muted:     #656E82; /* A11y: darkened vs. neutral-500 to clear 4.5:1 on --bg-subtle too */
   --text-on-dark:   var(--color-white);      /* ONLY on dark surfaces */
-  --action-primary: var(--color-brand-orange-text); /* button fill w/ white text — 4.85:1 AA */
-  --action-primary-hover: #A04D07;
+  --action-primary: var(--color-brand-orange); /* echtes, leuchtendes Marken-Orange — Button-Text daher dunkel statt weiß (s. .btn-primary) */
+  --action-primary-hover: var(--color-orange-600);
   --link:           var(--color-brand-blue);
   --focus-ring:     var(--color-brand-blue);
 
