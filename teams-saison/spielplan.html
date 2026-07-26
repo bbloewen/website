@@ -21,19 +21,12 @@
     <span class="eyebrow">Saison 2026/2027</span>
     <h1>Der <span class="kw">Spielplan<span class="swoosh" aria-hidden="true"></span></span>.</h1>
     <p class="lead">Alle Termine der Profis, Damen und NBBL auf einen Blick — dazu Rückblicke nach jedem Spieltag.</p>
+    <a class="btn btn-primary mt-4" href="/tickets/dauerkarte.html">Dauerkarte kaufen</a>
     </div>
   </section>
 
   <section class="section">
     <div class="container">
-      <div class="section-head">
-        <div class="head-text">
-          <span class="eyebrow">Alle Teams</span>
-          <h2 class="t-h2">Jeder Spieltag auf einen Blick</h2>
-          <p class="t-body" style="color:var(--text-secondary);margin-top:8px">Alle Termine der Profis, Damen und U19 gebündelt nach Spieltag — mit Ergebnissen und Spielberichten, sobald sie feststehen.</p>
-        </div>
-      </div>
-
       <div class="filter-row" id="spielplan-filter">
         <button type="button" class="filter-chip is-active" data-filter="alle">Alle</button>
         <button type="button" class="filter-chip" data-filter="profis">Herren Pro B</button>
@@ -89,7 +82,7 @@
       return '<div class="card">' +
         '<div class="card-media tint-neutral"><i data-lucide="file-text" class="icon-32"></i></div>' +
         '<div class="card-body">' +
-          '<span class="card-label">Pro B · ' + formatShort(g.date) + '</span>' +
+          '<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px"><span class="team-badge team-badge-profis" style="margin-bottom:0">Pro B</span><span class="t-body-sm" style="color:var(--text-muted)">' + formatShort(g.date) + '</span></div>' +
           '<h3 style="font-size:18px">Spielbericht</h3>' +
           '<p>Nach dem Spieltag findest du hier den ausführlichen Rückblick.</p>' +
           '<span class="card-link" style="opacity:.55;pointer-events:none">Weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span>' +

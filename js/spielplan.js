@@ -69,22 +69,47 @@
 
   function dayBoxHTML(day) {
     var teams = day.games.map(function (g) { return g.team; });
-    var dateStr = WOCHENTAGE[day.date.getDay()] + ', ' + formatShort(day.date);
+    var dates = day.games.map(function (g) { return dateKey(g.date); });
+    var uniqueDates = dates.filter(function (k, i) { return dates.indexOf(k) === i; })
+      .map(function (k) { return day.games.filter(function (g) { return dateKey(g.date) === k; })[0].date; })
+      .sort(function (a, b) { return a - b; });
+    var dateStr;
+    if (uniqueDates.length > 1) {
+      var first = uniqueDates[0], last = uniqueDates[uniqueDates.length - 1];
+      var sameMonth = first.getMonth() === last.getMonth() && first.getFullYear() === last.getFullYear();
+      var firstStr = sameMonth ? pad2(first.getDate()) + '.' : formatShort(first);
+      dateStr = WOCHENTAGE[first.getDay()] + '–' + WOCHENTAGE[last.getDay()] + ', ' + firstStr + '–' + formatShort(last);
+    } else {
+      dateStr = WOCHENTAGE[day.date.getDay()] + ', ' + formatShort(day.date);
+    }
     return '<div class="card fixture-day" data-teams="' + teams.join(' ') + '">' +
       '<div class="fixture-day-date">' + dateStr + '</div>' +
       day.games.map(function (g, i) { return gameRowHTML(g, i > 0); }).join('') +
       '</div>';
   }
 
+  function weekendKey(d) {
+    var day = d.getDay();
+    if (day !== 0 && day !== 5 && day !== 6) return 'day-' + dateKey(d);
+    var anchor = new Date(d);
+    if (day === 0) anchor.setDate(d.getDate() - 1);
+    else if (day === 5) anchor.setDate(d.getDate() + 1);
+    return 'wknd-' + dateKey(anchor);
+  }
+
   function groupByDay(games) {
     var map = {};
     var order = [];
     games.forEach(function (g) {
-      var key = dateKey(g.date);
+      var key = weekendKey(g.date);
       if (!map[key]) { map[key] = { date: g.date, games: [] }; order.push(key); }
       map[key].games.push(g);
     });
-    return order.map(function (key) { return map[key]; });
+    order.sort(function (a, b) { return map[a].games[0].date - map[b].games[0].date; });
+    return order.map(function (key) {
+      map[key].games.sort(function (a, b) { return a.date - b.date || (a.zeit || '').localeCompare(b.zeit || ''); });
+      return map[key];
+    });
   }
 
   function applyFilter(filter) {

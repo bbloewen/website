@@ -1621,8 +1621,8 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   margin-bottom: 6px; text-decoration: none;
 }
 .team-badge:hover { filter: brightness(0.94); }
-.team-badge-profis { background: var(--color-orange-50); color: var(--color-orange-700); }
-.team-badge-damen { background: var(--color-success-bg); color: var(--color-success); }
+.team-badge-profis { background: var(--color-success-bg); color: var(--color-success); }
+.team-badge-damen { background: var(--color-orange-50); color: var(--color-orange-700); }
 .team-badge-nbbl { background: var(--color-blue-100); color: var(--color-blue-700); }
 .fixture-day-actions { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .fixture-result-row { display: flex; align-items: center; gap: 8px; }
