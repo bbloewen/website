@@ -13,7 +13,6 @@
     nbbl: { label: 'NBBL', badgeClass: 'team-badge-nbbl', url: '/teams-saison/u19.html', tableUrl: '/teams-saison/tabelle.html#tabelle-nbbl' }
   };
   var RIETHSPORTHALLE_MAPS_URL = 'https://www.google.com/maps/search/?api=1&query=Essener+Stra%C3%9Fe+20%2C+99089+Erfurt';
-  var DAY_BOXES_INITIAL = 8;
 
   function parseDMY(str) {
     var parts = str.split('.').map(Number);
@@ -105,26 +104,15 @@
         });
       }
     });
-    var details = document.getElementById('spielplan-tage-details');
-    if (details) {
-      var anyVisibleInside = Array.prototype.some.call(details.querySelectorAll('.fixture-day'), function (b) { return b.style.display !== 'none'; });
-      details.style.display = anyVisibleInside ? '' : 'none';
-    }
+    document.querySelectorAll('#spielplan-cal-row [data-team]').forEach(function (btn) {
+      btn.style.display = (filter === 'alle' || btn.getAttribute('data-team') === filter) ? '' : 'none';
+    });
   }
 
   function renderDayList(days) {
     var container = document.getElementById('spielplan-tage');
     if (!container) return;
-    var first = days.slice(0, DAY_BOXES_INITIAL);
-    var rest = days.slice(DAY_BOXES_INITIAL);
-    var html = first.map(dayBoxHTML).join('');
-    if (rest.length) {
-      html += '<details class="accordion" id="spielplan-tage-details" style="margin-top:8px">' +
-        '<summary><span>Alle Spieltage anzeigen (' + rest.length + ' weitere)</span><i data-lucide="chevron-down" class="accordion-icon" style="width:20px;height:20px"></i></summary>' +
-        '<div class="accordion-body" style="padding:0">' + rest.map(dayBoxHTML).join('') + '</div>' +
-        '</details>';
-    }
-    container.innerHTML = html;
+    container.innerHTML = days.map(dayBoxHTML).join('');
     if (window.lucide) lucide.createIcons();
   }
 

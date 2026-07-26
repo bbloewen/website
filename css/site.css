@@ -1619,7 +1619,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 }
 .team-badge:hover { filter: brightness(0.94); }
 .team-badge-profis { background: var(--color-orange-50); color: var(--color-orange-700); }
-.team-badge-damen { background: #E5E5F5; color: var(--color-brand-violet); }
+.team-badge-damen { background: var(--color-success-bg); color: var(--color-success); }
 .team-badge-nbbl { background: var(--color-blue-100); color: var(--color-blue-700); }
 .fixture-day-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
 .fixture-result-row { display: flex; align-items: center; gap: 8px; }
@@ -2115,9 +2115,7 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
 .filter-chip.is-active { background: var(--color-brand-orange-text); border-color: var(--color-brand-orange-text); color: #fff; }
 
 /* Spielplan: kompakte Team-Schnelllinks über der Tages-Liste */
-.spielplan-team-links { display: flex; flex-wrap: wrap; gap: 10px 28px; margin: 22px 0 20px; }
-.spielplan-team-link-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 14px; }
-.spielplan-team-link-group strong { color: var(--text-primary); margin-right: 2px; }
+.spielplan-cal-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
 
 /* Spielberichte: horizontaler 5-Kachel-Slider auf der Spielplan-Seite */
 .spielberichte-slider-wrap { position: relative; }

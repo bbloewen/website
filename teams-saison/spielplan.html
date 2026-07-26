@@ -35,27 +35,6 @@
         </div>
       </div>
 
-      <div class="spielplan-team-links">
-        <div class="spielplan-team-link-group">
-          <strong>Profis</strong>
-          <a class="btn btn-ghost btn-sm" href="/teams-saison/profis.html">Zum Team</a>
-          <a class="btn btn-ghost btn-sm" href="/teams-saison/tabelle.html#tabelle-profis">Zur Tabelle</a>
-          <a class="btn btn-outline-orange btn-sm" href="webcal://api.2basketballbundesliga.de/cal/563" title="Spielplan der Profis abonnieren — aktualisiert sich automatisch"><i data-lucide="calendar-plus" class="icon-14"></i> Kalender abonnieren</a>
-        </div>
-        <div class="spielplan-team-link-group">
-          <strong>Damen</strong>
-          <a class="btn btn-ghost btn-sm" href="/teams-saison/damen.html">Zum Team</a>
-          <a class="btn btn-ghost btn-sm" href="/teams-saison/tabelle.html#tabelle-damen">Zur Tabelle</a>
-          <a class="btn btn-outline-orange btn-sm" href="#" title="Kalenderabo folgt in Kürze"><i data-lucide="calendar-plus" class="icon-14"></i> Kalender abonnieren</a>
-        </div>
-        <div class="spielplan-team-link-group">
-          <strong>NBBL</strong>
-          <a class="btn btn-ghost btn-sm" href="/teams-saison/u19.html">Zum Team</a>
-          <a class="btn btn-ghost btn-sm" href="/teams-saison/tabelle.html#tabelle-nbbl">Zur Tabelle</a>
-          <a class="btn btn-outline-orange btn-sm" href="#" title="Kalenderabo folgt in Kürze"><i data-lucide="calendar-plus" class="icon-14"></i> Kalender abonnieren</a>
-        </div>
-      </div>
-
       <div class="filter-row" id="spielplan-filter">
         <button type="button" class="filter-chip is-active" data-filter="alle">Alle</button>
         <button type="button" class="filter-chip" data-filter="profis">Herren Pro B</button>
@@ -64,6 +43,12 @@
       </div>
 
       <div id="spielplan-tage"></div>
+
+      <div class="spielplan-cal-row" id="spielplan-cal-row">
+        <a class="btn btn-outline-orange btn-sm" data-team="profis" href="webcal://api.2basketballbundesliga.de/cal/563" title="Spielplan der Profis abonnieren — aktualisiert sich automatisch"><i data-lucide="calendar-plus" class="icon-14"></i> Kalender Profis abonnieren</a>
+        <a class="btn btn-outline-orange btn-sm" data-team="damen" href="#" title="Kalenderabo folgt in Kürze"><i data-lucide="calendar-plus" class="icon-14"></i> Kalender Damen abonnieren</a>
+        <a class="btn btn-outline-orange btn-sm" data-team="nbbl" href="#" title="Kalenderabo folgt in Kürze"><i data-lucide="calendar-plus" class="icon-14"></i> Kalender NBBL abonnieren</a>
+      </div>
     </div>
   </section>
 
@@ -72,17 +57,7 @@
       <span class="eyebrow">Spielberichte</span>
       <h2 class="t-h2 mb-5">Rückblick, Zahlen, Stimmen</h2>
       <div class="spielberichte-slider-wrap">
-        <div class="spielberichte-track" id="spielberichte-track">
-          <div class="card">
-            <div class="card-media tint-blue"><i data-lucide="trophy" class="icon-32"></i></div>
-            <div class="card-body">
-              <span class="card-label">Saisonrückblick 2025/2026</span>
-              <h3 style="font-size:18px">Platz 12, Bilanz 8:16</h3>
-              <p>Die Profis verpassen knapp die Playoffs — Coach Florian Gut zieht Bilanz.</p>
-              <a class="card-link" href="/news/artikel/2026-03-31_verein_spielbericht-saisonrueckblick-2025-26.html">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></a>
-            </div>
-          </div>
-        </div>
+        <div class="spielberichte-track" id="spielberichte-track"></div>
         <button type="button" class="news-slider-arrow prev" id="spielberichte-prev" aria-label="Zurück"><i data-lucide="chevron-left"></i></button>
         <button type="button" class="news-slider-arrow next" id="spielberichte-next" aria-label="Weiter"><i data-lucide="chevron-right"></i></button>
       </div>
@@ -108,10 +83,10 @@
   function formatShort(d) { return pad2(d.getDate()) + '.' + pad2(d.getMonth() + 1) + '.' + d.getFullYear(); }
 
   window.addEventListener('spielplan:ready', function () {
-    var upcoming = (window.__spielplanProfisGames || []).filter(function (g) { return g.date >= window.__spielplanToday; }).slice(0, 4);
+    var upcoming = (window.__spielplanProfisGames || []).filter(function (g) { return g.date >= window.__spielplanToday; }).slice(0, 5);
     var track = document.getElementById('spielberichte-track');
     if (!track) return;
-    track.innerHTML += upcoming.map(function (g) {
+    track.innerHTML = upcoming.map(function (g) {
       return '<div class="card">' +
         '<div class="card-media tint-neutral"><i data-lucide="file-text" class="icon-32"></i></div>' +
         '<div class="card-body">' +
