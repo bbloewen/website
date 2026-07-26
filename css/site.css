@@ -639,7 +639,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .history-timeline-scroll-fade {
   position: absolute; left: 0; right: 14px; bottom: 0; height: 48px;
   background: linear-gradient(to bottom, rgba(246,247,249,0), var(--bg-subtle));
-  pointer-events: none;
+  pointer-events: none; transition: opacity .2s;
 }
 
 /* Über-uns-Geschichte: horizontale Variante auf hellem bg-subtle-Grund
