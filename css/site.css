@@ -902,6 +902,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   .partner-tile:hover .partner-tile-inner { transform: rotateY(180deg); }
 }
 .partner-tile:focus-visible .partner-tile-inner { transform: rotateY(180deg); }
+.partner-tile.is-flipped .partner-tile-inner { transform: rotateY(180deg); }
 .partner-tile-front, .partner-tile-back {
   position: absolute; inset: 0; backface-visibility: hidden; border-radius: var(--radius-lg);
   display: flex; align-items: center; justify-content: center; text-align: center; padding: 12px;
@@ -1331,6 +1332,8 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
    schmalen Viewports im sichtbaren Ausschnitt statt im linken Leerraum). */
 .hero-photo.hero-sportvernetzt { --hero-photo-url: url('/assets/img/hero-sportvernetzt.jpg'); background-position: 82% 40%; }
 
+.hero-photo.hero-spielplan { --hero-photo-url: url('/assets/img/hero-spielplan.jpg'); background-position: 70% 40%; }
+
 /* Hero-Variante für die Freundeskreis-Seite — Kinder mit Maskottchen beim BasKIDball,
    Motiv sitzt rechts im Bild, deshalb Bildausschnitt nach rechts verschoben. */
 .hero-photo.hero-freundeskreis { --hero-photo-url: url('/assets/img/hero-freundeskreis.jpg'); background-position: 80% 42%; }
@@ -1621,7 +1624,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .team-badge-profis { background: var(--color-orange-50); color: var(--color-orange-700); }
 .team-badge-damen { background: var(--color-success-bg); color: var(--color-success); }
 .team-badge-nbbl { background: var(--color-blue-100); color: var(--color-blue-700); }
-.fixture-day-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.fixture-day-actions { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .fixture-result-row { display: flex; align-items: center; gap: 8px; }
 @media (max-width: 599px) {
   .fixture-day-game { grid-template-columns: 1fr; text-align: left; }
