@@ -27,7 +27,7 @@
     var timeParts = (g.zeit || '00:00').split(':').map(Number);
     var start = new Date(g.date.getFullYear(), g.date.getMonth(), g.date.getDate(), timeParts[0], timeParts[1]);
     var end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
-    var text = g.heim ? ('Basketball ' + g.teamLabel + ' – ' + g.gegner) : (g.gegner + ' – Basketball ' + g.teamLabel);
+    var text = g.heim ? (g.teamLabel + ' – ' + g.gegner) : (g.gegner + ' – ' + g.teamLabel);
     var params = {
       action: 'TEMPLATE',
       text: text,
