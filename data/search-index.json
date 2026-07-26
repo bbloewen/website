@@ -93,17 +93,11 @@
     "description": "SPORT VERNETZT — die soziale Sportidee der Basketball Löwen Erfurt."
   },
   {
-    "title": "Schultour",
-    "url": "/trainieren/schultour.html",
+    "title": "Schulprogramm",
+    "url": "/trainieren/schulprogramm.html",
     "category": "Trainieren",
-    "description": "Schultour der Basketball Löwen Erfurt — Basketball an Schulen in der Region."
-  },
-  {
-    "title": "Schul-AGs",
-    "url": "/trainieren/schul-ags.html",
-    "category": "Trainieren",
-    "description": "Schul-AGs der Basketball Löwen Erfurt — Basketball direkt in die Schulen der Region.",
-    "keywords": "Schul AG AGs"
+    "description": "Schulprogramm der Basketball Löwen Erfurt — Schul-AGs und Schultour direkt an Erfurter Schulen.",
+    "keywords": "Schul AG AGs Schultour Schulprogramm"
   },
   {
     "title": "Camps & Anmeldung",
