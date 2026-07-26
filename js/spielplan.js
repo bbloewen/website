@@ -42,7 +42,7 @@
   function gameRowHTML(g, divider) {
     var isPast = g.date < window.__spielplanToday;
     var meta = TEAM_META[g.team];
-    var matchup = g.heim ? ('Basketball ' + g.teamLabel + ' – ' + g.gegner) : (g.gegner + ' – Basketball ' + g.teamLabel);
+    var matchup = g.heim ? (g.teamLabel + ' – ' + g.gegner) : (g.gegner + ' – ' + g.teamLabel);
     var venueHTML = g.heim
       ? '<span class="venue-heim">Heimspiel</span> · <a href="' + RIETHSPORTHALLE_MAPS_URL + '" target="_blank" rel="noopener">Riethsporthalle</a>'
       : 'Auswärts';
