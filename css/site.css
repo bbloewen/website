@@ -529,12 +529,13 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
    gleiches Prinzip wie die Aktuelles-Seite — als einzelne Boxen statt
    einer gemeinsamen grauen Fläche. */
 .loewenpark-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+.loewenpark-layout > div { min-width: 0; }
 .loewenpark-sidebar {
   display: flex; flex-direction: column; gap: 20px; position: sticky; top: 96px;
 }
 .loewenpark-sidebar .info-tile { gap: 6px; }
 @media (max-width: 1023px) {
-  .loewenpark-layout { grid-template-columns: 1fr; }
+  .loewenpark-layout { grid-template-columns: minmax(0, 1fr); }
   .loewenpark-sidebar { position: static; }
 }
 
