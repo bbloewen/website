@@ -1605,6 +1605,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   margin-bottom: 14px;
 }
 .fixture-day-date { font-size: 15px; font-weight: var(--weight-extrabold); margin-bottom: 14px; }
+.fixture-day-group.has-divider { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); }
 .fixture-day-game { display: grid; grid-template-columns: 180px 1fr auto; gap: 16px; align-items: center; }
 .fixture-day-game.has-divider { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
 .fixture-day-meta { display: flex; flex-direction: column; gap: 5px; min-width: 0; }

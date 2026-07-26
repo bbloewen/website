@@ -69,23 +69,22 @@
 
   function dayBoxHTML(day) {
     var teams = day.games.map(function (g) { return g.team; });
-    var dates = day.games.map(function (g) { return dateKey(g.date); });
-    var uniqueDates = dates.filter(function (k, i) { return dates.indexOf(k) === i; })
-      .map(function (k) { return day.games.filter(function (g) { return dateKey(g.date) === k; })[0].date; })
-      .sort(function (a, b) { return a - b; });
-    var dateStr;
-    if (uniqueDates.length > 1) {
-      var first = uniqueDates[0], last = uniqueDates[uniqueDates.length - 1];
-      var sameMonth = first.getMonth() === last.getMonth() && first.getFullYear() === last.getFullYear();
-      var firstStr = sameMonth ? pad2(first.getDate()) + '.' : formatShort(first);
-      dateStr = WOCHENTAGE[first.getDay()] + '–' + WOCHENTAGE[last.getDay()] + ', ' + firstStr + '–' + formatShort(last);
-    } else {
-      dateStr = WOCHENTAGE[day.date.getDay()] + ', ' + formatShort(day.date);
-    }
-    return '<div class="card fixture-day" data-teams="' + teams.join(' ') + '">' +
-      '<div class="fixture-day-date">' + dateStr + '</div>' +
-      day.games.map(function (g, i) { return gameRowHTML(g, i > 0); }).join('') +
-      '</div>';
+    var byDate = {};
+    var dateOrder = [];
+    day.games.forEach(function (g) {
+      var k = dateKey(g.date);
+      if (!byDate[k]) { byDate[k] = { date: g.date, games: [] }; dateOrder.push(k); }
+      byDate[k].games.push(g);
+    });
+    var groupsHTML = dateOrder.map(function (k, gi) {
+      var grp = byDate[k];
+      var dateStr = WOCHENTAGE[grp.date.getDay()] + ', ' + formatShort(grp.date);
+      return '<div class="fixture-day-group' + (gi > 0 ? ' has-divider' : '') + '">' +
+        '<div class="fixture-day-date">' + dateStr + '</div>' +
+        grp.games.map(function (g, i) { return gameRowHTML(g, i > 0); }).join('') +
+        '</div>';
+    }).join('');
+    return '<div class="card fixture-day" data-teams="' + teams.join(' ') + '">' + groupsHTML + '</div>';
   }
 
   function weekendKey(d) {
@@ -118,13 +117,21 @@
       var matches = filter === 'alle' || (box.getAttribute('data-teams') || '').indexOf(filter) !== -1;
       box.style.display = matches ? '' : 'none';
       if (matches) {
-        var seenVisible = false;
-        box.querySelectorAll('.fixture-day-game').forEach(function (row) {
-          var rowMatches = filter === 'alle' || row.getAttribute('data-team') === filter;
-          row.style.display = rowMatches ? '' : 'none';
-          if (rowMatches) {
-            row.classList.toggle('has-divider', seenVisible);
-            seenVisible = true;
+        var seenVisibleGroup = false;
+        box.querySelectorAll('.fixture-day-group').forEach(function (group) {
+          var seenVisible = false;
+          group.querySelectorAll('.fixture-day-game').forEach(function (row) {
+            var rowMatches = filter === 'alle' || row.getAttribute('data-team') === filter;
+            row.style.display = rowMatches ? '' : 'none';
+            if (rowMatches) {
+              row.classList.toggle('has-divider', seenVisible);
+              seenVisible = true;
+            }
+          });
+          group.style.display = seenVisible ? '' : 'none';
+          if (seenVisible) {
+            group.classList.toggle('has-divider', seenVisibleGroup);
+            seenVisibleGroup = true;
           }
         });
       }
