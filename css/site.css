@@ -2043,6 +2043,7 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
   display: flex; align-items: center; justify-content: center;
 }
 .panini-card-info { padding: 8px 6px; text-align: center; border-top: 2px solid var(--color-brand-navy); }
+#responsible-grid .panini-card-photo { border: 2px solid var(--color-brand-navy); border-bottom: none; }
 .panini-card-name { font-weight: var(--weight-extrabold); font-size: 13px; line-height: 1.2; color: var(--color-brand-navy); }
 .panini-card-meta { font-size: 11px; line-height: 1.3; color: var(--text-muted); margin-top: 2px; min-height: 2.6em; }
 .panini-card.is-empty .panini-card-name { color: var(--text-muted); font-weight: var(--weight-semibold); }
