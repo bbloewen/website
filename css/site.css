@@ -1324,7 +1324,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 /* Hero SPORT VERNETZT — Fototermin-Gruppe steht rechts im Panoramabild,
    deshalb Bildausschnitt weit nach rechts verschoben (Gruppe bleibt auch auf
    schmalen Viewports im sichtbaren Ausschnitt statt im linken Leerraum). */
-.hero-photo.hero-sportvernetzt { --hero-photo-url: url('/assets/img/hero-sportvernetzt.jpg'); background-position: 80% 40%; }
+.hero-photo.hero-sportvernetzt { --hero-photo-url: url('/assets/img/hero-sportvernetzt.jpg'); background-position: 82% 40%; }
 
 /* Hero-Variante für die Freundeskreis-Seite — Kinder mit Maskottchen beim BasKIDball,
    Motiv sitzt rechts im Bild, deshalb Bildausschnitt nach rechts verschoben. */
