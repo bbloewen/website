@@ -8,10 +8,11 @@
   var MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
   var WOCHENTAGE = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
   var TEAM_META = {
-    profis: { label: 'Pro B', badgeClass: 'team-badge-profis' },
-    damen: { label: 'RSLO', badgeClass: 'team-badge-damen' },
-    nbbl: { label: 'NBBL', badgeClass: 'team-badge-nbbl' }
+    profis: { label: 'Pro B', badgeClass: 'team-badge-profis', url: '/teams-saison/profis.html', tableUrl: '/teams-saison/tabelle.html#tabelle-profis' },
+    damen: { label: 'RSLO', badgeClass: 'team-badge-damen', url: '/teams-saison/damen.html', tableUrl: '/teams-saison/tabelle.html#tabelle-damen' },
+    nbbl: { label: 'NBBL', badgeClass: 'team-badge-nbbl', url: '/teams-saison/u19.html', tableUrl: '/teams-saison/tabelle.html#tabelle-nbbl' }
   };
+  var RIETHSPORTHALLE_MAPS_URL = 'https://www.google.com/maps/search/?api=1&query=Essener+Stra%C3%9Fe+20%2C+99089+Erfurt';
   var DAY_BOXES_INITIAL = 8;
 
   function parseDMY(str) {
@@ -43,23 +44,26 @@
     var isPast = g.date < window.__spielplanToday;
     var meta = TEAM_META[g.team];
     var matchup = g.heim ? ('Basketball ' + g.teamLabel + ' – ' + g.gegner) : (g.gegner + ' – Basketball ' + g.teamLabel);
-    var venue = g.heim ? 'Heimspiel · Riethsporthalle' : 'Auswärts';
-    var actionsHTML;
-    if (isPast) {
-      actionsHTML = '<div class="fixture-day-actions-past">' +
+    var venueHTML = g.heim
+      ? '<span class="venue-heim">Heimspiel</span> · <a href="' + RIETHSPORTHALLE_MAPS_URL + '" target="_blank" rel="noopener">Riethsporthalle</a>'
+      : 'Auswärts';
+    var actionsHTML = '<div class="fixture-day-actions">' +
+      '<div class="fixture-result-row">' +
         '<div class="fixture-result">' + (g.ergebnis || '– – : – –') + '</div>' +
-        (g.spielberichtUrl ? '<a class="card-link" style="font-size:13px" href="' + g.spielberichtUrl + '">Spielbericht <i data-lucide="arrow-right" style="width:12px;height:12px"></i></a>' : '') +
-        '</div>';
-    } else {
-      actionsHTML = '<div class="fixture-day-actions">' +
-        (g.ticketUrl ? '<a class="btn btn-outline-orange btn-sm" href="' + g.ticketUrl + '">Tickets <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>' : '') +
-        (g.spielberichtUrl ? '<a class="cal-link" href="' + g.spielberichtUrl + '" title="Zum Spielbericht"><i data-lucide="file-text" style="width:18px;height:18px"></i></a>' : '') +
-        '<a class="cal-link" href="' + calendarLink(g) + '" target="_blank" rel="noopener" title="Ins Kalender eintragen"><i data-lucide="calendar-plus" style="width:18px;height:18px"></i></a>' +
-        '</div>';
-    }
+        '<a class="cal-link" href="' + meta.tableUrl + '" title="Zur Tabelle"><i data-lucide="list-ordered" style="width:16px;height:16px"></i></a>' +
+      '</div>' +
+      (g.ticketUrl && !isPast ? '<a class="btn btn-outline-orange btn-sm" href="' + g.ticketUrl + '">Tickets <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>' : '') +
+      (g.spielberichtUrl ? '<a class="cal-link" href="' + g.spielberichtUrl + '" title="Zum Spielbericht"><i data-lucide="file-text" style="width:18px;height:18px"></i></a>' : '') +
+      '</div>';
     return '<div class="fixture-day-game' + (divider ? ' has-divider' : '') + '" data-team="' + g.team + '">' +
-      '<div><span class="team-badge ' + meta.badgeClass + '">' + meta.label + '</span><div class="fixture-time">' + (g.zeit || '–') + ' Uhr</div></div>' +
-      '<div class="fixture-mid"><div class="matchup">' + matchup + '</div><div class="venue">' + venue + '</div></div>' +
+      '<div class="fixture-day-meta">' +
+        '<div class="fixture-time"><a class="cal-link" href="' + calendarLink(g) + '" target="_blank" rel="noopener" title="Ins Kalender eintragen"><i data-lucide="calendar-plus" style="width:16px;height:16px"></i></a> ' + (g.zeit || '–') + ' Uhr</div>' +
+        '<div class="fixture-venue-line"><i data-lucide="map-pin" style="width:14px;height:14px"></i> ' + venueHTML + '</div>' +
+      '</div>' +
+      '<div class="fixture-mid">' +
+        '<a class="team-badge ' + meta.badgeClass + '" href="' + meta.url + '">' + meta.label + '</a>' +
+        '<div class="matchup">' + matchup + '</div>' +
+      '</div>' +
       actionsHTML +
       '</div>';
   }

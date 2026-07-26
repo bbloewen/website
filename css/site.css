@@ -1602,21 +1602,30 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   margin-bottom: 14px;
 }
 .fixture-day-date { font-size: 15px; font-weight: var(--weight-extrabold); margin-bottom: 14px; }
-.fixture-day-game { display: grid; grid-template-columns: 78px 1fr auto; gap: 16px; align-items: center; }
+.fixture-day-game { display: grid; grid-template-columns: 180px 1fr auto; gap: 16px; align-items: center; }
 .fixture-day-game.has-divider { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+.fixture-day-meta { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.fixture-time { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); }
+.fixture-time .cal-link { display: inline-flex; flex-shrink: 0; }
+.fixture-venue-line { display: flex; align-items: center; gap: 5px; font-size: 12.5px; color: var(--text-secondary); flex-wrap: wrap; row-gap: 2px; }
+.fixture-venue-line i { flex-shrink: 0; }
+.fixture-venue-line a { color: inherit; }
+.fixture-venue-line a:hover { color: var(--color-brand-orange); }
+.venue-heim { color: var(--color-brand-orange-text); font-weight: var(--weight-extrabold); text-transform: uppercase; letter-spacing: var(--tracking-label); font-size: 11px; }
 .team-badge {
   display: inline-flex; align-items: center; font-size: 11px; font-weight: var(--weight-extrabold);
   text-transform: uppercase; letter-spacing: var(--tracking-label); padding: 3px 9px; border-radius: var(--radius-full);
-  margin-bottom: 6px;
+  margin-bottom: 6px; text-decoration: none;
 }
+.team-badge:hover { filter: brightness(0.94); }
 .team-badge-profis { background: var(--color-orange-50); color: var(--color-orange-700); }
 .team-badge-damen { background: #E5E5F5; color: var(--color-brand-violet); }
 .team-badge-nbbl { background: var(--color-blue-100); color: var(--color-blue-700); }
-.fixture-day-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
-.fixture-day-actions-past { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.fixture-day-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.fixture-result-row { display: flex; align-items: center; gap: 8px; }
 @media (max-width: 599px) {
   .fixture-day-game { grid-template-columns: 1fr; text-align: left; }
-  .fixture-day-actions, .fixture-day-actions-past { align-items: flex-start; justify-content: flex-start; margin-top: 4px; }
+  .fixture-day-actions { align-items: flex-start; margin-top: 4px; }
 }
 
 /* =====================================================================
