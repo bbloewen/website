@@ -585,7 +585,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
    die Etappen wechseln sich links (history-content-top) und rechts
    (history-content-bottom) der Linie ab. Mobil rückt die Linie an den
    linken Rand und alle Etappen stehen rechts davon. */
-.history-timeline { position: relative; display: flex; flex-direction: column-reverse; gap: 26px; margin-top: 40px; padding: 26px 0 8px; }
+.history-timeline { position: relative; display: flex; flex-direction: column; gap: 26px; margin-top: 40px; padding: 26px 0 8px; }
 .history-timeline::before {
   content: ''; position: absolute; top: 0; bottom: 0; left: 50%; width: 4px;
   transform: translateX(-50%); background: rgba(255,255,255,.35);
@@ -595,7 +595,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   border-left: 8px solid transparent; border-right: 8px solid transparent;
   border-bottom: 14px solid rgba(255,255,255,.9);
 }
-.history-item { position: relative; min-height: 14px; }
+.history-item { position: relative; min-height: 14px; flex-shrink: 0; }
 .history-item::before {
   content: ''; position: absolute; top: 4px; left: 50%; transform: translateX(-50%);
   width: 12px; height: 12px; border-radius: 50%; background: var(--color-brand-orange);
@@ -622,6 +622,10 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .history-timeline-light .history-item p { color: var(--text-secondary); }
 .history-timeline-light::before { background: var(--border-strong); }
 .history-timeline-light::after { border-bottom-color: var(--color-brand-orange); }
+
+/* LÖWENPARK-Historie: nur ~3 Punkte gleichzeitig sichtbar, Rest scrollbar
+   (neueste zuerst dank column-reverse bleibt erhalten). */
+.history-timeline-limited { max-height: 360px; overflow-y: auto; padding-right: 14px; }
 
 /* Über-uns-Geschichte: horizontale Variante auf hellem bg-subtle-Grund
    (eigene Klassen statt .history-timeline, da diese für dunklen Hintergrund
