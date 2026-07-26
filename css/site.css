@@ -2004,7 +2004,7 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
   /* Kachel-Reihen als horizontales Swipe-Karussell statt gestapelt, damit
      immer sichtbar bleibt, dass es mehr Kacheln gibt (BasKIDball-Feedback,
      bisher nur dort verwendet). */
-  .grid-4.tile-scroll-mobile, .grid-3.tile-scroll-mobile {
+  .grid-4.tile-scroll-mobile, .grid-3.tile-scroll-mobile, .grid-5.tile-scroll-mobile {
     display: flex; grid-template-columns: none; overflow-x: auto;
     scroll-snap-type: x mandatory; gap: 14px; padding-bottom: 6px;
   }
