@@ -18,8 +18,8 @@
 <main id="main">
   <section class="hero-photo">
     <div class="container">
-    <span class="eyebrow">Teams & Saison</span>
-    <h1>Die <span class="kw">Spielpläne<span class="swoosh" aria-hidden="true"></span></span>.</h1>
+    <span class="eyebrow">Saison 2026/2027</span>
+    <h1>Der <span class="kw">Spielplan<span class="swoosh" aria-hidden="true"></span></span>.</h1>
     <p class="lead">Alle Termine der Profis, Damen und NBBL auf einen Blick — dazu Rückblicke nach jedem Spieltag.</p>
     </div>
     <span class="photo-note">Platzhalterbild — echtes Teamfoto folgt</span>
@@ -29,56 +29,41 @@
     <div class="container">
       <div class="section-head">
         <div class="head-text">
-          <span class="eyebrow">Profis</span>
-          <h2 class="t-h2">Basketball Löwen Erfurt — Saison 2026/2027</h2>
+          <span class="eyebrow">Alle Teams</span>
+          <h2 class="t-h2">Jeder Spieltag auf einen Blick</h2>
+          <p class="t-body" style="color:var(--text-secondary);margin-top:8px">Alle Termine der Profis, Damen und U19 gebündelt nach Spieltag — mit Ergebnissen und Spielberichten, sobald sie feststehen.</p>
         </div>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <a class="btn btn-ghost" href="/teams-saison/profis.html">Zum Team</a>
-          <a class="btn btn-ghost" href="/teams-saison/tabelle.html#tabelle-profis">Zur Tabelle</a>
+      </div>
+
+      <div class="spielplan-team-links">
+        <div class="spielplan-team-link-group">
+          <strong>Profis</strong>
+          <a class="btn btn-ghost btn-sm" href="/teams-saison/profis.html">Zum Team</a>
+          <a class="btn btn-ghost btn-sm" href="/teams-saison/tabelle.html#tabelle-profis">Zur Tabelle</a>
           <a class="btn btn-outline-orange btn-sm" href="webcal://api.2basketballbundesliga.de/cal/563" title="Spielplan der Profis abonnieren — aktualisiert sich automatisch"><i data-lucide="calendar-plus" class="icon-14"></i> Kalender abonnieren</a>
         </div>
-      </div>
-
-      <div id="spielplan-profis-liste"></div>
-      <p class="t-body-sm" style="margin-top:12px;color:var(--text-muted)">Weitere Auswärtstermine folgen, sobald die Liga den vollständigen Spielplan veröffentlicht.</p>
-    </div>
-  </section>
-
-  <section class="section bg-subtle">
-    <div class="container">
-      <div class="section-head">
-        <div class="head-text">
-          <span class="eyebrow">Damen</span>
-          <h2 class="t-h2">Basketball Löwinnen Erfurt — Saison 2026/2027</h2>
+        <div class="spielplan-team-link-group">
+          <strong>Damen</strong>
+          <a class="btn btn-ghost btn-sm" href="/teams-saison/damen.html">Zum Team</a>
+          <a class="btn btn-ghost btn-sm" href="/teams-saison/tabelle.html#tabelle-damen">Zur Tabelle</a>
+          <a class="btn btn-outline-orange btn-sm" href="#" title="Kalenderabo folgt in Kürze"><i data-lucide="calendar-plus" class="icon-14"></i> Kalender abonnieren</a>
         </div>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <a class="btn btn-ghost" href="/teams-saison/damen.html">Zum Team</a>
-          <a class="btn btn-ghost" href="/teams-saison/tabelle.html#tabelle-damen">Zur Tabelle</a>
+        <div class="spielplan-team-link-group">
+          <strong>NBBL</strong>
+          <a class="btn btn-ghost btn-sm" href="/teams-saison/u19.html">Zum Team</a>
+          <a class="btn btn-ghost btn-sm" href="/teams-saison/tabelle.html#tabelle-nbbl">Zur Tabelle</a>
           <a class="btn btn-outline-orange btn-sm" href="#" title="Kalenderabo folgt in Kürze"><i data-lucide="calendar-plus" class="icon-14"></i> Kalender abonnieren</a>
         </div>
       </div>
 
-      <div id="spielplan-damen-liste"></div>
-      <p id="spielplan-damen-hinweis" class="t-body-sm" style="display:none;color:var(--text-muted)"></p>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="container">
-      <div class="section-head">
-        <div class="head-text">
-          <span class="eyebrow">NBBL</span>
-          <h2 class="t-h2">Basketball Löwen U19 — NBBL</h2>
-        </div>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <a class="btn btn-ghost" href="/teams-saison/u19.html">Zum Team</a>
-          <a class="btn btn-ghost" href="/teams-saison/tabelle.html#tabelle-nbbl">Zur Tabelle</a>
-          <a class="btn btn-outline-orange btn-sm" href="#" title="Kalenderabo folgt in Kürze"><i data-lucide="calendar-plus" class="icon-14"></i> Kalender abonnieren</a>
-        </div>
+      <div class="filter-row" id="spielplan-filter">
+        <button type="button" class="filter-chip is-active" data-filter="alle">Alle</button>
+        <button type="button" class="filter-chip" data-filter="profis">Herren Pro B</button>
+        <button type="button" class="filter-chip" data-filter="damen">Damen RSLO</button>
+        <button type="button" class="filter-chip" data-filter="nbbl">Herren U19 NBBL</button>
       </div>
 
-      <div id="spielplan-nbbl-liste"></div>
-      <p id="spielplan-nbbl-hinweis" class="t-body-sm" style="display:none;color:var(--text-muted)"></p>
+      <div id="spielplan-tage"></div>
     </div>
   </section>
 
@@ -86,44 +71,30 @@
     <div class="container">
       <span class="eyebrow">Spielberichte</span>
       <h2 class="t-h2 mb-5">Rückblick, Zahlen, Stimmen</h2>
-      <div class="grid-3">
-        <div class="card">
-          <div class="card-media tint-blue"><i data-lucide="trophy" class="icon-32"></i></div>
-          <div class="card-body">
-            <span class="card-label">Saisonrückblick 2025/2026</span>
-            <h3 style="font-size:18px">Platz 12, Bilanz 8:16</h3>
-            <p>Die Profis verpassen knapp die Playoffs — Coach Florian Gut zieht Bilanz.</p>
-            <a class="card-link" href="/news/artikel/2026-03-31_verein_spielbericht-saisonrueckblick-2025-26.html">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></a>
+      <div class="spielberichte-slider-wrap">
+        <div class="spielberichte-track" id="spielberichte-track">
+          <div class="card">
+            <div class="card-media tint-blue"><i data-lucide="trophy" class="icon-32"></i></div>
+            <div class="card-body">
+              <span class="card-label">Saisonrückblick 2025/2026</span>
+              <h3 style="font-size:18px">Platz 12, Bilanz 8:16</h3>
+              <p>Die Profis verpassen knapp die Playoffs — Coach Florian Gut zieht Bilanz.</p>
+              <a class="card-link" href="/news/artikel/2026-03-31_verein_spielbericht-saisonrueckblick-2025-26.html">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></a>
+            </div>
           </div>
         </div>
-        <div class="card">
-          <div class="card-media tint-neutral"><i data-lucide="file-text" class="icon-32"></i></div>
-          <div class="card-body">
-            <span class="card-label">Platzhalter</span>
-            <h3 style="font-size:18px">Spielbericht folgt</h3>
-            <p>Nach dem Saisonstart im Oktober 2026 findest du hier laufend aktuelle Spielberichte.</p>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-media tint-orange"><i data-lucide="file-text" class="icon-32"></i></div>
-          <div class="card-body">
-            <span class="card-label">Platzhalter</span>
-            <h3 style="font-size:18px">Spielbericht folgt</h3>
-            <p>Auch für Damen und U19 planen wir eigene Rückblicke nach jedem Spieltag.</p>
-          </div>
-        </div>
+        <button type="button" class="news-slider-arrow prev" id="spielberichte-prev" aria-label="Zurück"><i data-lucide="chevron-left"></i></button>
+        <button type="button" class="news-slider-arrow next" id="spielberichte-next" aria-label="Weiter"><i data-lucide="chevron-right"></i></button>
       </div>
     </div>
   </section>
 
   <section class="section">
-    <div class="container">
-      <div class="cta-panel">
-        <span class="eyebrow">Live dabei sein</span>
-        <h2 class="t-h2">Auch im Replay dabei sein.</h2>
-        <p>Verpasste Spiele der Basketball Löwen Erfurt im Replay auf unserem sporteurope.tv-Kanal.</p>
-        <a class="btn btn-primary" href="https://sporteurope.tv/catl-basketball-loewen" target="_blank" rel="noopener">Zum sporteurope.tv-Kanal</a>
-      </div>
+    <div class="container container-narrow text-center">
+      <span class="eyebrow">Live dabei sein</span>
+      <h2 class="t-h3" style="margin:8px 0 12px">Auch im Replay dabei sein.</h2>
+      <p class="t-body-sm" style="max-width:56ch;margin:0 auto 20px;color:var(--text-secondary)">Verpasste Spiele der Basketball Löwen Erfurt im Replay auf unserem sporteurope.tv-Kanal.</p>
+      <a class="btn btn-primary" href="https://sporteurope.tv/catl-basketball-loewen" target="_blank" rel="noopener">Zum sporteurope.tv-Kanal</a>
     </div>
   </section>
 </main>
@@ -132,5 +103,34 @@
 <script src="/js/nav.js?v=1785200000"></script>
 <script src="/js/include.js?v=1785200000"></script>
 <script src="/js/spielplan.js?v=1785200000"></script>
+<script>
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function formatShort(d) { return pad2(d.getDate()) + '.' + pad2(d.getMonth() + 1) + '.' + d.getFullYear(); }
+
+  window.addEventListener('spielplan:ready', function () {
+    var upcoming = (window.__spielplanProfisGames || []).filter(function (g) { return g.date >= window.__spielplanToday; }).slice(0, 4);
+    var track = document.getElementById('spielberichte-track');
+    if (!track) return;
+    track.innerHTML += upcoming.map(function (g) {
+      return '<div class="card">' +
+        '<div class="card-media tint-neutral"><i data-lucide="file-text" class="icon-32"></i></div>' +
+        '<div class="card-body">' +
+          '<span class="card-label">Pro B · ' + formatShort(g.date) + '</span>' +
+          '<h3 style="font-size:18px">Spielbericht</h3>' +
+          '<p>Nach dem Spieltag findest du hier den ausführlichen Rückblick.</p>' +
+          '<span class="card-link" style="opacity:.55;pointer-events:none">Weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    if (window.lucide) lucide.createIcons();
+  });
+
+  document.getElementById('spielberichte-prev').addEventListener('click', function () {
+    document.getElementById('spielberichte-track').scrollBy({ left: -280, behavior: 'smooth' });
+  });
+  document.getElementById('spielberichte-next').addEventListener('click', function () {
+    document.getElementById('spielberichte-track').scrollBy({ left: 280, behavior: 'smooth' });
+  });
+</script>
 </body>
 </html>

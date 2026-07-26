@@ -622,8 +622,20 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .history-timeline-light::after { border-bottom-color: var(--color-brand-orange); }
 
 /* LÖWENPARK-Historie: nur ~3 Punkte gleichzeitig sichtbar, Rest scrollbar
-   (neueste zuerst dank column-reverse bleibt erhalten). */
-.history-timeline-limited { max-height: 360px; overflow-y: auto; padding-right: 14px; }
+   (neueste zuerst bleibt erhalten). Der Scroll-Wrapper liegt bewusst AUSSEN um
+   .history-timeline (statt overflow direkt auf .history-timeline zu setzen):
+   sonst wird die Linie (top:0;bottom:0) auf die sichtbare 360px-Box statt auf
+   die volle Inhaltshöhe begrenzt (Linie hört mittendrin auf), der eigene
+   padding-right verschiebt die Punkte (die die Content-Box als Breite nutzen)
+   gegenüber der Linie (die die volle Padding-Box nutzt), und der Pfeil oben
+   (top:-14px) wird vom eigenen overflow weggeschnitten. */
+.history-timeline-outer { position: relative; }
+.history-timeline-scroll { max-height: 360px; overflow-y: auto; padding-top: 18px; padding-right: 14px; }
+.history-timeline-scroll-fade {
+  position: absolute; left: 0; right: 14px; bottom: 0; height: 48px;
+  background: linear-gradient(to bottom, rgba(246,247,249,0), var(--bg-subtle));
+  pointer-events: none;
+}
 
 /* Über-uns-Geschichte: horizontale Variante auf hellem bg-subtle-Grund
    (eigene Klassen statt .history-timeline, da diese für dunklen Hintergrund
@@ -1309,6 +1321,11 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 
 .hero-photo.hero-baskidball { --hero-photo-url: url('/assets/img/hero-baskidball.jpg'); background-position: 70% 60%; }
 
+/* Hero SPORT VERNETZT — Fototermin-Gruppe steht rechts im Panoramabild,
+   deshalb Bildausschnitt weit nach rechts verschoben (Gruppe bleibt auch auf
+   schmalen Viewports im sichtbaren Ausschnitt statt im linken Leerraum). */
+.hero-photo.hero-sportvernetzt { --hero-photo-url: url('/assets/img/hero-sportvernetzt.jpg'); background-position: 80% 40%; }
+
 /* Hero-Variante für die Freundeskreis-Seite — Kinder mit Maskottchen beim BasKIDball,
    Motiv sitzt rechts im Bild, deshalb Bildausschnitt nach rechts verschoben. */
 .hero-photo.hero-freundeskreis { --hero-photo-url: url('/assets/img/hero-freundeskreis.jpg'); background-position: 80% 42%; }
@@ -1573,6 +1590,29 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .fixture-mid .matchup { font-size: 16px; font-weight: var(--weight-bold); margin: 4px 0; }
 .fixture-mid .venue { font-size: 13px; color: var(--text-secondary); }
 .fixture-result { font-size: 22px; font-weight: var(--weight-black); }
+
+/* Spielplan: nach Kalendertag gruppierte Karten (mehrere Teams pro Tag möglich) */
+.fixture-day {
+  padding: 20px 24px; border-radius: var(--radius-lg); background: #fff; border: 1px solid var(--border);
+  margin-bottom: 14px;
+}
+.fixture-day-date { font-size: 15px; font-weight: var(--weight-extrabold); margin-bottom: 14px; }
+.fixture-day-game { display: grid; grid-template-columns: 78px 1fr auto; gap: 16px; align-items: center; }
+.fixture-day-game.has-divider { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+.team-badge {
+  display: inline-flex; align-items: center; font-size: 11px; font-weight: var(--weight-extrabold);
+  text-transform: uppercase; letter-spacing: var(--tracking-label); padding: 3px 9px; border-radius: var(--radius-full);
+  margin-bottom: 6px;
+}
+.team-badge-profis { background: var(--color-orange-50); color: var(--color-orange-700); }
+.team-badge-damen { background: #E5E5F5; color: var(--color-brand-violet); }
+.team-badge-nbbl { background: var(--color-blue-100); color: var(--color-blue-700); }
+.fixture-day-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.fixture-day-actions-past { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+@media (max-width: 599px) {
+  .fixture-day-game { grid-template-columns: 1fr; text-align: left; }
+  .fixture-day-actions, .fixture-day-actions-past { align-items: flex-start; justify-content: flex-start; margin-top: 4px; }
+}
 
 /* =====================================================================
    PRETIX-TICKETSHOP-WIDGET — Wrapper gegen bekannten Body-Collapse-Bug
@@ -2059,6 +2099,23 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
 }
 .filter-chip:hover { border-color: var(--color-brand-orange); color: var(--color-brand-orange); }
 .filter-chip.is-active { background: var(--color-brand-orange-text); border-color: var(--color-brand-orange-text); color: #fff; }
+
+/* Spielplan: kompakte Team-Schnelllinks über der Tages-Liste */
+.spielplan-team-links { display: flex; flex-wrap: wrap; gap: 10px 28px; margin: 22px 0 20px; }
+.spielplan-team-link-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 14px; }
+.spielplan-team-link-group strong { color: var(--text-primary); margin-right: 2px; }
+
+/* Spielberichte: horizontaler 5-Kachel-Slider auf der Spielplan-Seite */
+.spielberichte-slider-wrap { position: relative; }
+.spielberichte-track {
+  display: flex; gap: 20px; overflow-x: auto; scroll-snap-type: x proximity; scroll-behavior: smooth;
+  scrollbar-width: none; -ms-overflow-style: none; padding-bottom: 4px;
+}
+.spielberichte-track::-webkit-scrollbar { display: none; }
+.spielberichte-track > .card { flex: 0 0 260px; scroll-snap-align: start; }
+@media (max-width: 599px) {
+  .spielberichte-track > .card { flex: 0 0 78%; }
+}
 
 /* =====================================================================
    FLIP-CARD — Verantwortliche: Klick zeigt Steckbrief auf der Rückseite
