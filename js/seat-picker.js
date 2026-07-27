@@ -18,6 +18,13 @@
 
   function fmtEUR(n) { return n.toFixed(2).replace('.', ','); }
 
+  function catClass(category) {
+    if (category === 'Kategorie I') return 'cat-kat1';
+    if (category === 'Kategorie II') return 'cat-kat2';
+    if (category === 'VIP') return 'cat-vip';
+    return '';
+  }
+
   /* Gutschein-Codes sind noch nicht an pretix angebunden — feste Testcodes,
      damit sich der Ablauf schon jetzt echt durchklicken lässt. Dieselben Codes
      wie auf der Checkout-Seite (tickets/checkout.html). */
@@ -126,16 +133,27 @@
           '<span class="sel"><i></i> deine Auswahl</span>' +
         '</div>';
 
+    // Kategorie-Farblegende — nur die Kategorien, die auf dieser Seite tatsächlich
+    // angeboten werden (excludeCategories berücksichtigt, z. B. kein VIP beim Einzelticket).
+    var catOrder = ['Kategorie I', 'Kategorie II', 'VIP'];
+    var catLegend = '<div class="seatplan-cat-legend">' +
+      catOrder.filter(function (c) { return self.prices[c] && self.excludeCategories.indexOf(c) === -1; })
+        .map(function (c) { return '<span class="' + catClass(c) + '"><i></i> ' + c + '</span>'; })
+        .join('') +
+      '</div>';
+
     this.root.innerHTML =
       '<div class="seatplan-strip">Nordtribüne</div>' +
       '<div id="seatplan-north"></div>' +
       '<div class="seatplan-court-area">' +
-        '<div class="seatplan-side-strip">Haupteingang &amp; Foyer</div>' +
+        '<div class="seatplan-side-strip stehblock">Stehblock</div>' +
+        '<div class="seatplan-side-strip entrance"></div>' +
         '<div class="seatplan-court">Spielfeld</div>' +
-        '<div class="seatplan-side-strip">VIP-Bereich</div>' +
+        '<div class="seatplan-side-strip entrance"></div>' +
       '</div>' +
       '<div id="seatplan-south" style="margin-top:14px"></div>' +
       '<div class="seatplan-strip seatplan-strip-south">Südtribüne</div>' +
+      catLegend +
       legend;
 
     document.getElementById('seatplan-north').appendChild(northRow);
@@ -173,21 +191,27 @@
       catEl.textContent = category + ' · ab ' + fmtEUR(priceInfo.normal) + ' €';
       wrap.appendChild(catEl);
 
+      // Jede Reihe ist eine eigene, zentrierte Flex-Zeile (nicht ein einziges CSS-Grid für
+      // den ganzen Block) — reale Reihen sind unterschiedlich breit (siehe echter Saalplan),
+      // ein gemeinsames Grid mit fester Spaltenzahl würde kürzere Reihen links abschneiden
+      // bzw. mit der nächsten Reihe verschmelzen lassen statt sie sauber zu zentrieren.
       var cols = Math.max.apply(null, group.rows.map(function (r) { return r.seats.length; }));
-      var grid = document.createElement('div');
-      grid.className = 'seatplan-grid';
-      grid.style.gridTemplateColumns = 'repeat(' + cols + ', 12px)';
+      var gridWrap = document.createElement('div');
+      gridWrap.className = 'seatplan-grid-wrap';
+      gridWrap.style.width = (cols * 15 - 3) + 'px';
 
       var freeCount = 0;
       group.rows.forEach(function (row, rIdxInGroup) {
         var rIdx = rowOffset + rIdxInGroup;
         var rowLabel = row.row_label || row.row_number;
+        var rowEl = document.createElement('div');
+        rowEl.className = 'seatplan-row-line';
         row.seats.forEach(function (seat, cIdx) {
           var taken = seededRandom(seedBase + rIdx * cols + cIdx) < 0.28;
           if (!taken) freeCount++;
           var btn = document.createElement('button');
           btn.type = 'button';
-          btn.className = 'seatplan-seat';
+          btn.className = 'seatplan-seat ' + catClass(category);
           if (blockMode) btn.tabIndex = -1;
           btn.dataset.seatGuid = seat.seat_guid;
           var seatLabel = zone.name + ', Reihe ' + rowLabel + ', Platz ' + seat.seat_number;
@@ -199,10 +223,11 @@
               self._toggleSeat(seat.seat_guid, zone.name, rowLabel, seat.seat_number, category, priceInfo);
             });
           }
-          grid.appendChild(btn);
+          rowEl.appendChild(btn);
         });
+        gridWrap.appendChild(rowEl);
       });
-      wrap.appendChild(grid);
+      wrap.appendChild(gridWrap);
       rowOffset += group.rows.length;
 
       if (blockMode && self.prices[category]) {

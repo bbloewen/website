@@ -37,13 +37,33 @@
 .seatplan-block-label { text-align: center; font-size: 12px; font-weight: 700; margin-bottom: 2px; }
 .seatplan-block-cat { text-align: center; font-size: 10px; color: var(--text-muted); margin-bottom: 8px; }
 .seatplan-grid { display: grid; gap: 3px; justify-content: center; width: max-content; margin: 0 auto; }
+/* Jede Reihe eine eigene zentrierte Flex-Zeile — reale Reihen sind unterschiedlich breit,
+   das ergibt automatisch die typische, zum Spielfeld hin verjüngte Tribünenform statt
+   eines starren Rasters mit linksbündig "abgeschnittenen" kürzeren Reihen. */
+.seatplan-grid-wrap { display: flex; flex-direction: column; gap: 3px; align-items: center; margin: 0 auto; }
+.seatplan-row-line { display: flex; gap: 3px; justify-content: center; }
 .seatplan-seat {
   width: 12px; height: 12px; border-radius: 3px;
   background: var(--color-neutral-200); border: 1px solid var(--color-neutral-300); cursor: pointer; padding: 0;
 }
-.seatplan-seat[disabled] { background: var(--color-neutral-100); border-color: var(--color-neutral-200); cursor: not-allowed; }
-.seatplan-seat.selected { background: var(--color-brand-orange); border-color: var(--color-orange-600); }
+/* Sitzfarbe nach Kategorie, wie im Original-Saalplan (Kategorie 1/2/VIP je eigene Farbe) —
+   macht den Block auf einen Blick als das erkennbar, was er im echten Plan ist. */
+.seatplan-seat.cat-kat1 { background: #D99A3E; border-color: #B87F2E; }
+.seatplan-seat.cat-kat2 { background: #7A8CA6; border-color: #5F7089; }
+.seatplan-seat.cat-vip { background: #B3392C; border-color: #8F2D22; }
+.seatplan-seat[disabled] { opacity: .35; cursor: not-allowed; }
+.seatplan-seat.selected {
+  box-shadow: 0 0 0 2px var(--color-brand-navy);
+  outline: 1px solid var(--color-white); outline-offset: -2px;
+}
 .seatplan-seat:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 1px; }
+
+.seatplan-cat-legend { display: flex; gap: 14px; margin: 10px 0 4px; font-size: 11px; color: var(--text-muted); flex-wrap: wrap; }
+.seatplan-cat-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.seatplan-cat-legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+.seatplan-cat-legend .cat-kat1 i { background: #D99A3E; }
+.seatplan-cat-legend .cat-kat2 i { background: #7A8CA6; }
+.seatplan-cat-legend .cat-vip i { background: #B3392C; }
 
 .seatplan-block-controls { margin-top: 10px; border-top: 1px dashed var(--color-neutral-200); padding-top: 8px; }
 .seatplan-stepper-row {
@@ -115,6 +135,16 @@
   text-align: center;
   white-space: nowrap;
 }
+/* Stehblock — im Original-Saalplan eine eigene große Fläche links neben dem Spielfeld,
+   nicht buchbar (kein Ticket-Produkt), nur zur räumlichen Einordnung gezeigt. */
+.seatplan-side-strip.stehblock {
+  writing-mode: horizontal-tb;
+  background: #6A4C93;
+  flex: 0 0 84px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; letter-spacing: 0.04em;
+}
+.seatplan-side-strip.entrance { flex: 0 0 24px; }
 .seatplan-court {
   flex: 1;
   border: 1px solid var(--color-neutral-200);
