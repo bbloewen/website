@@ -221,15 +221,21 @@
          Data Table, die eigentliche pretix-Buchung folgt als Folgeschritt.
          Deshalb hier kein lokal erzeugter Fake-Bestellcode, sondern die vom
          Workflow zurückgegebene Mandatsreferenz. */
-      if (cart.productType === 'dauerkarte') {
+      if (cart.productType === 'dauerkarte' || cart.productType === 'einzelticket') {
+        var webhookUrl = cart.productType === 'dauerkarte'
+          ? 'https://blev.app.n8n.cloud/webhook/dauerkarte-bestellung'
+          : 'https://blev.app.n8n.cloud/webhook/einzelticket-bestellung';
+        var payload = cart.productType === 'dauerkarte'
+          ? { buyer: buyer, cart: cart, sepa: { kontoinhaber: kontoinhaber, iban: iban } }
+          : { buyer: buyer, cart: cart };
         var payBtn = document.getElementById('pay-btn');
         var originalBtnText = payBtn.textContent;
         payBtn.disabled = true;
         payBtn.textContent = 'Wird gesendet …';
-        fetch('https://blev.app.n8n.cloud/webhook/dauerkarte-bestellung', {
+        fetch(webhookUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ buyer: buyer, cart: cart, sepa: { kontoinhaber: kontoinhaber, iban: iban } })
+          body: JSON.stringify(payload)
         }).then(function (res) {
           if (!res.ok) throw new Error('Webhook antwortete mit Fehler');
           return res.json();

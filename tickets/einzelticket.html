@@ -67,10 +67,6 @@
           <button class="modal-close" aria-label="Schließen" id="seatplan-modal-close"><i data-lucide="x"></i></button>
           <h3 class="t-h4 mb-3">Block wählen</h3>
           <div style="flex:1;min-height:0;overflow-y:auto">
-            <div class="realplan-ref">
-              <img loading="lazy" src="/assets/img/riethsporthalle-saalplan-real.webp" alt="Offizieller Saalplan der Riethsporthalle mit allen Blöcken, Reihen, Kategorien und VIP-Bereichen" />
-              <p class="t-caption" style="color:var(--text-muted)">Offizieller Saalplan zur Orientierung — deine Auswahl unten zeigt Kategorien und Verfügbarkeit.</p>
-            </div>
             <div id="seatplan-root"></div>
           </div>
           <button class="btn btn-primary btn-sm" id="seatplan-modal-confirm" style="margin-top:16px;width:100%;justify-content:center">Übernehmen</button>
@@ -145,6 +141,18 @@
 <script src="/js/include.js?v=1785200000"></script><script src="/js/seat-picker.js?v=1785200000"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
+    /* Vorschaubild soll nie höher sein als die Preistabelle daneben — auch
+       wenn der Warenkorb (dritte Spalte) durch mehrere Auswahlen höher wird
+       als beide. Preise ändern sich nie zur Laufzeit, daher reicht Messung
+       bei Load + Resize. */
+    function syncThumbHeight() {
+      var priceCol = document.querySelector('.buy-prices-col');
+      var thumbBtn = document.getElementById('seatplan-modal-trigger');
+      if (priceCol && thumbBtn) thumbBtn.style.height = priceCol.offsetHeight + 'px';
+    }
+    syncThumbHeight();
+    window.addEventListener('resize', syncThumbHeight);
+
     var picker = new SeatPicker(document.getElementById('seatplan-root'), {
       mode: 'blocks',
       nachwuchsBeitrag: true,

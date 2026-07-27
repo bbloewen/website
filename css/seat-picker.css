@@ -85,12 +85,6 @@
   overflow: hidden;
 }
 .buy-thumb-btn img { width: 100%; height: 100%; display: block; object-fit: cover; object-position: center; }
-
-/* Referenzbild des echten Saalplans oben im Blockplan-Popup — zeigt die reale
-   Halle (Querformat), die eigentliche Block-/Tarifwahl bleibt darunter. */
-.realplan-ref { margin-bottom: 16px; }
-.realplan-ref img { width: 100%; display: block; border-radius: var(--radius-md); border: 1px solid var(--border); }
-.realplan-ref p { margin-top: 8px; }
 .buy-thumb-cta {
   position: absolute; left: 0; right: 0; bottom: 0;
   background: linear-gradient(0deg, rgba(0,18,45,.82), rgba(0,18,45,0));
