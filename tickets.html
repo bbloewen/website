@@ -24,7 +24,9 @@
           <h1>Hol dir dein <span class="kw">Ticket<span class="swoosh" aria-hidden="true"></span></span>.</h1>
           <a class="hero-location" href="https://www.google.com/maps/search/?api=1&query=Riethsporthalle+Erfurt+Essener+Stra%C3%9Fe+20+99089+Erfurt" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Riethsporthalle, Essener Straße 20, 99089 Erfurt</a>
         </div>
-        <div><!-- reserviert für künftiges CTA/Element auf dem Herobild --></div>
+        <div style="display:flex;justify-content:flex-end">
+          <a class="btn btn-primary" href="/tickets/dauerkarte.html">Dauerkarte kaufen <i data-lucide="arrow-right" class="icon-16"></i></a>
+        </div>
       </div>
     </div>
   </section>
@@ -35,24 +37,15 @@
 
         <div>
           <div class="ticket-list">
-            <!-- Reale Heimspieltermine aus dem Spielplan. Spiele mit hinterlegter ticketUrl in
-                 heimspiele.json zeigen einen echten Tickets-Button statt des Vorverkaufsstart-Badges
-                 (aktuell nur 11.10. gegen Ludwigsburg — unser erstes real verkäufliches Spiel). -->
+            <!-- Reale Heimspieltermine aus dem Spielplan. Einzelticketverkauf ist noch nicht live
+                 (Produktanlage in pretix steht noch aus) — Tickets-Button ist daher überall
+                 ausgegraut/ohne Link, nur das erste Spiel bekommt zusätzlich das
+                 "Vorverkauf startet"-Label. -->
             <div id="heimspiele-liste"></div>
           </div>
         </div>
 
         <aside style="display:flex;flex-direction:column;gap:20px">
-          <div class="ticket-sidebar" style="position:static">
-            <span class="eyebrow">Preis pro Spiel</span>
-            <h2 class="t-h4" style="margin:6px 0 14px">Einzelpreistickets</h2>
-            <p class="t-body-sm mb-3">Bei Einzeltickets wählst du deine Kategorie, nicht mehr deinen festen Platz — den sicherst du dir mit der Dauerkarte.</p>
-            <p class="t-caption" style="margin-bottom:12px;color:var(--text-muted)">Ermäßigt gilt für Studierende, Azubis, FSJ, Menschen mit Behinderung, Rentner*innen und Mitglieder von Kooperationsvereinen (jeweils mit Nachweis beim Einlass).</p>
-            <div class="price-row"><span>Kategorie 1</span><strong>16,00 €</strong></div>
-            <div class="price-row"><span>Kategorie 1 (ermäßigt)</span><strong>14,00 €</strong></div>
-            <div class="price-row"><span>Kategorie 2</span><strong>12,00 €</strong></div>
-            <div class="price-row"><span>Kategorie 2 (ermäßigt)</span><strong>8,50 €</strong></div>
-          </div>
           <div class="ticket-sidebar" style="position:static">
             <div style="display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap">
               <div>
@@ -76,6 +69,16 @@
             <div class="price-row"><span>VIP</span><strong>1.000,00 €</strong></div>
             <p class="t-caption" style="margin-top:12px;color:var(--text-muted)">Ermäßigt gilt für Studierende, Azubis, FSJ, Menschen mit Behinderung, Rentner*innen und Mitglieder von Kooperationsvereinen.</p>
             <a class="btn btn-primary btn-sm" style="margin-top:12px;width:100%;justify-content:center" href="/tickets/dauerkarte.html">Dauerkarte kaufen</a>
+          </div>
+          <div class="ticket-sidebar" style="position:static">
+            <span class="eyebrow">Preis pro Spiel</span>
+            <h2 class="t-h4" style="margin:6px 0 14px">Einzelpreistickets</h2>
+            <p class="t-body-sm mb-3">Bei Einzeltickets wählst du deine Kategorie, nicht mehr deinen festen Platz — den sicherst du dir mit der Dauerkarte.</p>
+            <p class="t-caption" style="margin-bottom:12px;color:var(--text-muted)">Ermäßigt gilt für Studierende, Azubis, FSJ, Menschen mit Behinderung, Rentner*innen und Mitglieder von Kooperationsvereinen (jeweils mit Nachweis beim Einlass).</p>
+            <div class="price-row"><span>Kategorie 1</span><strong>16,00 €</strong></div>
+            <div class="price-row"><span>Kategorie 1 (ermäßigt)</span><strong>14,00 €</strong></div>
+            <div class="price-row"><span>Kategorie 2</span><strong>12,00 €</strong></div>
+            <div class="price-row"><span>Kategorie 2 (ermäßigt)</span><strong>8,50 €</strong></div>
           </div>
         </aside>
 
@@ -117,11 +120,6 @@
     return new Date(parts[2], parts[1] - 1, parts[0]);
   }
   function formatLong(d) { return d.getDate() + '. ' + MONATE[d.getMonth()]; }
-  function formatShort(d) {
-    var dd = String(d.getDate()).padStart(2, '0');
-    var mm = String(d.getMonth() + 1).padStart(2, '0');
-    return dd + '.' + mm + '.' + d.getFullYear();
-  }
   function pad2(n) { return String(n).padStart(2, '0'); }
   function gcalStamp(d) {
     return d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) + 'T' + pad2(d.getHours()) + pad2(d.getMinutes()) + '00';
@@ -142,10 +140,8 @@
   }
   fetch('/data/heimspiele.json?v=1785200000').then(function (r) { return r.json(); }).then(function (d) {
     var el = document.getElementById('heimspiele-liste');
-    el.innerHTML = d.spiele.map(function (s) {
+    el.innerHTML = d.spiele.map(function (s, i) {
       var gameDate = parseDMY(s.datum);
-      var vvkDate = new Date(gameDate);
-      vvkDate.setDate(vvkDate.getDate() - 10);
       return '<div class="ticket-row">' +
         '<div>' +
           '<div class="ticket-row-title"><strong>' + formatLong(gameDate) + '</strong> · Basketball Löwen – ' + s.gegner + '</div>' +
@@ -154,9 +150,9 @@
             '<span><i data-lucide="clock" class="icon-14"></i> ' + s.zeit + ' Uhr</span>' +
             '<a class="cal-link" href="' + calendarLink(gameDate, s.zeit, s.gegner) + '" target="_blank" rel="noopener" title="Ins Kalender eintragen"><i data-lucide="calendar-plus" class="icon-14"></i></a>' +
           '</div>' +
-          (s.ticketUrl ? '' : '<div class="ticket-row-vvk"><span class="badge badge-info">Vorverkaufsstart: ' + formatShort(vvkDate) + '</span></div>') +
+          (i === 0 ? '<div class="ticket-row-vvk"><span class="badge badge-info">Vorverkauf startet</span></div>' : '') +
         '</div>' +
-        (s.ticketUrl ? '<div class="tactions"><a class="btn btn-primary btn-sm" href="' + s.ticketUrl + '">Tickets <i data-lucide="arrow-right" class="icon-14"></i></a></div>' : '') +
+        '<div class="tactions"><button type="button" class="btn btn-primary btn-sm" disabled>Tickets <i data-lucide="arrow-right" class="icon-14"></i></button></div>' +
       '</div>';
     }).join('');
     if (window.lucide) window.lucide.createIcons();
