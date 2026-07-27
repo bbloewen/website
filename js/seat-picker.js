@@ -216,6 +216,15 @@
         // Original), unabhängig von Kategorie/Preis — nicht jede Reihen-Trennung im
         // echten Plan bedeutet eine andere Preisstufe.
         if (row.section_break) rowEl.style.marginTop = '8px';
+        // Reihen 4+5 in A/B/C sind schmaler als die Reihen darüber (1-3) und liegen im
+        // Original nicht mittig, sondern bündig zu einer Seite von deren Gang-Segment
+        // (A/B: rechte "12er"-Seite, C spiegelverkehrt: linke "12er"-Seite) — statt sie
+        // wie alle anderen Reihen zu zentrieren, an dieser Seite ausrichten.
+        if ((zone.zone_id === 'A' || zone.zone_id === 'B') && (row.row_number === '4' || row.row_number === '5')) {
+          rowEl.style.alignSelf = 'flex-end';
+        } else if (zone.zone_id === 'C' && (row.row_number === '4' || row.row_number === '5')) {
+          rowEl.style.alignSelf = 'flex-start';
+        }
         // Reihennummer links UND rechts an der Reihe, wie im Original-Saalplan.
         var rowNumLeft = document.createElement('span');
         rowNumLeft.className = 'seatplan-row-num';
