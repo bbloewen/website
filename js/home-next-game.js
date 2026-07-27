@@ -23,7 +23,7 @@
          gestartet) — sobald der Spielbetrieb läuft, wieder auf Einzelticket-
          Verlinkung (g.s.ticketUrl || /tickets.html) umstellen. */
       '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
-        '<a class="btn btn-outline-orange btn-sm" href="/tickets/dauerkarte.html">Dauerkarte kaufen <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>' +
+        '<a class="btn btn-primary btn-sm" style="color:#fff" href="/tickets/dauerkarte.html"><i data-lucide="ticket" style="width:14px;height:14px"></i> Dauerkarte kaufen</a>' +
         '<a class="btn btn-ghost btn-sm" href="/teams-saison/spielplan.html">Zum Spielplan</a>' +
       '</div>' +
     '</div>';
