@@ -158,6 +158,12 @@
 }
 /* Legende sitzt wie im Original-Saalplan mitten im Spielfeld-Bereich. */
 .seatplan-court .seatplan-legend { justify-content: center; overflow-x: visible; white-space: normal; }
+/* Live-Vorschau der aktuellen Auswahl (Reihe+Platz bzw. Block-Anzahl), ebenfalls
+   im Spielfeld-Bereich, direkt unter der Legende. */
+.seatplan-court-selection {
+  margin: 4px 0 0; font-size: 11px; font-weight: 700; color: var(--color-brand-navy);
+  text-align: center; max-width: 90%;
+}
 
 /* Fußzeile des Sitzplan-Popups: "Übernehmen"-Button zentriert, in der Breite eines
    einzelnen Blocks (die Legende sitzt jetzt wie im Original im Spielfeld, der Button

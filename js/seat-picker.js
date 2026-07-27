@@ -153,7 +153,9 @@
       '<div class="seatplan-court-area">' +
         '<div class="seatplan-side-strip stehblock">Stehblock</div>' +
         '<div class="seatplan-side-strip entrance"></div>' +
-        '<div class="seatplan-court"><span>Spielfeld</span>' + legendHtml + '</div>' +
+        '<div class="seatplan-court"><span>Spielfeld</span>' + legendHtml +
+          '<p class="seatplan-court-selection" id="seatplan-court-selection"></p>' +
+        '</div>' +
         '<div class="seatplan-side-strip entrance"></div>' +
       '</div>' +
       '<div id="seatplan-south" style="margin-top:14px"></div>' +
@@ -162,6 +164,7 @@
 
     document.getElementById('seatplan-north').appendChild(northRow);
     document.getElementById('seatplan-south').appendChild(southRow);
+    this.courtSelectionEl = document.getElementById('seatplan-court-selection');
     this._renderCart();
   };
 
@@ -428,7 +431,36 @@
     textarea.addEventListener('input', function () { self.notiz = this.value; });
   };
 
+  /* Live-Vorschau der aktuellen Auswahl direkt im Spielfeld-Bereich (neben der
+     Legende) — Reihe+Platz bei "seats", Anzahl je Block bei "blocks". */
+  SeatPicker.prototype._updateCourtSelection = function () {
+    var el = this.courtSelectionEl;
+    if (!el) return;
+    var self = this;
+    var lines = [];
+    if (this.mode === 'blocks') {
+      Object.keys(this.blockCounts).forEach(function (key) {
+        var c = self.blockCounts[key];
+        var qty = (c.normal || 0) + (c.ermaessigt || 0);
+        if (qty > 0) lines.push(qty + '× ' + c.zoneLabel);
+      });
+    } else {
+      Object.keys(this.selected).forEach(function (guid) {
+        var s = self.selected[guid];
+        lines.push(s.zoneLabel + ', Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber);
+      });
+    }
+    if (lines.length === 0) {
+      el.textContent = '';
+    } else if (lines.length <= 4) {
+      el.textContent = 'Deine Auswahl: ' + lines.join(' · ');
+    } else {
+      el.textContent = 'Deine Auswahl: ' + lines.length + ' Plätze';
+    }
+  };
+
   SeatPicker.prototype._renderCart = function () {
+    this._updateCourtSelection();
     if (this.mode === 'blocks') { this._renderCartBlocks(); return; }
 
     var self = this;
