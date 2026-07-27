@@ -1334,6 +1334,8 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 
 .hero-photo.hero-schulprogramm { --hero-photo-url: url('/assets/img/hero-schulprogramm.jpg'); background-position: 75% 45%; }
 
+.hero-photo.hero-camps { --hero-photo-url: url('/assets/img/hero-camps.jpg'); background-position: center 60%; }
+
 .hero-photo.hero-spielplan { --hero-photo-url: url('/assets/img/hero-spielplan.jpg'); background-position: 70% 40%; }
 
 /* Hero-Variante für die Freundeskreis-Seite — Kinder mit Maskottchen beim BasKIDball,
