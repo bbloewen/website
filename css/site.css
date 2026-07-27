@@ -1421,9 +1421,9 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 }
 
 /* Hero-Variante für die Profi-Team-Seite — echtes Mannschaftsfoto */
-.hero-photo.hero-profis { --hero-photo-url: url('/assets/img/team-prob.webp'); background-position: center 20%; }
-.hero-photo.hero-damen { --hero-photo-url: url('/assets/img/team-damen.webp'); background-position: center 20%; }
-.hero-photo.hero-u19 { --hero-photo-url: url('/assets/img/team-nbbl.webp'); background-position: center 20%; }
+.hero-photo.hero-profis { --hero-photo-url: url('/assets/img/team-prob-hero-blur.webp'); background-position: center 20%; }
+.hero-photo.hero-damen { --hero-photo-url: url('/assets/img/team-damen-hero-blur.webp'); background-position: center 20%; }
+.hero-photo.hero-u19 { --hero-photo-url: url('/assets/img/team-nbbl-hero-blur.webp'); background-position: center 20%; }
 
 /* Hero-Varianten für einzelne News-Artikel mit echtem Pressefoto */
 .hero-photo.hero-news-saisonstart-2025 { --hero-photo-url: url('/assets/img/news/saisonstart-2025.webp'); background-position: center 30%; }
