@@ -152,7 +152,7 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="/js/nav.js?v=1785200000"></script>
 <script src="/js/include.js?v=1785200000"></script>
-<script src="/js/seat-picker.js?v=1785200000"></script>
+<script src="/js/seat-picker.js?v=1785280000"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     /* Vorschaubild soll nie höher sein als die Preistabelle daneben — auch
@@ -170,12 +170,13 @@
     var picker = new SeatPicker(document.getElementById('seatplan-root'), {
       nachwuchsBeitrag: true,
       nachwuchsAmount: 2,
-      planUrl: '/assets/seating/riethsporthalle-seatingplan.json',
+      planUrl: '/assets/seating/riethsporthalle-seatingplan.json?v=1785270000',
       northZones: ['D', 'E', 'F'],
       southZones: ['A', 'B', 'C'],
       prices: {
         'Kategorie I': { normal: 208, ermaessigt: 182 },
-        'Kategorie II': { normal: 156, ermaessigt: 110.5 }
+        'Kategorie II': { normal: 156, ermaessigt: 110.5 },
+        'VIP': { normal: 1000 }
       },
       cartEl: document.getElementById('seatplan-cart'),
       totalEl: document.getElementById('seatplan-total'),
