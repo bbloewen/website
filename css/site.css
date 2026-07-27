@@ -870,16 +870,22 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .contact-person-photo span { font-size: 10px; text-align: center; line-height: 1.2; }
 .contact-person-card-centered { justify-content: center; }
 
-/* Rückblick-Sektion Camps-Seite: 4er-Foto-Grid neben dem Artikel, gleiche
-   Höhe wie die Artikel-Card (align-items:stretch vom umgebenden .grid-2). */
-.recap-photo-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 10px; height: 100%; min-height: 260px; }
+/* Rückblick-Sektion Camps-Seite: Artikel + 4er-Foto-Grid in einer gemeinsamen
+   Card, Fotos exakt so hoch wie der Artikeltext (align-items:stretch) statt
+   mit eigener Mindesthöhe. Klick auf ein Foto öffnet die Lightbox. */
+.recap-split { display: grid; grid-template-columns: 1fr 1fr; align-items: stretch; }
+.recap-photo-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 4px; }
 .recap-photo-placeholder {
-  background: var(--color-neutral-100); color: var(--color-neutral-400); border-radius: var(--radius-md);
+  background: var(--color-neutral-100); color: var(--color-neutral-400);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; overflow: hidden;
+  cursor: pointer; min-height: 60px;
 }
 .recap-photo-placeholder span { font-size: 11px; text-align: center; }
 .recap-photo-placeholder img { width: 100%; height: 100%; object-fit: cover; display: block; }
-@media (max-width: 700px) { .recap-photo-grid { min-height: 200px; } }
+@media (max-width: 700px) {
+  .recap-split { grid-template-columns: 1fr; }
+  .recap-photo-grid { min-height: 220px; }
+}
 @media (max-width: 700px) {
   .contact-person-card-centered { flex-direction: column; text-align: center; }
 }
