@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Freundeskreis — Basketball Löwen Erfurt</title>
 <meta name="description" content="Der Freundeskreis der Basketball Löwen Erfurt." />
-<meta name="robots" content="noindex, nofollow" />
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785200000" />
 <link rel="stylesheet" href="/css/site.css?v=1785200000" />
@@ -37,9 +36,9 @@
       <span class="eyebrow" style="display:block;margin-bottom:16px">Unsere Freunde</span>
       <div class="freundeskreis-gallery" id="freundeskreis-gallery"></div>
       <div class="freundeskreis-legend">
-        <span><img src="/assets/icons/basketball-gold.png" alt="" width="14" height="14" />Sponsor</span>
-        <span><img src="/assets/icons/basketball-gruen.png" alt="" width="14" height="14" />Freundeskreis</span>
-        <span><img src="/assets/icons/basketball-blau.png" alt="" width="14" height="14" />Gesellschafter</span>
+        <span><img loading="lazy" src="/assets/icons/basketball-gold.webp" alt="" width="14" height="14"  />Sponsor</span>
+        <span><img loading="lazy" src="/assets/icons/basketball-gruen.webp" alt="" width="14" height="14"  />Freundeskreis</span>
+        <span><img loading="lazy" src="/assets/icons/basketball-blau.webp" alt="" width="14" height="14"  />Gesellschafter</span>
       </div>
     </div>
   </section>
@@ -67,10 +66,10 @@
       var mitglieder = (data && data.mitglieder) || [];
       var gallery = document.getElementById('freundeskreis-gallery');
       gallery.innerHTML = mitglieder.map(function (m) {
-        var ICON_SRC = { green: '/assets/icons/basketball-gruen.png', gold: '/assets/icons/basketball-gold.png', blue: '/assets/icons/basketball-blau.png' };
+        var ICON_SRC = { green: '/assets/icons/basketball-gruen.webp', gold: '/assets/icons/basketball-gold.webp', blue: '/assets/icons/basketball-blau.webp' };
         var slot = 1;
         function addStar(colorClass, label) {
-          var html = '<div class="freundeskreis-star freundeskreis-star-' + colorClass + ' freundeskreis-star-slot-' + slot + '" data-tooltip="' + label + '" aria-label="' + label + '" tabindex="0"><img src="' + ICON_SRC[colorClass] + '" alt="" width="14" height="14" /></div>';
+          var html = '<div class="freundeskreis-star freundeskreis-star-' + colorClass + ' freundeskreis-star-slot-' + slot + '" data-tooltip="' + label + '" aria-label="' + label + '" tabindex="0"><img loading="lazy" src="' + ICON_SRC[colorClass] + '" alt="" width="14" height="14"  /></div>';
           slot++;
           return html;
         }
@@ -78,7 +77,7 @@
         if (m.sponsor) { stars += addStar('gold', 'Sponsor'); }
         if (m.gesellschafter) { stars += addStar('blue', 'Gesellschafter'); }
         var avatarInner = m.foto
-          ? '<img class="freundeskreis-avatar-photo" src="' + m.foto + '?v=1785200000" alt="" width="88" height="88" />'
+          ? '<img loading="lazy" class="freundeskreis-avatar-photo" src="' + m.foto + '?v=1785200000" alt="" width="88" height="88"  />'
           : m.initialen;
         return '<div class="freundeskreis-card">' +
           '<div class="freundeskreis-avatar">' +

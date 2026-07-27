@@ -9,7 +9,7 @@
       "titel": "Rückblick SWE Sommercamp 2026",
       "kurztext": "60 Kinder und Jugendliche erlebten eine Woche voller Sport, Spaß und Meet & Greets mit den Profis.",
       "url": "/news/artikel/2026-07-06_verein_swe-sommercamp.html",
-      "bild": "/assets/img/news/swe-sommercamp.jpg",
+      "bild": "/assets/img/news/swe-sommercamp.webp",
       "topNews": true
     },
     {
@@ -20,7 +20,7 @@
       "titel": "Wichtige Meilensteine für den Löwenpark",
       "kurztext": "Der Stadtrat hat die Kostensteigerung gedeckt — nach dem Richtfest im April ist die Eröffnung greifbar nah.",
       "url": "/news/artikel/2026-06-19_verein_loewenpark-meilenstein.html",
-      "bild": "/assets/img/news/loewenpark-dach.jpg",
+      "bild": "/assets/img/news/loewenpark-dach.webp",
       "topNews": true
     },
     {
@@ -31,7 +31,7 @@
       "titel": "Saisonrückblick 2025/2026: Platz 12, Bilanz 8:16",
       "kurztext": "Die Profis verpassen die Playoffs — Coach Florian Gut zieht Bilanz und blickt nach vorn.",
       "url": "/news/artikel/2026-03-31_verein_spielbericht-saisonrueckblick-2025-26.html",
-      "bild": "/assets/img/team-prob.jpg",
+      "bild": "/assets/img/team-prob.webp",
       "topNews": true,
       "team": "profis"
     },
@@ -43,7 +43,7 @@
       "titel": "Vier wichtige Spiele — und ein sportlicher Abgang",
       "kurztext": "Vor der entscheidenden Schlussphase verlässt Mike Mitchell das Team aus persönlichen Gründen.",
       "url": "/news/artikel/2026-03-04_verein_mitchell-abgang.html",
-      "bild": "/assets/img/news/mitchell-abgang.jpg",
+      "bild": "/assets/img/news/mitchell-abgang.webp",
       "topNews": true,
       "team": "profis"
     },
@@ -55,7 +55,7 @@
       "titel": "Löwen-Saisonstart und Dauerkartenverkauf",
       "kurztext": "Nach dem Testspiel startet die Saison zu Hause gegen die BBC Coburg.",
       "url": "/news/artikel/2025-09-25_verein_saisonstart-dauerkarten.html",
-      "bild": "/assets/img/news/saisonstart-2025.jpg",
+      "bild": "/assets/img/news/saisonstart-2025.webp",
       "topNews": true,
       "team": "profis"
     },
@@ -67,7 +67,7 @@
       "titel": "CATL verlängert Partnerschaft",
       "kurztext": "Der Batteriezellen-Hersteller bleibt Namenssponsor der Profimannschaft — schon die vierte gemeinsame Saison.",
       "url": "/news/artikel/2025-08-26_verein_catl-verlaengert.html",
-      "bild": "/assets/img/hero-basketball.jpg",
+      "bild": "/assets/img/hero-basketball.webp",
       "topNews": false,
       "team": "profis"
     },
@@ -79,7 +79,7 @@
       "titel": "Sommerinterview Teil 3: LÖWENPARK und Vorbereitung",
       "kurztext": "Florian Gut über Finanzierung und Zeitplan des LÖWENPARK sowie den Start in die Saisonvorbereitung.",
       "url": "/news/artikel/2025-08-08_verein_sommerinterview-teil3.html",
-      "bild": "/assets/img/hero-basketball.jpg",
+      "bild": "/assets/img/hero-basketball.webp",
       "topNews": false
     },
     {
@@ -90,7 +90,7 @@
       "titel": "Sommerinterview Teil 2: Neue Damenmannschaft",
       "kurztext": "Florian Gut über langfristige Vereinsziele und den Start der Löwinnen in der Regionalliga.",
       "url": "/news/artikel/2025-08-01_verein_sommerinterview-teil2.html",
-      "bild": "/assets/img/news/damen-regionalliga.jpg",
+      "bild": "/assets/img/news/damen-regionalliga.webp",
       "topNews": false,
       "team": "damen"
     },
@@ -102,7 +102,7 @@
       "titel": "Sommerinterview Teil 1: Kaderplanung",
       "kurztext": "Florian Gut über Abgänge, gesuchte Neuzugänge und einen starken Sommer für Musa Abra.",
       "url": "/news/artikel/2025-07-21_verein_sommerinterview-teil1.html",
-      "bild": "/assets/img/team-prob.jpg",
+      "bild": "/assets/img/team-prob.webp",
       "topNews": false,
       "team": "profis"
     },
@@ -114,7 +114,7 @@
       "titel": "Löwen-Kaderplanung für die nächste Saison",
       "kurztext": "Vier langjährige Spieler verlassen den Verein — Florian Gut über die Hintergründe.",
       "url": "/news/artikel/2025-05-19_verein_kaderplanung-naechste-saison.html",
-      "bild": "/assets/img/team-prob.jpg",
+      "bild": "/assets/img/team-prob.webp",
       "topNews": false,
       "team": "profis"
     },
@@ -126,7 +126,7 @@
       "titel": "CATL Basketball Löwen scheiden im Achtelfinale aus",
       "kurztext": "Knappe 82:84-Heimniederlage gegen Paderborn beendet die Playoff-Saison.",
       "url": "/news/artikel/2025-04-29_verein_achtelfinale-aus.html",
-      "bild": "/assets/img/news/achtelfinale.jpg",
+      "bild": "/assets/img/news/achtelfinale.webp",
       "topNews": false,
       "team": "profis"
     },
@@ -138,7 +138,7 @@
       "titel": "Playoff-Heimspiel am Freitagabend",
       "kurztext": "Nach knapper Auswärtsniederlage geht die Serie gegen Paderborn in der Riethsporthalle weiter.",
       "url": "/news/artikel/2025-04-22_verein_playoff-heimspiel-freitag.html",
-      "bild": "/assets/img/news/playoff-heimspiel.jpg",
+      "bild": "/assets/img/news/playoff-heimspiel.webp",
       "topNews": false,
       "team": "profis"
     }

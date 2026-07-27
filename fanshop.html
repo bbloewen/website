@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Fanshop — Basketball Löwen Erfurt</title>
 <meta name="description" content="Der Fanshop der Basketball Löwen Erfurt — Trikots, Merchandise und mehr." />
-<meta name="robots" content="noindex, nofollow" />
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785200000" />
 <link rel="stylesheet" href="/css/site.css?v=1785200000" />
@@ -124,17 +123,17 @@
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     var PRODUCTS = [
-      { id: 'tshirt-logo', name: 'T-Shirt LOGO', price: 29.00, icon: 'shirt', image: '/assets/img/stock-shop-tshirt.jpg' },
-      { id: 'tshirt-damen-logo', name: 'T-Shirt Damen LOGO', price: 29.00, icon: 'shirt', image: '/assets/img/stock-shop-tshirt.jpg' },
-      { id: 'tshirt-kinder-logo', name: 'T-Shirt Kinder LOGO', price: 25.00, icon: 'baby', image: '/assets/img/stock-shop-tshirt.jpg' },
-      { id: 'hoodie-stamp', name: 'Hoodie STAMP (unisex)', price: 59.00, icon: 'shirt', image: '/assets/img/stock-shop-hoodie.jpg' },
-      { id: 'pullover-logo', name: 'Pullover LOGO (unisex)', price: 45.00, icon: 'shirt', image: '/assets/img/stock-shop-hoodie.jpg' },
+      { id: 'tshirt-logo', name: 'T-Shirt LOGO', price: 29.00, icon: 'shirt', image: '/assets/img/stock-shop-tshirt.webp' },
+      { id: 'tshirt-damen-logo', name: 'T-Shirt Damen LOGO', price: 29.00, icon: 'shirt', image: '/assets/img/stock-shop-tshirt.webp' },
+      { id: 'tshirt-kinder-logo', name: 'T-Shirt Kinder LOGO', price: 25.00, icon: 'baby', image: '/assets/img/stock-shop-tshirt.webp' },
+      { id: 'hoodie-stamp', name: 'Hoodie STAMP (unisex)', price: 59.00, icon: 'shirt', image: '/assets/img/stock-shop-hoodie.webp' },
+      { id: 'pullover-logo', name: 'Pullover LOGO (unisex)', price: 45.00, icon: 'shirt', image: '/assets/img/stock-shop-hoodie.webp' },
       { id: 'sweatjacke-herren-logo', name: 'Sweatjacke Herren LOGO', price: 59.00, icon: 'shirt' },
       { id: 'fanschal', name: 'Fanschal', price: 17.00, icon: 'gift' },
-      { id: 'tasse', name: 'Tasse', price: 9.90, icon: 'coffee', image: '/assets/img/shop-tasse-logo.jpg' },
+      { id: 'tasse', name: 'Tasse', price: 9.90, icon: 'coffee', image: '/assets/img/shop-tasse-logo.webp' },
       { id: 'pin', name: 'Pin', price: 4.95, icon: 'tag' },
       { id: 'aufkleberbogen', name: 'Aufkleberbogen', price: 3.00, icon: 'package' },
-      { id: 'kaffee', name: 'Löwen-Kaffee, 250g', price: 9.00, icon: 'coffee', image: '/assets/img/shop-kaffee-loewen.jpg' },
+      { id: 'kaffee', name: 'Löwen-Kaffee, 250g', price: 9.00, icon: 'coffee', image: '/assets/img/shop-kaffee-loewen.webp' },
       { id: 'gutschein-10', name: 'Gutschein 10 €', price: 10.00, category: 'gutschein' },
       { id: 'gutschein-20', name: 'Gutschein 20 €', price: 20.00, category: 'gutschein' },
       { id: 'gutschein-50', name: 'Gutschein 50 €', price: 50.00, category: 'gutschein' }
@@ -161,7 +160,7 @@
     var grid = document.getElementById('fanshop-products');
     grid.innerHTML = orderedProducts.map(function (p) {
       return '<div class="card fanshop-product" style="padding:16px">' +
-        '<div class="fanshop-product-img">' + (p.image ? '<img src="' + p.image + '" alt="' + p.name + '">' : '<i data-lucide="' + p.icon + '"></i>') + '</div>' +
+        '<div class="fanshop-product-img">' + (p.image ? '<img loading="lazy" src="' + p.image + '" alt="' + p.name + '" />' : '<i data-lucide="' + p.icon + '"></i>') + '</div>' +
         '<h4>' + p.name + '</h4>' +
         '<div class="fanshop-price">' + formatMoney(p.price) + '</div>' +
         stepperHtml(p) +

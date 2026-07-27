@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Aktuelles — Basketball Löwen Erfurt</title>
 <meta name="description" content="Alle News der Basketball Löwen Erfurt." />
-<meta name="robots" content="noindex, nofollow" />
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785200000" />
 <link rel="stylesheet" href="/css/site.css?v=1785200000" />
@@ -35,11 +34,11 @@
             <div class="insta-sidebar-block" style="margin:0;padding:0;border:none">
               <h3>Löwen-YouTube-Kanal</h3>
               <div style="border-top:1px solid var(--border);margin-top:8px">
-                <a class="insta-sidebar-item" href="https://www.youtube.com/shorts/1X9RB8Xd7LI" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/1X9RB8Xd7LI/mqdefault.jpg" alt="" /><span>Musa &amp; Léonar beim SWE Basketballcamp 2026</span></a>
-                <a class="insta-sidebar-item" href="https://www.youtube.com/watch?v=SRrVEpqkHVc" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/SRrVEpqkHVc/mqdefault.jpg" alt="" /><span>Season Review Part 5 — Saison 2025/2026</span></a>
-                <a class="insta-sidebar-item" href="https://www.youtube.com/watch?v=lZa_L2_X8RE" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/lZa_L2_X8RE/mqdefault.jpg" alt="" /><span>Season Review Part 3 — Saison 2025/2026</span></a>
-                <a class="insta-sidebar-item" href="https://www.youtube.com/watch?v=fEhW6OVRlb4" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/fEhW6OVRlb4/mqdefault.jpg" alt="" /><span>Season Review Part 3 — Saison 2025/2026 (Teil 2)</span></a>
-                <a class="insta-sidebar-item" href="https://www.youtube.com/watch?v=aPYu0fQV4_Y" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/aPYu0fQV4_Y/mqdefault.jpg" alt="" /><span>Season Review Part 2 — Saison 2025/2026</span></a>
+                <a class="insta-sidebar-item" href="https://www.youtube.com/shorts/1X9RB8Xd7LI" target="_blank" rel="noopener"><img loading="lazy" src="https://i.ytimg.com/vi/1X9RB8Xd7LI/mqdefault.jpg" alt=""  /><span>Musa &amp; Léonar beim SWE Basketballcamp 2026</span></a>
+                <a class="insta-sidebar-item" href="https://www.youtube.com/watch?v=SRrVEpqkHVc" target="_blank" rel="noopener"><img loading="lazy" src="https://i.ytimg.com/vi/SRrVEpqkHVc/mqdefault.jpg" alt=""  /><span>Season Review Part 5 — Saison 2025/2026</span></a>
+                <a class="insta-sidebar-item" href="https://www.youtube.com/watch?v=lZa_L2_X8RE" target="_blank" rel="noopener"><img loading="lazy" src="https://i.ytimg.com/vi/lZa_L2_X8RE/mqdefault.jpg" alt=""  /><span>Season Review Part 3 — Saison 2025/2026</span></a>
+                <a class="insta-sidebar-item" href="https://www.youtube.com/watch?v=fEhW6OVRlb4" target="_blank" rel="noopener"><img loading="lazy" src="https://i.ytimg.com/vi/fEhW6OVRlb4/mqdefault.jpg" alt=""  /><span>Season Review Part 3 — Saison 2025/2026 (Teil 2)</span></a>
+                <a class="insta-sidebar-item" href="https://www.youtube.com/watch?v=aPYu0fQV4_Y" target="_blank" rel="noopener"><img loading="lazy" src="https://i.ytimg.com/vi/aPYu0fQV4_Y/mqdefault.jpg" alt=""  /><span>Season Review Part 2 — Saison 2025/2026</span></a>
               </div>
               <a class="card-link mt-3" href="https://www.youtube.com/channel/UCKV_um0lxsTkidR1Gaazlvw" target="_blank" rel="noopener">Zum Kanal <i data-lucide="arrow-up-right" class="icon-14"></i></a>
             </div>
@@ -101,7 +100,7 @@
     grid.innerHTML = items.map(function (a) {
       var label = a.datum ? (a.datum + ' · ' + a.kategorie) : a.kategorie;
       return '<div class="card hoverable">' +
-        '<div class="card-media-photo"><img src="' + a.bild + '" alt="" /></div>' +
+        '<div class="card-media-photo"><img loading="lazy" src="' + a.bild + '" alt=""  /></div>' +
         '<div class="card-body">' +
           '<span class="card-label">' + label + '</span>' +
           '<h3 style="font-size:18px">' + a.titel + '</h3>' +
@@ -120,7 +119,7 @@
     var container = document.getElementById(containerId);
     container.innerHTML = posts.map(function (p) {
       var url = '/news/insta-post.html?feed=' + feedKey + '&id=' + encodeURIComponent(p.id);
-      return '<a class="insta-sidebar-item" href="' + url + '"><img src="' + p.image + '" alt="" /><span>' + firstLine(p.caption, 90) + '</span></a>';
+      return '<a class="insta-sidebar-item" href="' + url + '"><img loading="lazy" src="' + p.image + '" alt=""  /><span>' + firstLine(p.caption, 90) + '</span></a>';
     }).join('');
   }
 

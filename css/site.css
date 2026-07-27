@@ -404,8 +404,8 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .kw .swoosh {
   position: absolute; left: -1%; bottom: -0.4em; width: 106%; height: .4em;
   background-color: var(--color-brand-orange);
-  -webkit-mask-image: url('/assets/icons/loewen-swoosh.png');
-  mask-image: url('/assets/icons/loewen-swoosh.png');
+  -webkit-mask-image: url('/assets/icons/loewen-swoosh.webp');
+  mask-image: url('/assets/icons/loewen-swoosh.webp');
   -webkit-mask-size: 100% 100%;
   mask-size: 100% 100%;
   -webkit-mask-repeat: no-repeat;
@@ -1084,7 +1084,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   --hero-overlay-mobile: linear-gradient(180deg, rgba(0,18,45,.92) 0%, rgba(0,18,45,.75) 45%, rgba(0,18,45,.25) 75%, rgba(0,18,45,0) 100%);
   position: sticky; top: 74px; z-index: 0;
   border-radius: 0 0 28px 28px;
-  background-image: var(--hero-overlay), var(--hero-photo-url, url('/assets/img/hero-basketball.jpg'));
+  background-image: var(--hero-overlay), var(--hero-photo-url, url('/assets/img/hero-basketball.webp'));
   background-size: cover; background-position: center;
   min-height: 480px; display: flex; align-items: center;
 }
@@ -1273,38 +1273,38 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
        in eine linke Spalte — der links-rechts-Verlauf allein reicht dann
        nicht mehr über die ganze Textzeile, daher zusätzlich ein Verlauf von
        oben (--hero-overlay-mobile), site-weit einheitlich für jede Variante. */
-    background-image: var(--hero-overlay-mobile), var(--hero-overlay), var(--hero-photo-url, url('/assets/img/hero-basketball.jpg'));
+    background-image: var(--hero-overlay-mobile), var(--hero-overlay), var(--hero-photo-url, url('/assets/img/hero-basketball.webp'));
     background-size: cover, cover, cover;
   }
   .hero-media::after { background: var(--hero-overlay-mobile), var(--hero-overlay); }
 }
 
 /* Hero-Variante für die Ticketseiten — Foto der vollen Halle */
-.hero-photo.hero-tickets { --hero-photo-url: url('/assets/img/hero-tickets-halle.jpg'); background-position: center 35%; }
+.hero-photo.hero-tickets { --hero-photo-url: url('/assets/img/hero-tickets-halle.webp'); background-position: center 35%; }
 
 /* Hero-Variante für den Fanshop — freies Stockfoto (Platzhalter, wird später gegen echtes Foto getauscht) */
-.hero-photo.hero-fanshop { --hero-photo-url: url('/assets/img/stock-fanshop.jpg'); background-position: center 60%; }
+.hero-photo.hero-fanshop { --hero-photo-url: url('/assets/img/stock-fanshop.webp'); background-position: center 60%; }
 
 /* Hero-Variante für die LÖWENPARK-Seite — echtes Baustellenfoto (Luftaufnahme
    Dach), bereits für die Meilenstein-News verwendet. */
-.hero-photo.hero-loewenpark { --hero-photo-url: url('/assets/img/news/loewenpark-dach.jpg'); background-position: center 60%; }
+.hero-photo.hero-loewenpark { --hero-photo-url: url('/assets/img/news/loewenpark-dach.webp'); background-position: center 60%; }
 
 /* Hero-Variante für die Löwen-Unterstützer-Seite — Erfurter Dom/Severikirche
    (Stockfoto, niedrige Auflösung als Platzhalter bis zum echten Lizenzkauf). */
-.hero-photo.hero-loewen-unterstuetzer { --hero-photo-url: url('/assets/img/hero-loewen-unterstuetzer.jpg'); background-position: center 55%; }
+.hero-photo.hero-loewen-unterstuetzer { --hero-photo-url: url('/assets/img/hero-loewen-unterstuetzer.webp'); background-position: center 55%; }
 
 /* Hero-Variante für die Über-uns-Seite — Kinder und Profis gemeinsam am Korb
    auf dem Petersberg, Domspitzen im Hintergrund. */
-.hero-photo.hero-ueberuns { --hero-photo-url: url('/assets/img/hero-ueberuns.jpg'); background-position: center 30%; }
+.hero-photo.hero-ueberuns { --hero-photo-url: url('/assets/img/hero-ueberuns.webp'); background-position: center 30%; }
 
 /* Hero-Variante für die Investoren-Seite — Maskottchen mit Vereinsflagge vor
    voller, jubelnder Halle ("INVESTORS" auf der Anzeigetafel). */
-.hero-photo.hero-investoren { --hero-photo-url: url('/assets/img/hero-investoren.jpg'); background-position: center 40%; }
+.hero-photo.hero-investoren { --hero-photo-url: url('/assets/img/hero-investoren.webp'); background-position: center 40%; }
 
 /* Hero-Variante für die Löwenrudel/Fanclub-Seite — Gruppenfoto mit "Ich bin
    ein Löwe"-T-Shirts vor dem Petersberg, Motiv über die ganze Breite verteilt.
    Höhe kommt jetzt vom vereinheitlichten .hero-photo-Basiswert. */
-.hero-photo.hero-loewenrudel { --hero-photo-url: url('/assets/img/hero-loewenrudel.jpg'); background-position: center 10%; }
+.hero-photo.hero-loewenrudel { --hero-photo-url: url('/assets/img/hero-loewenrudel.webp'); background-position: center 10%; }
 /* Auf schmalen Screens bricht die Überschrift auf volle Breite um (statt der
    linken Spalte bei breiten Screens) — Bildausschnitt daher etwas tiefer,
    der Verlauf selbst kommt bereits einheitlich vom .hero-photo-Basiswert. */
@@ -1315,53 +1315,53 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 /* Hero-Variante für die Ehrenamt-Seite — Team- und Helfer:innen-Gruppenfoto
    auf dem Spielfeld, Logo mittig unten im Bild. Höhe kommt vom
    vereinheitlichten .hero-photo-Basiswert. */
-.hero-photo.hero-ehrenamt { --hero-photo-url: url('/assets/img/hero-ehrenamt.jpg'); background-position: center 45%; }
+.hero-photo.hero-ehrenamt { --hero-photo-url: url('/assets/img/hero-ehrenamt.webp'); background-position: center 45%; }
 /* Überschrift ist länger als die üblichen kurzen Taglines — normal umbrechen
    und auf den geschützten (helleren) linken Bildbereich begrenzen. */
 .hero-photo.hero-ehrenamt h1 { white-space: normal; max-width: 23ch; }
 
 /* Hero-Variante für die Community-Events-Seite — gestaltete Festival-Szene
    mit Löwen-Maskottchen und "Community Stage". */
-.hero-photo.hero-community-events { --hero-photo-url: url('/assets/img/hero-community-events.jpg'); background-position: center 55%; }
+.hero-photo.hero-community-events { --hero-photo-url: url('/assets/img/hero-community-events.webp'); background-position: center 55%; }
 
 /* Hero-Variante für die Netzwerk-Treffen-Seite — Bühnenmoment beim
    Alley-Oop 2025, Basketball-Löwen/CATL-Wandlogo links, Publikum unten. */
-.hero-photo.hero-netzwerktreffen { --hero-photo-url: url('/assets/img/hero-netzwerktreffen.jpg'); background-position: center 22%; }
+.hero-photo.hero-netzwerktreffen { --hero-photo-url: url('/assets/img/hero-netzwerktreffen.webp'); background-position: center 22%; }
 
 /* Hero-Variante für die Media-Kit-Seite — gestaltete Grafik "Medienportal"
    mit Download-Icons für Pressematerial/Vereinsprofile/Fotos. */
-.hero-photo.hero-mediakit { --hero-photo-url: url('/assets/img/hero-mediakit.jpg'); background-position: center; }
+.hero-photo.hero-mediakit { --hero-photo-url: url('/assets/img/hero-mediakit.webp'); background-position: center; }
 .hero-photo.hero-mediakit h1 { white-space: normal; max-width: 28ch; }
 
 /* Hero-Variante für die Mitgliedschafts-Seiten (Übersicht + Fan-Formular) —
    feiernde Fans mit Maskottchen im Bus auf dem Weg zum Auswärtsspiel. */
-.hero-photo.hero-mitglied-werden { --hero-photo-url: url('/assets/img/hero-mitglied-werden.jpg'); background-position: center 40%; }
+.hero-photo.hero-mitglied-werden { --hero-photo-url: url('/assets/img/hero-mitglied-werden.webp'); background-position: center 40%; }
 
 /* Hero-Variante für die Newsletter-Seite. */
-.hero-photo.hero-newsletter { --hero-photo-url: url('/assets/img/hero-newsletter.jpg'); background-position: center 40%; }
+.hero-photo.hero-newsletter { --hero-photo-url: url('/assets/img/hero-newsletter.webp'); background-position: center 40%; }
 
-.hero-photo.hero-organisation { --hero-photo-url: url('/assets/img/hero-organisation.jpg'); background-position: center 30%; }
+.hero-photo.hero-organisation { --hero-photo-url: url('/assets/img/hero-organisation.webp'); background-position: center 30%; }
 
-.hero-photo.hero-jobs { --hero-photo-url: url('/assets/img/hero-jobs.jpg'); background-position: center; }
+.hero-photo.hero-jobs { --hero-photo-url: url('/assets/img/hero-jobs.webp'); background-position: center; }
 
-.hero-photo.hero-kinderschutz { --hero-photo-url: url('/assets/img/hero-kinderschutz.jpg'); background-position: center 20%; }
+.hero-photo.hero-kinderschutz { --hero-photo-url: url('/assets/img/hero-kinderschutz.webp'); background-position: center 20%; }
 
-.hero-photo.hero-baskidball { --hero-photo-url: url('/assets/img/hero-baskidball.jpg'); background-position: 70% 60%; }
+.hero-photo.hero-baskidball { --hero-photo-url: url('/assets/img/hero-baskidball.webp'); background-position: 70% 60%; }
 
 /* Hero SPORT VERNETZT — Fototermin-Gruppe steht rechts im Panoramabild,
    deshalb Bildausschnitt weit nach rechts verschoben (Gruppe bleibt auch auf
    schmalen Viewports im sichtbaren Ausschnitt statt im linken Leerraum). */
-.hero-photo.hero-sportvernetzt { --hero-photo-url: url('/assets/img/hero-sportvernetzt.jpg'); background-position: 82% 40%; }
+.hero-photo.hero-sportvernetzt { --hero-photo-url: url('/assets/img/hero-sportvernetzt.webp'); background-position: 82% 40%; }
 
-.hero-photo.hero-schulprogramm { --hero-photo-url: url('/assets/img/hero-schulprogramm.jpg'); background-position: 75% 45%; }
+.hero-photo.hero-schulprogramm { --hero-photo-url: url('/assets/img/hero-schulprogramm.webp'); background-position: 75% 45%; }
 
-.hero-photo.hero-camps { --hero-photo-url: url('/assets/img/hero-camps.jpg'); background-position: center 60%; }
+.hero-photo.hero-camps { --hero-photo-url: url('/assets/img/hero-camps.webp'); background-position: center 60%; }
 
-.hero-photo.hero-spielplan { --hero-photo-url: url('/assets/img/hero-spielplan.jpg'); background-position: 70% 40%; }
+.hero-photo.hero-spielplan { --hero-photo-url: url('/assets/img/hero-spielplan.webp'); background-position: 70% 40%; }
 
 /* Hero-Variante für die Freundeskreis-Seite — Kinder mit Maskottchen beim BasKIDball,
    Motiv sitzt rechts im Bild, deshalb Bildausschnitt nach rechts verschoben. */
-.hero-photo.hero-freundeskreis { --hero-photo-url: url('/assets/img/hero-freundeskreis.jpg'); background-position: 80% 42%; }
+.hero-photo.hero-freundeskreis { --hero-photo-url: url('/assets/img/hero-freundeskreis.webp'); background-position: 80% 42%; }
 /* Lead-Text auf dieser Seite ist kurz genug, um im Desktop-Format in eine Zeile
    zu passen (siehe Kommentar oben) — auf Mobil aber wieder normal umbrechen
    lassen, sonst läuft die feste Zeile über den Viewport-Rand hinaus und über
@@ -1381,7 +1381,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 
 /* Hero-Variante für die Sponsoren-Seite — Maskottchen klatscht mit Fans in der Kurve,
    Motiv sitzt rechts im Bild, links freie Wand für den Text. */
-.hero-photo.hero-sponsoring { --hero-photo-url: url('/assets/img/hero-sponsoring.jpg'); background-position: 68% 38%; }
+.hero-photo.hero-sponsoring { --hero-photo-url: url('/assets/img/hero-sponsoring.webp'); background-position: 68% 38%; }
 @media (max-width: 599px) {
   /* Gleiches Prinzip wie beim Freundeskreis-Hero: Bildausschnitt auf Mobil
      etwas verschoben, damit die Textbox nicht übers Maskottchen-Foto läuft. */
@@ -1394,23 +1394,22 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 }
 
 /* Hero-Variante für die Profi-Team-Seite — echtes Mannschaftsfoto */
-.hero-photo.hero-profis { --hero-photo-url: url('/assets/img/team-prob.jpg'); background-position: center 20%; }
-.hero-photo.hero-damen { --hero-photo-url: url('/assets/img/team-damen.jpg'); background-position: center 20%; }
-.hero-photo.hero-u19 { --hero-photo-url: url('/assets/img/team-nbbl.jpg'); background-position: center 20%; }
+.hero-photo.hero-profis { --hero-photo-url: url('/assets/img/team-prob.webp'); background-position: center 20%; }
+.hero-photo.hero-damen { --hero-photo-url: url('/assets/img/team-damen.webp'); background-position: center 20%; }
+.hero-photo.hero-u19 { --hero-photo-url: url('/assets/img/team-nbbl.webp'); background-position: center 20%; }
 
 /* Hero-Varianten für einzelne News-Artikel mit echtem Pressefoto */
-.hero-photo.hero-news-saisonstart-2025 { --hero-photo-url: url('/assets/img/news/saisonstart-2025.jpg'); background-position: center 30%; }
-.hero-photo.hero-news-mitchell-abgang { --hero-photo-url: url('/assets/img/news/mitchell-abgang.jpg'); background-position: center 25%; }
-.hero-photo.hero-news-loewenpark-dach { --hero-photo-url: url('/assets/img/news/loewenpark-dach.jpg'); background-position: center 55%; }
-.hero-photo.hero-news-swe-sommercamp { --hero-photo-url: url('/assets/img/news/swe-sommercamp.jpg'); background-position: center 40%; }
-.hero-photo.hero-news-damen-regionalliga { --hero-photo-url: url('/assets/img/news/damen-regionalliga.jpg'); background-position: center 25%; }
-.hero-photo.hero-news-achtelfinale { --hero-photo-url: url('/assets/img/news/achtelfinale.jpg'); background-position: center 35%; }
-.hero-photo.hero-news-playoff-heimspiel { --hero-photo-url: url('/assets/img/news/playoff-heimspiel.jpg'); background-position: center 35%; }
-.hero-photo.hero-news-raumtextilienshop { --hero-photo-url: url('/assets/img/news/raumtextilienshop.jpg'); background-position: center 50%; }
+.hero-photo.hero-news-saisonstart-2025 { --hero-photo-url: url('/assets/img/news/saisonstart-2025.webp'); background-position: center 30%; }
+.hero-photo.hero-news-mitchell-abgang { --hero-photo-url: url('/assets/img/news/mitchell-abgang.webp'); background-position: center 25%; }
+.hero-photo.hero-news-loewenpark-dach { --hero-photo-url: url('/assets/img/news/loewenpark-dach.webp'); background-position: center 55%; }
+.hero-photo.hero-news-swe-sommercamp { --hero-photo-url: url('/assets/img/news/swe-sommercamp.webp'); background-position: center 40%; }
+.hero-photo.hero-news-damen-regionalliga { --hero-photo-url: url('/assets/img/news/damen-regionalliga.webp'); background-position: center 25%; }
+.hero-photo.hero-news-achtelfinale { --hero-photo-url: url('/assets/img/news/achtelfinale.webp'); background-position: center 35%; }
+.hero-photo.hero-news-playoff-heimspiel { --hero-photo-url: url('/assets/img/news/playoff-heimspiel.webp'); background-position: center 35%; }
 
 /* Hero-Variante für die Startseite — Platz für eine Seiten-Box (Top-News/Heimspiel).
    Höhe kommt vom vereinheitlichten .hero-photo-Basiswert, hier nur noch Layout/Typo. */
-.hero-photo.hero-lg { --hero-photo-url: url('/assets/img/hero-startseite-alt.jpg'); background-position: center 20%; }
+.hero-photo.hero-lg { --hero-photo-url: url('/assets/img/hero-startseite-alt.webp'); background-position: center 20%; }
 .hero-photo.hero-lg .container { padding-top: 56px; padding-bottom: 56px; }
 .hero-lg-grid { display: grid; grid-template-columns: 1.3fr .8fr; gap: 40px; align-items: center; }
 .hero-photo.hero-lg h1 { white-space: normal; font-size: clamp(32px, 5vw, 60px); }

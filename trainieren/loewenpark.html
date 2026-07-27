@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>LÖWENPARK — Basketball Löwen Erfurt</title>
 <meta name="description" content="Der LÖWENPARK: neuer Trainingsstandort für den Basketball-Nachwuchs, Programm, Baufortschritt, Zeiten anfragen und die ganze Geschichte der Halle am Südpark." />
-<meta name="robots" content="noindex, nofollow" />
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785200000" />
 <link rel="stylesheet" href="/css/site.css?v=1785200000" />
@@ -93,37 +92,37 @@
           <div class="grid-3">
             <a class="partner-tile partner-tile-weitere" style="height:120px" href="https://eest.foundation/" target="_blank" rel="noopener">
               <div class="partner-tile-inner">
-                <div class="partner-tile-front"><img src="/assets/logos/Logo_EEST-Foundation.png" alt="E.E.S.T. Foundation" /></div>
+                <div class="partner-tile-front"><img loading="lazy" src="/assets/logos/Logo_EEST-Foundation.webp" alt="E.E.S.T. Foundation"  /></div>
                 <div class="partner-tile-back"><span class="partner-desc">Gemeinnützige Stiftung aus Erfurt mit den Schwerpunkten Bildung, Umwelt, Sport und Toleranz.</span></div>
               </div>
             </a>
             <a class="partner-tile partner-tile-weitere" style="height:120px" href="https://www.juston.com/" target="_blank" rel="noopener">
               <div class="partner-tile-inner">
-                <div class="partner-tile-front"><img src="/assets/logos/Logo_JustOn.png" alt="JustOn GmbH" /></div>
+                <div class="partner-tile-front"><img loading="lazy" src="/assets/logos/Logo_JustOn.webp" alt="JustOn GmbH"  /></div>
                 <div class="partner-tile-back"><span class="partner-desc">Software für automatisierte Rechnungsstellung in Salesforce, aus Jena.</span></div>
               </div>
             </a>
             <a class="partner-tile partner-tile-weitere" style="height:120px" href="https://www.leg-thueringen.de/" target="_blank" rel="noopener">
               <div class="partner-tile-inner">
-                <div class="partner-tile-front"><img src="/assets/logos/Logo_LEG-Thueringen.svg" alt="LEG Thüringen" /></div>
+                <div class="partner-tile-front"><img loading="lazy" src="/assets/logos/Logo_LEG-Thueringen.svg" alt="LEG Thüringen"  /></div>
                 <div class="partner-tile-back"><span class="partner-desc">Landesentwicklungsgesellschaft Thüringen mbH — Wirtschaftsförderung, Fachkräfte, Immobilien.</span></div>
               </div>
             </a>
             <a class="partner-tile partner-tile-weitere" style="height:120px" href="http://crestcomleadership.com/de/agent/fuehrungsschule-thueringen/" target="_blank" rel="noopener">
               <div class="partner-tile-inner">
-                <div class="partner-tile-front"><img src="/assets/logos/Logo_Crestcom.svg" alt="Crestcom" /></div>
+                <div class="partner-tile-front"><img loading="lazy" src="/assets/logos/Logo_Crestcom.svg" alt="Crestcom"  /></div>
                 <div class="partner-tile-back"><span class="partner-desc">Internationales Trainingsunternehmen für Führungskräfteentwicklung, in Erfurt vor Ort vertreten.</span></div>
               </div>
             </a>
             <a class="partner-tile partner-tile-weitere" style="height:120px" href="https://www.hks-architekten.de/" target="_blank" rel="noopener">
               <div class="partner-tile-inner">
-                <div class="partner-tile-front"><img src="/assets/logos/Logo_HKS-Architekten.png" alt="HKS Architekten" /></div>
+                <div class="partner-tile-front"><img loading="lazy" src="/assets/logos/Logo_HKS-Architekten.webp" alt="HKS Architekten"  /></div>
                 <div class="partner-tile-back"><span class="partner-desc">Erfurter Architekturbüro (BDA).</span></div>
               </div>
             </a>
             <a class="partner-tile partner-tile-weitere" style="height:120px" href="https://www.fes-bahntechnik.de/" target="_blank" rel="noopener">
               <div class="partner-tile-inner">
-                <div class="partner-tile-front"><img src="/assets/logos/Logo_FES-Bahntechnik.svg" alt="FES Bahntechnik GmbH & Co. KG" /></div>
+                <div class="partner-tile-front"><img loading="lazy" src="/assets/logos/Logo_FES-Bahntechnik.svg" alt="FES Bahntechnik GmbH & Co. KG"  /></div>
                 <div class="partner-tile-back"><span class="partner-desc">Familienunternehmen für Eisenbahntechnik aus Amt Wachsenburg, seit drei Generationen.</span></div>
               </div>
             </a>
@@ -248,7 +247,7 @@
         var line = (p.caption || '').split('\n')[0].trim();
         if (line.length > 90) line = line.slice(0, 89).trim() + '…';
         var url = '/news/insta-post.html?feed=loewenpark&id=' + encodeURIComponent(p.id);
-        return '<a class="insta-sidebar-item" href="' + url + '"><img src="' + p.image + '" alt="" /><span>' + line + '</span></a>';
+        return '<a class="insta-sidebar-item" href="' + url + '"><img loading="lazy" src="' + p.image + '" alt=""  /><span>' + line + '</span></a>';
       }).join('');
       if (window.lucide) { lucide.createIcons(); }
     })
