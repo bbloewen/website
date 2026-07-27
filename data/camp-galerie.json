@@ -1,4 +1,32 @@
 {
   "hinweis": "Fotos von Basketballcamps. Jeder Eintrag braucht 'src' (Bildpfad), 'alt' (Bildbeschreibung) und optional 'camp' (Slug, z.B. 'sommercamp-2026' — steuert, welche Rückblick-Seite das Foto zeigt). Auf trainieren/camps.html werden alle Fotos gezeigt (max. 50), in Rückblick-Artikeln nur die mit passendem 'camp'-Slug.",
-  "bilder": []
+  "bilder": [
+    { "src": "/assets/img/camps/impressionen-01.jpg", "alt": "Drei Teilnehmerinnen beim SWE Sommercamp 2026", "camp": "sommercamp-2026" },
+    { "src": "/assets/img/camps/impressionen-02.jpg", "alt": "Gruppe beim SWE Sommercamp 2026", "camp": "sommercamp-2026" },
+    { "src": "/assets/img/camps/impressionen-03.jpg", "alt": "Teilnehmer beim Dehnen vor dem Training", "camp": "sommercamp-2026" },
+    { "src": "/assets/img/camps/impressionen-04.jpg", "alt": "Profispieler im Gespräch mit Teilnehmenden", "camp": "sommercamp-2026" },
+    { "src": "/assets/img/camps/impressionen-05.jpg", "alt": "Profispieler und Teilnehmer beim SWE Sommercamp 2026", "camp": "sommercamp-2026" },
+    { "src": "/assets/img/camps/impressionen-06.jpg", "alt": "Dunking beim SWE Sommercamp 2026", "camp": "sommercamp-2026" },
+    { "src": "/assets/img/camps/impressionen-07.jpg", "alt": "Wurf beim SWE Sommercamp 2026", "camp": "sommercamp-2026" },
+    { "src": "/assets/img/camps/impressionen-08.jpg", "alt": "Dribbling-Übung in der Gruppe", "camp": "sommercamp-2026" },
+    { "src": "/assets/img/camps/impressionen-09.jpg", "alt": "Meet & Greet mit den Profis", "camp": "sommercamp-2026" },
+    { "src": "/assets/img/camps/impressionen-10.jpg", "alt": "Teamfoto beim Basketballcamp", "camp": "sommercamp-2026" },
+    { "src": "/assets/img/camps/impressionen-11.jpg", "alt": "Jubel in der Gruppe beim Basketballcamp", "camp": "sommercamp-2026" },
+    { "src": "/assets/img/camps/impressionen-12.jpg", "alt": "Plank-Übung in der Reihe", "camp": "sommercamp-2026" },
+    { "src": "/assets/img/camps/impressionen-13.jpg", "alt": "Teilnehmer mit Basketball", "camp": "sommercamp-2026" },
+    { "src": "/assets/img/camps/impressionen-14.jpg", "alt": "Spielszene beim Basketballcamp", "camp": "sommercamp-2026" },
+    { "src": "/assets/img/camps/impressionen-15.jpg", "alt": "Korbleger im portablen Korb", "camp": "sommercamp-2026" },
+    { "src": "/assets/img/camps/impressionen-16.jpg", "alt": "Gruppenübung im Kreis", "camp": "sommercamp-2026" },
+    { "src": "/assets/img/camps/impressionen-17.jpg", "alt": "Teamfoto mit Trainer:innen", "camp": "sommercamp-2026" },
+    { "src": "/assets/img/camps/impressionen-18.jpg", "alt": "Teilnehmerin beim QUNDIS Girlscamp 2026", "camp": "girlscamp-2026" },
+    { "src": "/assets/img/camps/impressionen-19.jpg", "alt": "Teilnehmerinnen mit Basketball beim QUNDIS Girlscamp 2026", "camp": "girlscamp-2026" },
+    { "src": "/assets/img/camps/impressionen-20.jpg", "alt": "Teilnehmerin beim QUNDIS Girlscamp 2026", "camp": "girlscamp-2026" },
+    { "src": "/assets/img/camps/impressionen-21.jpg", "alt": "Teilnehmerinnen sitzen zusammen beim QUNDIS Girlscamp 2026", "camp": "girlscamp-2026" },
+    { "src": "/assets/img/camps/impressionen-22.jpg", "alt": "Trikot-Unterschrift beim QUNDIS Girlscamp 2026", "camp": "girlscamp-2026" },
+    { "src": "/assets/img/camps/impressionen-23.jpg", "alt": "Gruppenfoto beim QUNDIS Girlscamp 2026", "camp": "girlscamp-2026" },
+    { "src": "/assets/img/camps/impressionen-24.jpg", "alt": "Teilnehmerin beim QUNDIS Girlscamp 2026", "camp": "girlscamp-2026" },
+    { "src": "/assets/img/camps/impressionen-25.jpg", "alt": "Teilnehmerinnen sitzen mit Ball beim QUNDIS Girlscamp 2026", "camp": "girlscamp-2026" },
+    { "src": "/assets/img/camps/impressionen-26.jpg", "alt": "Werksführung beim QUNDIS Girlscamp 2026", "camp": "girlscamp-2026" },
+    { "src": "/assets/img/camps/impressionen-27.jpg", "alt": "Teilnehmerin beim Löten während der Werksführung", "camp": "girlscamp-2026" }
+  ]
 }
