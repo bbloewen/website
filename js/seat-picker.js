@@ -195,21 +195,11 @@
       var category = group.category;
       var priceInfo = self.prices[category] || { normal: 0 };
 
-      // VIP-Label wird im Block selbst nicht wiederholt — die Farbe steht schon in der
-      // Legende im Spielfeld-Bereich; Kategorie I/II bleibt beschriftet, u. a. damit
-      // Blöcke wie A/C, wo sich die Kategorie gar nicht ändert, denselben Lücken-Abstand
-      // UND dieselbe Beschriftung wie Block B bekommen (rein optischer section_break).
-      if (category !== 'VIP') {
-        var catEl = document.createElement('div');
-        catEl.className = 'seatplan-block-cat';
-        if (gIdx > 0) catEl.style.marginTop = '10px';
-        catEl.textContent = category;
-        wrap.appendChild(catEl);
-      } else if (gIdx > 0) {
-        var spacer = document.createElement('div');
-        spacer.style.marginTop = '10px';
-        wrap.appendChild(spacer);
-      }
+      var catEl = document.createElement('div');
+      catEl.className = 'seatplan-block-cat';
+      if (gIdx > 0) catEl.style.marginTop = '10px';
+      catEl.textContent = category;
+      wrap.appendChild(catEl);
 
       // Jede Reihe ist eine eigene, zentrierte Flex-Zeile (nicht ein einziges CSS-Grid für
       // den ganzen Block) — reale Reihen sind unterschiedlich breit (siehe echter Saalplan),
@@ -220,6 +210,14 @@
       gridWrap.className = 'seatplan-grid-wrap';
       // +2×(14px Reihennummer + 2px Abstand) für die Labels links/rechts jeder Reihe.
       gridWrap.style.width = (cols * 10 - 2 + 2 * 16) + 'px';
+
+      // Block B: die VIP-Gruppe (Reihen 1-5) ist schmaler als die Kategorie-I-Gruppe
+      // darunter und wird separat zentriert — dadurch ragt ihr rechter Rand über den
+      // von Reihe 6 hinaus. Um beide Ränder rechtsbündig anzugleichen, die VIP-Gruppe
+      // insgesamt nach links verschieben (Wert per Bounding-Box-Messung ermittelt).
+      if (zone.zone_id === 'B' && category === 'VIP') {
+        gridWrap.style.transform = 'translateX(-18px)';
+      }
 
       // Reihe 3 (19 Plätze) ist im Original schmaler als Reihe 12/1 (Blockbreite = cols),
       // liegt aber selbst zentriert im Block — d. h. ihr Rand hat bereits einen eigenen
@@ -240,10 +238,10 @@
         // anderen Reihen zu zentrieren, exakt an Reihe 3s Rand ausrichten.
         if ((zone.zone_id === 'A' || zone.zone_id === 'B') && (row.row_number === '4' || row.row_number === '5')) {
           rowEl.style.alignSelf = 'flex-end';
-          rowEl.style.marginRight = row3Gap + 'px';
+          rowEl.style.marginRight = (row3Gap - 2) + 'px';
         } else if (zone.zone_id === 'C' && (row.row_number === '4' || row.row_number === '5')) {
           rowEl.style.alignSelf = 'flex-start';
-          rowEl.style.marginLeft = row3Gap + 'px';
+          rowEl.style.marginLeft = (row3Gap - 2) + 'px';
         }
         // Reihennummer links UND rechts an der Reihe, wie im Original-Saalplan.
         var rowNumLeft = document.createElement('span');

@@ -1844,7 +1844,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 }
 /* Große Modal-Variante — z.B. Blockplan-Popup, so groß wie es der Bildschirm zulässt */
 .modal-box-blockplan {
-  max-width: min(95vw, 1100px); width: 100%; height: min(90vh, 900px);
+  max-width: min(95vw, 1100px); width: 100%; max-height: min(90vh, 900px);
   display: flex; flex-direction: column; text-align: left; padding: 24px;
 }
 
