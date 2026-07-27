@@ -873,7 +873,11 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 /* Rückblick-Sektion Camps-Seite: Artikel + 4er-Foto-Grid in einer gemeinsamen
    Card, Fotos exakt so hoch wie der Artikeltext (align-items:stretch) statt
    mit eigener Mindesthöhe. Klick auf ein Foto öffnet die Lightbox. */
-.recap-split { display: grid; grid-template-columns: 1fr 1fr; align-items: stretch; }
+/* align-items:start (nicht stretch) ist hier wichtig: sonst zieht das
+   Foto-Grid (intrinsisch hoch durch die Bild-Seitenverhältnisse) die
+   Artikel-Spalte mit hoch, bevor das Sync-Script unten die echte
+   Text-Höhe auslesen kann. */
+.recap-split { display: grid; grid-template-columns: 1fr 1fr; align-items: start; }
 .recap-photo-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 4px; }
 .recap-photo-placeholder {
   background: var(--color-neutral-100); color: var(--color-neutral-400);
