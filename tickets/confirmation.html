@@ -85,6 +85,7 @@
           <p class="t-caption" style="color:var(--text-muted);margin-bottom:14px" id="confirmation-event-label"></p>
           <div id="confirmation-lines"></div>
           <div class="seatplan-cart-total"><span>Gesamt</span><span><span id="confirmation-lines-total">0,00 €</span> <span id="confirmation-vat-note" style="font-weight:400;font-size:12px;color:var(--text-muted);display:none"></span></span></div>
+          <p class="t-caption hidden" id="confirmation-notiz" style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--border);color:var(--text-muted)"></p>
         </div>
 
         <div class="card" style="padding:20px 24px;margin-top:20px">
@@ -124,22 +125,28 @@
     var buyer = order.buyer || {};
 
     var isFanshop = cart.productType === 'fanshop';
+    var isDauerkarte = cart.productType === 'dauerkarte';
 
     function formatMoney(n) { return n.toFixed(2).replace('.', ',') + ' €'; }
 
     document.getElementById('confirmation-order-number').textContent = order.orderNumber;
+    document.querySelector('#confirmation-order-number').previousElementSibling.textContent = isDauerkarte ? 'Referenz' : 'Bestellnummer';
     document.getElementById('confirmation-total').textContent = formatMoney(cart.total);
     document.getElementById('confirmation-method').textContent = order.paymentMethod === 'sepa' ? 'SEPA-Lastschrift' : 'PayPal';
     document.getElementById('confirmation-event-label').textContent = cart.eventLabel;
 
     var fulfillmentNote = isFanshop
       ? 'Wir bereiten deine Bestellung vor und schicken sie dir in den nächsten Tagen an deine Adresse.'
-      : 'Wir haben deine Bestellung erhalten und schicken dir deine Tickets in Kürze per E-Mail.';
+      : isDauerkarte
+        ? 'Wir haben deine Dauerkarten-Bestellung erhalten und legen sie jetzt für dich an.'
+        : 'Wir haben deine Bestellung erhalten und schicken dir deine Tickets in Kürze per E-Mail.';
     document.getElementById('confirmation-lead').textContent = buyer.vorname ? ('Danke, ' + buyer.vorname + '! ' + fulfillmentNote) : ('Vielen Dank! ' + fulfillmentNote);
 
     document.getElementById('confirmation-fulfillment-text').innerHTML = isFanshop
       ? 'Wir bearbeiten deine Bestellung, sobald die Zahlung bestätigt ist, und schicken dir eine Versandbestätigung an <strong id="confirmation-email-2"></strong>.'
-      : 'Deine Tickets als QR-Code gehen an <strong id="confirmation-email-2"></strong>, sobald die Zahlung bestätigt ist.';
+      : isDauerkarte
+        ? 'Du bekommst von uns eine E-Mail mit den Lastschrift-Details und deiner Dauerkarte an <strong id="confirmation-email-2"></strong>, sobald alles bereit ist.'
+        : 'Deine Tickets als QR-Code gehen an <strong id="confirmation-email-2"></strong>, sobald die Zahlung bestätigt ist.';
     document.getElementById('confirmation-email-2').textContent = buyer.email || 'deiner E-Mail-Adresse';
     document.querySelector('#confirmation-fulfillment-icon i').setAttribute('data-lucide', isFanshop ? 'package' : 'mail');
     if (window.lucide) window.lucide.createIcons();
@@ -155,6 +162,12 @@
     var confirmationVatNoteEl = document.getElementById('confirmation-vat-note');
     confirmationVatNoteEl.textContent = cart.vatNote || '';
     confirmationVatNoteEl.style.display = cart.vatNote ? '' : 'none';
+
+    var confirmationNotizEl = document.getElementById('confirmation-notiz');
+    if (buyer.notiz) {
+      confirmationNotizEl.textContent = 'Notiz zur Bestellung: ' + buyer.notiz;
+      confirmationNotizEl.classList.remove('hidden');
+    }
 
     sessionStorage.removeItem('bl_cart');
     sessionStorage.removeItem('bl_buyer');

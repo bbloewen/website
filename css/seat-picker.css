@@ -80,11 +80,17 @@
 .buy-cart-col { display: flex; flex-direction: column; }
 .buy-cart-col #seatplan-cart { flex: 1; }
 .buy-thumb-btn {
-  display: block; width: 100%; padding: 0; border: 1px solid var(--border);
+  display: block; width: 100%; height: 100%; padding: 0; border: 1px solid var(--border);
   border-radius: var(--radius-md); background: none; cursor: pointer; position: relative;
   overflow: hidden;
 }
-.buy-thumb-btn img { width: 100%; display: block; }
+.buy-thumb-btn img { width: 100%; height: 100%; display: block; object-fit: cover; object-position: center; }
+
+/* Referenzbild des echten Saalplans oben im Blockplan-Popup — zeigt die reale
+   Halle (Querformat), die eigentliche Block-/Tarifwahl bleibt darunter. */
+.realplan-ref { margin-bottom: 16px; }
+.realplan-ref img { width: 100%; display: block; border-radius: var(--radius-md); border: 1px solid var(--border); }
+.realplan-ref p { margin-top: 8px; }
 .buy-thumb-cta {
   position: absolute; left: 0; right: 0; bottom: 0;
   background: linear-gradient(0deg, rgba(0,18,45,.82), rgba(0,18,45,0));
@@ -176,6 +182,14 @@
   display: flex; justify-content: space-between; font-weight: 700; font-size: 15px;
   margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--color-neutral-100);
 }
+.seatplan-notiz-row { padding: 12px 0; border-top: 1px dashed var(--color-neutral-200); }
+.seatplan-notiz-row label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+.seatplan-notiz-row textarea {
+  width: 100%; font-size: 13px; font-family: inherit; padding: 8px 10px; resize: vertical;
+  border: 1px solid var(--color-neutral-200); border-radius: var(--radius-md);
+}
+.seatplan-notiz-row textarea::placeholder { color: var(--text-muted); opacity: .7; }
+.seatplan-notiz-row textarea:focus { outline: 2px solid var(--color-brand-blue); outline-offset: 1px; }
 
 @media (max-width: 720px) {
   .seatplan-row { grid-template-columns: 1fr; }

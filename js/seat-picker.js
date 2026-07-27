@@ -45,6 +45,7 @@
     this.voucherCode = null;
     this.voucherInfo = null;
     this.voucherError = null;
+    this.notiz = '';
     this._load();
   }
 
@@ -367,6 +368,23 @@
     }
   };
 
+  /* Notiz zur Bestellung — direkt im Warenkorb auf der Detailseite eingebbar
+     (nicht erst auf der Käuferdaten-Seite), wird beim Übergang zum Warenkorb
+     mitgegeben und dort im Notiz-Feld vorausgefüllt. Gemeinsam für "seats"-
+     und "blocks"-Modus, wie Nachwuchsbeitrag und Gutschein. */
+  SeatPicker.prototype._appendNotizRow = function () {
+    var self = this;
+    var wrap = document.createElement('div');
+    wrap.className = 'seatplan-notiz-row';
+    wrap.innerHTML =
+      '<label for="seatplan-notiz-input">Notiz zur Bestellung (optional)</label>' +
+      '<textarea id="seatplan-notiz-input" rows="2" placeholder="z. B. Schulklasse 3c, Grundschule Gispersleben"></textarea>';
+    this.cartEl.appendChild(wrap);
+    var textarea = wrap.querySelector('textarea');
+    textarea.value = this.notiz;
+    textarea.addEventListener('input', function () { self.notiz = this.value; });
+  };
+
   SeatPicker.prototype._renderCart = function () {
     if (this.mode === 'blocks') { this._renderCartBlocks(); return; }
 
@@ -397,6 +415,7 @@
 
       this._appendNachwuchsRow();
       this._appendVoucherRow();
+      this._appendNotizRow();
       this.ctaEl.disabled = false;
 
       this.cartEl.querySelectorAll('[data-tarif]').forEach(function (sel) {
@@ -459,6 +478,7 @@
 
       this._appendNachwuchsRow();
       this._appendVoucherRow();
+      this._appendNotizRow();
       this.ctaEl.disabled = false;
 
       this.cartEl.querySelectorAll('[data-block-tarif-select]').forEach(function (sel) {
@@ -572,7 +592,8 @@
       lines: lines,
       total: total,
       nachwuchsBeitrag: { checked: this.nachwuchsChecked, amount: nachwuchsAmount },
-      voucher: discount > 0 ? { code: this.voucherCode, label: this.voucherInfo.label, amount: discount } : null
+      voucher: discount > 0 ? { code: this.voucherCode, label: this.voucherInfo.label, amount: discount } : null,
+      notiz: this.notiz || ''
     };
   };
 

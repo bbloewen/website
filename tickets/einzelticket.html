@@ -46,7 +46,7 @@
           </div>
           <div class="buy-thumb-col">
             <button type="button" class="buy-thumb-btn" id="seatplan-modal-trigger" aria-label="Blockwahl öffnen">
-              <img loading="lazy" src="/assets/img/riethsporthalle-blockplan.webp" alt="Blockplan der Riethsporthalle mit Blöcken A–F, Kategorien und Spielfeld"  />
+              <img loading="lazy" src="/assets/img/riethsporthalle-saalplan-real-thumb.webp" alt="Offizieller Saalplan der Riethsporthalle mit allen Blöcken, Reihen und Kategorien"  />
               <span class="buy-thumb-cta"><i data-lucide="expand" class="icon-16"></i> Block wählen</span>
             </button>
           </div>
@@ -67,6 +67,10 @@
           <button class="modal-close" aria-label="Schließen" id="seatplan-modal-close"><i data-lucide="x"></i></button>
           <h3 class="t-h4 mb-3">Block wählen</h3>
           <div style="flex:1;min-height:0;overflow-y:auto">
+            <div class="realplan-ref">
+              <img loading="lazy" src="/assets/img/riethsporthalle-saalplan-real.webp" alt="Offizieller Saalplan der Riethsporthalle mit allen Blöcken, Reihen, Kategorien und VIP-Bereichen" />
+              <p class="t-caption" style="color:var(--text-muted)">Offizieller Saalplan zur Orientierung — deine Auswahl unten zeigt Kategorien und Verfügbarkeit.</p>
+            </div>
             <div id="seatplan-root"></div>
           </div>
           <button class="btn btn-primary btn-sm" id="seatplan-modal-confirm" style="margin-top:16px;width:100%;justify-content:center">Übernehmen</button>
@@ -164,7 +168,8 @@
         eventLabel: 'Basketball Löwen Erfurt – Porsche BBA Ludwigsburg, 11. Oktober 2026',
         lines: summary.lines,
         total: summary.total,
-        voucher: summary.voucher
+        voucher: summary.voucher,
+        notiz: summary.notiz
       }));
       window.location.href = '/tickets/checkout.html';
     }

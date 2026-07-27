@@ -204,6 +204,7 @@
     }
     document.getElementById('checkout-content').style.display = 'grid';
     document.getElementById('checkout-event-label').textContent = cart.eventLabel;
+    if (cart.notiz) document.getElementById('cf-notiz').value = cart.notiz;
 
     /* Gutschein-Codes sind noch nicht an pretix angebunden — feste Testcodes,
        damit sich der Ablauf (einlösen, Rabattzeile, entfernen) schon jetzt echt

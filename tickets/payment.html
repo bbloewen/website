@@ -175,7 +175,11 @@
     document.getElementById('pay-btn').textContent = 'Jetzt ' + cart.total.toFixed(2).replace('.', ',') + ' € bezahlen';
 
     if (cart.productType === 'dauerkarte') {
+      document.getElementById('pm-paypal').style.display = 'none';
       document.getElementById('pm-sepa').style.display = 'flex';
+      document.getElementById('pm-sepa-caption').textContent = 'Einzige Zahlart für die Dauerkarte.';
+      document.querySelector('input[value="sepa"]').checked = true;
+      document.getElementById('sepa-fields').style.display = 'block';
     }
 
     /* Löwen-Club der 100-Pakete: ausschließlich SEPA-Lastschrift, kein PayPal —
@@ -198,9 +202,10 @@
     document.getElementById('payment-form').addEventListener('submit', function (e) {
       e.preventDefault();
       var method = document.querySelector('input[name="paymethod"]:checked').value;
+      var kontoinhaber = '', iban = '';
       if (method === 'sepa') {
-        var kontoinhaber = document.getElementById('pf-kontoinhaber').value.trim();
-        var iban = document.getElementById('pf-iban').value.trim();
+        kontoinhaber = document.getElementById('pf-kontoinhaber').value.trim();
+        iban = document.getElementById('pf-iban').value.trim();
         var mandat = document.getElementById('pf-sepa-mandat').checked;
         if (!kontoinhaber || !iban || !mandat) {
           alert('Bitte Kontoinhaber, IBAN und das SEPA-Mandat ausfüllen.');
@@ -211,6 +216,34 @@
       var raw = sessionStorage.getItem('bl_buyer');
       var buyer = null;
       try { buyer = raw ? JSON.parse(raw) : null; } catch (e2) {}
+
+      /* Dauerkarte läuft asynchron über n8n: Bestellung landet zuerst in einer
+         Data Table, die eigentliche pretix-Buchung folgt als Folgeschritt.
+         Deshalb hier kein lokal erzeugter Fake-Bestellcode, sondern die vom
+         Workflow zurückgegebene Mandatsreferenz. */
+      if (cart.productType === 'dauerkarte') {
+        var payBtn = document.getElementById('pay-btn');
+        var originalBtnText = payBtn.textContent;
+        payBtn.disabled = true;
+        payBtn.textContent = 'Wird gesendet …';
+        fetch('https://blev.app.n8n.cloud/webhook/dauerkarte-bestellung', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ buyer: buyer, cart: cart, sepa: { kontoinhaber: kontoinhaber, iban: iban } })
+        }).then(function (res) {
+          if (!res.ok) throw new Error('Webhook antwortete mit Fehler');
+          return res.json();
+        }).then(function (data) {
+          var order = { orderNumber: data.reference || '', cart: cart, buyer: buyer, paymentMethod: method };
+          sessionStorage.setItem('bl_order', JSON.stringify(order));
+          window.location.href = '/tickets/confirmation.html';
+        }).catch(function () {
+          payBtn.disabled = false;
+          payBtn.textContent = originalBtnText;
+          alert('Deine Bestellung konnte nicht gesendet werden. Bitte versuche es gleich noch einmal oder schreib uns direkt an info@basketball-loewen.com.');
+        });
+        return;
+      }
 
       var order = {
         orderNumber: 'BL' + Math.floor(100000 + Math.random() * 900000),

@@ -37,12 +37,12 @@
           <div class="buy-prices-col">
             <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:12px;flex-wrap:wrap">
               <h3 class="t-h4" style="margin-bottom:0">Preise</h3>
-              <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;margin-left:auto">
+              <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start;margin-left:auto">
                 <button type="button" class="badge badge-orange" id="dk-member-badge" style="border:none;cursor:pointer;font-family:inherit">
-                  <i data-lucide="percent" class="icon-12"></i> -30 % Vereinsmitglieder
+                  -30 % Vereinsmitglieder
                 </button>
                 <button type="button" class="badge badge-orange" id="dk-discount-badge" style="border:none;cursor:pointer;font-family:inherit">
-                  <i data-lucide="percent" class="icon-12"></i> -20 % Frühbucher bis 31.08.
+                  -20 % Frühbucher bis 31.08.
                 </button>
               </div>
             </div>
@@ -55,7 +55,7 @@
           </div>
           <div class="buy-thumb-col">
             <button type="button" class="buy-thumb-btn" id="seatplan-modal-trigger" aria-label="Sitzplatzwahl öffnen">
-              <img loading="lazy" src="/assets/img/riethsporthalle-blockplan.webp" alt="Blockplan der Riethsporthalle mit Blöcken A–F, Kategorien und Spielfeld"  />
+              <img loading="lazy" src="/assets/img/riethsporthalle-saalplan-real-thumb.webp" alt="Offizieller Saalplan der Riethsporthalle mit allen Blöcken, Reihen und Kategorien"  />
               <span class="buy-thumb-cta"><i data-lucide="expand" class="icon-16"></i> Sitzplatz wählen</span>
             </button>
           </div>
@@ -76,6 +76,10 @@
           <button class="modal-close" aria-label="Schließen" id="seatplan-modal-close"><i data-lucide="x"></i></button>
           <h3 class="t-h4 mb-3">Sitzplatz wählen</h3>
           <div style="flex:1;min-height:0;overflow-y:auto">
+            <div class="realplan-ref">
+              <img loading="lazy" src="/assets/img/riethsporthalle-saalplan-real.webp" alt="Offizieller Saalplan der Riethsporthalle mit allen Blöcken, Reihen, Kategorien und VIP-Bereichen" />
+              <p class="t-caption" style="color:var(--text-muted)">Offizieller Saalplan zur Orientierung — deine Auswahl unten zeigt Kategorien und Verfügbarkeit.</p>
+            </div>
             <div id="seatplan-root"></div>
           </div>
           <button class="btn btn-primary btn-sm" id="seatplan-modal-confirm" style="margin-top:16px;width:100%;justify-content:center">Übernehmen</button>
@@ -105,26 +109,23 @@
         </div>
       </div>
 
-      <div class="card" style="margin-top:32px;padding:20px 24px">
-        <h3 class="t-h4 mb-3">Deine Dauerkarte</h3>
-        <div class="grid-3">
-          <div style="display:flex;gap:10px;align-items:flex-start">
-            <i data-lucide="armchair" class="icon-18" style="color:var(--color-brand-orange);flex-shrink:0;margin-top:2px"></i>
-            <p class="t-body-sm">Dein Sitzplatz gilt für die komplette Hin- und Rückrunde der Saison, außer Playoffs.</p>
-          </div>
-          <div style="display:flex;gap:10px;align-items:flex-start">
-            <i data-lucide="smartphone" class="icon-18" style="color:var(--color-brand-orange);flex-shrink:0;margin-top:2px"></i>
-            <p class="t-body-sm">Ein Ticket, ein QR-Code — gültig bei jedem Heimspiel der Saison.</p>
-          </div>
-          <div style="display:flex;gap:10px;align-items:flex-start">
-            <i data-lucide="percent" class="icon-18" style="color:var(--color-brand-orange);flex-shrink:0;margin-top:2px"></i>
-            <p class="t-body-sm">Ermäßigt für Studierende, Azubis, Menschen mit Behinderung, Rentner*innen und Mitglieder von Kooperationsvereinen.</p>
-          </div>
-        </div>
-      </div>
-
-      <span class="eyebrow" style="display:block;margin-top:40px;margin-bottom:16px">Gut zu wissen</span>
+      <span class="eyebrow" style="display:block;margin-top:40px;margin-bottom:16px">Wissenswertes</span>
       <div class="grid-3">
+        <div class="info-tile">
+          <div class="tile-icon"><i data-lucide="armchair"></i></div>
+          <h3 class="t-h4">Fester Sitzplatz</h3>
+          <p class="t-body-sm">Dein Sitzplatz gilt für die komplette Hin- und Rückrunde der Saison, außer Playoffs.</p>
+        </div>
+        <div class="info-tile">
+          <div class="tile-icon"><i data-lucide="smartphone"></i></div>
+          <h3 class="t-h4">Digitales Ticket</h3>
+          <p class="t-body-sm">Ein Ticket, ein QR-Code — gültig bei jedem Heimspiel der Saison.</p>
+        </div>
+        <div class="info-tile">
+          <div class="tile-icon"><i data-lucide="percent"></i></div>
+          <h3 class="t-h4">Ermäßigungen</h3>
+          <p class="t-body-sm">Ermäßigt für Studierende, Azubis, Menschen mit Behinderung, Rentner*innen und Mitglieder von Kooperationsvereinen.</p>
+        </div>
         <div class="info-tile">
           <div class="tile-icon"><i data-lucide="door-open"></i></div>
           <h3 class="t-h4">Einlass</h3>
@@ -179,7 +180,8 @@
         eventLabel: 'Dauerkarte 2026/2027 — alle Heimspiele der Hin- und Rückrunde, außer Playoffs',
         lines: summary.lines,
         total: summary.total,
-        voucher: summary.voucher
+        voucher: summary.voucher,
+        notiz: summary.notiz
       }));
       window.location.href = '/tickets/checkout.html';
     }
