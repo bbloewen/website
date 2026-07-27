@@ -40,10 +40,10 @@
 /* Jede Reihe eine eigene zentrierte Flex-Zeile — reale Reihen sind unterschiedlich breit,
    das ergibt automatisch die typische, zum Spielfeld hin verjüngte Tribünenform statt
    eines starren Rasters mit linksbündig "abgeschnittenen" kürzeren Reihen. */
-.seatplan-grid-wrap { display: flex; flex-direction: column; gap: 3px; align-items: center; margin: 0 auto; }
-.seatplan-row-line { display: flex; gap: 3px; justify-content: center; }
+.seatplan-grid-wrap { display: flex; flex-direction: column; gap: 2px; align-items: center; margin: 0 auto; }
+.seatplan-row-line { display: flex; gap: 2px; justify-content: center; }
 .seatplan-seat {
-  width: 12px; height: 12px; border-radius: 3px;
+  width: 8px; height: 8px; border-radius: 2px;
   background: var(--color-neutral-200); border: 1px solid var(--color-neutral-300); cursor: pointer; padding: 0;
 }
 /* Sitzfarbe nach Kategorie, wie im Original-Saalplan (Kategorie 1/2/VIP je eigene Farbe) —
@@ -57,13 +57,6 @@
   outline: 1px solid var(--color-white); outline-offset: -2px;
 }
 .seatplan-seat:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 1px; }
-
-.seatplan-cat-legend { display: flex; gap: 14px; margin: 10px 0 4px; font-size: 11px; color: var(--text-muted); flex-wrap: wrap; }
-.seatplan-cat-legend span { display: inline-flex; align-items: center; gap: 5px; }
-.seatplan-cat-legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
-.seatplan-cat-legend .cat-kat1 i { background: #D99A3E; }
-.seatplan-cat-legend .cat-kat2 i { background: #7A8CA6; }
-.seatplan-cat-legend .cat-vip i { background: #B3392C; }
 
 .seatplan-block-controls { margin-top: 10px; border-top: 1px dashed var(--color-neutral-200); padding-top: 8px; }
 .seatplan-stepper-row {
@@ -155,12 +148,20 @@
   background: var(--color-white);
 }
 
-.seatplan-legend { display: flex; gap: 16px; margin-top: 16px; font-size: 12px; color: var(--text-muted); flex-wrap: wrap; }
-.seatplan-legend span { display: inline-flex; align-items: center; gap: 6px; }
-.seatplan-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
-.seatplan-legend .free i { background: var(--color-neutral-200); border: 1px solid var(--color-neutral-300); }
-.seatplan-legend .taken i { background: var(--color-neutral-100); border: 1px solid var(--color-neutral-200); }
-.seatplan-legend .sel i { background: var(--color-brand-orange); }
+/* Eine einzige, zeilenbündige Legende — Kategorie-Farben und Status (frei/vergeben/Auswahl)
+   nebeneinander statt in zwei getrennten, uneinheitlich gestylten Boxen. */
+.seatplan-legend {
+  display: flex; gap: 12px; margin-top: 12px; font-size: 11px; color: var(--text-muted);
+  flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; padding-bottom: 2px;
+}
+.seatplan-legend span { display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; }
+.seatplan-legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
+.seatplan-legend .cat-kat1 i { background: #D99A3E; }
+.seatplan-legend .cat-kat2 i { background: #7A8CA6; }
+.seatplan-legend .cat-vip i { background: #B3392C; }
+.seatplan-legend .free i { background: var(--color-neutral-300); border: 1px solid var(--color-neutral-400); }
+.seatplan-legend .taken i { background: var(--color-neutral-300); border: 1px solid var(--color-neutral-400); opacity: .35; }
+.seatplan-legend .sel i { background: var(--color-neutral-300); box-shadow: 0 0 0 2px var(--color-brand-navy); }
 
 .seatplan-cart-empty { font-size: 13px; color: var(--text-muted); padding: 12px 0; }
 .seatplan-cart-item {

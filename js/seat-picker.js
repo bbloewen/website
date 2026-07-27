@@ -121,26 +121,24 @@
     this.northZones.forEach(function (id) { northRow.appendChild(self._renderZone(self._zoneById(id))); });
     this.southZones.forEach(function (id) { southRow.appendChild(self._renderZone(self._zoneById(id))); });
 
+    // Eine einzige, zeilenbündige Legende: erst die Kategorie-Farben (nur die auf dieser
+    // Seite tatsächlich angebotenen — excludeCategories berücksichtigt, z. B. kein VIP
+    // beim Einzelticket), dann Status (frei/vergeben/Auswahl bzw. First-Come-First-Serve).
+    var catOrder = ['Kategorie I', 'Kategorie II', 'VIP'];
+    var catItems = catOrder.filter(function (c) { return self.prices[c] && self.excludeCategories.indexOf(c) === -1; })
+      .map(function (c) { return '<span class="' + catClass(c) + '"><i></i> ' + c + '</span>'; })
+      .join('');
+
     var legend = this.mode === 'blocks'
-      ? '<div class="seatplan-legend">' +
-          '<span class="free"><i></i> First come, first serve</span>' +
-          '<span class="free"><i></i> Freie Sitzplatzwahl innerhalb des Blocks</span>' +
+      ? '<div class="seatplan-legend">' + catItems +
+          '<span class="free"><i></i> First come, first serve innerhalb des Blocks</span>' +
         '</div>' +
         '<p class="t-caption" style="margin-top:6px;color:var(--text-muted)">Nur mit der Dauerkarte sicherst du dir einen festen Sitzplatz.</p>'
-      : '<div class="seatplan-legend">' +
+      : '<div class="seatplan-legend">' + catItems +
           '<span class="free"><i></i> frei</span>' +
           '<span class="taken"><i></i> vergeben</span>' +
           '<span class="sel"><i></i> deine Auswahl</span>' +
         '</div>';
-
-    // Kategorie-Farblegende — nur die Kategorien, die auf dieser Seite tatsächlich
-    // angeboten werden (excludeCategories berücksichtigt, z. B. kein VIP beim Einzelticket).
-    var catOrder = ['Kategorie I', 'Kategorie II', 'VIP'];
-    var catLegend = '<div class="seatplan-cat-legend">' +
-      catOrder.filter(function (c) { return self.prices[c] && self.excludeCategories.indexOf(c) === -1; })
-        .map(function (c) { return '<span class="' + catClass(c) + '"><i></i> ' + c + '</span>'; })
-        .join('') +
-      '</div>';
 
     this.root.innerHTML =
       '<div class="seatplan-strip">Nordtribüne</div>' +
@@ -153,7 +151,6 @@
       '</div>' +
       '<div id="seatplan-south" style="margin-top:14px"></div>' +
       '<div class="seatplan-strip seatplan-strip-south">Südtribüne</div>' +
-      catLegend +
       legend;
 
     document.getElementById('seatplan-north').appendChild(northRow);
@@ -198,7 +195,7 @@
       var cols = Math.max.apply(null, group.rows.map(function (r) { return r.seats.length; }));
       var gridWrap = document.createElement('div');
       gridWrap.className = 'seatplan-grid-wrap';
-      gridWrap.style.width = (cols * 15 - 3) + 'px';
+      gridWrap.style.width = (cols * 10 - 2) + 'px';
 
       var freeCount = 0;
       group.rows.forEach(function (row, rIdxInGroup) {
@@ -206,6 +203,10 @@
         var rowLabel = row.row_label || row.row_number;
         var rowEl = document.createElement('div');
         rowEl.className = 'seatplan-row-line';
+        // Rein optischer Bruch (z. B. Block A/B/C: vorderer/hinterer Bereich wie im
+        // Original), unabhängig von Kategorie/Preis — nicht jede Reihen-Trennung im
+        // echten Plan bedeutet eine andere Preisstufe.
+        if (row.section_break) rowEl.style.marginTop = '8px';
         row.seats.forEach(function (seat, cIdx) {
           var taken = seededRandom(seedBase + rIdx * cols + cIdx) < 0.28;
           if (!taken) freeCount++;
