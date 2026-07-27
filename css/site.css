@@ -489,9 +489,8 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 }
 .section-divider::before, .section-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-/* News-Übersichtsseite: 2/3 Vereinsnews (endlos scrollend) + 1/3 fest stehende,
-   grau unterlegte Instagram-Seitenleiste — verhindert, dass die Insta-Beiträge
-   bei vielen Vereinsnews aus dem Blick geraten. */
+/* News-Übersichtsseite: 2/3 Vereinsnews (endlos scrollend) + 1/3 grau
+   unterlegte Instagram-Seitenleiste, scrollt mit der Seite mit. */
 .aktuelles-layout {
   display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 40px; align-items: start;
   grid-template-areas: "news sidebar" "newsletter sidebar";
@@ -499,7 +498,7 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .aktuelles-news { grid-area: news; }
 .aktuelles-newsletter { grid-area: newsletter; }
 .aktuelles-sidebar {
-  display: flex; flex-direction: column; gap: 20px; position: sticky; top: 96px;
+  display: flex; flex-direction: column; gap: 20px;
   /* Bündig mit der ersten Reihe der Vereinsnews-Karten statt mit dem
      "Vereinsnews"-Label darüber. */
   margin-top: 36px;
