@@ -194,6 +194,19 @@
     renderDayList(groupByDay(alleGames));
     initFilterChips();
 
+    /* Team-Seiten (Profis/Damen/U19) verlinken mit ?team=... hierher — Filter
+       direkt entsprechend vorauswählen statt "Alle" zu zeigen. */
+    var urlTeam = new URLSearchParams(location.search).get('team');
+    if (urlTeam && TEAM_META[urlTeam]) {
+      var filterRow = document.getElementById('spielplan-filter');
+      var chip = filterRow && filterRow.querySelector('.filter-chip[data-filter="' + urlTeam + '"]');
+      if (chip) {
+        filterRow.querySelectorAll('.filter-chip').forEach(function (c) { c.classList.remove('is-active'); });
+        chip.classList.add('is-active');
+        applyFilter(urlTeam);
+      }
+    }
+
     window.__spielplanProfisGames = profisGames;
     window.dispatchEvent(new Event('spielplan:ready'));
   });
