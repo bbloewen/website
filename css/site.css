@@ -1371,6 +1371,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .hero-photo.hero-jobs { --hero-photo-url: url('/assets/img/hero-jobs.webp'); background-position: center; }
 .hero-photo.hero-impressum { --hero-photo-url: url('/assets/img/hero-impressum.webp'); background-position: center 10%; }
 .hero-photo.hero-datenschutz { --hero-photo-url: url('/assets/img/hero-datenschutz.webp'); background-position: center 10%; }
+.hero-photo.hero-agb { --hero-photo-url: url('/assets/img/hero-agb.webp'); background-position: center 10%; }
 
 .hero-photo.hero-kinderschutz { --hero-photo-url: url('/assets/img/hero-kinderschutz.webp'); background-position: center 20%; }
 .hero-photo.hero-waidloewen { --hero-photo-url: url('/assets/img/hero-waidloewen.webp'); background-position: center 40%; }
