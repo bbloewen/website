@@ -118,8 +118,18 @@
     var southRow = document.createElement('div');
     southRow.className = 'seatplan-row';
 
-    this.northZones.forEach(function (id) { northRow.appendChild(self._renderZone(self._zoneById(id))); });
-    this.southZones.forEach(function (id) { southRow.appendChild(self._renderZone(self._zoneById(id))); });
+    // _renderZone gibt null zurück, wenn ein Block nach excludeCategories keine
+    // verkäuflichen Reihen mehr hat (z. B. Block B ist beim Einzelticket komplett VIP
+    // und damit komplett ausgeschlossen) — dann wird die Karte gar nicht erst angezeigt,
+    // statt als leere graue Box mit nur dem Block-Namen zu erscheinen.
+    this.northZones.forEach(function (id) {
+      var el = self._renderZone(self._zoneById(id));
+      if (el) northRow.appendChild(el);
+    });
+    this.southZones.forEach(function (id) {
+      var el = self._renderZone(self._zoneById(id));
+      if (el) southRow.appendChild(el);
+    });
 
     // Eine einzige, zeilenbündige Legende: erst die Kategorie-Farben (nur die auf dieser
     // Seite tatsächlich angebotenen — excludeCategories berücksichtigt, z. B. kein VIP
@@ -129,16 +139,18 @@
       .map(function (c) { return '<span class="' + catClass(c) + '"><i></i> ' + c + '</span>'; })
       .join('');
 
-    var legend = this.mode === 'blocks'
+    var legendHtml = this.mode === 'blocks'
       ? '<div class="seatplan-legend">' + catItems +
-          '<span class="free"><i></i> First come, first serve innerhalb des Blocks</span>' +
-        '</div>' +
-        '<p class="t-caption" style="margin-top:6px;color:var(--text-muted)">Nur mit der Dauerkarte sicherst du dir einen festen Sitzplatz.</p>'
+          '<span class="free"><i></i> First come, first serve</span>' +
+        '</div>'
       : '<div class="seatplan-legend">' + catItems +
           '<span class="free"><i></i> frei</span>' +
           '<span class="taken"><i></i> vergeben</span>' +
           '<span class="sel"><i></i> deine Auswahl</span>' +
         '</div>';
+    var caption = this.mode === 'blocks'
+      ? '<p class="t-caption" style="margin-top:10px;color:var(--text-muted)">Nur mit der Dauerkarte sicherst du dir einen festen Sitzplatz.</p>'
+      : '';
 
     this.root.innerHTML =
       '<div class="seatplan-strip">Nordtribüne</div>' +
@@ -146,12 +158,12 @@
       '<div class="seatplan-court-area">' +
         '<div class="seatplan-side-strip stehblock">Stehblock</div>' +
         '<div class="seatplan-side-strip entrance"></div>' +
-        '<div class="seatplan-court">Spielfeld</div>' +
+        '<div class="seatplan-court"><span>Spielfeld</span>' + legendHtml + '</div>' +
         '<div class="seatplan-side-strip entrance"></div>' +
       '</div>' +
       '<div id="seatplan-south" style="margin-top:14px"></div>' +
       '<div class="seatplan-strip seatplan-strip-south">Südtribüne</div>' +
-      legend;
+      caption;
 
     document.getElementById('seatplan-north').appendChild(northRow);
     document.getElementById('seatplan-south').appendChild(southRow);
@@ -163,6 +175,7 @@
     var groups = this._categoryGroups(zone).filter(function (g) {
       return self.excludeCategories.indexOf(g.category) === -1;
     });
+    if (groups.length === 0) return null;
     var singleCategory = groups.length === 1 ? groups[0].category : null;
     var isCat1 = singleCategory === 'Kategorie I';
 
@@ -213,6 +226,12 @@
           var btn = document.createElement('button');
           btn.type = 'button';
           btn.className = 'seatplan-seat ' + catClass(category);
+          // Echte Gang-Lücke innerhalb der Reihe (z. B. "1,2 | 3-22 | 23,24,25") —
+          // die Sitznummerierung bleibt über den Gang hinweg durchgehend, nur die
+          // Darstellung bekommt hier eine kleine zusätzliche Lücke.
+          if (row.segment_breaks && row.segment_breaks.indexOf(parseInt(seat.seat_number, 10)) !== -1) {
+            btn.style.marginLeft = '6px';
+          }
           if (blockMode) btn.tabIndex = -1;
           btn.dataset.seatGuid = seat.seat_guid;
           var seatLabel = zone.name + ', Reihe ' + rowLabel + ', Platz ' + seat.seat_number;
