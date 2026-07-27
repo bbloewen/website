@@ -43,7 +43,14 @@
    das ergibt automatisch die typische, zum Spielfeld hin verjüngte Tribünenform statt
    eines starren Rasters mit linksbündig "abgeschnittenen" kürzeren Reihen. */
 .seatplan-grid-wrap { display: flex; flex-direction: column; gap: 2px; align-items: center; margin: 0 auto; }
-.seatplan-row-line { display: flex; gap: 2px; justify-content: center; }
+.seatplan-row-line { display: flex; gap: 2px; justify-content: center; align-items: center; }
+/* Reihennummer links UND rechts an jeder Reihe, wie im Original-Saalplan
+   (dort z. B. "B7" beidseitig neben der Reihe). Feste Breite, damit die
+   Sitze selbst über alle Reihen hinweg exakt zentriert bleiben. */
+.seatplan-row-num {
+  width: 14px; flex-shrink: 0; text-align: center; font-size: 8px; line-height: 8px;
+  color: var(--text-muted);
+}
 .seatplan-seat {
   width: 8px; height: 8px; border-radius: 2px;
   background: var(--color-neutral-200); border: 1px solid var(--color-neutral-300); cursor: pointer; padding: 0;
@@ -144,7 +151,7 @@
   flex: 1;
   border: 1px solid var(--color-neutral-200);
   border-radius: var(--radius-md);
-  min-height: 110px;
+  min-height: 220px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
   color: var(--text-muted); font-size: 12px; font-weight: 600; letter-spacing: 0.05em;
   background: var(--color-white);
@@ -152,9 +159,11 @@
 /* Legende sitzt wie im Original-Saalplan mitten im Spielfeld-Bereich. */
 .seatplan-court .seatplan-legend { justify-content: center; overflow-x: visible; white-space: normal; }
 
-/* Fußzeile des Sitzplan-Popups: "Übernehmen"-Button rechtsbündig, muss nicht mehr
-   die volle Breite einnehmen (die Legende sitzt jetzt wie im Original im Spielfeld). */
-.seatplan-footer-row { display: flex; justify-content: flex-end; margin-top: 14px; }
+/* Fußzeile des Sitzplan-Popups: "Übernehmen"-Button zentriert, in der Breite eines
+   einzelnen Blocks (die Legende sitzt jetzt wie im Original im Spielfeld, der Button
+   muss deshalb nicht mehr die volle Breite einnehmen). */
+.seatplan-footer-row { display: flex; justify-content: center; margin-top: 14px; }
+.seatplan-footer-row #seatplan-modal-confirm { width: 100%; max-width: 340px; justify-content: center; }
 
 /* Eine einzige, zeilenbündige Legende — Kategorie-Farben und Status (frei/vergeben/Auswahl)
    nebeneinander statt in zwei getrennten, uneinheitlich gestylten Boxen. */

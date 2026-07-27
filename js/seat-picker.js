@@ -1,8 +1,8 @@
 /* Wiederverwendbare Sitzplatzwahl für Einzelticket- und Dauerkarten-Detailseite.
    Lädt den echten, pretix-schema-konformen Saalplan aus assets/seating/ und rendert
-   ihn als Block-Grid. Verfügbarkeit ist bis zur echten pretix-Anbindung ein
-   deterministischer Zufalls-Mock (siehe seededRandom). Kein Limit an wählbaren
-   Plätzen pro Bestellung.
+   ihn als Block-Grid. Verfügbarkeit ist bis zur echten pretix-Anbindung noch nicht
+   live geprüft — alle Plätze gelten vorerst als frei (keine echten Bestellungen
+   vorhanden). Kein Limit an wählbaren Plätzen pro Bestellung.
 
    Zwei Modi:
    - "seats" (Dauerkarte): einzelne Sitze sind klickbar, fester Platz für die Saison.
@@ -10,11 +10,6 @@
      im Block sind rein dekorativ (First-Come-First-Serve-Platzwahl vor Ort). */
 (function () {
   'use strict';
-
-  function seededRandom(seed) {
-    var x = Math.sin(seed) * 10000;
-    return x - Math.floor(x);
-  }
 
   function fmtEUR(n) { return n.toFixed(2).replace('.', ','); }
 
@@ -188,8 +183,6 @@
     wrap.appendChild(label);
 
     var blockMode = this.mode === 'blocks';
-    var seedBase = zone.zone_id.charCodeAt(0) * 97;
-    var rowOffset = 0;
 
     groups.forEach(function (group, gIdx) {
       var category = group.category;
@@ -198,7 +191,7 @@
       var catEl = document.createElement('div');
       catEl.className = 'seatplan-block-cat';
       if (gIdx > 0) catEl.style.marginTop = '10px';
-      catEl.textContent = category + ' · ab ' + fmtEUR(priceInfo.normal) + ' €';
+      catEl.textContent = category;
       wrap.appendChild(catEl);
 
       // Jede Reihe ist eine eigene, zentrierte Flex-Zeile (nicht ein einziges CSS-Grid für
@@ -208,11 +201,11 @@
       var cols = Math.max.apply(null, group.rows.map(function (r) { return r.seats.length; }));
       var gridWrap = document.createElement('div');
       gridWrap.className = 'seatplan-grid-wrap';
-      gridWrap.style.width = (cols * 10 - 2) + 'px';
+      // +2×(14px Reihennummer + 2px Abstand) für die Labels links/rechts jeder Reihe.
+      gridWrap.style.width = (cols * 10 - 2 + 2 * 16) + 'px';
 
       var freeCount = 0;
-      group.rows.forEach(function (row, rIdxInGroup) {
-        var rIdx = rowOffset + rIdxInGroup;
+      group.rows.forEach(function (row) {
         var rowLabel = row.row_label || row.row_number;
         var rowEl = document.createElement('div');
         rowEl.className = 'seatplan-row-line';
@@ -220,8 +213,13 @@
         // Original), unabhängig von Kategorie/Preis — nicht jede Reihen-Trennung im
         // echten Plan bedeutet eine andere Preisstufe.
         if (row.section_break) rowEl.style.marginTop = '8px';
+        // Reihennummer links UND rechts an der Reihe, wie im Original-Saalplan.
+        var rowNumLeft = document.createElement('span');
+        rowNumLeft.className = 'seatplan-row-num';
+        rowNumLeft.textContent = rowLabel;
+        rowEl.appendChild(rowNumLeft);
         row.seats.forEach(function (seat, cIdx) {
-          var taken = seededRandom(seedBase + rIdx * cols + cIdx) < 0.28;
+          var taken = false; // Noch keine echten Bestellungen — keine Plätze vorab als vergeben markieren.
           if (!taken) freeCount++;
           var btn = document.createElement('button');
           btn.type = 'button';
@@ -245,10 +243,13 @@
           }
           rowEl.appendChild(btn);
         });
+        var rowNumRight = document.createElement('span');
+        rowNumRight.className = 'seatplan-row-num';
+        rowNumRight.textContent = rowLabel;
+        rowEl.appendChild(rowNumRight);
         gridWrap.appendChild(rowEl);
       });
       wrap.appendChild(gridWrap);
-      rowOffset += group.rows.length;
 
       if (blockMode && self.prices[category]) {
         var blockKey = zone.zone_id + '::' + category;
