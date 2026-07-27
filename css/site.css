@@ -186,6 +186,13 @@ a.no-underline:hover { text-decoration: none; }
    als "das grüne Herz Deutschlands". */
 .utility-link.emphasis { color: var(--color-heart-green); }
 .utility-link.emphasis:hover { color: var(--color-heart-green); opacity: .8; }
+/* Für Nav-Einträge, die vorübergehend deaktiviert sind (z.B. Fanshop vor Launch) —
+   Seite bleibt per direkter URL erreichbar, nur der Nav-Link ist stillgelegt. */
+.utility-link.is-disabled,
+.drawer-utility-section .is-disabled {
+  opacity: .45; cursor: default; pointer-events: none;
+}
+.utility-link.is-disabled:hover { color: var(--text-secondary); }
 
 /* -- Main nav -- */
 .main-nav-bar .container {
