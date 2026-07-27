@@ -1304,7 +1304,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .hero-photo.hero-tickets { --hero-photo-url: url('/assets/img/hero-tickets-halle.webp'); background-position: center 35%; }
 
 /* Hero-Variante für den Fanshop — freies Stockfoto (Platzhalter, wird später gegen echtes Foto getauscht) */
-.hero-photo.hero-fanshop { --hero-photo-url: url('/assets/img/stock-fanshop.webp'); background-position: center 60%; }
+.hero-photo.hero-fanshop { --hero-photo-url: url('/assets/img/hero-fanshop.webp'); background-position: center 60%; }
 
 /* Hero-Variante für die LÖWENPARK-Seite — echtes Baustellenfoto (Luftaufnahme
    Dach), bereits für die Meilenstein-News verwendet. */
