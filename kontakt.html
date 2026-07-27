@@ -58,16 +58,16 @@
           <h3 class="t-h4" style="margin:6px 0 16px">Kontaktformular</h3>
           <form class="form-panel" id="contact-form">
             <div class="field">
+              <label for="betreff">Betreff</label>
+              <input type="text" id="betreff" name="betreff" placeholder="Worum geht's?" />
+            </div>
+            <div class="field">
               <label for="name">Name</label>
               <input type="text" id="name" name="name" required autocomplete="name" />
             </div>
             <div class="field">
               <label for="email">E-Mail</label>
               <input type="email" id="email" name="email" required autocomplete="email" />
-            </div>
-            <div class="field">
-              <label for="betreff">Betreff</label>
-              <input type="text" id="betreff" name="betreff" placeholder="Worum geht's?" />
             </div>
             <div class="field">
               <label for="nachricht">Nachricht</label>
@@ -90,6 +90,13 @@
     e.preventDefault();
     document.getElementById('contact-status').classList.add('visible');
   });
+  /* Vorbelegung des Betreffs per URL-Param (z.B. von der Schulprogramm-Seite
+     aus verlinkt), damit Absender:innen nicht selbst den Betreff formulieren
+     müssen. */
+  (function () {
+    var betreff = new URLSearchParams(window.location.search).get('betreff');
+    if (betreff) document.getElementById('betreff').value = betreff;
+  })();
 </script>
 </body>
 </html>
