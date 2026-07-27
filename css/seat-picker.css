@@ -55,16 +55,17 @@
   width: 8px; height: 8px; border-radius: 2px;
   background: var(--color-neutral-200); border: 1px solid var(--color-neutral-300); cursor: pointer; padding: 0;
 }
-/* Sitzfarbe nach Kategorie, wie im Original-Saalplan (Kategorie 1/2/VIP je eigene Farbe) —
-   macht den Block auf einen Blick als das erkennbar, was er im echten Plan ist. */
-.seatplan-seat.cat-kat1 { background: #D99A3E; border-color: #B87F2E; }
-.seatplan-seat.cat-kat2 { background: #7A8CA6; border-color: #5F7089; }
-.seatplan-seat.cat-vip { background: #B3392C; border-color: #8F2D22; }
+/* Sitzfarbe nach Kategorie: Kategorie I (Orange) und VIP (Rot) mit Transparenz für
+   einen helleren Eindruck, Kategorie II in hellem Grau — auf Wunsch abgestimmt. */
+.seatplan-seat.cat-kat1 { background: rgba(232, 119, 34, .55); border-color: rgba(232, 119, 34, .9); }
+.seatplan-seat.cat-kat2 { background: #D9DEE3; border-color: #B9C1C8; }
+.seatplan-seat.cat-vip { background: rgba(179, 57, 44, .55); border-color: rgba(179, 57, 44, .9); }
 .seatplan-seat[disabled] { opacity: .35; cursor: not-allowed; }
-.seatplan-seat.selected {
-  box-shadow: 0 0 0 2px var(--color-brand-navy);
-  outline: 1px solid var(--color-white); outline-offset: -2px;
-}
+/* Vergeben (sobald echte Bestellungen vorliegen) — helles Blau, deutlich heller als die
+   "Deine Auswahl"-Farbe, damit beide Zustände klar unterscheidbar bleiben. */
+.seatplan-seat.taken { background: #A9C2F5; border-color: #7FA0E8; opacity: 1; cursor: not-allowed; }
+/* Deine Auswahl — dasselbe dunkle Blau wie die Flächen neben dem Spielfeld. */
+.seatplan-seat.selected { background: var(--color-brand-blue); border-color: var(--color-brand-navy); }
 .seatplan-seat:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 1px; }
 
 .seatplan-block-controls { margin-top: 10px; border-top: 1px dashed var(--color-neutral-200); padding-top: 8px; }
@@ -148,6 +149,7 @@
 }
 .seatplan-side-strip.entrance { flex: 0 0 24px; }
 .seatplan-court {
+  position: relative;
   flex: 1;
   border: 1px solid var(--color-neutral-200);
   border-radius: var(--radius-md);
@@ -156,6 +158,10 @@
   color: var(--text-muted); font-size: 12px; font-weight: 600; letter-spacing: 0.05em;
   background: var(--color-white);
 }
+/* "Spielfeld"-Label wandert nach oben und wird aus dem normalen Fluss genommen, damit
+   sich Legende + Auswahl-Vorschau darunter als eigene Gruppe zentrieren, statt alles
+   gemeinsam als ein Block mittig zu stehen. */
+.seatplan-court > span:first-child { position: absolute; top: 16px; left: 0; right: 0; text-align: center; }
 /* Legende sitzt wie im Original-Saalplan mitten im Spielfeld-Bereich. */
 .seatplan-court .seatplan-legend { justify-content: center; overflow-x: visible; white-space: normal; }
 /* Live-Vorschau der aktuellen Auswahl (Reihe+Platz bzw. Block-Anzahl), ebenfalls
@@ -168,7 +174,7 @@
 /* Fußzeile des Sitzplan-Popups: "Übernehmen"-Button zentriert, in der Breite eines
    einzelnen Blocks (die Legende sitzt jetzt wie im Original im Spielfeld, der Button
    muss deshalb nicht mehr die volle Breite einnehmen). */
-.seatplan-footer-row { display: flex; justify-content: center; margin-top: 14px; }
+.seatplan-footer-row { display: flex; justify-content: center; margin-top: 6px; }
 .seatplan-footer-row #seatplan-modal-confirm { width: 100%; max-width: 340px; justify-content: center; }
 
 /* Eine einzige, zeilenbündige Legende — Kategorie-Farben und Status (frei/vergeben/Auswahl)
@@ -179,12 +185,12 @@
 }
 .seatplan-legend span { display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; }
 .seatplan-legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
-.seatplan-legend .cat-kat1 i { background: #D99A3E; }
-.seatplan-legend .cat-kat2 i { background: #7A8CA6; }
-.seatplan-legend .cat-vip i { background: #B3392C; }
-.seatplan-legend .free i { background: var(--color-neutral-300); border: 1px solid var(--color-neutral-400); }
-.seatplan-legend .taken i { background: var(--color-neutral-300); border: 1px solid var(--color-neutral-400); opacity: .35; }
-.seatplan-legend .sel i { background: var(--color-neutral-300); box-shadow: 0 0 0 2px var(--color-brand-navy); }
+.seatplan-legend .cat-kat1 i { background: rgba(232, 119, 34, .55); border: 1px solid rgba(232, 119, 34, .9); }
+.seatplan-legend .cat-kat2 i { background: #D9DEE3; border: 1px solid #B9C1C8; }
+.seatplan-legend .cat-vip i { background: rgba(179, 57, 44, .55); border: 1px solid rgba(179, 57, 44, .9); }
+.seatplan-legend .taken i { background: #A9C2F5; border: 1px solid #7FA0E8; }
+.seatplan-legend .sel i { background: var(--color-brand-blue); border: 1px solid var(--color-brand-navy); }
+.seatplan-legend .fcfs { color: var(--text-muted); }
 
 .seatplan-cart-empty { font-size: 13px; color: var(--text-muted); padding: 12px 0; }
 .seatplan-cart-item {

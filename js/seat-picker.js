@@ -86,14 +86,18 @@
     return blocks;
   };
 
-  /* Reihen eines Blocks in zusammenhängende Gruppen gleicher Kategorie teilen,
-     in Reihenfolge des Plans (z. B. [VIP: Reihe 1], [Kategorie II: Reihen 2-11]). */
+  /* Reihen eines Blocks in zusammenhängende Gruppen teilen — sowohl bei Kategoriewechsel
+     (z. B. [VIP: Reihe 1-5], [Kategorie I: Reihen 6-12]) als auch bei einem rein optischen
+     section_break OHNE Kategoriewechsel (z. B. Block A/C: [Kategorie II: Reihen 1-5],
+     [Kategorie II: Reihen 6-12]) — damit A/C denselben Lücken-Abstand UND dieselbe
+     wiederholte Kategorie-Beschriftung wie Block B bekommen, statt nur einer stummen
+     CSS-Lücke ohne Label. */
   SeatPicker.prototype._categoryGroups = function (zone) {
     var groups = [];
     zone.rows.forEach(function (row) {
       var category = row.seats[0].category;
       var last = groups[groups.length - 1];
-      if (last && last.category === category) {
+      if (last && last.category === category && !row.section_break) {
         last.rows.push(row);
       } else {
         groups.push({ category: category, rows: [row] });
@@ -128,7 +132,8 @@
 
     // Eine einzige, zeilenbündige Legende: erst die Kategorie-Farben (nur die auf dieser
     // Seite tatsächlich angebotenen — excludeCategories berücksichtigt, z. B. kein VIP
-    // beim Einzelticket), dann Status (frei/vergeben/Auswahl bzw. First-Come-First-Serve).
+    // beim Einzelticket), dann Status. "Frei" braucht kein eigenes Symbol — alles, was
+    // nicht blau markiert ist, ist frei.
     var catOrder = ['Kategorie I', 'Kategorie II', 'VIP'];
     var catItems = catOrder.filter(function (c) { return self.prices[c] && self.excludeCategories.indexOf(c) === -1; })
       .map(function (c) { return '<span class="' + catClass(c) + '"><i></i> ' + c + '</span>'; })
@@ -136,10 +141,9 @@
 
     var legendHtml = this.mode === 'blocks'
       ? '<div class="seatplan-legend">' + catItems +
-          '<span class="free"><i></i> First come, first serve</span>' +
+          '<span class="fcfs">First come, first serve</span>' +
         '</div>'
       : '<div class="seatplan-legend">' + catItems +
-          '<span class="free"><i></i> frei</span>' +
           '<span class="taken"><i></i> vergeben</span>' +
           '<span class="sel"><i></i> deine Auswahl</span>' +
         '</div>';
@@ -191,11 +195,21 @@
       var category = group.category;
       var priceInfo = self.prices[category] || { normal: 0 };
 
-      var catEl = document.createElement('div');
-      catEl.className = 'seatplan-block-cat';
-      if (gIdx > 0) catEl.style.marginTop = '10px';
-      catEl.textContent = category;
-      wrap.appendChild(catEl);
+      // VIP-Label wird im Block selbst nicht wiederholt — die Farbe steht schon in der
+      // Legende im Spielfeld-Bereich; Kategorie I/II bleibt beschriftet, u. a. damit
+      // Blöcke wie A/C, wo sich die Kategorie gar nicht ändert, denselben Lücken-Abstand
+      // UND dieselbe Beschriftung wie Block B bekommen (rein optischer section_break).
+      if (category !== 'VIP') {
+        var catEl = document.createElement('div');
+        catEl.className = 'seatplan-block-cat';
+        if (gIdx > 0) catEl.style.marginTop = '10px';
+        catEl.textContent = category;
+        wrap.appendChild(catEl);
+      } else if (gIdx > 0) {
+        var spacer = document.createElement('div');
+        spacer.style.marginTop = '10px';
+        wrap.appendChild(spacer);
+      }
 
       // Jede Reihe ist eine eigene, zentrierte Flex-Zeile (nicht ein einziges CSS-Grid für
       // den ganzen Block) — reale Reihen sind unterschiedlich breit (siehe echter Saalplan),
@@ -207,23 +221,29 @@
       // +2×(14px Reihennummer + 2px Abstand) für die Labels links/rechts jeder Reihe.
       gridWrap.style.width = (cols * 10 - 2 + 2 * 16) + 'px';
 
+      // Reihe 3 (19 Plätze) ist im Original schmaler als Reihe 12/1 (Blockbreite = cols),
+      // liegt aber selbst zentriert im Block — d. h. ihr Rand hat bereits einen eigenen
+      // Abstand zur Blockkante. Reihen 4+5 (12 Plätze) müssen bündig an GENAU DIESEM Rand
+      // von Reihe 3 abschließen, nicht an der äußersten Blockkante (das war der Fehler
+      // zuvor: align-self:flex-end allein richtet an der Blockkante aus, nicht an Reihe 3).
+      var row3 = group.rows.filter(function (r) { return r.row_number === '3'; })[0];
+      var row3Gap = row3 ? (cols - row3.seats.length) / 2 * 10 : 0;
+
       var freeCount = 0;
       group.rows.forEach(function (row) {
         var rowLabel = row.row_label || row.row_number;
         var rowEl = document.createElement('div');
         rowEl.className = 'seatplan-row-line';
-        // Rein optischer Bruch (z. B. Block A/B/C: vorderer/hinterer Bereich wie im
-        // Original), unabhängig von Kategorie/Preis — nicht jede Reihen-Trennung im
-        // echten Plan bedeutet eine andere Preisstufe.
-        if (row.section_break) rowEl.style.marginTop = '8px';
         // Reihen 4+5 in A/B/C sind schmaler als die Reihen darüber (1-3) und liegen im
-        // Original nicht mittig, sondern bündig zu einer Seite von deren Gang-Segment
-        // (A/B: rechte "12er"-Seite, C spiegelverkehrt: linke "12er"-Seite) — statt sie
-        // wie alle anderen Reihen zu zentrieren, an dieser Seite ausrichten.
+        // Original nicht mittig, sondern bündig zu einer Seite von Reihe 3
+        // (A/B: rechte Seite, C spiegelverkehrt: linke Seite) — statt sie wie alle
+        // anderen Reihen zu zentrieren, exakt an Reihe 3s Rand ausrichten.
         if ((zone.zone_id === 'A' || zone.zone_id === 'B') && (row.row_number === '4' || row.row_number === '5')) {
           rowEl.style.alignSelf = 'flex-end';
+          rowEl.style.marginRight = row3Gap + 'px';
         } else if (zone.zone_id === 'C' && (row.row_number === '4' || row.row_number === '5')) {
           rowEl.style.alignSelf = 'flex-start';
+          rowEl.style.marginLeft = row3Gap + 'px';
         }
         // Reihennummer links UND rechts an der Reihe, wie im Original-Saalplan.
         var rowNumLeft = document.createElement('span');
@@ -235,7 +255,7 @@
           if (!taken) freeCount++;
           var btn = document.createElement('button');
           btn.type = 'button';
-          btn.className = 'seatplan-seat ' + catClass(category);
+          btn.className = 'seatplan-seat ' + catClass(category) + (taken ? ' taken' : '');
           // Echte Gang-Lücke innerhalb der Reihe (z. B. "1,2 | 3-22 | 23,24,25") —
           // die Sitznummerierung bleibt über den Gang hinweg durchgehend, nur die
           // Darstellung bekommt hier eine kleine zusätzliche Lücke.
