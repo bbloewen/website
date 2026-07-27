@@ -641,6 +641,27 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   background: linear-gradient(to bottom, rgba(246,247,249,0), var(--bg-subtle));
   pointer-events: none; transition: opacity .2s;
 }
+/* Scroll-Pfeil: v.a. für iPad/Touch gedacht, wo der Scrollbalken im
+   verschachtelten .history-timeline-scroll kaum sichtbar/greifbar ist und
+   Nutzer:innen sonst nicht merken, dass unten noch mehr Historie folgt.
+   Klick scrollt ein Stück runter; sobald das Ende erreicht ist, blendet
+   history-timeline.js Pfeil und Fade gemeinsam aus. */
+.history-timeline-scroll-arrow {
+  position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%);
+  width: 34px; height: 34px; border-radius: 50%; border: none; z-index: 1;
+  background: var(--color-brand-orange); color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.18); transition: opacity .2s;
+  animation: history-scroll-arrow-bounce 1.6s ease-in-out infinite;
+}
+.history-timeline-scroll-arrow:hover { background: var(--color-brand-orange-dark, var(--color-brand-orange)); }
+@keyframes history-scroll-arrow-bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(4px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .history-timeline-scroll-arrow { animation: none; }
+}
 
 /* Über-uns-Geschichte: horizontale Variante auf hellem bg-subtle-Grund
    (eigene Klassen statt .history-timeline, da diese für dunklen Hintergrund
