@@ -315,7 +315,7 @@
       '<span class="seatplan-mobile-detail-title">' +
         '<strong class="t-body-sm">' + zone.name + '</strong>' +
         '<span class="t-caption" style="color:var(--text-muted)">' + mainCategory +
-          (hasVip ? ' (<span style="color:rgba(179,57,44,.9)">VIP</span>)' : '') +
+          (hasVip ? ' (und <span style="color:rgba(179,57,44,.9)">VIP</span>)' : '') +
         '</span>' +
       '</span><span style="width:32px"></span>';
     wrap.appendChild(header);
