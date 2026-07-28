@@ -46,8 +46,10 @@
 .seatplan-row-line { display: flex; gap: 2px; justify-content: center; align-items: center; }
 /* Markiert den echten Gang zwischen zwei Reihengruppen (z. B. Reihe 5/6) als eigene
    Linie — bei einfarbigen Blöcken (A/C) gibt es sonst keinen optischen Hinweis, dass
-   die Lücke dort Absicht ist und nicht wie ein Layout-Fehler aussieht. */
-.seatplan-aisle-line { width: 100%; height: 1px; background: var(--color-neutral-400); margin: 8px 0; }
+   die Lücke dort Absicht ist und nicht wie ein Layout-Fehler aussieht. 2px statt 1px,
+   da die Zone insgesamt bis auf 0.5 herunterskaliert wird (s. _fitZoneScale) — bei
+   1px wäre die Linie dann unter 1 Bildschirmpixel und praktisch unsichtbar. */
+.seatplan-aisle-line { width: 100%; height: 2px; background: var(--color-neutral-400); margin: 8px 0; }
 /* Reihennummer links UND rechts an jeder Reihe, wie im Original-Saalplan
    (dort z. B. "B7" beidseitig neben der Reihe). Feste Breite, damit die
    Sitze selbst über alle Reihen hinweg exakt zentriert bleiben. */
@@ -112,6 +114,13 @@
    immer mit der Unterkante von Preistabelle und Floorplan abschließt. */
 .buy-cart-col { display: flex; flex-direction: column; }
 .buy-cart-col #seatplan-cart { flex: 1; }
+/* Ohne height:100% füllt die Blockübersicht nur ihre eigene Inhaltshöhe — die
+   Spalte selbst streckt sich zwar (align-items:stretch), aber darunter bliebe
+   Leerraum, wodurch der Button in der Cart-Spalte sichtbar tiefer sitzt als das
+   Bild endet. Die mittlere Grid-Zeile (1fr, s. .seatplan-mobile-overview) nutzt
+   die zusätzliche Höhe dann für den Spielfeld-Bereich. */
+.buy-thumb-col #seatplan-root { height: 100%; }
+.buy-thumb-col .seatplan-mobile-overview { height: 100%; box-sizing: border-box; }
 .buy-thumb-btn {
   display: block; width: 100%; height: 100%; padding: 0; border: 1px solid var(--border);
   border-radius: var(--radius-md); background: none; cursor: pointer; position: relative;
@@ -441,15 +450,17 @@
 .seatplan-mobile-detail .seatplan-row-line { gap: 6px; justify-content: flex-start; }
 .seatplan-mobile-detail .seatplan-row-num { width: 20px; font-size: 10px; line-height: 10px; }
 .seatplan-mobile-detail .seatplan-block {
-  padding: 14px 10px 14px 40px; position: relative;
+  padding: 14px 40px 14px 10px; position: relative;
   flex: 1 1 auto; min-height: 0; overflow: auto;
   display: flex; align-items: center; justify-content: center;
 }
 /* scaleWrap bekommt seine Größe per JS (_fitZoneScale) exakt passend zum
    bereits herunterskalierten Inhalt — kein eigenes Layout-Verhalten nötig. */
 .seatplan-scale-wrap { flex-shrink: 0; }
+/* top wird per JS auf Höhe der Gang-Trennlinie gesetzt (s. _fitZoneScale); ohne
+   Trennlinie bleibt top:50% (vertikal mittig) als Fallback. */
 .seatplan-zoom-controls {
-  position: absolute; left: 6px; top: 50%; transform: translateY(-50%);
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
   display: flex; flex-direction: column; gap: 6px; z-index: 3;
 }
 .seatplan-zoom-controls button {

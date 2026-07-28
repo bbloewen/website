@@ -8,7 +8,7 @@
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785200000" />
 <link rel="stylesheet" href="/css/site.css?v=1785800000" />
-<link rel="stylesheet" href="/css/seat-picker.css?v=1785800000" />
+<link rel="stylesheet" href="/css/seat-picker.css?v=1785880000" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 </head>
@@ -25,7 +25,13 @@
           <h1 class="nowrap-lg" style="font-size:clamp(24px,5vw,56px)">Deine <span class="kw">Dauerkarte<span class="swoosh" aria-hidden="true"></span></span>.</h1>
           <p class="lead">Einmal gewählt, immer der gleiche Blick aufs Parkett.</p>
         </div>
-        <div></div>
+        <div style="display:flex;justify-content:center">
+          <div style="background:rgba(255,255,255,.1);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.25);border-radius:var(--radius-lg);padding:20px 24px;max-width:320px;text-align:center">
+            <i data-lucide="heart-handshake" class="icon-28" style="color:var(--color-brand-orange)"></i>
+            <p class="t-body-sm" style="color:#fff;margin:10px 0 14px">Als Vereinsmitglied sicherst du dir dauerhaft 30&nbsp;% Rabatt auf deine Dauerkarte.</p>
+            <a class="btn btn-primary btn-sm" href="/mitglied-werden/formular.html?typ=fan">Vereinsmitglied werden</a>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -52,7 +58,7 @@
           </div>
           <div class="buy-cart-col">
             <h3 class="t-h4 mb-1">Deine Auswahl</h3>
-            <p class="t-caption" style="color:var(--text-muted);margin-bottom:14px">Dauerkarte für alle Heimspiele der Hin- und Rückrunde, außer Playoffs.</p>
+            <p class="t-caption" style="color:var(--text-muted);margin-bottom:14px">Dauerkarte für alle Heimspiele der Hin- und Rückrunde (ohne Playoffs).</p>
             <div id="seatplan-cart"></div>
             <div class="seatplan-cart-total"><span>Gesamt</span><span id="seatplan-total">0 €</span></div>
             <button class="btn btn-primary btn-sm" id="seatplan-cta" style="margin-top:16px;width:100%;justify-content:center" disabled>Weiter zur Kasse</button>
@@ -70,39 +76,53 @@
 
       <span class="eyebrow" style="display:block;margin-top:40px;margin-bottom:16px">Wissenswertes</span>
       <div class="grid-3">
-        <div class="info-tile">
-          <div class="tile-icon"><i data-lucide="armchair"></i></div>
-          <h3 class="t-h4">Fester Sitzplatz</h3>
+        <div class="info-tile info-tile-row info-tile-row-divided">
+          <div class="info-tile-row-head">
+            <div class="tile-icon"><i data-lucide="armchair"></i></div>
+            <h3 class="t-h4">Fester Sitzplatz</h3>
+          </div>
           <p class="t-body-sm">Dein Sitzplatz gilt für die komplette Hin- und Rückrunde der Saison, außer Playoffs.</p>
         </div>
-        <div class="info-tile">
-          <div class="tile-icon"><i data-lucide="smartphone"></i></div>
-          <h3 class="t-h4">Digitales Ticket</h3>
+        <div class="info-tile info-tile-row info-tile-row-divided">
+          <div class="info-tile-row-head">
+            <div class="tile-icon"><i data-lucide="smartphone"></i></div>
+            <h3 class="t-h4">Digitales Ticket</h3>
+          </div>
           <p class="t-body-sm">Ein Ticket, ein QR-Code — gültig bei jedem Heimspiel der Saison.</p>
         </div>
-        <div class="info-tile">
-          <div class="tile-icon"><i data-lucide="percent"></i></div>
-          <h3 class="t-h4">Ermäßigungen</h3>
+        <div class="info-tile info-tile-row info-tile-row-divided">
+          <div class="info-tile-row-head">
+            <div class="tile-icon"><i data-lucide="percent"></i></div>
+            <h3 class="t-h4">Ermäßigungen</h3>
+          </div>
           <p class="t-body-sm">Ermäßigt für Studierende, Azubis, Menschen mit Behinderung, Rentner*innen und Mitglieder von Kooperationsvereinen.</p>
         </div>
-        <div class="info-tile">
-          <div class="tile-icon"><i data-lucide="door-open"></i></div>
-          <h3 class="t-h4">Einlass</h3>
+        <div class="info-tile info-tile-row info-tile-row-divided">
+          <div class="info-tile-row-head">
+            <div class="tile-icon"><i data-lucide="door-open"></i></div>
+            <h3 class="t-h4">Einlass</h3>
+          </div>
           <p class="t-body-sm">Eine Stunde vor Spielbeginn öffnen sich die Türen der Riethsporthalle — bei jedem Heimspiel der Saison.</p>
         </div>
-        <div class="info-tile">
-          <div class="tile-icon"><i data-lucide="baby"></i></div>
-          <h3 class="t-h4">Kinder bis 6</h3>
+        <div class="info-tile info-tile-row info-tile-row-divided">
+          <div class="info-tile-row-head">
+            <div class="tile-icon"><i data-lucide="baby"></i></div>
+            <h3 class="t-h4">Kinder bis 6</h3>
+          </div>
           <p class="t-body-sm">Kinder bis 6 Jahre haben freien Eintritt (ohne Anspruch auf einen eigenen Sitzplatz).</p>
         </div>
-        <div class="info-tile">
-          <div class="tile-icon"><i data-lucide="ban"></i></div>
-          <h3 class="t-h4">Rückgabe & Verlust</h3>
+        <div class="info-tile info-tile-row info-tile-row-divided">
+          <div class="info-tile-row-head">
+            <div class="tile-icon"><i data-lucide="ban"></i></div>
+            <h3 class="t-h4">Rückgabe & Verlust</h3>
+          </div>
           <p class="t-body-sm">Eine Rücknahme von Eintrittskarten ist nicht möglich. Bei Verlust wird kein Ersatz geleistet.</p>
         </div>
-        <div class="info-tile">
-          <div class="tile-icon"><i data-lucide="mail"></i></div>
-          <h3 class="t-h4">Fragen zur Dauerkarte?</h3>
+        <div class="info-tile info-tile-row info-tile-row-divided">
+          <div class="info-tile-row-head">
+            <div class="tile-icon"><i data-lucide="mail"></i></div>
+            <h3 class="t-h4">Fragen zur Dauerkarte?</h3>
+          </div>
           <p class="t-body-sm">Wir helfen gerne: <a href="mailto:info@basketball-loewen.com">info@basketball-loewen.com</a></p>
         </div>
       </div>
@@ -115,7 +135,7 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="/js/nav.js?v=1785200000"></script>
 <script src="/js/include.js?v=1785200000"></script>
-<script src="/js/seat-picker.js?v=1785830000"></script>
+<script src="/js/seat-picker.js?v=1785860000"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     /* Preisbox zeigt bewusst den Normalpreis (data-base) statisch an. Rabatte

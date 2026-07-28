@@ -117,6 +117,21 @@
     return this._dkPrice(base, tarif.indexOf('_member') !== -1);
   };
 
+  /* Rechnet die Rabattkette transparent vor, statt nur den fertigen Endpreis zu
+     zeigen ("Normalpreis 1.000 € je Ticket, abzüglich 20 % Frühbucherrabatt,
+     abzüglich 30 % Vereinsmitgliederrabatt") — der Endpreis selbst steht separat
+     rechts in der Zeile (s. _renderCart), nicht mehr hier verdoppelt. */
+  SeatPicker.prototype._dkBreakdownText = function (priceInfo, tarif) {
+    var isErmaessigt = tarif.indexOf('ermaessigt') === 0;
+    var base = isErmaessigt ? priceInfo.ermaessigt : priceInfo.normal;
+    var parts = [(isErmaessigt ? 'Ermäßigt' : 'Normalpreis') + ' ' + fmtEUR(base) + ' € je Ticket'];
+    if (this.dkDiscount) {
+      if (this._earlyBirdActive()) parts.push('abzüglich ' + this.dkDiscount.earlyBirdPercent + ' % Frühbucherrabatt');
+      if (tarif.indexOf('_member') !== -1) parts.push('abzüglich ' + this.dkDiscount.memberPercent + ' % Vereinsmitgliederrabatt');
+    }
+    return parts.join(', ');
+  };
+
   SeatPicker.prototype._load = function () {
     var self = this;
     var planFetch = fetch(this.planUrl).then(function (r) { return r.json(); });
@@ -438,6 +453,21 @@
       gridWrap.style.transform = 'scale(' + scale + ')';
       scaleWrap.style.width = Math.ceil(naturalWidth * scale) + 'px';
       scaleWrap.style.height = Math.ceil(naturalHeight * scale) + 'px';
+      positionZoomControls();
+    }
+    // Zoom-Buttons sitzen auf Höhe der Gang-Trennlinie (statt starr vertikal
+    // mittig in der ganzen Box) — dort ist ohnehin schon eine optische Zäsur,
+    // Buttons docken sich also an ein bestehendes Element an statt eine eigene
+    // beliebige Höhe zu behaupten. Ohne Trennlinie (Zone ohne section_break)
+    // bleibt die CSS-Vorgabe (vertikal mittig) als Fallback bestehen.
+    function positionZoomControls() {
+      var controls = box.querySelector('.seatplan-zoom-controls');
+      var aisleLine = box.querySelector('.seatplan-aisle-line');
+      if (!controls || !aisleLine) return;
+      var boxRect = box.getBoundingClientRect();
+      var lineRect = aisleLine.getBoundingClientRect();
+      var centerY = lineRect.top + lineRect.height / 2 - boxRect.top;
+      controls.style.top = centerY + 'px';
     }
     apply();
 
@@ -811,11 +841,10 @@
         }
         row.innerHTML =
           '<div>' + s.zoneLabel + ' · Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber +
-          '<br><span class="t-caption">' + fmtEUR(s.price) + ' € je Ticket</span>' +
+          '<br><span class="t-caption">' + self._dkBreakdownText(s.priceInfo, s.tarif) + '</span>' +
           (tarifOptions.length > 1 ? '<br><select data-tarif="' + guid + '" class="seatplan-tarif-select">' +
             tarifOptions.map(function (t) {
-              return '<option value="' + t + '"' + (s.tarif === t ? ' selected' : '') + '>' +
-                DK_TARIF_LABELS[t] + ' (' + fmtEUR(self._dkTarifPrice(s.priceInfo, t)) + ' €)</option>';
+              return '<option value="' + t + '"' + (s.tarif === t ? ' selected' : '') + '>' + DK_TARIF_LABELS[t] + '</option>';
             }).join('') +
             '</select>' : '') +
           '</div>' +
