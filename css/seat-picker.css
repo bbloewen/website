@@ -367,7 +367,7 @@
   flex: 0 0 34px;
   align-self: center;
   height: 50%;
-  transform: translate(-10px, 20px);
+  transform: translate(-15px, 20px);
   background: transparent;
   border: 1px dashed var(--color-neutral-200);
   border-radius: var(--radius-md);
@@ -389,7 +389,7 @@
      dazu, um die der Stehplatzbereich per transform nach links verschoben ist
      (sonst bliebe dort trotz negativer Margin eine Lücke) — insgesamt berührt
      das Spielfeld so den Stehplatzbereich direkt. */
-  margin: 0 -8px 0 -18px;
+  margin: 0 -13px 0 -18px;
   aspect-ratio: 28 / 15;
   border: 1px solid var(--color-neutral-200);
   border-radius: var(--radius-md);
