@@ -7842,7 +7842,8 @@
               },
               "category": "Kategorie II"
             }
-          ]
+          ],
+          "align_reference_seat": true
         },
         {
           "uuid": "4ad361b9-a738-5c2e-a519-39d178d43248",
@@ -8108,7 +8109,8 @@
               },
               "category": "Kategorie II"
             }
-          ]
+          ],
+          "align_target_seat": 22
         },
         {
           "uuid": "b91d68c0-aaa2-5182-be12-59ef38bfafb7",
@@ -8404,7 +8406,8 @@
               },
               "category": "Kategorie II"
             }
-          ]
+          ],
+          "align_target_seat": 24
         }
       ]
     },
@@ -10206,7 +10209,8 @@
               "category": "Kategorie I"
             }
           ],
-          "match_first_row_width": true
+          "match_first_row_width": true,
+          "align_reference_seat": true
         },
         {
           "uuid": "32be158c-3325-513a-8d32-adc74d41e91d",
@@ -10472,7 +10476,8 @@
               },
               "category": "Kategorie I"
             }
-          ]
+          ],
+          "align_target_seat": 22
         },
         {
           "uuid": "edaebdfb-31c7-52d3-b980-056553355a0f",
@@ -10768,7 +10773,8 @@
               },
               "category": "Kategorie I"
             }
-          ]
+          ],
+          "align_target_seat": 24
         }
       ]
     },
@@ -12725,7 +12731,8 @@
               },
               "category": "Kategorie II"
             }
-          ]
+          ],
+          "align_reference_seat": true
         },
         {
           "uuid": "eebc6320-5a03-5777-a249-b30379d7c925",
@@ -12981,7 +12988,8 @@
               },
               "category": "Kategorie II"
             }
-          ]
+          ],
+          "align_target_seat": 22
         },
         {
           "uuid": "36f95053-88e7-55fc-8fc0-2331237dffda",
@@ -13277,7 +13285,8 @@
               },
               "category": "Kategorie II"
             }
-          ]
+          ],
+          "align_target_seat": 24
         }
       ]
     }

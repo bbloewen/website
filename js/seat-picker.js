@@ -33,6 +33,11 @@
     if (category === 'VIP') return 'rgba(179,57,44,.9)';
     return '#B9C1C8';
   }
+  function catShortLabel(category) {
+    if (category === 'Kategorie I') return 'Kat. I';
+    if (category === 'Kategorie II') return 'Kat. II';
+    return category;
+  }
 
   /* Gutschein-Codes sind noch nicht an pretix angebunden — feste Testcodes,
      damit sich der Ablauf schon jetzt echt durchklicken lässt. Dieselben Codes
@@ -176,7 +181,6 @@
 
   SeatPicker.prototype._renderMobileOverview = function () {
     var self = this;
-    var MOBILE_CAT_LABEL = { 'Kategorie I': 'Kat. I', 'Kategorie II': 'Kat. II', 'VIP': 'VIP' };
 
     function blockTile(id, isNorth) {
       var zone = self._zoneById(id);
@@ -218,7 +222,7 @@
       return '<button type="button" class="' + tileClass + '" style="background:' + background + ';border-color:' + borderColor + '" data-zone="' + id + '">' +
         vipLabel +
         '<span class="seatplan-mobile-tile-letter">' + id + '</span>' +
-        '<span class="seatplan-mobile-tile-cat">' + MOBILE_CAT_LABEL[mainCategory] + '</span>' +
+        '<span class="seatplan-mobile-tile-cat">' + catShortLabel(mainCategory) + '</span>' +
         '</button>';
     }
 
@@ -293,7 +297,8 @@
     var priceInfo = this.prices[category] || { normal: 0 };
     var blockKey = zoneId + '::' + category;
     var counts = this.blockCounts[blockKey] || { normal: 0, ermaessigt: 0 };
-    this._setBlockCount(blockKey, zone.name, category, priceInfo, 'normal', (counts.normal || 0) + qty, total);
+    var zoneLabel = zone.name + ' - ' + catShortLabel(category);
+    this._setBlockCount(blockKey, zoneLabel, category, priceInfo, 'normal', (counts.normal || 0) + qty, total);
   };
 
   SeatPicker.prototype._addPendingBlock = function () {
@@ -339,7 +344,7 @@
     target.appendChild(wrap);
     if (this.detailBackdropEl) this.detailBackdropEl.classList.add('open');
     if (zoneEl) {
-      this._fixupRowWidths(zoneEl);
+      this._fixupRowWidths(zoneEl, zone);
       this._fitZoneScale(zoneEl);
     }
     if (window.lucide) window.lucide.createIcons();
@@ -358,7 +363,7 @@
      gerenderte Breite von Reihe 1 gestreckt/gestaucht (justify-content:space-between
      verteilt die Sitze dafür neu) — Messung erst möglich, wenn die Zone im echten DOM
      hängt, deshalb ein separater Schritt statt Teil von _renderZone selbst. */
-  SeatPicker.prototype._fixupRowWidths = function (zoneEl) {
+  SeatPicker.prototype._fixupRowWidths = function (zoneEl, zone) {
     var rows = zoneEl.querySelectorAll('.seatplan-row-line');
     if (!rows.length) return;
     var targetWidth = rows[0].getBoundingClientRect().width;
@@ -366,6 +371,31 @@
       row.style.width = targetWidth + 'px';
       row.style.justifyContent = 'space-between';
     });
+
+    // Hintere Reihen mit data-align-target-seat (s. _renderZone) so verschieben, dass
+    // GENAU dieser eine Sitz auf derselben Höhe landet wie der letzte Sitz der mit
+    // seatplan-row-line--align-reference markierten Reihe (z. B. Reihe 10) — statt
+    // Sitzanzahl × Rasterbreite anzunehmen, was Segment-Lücken innerhalb der Reihe
+    // (segment_breaks) verfälschen würden. Rechts bei A/B/D/E (Standard-Kante), links
+    // bei den gespiegelten Blöcken C/F.
+    var mirrored = zone && (zone.zone_id === 'C' || zone.zone_id === 'F');
+    var referenceRow = zoneEl.querySelector('.seatplan-row-line--align-reference');
+    var referenceSeats = referenceRow ? referenceRow.querySelectorAll('.seatplan-seat') : null;
+    var referenceSeat = referenceSeats && referenceSeats.length ? referenceSeats[referenceSeats.length - 1] : null;
+    if (referenceSeat) {
+      var refRect = referenceSeat.getBoundingClientRect();
+      var refEdge = mirrored ? refRect.left : refRect.right;
+      zoneEl.querySelectorAll('[data-align-target-seat]').forEach(function (row) {
+        var targetNum = row.dataset.alignTargetSeat;
+        var targetSeat = Array.from(row.querySelectorAll('.seatplan-seat')).find(function (s) {
+          return s.textContent === targetNum;
+        });
+        if (!targetSeat) return;
+        var seatRect = targetSeat.getBoundingClientRect();
+        if (mirrored) row.style.marginLeft = '-' + (seatRect.left - refEdge) + 'px';
+        else row.style.marginRight = '-' + (refEdge - seatRect.right) + 'px';
+      });
+    }
   };
 
   /* Passt den kompletten Blockplan per Skalierung so ein, dass er komplett ohne
@@ -392,7 +422,13 @@
     var availHeight = box.clientHeight;
     if (!naturalWidth || !naturalHeight || !availWidth || !availHeight) return;
 
-    var autoFit = Math.min(1, availWidth / naturalWidth, availHeight / naturalHeight);
+    // Untere Grenze, damit Sitze auch bei sehr breiten Reihen (z. B. Block B, Reihe 12
+    // mit 28 Sitzen) auf einem schmalen Handy-Format noch lesbar und die "ausgewählt"-
+    // Färbung erkennbar bleibt — geht das nicht ohne Rest, überläuft die Box seitlich
+    // und ist per overflow:auto (s. seat-picker.css) horizontal scrollbar statt
+    // unbrauchbar winzig zu werden.
+    var MIN_READABLE_SCALE = 0.5;
+    var autoFit = Math.max(MIN_READABLE_SCALE, Math.min(1, availWidth / naturalWidth, availHeight / naturalHeight));
     var zoom = 1;
     var minZoom = 0.5, maxZoom = 2.5;
 
@@ -493,6 +529,15 @@
         // trotzdem optisch gleich breit wirken — Breite wird nach dem Einfügen ins DOM
         // gemessen (s. _fixupRowWidths), nicht aus einer festen Pixelzahl berechnet.
         if (row.match_first_row_width) rowEl.classList.add('seatplan-row-line--match-first');
+        // Hintere Reihen (z. B. Block B, Reihe 11/12) wachsen nicht symmetrisch nach
+        // außen, sondern verschieben sich ganz gegenüber den vorderen Reihen — ein
+        // bestimmter Sitz (align_target_seat) dort liegt exakt auf Höhe des letzten
+        // Sitzes einer vorderen Reihe. Verschiebung wird nach dem Einfügen ins DOM aus
+        // der tatsächlichen Position des Zielsitzes berechnet (s. _fixupRowWidths),
+        // nicht aus Sitzanzahl × Rasterbreite — Segment-Lücken innerhalb der Reihe
+        // (segment_breaks) machen den Abstand zwischen Sitzen sonst uneinheitlich.
+        if (row.align_target_seat) rowEl.dataset.alignTargetSeat = row.align_target_seat;
+        if (row.align_reference_seat) rowEl.classList.add('seatplan-row-line--align-reference');
         // Sichtbarer Gang zwischen zwei Struktur-/Kategorie-Gruppen (z. B. Reihe 5/6).
         // Bei B markiert schon der Farbwechsel (VIP/Kat. I) diese Grenze; bei den
         // einfarbigen Blöcken A/C braucht es dafür eine eigene Trennlinie, sonst wirkt
