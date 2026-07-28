@@ -13121,7 +13121,17 @@
               "category": "Kategorie II"
             }
           ],
-          "align_target_seat": 3
+          "align_target_seat": 3,
+          "segment_align": {
+            "1": {
+              "row": "12",
+              "seat": 1
+            },
+            "23": {
+              "row": "12",
+              "seat": 27
+            }
+          }
         },
         {
           "uuid": "36f95053-88e7-55fc-8fc0-2331237dffda",
