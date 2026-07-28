@@ -57,11 +57,11 @@
               </div>
             </div>
             <p class="t-body-sm" style="margin:12px 0">Mit der Dauerkarte sicherst du dir deinen festen Platz für die ganze Saison — Spiel für Spiel derselbe Blick aufs Parkett.</p>
-            <div class="price-row"><span>Kategorie 1</span><strong>208,00 €</strong></div>
-            <div class="price-row"><span>Kategorie 1 (ermäßigt)</span><strong>182,00 €</strong></div>
-            <div class="price-row"><span>Kategorie 2</span><strong>156,00 €</strong></div>
-            <div class="price-row"><span>Kategorie 2 (ermäßigt)</span><strong>110,50 €</strong></div>
-            <div class="price-row"><span>VIP</span><strong>1.000,00 €</strong></div>
+            <div class="price-row"><span>Kategorie 1</span><strong id="ov-price-kat1" data-base="208">208,00 €</strong></div>
+            <div class="price-row"><span>Kategorie 1 (ermäßigt)</span><strong id="ov-price-kat1-erm" data-base="182">182,00 €</strong></div>
+            <div class="price-row"><span>Kategorie 2</span><strong id="ov-price-kat2" data-base="156">156,00 €</strong></div>
+            <div class="price-row"><span>Kategorie 2 (ermäßigt)</span><strong id="ov-price-kat2-erm" data-base="110.5">110,50 €</strong></div>
+            <div class="price-row"><span>VIP</span><strong id="ov-price-vip" data-base="1000">1.000,00 €</strong></div>
             <p class="t-caption" style="margin-top:12px;color:var(--text-muted)">Ermäßigt gilt für Studierende, Azubis, FSJ, Menschen mit Behinderung, Rentner*innen und Mitglieder von Kooperationsvereinen.</p>
             <a class="btn btn-primary btn-sm" style="margin-top:12px;width:100%;justify-content:center" href="/tickets/dauerkarte.html">Dauerkarte kaufen</a>
           </div>
@@ -86,7 +86,7 @@
           <span class="eyebrow" id="overview-discount-modal-title">Frühbucherrabatt</span>
           <h3 class="t-h3" style="margin:8px 0 12px">Je früher, desto günstiger.</h3>
           <p class="t-body-sm">Bestellst du bis zum 31.08.2026, sparst du 20&nbsp;%. Ab dem 01.09.2026 gilt der reguläre Preis.</p>
-          <p class="t-body-sm mt-3">Die hier angezeigten Preise enthalten den Rabatt noch nicht — er wird automatisch bei der Bestellung bis zum Stichtag abgezogen.</p>
+          <p class="t-body-sm mt-3">Die hier angezeigten Preise enthalten den Rabatt bereits automatisch bis zum Stichtag.</p>
         </div>
       </div>
 
@@ -154,6 +154,21 @@
     }).join('');
     if (window.lucide) window.lucide.createIcons();
   });
+
+  /* Frühbucherrabatt automatisch berechnen und zeigen — gleiche Logik wie auf
+     tickets/dauerkarte.html (durchgestrichener Originalpreis + reduzierter Preis). */
+  (function applyEarlyBirdToOverviewPrices() {
+    var earlyBirdUntil = new Date('2026-08-31T23:59:59');
+    var earlyBirdPercent = 20;
+    if (new Date() > earlyBirdUntil) return;
+    document.querySelectorAll('strong[data-base]').forEach(function (el) {
+      var base = parseFloat(el.dataset.base);
+      var discounted = Math.round(base * (1 - earlyBirdPercent / 100) * 100) / 100;
+      var fmt = function (n) { return n.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'; };
+      el.innerHTML = '<span style="text-decoration:line-through;color:var(--text-muted);font-weight:400;margin-right:6px">' +
+        fmt(base) + '</span>' + fmt(discounted);
+    });
+  })();
 
   function wireBadgeModal(badgeId, backdropId, closeId) {
     var backdrop = document.getElementById(backdropId);
