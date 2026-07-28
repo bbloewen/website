@@ -212,6 +212,14 @@
 
     var wrap = document.createElement('div');
     wrap.className = 'seatplan-block' + (isCat1 ? ' cat1' : '');
+    // Block B: die vielen Einzelreihen-Korrekturen (Reihe 6-12) verschieben die
+    // sichtbare Sitzmasse insgesamt leicht nach links gegenüber der Blockbox —
+    // per Messung (getBoundingClientRect) 5px asymmetrisches Padding gegensteuern,
+    // damit der gesamte Sitzplan wieder in seiner Box zentriert wirkt.
+    if (zone.zone_id === 'B') {
+      wrap.style.paddingLeft = '15px';
+      wrap.style.paddingRight = '5px';
+    }
 
     var label = document.createElement('div');
     label.className = 'seatplan-block-label';
@@ -302,12 +310,14 @@
           }
         }
         // Block B, Reihe 11+12: komplett nach links (eigene Korrektur, unabhängig
-        // von der Reihe-1-10-Ausrichtung darüber).
+        // von der Reihe-1-10-Ausrichtung darüber). Als marginLeft statt transform,
+        // da transform die Reihennummer links aus der scrollbaren Blockbreite
+        // herausschiebt (unsichtbar wird) — marginLeft zählt korrekt zur Breite.
         if (zone.zone_id === 'B' && row.row_number === '11') {
-          rowEl.style.transform = 'translateX(-15px)';
+          rowEl.style.marginLeft = '-15px';
         }
         if (zone.zone_id === 'B' && row.row_number === '12') {
-          rowEl.style.transform = 'translateX(-10px)';
+          rowEl.style.marginLeft = '-10px';
         }
         // Reihennummer links UND rechts an der Reihe, wie im Original-Saalplan.
         var rowNumLeft = document.createElement('span');
@@ -333,6 +343,10 @@
           // Block B, Reihe 11, Platz 1+2: zusätzlich 10px nach links (Einzelsitz-Korrektur).
           if (zone.zone_id === 'B' && row.row_number === '11' && ['1', '2'].indexOf(seat.seat_number) !== -1) {
             btn.style.transform = 'translateX(-10px)';
+          }
+          // Block B, Reihe 12, Platz 1-7: zusätzlich 2px nach links (Einzelsitz-Korrektur).
+          if (zone.zone_id === 'B' && row.row_number === '12' && ['1', '2', '3', '4', '5', '6', '7'].indexOf(seat.seat_number) !== -1) {
+            btn.style.transform = 'translateX(-2px)';
           }
           if (blockMode) btn.tabIndex = -1;
           btn.dataset.seatGuid = seat.seat_guid;
