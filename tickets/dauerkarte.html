@@ -37,12 +37,8 @@
           <div class="buy-prices-col">
             <h3 class="t-h4" style="margin-bottom:8px">Preise</h3>
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-              <button type="button" class="badge badge-orange" id="dk-member-badge" style="border:none;cursor:pointer;font-family:inherit">
-                -30 % Vereinsmitglieder
-              </button>
-              <button type="button" class="badge badge-orange" id="dk-discount-badge" style="border:none;cursor:pointer;font-family:inherit">
-                -20 % Frühbucher bis 31.08.
-              </button>
+              <span class="badge badge-orange">-30 % Vereinsmitglieder</span>
+              <span class="badge badge-orange">-20 % Frühbucher bis 31.08.</span>
             </div>
             <div class="price-row"><span>Kategorie 1</span><strong id="dk-price-kat1" data-base="208">208,00 €</strong></div>
             <div class="price-row"><span>Kategorie 1 (ermäßigt)</span><strong id="dk-price-kat1-erm" data-base="182">182,00 €</strong></div>
@@ -69,29 +65,6 @@
       <div class="modal-backdrop" id="seatplan-detail-backdrop">
         <div class="modal-box modal-box-blockplan" role="dialog" aria-modal="true" aria-label="Sitzplatz-Detail">
           <div id="seatplan-detail-root"></div>
-        </div>
-      </div>
-
-      <div class="modal-backdrop" id="dk-discount-modal-backdrop">
-        <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="dk-discount-modal-title">
-          <button class="modal-close" aria-label="Schließen" id="dk-discount-modal-close"><i data-lucide="x"></i></button>
-          <div class="modal-icon"><i data-lucide="percent"></i></div>
-          <span class="eyebrow" id="dk-discount-modal-title">Frühbucherrabatt</span>
-          <h3 class="t-h3" style="margin:8px 0 12px">Je früher, desto günstiger.</h3>
-          <p class="t-body-sm">Bestellst du bis zum 31.08.2026, sparst du 20&nbsp;%. Ab dem 01.09.2026 gilt der reguläre Preis.</p>
-          <p class="t-body-sm mt-3">Die hier angezeigten Preise enthalten den Rabatt bereits automatisch bis zum Stichtag.</p>
-        </div>
-      </div>
-
-      <div class="modal-backdrop" id="dk-member-modal-backdrop">
-        <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="dk-member-modal-title">
-          <button class="modal-close" aria-label="Schließen" id="dk-member-modal-close"><i data-lucide="x"></i></button>
-          <div class="modal-icon"><i data-lucide="percent"></i></div>
-          <span class="eyebrow" id="dk-member-modal-title">Vereinsmitgliedsrabatt</span>
-          <h3 class="t-h3" style="margin:8px 0 12px">Dauerhaft 30 % für Vereinsmitglieder.</h3>
-          <p class="t-body-sm">Mitglieder von BC Erfurt, USV Erfurt, BIG Gotha und der Basketball Löwen Erfurt erhalten dauerhaft 30&nbsp;% Rabatt auf die Dauerkarte.</p>
-          <p class="t-body-sm mt-3">Bis zum 31.08.2026 lässt sich dieser Rabatt mit dem Frühbucherrabatt kombinieren — macht zusammen 50&nbsp;% Rabatt. Ab dem 01.09.2026 gilt nur noch der Vereinsmitgliedsrabatt von 30&nbsp;%.</p>
-          <p class="t-body-sm mt-3">Nachweis der Mitgliedschaft beim Kauf erforderlich. Wähle dazu bei deinem Sitzplatz im Warenkorb den Tarif „… mit Vereinsrabatt" aus.</p>
         </div>
       </div>
 
@@ -185,22 +158,6 @@
       window.location.href = '/tickets/checkout.html';
     }
     document.getElementById('seatplan-cta').addEventListener('click', goToBuyerDetails);
-
-    var discountBackdrop = document.getElementById('dk-discount-modal-backdrop');
-    function openDiscountModal() { discountBackdrop.classList.add('open'); }
-    function closeDiscountModal() { discountBackdrop.classList.remove('open'); }
-    document.getElementById('dk-discount-badge').addEventListener('click', openDiscountModal);
-    document.getElementById('dk-discount-modal-close').addEventListener('click', closeDiscountModal);
-    discountBackdrop.addEventListener('click', function (e) { if (e.target === discountBackdrop) closeDiscountModal(); });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDiscountModal(); });
-
-    var memberBackdrop = document.getElementById('dk-member-modal-backdrop');
-    function openMemberModal() { memberBackdrop.classList.add('open'); }
-    function closeMemberModal() { memberBackdrop.classList.remove('open'); }
-    document.getElementById('dk-member-badge').addEventListener('click', openMemberModal);
-    document.getElementById('dk-member-modal-close').addEventListener('click', closeMemberModal);
-    memberBackdrop.addEventListener('click', function (e) { if (e.target === memberBackdrop) closeMemberModal(); });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMemberModal(); });
   });
 </script>
 </body>
