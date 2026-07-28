@@ -250,15 +250,26 @@
           rowEl.style.alignSelf = 'flex-start';
           rowEl.style.marginLeft = (row3Gap - 3) + 'px';
         }
+        // Block B: Reihen 1-3 rechts verankert (deckt sich mit ihrem bisherigen, unver-
+        // änderten rechten Rand) — die 2px-Verschiebung nach links passiert NICHT über
+        // eine Margin, sondern weiter unten über eine breitere Gang-Lücke zwischen
+        // Platz 7 und 8 (die dadurch links davon alles automatisch nach links schiebt).
+        if (zone.zone_id === 'B' && ['1', '2', '3'].indexOf(row.row_number) !== -1) {
+          rowEl.style.alignSelf = 'flex-end';
+          rowEl.style.marginRight = '-3px';
+        }
         // Block B: Reihen 6-10 gemeinsam an derselben Kante verankern (rechtsbündig mit
         // Reihe 1-5). Reihe 6-9 zusätzlich per größerem Sitzabstand (Anzahl bleibt gleich)
         // auf die Breite von Reihe 1-3 aufziehen, damit sie dadurch automatisch auch
-        // linksbündig mit Reihe 1-3/10 werden.
+        // linksbündig mit Reihe 1-3/10 werden. Reihe 6-9 zusätzlich 4px weiter nach
+        // links (mehr Sitzabstand) und 1px weiter nach rechts (kleinere Anker-Margin).
         if (zone.zone_id === 'B' && ['6', '7', '8', '9', '10'].indexOf(row.row_number) !== -1) {
           rowEl.style.alignSelf = 'flex-end';
-          rowEl.style.marginRight = kat1AnchorGap + 'px';
-          if (row.row_number !== '10') {
-            rowEl.style.gap = '4.08px';
+          if (row.row_number === '10') {
+            rowEl.style.marginRight = kat1AnchorGap + 'px';
+          } else {
+            rowEl.style.marginRight = (kat1AnchorGap - 1) + 'px';
+            rowEl.style.gap = '4.37px';
           }
         }
         // Reihennummer links UND rechts an der Reihe, wie im Original-Saalplan.
@@ -276,7 +287,11 @@
           // die Sitznummerierung bleibt über den Gang hinweg durchgehend, nur die
           // Darstellung bekommt hier eine kleine zusätzliche Lücke.
           if (row.segment_breaks && row.segment_breaks.indexOf(parseInt(seat.seat_number, 10)) !== -1) {
-            btn.style.marginLeft = '6px';
+            // Block B, Reihe 1-3: Gang zwischen Platz 7/8 um 2px breiter — da diese
+            // Reihen rechts verankert sind (s.o.), schiebt das alles links davon
+            // (Platz 1-7 + linkes Reihenlabel) automatisch 2px weiter nach links.
+            var isWiderAisle = zone.zone_id === 'B' && ['1', '2', '3'].indexOf(row.row_number) !== -1;
+            btn.style.marginLeft = isWiderAisle ? '8px' : '6px';
           }
           if (blockMode) btn.tabIndex = -1;
           btn.dataset.seatGuid = seat.seat_guid;
