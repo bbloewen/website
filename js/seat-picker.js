@@ -428,7 +428,14 @@
     var target = this.detailRootEl || this.root;
     target.innerHTML = '';
     target.appendChild(wrap);
-    if (this.detailBackdropEl) this.detailBackdropEl.classList.add('open');
+    if (this.detailBackdropEl) {
+      this.detailBackdropEl.classList.add('open');
+      // Solange das Overlay offen ist, darf die Seite DAHINTER nicht mitscrollen:
+      // passt der Sitzplan komplett in die Box, gibt es darin nichts zu scrollen und
+      // das Rad-Delta landete bisher am Body — es sah aus, als würde sich "das Bild
+      // dahinter" verschieben statt der Sitzplan.
+      document.documentElement.classList.add('seatplan-detail-open');
+    }
     if (zoneEl) {
       this._fixupRowWidths(zoneEl, zone);
       this._fitZoneScale(zoneEl);
@@ -594,6 +601,7 @@
       this._renderMobileZoneDetail();
     } else {
       if (this.detailBackdropEl) this.detailBackdropEl.classList.remove('open');
+      document.documentElement.classList.remove('seatplan-detail-open');
       this._renderMobileOverview();
     }
   };

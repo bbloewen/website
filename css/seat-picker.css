@@ -439,7 +439,16 @@
   content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
   width: 26%; aspect-ratio: 1; border-radius: 50%; border: 1px solid var(--color-neutral-200);
 }
-.seatplan-mobile-court > * { position: relative; }
+/* z-index (nicht nur position:relative) ist hier nötig: ::after (Mittelkreis) steht
+   in der Malreihenfolge NACH den echten Kindern und würde sonst über dem
+   "Spielfeld"-Label liegen. Mit z-index liegt das Label vor der Feldmarkierung. */
+.seatplan-mobile-court > * { position: relative; z-index: 1; }
+
+/* Scroll-Sperre der Seite hinter der offenen Block-Detailansicht. overflow sitzt am
+   Scroll-Container (documentElement), nicht am body — sonst scrollt die Seite in
+   manchen Browsern trotzdem weiter. scrollbar-gutter hält die Breite stabil, damit
+   das Wegfallen der Scrollleiste keinen Layout-Sprung erzeugt. */
+:root.seatplan-detail-open { overflow: hidden; scrollbar-gutter: stable; }
 
 /* Detailansicht eines einzelnen Blocks: Header mit Zurück-Button, danach der
    bestehende Zonen-Renderer, aber mit größeren, besser tappbaren Sitzen.
