@@ -215,12 +215,15 @@
     this.root.innerHTML =
       '<p class="t-body-sm" style="text-align:center;margin:0 0 12px;font-weight:600">Wähle deinen Block</p>' +
       '<div class="seatplan-mobile-overview">' +
-        '<div class="seatplan-mobile-entrance main" style="grid-column:1;grid-row:1 / 5"><span></span><i>Haupteingang</i><span></span></div>' +
+        '<div class="seatplan-mobile-entrance main" style="grid-column:1;grid-row:1 / 4"><span></span><i>Haupteingang</i><span></span></div>' +
         '<div class="seatplan-mobile-tiles" style="grid-column:2;grid-row:1">' + northTiles + '</div>' +
-        '<div class="seatplan-mobile-scoreboard" style="grid-column:2;grid-row:2"><span></span><i>Anzeigetafel</i></div>' +
-        '<div class="seatplan-mobile-court" style="grid-column:2;grid-row:3"><div class="seatplan-mobile-standing"><span>Stehplatz</span></div><p class="t-caption" style="margin:0 0 4px;color:var(--text-muted)">Spielfeld</p><div class="seatplan-legend">' + legendItems + '</div></div>' +
-        '<div class="seatplan-mobile-tiles" style="grid-column:2;grid-row:4">' + southTiles + '</div>' +
-        '<div class="seatplan-mobile-entrance vip" style="grid-column:3;grid-row:4"><span></span><i>VIP-Eingang</i><span></span></div>' +
+        '<div class="seatplan-mobile-court-row" style="grid-column:2;grid-row:2">' +
+          '<div class="seatplan-mobile-scoreboard"><span></span><i>Anzeigetafel</i><span></span></div>' +
+          '<div class="seatplan-mobile-standing"><span>Stehplatz</span></div>' +
+          '<div class="seatplan-mobile-court"><p class="t-caption" style="margin:0 0 4px;color:var(--text-muted)">Spielfeld</p><div class="seatplan-legend">' + legendItems + '</div></div>' +
+        '</div>' +
+        '<div class="seatplan-mobile-tiles" style="grid-column:2;grid-row:3">' + southTiles + '</div>' +
+        '<div class="seatplan-mobile-entrance vip" style="grid-column:3;grid-row:3"><span></span><i>VIP-Eingang</i><span></span></div>' +
       '</div>';
 
     this.root.querySelectorAll('.seatplan-mobile-tile[data-zone]').forEach(function (btn) {

@@ -263,7 +263,7 @@
 .seatplan-mobile-overview {
   display: grid;
   grid-template-columns: 16px minmax(0, 1fr) 16px;
-  grid-template-rows: auto auto 1fr auto;
+  grid-template-rows: auto 1fr auto;
   gap: 8px;
   padding: 6px 0 4px;
 }
@@ -307,25 +307,48 @@
 .seatplan-mobile-entrance.vip span { background: rgba(179, 57, 44, .35); }
 .seatplan-mobile-entrance.vip i { color: rgba(179, 57, 44, .9); }
 
-/* Anzeigetafel: dünne graue Linie mit Beschriftung, an der Seite von Block D/A
-   (nicht über die volle Breite) — sitzt zwischen den Nord-Kacheln und dem Spielfeld. */
+/* Reihe zwischen den Nord-Kacheln und den Süd-Kacheln: Anzeigetafel (vertikale
+   Linie, wie Haupt-/VIP-Eingang), Stehplatz (eigene Box) und Spielfeld nebeneinander
+   — in genau dieser Reihenfolge, wie im echten Saalplan (Stehplatz liegt neben dem
+   Spielfeld, nicht auf ihm). Die Zeilenhöhe ergibt sich aus dem Spielfeld
+   (aspect-ratio), Anzeigetafel/Stehplatz strecken sich per align-items:stretch mit.
+*/
+.seatplan-mobile-court-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
 .seatplan-mobile-scoreboard {
-  display: flex; align-items: center; gap: 6px;
-  width: 34%;
+  flex: 0 0 14px;
+  display: flex; flex-direction: column; align-items: center;
 }
 .seatplan-mobile-scoreboard span {
-  flex: 1; height: 2px; background: var(--color-neutral-200); border-radius: 1px;
+  flex: 1; width: 2px; min-height: 6px; border-radius: 1px;
+  background: var(--color-neutral-200);
 }
 .seatplan-mobile-scoreboard i {
-  font-style: normal; font-size: 9px; color: var(--text-muted); white-space: nowrap;
+  font-style: normal; font-size: 8px; font-weight: 600; letter-spacing: .04em;
+  color: var(--text-muted); white-space: nowrap;
+  writing-mode: vertical-rl; transform: rotate(180deg);
+  padding: 4px 0;
+}
+.seatplan-mobile-standing {
+  flex: 0 0 32px;
+  background: rgba(101, 110, 130, .08);
+  border: 1px dashed var(--color-neutral-200);
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+}
+.seatplan-mobile-standing span {
+  font-size: 8px; font-weight: 600; letter-spacing: .04em; color: var(--text-muted);
+  writing-mode: vertical-rl;
 }
 
-/* Spielfeld: von der Hälfte Block A/D bis zur Hälfte Block C/F, im echten
-   Seitenverhältnis eines Basketballfelds (28 x 15 m) statt künstlich schmal. */
+/* Spielfeld: im echten Seitenverhältnis eines Basketballfelds (28 x 15 m) statt
+   künstlich schmal, nimmt die verbleibende Breite neben Anzeigetafel + Stehplatz ein. */
 .seatplan-mobile-court {
-  position: relative;
-  width: 82%;
-  margin: 0 auto;
+  flex: 1 1 auto;
+  min-width: 0;
   aspect-ratio: 28 / 15;
   border: 1px solid var(--color-neutral-200);
   border-radius: var(--radius-md);
@@ -333,23 +356,7 @@
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 6px;
 }
-/* Stehplatzbereich: transparente Box zwischen Block A und D (linke, spielfeldnahe
-   Seite), halb so breit wie das Spielfeld. Rein dekorativ/informativ. */
-.seatplan-mobile-standing {
-  position: absolute; top: 0; bottom: 0; left: 0; width: 50%;
-  background: rgba(101, 110, 130, .08);
-  border-right: 1px dashed var(--color-neutral-200);
-  border-radius: var(--radius-md) 0 0 var(--radius-md);
-  display: flex; align-items: flex-start; justify-content: center;
-  padding-top: 6px;
-  pointer-events: none;
-}
-.seatplan-mobile-standing span {
-  font-size: 8px; font-weight: 600; letter-spacing: .04em; color: var(--text-muted);
-  writing-mode: vertical-rl;
-}
-.seatplan-mobile-court .seatplan-legend { justify-content: center; z-index: 1; }
-.seatplan-mobile-court > .t-caption { z-index: 1; }
+.seatplan-mobile-court .seatplan-legend { justify-content: center; }
 
 /* Detailansicht eines einzelnen Blocks: Header mit Zurück-Button, danach der
    bestehende Zonen-Renderer, aber mit größeren, besser tappbaren Sitzen. */
