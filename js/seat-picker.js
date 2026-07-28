@@ -262,7 +262,14 @@
             '<div class="seatplan-mobile-scoreboard"><span></span><i>Anzeigetafel</i><span></span></div>' +
             '<div class="seatplan-mobile-standing"><span>Steh-</span><span>platz</span></div>' +
           '</div>' +
-          '<div class="seatplan-mobile-court">' + courtConfirm + '<p class="t-caption" style="margin:0;color:var(--text-muted)">Spielfeld</p></div>' +
+          '<div class="seatplan-mobile-court-col">' +
+            '<div class="seatplan-mobile-bench-strip">' +
+              '<span class="seatplan-mobile-bench-gaeste">- Gäste -</span>' +
+              '<span class="seatplan-mobile-bench-kg">- Kampfgericht -</span>' +
+              '<span class="seatplan-mobile-bench-heim">- Heim -</span>' +
+            '</div>' +
+            '<div class="seatplan-mobile-court">' + courtConfirm + '<p class="t-caption" style="margin:0;color:var(--text-muted)">Spielfeld</p></div>' +
+          '</div>' +
           '<div class="seatplan-mobile-court-aside-mirror" aria-hidden="true"></div>' +
         '</div>' +
         '<div class="seatplan-mobile-tiles" style="grid-column:2;grid-row:3">' + southTiles + '</div>' +

@@ -298,6 +298,10 @@
   transition: transform .12s ease;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
 }
+/* Nordblöcke (D/E/F) zwei Drittel so hoch wie Südblöcke (unteres Drittel weg) —
+   der gewonnene Platz zur Anzeigetafel-Zeile (s. .seatplan-mobile-bench-strip)
+   nutzt genau diese Differenz, alles andere bleibt unverändert. */
+.seatplan-mobile-tile:not(.seatplan-mobile-tile-south) { aspect-ratio: 3 / 2; }
 .seatplan-mobile-tile:active { transform: scale(.96); }
 .seatplan-mobile-tile:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 2px; }
 .seatplan-mobile-tile-letter { font-size: 15px; font-weight: 700; }
@@ -391,18 +395,46 @@
   writing-mode: vertical-rl; transform: rotate(180deg);
 }
 
+/* Spalte aus Anzeigetafel-Zeile (s. .seatplan-mobile-bench-strip) + Spielfeld —
+   übernimmt die Flex-Teilnahme UND die Rand-Ausrichtung, die vorher direkt am
+   Spielfeld hingen, damit die neue Zeile exakt dieselbe Breite wie das Spielfeld
+   bekommt statt die volle Zeilenbreite. */
+.seatplan-mobile-court-col {
+  flex: 1 1 auto;
+  min-width: 0;
+  /* Negative Margin frisst den Row-Gap (8px) auf: rechts reicht die Spalte
+     direkt an den unsichtbaren Spiegel heran. Links kommen zusätzlich die 10px
+     dazu, um die der Stehplatzbereich per transform nach links verschoben ist
+     (sonst bliebe dort trotz negativer Margin eine Lücke) — insgesamt berührt
+     die Spalte so den Stehplatzbereich direkt. */
+  margin: 0 -13px 0 -18px;
+  display: flex; flex-direction: column;
+}
+/* Anzeigetafel-Zeile für den Nordbereich (Gäste-/Kampfgericht-/Heimbank) — analog
+   zur vertikalen "Anzeigetafel" bei Steh-/platz, nur liegend und dreigeteilt statt
+   einem einzelnen Label. Sitzt exakt über dem Spielfeld (nicht der ganzen Zeile),
+   im Platz, der durch die kürzeren D/E/F-Kacheln frei wird. */
+.seatplan-mobile-bench-strip {
+  display: flex;
+  border-top: 1px dashed var(--color-neutral-200);
+  border-bottom: 1px dashed var(--color-neutral-200);
+  margin-bottom: 6px;
+}
+.seatplan-mobile-bench-strip span {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px; font-weight: 600; letter-spacing: .02em; color: var(--text-muted);
+  white-space: nowrap; padding: 4px 0;
+}
+.seatplan-mobile-bench-gaeste, .seatplan-mobile-bench-heim { flex: 1 1 25%; }
+.seatplan-mobile-bench-kg {
+  flex: 1 1 50%;
+  border-left: 1px dashed var(--color-neutral-200);
+  border-right: 1px dashed var(--color-neutral-200);
+}
 /* Spielfeld: im echten Seitenverhältnis eines Basketballfelds (28 x 15 m) statt
    künstlich schmal, nimmt die verbleibende Breite zwischen Aside-Gruppe und Spiegel ein. */
 .seatplan-mobile-court {
   position: relative;
-  flex: 1 1 auto;
-  min-width: 0;
-  /* Negative Margin frisst den Row-Gap (8px) auf: rechts reicht das Spielfeld
-     direkt an den unsichtbaren Spiegel heran. Links kommen zusätzlich die 10px
-     dazu, um die der Stehplatzbereich per transform nach links verschoben ist
-     (sonst bliebe dort trotz negativer Margin eine Lücke) — insgesamt berührt
-     das Spielfeld so den Stehplatzbereich direkt. */
-  margin: 0 -13px 0 -18px;
   aspect-ratio: 28 / 15;
   border: 1px solid var(--color-neutral-200);
   border-radius: var(--radius-md);
