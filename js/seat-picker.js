@@ -209,7 +209,11 @@
         return self.excludeCategories.indexOf(g.category) === -1;
       });
       if (!groups.length) return '<div class="seatplan-mobile-tile" style="visibility:hidden"></div>';
-      var total = allGroups.reduce(function (sum, g) { return sum + g.rows.reduce(function (s, r) { return s + r.seats.length; }, 0); }, 0);
+      // Gewichtung nach REIHENANZAHL, nicht nach Sitzanzahl: der Gang liegt bei A/B/C
+      // physisch auf derselben Tiefe (nach Reihe 5 von 12) — mit sitzanzahl-basierter
+      // Gewichtung würde die Trennlinie je Block leicht unterschiedlich hoch landen,
+      // weil einzelne Reihen unterschiedlich viele Sitze haben.
+      var total = allGroups.reduce(function (sum, g) { return sum + g.rows.length; }, 0);
       // Reihenfolge in den Rohdaten: erste Gruppe = Reihen nächst dem Spielfeld. Bei
       // Nordblöcken (D/E/F) ist "nächst Spielfeld" die UNTERE Kante der Kachel (Spielfeld
       // liegt darunter), bei Südblöcken (A/B/C) die OBERE Kante (Spielfeld liegt darüber).
@@ -218,7 +222,7 @@
       var boundaries = [];
       var acc = 0;
       ordered.forEach(function (g, idx) {
-        var count = g.rows.reduce(function (s, r) { return s + r.seats.length; }, 0);
+        var count = g.rows.length;
         var pct = Math.round((count / total) * 1000) / 10;
         stops.push(catColor(g.category) + ' ' + acc + '%');
         acc += pct;
