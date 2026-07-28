@@ -177,6 +177,7 @@
 
   SeatPicker.prototype._renderMobileOverview = function () {
     var self = this;
+    var MOBILE_CAT_LABEL = { 'Kategorie I': 'Kat. I', 'Kategorie II': 'Kat. II', 'VIP': 'VIP' };
 
     function blockTile(id, isNorth) {
       var zone = self._zoneById(id);
@@ -200,15 +201,16 @@
         stops.push(catColor(g.category) + ' ' + acc + '%');
       });
       var background = groups.length > 1 ? 'linear-gradient(to bottom, ' + stops.join(', ') + ')' : catColor(groups[0].category);
-      var borderColor = catBorderColor(groups[groups.length - 1].category);
-      return '<button type="button" class="seatplan-mobile-tile" style="background:' + background + ';border-color:' + borderColor + '" data-zone="' + id + '">' + id + '</button>';
+      // Bei gemischten Blöcken (z. B. B: VIP vorn + Kategorie I hinten) beschriftet die
+      // Kachel bewusst nur die Hauptkategorie (letzte/größte Gruppe) statt beider — die
+      // Legende wurde entfernt, VIP-Anteile bleiben rein farblich erkennbar (Farbverlauf).
+      var mainCategory = groups[groups.length - 1].category;
+      var borderColor = catBorderColor(mainCategory);
+      return '<button type="button" class="seatplan-mobile-tile" style="background:' + background + ';border-color:' + borderColor + '" data-zone="' + id + '">' +
+        '<span class="seatplan-mobile-tile-letter">' + id + '</span>' +
+        '<span class="seatplan-mobile-tile-cat">' + MOBILE_CAT_LABEL[mainCategory] + '</span>' +
+        '</button>';
     }
-
-    var MOBILE_CAT_LABEL = { 'Kategorie I': 'Kat. I', 'Kategorie II': 'Kat. II', 'VIP': 'VIP' };
-    var catOrder = ['Kategorie I', 'Kategorie II', 'VIP'];
-    var legendItems = catOrder.filter(function (c) { return self.prices[c] && self.excludeCategories.indexOf(c) === -1; })
-      .map(function (c) { return '<span class="' + catClass(c) + '"><i></i> ' + MOBILE_CAT_LABEL[c] + '</span>'; })
-      .join('');
 
     var northTiles = this.northZones.map(function (id) { return blockTile(id, true); }).join('');
     var southTiles = this.southZones.map(function (id) { return blockTile(id, false); }).join('');
@@ -223,7 +225,7 @@
             '<div class="seatplan-mobile-scoreboard"><span></span><i>Anzeigetafel</i><span></span></div>' +
             '<div class="seatplan-mobile-standing"><span>Stehplatz</span></div>' +
           '</div>' +
-          '<div class="seatplan-mobile-court"><p class="t-caption" style="margin:0 0 4px;color:var(--text-muted)">Spielfeld</p><div class="seatplan-legend">' + legendItems + '</div></div>' +
+          '<div class="seatplan-mobile-court"><p class="t-caption" style="margin:0;color:var(--text-muted)">Spielfeld</p></div>' +
           '<div class="seatplan-mobile-court-aside-mirror" aria-hidden="true"></div>' +
         '</div>' +
         '<div class="seatplan-mobile-tiles" style="grid-column:2;grid-row:3">' + southTiles + '</div>' +

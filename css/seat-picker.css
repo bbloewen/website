@@ -278,15 +278,19 @@
   aspect-ratio: 1;
   border-radius: var(--radius-md);
   border: 1.5px solid;
-  font-size: 15px;
-  font-weight: 700;
   color: var(--color-brand-navy);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: transform .12s ease;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
 }
 .seatplan-mobile-tile:active { transform: scale(.96); }
 .seatplan-mobile-tile:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 2px; }
+.seatplan-mobile-tile-letter { font-size: 15px; font-weight: 700; }
+/* Ersetzt die frühere separate Legende: die Kategorie steht jetzt direkt an der
+   Kachel, bei gemischten Blöcken (z. B. B) nur die Hauptkategorie als Text —
+   der VIP-Anteil bleibt rein über den Farbverlauf erkennbar. */
+.seatplan-mobile-tile-cat { font-size: 8px; font-weight: 600; letter-spacing: .02em; opacity: .8; }
 
 /* Eingangs-Markierung: eine durchgehende Linie, die vom Label unterbrochen wird,
    statt eines Labels, das die Grafik zusätzlich verlängert. */
@@ -327,11 +331,12 @@
   gap: 6px;
 }
 .seatplan-mobile-court-aside-mirror {
-  flex: 0 0 52px;
+  flex: 0 0 44px;
 }
 .seatplan-mobile-scoreboard {
   flex: 0 0 14px;
   display: flex; flex-direction: column; align-items: center;
+  transform: translateX(-10px);
 }
 .seatplan-mobile-scoreboard span {
   flex: 1; width: 2px; min-height: 6px; border-radius: 1px;
@@ -346,9 +351,10 @@
 /* Stehplatz: nur halb so hoch wie das Spielfeld und mittig in der Aside-Gruppe
    (nicht wie die Anzeigetafel über die volle Höhe gestreckt). */
 .seatplan-mobile-standing {
-  flex: 0 0 32px;
+  flex: 0 0 24px;
   align-self: center;
   height: 50%;
+  transform: translateY(20px);
   background: rgba(101, 110, 130, .08);
   border: 1px dashed var(--color-neutral-200);
   border-radius: var(--radius-md);
@@ -369,9 +375,7 @@
   border-radius: var(--radius-md);
   background: var(--color-white);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 6px;
 }
-.seatplan-mobile-court .seatplan-legend { justify-content: center; }
 
 /* Detailansicht eines einzelnen Blocks: Header mit Zurück-Button, danach der
    bestehende Zonen-Renderer, aber mit größeren, besser tappbaren Sitzen. */
