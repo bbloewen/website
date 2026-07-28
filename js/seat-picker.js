@@ -576,6 +576,21 @@
           var anchorSeat = seatIn(row, anchorNum);
           if (!anchorSeat) return;
 
+          // Segmentanfänge der Reihe: Sitz 1 plus jede Segmentgrenze. Eine Lücke, die
+          // ein Segment VOR dem Anker vom Rest abrücken soll, muss am Anfang des
+          // FOLGENDEN Segments sitzen — nicht am Ankersitz. In Block D fällt beides
+          // zusammen (Anker = Sitz 3 = Anfang des Mittelsegments), in Block F nicht:
+          // dort ist der Anker Sitz 22, also das ENDE des Mittelsegments. Eine Lücke
+          // dort schiebt nur 22-24 nach rechts und zieht beim Ankern die Sitze 3-21
+          // nach links.
+          var breaks = [];
+          try { breaks = JSON.parse(row.dataset.segmentBreaks || '[]'); } catch (e) { breaks = []; }
+          var segStarts = [1].concat(breaks).sort(function (a, b) { return a - b; });
+          function gapSeatFor(segNumInt) {
+            var next = segStarts.filter(function (s) { return s > segNumInt; })[0];
+            return next === undefined ? anchorNum : String(next);
+          }
+
           // Soll-Abstand jedes Segmentanfangs zur Bezugslinie, aus der Bezugsreihe
           var want = {};
           Object.keys(spec).forEach(function (segNum) {
@@ -586,8 +601,11 @@
             if (d !== null) want[segNum] = d;
           });
 
-          // Lücken auf 0 und natürliche Abstände zum Ankersitz messen
-          var starts = Object.keys(spec).concat([anchorNum]);
+          // Lücken auf 0 und natürliche Abstände zum Ankersitz messen. Genullt werden
+          // muss jeder Sitz, der später eine Lücke tragen kann — also auch die
+          // Segmentanfänge, die aus segment_breaks kommen (die tragen aus dem Rendern
+          // noch die feste 10px-Lücke).
+          var starts = Object.keys(spec).concat([anchorNum]).concat(segStarts.map(String));
           starts.forEach(function (n) { var s = seatIn(row, n); if (s) s.style.marginLeft = '0px'; });
           var nat = {};
           starts.forEach(function (n) { nat[n] = deltaToAnchor(row, n); });
@@ -610,7 +628,8 @@
               seatEl.style.marginLeft = gap + 'px';
               applied += gap;
             } else {
-              anchorSeat.style.marginLeft = Math.max(0, -missing) + 'px';
+              var gapSeat = seatIn(row, gapSeatFor(segNumInt));
+              if (gapSeat) gapSeat.style.marginLeft = Math.max(0, -missing) + 'px';
             }
           });
         });
@@ -793,6 +812,10 @@
         // Reihen 11-13 fluchten mit bestimmten Sitzen der Reihe 14).
         if (row.row_number) rowEl.dataset.rowNumber = row.row_number;
         if (row.segment_align) rowEl.dataset.segmentAlign = JSON.stringify(row.segment_align);
+        // Die Segmentgrenzen müssen auch nach dem Rendern bekannt sein: der
+        // Segment-Abgleich in _fixupRowWidths muss wissen, wo das nächste Segment
+        // beginnt, um eine Lücke an der richtigen Stelle zu setzen.
+        if (row.segment_breaks) rowEl.dataset.segmentBreaks = JSON.stringify(row.segment_breaks);
         // Reihen mit weniger/mehr Sitzen als Reihe 1 (z. B. Block B, Reihe 6-10) sollen
         // trotzdem optisch gleich breit wirken — Breite wird nach dem Einfügen ins DOM
         // gemessen (s. _fixupRowWidths), nicht aus einer festen Pixelzahl berechnet.
