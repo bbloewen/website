@@ -215,15 +215,33 @@
       // liegt darunter), bei Südblöcken (A/B/C) die OBERE Kante (Spielfeld liegt darüber).
       var ordered = isNorth ? allGroups.slice().reverse() : allGroups;
       var stops = [];
+      var boundaries = [];
       var acc = 0;
-      ordered.forEach(function (g) {
+      ordered.forEach(function (g, idx) {
         var count = g.rows.reduce(function (s, r) { return s + r.seats.length; }, 0);
         var pct = Math.round((count / total) * 1000) / 10;
         stops.push(catColor(g.category) + ' ' + acc + '%');
         acc += pct;
         stops.push(catColor(g.category) + ' ' + acc + '%');
+        if (idx < ordered.length - 1) boundaries.push(acc);
       });
-      var background = allGroups.length > 1 ? 'linear-gradient(to bottom, ' + stops.join(', ') + ')' : catColor(allGroups[0].category);
+      var colorBackground = allGroups.length > 1 ? 'linear-gradient(to bottom, ' + stops.join(', ') + ')' : catColor(allGroups[0].category);
+      // Gang-Trennlinie (wie in der Detailansicht, s. .seatplan-aisle-line) auch schon
+      // in der kleinen Übersichtskachel andeuten — bei A/C sonst unsichtbar, weil dort
+      // beide Gruppen dieselbe Kategoriefarbe haben und nur der Farbverlauf allein
+      // (s.o.) keine Grenze zeigt.
+      var lineBackground = '';
+      if (boundaries.length) {
+        var half = 0.9;
+        var lineStops = [];
+        boundaries.forEach(function (pos) {
+          var from = Math.max(0, pos - half);
+          var to = Math.min(100, pos + half);
+          lineStops.push('transparent ' + from + '%', 'var(--color-neutral-400) ' + from + '%', 'var(--color-neutral-400) ' + to + '%', 'transparent ' + to + '%');
+        });
+        lineBackground = 'linear-gradient(to bottom, ' + lineStops.join(', ') + ')';
+      }
+      var background = lineBackground ? (lineBackground + ', ' + colorBackground) : colorBackground;
       // Bei gemischten Blöcken (z. B. B: VIP vorn + Kategorie I hinten) beschriftet die
       // Kachel bewusst nur die kaufbare Hauptkategorie (letzte/größte gefilterte Gruppe)
       // unten am Buchstaben — ein zusätzliches "VIP"-Label oben markiert den roten
