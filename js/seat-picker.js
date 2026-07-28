@@ -208,7 +208,8 @@
       var borderColor = catBorderColor(mainCategory);
       var hasVip = groups.some(function (g) { return g.category === 'VIP'; });
       var vipLabel = hasVip ? '<span class="seatplan-mobile-tile-vip">VIP</span>' : '';
-      return '<button type="button" class="seatplan-mobile-tile" style="background:' + background + ';border-color:' + borderColor + '" data-zone="' + id + '">' +
+      var tileClass = 'seatplan-mobile-tile' + (isNorth ? '' : ' seatplan-mobile-tile-south');
+      return '<button type="button" class="' + tileClass + '" style="background:' + background + ';border-color:' + borderColor + '" data-zone="' + id + '">' +
         vipLabel +
         '<span class="seatplan-mobile-tile-letter">' + id + '</span>' +
         '<span class="seatplan-mobile-tile-cat">' + MOBILE_CAT_LABEL[mainCategory] + '</span>' +
