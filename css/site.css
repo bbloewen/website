@@ -434,6 +434,8 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
    unter die Inhaltsbreite zu schrumpfen — ohne Effekt, wenn der Inhalt
    ohnehin passt. */
 .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+/* Bleibt in einer 3er-Reihe ein einzelnes letztes Element allein übrig (z.B. 7 Infokacheln), wird es zentriert statt linksbündig — gleiches Muster wie beim Hauptpartner-/Partner-Wall-Grid. */
+.grid-3 > *:last-child:nth-child(3n+1) { grid-column: 1 / -1; justify-self: center; width: calc((100% - 40px) / 3); }
 .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
 .grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
 /* Bleibt in einer 4er-Reihe ein einzelnes letztes Element allein übrig (z.B. Hauptpartner-Grid), wird es zentriert statt linksbündig — gleiche Breite wie die anderen Kacheln, nur die Position wird zentriert. */
