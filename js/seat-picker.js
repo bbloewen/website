@@ -353,9 +353,9 @@
             var isWiderAisle = zone.zone_id === 'B' && ['1', '2', '3'].indexOf(row.row_number) !== -1;
             btn.style.marginLeft = isWiderAisle ? '8px' : '6px';
           }
-          // Block B, Reihe 11, Platz 1+2: zusätzlich 10px nach links (Einzelsitz-Korrektur).
+          // Block B, Reihe 11, Platz 1+2: zusätzlich 15px nach links (Einzelsitz-Korrektur).
           if (zone.zone_id === 'B' && row.row_number === '11' && ['1', '2'].indexOf(seat.seat_number) !== -1) {
-            btn.style.transform = 'translateX(-10px)';
+            btn.style.transform = 'translateX(-15px)';
           }
           // Block B, Reihe 12, Platz 1-7: zusätzlich 2px nach links (Einzelsitz-Korrektur).
           if (zone.zone_id === 'B' && row.row_number === '12' && ['1', '2', '3', '4', '5', '6', '7'].indexOf(seat.seat_number) !== -1) {

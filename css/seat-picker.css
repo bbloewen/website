@@ -50,6 +50,12 @@
 .seatplan-row-num {
   width: 14px; flex-shrink: 0; text-align: center; font-size: 8px; line-height: 8px;
   color: var(--text-muted);
+  /* Einzelsitz-Feinjustierungen (transform:translateX) können Sitze so weit
+     verschieben, dass sie optisch mit der Reihennummer überlappen — position+
+     z-index stellt sicher, dass die Nummer immer lesbar über dem Sitz bleibt.
+     pointer-events:none verhindert, dass die Nummer dabei Klicks auf den
+     darunterliegenden Sitz-Button abfängt. */
+  position: relative; z-index: 1; pointer-events: none;
 }
 .seatplan-seat {
   width: 8px; height: 8px; border-radius: 2px;
