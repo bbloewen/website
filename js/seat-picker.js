@@ -498,19 +498,99 @@
       var refRowRect = referenceRow.getBoundingClientRect();
       var refSeatRect = referenceSeat.getBoundingClientRect();
       var refOffset = leading ? (refSeatRect.left - refRowRect.left) : (refRowRect.right - refSeatRect.right);
-      zoneEl.querySelectorAll('[data-align-target-seat]').forEach(function (row) {
-        var targetNum = row.dataset.alignTargetSeat;
-        var targetSeat = Array.from(row.querySelectorAll('.seatplan-seat')).find(function (s) {
-          return s.textContent === targetNum;
+
+      function seatIn(row, num) {
+        return Array.from(row.querySelectorAll('.seatplan-seat')).find(function (s) {
+          return s.textContent === String(num);
         });
-        if (!targetSeat) return;
-        var rowRect = row.getBoundingClientRect();
-        var seatRect = targetSeat.getBoundingClientRect();
-        var targetOffset = leading ? (seatRect.left - rowRect.left) : (rowRect.right - seatRect.right);
-        var shift = targetOffset - refOffset;
-        if (leading) row.style.marginLeft = (-shift) + 'px';
-        else row.style.marginRight = (-shift) + 'px';
-      });
+      }
+      // Die Verschiebungen werden erst gesammelt und dann gemeinsam so normalisiert,
+      // dass die kleinste 0 ist (alle Reihen um denselben Betrag mitverschoben — die
+      // Ausrichtung untereinander bleibt dadurch erhalten). Grund: eine NEGATIVE
+      // Margin lässt die Reihe über die Containerkante hinausragen, und Überlauf nach
+      // links zählt nicht in scrollWidth — die automatische Einpassung (_fitZoneScale)
+      // würde ihn übersehen und Sitz 1 abschneiden.
+      function anchorAll() {
+        var margins = [];
+        zoneEl.querySelectorAll('[data-align-target-seat]').forEach(function (row) {
+          var targetSeat = seatIn(row, row.dataset.alignTargetSeat);
+          if (!targetSeat) return;
+          var rowRect = row.getBoundingClientRect();
+          var seatRect = targetSeat.getBoundingClientRect();
+          var targetOffset = leading ? (seatRect.left - rowRect.left) : (rowRect.right - seatRect.right);
+          margins.push({ row: row, value: -(targetOffset - refOffset) });
+        });
+        var min = 0;
+        margins.forEach(function (m) { if (m.value < min) min = m.value; });
+        var byRow = new Map();
+        margins.forEach(function (m) { byRow.set(m.row, m.value); });
+        zoneEl.querySelectorAll('.seatplan-row-line').forEach(function (row) {
+          var v = (byRow.get(row) || 0) - min;
+          if (leading) row.style.marginLeft = v + 'px';
+          else row.style.marginRight = v + 'px';
+        });
+      }
+      anchorAll();
+
+      // Segmente innerhalb einer Reihe einzeln ausrichten (segment_align in den
+      // Zonendaten). Bei Block D sollen die Randsegmente der Reihen 11-13 nicht nur
+      // "irgendwie" neben dem Mittelsegment liegen, sondern mit bestimmten Sitzen der
+      // Reihe 14 fluchten (Sitz 1 über Sitz 1, Sitz 23 über Sitz 26). Der feste
+      // 10px-Abstand aus segment_breaks kann das nicht leisten — die Lücken werden
+      // hier aus den Zielabständen berechnet.
+      // Ablauf je Reihe: Lücken auf 0, natürliche Segmentbreiten messen, Lücken aus
+      // (Zielabstand − natürliche Breite) setzen, danach die Reihe neu ankern (die
+      // geänderten Lücken haben den Ankersitz mitverschoben).
+      if (leading) {
+        // Alle Abstände werden als Differenz ZWEIER SITZE DERSELBEN REIHE gemessen.
+        // Da jede Reihe über ihren Ankersitz auf derselben Bezugslinie hängt, sind
+        // solche reiheninternen Differenzen direkt vergleichbar — und anders als
+        // absolute Koordinaten immun dagegen, dass sich der (zentrierte) Block durch
+        // die geänderten Lücken als Ganzes verschiebt.
+        function deltaToAnchor(rowEl, seatNum) {
+          var anchor = seatIn(rowEl, rowEl.dataset.alignTargetSeat);
+          var s = seatIn(rowEl, seatNum);
+          if (!anchor || !s) return null;
+          return s.getBoundingClientRect().left - anchor.getBoundingClientRect().left;
+        }
+        zoneEl.querySelectorAll('[data-segment-align]').forEach(function (row) {
+          var spec;
+          try { spec = JSON.parse(row.dataset.segmentAlign); } catch (e) { return; }
+          var anchorNum = row.dataset.alignTargetSeat;
+          var anchorSeat = seatIn(row, anchorNum);
+          if (!anchorSeat) return;
+
+          // Soll-Abstand jedes Segmentanfangs zur Bezugslinie, aus der Bezugsreihe
+          var want = {};
+          Object.keys(spec).forEach(function (segNum) {
+            var cfg = spec[segNum];
+            var refRowEl = zoneEl.querySelector('.seatplan-row-line[data-row-number="' + cfg.row + '"]');
+            if (!refRowEl) return;
+            var d = deltaToAnchor(refRowEl, cfg.seat);
+            if (d !== null) want[segNum] = d;
+          });
+
+          // Lücken auf 0 und natürliche Abstände zum Ankersitz messen
+          var starts = Object.keys(spec).concat([anchorNum]);
+          starts.forEach(function (n) { var s = seatIn(row, n); if (s) s.style.marginLeft = '0px'; });
+          var nat = {};
+          starts.forEach(function (n) { nat[n] = deltaToAnchor(row, n); });
+
+          Object.keys(spec).forEach(function (segNum) {
+            if (want[segNum] === undefined || nat[segNum] === null) return;
+            var seatEl = seatIn(row, segNum);
+            if (!seatEl) return;
+            // Lücke = fehlender Abstand. Vor dem Anker sitzt die Lücke am Ankersitz
+            // (dort beginnt das Mittelsegment), nach dem Anker am Segmentanfang selbst.
+            var missing = want[segNum] - nat[segNum];
+            var target = parseInt(segNum, 10) > parseInt(anchorNum, 10) ? seatEl : anchorSeat;
+            var sign = target === anchorSeat ? -1 : 1;
+            target.style.marginLeft = Math.max(0, sign * missing) + 'px';
+          });
+        });
+        // Die geänderten Lücken haben die Ankersitze mitverschoben — neu ankern.
+        anchorAll();
+      }
     }
   };
 
@@ -679,6 +759,11 @@
         var rowLabel = row.row_label || row.row_number;
         var rowEl = document.createElement('div');
         rowEl.className = 'seatplan-row-line';
+        // Reihennummer als Attribut, damit segment_align (s. _fixupRowWidths) eine
+        // andere Reihe als Bezug ansprechen kann (z. B. Block D: Randsegmente der
+        // Reihen 11-13 fluchten mit bestimmten Sitzen der Reihe 14).
+        if (row.row_number) rowEl.dataset.rowNumber = row.row_number;
+        if (row.segment_align) rowEl.dataset.segmentAlign = JSON.stringify(row.segment_align);
         // Reihen mit weniger/mehr Sitzen als Reihe 1 (z. B. Block B, Reihe 6-10) sollen
         // trotzdem optisch gleich breit wirken — Breite wird nach dem Einfügen ins DOM
         // gemessen (s. _fixupRowWidths), nicht aus einer festen Pixelzahl berechnet.
