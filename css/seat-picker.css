@@ -114,13 +114,6 @@
    immer mit der Unterkante von Preistabelle und Floorplan abschließt. */
 .buy-cart-col { display: flex; flex-direction: column; }
 .buy-cart-col #seatplan-cart { flex: 1; }
-/* Ohne height:100% füllt die Blockübersicht nur ihre eigene Inhaltshöhe — die
-   Spalte selbst streckt sich zwar (align-items:stretch), aber darunter bliebe
-   Leerraum, wodurch der Button in der Cart-Spalte sichtbar tiefer sitzt als das
-   Bild endet. Die mittlere Grid-Zeile (1fr, s. .seatplan-mobile-overview) nutzt
-   die zusätzliche Höhe dann für den Spielfeld-Bereich. */
-.buy-thumb-col #seatplan-root { height: 100%; }
-.buy-thumb-col .seatplan-mobile-overview { height: 100%; box-sizing: border-box; }
 .buy-thumb-btn {
   display: block; width: 100%; height: 100%; padding: 0; border: 1px solid var(--border);
   border-radius: var(--radius-md); background: none; cursor: pointer; position: relative;
