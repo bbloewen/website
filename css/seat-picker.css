@@ -285,16 +285,22 @@
 .seatplan-mobile-bench-row {
   flex: 1 1 auto; min-width: 0; margin: 0 -13px 0 -18px;
   display: flex; align-items: center; gap: 6px;
+  /* Reicht die Spielfeldbreite für die drei Labels nicht (z. B. iPad-Breite), ragt die
+     Zeile mit center nach BEIDEN Seiten gleich weit heraus — der Labelbereich bleibt
+     dadurch mittig zum Spielfeld, statt einseitig rechts darüber hinauszulaufen. */
+  justify-content: center;
 }
-.seatplan-mobile-bench { flex: 1 1 25%; display: flex; align-items: center; }
+.seatplan-mobile-bench { flex: 1 1 25%; min-width: 0; display: flex; align-items: center; }
 .seatplan-mobile-bench-kg { flex: 1 1 50%; }
+/* min-width:0 (statt eines Mindestmaßes): bei knapper Breite verschwinden zuerst die
+   Striche, damit die Labels selbst noch in die Spielfeldbreite passen. */
 .seatplan-mobile-bench span {
-  flex: 1; height: 2px; min-width: 6px; border-radius: 1px;
+  flex: 1; height: 2px; min-width: 0; border-radius: 1px;
   background: var(--color-neutral-200);
 }
 .seatplan-mobile-bench i {
   font-style: normal; font-size: 8px; font-weight: 600; letter-spacing: .04em;
-  color: var(--text-muted); white-space: nowrap; padding: 0 4px;
+  color: var(--text-muted); white-space: nowrap; padding: 0 3px;
 }
 .seatplan-mobile-tiles {
   display: grid;
@@ -324,11 +330,10 @@
 /* Ersetzt die frühere separate Legende: die Kategorie steht jetzt direkt an der
    Kachel, bei gemischten Blöcken (z. B. B) nur die Hauptkategorie als Text. */
 .seatplan-mobile-tile-cat { font-size: 8px; font-weight: 600; letter-spacing: .02em; opacity: .8; }
-/* Südblöcke (A/B/C): Buchstabe+Kategorie-Label 5px tiefer als bei den Nordblöcken. */
-.seatplan-mobile-tile-south .seatplan-mobile-tile-letter,
-.seatplan-mobile-tile-south .seatplan-mobile-tile-cat {
-  transform: translateY(5px);
-}
+/* Hinweis: die früheren 5px Tiefer-Versatz bei den Südblöcken sind entfallen — seit die
+   Gang-Trennlinie existiert, positioniert das padding-top der Kachel (s. seat-picker.js)
+   das Label mittig im Abschnitt unter der Linie; ein zusätzlicher Versatz schob es
+   sichtbar zu weit nach unten. */
 /* Zusätzliches VIP-Label oben in der Kachel, sitzt im roten Farbverlauf-Anteil
    (nur bei Blöcken mit VIP-Reihen, aktuell nur Block B). */
 .seatplan-mobile-tile-vip {

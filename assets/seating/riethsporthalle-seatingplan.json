@@ -322,7 +322,8 @@
               },
               "category": "Kategorie II"
             }
-          ]
+          ],
+          "align_target_seat": 6
         },
         {
           "uuid": "d1b73400-2c56-516f-af8e-0668b4300087",
@@ -588,7 +589,8 @@
               },
               "category": "Kategorie II"
             }
-          ]
+          ],
+          "align_target_seat": 3
         },
         {
           "uuid": "d6ccd4ac-0410-5350-a571-218594ec0581",
@@ -854,7 +856,8 @@
               },
               "category": "Kategorie II"
             }
-          ]
+          ],
+          "align_target_seat": 3
         },
         {
           "uuid": "ed707614-09f4-5886-af11-9906c4c83ded",
@@ -1120,7 +1123,8 @@
               },
               "category": "Kategorie II"
             }
-          ]
+          ],
+          "align_target_seat": 3
         },
         {
           "uuid": "0e7f1e1e-152f-5819-8f81-7f27637d227e",
@@ -2085,9 +2089,11 @@
               },
               "category": "Kategorie II"
             }
-          ]
+          ],
+          "align_reference_seat": true
         }
-      ]
+      ],
+      "align_edge": "leading"
     },
     {
       "zone_id": "E",
@@ -2313,7 +2319,8 @@
               },
               "category": "Kategorie I"
             }
-          ]
+          ],
+          "align_target_seat": 6
         },
         {
           "uuid": "e6022e22-c752-5485-8a79-d0b3aa8ddbf7",
@@ -2500,7 +2507,8 @@
               },
               "category": "Kategorie I"
             }
-          ]
+          ],
+          "align_target_seat": 3
         },
         {
           "uuid": "6962b9df-6c2c-529b-af60-ea2a97a0f1a6",
@@ -2727,7 +2735,8 @@
               },
               "category": "Kategorie I"
             }
-          ]
+          ],
+          "align_target_seat": 3
         },
         {
           "uuid": "f1c2f2b8-057d-5c58-84bb-775f69f79d8b",
@@ -2993,7 +3002,8 @@
               },
               "category": "Kategorie I"
             }
-          ]
+          ],
+          "align_target_seat": 3
         },
         {
           "uuid": "2f9bf8a2-ffd2-5cc4-b4dd-5a23646113d8",
@@ -3206,7 +3216,8 @@
               },
               "category": "Kategorie I"
             }
-          ]
+          ],
+          "align_reference_seat": true
         },
         {
           "uuid": "8b76f90d-469e-5a81-9ce4-3e61d962fa1c",
@@ -3847,7 +3858,8 @@
             }
           ]
         }
-      ]
+      ],
+      "align_edge": "leading"
     },
     {
       "zone_id": "F",
@@ -4152,7 +4164,8 @@
               },
               "category": "Kategorie II"
             }
-          ]
+          ],
+          "align_target_seat": 23
         },
         {
           "uuid": "55025fd4-f52a-5c65-8206-dba5f42b9bae",
@@ -4408,7 +4421,8 @@
               },
               "category": "Kategorie II"
             }
-          ]
+          ],
+          "align_target_seat": 22
         },
         {
           "uuid": "2cba1f4a-81b6-582a-9b01-e3d4fad47fe7",
@@ -4664,7 +4678,8 @@
               },
               "category": "Kategorie II"
             }
-          ]
+          ],
+          "align_target_seat": 22
         },
         {
           "uuid": "fdba9581-1b9b-5a47-9634-483895df34a0",
@@ -4920,7 +4935,8 @@
               },
               "category": "Kategorie II"
             }
-          ]
+          ],
+          "align_target_seat": 22
         },
         {
           "uuid": "0e4a7661-b32e-581c-8ff4-529e344d6f0b",
@@ -5133,7 +5149,8 @@
               },
               "category": "Kategorie II"
             }
-          ]
+          ],
+          "align_reference_seat": true
         },
         {
           "uuid": "a40c9388-5348-5d39-885d-ef8f01cafffe",
@@ -5887,7 +5904,8 @@
             }
           ]
         }
-      ]
+      ],
+      "align_edge": "trailing"
     },
     {
       "zone_id": "A",
@@ -8409,7 +8427,8 @@
           ],
           "align_target_seat": 24
         }
-      ]
+      ],
+      "align_edge": "trailing"
     },
     {
       "zone_id": "B",
@@ -10776,7 +10795,8 @@
           ],
           "align_target_seat": 24
         }
-      ]
+      ],
+      "align_edge": "trailing"
     },
     {
       "zone_id": "C",
@@ -13288,7 +13308,8 @@
           ],
           "align_target_seat": 24
         }
-      ]
+      ],
+      "align_edge": "leading"
     }
   ]
 }

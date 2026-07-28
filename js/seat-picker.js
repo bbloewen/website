@@ -39,6 +39,15 @@
     return category;
   }
 
+  /* An welcher Kante die Reihen eines Blocks ausgerichtet sind. Steht als align_edge
+     in den Zonendaten, weil es pro Blockseite unterschiedlich ist: A/B/F richten sich
+     an der rechten Kante aus ("trailing"), C/D/E an der linken ("leading"). Fällt die
+     Angabe weg, gilt die alte Regel (nur die gespiegelten Blöcke C/F linksbündig). */
+  function isLeadingEdge(zone) {
+    if (zone && zone.align_edge) return zone.align_edge === 'leading';
+    return !!(zone && (zone.zone_id === 'C' || zone.zone_id === 'F'));
+  }
+
   /* Gutschein-Codes sind noch nicht an pretix angebunden — feste Testcodes,
      damit sich der Ablauf schon jetzt echt durchklicken lässt. Dieselben Codes
      wie auf der Checkout-Seite (tickets/checkout.html). */
@@ -256,15 +265,13 @@
       var mainCategory = groups[groups.length - 1].category;
       var borderColor = catBorderColor(mainCategory);
       var hasVip = allGroups.some(function (g) { return g.category === 'VIP'; });
-      // Ohne die Gang-Trennlinie stand Buchstabe+Kategorie einfach mittig in der
-      // ganzen Kachel — jetzt, wo die Linie eine sichtbare Grenze zieht, muss das
-      // Label knapp unter der Linie stehen (kleiner fester Abstand statt exakter
-      // Zentrierung im gesamten unteren Abschnitt, sonst wirkt es zu weit unten).
-      // padding-top+flex-start verschiebt den Startpunkt entsprechend nach unten —
-      // bei quadratischen (Süd-)Kacheln (aspect-ratio:1) ist ein %-Wert dafür
-      // korrekt, weil Breite und Höhe dort gleich sind.
+      // Ohne die Gang-Trennlinie stand Buchstabe+Kategorie mittig in der ganzen
+      // Kachel — jetzt, wo die Linie eine sichtbare Grenze zieht, gehört das Label
+      // mittig in den UNTEREN Abschnitt. padding-top schiebt den Inhaltsbereich genau
+      // auf die Linie, die (per CSS) mittige Ausrichtung zentriert das Label dann im
+      // Rest darunter. Bei den quadratischen Süd-Kacheln (aspect-ratio:1) ist ein
+      // %-Wert dafür korrekt, weil Breite und Höhe dort gleich sind.
       var lineBoundary = boundaries.length ? boundaries[0] : null;
-      var labelGap = 6;
       var vipTop = lineBoundary !== null ? (lineBoundary / 2) : 9;
       var vipStyle = lineBoundary !== null
         ? 'top:' + vipTop + '%;transform:translateY(-50%)'
@@ -273,7 +280,7 @@
       var isPending = self.mode === 'blocks' && self.pendingBlockId === id;
       var tileClass = 'seatplan-mobile-tile' + (isNorth ? '' : ' seatplan-mobile-tile-south') + (isPending ? ' selected' : '');
       var tileStyle = 'background:' + background + ';border-color:' + borderColor +
-        (lineBoundary !== null ? ';padding-top:' + (lineBoundary + labelGap) + '%;justify-content:flex-start' : '');
+        (lineBoundary !== null ? ';padding-top:' + lineBoundary + '%' : '');
       return '<button type="button" class="' + tileClass + '" style="' + tileStyle + '" data-zone="' + id + '">' +
         vipLabel +
         '<span class="seatplan-mobile-tile-letter">' + id + '</span>' +
@@ -466,27 +473,43 @@
     });
 
     // Hintere Reihen mit data-align-target-seat (s. _renderZone) so verschieben, dass
-    // GENAU dieser eine Sitz auf derselben Höhe landet wie der letzte Sitz der mit
-    // seatplan-row-line--align-reference markierten Reihe (z. B. Reihe 10) — statt
-    // Sitzanzahl × Rasterbreite anzunehmen, was Segment-Lücken innerhalb der Reihe
-    // (segment_breaks) verfälschen würden. Rechts bei A/B/D/E (Standard-Kante), links
-    // bei den gespiegelten Blöcken C/F.
-    var mirrored = zone && (zone.zone_id === 'C' || zone.zone_id === 'F');
+    // GENAU dieser eine Sitz auf derselben Höhe landet wie der Bezugssitz der mit
+    // seatplan-row-line--align-reference markierten Reihe — statt Sitzanzahl ×
+    // Rasterbreite anzunehmen, was Segment-Lücken innerhalb der Reihe
+    // (segment_breaks) verfälschen würden.
+    // Welche Kante die Blockseite ausrichtet, steht als align_edge in den Zonendaten:
+    // "trailing" (A/B/F) = rechte Kante, Bezug ist der LETZTE Sitz der Bezugsreihe;
+    // "leading" (C/D/E) = linke Kante, Bezug ist der ERSTE Sitz. Beispiel Block D:
+    // Reihen 6-10 linksbündig, Sitz 3 der Reihen 11-13 und Sitz 6 der Reihe 14 liegen
+    // dann genau über Sitz 1 der Reihe 6.
+    var leading = isLeadingEdge(zone);
     var referenceRow = zoneEl.querySelector('.seatplan-row-line--align-reference');
     var referenceSeats = referenceRow ? referenceRow.querySelectorAll('.seatplan-seat') : null;
-    var referenceSeat = referenceSeats && referenceSeats.length ? referenceSeats[referenceSeats.length - 1] : null;
+    var referenceSeat = referenceSeats && referenceSeats.length
+      ? referenceSeats[leading ? 0 : referenceSeats.length - 1]
+      : null;
     if (referenceSeat) {
-      var refRect = referenceSeat.getBoundingClientRect();
-      var refEdge = mirrored ? refRect.left : refRect.right;
+      // Gemessen wird der Abstand des Sitzes zur EIGENEN Reihenkante, nicht seine
+      // absolute Position: die negativen Margins unten vergrößern die fit-content-
+      // Breite des Rasters, wodurch sich der (zentrierte) Block als Ganzes verschiebt
+      // — absolute Koordinaten würden dadurch schon während der Schleife veralten.
+      // Reihenintern gemessene Abstände sind davon unabhängig, und da alle Reihen an
+      // derselben Kante hängen, deckt gleicher Abstand auch gleiche Position.
+      var refRowRect = referenceRow.getBoundingClientRect();
+      var refSeatRect = referenceSeat.getBoundingClientRect();
+      var refOffset = leading ? (refSeatRect.left - refRowRect.left) : (refRowRect.right - refSeatRect.right);
       zoneEl.querySelectorAll('[data-align-target-seat]').forEach(function (row) {
         var targetNum = row.dataset.alignTargetSeat;
         var targetSeat = Array.from(row.querySelectorAll('.seatplan-seat')).find(function (s) {
           return s.textContent === targetNum;
         });
         if (!targetSeat) return;
+        var rowRect = row.getBoundingClientRect();
         var seatRect = targetSeat.getBoundingClientRect();
-        if (mirrored) row.style.marginLeft = '-' + (seatRect.left - refEdge) + 'px';
-        else row.style.marginRight = '-' + (refEdge - seatRect.right) + 'px';
+        var targetOffset = leading ? (seatRect.left - rowRect.left) : (rowRect.right - seatRect.right);
+        var shift = targetOffset - refOffset;
+        if (leading) row.style.marginLeft = (-shift) + 'px';
+        else row.style.marginRight = (-shift) + 'px';
       });
     }
   };
@@ -623,12 +646,12 @@
     var wrap = document.createElement('div');
     wrap.className = 'seatplan-block';
     var blockMode = this.mode === 'blocks';
-    var mirrored = (zone.zone_id === 'C' || zone.zone_id === 'F');
+    var leading = isLeadingEdge(zone);
 
     var gridWrap = document.createElement('div');
     gridWrap.className = 'seatplan-grid-wrap';
     gridWrap.style.width = 'fit-content';
-    gridWrap.style.alignItems = mirrored ? 'flex-start' : 'flex-end';
+    gridWrap.style.alignItems = leading ? 'flex-start' : 'flex-end';
     // scaleWrap bekommt nach dem Einfügen ins DOM (s. _fitZoneScale) eine feste,
     // bereits herunterskalierte Größe — reserviert dadurch exakt so viel Platz im
     // Layout, wie der Sitzplan nach dem automatischen Zoom tatsächlich braucht,
