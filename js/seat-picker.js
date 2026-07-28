@@ -41,6 +41,7 @@
     this.root = root;
     this.mode = opts.mode || 'seats';
     this.planUrl = opts.planUrl;
+    this.seatStatusUrl = opts.seatStatusUrl || null; // n8n-Proxy: liefert {takenSeatGuids:[...]}, nur Modus "seats" relevant
     this.prices = opts.prices; // { "Kategorie I": {normal: 19, ermaessigt: 12}, "Kategorie II": {...} }
     this.northZones = opts.northZones; // z.B. ["D", "E", "F"]
     this.southZones = opts.southZones; // z.B. ["A", "B", "C"]
@@ -91,8 +92,20 @@
 
   SeatPicker.prototype._load = function () {
     var self = this;
-    fetch(this.planUrl).then(function (r) { return r.json(); }).then(function (plan) {
+    var planFetch = fetch(this.planUrl).then(function (r) { return r.json(); });
+    /* Belegte Sitze kommen aus einem eigenen n8n-Proxy-Endpunkt (fragt pretix'
+       Seats-API ab, Token bleibt serverseitig). Schlägt der Abruf fehl (Netzwerk,
+       n8n down o.ä.), degradiert das bewusst auf "keine Sitze als belegt bekannt"
+       statt die ganze Sitzplatzwahl zu blockieren — besser ein optimistischer
+       Anzeigefehler als ein kompletter Ausfall der Seite. */
+    var statusFetch = this.seatStatusUrl
+      ? fetch(this.seatStatusUrl).then(function (r) { return r.ok ? r.json() : { takenSeatGuids: [] }; }).catch(function () { return { takenSeatGuids: [] }; })
+      : Promise.resolve({ takenSeatGuids: [] });
+    Promise.all([planFetch, statusFetch]).then(function (results) {
+      var plan = results[0];
+      var status = results[1] || {};
       self.plan = plan;
+      self.takenSeatGuids = new Set(Array.isArray(status.takenSeatGuids) ? status.takenSeatGuids : []);
       self.blocks = self._deriveBlocks(plan);
       self._render();
     }).catch(function (err) {
@@ -325,7 +338,7 @@
         rowNumLeft.textContent = rowLabel;
         rowEl.appendChild(rowNumLeft);
         row.seats.forEach(function (seat, cIdx) {
-          var taken = false; // Noch keine echten Bestellungen — keine Plätze vorab als vergeben markieren.
+          var taken = !!(self.takenSeatGuids && self.takenSeatGuids.has(seat.seat_guid));
           if (!taken) freeCount++;
           var btn = document.createElement('button');
           btn.type = 'button';
