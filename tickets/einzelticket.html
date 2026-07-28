@@ -22,8 +22,8 @@
       <div class="hero-lg-grid">
         <div>
           <span class="eyebrow">Heimspiel Basketball Löwen Erfurt</span>
-          <h1 class="nowrap-lg" style="font-size:clamp(20px,5vw,56px)"><span class="kw">Porsche BBA Ludwigsburg<span class="swoosh" aria-hidden="true"></span></span>.</h1>
-          <p class="lead">11. Oktober 2026 · 17:00 Uhr</p>
+          <h1 class="nowrap-lg" style="font-size:clamp(20px,5vw,56px)"><span class="kw"><span id="et-gegner">Porsche BBA Ludwigsburg</span><span class="swoosh" aria-hidden="true"></span></span>.</h1>
+          <p class="lead" id="et-termin">11. Oktober 2026 · 17:00 Uhr</p>
           <a class="hero-location" href="https://www.google.com/maps/search/?api=1&query=Riethsporthalle+Erfurt+Essener+Stra%C3%9Fe+20+99089+Erfurt" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Riethsporthalle, Essener Straße 20, 99089 Erfurt</a>
         </div>
         <div><!-- reserviert für künftiges CTA/Element auf dem Herobild --></div>
@@ -49,7 +49,7 @@
           </div>
           <div class="buy-cart-col">
             <h3 class="t-h4 mb-1">Deine Auswahl</h3>
-            <p class="t-caption" style="color:var(--text-muted);margin-bottom:14px">Einzelticket für den 11.10.2026</p>
+            <p class="t-caption" style="color:var(--text-muted);margin-bottom:14px" id="et-cart-caption">Einzelticket für den 11.10.2026</p>
             <div id="seatplan-cart"></div>
             <div class="seatplan-cart-total"><span>Gesamt</span><span id="seatplan-total">0 €</span></div>
             <button class="btn btn-primary btn-sm" id="seatplan-cta" style="margin-top:16px;width:100%;justify-content:center" disabled>Weiter zur Kasse</button>
@@ -125,37 +125,103 @@
 <script src="/js/nav.js?v=1785200000"></script>
 <script src="/js/include.js?v=1785200000"></script><script src="/js/seat-picker.js?v=1786070000"></script>
 <script>
+  /* Die Seite gilt für JEDES Heimspiel, nicht nur für das erste. Welches gemeint
+     ist, steht in ?spiel=<slug> (z. B. ?spiel=2026-10-11) und wird gegen
+     data/heimspiele.json aufgelöst — dort liegt auch die pretix-Subevent-ID, die
+     der Bestell-Workflow braucht, um die Order am richtigen Spieltag anzulegen.
+     Ohne oder mit unbekanntem Parameter fällt die Seite auf das nächste
+     anstehende Heimspiel zurück, damit ein alter Link nie ins Leere läuft.
+     Das im HTML stehende Ludwigsburg-Spiel ist nur das serverseitige Fallback
+     für den Fall, dass die JSON nicht lädt. */
   document.addEventListener('DOMContentLoaded', function () {
-    var picker = new SeatPicker(document.getElementById('seatplan-root'), {
-      mode: 'blocks',
-      nachwuchsBeitrag: true,
-      nachwuchsAmount: 2,
-      planUrl: '/assets/seating/riethsporthalle-seatingplan.json?v=1786040000',
-      northZones: ['D', 'E', 'F'],
-      southZones: ['A', 'B', 'C'],
-      excludeCategories: ['VIP'],
-      prices: {
-        'Kategorie I': { normal: 16, ermaessigt: 14 },
-        'Kategorie II': { normal: 12, ermaessigt: 8.5 }
-      },
-      cartEl: document.getElementById('seatplan-cart'),
-      totalEl: document.getElementById('seatplan-total'),
-      ctaEl: document.getElementById('seatplan-cta')
-    });
+    var MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli',
+                  'August', 'September', 'Oktober', 'November', 'Dezember'];
 
-    function goToCheckout() {
-      var summary = picker.getSummary();
-      sessionStorage.setItem('bl_cart', JSON.stringify({
-        productType: 'einzelticket',
-        eventLabel: 'Basketball Löwen Erfurt – Porsche BBA Ludwigsburg, 11. Oktober 2026',
-        lines: summary.lines,
-        total: summary.total,
-        voucher: summary.voucher,
-        notiz: summary.notiz
-      }));
-      window.location.href = '/tickets/checkout.html';
+    function parseDMY(str) {
+      var p = str.split('.').map(Number);
+      return new Date(p[2], p[1] - 1, p[0]);
     }
-    document.getElementById('seatplan-cta').addEventListener('click', goToCheckout);
+
+    function pickGame(spiele, slug) {
+      var byslug = spiele.filter(function (s) { return s.slug === slug; })[0];
+      if (byslug) return byslug;
+      var today = new Date();
+      today.setHours(0, 0, 0, 0);
+      var upcoming = spiele
+        .filter(function (s) { return parseDMY(s.datum) >= today; })
+        .sort(function (a, b) { return parseDMY(a.datum) - parseDMY(b.datum); });
+      return upcoming[0] || spiele[spiele.length - 1];
+    }
+
+    function applyGame(game) {
+      var d = parseDMY(game.datum);
+      var langDatum = d.getDate() + '. ' + MONATE[d.getMonth()] + ' ' + d.getFullYear();
+      document.getElementById('et-gegner').textContent = game.gegner;
+      document.getElementById('et-termin').textContent = langDatum + ' · ' + game.zeit + ' Uhr';
+      document.getElementById('et-cart-caption').textContent = 'Einzelticket für den ' + game.datum;
+      document.title = 'Tickets — Basketball Löwen Erfurt – ' + game.gegner;
+      var meta = document.querySelector('meta[name="description"]');
+      if (meta) meta.setAttribute('content', 'Tickets für Basketball Löwen Erfurt gegen ' + game.gegner + ' am ' + game.datum + '.');
+      return {
+        eventLabel: 'Basketball Löwen Erfurt – ' + game.gegner + ', ' + langDatum,
+        subeventId: game.subeventId
+      };
+    }
+
+    function start(game) {
+      var info = applyGame(game);
+      var picker = new SeatPicker(document.getElementById('seatplan-root'), {
+        mode: 'blocks',
+        nachwuchsBeitrag: true,
+        nachwuchsAmount: 2,
+        planUrl: '/assets/seating/riethsporthalle-seatingplan.json?v=1786090000',
+        /* Belegt sind hier zwei Dinge: die für DIESES Spiel schon verkauften
+           Einzeltickets und — spielunabhängig — alle Dauerkarten-Plätze. pretix
+           kennt den Zusammenhang nicht, weil Dauerkarte und Einzeltickets zwei
+           getrennte Events sind; die Vereinigung bildet der n8n-Endpunkt. */
+        seatStatusUrl: info.subeventId
+          ? 'https://blev.app.n8n.cloud/webhook/einzelticket-sitzplatz-status?subevent=' + info.subeventId
+          : null,
+        northZones: ['D', 'E', 'F'],
+        southZones: ['A', 'B', 'C'],
+        excludeCategories: ['VIP'],
+        prices: {
+          'Kategorie I': { normal: 16, ermaessigt: 14 },
+          'Kategorie II': { normal: 12, ermaessigt: 8.5 }
+        },
+        cartEl: document.getElementById('seatplan-cart'),
+        totalEl: document.getElementById('seatplan-total'),
+        ctaEl: document.getElementById('seatplan-cta')
+      });
+
+      document.getElementById('seatplan-cta').addEventListener('click', function () {
+        var summary = picker.getSummary();
+        sessionStorage.setItem('bl_cart', JSON.stringify({
+          productType: 'einzelticket',
+          eventLabel: info.eventLabel,
+          pretixEventSlug: 'einzeltickets2627',
+          pretixSubeventId: info.subeventId,
+          spielDatum: game.datum,
+          gegner: game.gegner,
+          lines: summary.lines,
+          total: summary.total,
+          voucher: summary.voucher,
+          notiz: summary.notiz
+        }));
+        window.location.href = '/tickets/checkout.html';
+      });
+    }
+
+    var slug = new URLSearchParams(window.location.search).get('spiel');
+    fetch('/data/heimspiele.json?v=1786080000')
+      .then(function (r) { return r.json(); })
+      .then(function (d) { start(pickGame(d.spiele, slug)); })
+      .catch(function (err) {
+        /* JSON nicht erreichbar: mit dem im HTML stehenden Spiel weiterarbeiten,
+           statt die Sitzplatzwahl komplett auszusperren. */
+        console.error('Heimspieldaten konnten nicht geladen werden', err);
+        start({ datum: '11.10.2026', zeit: '17:00', gegner: 'Porsche BBA Ludwigsburg', slug: '2026-10-11', subeventId: 12 });
+      });
   });
 </script>
 </body>
