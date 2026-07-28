@@ -167,22 +167,9 @@
     syncThumbHeight();
     window.addEventListener('resize', syncThumbHeight);
 
-    /* Frühbucherrabatt automatisch berechnen und in der Preistabelle direkt zeigen
-       (nur der reduzierte Preis, kein durchgestrichener Originalpreis — das würde
-       den Eindruck erwecken, der Vereinsrabatt-Tarif im Warenkorb rechne nochmal
-       20% zusätzlich obendrauf). Gilt für alle, im Gegensatz zum Vereinsrabatt
-       (Nachweis nötig, nur als Tarif-Option im Warenkorb wählbar, s. seat-picker.js
-       dauerkarteDiscount). */
-    (function applyEarlyBirdToPriceTable() {
-      var earlyBirdUntil = new Date('2026-08-31T23:59:59');
-      var earlyBirdPercent = 20;
-      if (new Date() > earlyBirdUntil) return;
-      document.querySelectorAll('.buy-prices-col strong[data-base]').forEach(function (el) {
-        var base = parseFloat(el.dataset.base);
-        var discounted = Math.round(base * (1 - earlyBirdPercent / 100) * 100) / 100;
-        el.textContent = discounted.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
-      });
-    })();
+    /* Preisbox zeigt bewusst den Normalpreis (data-base) statisch an. Rabatte
+       (Frühbucher/Vereinsrabatt) werden erst im Warenkorb-Widget bei Auswahl
+       des Tarifs berechnet und angezeigt, s. seat-picker.js dauerkarteDiscount. */
 
     var picker = new SeatPicker(document.getElementById('seatplan-root'), {
       nachwuchsBeitrag: true,

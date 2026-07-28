@@ -736,14 +736,17 @@
       var s = self.selected[guid];
       lines.push({
         label: s.zoneLabel + ' · Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber + ' · ' + (DK_TARIF_LABELS[s.tarif] || 'Normalpreis'),
-        qty: 1, unitPrice: s.price, lineTotal: s.price
+        qty: 1, unitPrice: s.price, lineTotal: s.price,
+        // Maschinenlesbare Felder für die echte Pretix-Order-Erstellung (n8n) —
+        // category/tarif bestimmen dort Item+Variation, seatGuid den Sitz.
+        type: 'seat', seatGuid: guid, category: s.category, tarif: s.tarif
       });
       total += s.price;
     });
     var nwAmount = 0;
     if (this.nachwuchsBeitrag && this.nachwuchsChecked && lines.length > 0) {
       nwAmount = this.nachwuchsAmount;
-      lines.push({ label: 'Unterstützung für den Nachwuchs', qty: 1, unitPrice: nwAmount, lineTotal: nwAmount });
+      lines.push({ label: 'Unterstützung für den Nachwuchs', qty: 1, unitPrice: nwAmount, lineTotal: nwAmount, type: 'nachwuchs' });
       total += nwAmount;
     }
     return this._applyVoucherToSummary(lines, total, nwAmount);

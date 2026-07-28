@@ -47,10 +47,10 @@
               <h2 class="t-h4" style="margin:6px 0 8px">Dauerkarten 2026/2027</h2>
               <div style="display:flex;gap:8px;flex-wrap:wrap">
                 <button type="button" class="badge badge-orange" id="overview-member-badge" style="border:none;cursor:pointer;font-family:inherit">
-                  <i data-lucide="percent" class="icon-12"></i> -30 % Vereinsmitglieder
+                  -30 % Vereinsmitglieder
                 </button>
                 <button type="button" class="badge badge-orange" id="overview-discount-badge" style="border:none;cursor:pointer;font-family:inherit">
-                  <i data-lucide="percent" class="icon-12"></i> -20 % Frühbucher bis 31.08.
+                  -20 % Frühbucher bis 31.08.
                 </button>
               </div>
             </div>
@@ -155,19 +155,8 @@
     if (window.lucide) window.lucide.createIcons();
   });
 
-  /* Frühbucherrabatt automatisch berechnen und zeigen — nur der reduzierte Preis,
-     kein durchgestrichener Originalpreis (gleiche Logik wie auf
-     tickets/dauerkarte.html, s. dortiger Kommentar für die Begründung). */
-  (function applyEarlyBirdToOverviewPrices() {
-    var earlyBirdUntil = new Date('2026-08-31T23:59:59');
-    var earlyBirdPercent = 20;
-    if (new Date() > earlyBirdUntil) return;
-    document.querySelectorAll('strong[data-base]').forEach(function (el) {
-      var base = parseFloat(el.dataset.base);
-      var discounted = Math.round(base * (1 - earlyBirdPercent / 100) * 100) / 100;
-      el.textContent = discounted.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
-    });
-  })();
+  /* Preisbox zeigt bewusst den Normalpreis (data-base) statisch an. Rabatte
+     werden erst im Warenkorb-Widget bei Tarifauswahl berechnet und angezeigt. */
 
   function wireBadgeModal(badgeId, backdropId, closeId) {
     var backdrop = document.getElementById(backdropId);
