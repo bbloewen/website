@@ -290,15 +290,15 @@
         // Block B: Reihen 6-10 gemeinsam an derselben Kante verankern (rechtsbündig mit
         // Reihe 1-5). Reihe 6-9 zusätzlich per größerem Sitzabstand (Anzahl bleibt gleich)
         // auf die Breite von Reihe 1-3 aufziehen, damit sie dadurch automatisch auch
-        // linksbündig mit Reihe 1-3/10 werden. Reihe 6-9 zusätzlich 5px weiter nach
-        // links (mehr Sitzabstand) und 1,5px weiter nach rechts (kleinere Anker-Margin).
+        // linksbündig mit Reihe 1-3/10 werden. Reihe 6-9 zusätzlich 6px weiter nach
+        // links (mehr Sitzabstand) und 2px weiter nach rechts (kleinere Anker-Margin).
         if (zone.zone_id === 'B' && ['6', '7', '8', '9', '10'].indexOf(row.row_number) !== -1) {
           rowEl.style.alignSelf = 'flex-end';
           if (row.row_number === '10') {
             rowEl.style.marginRight = kat1AnchorGap + 'px';
           } else {
-            rowEl.style.marginRight = (kat1AnchorGap - 1.5) + 'px';
-            rowEl.style.gap = '4.47px';
+            rowEl.style.marginRight = (kat1AnchorGap - 2) + 'px';
+            rowEl.style.gap = '4.57px';
           }
         }
         // Reihennummer links UND rechts an der Reihe, wie im Original-Saalplan.
