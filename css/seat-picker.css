@@ -384,6 +384,12 @@
   position: relative;
   flex: 1 1 auto;
   min-width: 0;
+  /* Negative Margin frisst den Row-Gap (8px) auf: rechts reicht das Spielfeld
+     direkt an den unsichtbaren Spiegel heran. Links kommen zusätzlich die 10px
+     dazu, um die der Stehplatzbereich per transform nach links verschoben ist
+     (sonst bliebe dort trotz negativer Margin eine Lücke) — insgesamt berührt
+     das Spielfeld so den Stehplatzbereich direkt. */
+  margin: 0 -8px 0 -18px;
   aspect-ratio: 28 / 15;
   border: 1px solid var(--color-neutral-200);
   border-radius: var(--radius-md);
