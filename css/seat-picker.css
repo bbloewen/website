@@ -442,6 +442,12 @@
 .seatplan-mobile-detail .seatplan-grid-wrap { gap: 6px; margin: 0; align-items: flex-start; }
 .seatplan-mobile-detail .seatplan-row-line { gap: 6px; justify-content: flex-start; }
 .seatplan-mobile-detail .seatplan-row-num { width: 20px; font-size: 10px; line-height: 10px; }
+/* justify-content:center als Default (sieht bei normal passendem Inhalt am
+   saubersten aus) — _fitZoneScale schaltet per Inline-Style auf flex-start um,
+   sobald der Inhalt (Mindest-Skalierung, s. dort) breiter als die Box bleibt:
+   zentrierter Inhalt, der seinen scrollbaren Container überragt, erzeugt sonst
+   einen linksseitigen Überlauf, der per Scroll nicht erreichbar ist (scrollLeft
+   kann nicht negativ werden). */
 .seatplan-mobile-detail .seatplan-block {
   padding: 14px 40px 14px 10px; position: relative;
   flex: 1 1 auto; min-height: 0; overflow: auto;

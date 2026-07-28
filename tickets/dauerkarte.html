@@ -8,7 +8,7 @@
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785200000" />
 <link rel="stylesheet" href="/css/site.css?v=1785800000" />
-<link rel="stylesheet" href="/css/seat-picker.css?v=1785900000" />
+<link rel="stylesheet" href="/css/seat-picker.css?v=1785910000" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 </head>
@@ -135,7 +135,7 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="/js/nav.js?v=1785200000"></script>
 <script src="/js/include.js?v=1785200000"></script>
-<script src="/js/seat-picker.js?v=1785860000"></script>
+<script src="/js/seat-picker.js?v=1785910000"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     /* Preisbox zeigt bewusst den Normalpreis (data-base) statisch an. Rabatte
@@ -178,6 +178,31 @@
       window.location.href = '/tickets/checkout.html';
     }
     document.getElementById('seatplan-cta').addEventListener('click', goToBuyerDetails);
+
+    // Nur im leeren Warenkorb-Zustand (Desktop-Breite, 3-Spalten-Grid): "Weiter zur
+    // Kasse" rutscht an die Unterkante der Blockübersicht-Grafik statt weiter unten
+    // an der Unterkante der (durch VIP-Zeile + Badges höheren) Preise-Spalte zu
+    // hängen — dafür wird NICHT die Grafik selbst gestreckt (das verzerrt das
+    // Spielfeld), sondern nur die verfügbare Höhe von #seatplan-cart gekappt.
+    // Sobald echte Plätze ausgewählt sind, braucht der Warenkorb seinen natürlichen
+    // Platz zurück, deshalb kein Cap mehr in diesem Fall.
+    function alignEmptyCartButton() {
+      var cartEl = document.getElementById('seatplan-cart');
+      var overview = document.querySelector('.seatplan-mobile-overview');
+      var cartCol = document.querySelector('.buy-cart-col');
+      if (!cartEl || !overview || !cartCol) return;
+      cartEl.style.maxHeight = '';
+      if (window.innerWidth <= 900 || !cartEl.querySelector('.seatplan-cart-empty')) return;
+      // Nach #seatplan-cart kommen noch "Gesamt" und der Button — deren Platzbedarf
+      // muss von der Zielhöhe abgezogen werden, sonst landet der Button zu tief.
+      var afterCartHeight = cartCol.getBoundingClientRect().bottom - cartEl.getBoundingClientRect().bottom;
+      var target = overview.getBoundingClientRect().bottom - afterCartHeight - cartEl.getBoundingClientRect().top;
+      if (target > 0) cartEl.style.maxHeight = target + 'px';
+    }
+    new MutationObserver(alignEmptyCartButton).observe(document.getElementById('seatplan-cart'), { childList: true, subtree: true });
+    new MutationObserver(alignEmptyCartButton).observe(document.getElementById('seatplan-root'), { childList: true, subtree: true });
+    window.addEventListener('resize', alignEmptyCartButton);
+    alignEmptyCartButton();
   });
 </script>
 </body>

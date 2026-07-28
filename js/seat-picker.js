@@ -453,6 +453,12 @@
       gridWrap.style.transform = 'scale(' + scale + ')';
       scaleWrap.style.width = Math.ceil(naturalWidth * scale) + 'px';
       scaleWrap.style.height = Math.ceil(naturalHeight * scale) + 'px';
+      // Bleibt der Inhalt trotz Mindest-Skalierung (oder nach manuellem Reinzoomen)
+      // breiter als die Box, macht center ihn per Scroll teilweise unerreichbar
+      // (scrollLeft kann nicht negativ werden) — dann auf flex-start umschalten,
+      // damit wirklich der ganze Inhalt erreichbar bleibt. Passt der Inhalt,
+      // bleibt center (aus der CSS-Regel) für die übliche, saubere Optik erhalten.
+      box.style.justifyContent = (scaleWrap.getBoundingClientRect().width > box.clientWidth) ? 'flex-start' : '';
       positionZoomControls();
     }
     // Zoom-Buttons sitzen auf Höhe der Gang-Trennlinie (statt starr vertikal
