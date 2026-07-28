@@ -4504,7 +4504,17 @@
               "category": "Kategorie II"
             }
           ],
-          "align_target_seat": 22
+          "align_target_seat": 22,
+          "segment_align": {
+            "1": {
+              "row": "14",
+              "seat": 1
+            },
+            "23": {
+              "row": "14",
+              "seat": 27
+            }
+          }
         },
         {
           "uuid": "2cba1f4a-81b6-582a-9b01-e3d4fad47fe7",
@@ -4761,7 +4771,17 @@
               "category": "Kategorie II"
             }
           ],
-          "align_target_seat": 22
+          "align_target_seat": 22,
+          "segment_align": {
+            "1": {
+              "row": "14",
+              "seat": 1
+            },
+            "23": {
+              "row": "14",
+              "seat": 27
+            }
+          }
         },
         {
           "uuid": "fdba9581-1b9b-5a47-9634-483895df34a0",
@@ -5018,7 +5038,17 @@
               "category": "Kategorie II"
             }
           ],
-          "align_target_seat": 22
+          "align_target_seat": 22,
+          "segment_align": {
+            "1": {
+              "row": "14",
+              "seat": 1
+            },
+            "23": {
+              "row": "14",
+              "seat": 27
+            }
+          }
         },
         {
           "uuid": "0e4a7661-b32e-581c-8ff4-529e344d6f0b",
