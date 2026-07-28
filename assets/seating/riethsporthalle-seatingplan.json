@@ -2355,6 +2355,10 @@
             "8": {
               "row": "13",
               "seat": 6
+            },
+            "11": {
+              "row": "12",
+              "seat": 13
             }
           }
         },
@@ -2544,7 +2548,17 @@
               "category": "Kategorie I"
             }
           ],
-          "align_target_seat": 3
+          "align_target_seat": 3,
+          "segment_align": {
+            "1": {
+              "row": "14",
+              "seat": 1
+            },
+            "9": {
+              "row": "12",
+              "seat": 11
+            }
+          }
         },
         {
           "uuid": "6962b9df-6c2c-529b-af60-ea2a97a0f1a6",
@@ -2772,7 +2786,17 @@
               "category": "Kategorie I"
             }
           ],
-          "align_target_seat": 3
+          "align_target_seat": 3,
+          "segment_align": {
+            "1": {
+              "row": "14",
+              "seat": 1
+            },
+            "11": {
+              "row": "11",
+              "seat": 15
+            }
+          }
         },
         {
           "uuid": "f1c2f2b8-057d-5c58-84bb-775f69f79d8b",
@@ -3039,7 +3063,13 @@
               "category": "Kategorie I"
             }
           ],
-          "align_target_seat": 3
+          "align_target_seat": 3,
+          "segment_align": {
+            "1": {
+              "row": "14",
+              "seat": 1
+            }
+          }
         },
         {
           "uuid": "2f9bf8a2-ffd2-5cc4-b4dd-5a23646113d8",

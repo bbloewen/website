@@ -553,7 +553,13 @@
           if (!anchor || !s) return null;
           return s.getBoundingClientRect().left - anchor.getBoundingClientRect().left;
         }
-        zoneEl.querySelectorAll('[data-segment-align]').forEach(function (row) {
+        // Von innen nach außen (Reihen nahe dem Spielfeld zuerst), weil sich die
+        // Bezüge dorthin richten: in Block E hängt Reihe 13 an Reihe 12, Reihe 12 an
+        // Reihe 11. Zusätzlich läuft der Durchgang zweimal, damit auch Bezüge über
+        // mehrere Stufen sicher auf den Endstand treffen.
+        var segRows = Array.from(zoneEl.querySelectorAll('[data-segment-align]')).reverse();
+        function segmentPass() {
+        segRows.forEach(function (row) {
           var spec;
           try { spec = JSON.parse(row.dataset.segmentAlign); } catch (e) { return; }
           var anchorNum = row.dataset.alignTargetSeat;
@@ -576,18 +582,31 @@
           var nat = {};
           starts.forEach(function (n) { nat[n] = deltaToAnchor(row, n); });
 
-          Object.keys(spec).forEach(function (segNum) {
+          // Aufsteigend abarbeiten und die schon gesetzten Lücken mitzählen: eine Lücke
+          // verschiebt ALLE folgenden Sitze der Reihe mit. Ohne diesen Abzug landete in
+          // Block E Sitz 11 der Reihe 14 um genau die Lücke bei Sitz 8 zu weit rechts.
+          var applied = 0;
+          Object.keys(spec).map(Number).sort(function (a, b) { return a - b; }).forEach(function (segNumInt) {
+            var segNum = String(segNumInt);
             if (want[segNum] === undefined || nat[segNum] === null) return;
             var seatEl = seatIn(row, segNum);
             if (!seatEl) return;
             // Lücke = fehlender Abstand. Vor dem Anker sitzt die Lücke am Ankersitz
             // (dort beginnt das Mittelsegment), nach dem Anker am Segmentanfang selbst.
+            var afterAnchor = segNumInt > parseInt(anchorNum, 10);
             var missing = want[segNum] - nat[segNum];
-            var target = parseInt(segNum, 10) > parseInt(anchorNum, 10) ? seatEl : anchorSeat;
-            var sign = target === anchorSeat ? -1 : 1;
-            target.style.marginLeft = Math.max(0, sign * missing) + 'px';
+            if (afterAnchor) {
+              var gap = Math.max(0, missing - applied);
+              seatEl.style.marginLeft = gap + 'px';
+              applied += gap;
+            } else {
+              anchorSeat.style.marginLeft = Math.max(0, -missing) + 'px';
+            }
           });
         });
+        }
+        segmentPass();
+        segmentPass();
         // Die geänderten Lücken haben die Ankersitze mitverschoben — neu ankern.
         anchorAll();
       }
