@@ -301,10 +301,10 @@
             rowEl.style.gap = '4.6033px';
           }
         }
-        // Block B, Reihe 11: komplett 10px nach links (eigene Korrektur, unabhängig
+        // Block B, Reihe 11: komplett 15px nach links (eigene Korrektur, unabhängig
         // von der Reihe-1-10-Ausrichtung darüber).
         if (zone.zone_id === 'B' && row.row_number === '11') {
-          rowEl.style.transform = 'translateX(-10px)';
+          rowEl.style.transform = 'translateX(-15px)';
         }
         // Reihennummer links UND rechts an der Reihe, wie im Original-Saalplan.
         var rowNumLeft = document.createElement('span');
