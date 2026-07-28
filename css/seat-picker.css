@@ -308,15 +308,26 @@
 .seatplan-mobile-entrance.vip i { color: rgba(179, 57, 44, .9); }
 
 /* Reihe zwischen den Nord-Kacheln und den Süd-Kacheln: Anzeigetafel (vertikale
-   Linie, wie Haupt-/VIP-Eingang), Stehplatz (eigene Box) und Spielfeld nebeneinander
-   — in genau dieser Reihenfolge, wie im echten Saalplan (Stehplatz liegt neben dem
-   Spielfeld, nicht auf ihm). Die Zeilenhöhe ergibt sich aus dem Spielfeld
-   (aspect-ratio), Anzeigetafel/Stehplatz strecken sich per align-items:stretch mit.
-*/
+   Linie, wie Haupt-/VIP-Eingang) + Stehplatz (eigene, halb so hohe Box) links,
+   Spielfeld in der Mitte — in genau dieser Reihenfolge, wie im echten Saalplan
+   (Stehplatz liegt neben dem Spielfeld, nicht auf ihm). Ein unsichtbarer Spiegel
+   rechts (gleiche Breite wie die linke Aside-Gruppe) sorgt dafür, dass das
+   Spielfeld selbst mittig bleibt, statt durch die linke Gruppe nach rechts verschoben
+   zu wirken. Die Zeilenhöhe ergibt sich aus dem Spielfeld (aspect-ratio); die
+   Anzeigetafel streckt sich per align-items:stretch mit, der Stehplatz nicht. */
 .seatplan-mobile-court-row {
   display: flex;
   align-items: stretch;
   gap: 8px;
+}
+.seatplan-mobile-court-aside {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+.seatplan-mobile-court-aside-mirror {
+  flex: 0 0 52px;
 }
 .seatplan-mobile-scoreboard {
   flex: 0 0 14px;
@@ -332,8 +343,12 @@
   writing-mode: vertical-rl; transform: rotate(180deg);
   padding: 4px 0;
 }
+/* Stehplatz: nur halb so hoch wie das Spielfeld und mittig in der Aside-Gruppe
+   (nicht wie die Anzeigetafel über die volle Höhe gestreckt). */
 .seatplan-mobile-standing {
   flex: 0 0 32px;
+  align-self: center;
+  height: 50%;
   background: rgba(101, 110, 130, .08);
   border: 1px dashed var(--color-neutral-200);
   border-radius: var(--radius-md);
@@ -341,11 +356,11 @@
 }
 .seatplan-mobile-standing span {
   font-size: 8px; font-weight: 600; letter-spacing: .04em; color: var(--text-muted);
-  writing-mode: vertical-rl;
+  writing-mode: vertical-rl; transform: rotate(180deg);
 }
 
 /* Spielfeld: im echten Seitenverhältnis eines Basketballfelds (28 x 15 m) statt
-   künstlich schmal, nimmt die verbleibende Breite neben Anzeigetafel + Stehplatz ein. */
+   künstlich schmal, nimmt die verbleibende Breite zwischen Aside-Gruppe und Spiegel ein. */
 .seatplan-mobile-court {
   flex: 1 1 auto;
   min-width: 0;

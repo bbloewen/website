@@ -204,9 +204,10 @@
       return '<button type="button" class="seatplan-mobile-tile" style="background:' + background + ';border-color:' + borderColor + '" data-zone="' + id + '">' + id + '</button>';
     }
 
+    var MOBILE_CAT_LABEL = { 'Kategorie I': 'Kat. I', 'Kategorie II': 'Kat. II', 'VIP': 'VIP' };
     var catOrder = ['Kategorie I', 'Kategorie II', 'VIP'];
     var legendItems = catOrder.filter(function (c) { return self.prices[c] && self.excludeCategories.indexOf(c) === -1; })
-      .map(function (c) { return '<span class="' + catClass(c) + '"><i></i> ' + c + '</span>'; })
+      .map(function (c) { return '<span class="' + catClass(c) + '"><i></i> ' + MOBILE_CAT_LABEL[c] + '</span>'; })
       .join('');
 
     var northTiles = this.northZones.map(function (id) { return blockTile(id, true); }).join('');
@@ -218,9 +219,12 @@
         '<div class="seatplan-mobile-entrance main" style="grid-column:1;grid-row:1 / 4"><span></span><i>Haupteingang</i><span></span></div>' +
         '<div class="seatplan-mobile-tiles" style="grid-column:2;grid-row:1">' + northTiles + '</div>' +
         '<div class="seatplan-mobile-court-row" style="grid-column:2;grid-row:2">' +
-          '<div class="seatplan-mobile-scoreboard"><span></span><i>Anzeigetafel</i><span></span></div>' +
-          '<div class="seatplan-mobile-standing"><span>Stehplatz</span></div>' +
+          '<div class="seatplan-mobile-court-aside">' +
+            '<div class="seatplan-mobile-scoreboard"><span></span><i>Anzeigetafel</i><span></span></div>' +
+            '<div class="seatplan-mobile-standing"><span>Stehplatz</span></div>' +
+          '</div>' +
           '<div class="seatplan-mobile-court"><p class="t-caption" style="margin:0 0 4px;color:var(--text-muted)">Spielfeld</p><div class="seatplan-legend">' + legendItems + '</div></div>' +
+          '<div class="seatplan-mobile-court-aside-mirror" aria-hidden="true"></div>' +
         '</div>' +
         '<div class="seatplan-mobile-tiles" style="grid-column:2;grid-row:3">' + southTiles + '</div>' +
         '<div class="seatplan-mobile-entrance vip" style="grid-column:3;grid-row:3"><span></span><i>VIP-Eingang</i><span></span></div>' +
