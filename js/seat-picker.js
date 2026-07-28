@@ -28,6 +28,15 @@
     'WILLKOMMEN5': { type: 'fixed', value: 5, label: 'WILLKOMMEN5 (5 €)' }
   };
 
+  /* Dauerkarte-Tarife inkl. Vereinsrabatt — nur relevant, wenn opts.dauerkarteDiscount
+     gesetzt ist (Einzelticket bleibt unberührt, dort bleibt es bei normal/ermaessigt). */
+  var DK_TARIF_LABELS = {
+    normal: 'Normalpreis',
+    ermaessigt: 'Ermäßigt',
+    normal_member: 'Normalpreis mit Vereinsrabatt',
+    ermaessigt_member: 'Ermäßigt mit Vereinsrabatt'
+  };
+
   function SeatPicker(root, opts) {
     this.root = root;
     this.mode = opts.mode || 'seats';
@@ -49,6 +58,10 @@
     this.voucherInfo = null;
     this.voucherError = null;
     this.notiz = '';
+    /* Dauerkarte: Frühbucher (automatisch, für alle) + Vereinsmitglieder (30 %,
+       Nachweis nötig, als eigene Tarif-Option wählbar). Kombinierbar bis zum
+       Frühbucher-Stichtag ("zusammen 50 %"), danach nur noch der Mitgliedsrabatt. */
+    this.dkDiscount = opts.dauerkarteDiscount || null;
     this._load();
   }
 
@@ -58,6 +71,22 @@
     if (!this.voucherInfo || base <= 0) return 0;
     var d = this.voucherInfo.type === 'percent' ? (base * this.voucherInfo.value / 100) : this.voucherInfo.value;
     return Math.min(Math.round(d * 100) / 100, base);
+  };
+
+  SeatPicker.prototype._earlyBirdActive = function () {
+    if (!this.dkDiscount) return false;
+    return new Date() <= new Date(this.dkDiscount.earlyBirdUntil + 'T23:59:59');
+  };
+
+  SeatPicker.prototype._dkPrice = function (basePrice, member) {
+    if (!this.dkDiscount || basePrice === undefined) return basePrice;
+    var pct = (member ? this.dkDiscount.memberPercent : 0) + (this._earlyBirdActive() ? this.dkDiscount.earlyBirdPercent : 0);
+    return Math.round(basePrice * (1 - pct / 100) * 100) / 100;
+  };
+
+  SeatPicker.prototype._dkTarifPrice = function (priceInfo, tarif) {
+    var base = tarif.indexOf('ermaessigt') === 0 ? priceInfo.ermaessigt : priceInfo.normal;
+    return this._dkPrice(base, tarif.indexOf('_member') !== -1);
   };
 
   SeatPicker.prototype._load = function () {
@@ -400,7 +429,7 @@
     } else {
       this.selected[guid] = {
         zoneLabel: zoneLabel, rowLabel: rowLabel, seatNumber: seatNumber,
-        category: category, tarif: 'normal', price: priceInfo.normal, priceInfo: priceInfo
+        category: category, tarif: 'normal', price: this._dkPrice(priceInfo.normal, false), priceInfo: priceInfo
       };
       btn.classList.add('selected');
     }
@@ -535,12 +564,18 @@
         var row = document.createElement('div');
         row.className = 'seatplan-cart-item';
         var hasErmaessigt = s.priceInfo.ermaessigt !== undefined;
+        var tarifOptions = ['normal'].concat(hasErmaessigt ? ['ermaessigt'] : []);
+        if (self.dkDiscount) {
+          tarifOptions = tarifOptions.concat(['normal_member'], hasErmaessigt ? ['ermaessigt_member'] : []);
+        }
         row.innerHTML =
           '<div>' + s.zoneLabel + ' · Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber +
           '<br><span class="t-caption">' + fmtEUR(s.price) + ' € je Ticket</span>' +
-          (hasErmaessigt ? '<br><select data-tarif="' + guid + '" class="seatplan-tarif-select">' +
-            '<option value="normal"' + (s.tarif === 'normal' ? ' selected' : '') + '>Normalpreis</option>' +
-            '<option value="ermaessigt"' + (s.tarif === 'ermaessigt' ? ' selected' : '') + '>Ermäßigt</option>' +
+          (tarifOptions.length > 1 ? '<br><select data-tarif="' + guid + '" class="seatplan-tarif-select">' +
+            tarifOptions.map(function (t) {
+              return '<option value="' + t + '"' + (s.tarif === t ? ' selected' : '') + '>' +
+                DK_TARIF_LABELS[t] + ' (' + fmtEUR(self._dkTarifPrice(s.priceInfo, t)) + ' €)</option>';
+            }).join('') +
             '</select>' : '') +
           '</div>' +
           '<div class="seatplan-cart-item-right"><span>' + fmtEUR(s.price) + ' €</span>' +
@@ -558,7 +593,7 @@
           var guid = this.dataset.tarif;
           var s = self.selected[guid];
           s.tarif = this.value;
-          s.price = this.value === 'ermaessigt' ? s.priceInfo.ermaessigt : s.priceInfo.normal;
+          s.price = self._dkTarifPrice(s.priceInfo, s.tarif);
           self._renderCart();
         });
       });
@@ -700,7 +735,7 @@
     Object.keys(this.selected).forEach(function (guid) {
       var s = self.selected[guid];
       lines.push({
-        label: s.zoneLabel + ' · Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber + ' · ' + (s.tarif === 'ermaessigt' ? 'Ermäßigt' : 'Normalpreis'),
+        label: s.zoneLabel + ' · Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber + ' · ' + (DK_TARIF_LABELS[s.tarif] || 'Normalpreis'),
         qty: 1, unitPrice: s.price, lineTotal: s.price
       });
       total += s.price;
