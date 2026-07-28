@@ -1246,15 +1246,20 @@
     var total = 0;
 
     if (this.mode === 'blocks') {
-      Object.keys(this.blockCounts).forEach(function (zoneId) {
-        var c = self.blockCounts[zoneId];
+      Object.keys(this.blockCounts).forEach(function (blockKey) {
+        var c = self.blockCounts[blockKey];
         ['normal', 'ermaessigt'].forEach(function (tarif) {
           var count = c[tarif];
           if (count > 0) {
             var price = tarif === 'ermaessigt' ? c.priceInfo.ermaessigt : c.priceInfo.normal;
             lines.push({
               label: c.zoneLabel + ' · ' + (tarif === 'ermaessigt' ? 'Ermäßigt' : 'Normalpreis'),
-              qty: count, unitPrice: price, lineTotal: count * price
+              qty: count, unitPrice: price, lineTotal: count * price,
+              // Maschinenlesbar für die pretix-Order (n8n): im Blockmodus wählt der
+              // Käufer keinen konkreten Sitz, sondern Block + Kategorie + Anzahl.
+              // Welche Sitze das konkret werden, entscheidet der Bestell-Workflow —
+              // pretix verlangt bei bestuhlten Events pro Ticket einen echten Sitz.
+              type: 'block', zoneLabel: c.zoneLabel, category: c.category, tarif: tarif
             });
             total += count * price;
           }
@@ -1264,7 +1269,7 @@
       var nachwuchsAmount = 0;
       if (this.nachwuchsBeitrag && this.nachwuchsChecked && ticketCount > 0) {
         nachwuchsAmount = this.nachwuchsAmount;
-        lines.push({ label: 'Unterstützung für den Nachwuchs', qty: 1, unitPrice: nachwuchsAmount, lineTotal: nachwuchsAmount });
+        lines.push({ label: 'Unterstützung für den Nachwuchs', qty: 1, unitPrice: nachwuchsAmount, lineTotal: nachwuchsAmount, type: 'nachwuchs' });
         total += nachwuchsAmount;
       }
       return this._applyVoucherToSummary(lines, total, nachwuchsAmount);
