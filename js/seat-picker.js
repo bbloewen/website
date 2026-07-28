@@ -227,6 +227,13 @@
       var row3 = group.rows.filter(function (r) { return r.row_number === '3'; })[0];
       var row3Gap = row3 ? (cols - row3.seats.length) / 2 * 10 : 0;
 
+      // Block B, Kategorie-I-Gruppe: Reihen 6-9 (16 Plätze) sollen optisch genauso breit
+      // wirken wie Reihe 1-3 (VIP, 19 Plätze) darüber und mit Reihe 6-10 gemeinsam rechts-
+      // UND linksbündig mit Reihe 1-5 abschließen. Referenz-Margin über Reihe 6 berechnet
+      // (gleiche Technik wie row3Gap oben) — dieselbe Margin gilt dann für Reihe 6-10.
+      var kat1Ref = group.rows.filter(function (r) { return r.row_number === '6'; })[0];
+      var kat1AnchorGap = kat1Ref ? (cols - kat1Ref.seats.length) / 2 * 10 : 0;
+
       var freeCount = 0;
       group.rows.forEach(function (row) {
         var rowLabel = row.row_label || row.row_number;
@@ -238,10 +245,21 @@
         // anderen Reihen zu zentrieren, exakt an Reihe 3s Rand ausrichten.
         if ((zone.zone_id === 'A' || zone.zone_id === 'B') && (row.row_number === '4' || row.row_number === '5')) {
           rowEl.style.alignSelf = 'flex-end';
-          rowEl.style.marginRight = (row3Gap - 2) + 'px';
+          rowEl.style.marginRight = (row3Gap - 3) + 'px';
         } else if (zone.zone_id === 'C' && (row.row_number === '4' || row.row_number === '5')) {
           rowEl.style.alignSelf = 'flex-start';
-          rowEl.style.marginLeft = (row3Gap - 2) + 'px';
+          rowEl.style.marginLeft = (row3Gap - 3) + 'px';
+        }
+        // Block B: Reihen 6-10 gemeinsam an derselben Kante verankern (rechtsbündig mit
+        // Reihe 1-5). Reihe 6-9 zusätzlich per größerem Sitzabstand (Anzahl bleibt gleich)
+        // auf die Breite von Reihe 1-3 aufziehen, damit sie dadurch automatisch auch
+        // linksbündig mit Reihe 1-3/10 werden.
+        if (zone.zone_id === 'B' && ['6', '7', '8', '9', '10'].indexOf(row.row_number) !== -1) {
+          rowEl.style.alignSelf = 'flex-end';
+          rowEl.style.marginRight = kat1AnchorGap + 'px';
+          if (row.row_number !== '10') {
+            rowEl.style.gap = '4.08px';
+          }
         }
         // Reihennummer links UND rechts an der Reihe, wie im Original-Saalplan.
         var rowNumLeft = document.createElement('span');
