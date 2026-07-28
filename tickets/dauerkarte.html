@@ -8,7 +8,7 @@
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785200000" />
 <link rel="stylesheet" href="/css/site.css?v=1785400000" />
-<link rel="stylesheet" href="/css/seat-picker.css?v=1785660000" />
+<link rel="stylesheet" href="/css/seat-picker.css?v=1785700000" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 </head>
@@ -52,10 +52,7 @@
             <p class="t-caption" style="margin-top:12px;color:var(--text-muted)">Ermäßigt gilt für Studierende, Azubis, FSJ, Menschen mit Behinderung, Rentner*innen und Mitglieder von Kooperationsvereinen.</p>
           </div>
           <div class="buy-thumb-col">
-            <button type="button" class="buy-thumb-btn" id="seatplan-modal-trigger" aria-label="Sitzplatzwahl öffnen">
-              <img loading="lazy" src="/assets/img/riethsporthalle-saalplan-real-thumb.webp" alt="Offizieller Saalplan der Riethsporthalle mit allen Blöcken, Reihen und Kategorien"  />
-              <span class="buy-thumb-cta"><i data-lucide="expand" class="icon-16"></i> Sitzplatz wählen</span>
-            </button>
+            <div id="seatplan-root"></div>
           </div>
           <div class="buy-cart-col">
             <h3 class="t-h4 mb-1">Deine Auswahl</h3>
@@ -63,21 +60,6 @@
             <div id="seatplan-cart"></div>
             <div class="seatplan-cart-total"><span>Gesamt</span><span id="seatplan-total">0 €</span></div>
             <button class="btn btn-primary btn-sm" id="seatplan-cta" style="margin-top:16px;width:100%;justify-content:center" disabled>Weiter zur Kasse</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sitzplatzwahl-Popup — Vorschaubild bleibt kompakt im Grid, Klick öffnet den echten,
-           interaktiven Sitzplan groß. Warenkorb/Preise oben bleiben unabhängig vom Modal sichtbar. -->
-      <div class="modal-backdrop" id="seatplan-modal-backdrop">
-        <div class="modal-box modal-box-blockplan" role="dialog" aria-modal="true" aria-label="Sitzplatzwahl">
-          <button class="modal-close" aria-label="Schließen" id="seatplan-modal-close"><i data-lucide="x"></i></button>
-          <h3 class="t-h4 mb-3" id="seatplan-modal-title">Sitzplatz wählen</h3>
-          <div style="flex:1;min-height:0;overflow-y:auto">
-            <div id="seatplan-root"></div>
-          </div>
-          <div class="seatplan-footer-row">
-            <button class="btn btn-primary btn-sm" id="seatplan-modal-confirm">Übernehmen</button>
           </div>
         </div>
       </div>
@@ -152,21 +134,9 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="/js/nav.js?v=1785200000"></script>
 <script src="/js/include.js?v=1785200000"></script>
-<script src="/js/seat-picker.js?v=1785660000"></script>
+<script src="/js/seat-picker.js?v=1785700000"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    /* Vorschaubild soll nie höher sein als die Preistabelle daneben — auch
-       wenn der Warenkorb (dritte Spalte) durch mehrere Auswahlen höher wird
-       als beide. Preise ändern sich nie zur Laufzeit, daher reicht Messung
-       bei Load + Resize. */
-    function syncThumbHeight() {
-      var priceCol = document.querySelector('.buy-prices-col');
-      var thumbBtn = document.getElementById('seatplan-modal-trigger');
-      if (priceCol && thumbBtn) thumbBtn.style.height = priceCol.offsetHeight + 'px';
-    }
-    syncThumbHeight();
-    window.addEventListener('resize', syncThumbHeight);
-
     /* Preisbox zeigt bewusst den Normalpreis (data-base) statisch an. Rabatte
        (Frühbucher/Vereinsrabatt) werden erst im Warenkorb-Widget bei Auswahl
        des Tarifs berechnet und angezeigt, s. seat-picker.js dauerkarteDiscount. */
@@ -201,15 +171,6 @@
       window.location.href = '/tickets/checkout.html';
     }
     document.getElementById('seatplan-cta').addEventListener('click', goToBuyerDetails);
-
-    var backdrop = document.getElementById('seatplan-modal-backdrop');
-    function openSeatModal() { backdrop.classList.add('open'); }
-    function closeSeatModal() { backdrop.classList.remove('open'); }
-    document.getElementById('seatplan-modal-trigger').addEventListener('click', openSeatModal);
-    document.getElementById('seatplan-modal-close').addEventListener('click', closeSeatModal);
-    backdrop.addEventListener('click', function (e) { if (e.target === backdrop) closeSeatModal(); });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSeatModal(); });
-    document.getElementById('seatplan-modal-confirm').addEventListener('click', closeSeatModal);
 
     var discountBackdrop = document.getElementById('dk-discount-modal-backdrop');
     function openDiscountModal() { discountBackdrop.classList.add('open'); }

@@ -439,3 +439,25 @@
 @media (max-width: 720px) {
   #seatplan-modal-title { display: none; }
 }
+
+/* Modus "blocks" (Einzelticket): Übernehmen-Button unter der Blockübersicht,
+   erst aktiv sobald ein Block angetippt wurde (visuell markiert). */
+.seatplan-mobile-add-row { margin-top: 14px; display: flex; justify-content: center; }
+.seatplan-mobile-add-row .btn { width: 100%; max-width: 260px; justify-content: center; }
+.seatplan-mobile-tile.selected { outline: 2px solid var(--color-brand-blue); outline-offset: 1px; }
+
+/* Modus "seats" (Dauerkarte): Übernehmen-Button am Ende der Block-Detailansicht,
+   schließt zurück zur Blockübersicht. */
+.seatplan-mobile-detail-confirm { display: flex; width: 100%; margin-top: 14px; justify-content: center; }
+
+/* Direkte Block+Anzahl-Wahl im Warenkorb, Alternative zum Antippen im Bild. */
+.seatplan-direct-add-row {
+  padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px dashed var(--color-neutral-200);
+}
+.seatplan-direct-add-row select,
+.seatplan-direct-add-row input {
+  border: 1px solid var(--color-neutral-200); border-radius: var(--radius-md);
+  padding: 6px 8px; font-family: inherit; font-size: 13px; color: inherit;
+}
+.seatplan-direct-add-row select { flex: 1; min-width: 0; }
+.seatplan-direct-add-row input { width: 52px; text-align: center; }

@@ -64,7 +64,8 @@
     this.totalEl = opts.totalEl;
     this.ctaEl = opts.ctaEl;
     this.onContinue = opts.onContinue || function () {};
-    this.mobileZoneId = null; // Modus "seats" + mobile Breite: null = Block-Übersicht, sonst gewählter Block
+    this.mobileZoneId = null; // Modus "seats": null = Block-Übersicht, sonst gewählter Block (Sitzdetail offen)
+    this.pendingBlockId = null; // Modus "blocks": per Tippen in der Übersicht markierter, noch nicht übernommener Block
     this.nachwuchsBeitrag = !!opts.nachwuchsBeitrag; // Pauschale pro Bestellung, standardmäßig an, unabhängig von Anzahl Plätze/Tickets
     this.nachwuchsAmount = opts.nachwuchsAmount || 2;
     this.nachwuchsChecked = true;
@@ -167,14 +168,6 @@
     return this.blocks[id];
   };
 
-  /* Mobil (≤720px) ist die Sitzplatzwahl mit allen 6 Blöcken nebeneinander zu klein zum
-     Antippen — deshalb dort erst eine kompakte Block-Übersicht (Tap = welcher Block),
-     danach den gewählten Block groß mit anwählbaren Sitzen. Nur Modus "seats" (Dauerkarte);
-     Einzelticket (Modus "blocks") wählt ohnehin nur ganze Blöcke, keine Einzelsitze. */
-  SeatPicker.prototype._isMobileBreakpoint = function () {
-    return window.matchMedia && window.matchMedia('(max-width: 720px)').matches;
-  };
-
   SeatPicker.prototype._renderMobileOverview = function () {
     var self = this;
     var MOBILE_CAT_LABEL = { 'Kategorie I': 'Kat. I', 'Kategorie II': 'Kat. II', 'VIP': 'VIP' };
@@ -208,7 +201,8 @@
       var borderColor = catBorderColor(mainCategory);
       var hasVip = groups.some(function (g) { return g.category === 'VIP'; });
       var vipLabel = hasVip ? '<span class="seatplan-mobile-tile-vip">VIP</span>' : '';
-      var tileClass = 'seatplan-mobile-tile' + (isNorth ? '' : ' seatplan-mobile-tile-south');
+      var isPending = self.mode === 'blocks' && self.pendingBlockId === id;
+      var tileClass = 'seatplan-mobile-tile' + (isNorth ? '' : ' seatplan-mobile-tile-south') + (isPending ? ' selected' : '');
       return '<button type="button" class="' + tileClass + '" style="background:' + background + ';border-color:' + borderColor + '" data-zone="' + id + '">' +
         vipLabel +
         '<span class="seatplan-mobile-tile-letter">' + id + '</span>' +
@@ -218,6 +212,15 @@
 
     var northTiles = this.northZones.map(function (id) { return blockTile(id, true); }).join('');
     var southTiles = this.southZones.map(function (id) { return blockTile(id, false); }).join('');
+
+    // Modus "blocks" (Einzelticket): kein Sitzdetail nötig (freie Platzwahl im Block) —
+    // stattdessen direkt in der Übersicht einen Block antippen (Markierung) und mit
+    // "Übernehmen" 1 Ticket in den Warenkorb legen. Weitere Anpassung der Anzahl
+    // passiert danach im Warenkorb selbst (Stepper) statt hier erneut anzutippen.
+    var blocksFooter = this.mode === 'blocks'
+      ? '<div class="seatplan-mobile-add-row"><button type="button" class="btn btn-primary btn-sm" id="seatplan-mobile-add-btn"' +
+          (this.pendingBlockId ? '' : ' disabled') + '>Übernehmen</button></div>'
+      : '';
 
     this.root.innerHTML =
       '<p class="t-body-sm" style="text-align:center;margin:0 0 12px;font-weight:600">Wähle deinen Block</p>' +
@@ -234,14 +237,60 @@
         '</div>' +
         '<div class="seatplan-mobile-tiles" style="grid-column:2;grid-row:3">' + southTiles + '</div>' +
         '<div class="seatplan-mobile-entrance vip" style="grid-column:3;grid-row:3"><i>VIP-Eingang</i></div>' +
-      '</div>';
+      '</div>' +
+      blocksFooter;
 
     this.root.querySelectorAll('.seatplan-mobile-tile[data-zone]').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        self.mobileZoneId = btn.dataset.zone;
-        self._render();
+        if (self.mode === 'blocks') {
+          self.pendingBlockId = self.pendingBlockId === btn.dataset.zone ? null : btn.dataset.zone;
+          self._render();
+        } else {
+          self.mobileZoneId = btn.dataset.zone;
+          self._render();
+        }
       });
     });
+    if (this.mode === 'blocks') {
+      var addBtn = this.root.querySelector('#seatplan-mobile-add-btn');
+      if (addBtn) addBtn.addEventListener('click', function () { self._addPendingBlock(); });
+    }
+    this._renderCart();
+  };
+
+  /* Modus "blocks" (Einzelticket): Gesamtkapazität einer Kategorie in einem Block —
+     Grundlage für den Stepper-Grenzwert, sowohl beim Schnell-Hinzufügen aus der
+     Übersicht/Direktwahl als auch beim +/- im Warenkorb selbst. Keine Live-Belegungs-
+     prüfung (Einzelticket ist ohnehin First-Come-First-Serve vor Ort). */
+  SeatPicker.prototype._blockFreeCount = function (zoneId, category) {
+    var zone = this._zoneById(zoneId);
+    if (!zone) return 0;
+    return this._categoryGroups(zone).filter(function (g) { return g.category === category; })
+      .reduce(function (sum, g) { return sum + g.rows.reduce(function (s, r) { return s + r.seats.length; }, 0); }, 0);
+  };
+
+  /* Fügt `qty` Tickets der Hauptkategorie eines Blocks zum Warenkorb hinzu (Tarif
+     "normal" als Default, im Warenkorb danach umstellbar) — gemeinsame Grundlage für
+     "Übernehmen" in der Übersicht UND die Direktwahl (Block+Anzahl) im Warenkorb. */
+  SeatPicker.prototype._quickAddBlock = function (zoneId, qty) {
+    var self = this;
+    var zone = this._zoneById(zoneId);
+    if (!zone) return;
+    var groups = this._categoryGroups(zone).filter(function (g) { return self.excludeCategories.indexOf(g.category) === -1; });
+    if (!groups.length) return;
+    var category = groups[groups.length - 1].category;
+    var total = this._blockFreeCount(zoneId, category);
+    var priceInfo = this.prices[category] || { normal: 0 };
+    var blockKey = zoneId + '::' + category;
+    var counts = this.blockCounts[blockKey] || { normal: 0, ermaessigt: 0 };
+    this._setBlockCount(blockKey, zone.name, category, priceInfo, 'normal', (counts.normal || 0) + qty, total);
+  };
+
+  SeatPicker.prototype._addPendingBlock = function () {
+    if (!this.pendingBlockId) return;
+    this._quickAddBlock(this.pendingBlockId, 1);
+    this.pendingBlockId = null;
+    this._render();
   };
 
   SeatPicker.prototype._renderMobileZoneDetail = function () {
@@ -256,6 +305,11 @@
     wrap.appendChild(header);
     var zoneEl = this._renderZone(zone);
     if (zoneEl) wrap.appendChild(zoneEl);
+    var confirmBtn = document.createElement('button');
+    confirmBtn.type = 'button';
+    confirmBtn.className = 'btn btn-primary btn-sm seatplan-mobile-detail-confirm';
+    confirmBtn.textContent = 'Übernehmen';
+    wrap.appendChild(confirmBtn);
     this.root.innerHTML = '';
     this.root.appendChild(wrap);
     if (window.lucide) window.lucide.createIcons();
@@ -263,77 +317,23 @@
       self.mobileZoneId = null;
       self._render();
     });
+    confirmBtn.addEventListener('click', function () {
+      self.mobileZoneId = null;
+      self._render();
+    });
     this._renderCart();
   };
 
+  /* Blockübersicht ist die durchgehende Ansicht an jeder Breite (kein Desktop/Mobile-
+     Umschalten mehr) — Modus "seats" kann in die Sitzdetailansicht eines Blocks
+     wechseln, Modus "blocks" bleibt immer in der Übersicht (freie Platzwahl, kein
+     Sitzdetail nötig). */
   SeatPicker.prototype._render = function () {
-    if (this.mode === 'seats' && this._isMobileBreakpoint()) {
-      if (this.mobileZoneId) {
-        this._renderMobileZoneDetail();
-      } else {
-        this._renderMobileOverview();
-      }
-      return;
+    if (this.mode === 'seats' && this.mobileZoneId) {
+      this._renderMobileZoneDetail();
+    } else {
+      this._renderMobileOverview();
     }
-    var self = this;
-    var northRow = document.createElement('div');
-    northRow.className = 'seatplan-row';
-    var southRow = document.createElement('div');
-    southRow.className = 'seatplan-row';
-
-    // _renderZone gibt null zurück, wenn ein Block nach excludeCategories keine
-    // verkäuflichen Reihen mehr hat (z. B. Block B ist beim Einzelticket komplett VIP
-    // und damit komplett ausgeschlossen) — dann wird die Karte gar nicht erst angezeigt,
-    // statt als leere graue Box mit nur dem Block-Namen zu erscheinen.
-    this.northZones.forEach(function (id) {
-      var el = self._renderZone(self._zoneById(id));
-      if (el) northRow.appendChild(el);
-    });
-    this.southZones.forEach(function (id) {
-      var el = self._renderZone(self._zoneById(id));
-      if (el) southRow.appendChild(el);
-    });
-
-    // Eine einzige, zeilenbündige Legende: erst die Kategorie-Farben (nur die auf dieser
-    // Seite tatsächlich angebotenen — excludeCategories berücksichtigt, z. B. kein VIP
-    // beim Einzelticket), dann Status. "Frei" braucht kein eigenes Symbol — alles, was
-    // nicht blau markiert ist, ist frei.
-    var catOrder = ['Kategorie I', 'Kategorie II', 'VIP'];
-    var catItems = catOrder.filter(function (c) { return self.prices[c] && self.excludeCategories.indexOf(c) === -1; })
-      .map(function (c) { return '<span class="' + catClass(c) + '"><i></i> ' + c + '</span>'; })
-      .join('');
-
-    var legendHtml = this.mode === 'blocks'
-      ? '<div class="seatplan-legend">' + catItems +
-          '<span class="fcfs">First come, first serve</span>' +
-        '</div>'
-      : '<div class="seatplan-legend">' + catItems +
-          '<span class="taken"><i></i> vergeben</span>' +
-          '<span class="sel"><i></i> deine Auswahl</span>' +
-        '</div>';
-    var caption = this.mode === 'blocks'
-      ? '<p class="t-caption" style="margin-top:10px;color:var(--text-muted)">Nur mit der Dauerkarte sicherst du dir einen festen Sitzplatz.</p>'
-      : '';
-
-    this.root.innerHTML =
-      '<div class="seatplan-strip">Nordtribüne</div>' +
-      '<div id="seatplan-north"></div>' +
-      '<div class="seatplan-court-area">' +
-        '<div class="seatplan-side-strip stehblock">Stehblock</div>' +
-        '<div class="seatplan-side-strip entrance"></div>' +
-        '<div class="seatplan-court"><span>Spielfeld</span>' + legendHtml +
-          '<p class="seatplan-court-selection" id="seatplan-court-selection"></p>' +
-        '</div>' +
-        '<div class="seatplan-side-strip entrance"></div>' +
-      '</div>' +
-      '<div id="seatplan-south" style="margin-top:14px"></div>' +
-      '<div class="seatplan-strip seatplan-strip-south">Südtribüne</div>' +
-      caption;
-
-    document.getElementById('seatplan-north').appendChild(northRow);
-    document.getElementById('seatplan-south').appendChild(southRow);
-    this.courtSelectionEl = document.getElementById('seatplan-court-selection');
-    this._renderCart();
   };
 
   SeatPicker.prototype._renderZone = function (zone) {
@@ -775,35 +775,77 @@
     this.totalEl.textContent = fmtEUR(total) + ' €';
   };
 
+  /* Direkte Block+Anzahl-Wahl im Warenkorb selbst — Alternative zum Antippen im Bild
+     oben, für Nutzer, die schon wissen, welchen Block sie wollen. Immer sichtbar,
+     unabhängig vom aktuellen Warenkorb-Inhalt. */
+  SeatPicker.prototype._renderDirectAddRow = function () {
+    var self = this;
+    var options = this.northZones.concat(this.southZones).map(function (id) {
+      var zone = self._zoneById(id);
+      if (!zone) return '';
+      var groups = self._categoryGroups(zone).filter(function (g) { return self.excludeCategories.indexOf(g.category) === -1; });
+      if (!groups.length) return '';
+      return '<option value="' + id + '">Block ' + id + '</option>';
+    }).join('');
+    if (!options) return;
+    var wrap = document.createElement('div');
+    wrap.className = 'seatplan-direct-add-row';
+    wrap.innerHTML =
+      '<label class="t-caption" for="seatplan-direct-block" style="display:block;margin-bottom:6px;color:var(--text-muted)">Block direkt wählen, ohne den Sitzplan zu öffnen</label>' +
+      '<div style="display:flex;gap:8px">' +
+        '<select id="seatplan-direct-block">' + options + '</select>' +
+        '<input type="number" id="seatplan-direct-qty" min="1" value="1" aria-label="Anzahl">' +
+        '<button type="button" class="btn btn-primary btn-sm" id="seatplan-direct-add">Hinzufügen</button>' +
+      '</div>';
+    this.cartEl.appendChild(wrap);
+    wrap.querySelector('#seatplan-direct-add').addEventListener('click', function () {
+      var zoneId = wrap.querySelector('#seatplan-direct-block').value;
+      var qty = parseInt(wrap.querySelector('#seatplan-direct-qty').value, 10);
+      if (!zoneId || !qty || qty < 1) return;
+      self._quickAddBlock(zoneId, qty);
+    });
+  };
+
   SeatPicker.prototype._renderCartBlocks = function () {
     var self = this;
     var lines = [];
-    Object.keys(this.blockCounts).forEach(function (zoneId) {
-      var c = self.blockCounts[zoneId];
-      if (c.normal > 0) lines.push({ zoneId: zoneId, tarif: 'normal', label: 'Normalpreis', count: c.normal, price: c.priceInfo.normal, zoneLabel: c.zoneLabel });
-      if (c.ermaessigt > 0) lines.push({ zoneId: zoneId, tarif: 'ermaessigt', label: 'Ermäßigt', count: c.ermaessigt, price: c.priceInfo.ermaessigt, zoneLabel: c.zoneLabel });
+    Object.keys(this.blockCounts).forEach(function (blockKey) {
+      var c = self.blockCounts[blockKey];
+      if (c.normal > 0) lines.push({ blockKey: blockKey, tarif: 'normal', label: 'Normalpreis', count: c.normal, price: c.priceInfo.normal, zoneLabel: c.zoneLabel });
+      if (c.ermaessigt > 0) lines.push({ blockKey: blockKey, tarif: 'ermaessigt', label: 'Ermäßigt', count: c.ermaessigt, price: c.priceInfo.ermaessigt, zoneLabel: c.zoneLabel });
     });
     var ticketCount = lines.reduce(function (sum, l) { return sum + l.count; }, 0);
 
+    this.cartEl.innerHTML = '';
+    this._renderDirectAddRow();
+
     if (lines.length === 0) {
-      this.cartEl.innerHTML = '<div class="seatplan-cart-empty">Noch keine Tickets ausgewählt.</div>';
+      var emptyEl = document.createElement('div');
+      emptyEl.className = 'seatplan-cart-empty';
+      emptyEl.textContent = 'Noch keine Tickets ausgewählt.';
+      this.cartEl.appendChild(emptyEl);
       this.ctaEl.disabled = true;
     } else {
-      this.cartEl.innerHTML = '';
       lines.forEach(function (l) {
         var row = document.createElement('div');
         row.className = 'seatplan-cart-item';
-        var hasErmaessigt = l.zoneId && self.blockCounts[l.zoneId].priceInfo.ermaessigt !== undefined;
+        var hasErmaessigt = self.blockCounts[l.blockKey].priceInfo.ermaessigt !== undefined;
+        var freeCount = self._blockFreeCount(l.blockKey.split('::')[0], self.blockCounts[l.blockKey].category);
         row.innerHTML =
-          '<div>' + l.count + '× ' + l.zoneLabel +
+          '<div>' + l.zoneLabel +
           '<br><span class="t-caption">' + fmtEUR(l.price) + ' € je Ticket</span>' +
-          (hasErmaessigt ? '<br><select class="seatplan-tarif-select" data-block-tarif-select data-zone="' + l.zoneId + '" data-tarif="' + l.tarif + '">' +
+          (hasErmaessigt ? '<br><select class="seatplan-tarif-select" data-block-tarif-select data-zone="' + l.blockKey + '" data-tarif="' + l.tarif + '">' +
             '<option value="normal"' + (l.tarif === 'normal' ? ' selected' : '') + '>Normalpreis</option>' +
             '<option value="ermaessigt"' + (l.tarif === 'ermaessigt' ? ' selected' : '') + '>Ermäßigt</option>' +
             '</select>' : '<br><span class="t-caption">' + l.label + '</span>') +
           '</div>' +
-          '<div class="seatplan-cart-item-right"><span>' + fmtEUR(l.count * l.price) + ' €</span>' +
-          '<button type="button" data-block-remove="' + l.zoneId + '" data-block-tarif="' + l.tarif + '">entfernen</button></div>';
+          '<div class="seatplan-cart-item-right">' +
+            '<span class="seatplan-stepper">' +
+              '<button type="button" data-cart-step="-1" data-zone="' + l.blockKey + '" data-tarif="' + l.tarif + '" aria-label="weniger">−</button>' +
+              '<span style="min-width:16px;text-align:center;font-weight:700">' + l.count + '</span>' +
+              '<button type="button" data-cart-step="1" data-zone="' + l.blockKey + '" data-tarif="' + l.tarif + '" aria-label="mehr" ' + (l.count >= freeCount ? 'disabled' : '') + '>+</button>' +
+            '</span>' +
+            '<span>' + fmtEUR(l.count * l.price) + ' €</span></div>';
         self.cartEl.appendChild(row);
       });
 
@@ -812,30 +854,25 @@
       this._appendNotizRow();
       this.ctaEl.disabled = false;
 
+      this.cartEl.querySelectorAll('[data-cart-step]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var blockKey = this.dataset.zone;
+          var tarif = this.dataset.tarif;
+          var delta = parseInt(this.dataset.cartStep, 10);
+          var c = self.blockCounts[blockKey];
+          var freeCount = self._blockFreeCount(blockKey.split('::')[0], c.category);
+          self._stepBlock(blockKey, c.zoneLabel, c.category, c.priceInfo, tarif, delta, freeCount);
+        });
+      });
       this.cartEl.querySelectorAll('[data-block-tarif-select]').forEach(function (sel) {
         sel.addEventListener('change', function () {
-          var zoneId = this.dataset.zone;
+          var blockKey = this.dataset.zone;
           var oldTarif = this.dataset.tarif;
           var newTarif = this.value;
           if (newTarif === oldTarif) return;
-          var counts = self.blockCounts[zoneId];
-          var moved = counts[oldTarif];
+          var counts = self.blockCounts[blockKey];
+          counts[newTarif] = (counts[newTarif] || 0) + counts[oldTarif];
           counts[oldTarif] = 0;
-          counts[newTarif] = (counts[newTarif] || 0) + moved;
-          var oldInput = self.root.querySelector('[data-count="' + zoneId + '-' + oldTarif + '"]');
-          if (oldInput) oldInput.value = '0';
-          var newInput = self.root.querySelector('[data-count="' + zoneId + '-' + newTarif + '"]');
-          if (newInput) newInput.value = String(counts[newTarif]);
-          self._renderCart();
-        });
-      });
-      this.cartEl.querySelectorAll('[data-block-remove]').forEach(function (b) {
-        b.addEventListener('click', function () {
-          var zoneId = this.dataset.blockRemove;
-          var tarif = this.dataset.blockTarif;
-          self.blockCounts[zoneId][tarif] = 0;
-          var input = self.root.querySelector('[data-count="' + zoneId + '-' + tarif + '"]');
-          if (input) input.value = '0';
           self._renderCart();
         });
       });
