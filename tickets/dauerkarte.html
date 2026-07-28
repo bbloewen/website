@@ -35,16 +35,14 @@
       <div class="card" style="padding:24px">
         <div class="buy-grid">
           <div class="buy-prices-col">
-            <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-              <h3 class="t-h4" style="margin-bottom:0">Preise</h3>
-              <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start;margin-left:auto">
-                <button type="button" class="badge badge-orange" id="dk-member-badge" style="border:none;cursor:pointer;font-family:inherit">
-                  -30 % Vereinsmitglieder
-                </button>
-                <button type="button" class="badge badge-orange" id="dk-discount-badge" style="border:none;cursor:pointer;font-family:inherit">
-                  -20 % Frühbucher bis 31.08.
-                </button>
-              </div>
+            <h3 class="t-h4" style="margin-bottom:8px">Preise</h3>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+              <button type="button" class="badge badge-orange" id="dk-member-badge" style="border:none;cursor:pointer;font-family:inherit">
+                -30 % Vereinsmitglieder
+              </button>
+              <button type="button" class="badge badge-orange" id="dk-discount-badge" style="border:none;cursor:pointer;font-family:inherit">
+                -20 % Frühbucher bis 31.08.
+              </button>
             </div>
             <div class="price-row"><span>Kategorie 1</span><strong id="dk-price-kat1" data-base="208">208,00 €</strong></div>
             <div class="price-row"><span>Kategorie 1 (ermäßigt)</span><strong id="dk-price-kat1-erm" data-base="182">182,00 €</strong></div>
@@ -170,9 +168,11 @@
     window.addEventListener('resize', syncThumbHeight);
 
     /* Frühbucherrabatt automatisch berechnen und in der Preistabelle direkt zeigen
-       (ursprünglicher Preis durchgestrichen + reduzierter Preis fett) — gilt für
-       alle, im Gegensatz zum Vereinsrabatt (Nachweis nötig, nur als Tarif-Option
-       im Warenkorb wählbar, s. seat-picker.js dauerkarteDiscount). */
+       (nur der reduzierte Preis, kein durchgestrichener Originalpreis — das würde
+       den Eindruck erwecken, der Vereinsrabatt-Tarif im Warenkorb rechne nochmal
+       20% zusätzlich obendrauf). Gilt für alle, im Gegensatz zum Vereinsrabatt
+       (Nachweis nötig, nur als Tarif-Option im Warenkorb wählbar, s. seat-picker.js
+       dauerkarteDiscount). */
     (function applyEarlyBirdToPriceTable() {
       var earlyBirdUntil = new Date('2026-08-31T23:59:59');
       var earlyBirdPercent = 20;
@@ -180,9 +180,7 @@
       document.querySelectorAll('.buy-prices-col strong[data-base]').forEach(function (el) {
         var base = parseFloat(el.dataset.base);
         var discounted = Math.round(base * (1 - earlyBirdPercent / 100) * 100) / 100;
-        var fmt = function (n) { return n.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'; };
-        el.innerHTML = '<span style="text-decoration:line-through;color:var(--text-muted);font-weight:400;margin-right:6px">' +
-          fmt(base) + '</span>' + fmt(discounted);
+        el.textContent = discounted.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
       });
     })();
 

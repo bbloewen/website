@@ -44,7 +44,7 @@
     var meta = TEAM_META[g.team];
     var matchup = g.heim ? (g.teamLabel + ' – ' + g.gegner) : (g.gegner + ' – ' + g.teamLabel);
     var venueHTML = g.heim
-      ? '<span class="venue-heim">Heimspiel</span> · <a href="' + RIETHSPORTHALLE_MAPS_URL + '" target="_blank" rel="noopener">Riethsporthalle</a>'
+      ? '<span class="venue-heim">Heimspiel</span> · <a href="' + RIETHSPORTHALLE_MAPS_URL + '" target="_blank" rel="noopener"><i data-lucide="map-pin" style="width:14px;height:14px"></i> Riethsporthalle</a>'
       : 'Auswärts';
     var actionsHTML = '<div class="fixture-day-actions">' +
       '<div class="fixture-result-row">' +
@@ -57,7 +57,7 @@
     return '<div class="fixture-day-game' + (divider ? ' has-divider' : '') + '" data-team="' + g.team + '">' +
       '<div class="fixture-day-meta">' +
         '<div class="fixture-time"><a class="cal-link" href="' + calendarLink(g) + '" target="_blank" rel="noopener" title="Ins Kalender eintragen"><i data-lucide="calendar-plus" style="width:16px;height:16px"></i></a> ' + (g.zeit || '–') + ' Uhr</div>' +
-        '<div class="fixture-venue-line"><i data-lucide="map-pin" style="width:14px;height:14px"></i> ' + venueHTML + '</div>' +
+        '<div class="fixture-venue-line">' + venueHTML + '</div>' +
       '</div>' +
       '<div class="fixture-mid">' +
         '<a class="team-badge ' + meta.badgeClass + '" href="' + meta.url + '">' + meta.label + '</a>' +

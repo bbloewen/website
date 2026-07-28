@@ -42,12 +42,10 @@
 
         <aside style="display:flex;flex-direction:column;gap:20px">
           <div class="ticket-sidebar" style="position:static">
-            <div style="display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap">
-              <div>
-                <span class="eyebrow">Preis pro Saison</span>
-                <h2 class="t-h4" style="margin:6px 0 0">Dauerkarten 2026/2027</h2>
-              </div>
-              <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;margin-left:auto">
+            <div>
+              <span class="eyebrow">Preis pro Saison</span>
+              <h2 class="t-h4" style="margin:6px 0 8px">Dauerkarten 2026/2027</h2>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
                 <button type="button" class="badge badge-orange" id="overview-member-badge" style="border:none;cursor:pointer;font-family:inherit">
                   <i data-lucide="percent" class="icon-12"></i> -30 % Vereinsmitglieder
                 </button>
@@ -110,12 +108,14 @@
   // Restliche Heimspiele aus data/heimspiele.json rendern (noch nicht in pretix, daher ohne Kaufbutton).
   // Vorverkaufsstart = Spieltag minus 10 Tage.
   var MONATE = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  var WOCHENTAGE = ['So','Mo','Di','Mi','Do','Fr','Sa'];
   function parseDMY(str) {
     var parts = str.split('.').map(Number);
     return new Date(parts[2], parts[1] - 1, parts[0]);
   }
   function formatLong(d) { return d.getDate() + '. ' + MONATE[d.getMonth()]; }
   function pad2(n) { return String(n).padStart(2, '0'); }
+  function formatShortWithWeekday(d) { return WOCHENTAGE[d.getDay()] + ', ' + pad2(d.getDate()) + '.' + pad2(d.getMonth() + 1) + '.' + d.getFullYear(); }
   function gcalStamp(d) {
     return d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) + 'T' + pad2(d.getHours()) + pad2(d.getMinutes()) + '00';
   }
@@ -141,11 +141,11 @@
       vvkDate.setDate(vvkDate.getDate() - 10);
       return '<div class="ticket-row">' +
         '<div>' +
-          '<div class="ticket-row-title"><strong>' + formatLong(gameDate) + '</strong> · Basketball Löwen – ' + s.gegner + '</div>' +
+          '<div class="ticket-row-title"><strong>' + formatShortWithWeekday(gameDate) + '</strong> · Basketball Löwen – ' + s.gegner + '</div>' +
           '<div class="ticket-row-meta">' +
-            '<a href="https://www.google.com/maps/search/?api=1&query=Riethsporthalle+Erfurt+Essener+Stra%C3%9Fe+20+99089+Erfurt" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-14"></i> Riethsporthalle</a>' +
-            '<span><i data-lucide="clock" class="icon-14"></i> ' + s.zeit + ' Uhr</span>' +
             '<a class="cal-link" href="' + calendarLink(gameDate, s.zeit, s.gegner) + '" target="_blank" rel="noopener" title="Ins Kalender eintragen"><i data-lucide="calendar-plus" class="icon-14"></i></a>' +
+            '<span><i data-lucide="clock" class="icon-14"></i> ' + s.zeit + ' Uhr</span>' +
+            '<a href="https://www.google.com/maps/search/?api=1&query=Riethsporthalle+Erfurt+Essener+Stra%C3%9Fe+20+99089+Erfurt" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-14"></i> Riethsporthalle</a>' +
           '</div>' +
           (i === 0 ? '<div class="ticket-row-vvk"><span class="badge badge-info">Vorverkauf startet am ' + formatLong(vvkDate) + '</span></div>' : '') +
         '</div>' +
@@ -155,8 +155,9 @@
     if (window.lucide) window.lucide.createIcons();
   });
 
-  /* Frühbucherrabatt automatisch berechnen und zeigen — gleiche Logik wie auf
-     tickets/dauerkarte.html (durchgestrichener Originalpreis + reduzierter Preis). */
+  /* Frühbucherrabatt automatisch berechnen und zeigen — nur der reduzierte Preis,
+     kein durchgestrichener Originalpreis (gleiche Logik wie auf
+     tickets/dauerkarte.html, s. dortiger Kommentar für die Begründung). */
   (function applyEarlyBirdToOverviewPrices() {
     var earlyBirdUntil = new Date('2026-08-31T23:59:59');
     var earlyBirdPercent = 20;
@@ -164,9 +165,7 @@
     document.querySelectorAll('strong[data-base]').forEach(function (el) {
       var base = parseFloat(el.dataset.base);
       var discounted = Math.round(base * (1 - earlyBirdPercent / 100) * 100) / 100;
-      var fmt = function (n) { return n.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'; };
-      el.innerHTML = '<span style="text-decoration:line-through;color:var(--text-muted);font-weight:400;margin-right:6px">' +
-        fmt(base) + '</span>' + fmt(discounted);
+      el.textContent = discounted.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
     });
   })();
 
