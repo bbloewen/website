@@ -236,12 +236,15 @@
       // (s.o.) keine Grenze zeigt.
       var lineBackground = '';
       if (boundaries.length) {
+        // Block B liegt auf orangem/rotem Farbverlauf — dort darf die Trennlinie
+        // in derselben Orange-Akzentfarbe stehen statt im neutralen Grau von A/C.
+        var lineColor = id === 'B' ? 'rgba(232,119,34,.9)' : 'var(--color-neutral-400)';
         var half = 0.9;
         var lineStops = [];
         boundaries.forEach(function (pos) {
           var from = Math.max(0, pos - half);
           var to = Math.min(100, pos + half);
-          lineStops.push('transparent ' + from + '%', 'var(--color-neutral-400) ' + from + '%', 'var(--color-neutral-400) ' + to + '%', 'transparent ' + to + '%');
+          lineStops.push('transparent ' + from + '%', lineColor + ' ' + from + '%', lineColor + ' ' + to + '%', 'transparent ' + to + '%');
         });
         lineBackground = 'linear-gradient(to bottom, ' + lineStops.join(', ') + ')';
       }
@@ -255,11 +258,13 @@
       var hasVip = allGroups.some(function (g) { return g.category === 'VIP'; });
       // Ohne die Gang-Trennlinie stand Buchstabe+Kategorie einfach mittig in der
       // ganzen Kachel — jetzt, wo die Linie eine sichtbare Grenze zieht, muss das
-      // Label mittig im UNTEREN Abschnitt (unter der Linie) stehen, sonst klebt es
-      // an der Linie. padding-top verschiebt den Bezugsrahmen der Flex-Zentrierung
-      // entsprechend nach unten — bei quadratischen (Süd-)Kacheln (aspect-ratio:1)
-      // ist ein %-Wert dafür korrekt, weil Breite und Höhe dort gleich sind.
+      // Label knapp unter der Linie stehen (kleiner fester Abstand statt exakter
+      // Zentrierung im gesamten unteren Abschnitt, sonst wirkt es zu weit unten).
+      // padding-top+flex-start verschiebt den Startpunkt entsprechend nach unten —
+      // bei quadratischen (Süd-)Kacheln (aspect-ratio:1) ist ein %-Wert dafür
+      // korrekt, weil Breite und Höhe dort gleich sind.
       var lineBoundary = boundaries.length ? boundaries[0] : null;
+      var labelGap = 6;
       var vipTop = lineBoundary !== null ? (lineBoundary / 2) : 9;
       var vipStyle = lineBoundary !== null
         ? 'top:' + vipTop + '%;transform:translateY(-50%)'
@@ -268,7 +273,7 @@
       var isPending = self.mode === 'blocks' && self.pendingBlockId === id;
       var tileClass = 'seatplan-mobile-tile' + (isNorth ? '' : ' seatplan-mobile-tile-south') + (isPending ? ' selected' : '');
       var tileStyle = 'background:' + background + ';border-color:' + borderColor +
-        (lineBoundary !== null ? ';padding-top:' + lineBoundary + '%' : '');
+        (lineBoundary !== null ? ';padding-top:' + (lineBoundary + labelGap) + '%;justify-content:flex-start' : '');
       return '<button type="button" class="' + tileClass + '" style="' + tileStyle + '" data-zone="' + id + '">' +
         vipLabel +
         '<span class="seatplan-mobile-tile-letter">' + id + '</span>' +
@@ -290,9 +295,18 @@
     this.root.innerHTML =
       '<h3 class="t-h4" style="text-align:center;margin:0 0 12px">Wähle deinen Block</h3>' +
       '<div class="seatplan-mobile-overview">' +
-        '<div class="seatplan-mobile-entrance main" style="grid-column:1;grid-row:1 / 4"><span></span><i>Haupteingang</i><span></span></div>' +
+        '<div class="seatplan-mobile-entrance main" style="grid-column:1;grid-row:1 / 5"><span></span><i>Haupteingang</i><span></span></div>' +
         '<div class="seatplan-mobile-tiles" style="grid-column:2;grid-row:1">' + northTiles + '</div>' +
-        '<div class="seatplan-mobile-court-row" style="grid-column:2;grid-row:2">' +
+        '<div class="seatplan-mobile-bench-align" style="grid-column:2;grid-row:2">' +
+          '<div class="seatplan-mobile-bench-spacer" aria-hidden="true"></div>' +
+          '<div class="seatplan-mobile-bench-row">' +
+            '<div class="seatplan-mobile-bench seatplan-mobile-bench-gaeste"><span></span><i>Gäste</i><span></span></div>' +
+            '<div class="seatplan-mobile-bench seatplan-mobile-bench-kg"><span></span><i>Kampfgericht</i><span></span></div>' +
+            '<div class="seatplan-mobile-bench seatplan-mobile-bench-heim"><span></span><i>Heim</i><span></span></div>' +
+          '</div>' +
+          '<div class="seatplan-mobile-bench-spacer" aria-hidden="true"></div>' +
+        '</div>' +
+        '<div class="seatplan-mobile-court-row" style="grid-column:2;grid-row:3">' +
           '<div class="seatplan-mobile-court-aside">' +
             '<div class="seatplan-mobile-scoreboard"><span></span><i>Anzeigetafel</i><span></span></div>' +
             '<div class="seatplan-mobile-standing"><span>Steh-</span><span>platz</span></div>' +
@@ -300,8 +314,8 @@
           '<div class="seatplan-mobile-court">' + courtConfirm + '<p class="t-caption" style="margin:0;color:var(--text-muted)">Spielfeld</p></div>' +
           '<div class="seatplan-mobile-court-aside-mirror" aria-hidden="true"></div>' +
         '</div>' +
-        '<div class="seatplan-mobile-tiles" style="grid-column:2;grid-row:3">' + southTiles + '</div>' +
-        '<div class="seatplan-mobile-entrance vip" style="grid-column:3;grid-row:3"><i>VIP-Eingang</i></div>' +
+        '<div class="seatplan-mobile-tiles" style="grid-column:2;grid-row:4">' + southTiles + '</div>' +
+        '<div class="seatplan-mobile-entrance vip" style="grid-column:3;grid-row:4"><i>VIP-Eingang</i></div>' +
       '</div>';
 
     this.root.querySelectorAll('.seatplan-mobile-tile[data-zone]').forEach(function (btn) {
@@ -319,7 +333,29 @@
       var addBtn = this.root.querySelector('#seatplan-mobile-add-btn');
       if (addBtn) addBtn.addEventListener('click', function () { self._addPendingBlock(); });
     }
+    this._fixupStandingBox();
     this._renderCart();
+  };
+
+  /* .seatplan-mobile-standing hat einen festen 25px-Versatz nach unten (s. CSS) —
+     bei ausreichender Spielfeldhöhe eine bewusste optische Feinjustierung, bei sehr
+     schmaler Spielfeldbreite (z. B. iPad-Breite: die Aside-Gruppe stretcht auf die
+     Spielfeldhöhe, die per aspect-ratio mitschrumpft) reicht der feste Versatz aber
+     über die Unterkante des Spielfelds hinaus. Fixer Pixel-Wert lässt sich in CSS
+     nicht an die schrumpfende Höhe koppeln — deshalb hier nach dem Rendern messen
+     und den Versatz nur so weit reduzieren, wie zum Vermeiden des Überstands nötig
+     ist (bei ausreichend Platz bleibt der ursprüngliche Versatz unverändert). */
+  SeatPicker.prototype._fixupStandingBox = function () {
+    var standing = this.root.querySelector('.seatplan-mobile-standing');
+    var aside = this.root.querySelector('.seatplan-mobile-court-aside');
+    if (!standing || !aside) return;
+    standing.style.transform = '';
+    var overflow = standing.getBoundingClientRect().bottom - aside.getBoundingClientRect().bottom;
+    if (overflow > 0) {
+      var baseY = 25;
+      var newY = Math.max(0, baseY - overflow);
+      standing.style.transform = 'translate(-15px, ' + newY + 'px)';
+    }
   };
 
   /* Modus "blocks" (Einzelticket): Gesamtkapazität einer Kategorie in einem Block —

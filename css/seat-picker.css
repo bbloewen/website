@@ -269,11 +269,33 @@
 .seatplan-mobile-overview {
   display: grid;
   grid-template-columns: 16px minmax(0, 1fr) 16px;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto auto 1fr auto;
   gap: 8px;
   padding: 6px 0 4px;
 }
 .seatplan-mobile-overview > * { min-width: 0; }
+/* Gäste/Kampfgericht/Heim-Zeile im Platz zwischen Nordblöcken (D/E/F, unten um ein
+   Drittel gekürzt) und Spielfeld — exakt dasselbe Tick-Linie+Text-Muster wie
+   .seatplan-mobile-scoreboard ("Anzeigetafel"), nur um 90° gedreht (horizontale
+   statt vertikale Striche/Text). Unsichtbare 54px-Platzhalter links/rechts (gleiche
+   Breite wie Aside-Gruppe/Spiegel neben dem Spielfeld) sorgen dafür, dass die Zeile
+   exakt die Spielfeldbreite einnimmt statt der vollen Zeilenbreite. */
+.seatplan-mobile-bench-align { display: flex; align-items: center; gap: 8px; }
+.seatplan-mobile-bench-spacer { flex: 0 0 54px; }
+.seatplan-mobile-bench-row {
+  flex: 1 1 auto; min-width: 0; margin: 0 -13px 0 -18px;
+  display: flex; align-items: center; gap: 6px;
+}
+.seatplan-mobile-bench { flex: 1 1 25%; display: flex; align-items: center; }
+.seatplan-mobile-bench-kg { flex: 1 1 50%; }
+.seatplan-mobile-bench span {
+  flex: 1; height: 2px; min-width: 6px; border-radius: 1px;
+  background: var(--color-neutral-200);
+}
+.seatplan-mobile-bench i {
+  font-style: normal; font-size: 8px; font-weight: 600; letter-spacing: .04em;
+  color: var(--text-muted); white-space: nowrap; padding: 0 4px;
+}
 .seatplan-mobile-tiles {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
