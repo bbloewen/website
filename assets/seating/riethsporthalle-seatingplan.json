@@ -2350,7 +2350,13 @@
               "category": "Kategorie I"
             }
           ],
-          "align_target_seat": 6
+          "align_target_seat": 6,
+          "segment_align": {
+            "8": {
+              "row": "13",
+              "seat": 6
+            }
+          }
         },
         {
           "uuid": "e6022e22-c752-5485-8a79-d0b3aa8ddbf7",
