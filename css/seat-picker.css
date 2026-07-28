@@ -73,9 +73,18 @@
 .seatplan-seat.cat-kat2 { background: #D9DEE3; border-color: #B9C1C8; }
 .seatplan-seat.cat-vip { background: rgba(179, 57, 44, .55); border-color: rgba(179, 57, 44, .9); }
 .seatplan-seat[disabled] { opacity: .35; cursor: not-allowed; }
-/* Vergeben (sobald echte Bestellungen vorliegen) — helles Blau, deutlich heller als die
-   "Deine Auswahl"-Farbe, damit beide Zustände klar unterscheidbar bleiben. */
-.seatplan-seat.taken { background: #A9C2F5; border-color: #7FA0E8; opacity: 1; cursor: not-allowed; }
+/* Vergeben (sobald echte Bestellungen vorliegen) — diagonale Schraffur in Grau.
+   Bewusst NICHT blau: Blau ist ausschließlich "Deine Auswahl". Zwei Blautöne für zwei
+   völlig verschiedene Bedeutungen (gesperrt vs. selbst gewählt) waren nicht
+   unterscheidbar, erst recht nicht auf dem heruntskalierten Sitzplan. Die Schraffur
+   wirkt zusätzlich zur Farbe und bleibt damit auch bei Farbfehlsichtigkeit erkennbar. */
+.seatplan-seat.taken {
+  background-color: var(--color-neutral-300);
+  background-image: repeating-linear-gradient(45deg,
+    rgba(107, 116, 136, .55) 0 1.5px, transparent 1.5px 4.5px);
+  border-color: var(--color-neutral-500);
+  opacity: 1; cursor: not-allowed;
+}
 /* Deine Auswahl — dasselbe dunkle Blau wie die Flächen neben dem Spielfeld. */
 .seatplan-seat.selected { background: var(--color-brand-blue); border-color: var(--color-brand-navy); }
 .seatplan-seat:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 1px; }
@@ -200,7 +209,12 @@
 .seatplan-legend .cat-kat1 i { background: rgba(232, 119, 34, .55); border: 1px solid rgba(232, 119, 34, .9); }
 .seatplan-legend .cat-kat2 i { background: #D9DEE3; border: 1px solid #B9C1C8; }
 .seatplan-legend .cat-vip i { background: rgba(179, 57, 44, .55); border: 1px solid rgba(179, 57, 44, .9); }
-.seatplan-legend .taken i { background: #A9C2F5; border: 1px solid #7FA0E8; }
+.seatplan-legend .taken i {
+  background-color: var(--color-neutral-300);
+  background-image: repeating-linear-gradient(45deg,
+    rgba(107, 116, 136, .55) 0 1.5px, transparent 1.5px 4.5px);
+  border: 1px solid var(--color-neutral-500);
+}
 .seatplan-legend .sel i { background: var(--color-brand-blue); border: 1px solid var(--color-brand-navy); }
 .seatplan-legend .fcfs { color: var(--text-muted); }
 
@@ -531,8 +545,10 @@
   display: flex; align-items: center; justify-content: center;
   font-size: 9px; font-weight: 600; color: var(--color-brand-navy);
 }
-.seatplan-mobile-detail .seatplan-seat.selected,
-.seatplan-mobile-detail .seatplan-seat.taken { color: var(--color-white); }
+.seatplan-mobile-detail .seatplan-seat.selected { color: var(--color-white); }
+/* Vergeben hat einen HELLEN, schraffierten Hintergrund — weiße Ziffer wäre darauf
+   unlesbar, daher dunkle Schrift (im Gegensatz zu "ausgewählt" auf dunklem Blau). */
+.seatplan-mobile-detail .seatplan-seat.taken { color: var(--color-neutral-500); }
 
 /* Block-Name + Kategorie stehen jetzt im Header über der grauen Box, nicht mehr
    darin — VIP-Anteil wird dort zusätzlich farblich markiert statt als Legende. */
