@@ -253,10 +253,23 @@
       var mainCategory = groups[groups.length - 1].category;
       var borderColor = catBorderColor(mainCategory);
       var hasVip = allGroups.some(function (g) { return g.category === 'VIP'; });
-      var vipLabel = hasVip ? '<span class="seatplan-mobile-tile-vip">VIP</span>' : '';
+      // Ohne die Gang-Trennlinie stand Buchstabe+Kategorie einfach mittig in der
+      // ganzen Kachel — jetzt, wo die Linie eine sichtbare Grenze zieht, muss das
+      // Label mittig im UNTEREN Abschnitt (unter der Linie) stehen, sonst klebt es
+      // an der Linie. padding-top verschiebt den Bezugsrahmen der Flex-Zentrierung
+      // entsprechend nach unten — bei quadratischen (Süd-)Kacheln (aspect-ratio:1)
+      // ist ein %-Wert dafür korrekt, weil Breite und Höhe dort gleich sind.
+      var lineBoundary = boundaries.length ? boundaries[0] : null;
+      var vipTop = lineBoundary !== null ? (lineBoundary / 2) : 9;
+      var vipStyle = lineBoundary !== null
+        ? 'top:' + vipTop + '%;transform:translateY(-50%)'
+        : 'top:' + vipTop + 'px';
+      var vipLabel = hasVip ? '<span class="seatplan-mobile-tile-vip" style="' + vipStyle + '">VIP</span>' : '';
       var isPending = self.mode === 'blocks' && self.pendingBlockId === id;
       var tileClass = 'seatplan-mobile-tile' + (isNorth ? '' : ' seatplan-mobile-tile-south') + (isPending ? ' selected' : '');
-      return '<button type="button" class="' + tileClass + '" style="background:' + background + ';border-color:' + borderColor + '" data-zone="' + id + '">' +
+      var tileStyle = 'background:' + background + ';border-color:' + borderColor +
+        (lineBoundary !== null ? ';padding-top:' + lineBoundary + '%' : '');
+      return '<button type="button" class="' + tileClass + '" style="' + tileStyle + '" data-zone="' + id + '">' +
         vipLabel +
         '<span class="seatplan-mobile-tile-letter">' + id + '</span>' +
         '<span class="seatplan-mobile-tile-cat">' + catShortLabel(mainCategory) + '</span>' +
@@ -509,6 +522,22 @@
       zoom = Math.max(minZoom, zoom - 0.2);
       apply();
     });
+
+    // Normales Mausrad liefert nur ein vertikales Delta. Passt der Sitzplan (nach
+    // Mindest-Skalierung) zwar in der Höhe, aber nicht in der Breite in die Box
+    // (z. B. Block C/F), läuft dieses Delta sonst ungenutzt an der Box vorbei und
+    // scrollt stattdessen die äußere Modal-Box (die ebenfalls overflow-y:auto hat)
+    // — der Sitzplan selbst bewegt sich dann gar nicht, nur der Rahmen darum.
+    // Deshalb: ohne eigenes vertikales Overflow das Rad-Delta in horizontales
+    // Scrollen der Box umlenken, statt es weiterzureichen.
+    box.addEventListener('wheel', function (e) {
+      var hOverflow = box.scrollWidth > box.clientWidth + 1;
+      var vOverflow = box.scrollHeight > box.clientHeight + 1;
+      if (hOverflow && !vOverflow) {
+        e.preventDefault();
+        box.scrollLeft += e.deltaY;
+      }
+    }, { passive: false });
   };
 
   /* Öffentliche Methode, damit die Seite (Backdrop-Klick, ESC-Taste) die

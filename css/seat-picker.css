@@ -291,6 +291,11 @@
   transition: transform .12s ease;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
 }
+/* Nordblöcke (D/E/F) unten um ein Drittel gekürzt (Grid-Zeile ist "auto" hoch, d.h.
+   die Kachel-Oberkante bleibt exakt an ihrer Stelle, nur die Höhe schrumpft) — der
+   dadurch freiwerdende Platz zum Spielfeld hin bleibt vorerst leer und wird in
+   einem nächsten Schritt gefüllt. Südblöcke (A/B/C) bleiben unverändert quadratisch. */
+.seatplan-mobile-tile:not(.seatplan-mobile-tile-south) { aspect-ratio: 3 / 2; }
 .seatplan-mobile-tile:active { transform: scale(.96); }
 .seatplan-mobile-tile:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 2px; }
 .seatplan-mobile-tile-letter { font-size: 15px; font-weight: 700; }
