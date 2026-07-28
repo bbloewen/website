@@ -181,15 +181,20 @@
     function blockTile(id, isNorth) {
       var zone = self._zoneById(id);
       if (!zone) return '';
-      var groups = self._categoryGroups(zone).filter(function (g) {
+      // allGroups (ungefiltert) ist nur für die Optik da: der VIP-Anteil eines Blocks
+      // (z. B. B) soll im Floorplan sichtbar bleiben, auch wenn er hier gar nicht kaufbar
+      // ist (excludeCategories) — sonst wirkt der Block als wäre er komplett Kategorie I.
+      // groups (gefiltert) bleibt die Grundlage für Hauptkategorie/Kaufbarkeit der Kachel.
+      var allGroups = self._categoryGroups(zone);
+      var groups = allGroups.filter(function (g) {
         return self.excludeCategories.indexOf(g.category) === -1;
       });
       if (!groups.length) return '<div class="seatplan-mobile-tile" style="visibility:hidden"></div>';
-      var total = groups.reduce(function (sum, g) { return sum + g.rows.reduce(function (s, r) { return s + r.seats.length; }, 0); }, 0);
+      var total = allGroups.reduce(function (sum, g) { return sum + g.rows.reduce(function (s, r) { return s + r.seats.length; }, 0); }, 0);
       // Reihenfolge in den Rohdaten: erste Gruppe = Reihen nächst dem Spielfeld. Bei
       // Nordblöcken (D/E/F) ist "nächst Spielfeld" die UNTERE Kante der Kachel (Spielfeld
       // liegt darunter), bei Südblöcken (A/B/C) die OBERE Kante (Spielfeld liegt darüber).
-      var ordered = isNorth ? groups.slice().reverse() : groups;
+      var ordered = isNorth ? allGroups.slice().reverse() : allGroups;
       var stops = [];
       var acc = 0;
       ordered.forEach(function (g) {
@@ -199,13 +204,14 @@
         acc += pct;
         stops.push(catColor(g.category) + ' ' + acc + '%');
       });
-      var background = groups.length > 1 ? 'linear-gradient(to bottom, ' + stops.join(', ') + ')' : catColor(groups[0].category);
+      var background = allGroups.length > 1 ? 'linear-gradient(to bottom, ' + stops.join(', ') + ')' : catColor(allGroups[0].category);
       // Bei gemischten Blöcken (z. B. B: VIP vorn + Kategorie I hinten) beschriftet die
-      // Kachel bewusst nur die Hauptkategorie (letzte/größte Gruppe) unten am Buchstaben —
-      // ein zusätzliches "VIP"-Label oben markiert den roten Farbverlauf-Anteil separat.
+      // Kachel bewusst nur die kaufbare Hauptkategorie (letzte/größte gefilterte Gruppe)
+      // unten am Buchstaben — ein zusätzliches "VIP"-Label oben markiert den roten
+      // Farbverlauf-Anteil separat, auch wenn VIP hier nicht kaufbar ist.
       var mainCategory = groups[groups.length - 1].category;
       var borderColor = catBorderColor(mainCategory);
-      var hasVip = groups.some(function (g) { return g.category === 'VIP'; });
+      var hasVip = allGroups.some(function (g) { return g.category === 'VIP'; });
       var vipLabel = hasVip ? '<span class="seatplan-mobile-tile-vip">VIP</span>' : '';
       var isPending = self.mode === 'blocks' && self.pendingBlockId === id;
       var tileClass = 'seatplan-mobile-tile' + (isNorth ? '' : ' seatplan-mobile-tile-south') + (isPending ? ' selected' : '');
