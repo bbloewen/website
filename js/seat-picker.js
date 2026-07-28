@@ -544,7 +544,14 @@
       // Ablauf je Reihe: Lücken auf 0, natürliche Segmentbreiten messen, Lücken aus
       // (Zielabstand − natürliche Breite) setzen, danach die Reihe neu ankern (die
       // geänderten Lücken haben den Ankersitz mitverschoben).
-      if (leading) {
+      //
+      // Gilt für linksbündige UND rechtsbündige Blöcke: gemessen werden ausschließlich
+      // Abstände innerhalb einer Reihe, relativ zu deren eigenem Ankersitz. Diese
+      // Differenzen sind vorzeichenbehaftet und damit richtungsneutral — an welcher
+      // Kante die Reihe hängt, entscheidet erst das abschließende anchorAll(). Der
+      // Abgleich war ursprünglich auf leading beschränkt, weil nur Block D und E ihn
+      // brauchten; Block F ist trailing und wurde dadurch stillschweigend übersprungen.
+      {
         // Alle Abstände werden als Differenz ZWEIER SITZE DERSELBEN REIHE gemessen.
         // Da jede Reihe über ihren Ankersitz auf derselben Bezugslinie hängt, sind
         // solche reiheninternen Differenzen direkt vergleichbar — und anders als
