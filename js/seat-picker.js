@@ -56,13 +56,13 @@
     'WILLKOMMEN5': { type: 'fixed', value: 5, label: 'WILLKOMMEN5 (5 €)' }
   };
 
-  /* Dauerkarte-Tarife inkl. Vereinsrabatt — nur relevant, wenn opts.dauerkarteDiscount
+  /* Dauerkarte-Tarife inkl. Mitgliedsrabatt — nur relevant, wenn opts.dauerkarteDiscount
      gesetzt ist (Einzelticket bleibt unberührt, dort bleibt es bei normal/ermaessigt). */
   var DK_TARIF_LABELS = {
     normal: 'Normalpreis',
     ermaessigt: 'Ermäßigt',
-    normal_member: 'Normalpreis mit Vereinsrabatt',
-    ermaessigt_member: 'Ermäßigt mit Vereinsrabatt'
+    normal_member: 'Normalpreis mit Mitgliedsrabatt (Löwen e.V.)',
+    ermaessigt_member: 'Ermäßigt mit Mitgliedsrabatt (Löwen e.V.)'
   };
 
   function SeatPicker(root, opts) {
@@ -95,9 +95,12 @@
     this.voucherInfo = null;
     this.voucherError = null;
     this.notiz = '';
-    /* Dauerkarte: Frühbucher (automatisch, für alle) + Vereinsmitglieder (30 %,
-       Nachweis nötig, als eigene Tarif-Option wählbar). Kombinierbar bis zum
-       Frühbucher-Stichtag ("zusammen 50 %"), danach nur noch der Mitgliedsrabatt. */
+    /* Dauerkarte: Frühbucher (automatisch, für alle) + Mitglieder des Basketball
+       Löwen e.V. (30 %, Nachweis nötig, als eigene Tarif-Option wählbar).
+       Kombinierbar bis zum Frühbucher-Stichtag ("zusammen 50 %"), danach nur noch
+       der Mitgliedsrabatt. Nicht zu verwechseln mit dem ermäßigten Satz, den u. a.
+       Mitglieder der Kooperationsvereine bekommen — das ist eine Preisstufe, kein
+       Rabatt, und gilt nur bei der Dauerkarte, nicht beim Einzelticket. */
     this.dkDiscount = opts.dauerkarteDiscount || null;
     this._load();
   }
@@ -128,7 +131,7 @@
 
   /* Rechnet die Rabattkette transparent vor, statt nur den fertigen Endpreis zu
      zeigen ("Normalpreis 1.000 € je Ticket, abzüglich 20 % Frühbucherrabatt,
-     abzüglich 30 % Vereinsmitgliederrabatt") — der Endpreis selbst steht separat
+     abzüglich 30 % Mitgliedsrabatt (Löwen e.V.)") — der Endpreis selbst steht separat
      rechts in der Zeile (s. _renderCart), nicht mehr hier verdoppelt. */
   SeatPicker.prototype._dkBreakdownText = function (priceInfo, tarif) {
     var isErmaessigt = tarif.indexOf('ermaessigt') === 0;
@@ -136,7 +139,7 @@
     var parts = [(isErmaessigt ? 'Ermäßigt' : 'Normalpreis') + ' ' + fmtEUR(base) + ' € je Ticket'];
     if (this.dkDiscount) {
       if (this._earlyBirdActive()) parts.push('abzüglich ' + this.dkDiscount.earlyBirdPercent + ' % Frühbucherrabatt');
-      if (tarif.indexOf('_member') !== -1) parts.push('abzüglich ' + this.dkDiscount.memberPercent + ' % Vereinsmitgliederrabatt');
+      if (tarif.indexOf('_member') !== -1) parts.push('abzüglich ' + this.dkDiscount.memberPercent + ' % Mitgliedsrabatt (Löwen e.V.)');
     }
     return parts.join(', ');
   };

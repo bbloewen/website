@@ -28,8 +28,8 @@
         <div style="display:flex;justify-content:center">
           <div style="background:rgba(255,255,255,.1);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.25);border-radius:var(--radius-lg);padding:20px 24px;max-width:320px;text-align:center">
             <i data-lucide="heart-handshake" class="icon-28" style="color:var(--color-brand-orange)"></i>
-            <p class="t-body-sm" style="color:#fff;margin:10px 0 14px">Als Vereinsmitglied sicherst du dir dauerhaft 30&nbsp;% Rabatt auf deine Dauerkarte.</p>
-            <a class="btn btn-primary btn-sm" href="/mitglied-werden/formular.html?typ=fan">Vereinsmitglied werden</a>
+            <p class="t-body-sm" style="color:#fff;margin:10px 0 14px">Als Mitglied des Basketball Löwen e.V. sicherst du dir dauerhaft 30&nbsp;% Rabatt auf deine Dauerkarte.</p>
+            <a class="btn btn-primary btn-sm" href="/mitglied-werden/formular.html?typ=fan">Mitglied werden</a>
           </div>
         </div>
       </div>
@@ -43,15 +43,15 @@
           <div class="buy-prices-col">
             <h3 class="t-h4" style="margin-bottom:8px">Preise</h3>
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-              <span class="badge badge-orange">-30 % Vereinsmitglieder</span>
+              <span class="badge badge-orange">-30 % Mitglieder des Basketball Löwen e.V.</span>
               <span class="badge badge-orange">-20 % Frühbucher bis 31.08.</span>
             </div>
             <div class="price-row"><span>Kategorie 1</span><strong id="dk-price-kat1" data-base="208">208,00 €</strong></div>
             <div class="price-row"><span>Kategorie 1 (ermäßigt)</span><strong id="dk-price-kat1-erm" data-base="182">182,00 €</strong></div>
             <div class="price-row"><span>Kategorie 2</span><strong id="dk-price-kat2" data-base="156">156,00 €</strong></div>
-            <div class="price-row"><span>Kategorie 2 (ermäßigt)</span><strong id="dk-price-kat2-erm" data-base="110.5">110,50 €</strong></div>
+            <div class="price-row"><span>Kategorie 2 (ermäßigt)</span><strong id="dk-price-kat2-erm" data-base="115">115,00 €</strong></div>
             <div class="price-row"><span>VIP</span><strong id="dk-price-vip" data-base="1000">1.000,00 €</strong></div>
-            <p class="t-caption" style="margin-top:12px;color:var(--text-muted)">Ermäßigt gilt für Studierende, Azubis, FSJ, Menschen mit Behinderung, Rentner*innen und Mitglieder von Kooperationsvereinen.</p>
+            <p class="t-caption" style="margin-top:12px;color:var(--text-muted)">Ermäßigt gilt bei der Dauerkarte für Studierende, Azubis, FSJ, Menschen mit Behinderung, Rentner*innen und Mitglieder von Kooperationsvereinen. Die 30&nbsp;% gelten für Mitglieder des Basketball Löwen e.V.</p>
           </div>
           <div class="buy-thumb-col">
             <div id="seatplan-root"></div>
@@ -95,7 +95,7 @@
             <div class="tile-icon"><i data-lucide="percent"></i></div>
             <h3 class="t-h4">Ermäßigungen</h3>
           </div>
-          <p class="t-body-sm">Ermäßigt für Studierende, Azubis, Menschen mit Behinderung, Rentner*innen und Mitglieder von Kooperationsvereinen.</p>
+          <p class="t-body-sm">Bei der Dauerkarte gilt der ermäßigte Satz für Studierende, Azubis, Menschen mit Behinderung, Rentner*innen und Mitglieder unserer Kooperationsvereine. Mitglieder des Basketball Löwen e.V. erhalten stattdessen 30&nbsp;% Rabatt.</p>
         </div>
         <div class="info-tile info-tile-row info-tile-row-divided">
           <div class="info-tile-row-head">
@@ -135,11 +135,11 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="/js/nav.js?v=1785200000"></script>
 <script src="/js/include.js?v=1785200000"></script>
-<script src="/js/seat-picker.js?v=1786050000"></script>
+<script src="/js/seat-picker.js?v=1786070000"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     /* Preisbox zeigt bewusst den Normalpreis (data-base) statisch an. Rabatte
-       (Frühbucher/Vereinsrabatt) werden erst im Warenkorb-Widget bei Auswahl
+       (Frühbucher/Mitgliedsrabatt Löwen e.V.) werden erst im Warenkorb-Widget bei Auswahl
        des Tarifs berechnet und angezeigt, s. seat-picker.js dauerkarteDiscount. */
 
     var picker = new SeatPicker(document.getElementById('seatplan-root'), {
@@ -155,7 +155,7 @@
       southZones: ['A', 'B', 'C'],
       prices: {
         'Kategorie I': { normal: 208, ermaessigt: 182 },
-        'Kategorie II': { normal: 156, ermaessigt: 110.5 },
+        'Kategorie II': { normal: 156, ermaessigt: 115 },
         'VIP': { normal: 1000 }
       },
       dauerkarteDiscount: { earlyBirdPercent: 20, earlyBirdUntil: '2026-08-31', memberPercent: 30 },
