@@ -20,6 +20,20 @@
     return '';
   }
 
+  /* Dieselben Farbwerte wie die .seatplan-seat.cat-* Regeln in seat-picker.css —
+     für die Block-Mini-Kacheln der mobilen Übersicht, die per JS-Gradient statt
+     CSS-Klasse eingefärbt werden (mehrere Kategorien in einer einzigen Kachel). */
+  function catColor(category) {
+    if (category === 'Kategorie I') return 'rgba(232,119,34,.55)';
+    if (category === 'VIP') return 'rgba(179,57,44,.55)';
+    return '#D9DEE3'; // Kategorie II
+  }
+  function catBorderColor(category) {
+    if (category === 'Kategorie I') return 'rgba(232,119,34,.9)';
+    if (category === 'VIP') return 'rgba(179,57,44,.9)';
+    return '#B9C1C8';
+  }
+
   /* Gutschein-Codes sind noch nicht an pretix angebunden — feste Testcodes,
      damit sich der Ablauf schon jetzt echt durchklicken lässt. Dieselben Codes
      wie auf der Checkout-Seite (tickets/checkout.html). */
@@ -50,6 +64,7 @@
     this.totalEl = opts.totalEl;
     this.ctaEl = opts.ctaEl;
     this.onContinue = opts.onContinue || function () {};
+    this.mobileZoneId = null; // Modus "seats" + mobile Breite: null = Block-Übersicht, sonst gewählter Block
     this.nachwuchsBeitrag = !!opts.nachwuchsBeitrag; // Pauschale pro Bestellung, standardmäßig an, unabhängig von Anzahl Plätze/Tickets
     this.nachwuchsAmount = opts.nachwuchsAmount || 2;
     this.nachwuchsChecked = true;
@@ -152,7 +167,101 @@
     return this.blocks[id];
   };
 
+  /* Mobil (≤720px) ist die Sitzplatzwahl mit allen 6 Blöcken nebeneinander zu klein zum
+     Antippen — deshalb dort erst eine kompakte Block-Übersicht (Tap = welcher Block),
+     danach den gewählten Block groß mit anwählbaren Sitzen. Nur Modus "seats" (Dauerkarte);
+     Einzelticket (Modus "blocks") wählt ohnehin nur ganze Blöcke, keine Einzelsitze. */
+  SeatPicker.prototype._isMobileBreakpoint = function () {
+    return window.matchMedia && window.matchMedia('(max-width: 720px)').matches;
+  };
+
+  SeatPicker.prototype._renderMobileOverview = function () {
+    var self = this;
+
+    function blockTile(id, isNorth) {
+      var zone = self._zoneById(id);
+      if (!zone) return '';
+      var groups = self._categoryGroups(zone).filter(function (g) {
+        return self.excludeCategories.indexOf(g.category) === -1;
+      });
+      if (!groups.length) return '<div class="seatplan-mobile-tile" style="visibility:hidden"></div>';
+      var total = groups.reduce(function (sum, g) { return sum + g.rows.reduce(function (s, r) { return s + r.seats.length; }, 0); }, 0);
+      // Reihenfolge in den Rohdaten: erste Gruppe = Reihen nächst dem Spielfeld. Bei
+      // Nordblöcken (D/E/F) ist "nächst Spielfeld" die UNTERE Kante der Kachel (Spielfeld
+      // liegt darunter), bei Südblöcken (A/B/C) die OBERE Kante (Spielfeld liegt darüber).
+      var ordered = isNorth ? groups.slice().reverse() : groups;
+      var stops = [];
+      var acc = 0;
+      ordered.forEach(function (g) {
+        var count = g.rows.reduce(function (s, r) { return s + r.seats.length; }, 0);
+        var pct = Math.round((count / total) * 1000) / 10;
+        stops.push(catColor(g.category) + ' ' + acc + '%');
+        acc += pct;
+        stops.push(catColor(g.category) + ' ' + acc + '%');
+      });
+      var background = groups.length > 1 ? 'linear-gradient(to bottom, ' + stops.join(', ') + ')' : catColor(groups[0].category);
+      var borderColor = catBorderColor(groups[groups.length - 1].category);
+      return '<button type="button" class="seatplan-mobile-tile" style="background:' + background + ';border-color:' + borderColor + '" data-zone="' + id + '">' + id + '</button>';
+    }
+
+    var catOrder = ['Kategorie I', 'Kategorie II', 'VIP'];
+    var legendItems = catOrder.filter(function (c) { return self.prices[c] && self.excludeCategories.indexOf(c) === -1; })
+      .map(function (c) { return '<span class="' + catClass(c) + '"><i></i> ' + c + '</span>'; })
+      .join('');
+
+    var northTiles = this.northZones.map(function (id) { return blockTile(id, true); }).join('');
+    var southTiles = this.southZones.map(function (id) { return blockTile(id, false); }).join('');
+
+    this.root.innerHTML =
+      '<p class="t-body-sm" style="text-align:center;margin:0 0 12px;font-weight:600">Wähle deinen Block</p>' +
+      '<div class="seatplan-mobile-overview">' +
+        '<div class="seatplan-mobile-entrance main" style="grid-column:1;grid-row:1 / 5"><span></span><i>Haupteingang</i><span></span></div>' +
+        '<div class="seatplan-mobile-tiles" style="grid-column:2;grid-row:1">' + northTiles + '</div>' +
+        '<div class="seatplan-mobile-scoreboard" style="grid-column:2;grid-row:2"><span></span><i>Anzeigetafel</i></div>' +
+        '<div class="seatplan-mobile-court" style="grid-column:2;grid-row:3"><div class="seatplan-mobile-standing"><span>Stehplatz</span></div><p class="t-caption" style="margin:0 0 4px;color:var(--text-muted)">Spielfeld</p><div class="seatplan-legend">' + legendItems + '</div></div>' +
+        '<div class="seatplan-mobile-tiles" style="grid-column:2;grid-row:4">' + southTiles + '</div>' +
+        '<div class="seatplan-mobile-entrance vip" style="grid-column:3;grid-row:4"><span></span><i>VIP-Eingang</i><span></span></div>' +
+      '</div>';
+
+    this.root.querySelectorAll('.seatplan-mobile-tile[data-zone]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        self.mobileZoneId = btn.dataset.zone;
+        self._render();
+      });
+    });
+  };
+
+  SeatPicker.prototype._renderMobileZoneDetail = function () {
+    var self = this;
+    var zone = this._zoneById(this.mobileZoneId);
+    var wrap = document.createElement('div');
+    wrap.className = 'seatplan-mobile-detail';
+    var header = document.createElement('div');
+    header.className = 'seatplan-mobile-detail-header';
+    header.innerHTML = '<button type="button" class="seatplan-mobile-back" aria-label="Zurück zur Blockübersicht"><i data-lucide="arrow-left" class="icon-16"></i></button>' +
+      '<span class="t-body-sm" style="font-weight:600">' + zone.name + '</span><span style="width:32px"></span>';
+    wrap.appendChild(header);
+    var zoneEl = this._renderZone(zone);
+    if (zoneEl) wrap.appendChild(zoneEl);
+    this.root.innerHTML = '';
+    this.root.appendChild(wrap);
+    if (window.lucide) window.lucide.createIcons();
+    header.querySelector('.seatplan-mobile-back').addEventListener('click', function () {
+      self.mobileZoneId = null;
+      self._render();
+    });
+    this._renderCart();
+  };
+
   SeatPicker.prototype._render = function () {
+    if (this.mode === 'seats' && this._isMobileBreakpoint()) {
+      if (this.mobileZoneId) {
+        this._renderMobileZoneDetail();
+      } else {
+        this._renderMobileOverview();
+      }
+      return;
+    }
     var self = this;
     var northRow = document.createElement('div');
     northRow.className = 'seatplan-row';
