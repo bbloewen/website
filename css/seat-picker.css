@@ -440,11 +440,25 @@
   #seatplan-modal-title { display: none; }
 }
 
-/* Modus "blocks" (Einzelticket): Übernehmen-Button unter der Blockübersicht,
-   erst aktiv sobald ein Block angetippt wurde (visuell markiert). */
-.seatplan-mobile-add-row { margin-top: 14px; display: flex; justify-content: center; }
-.seatplan-mobile-add-row .btn { width: 100%; max-width: 260px; justify-content: center; }
+/* Modus "blocks" (Einzelticket): Übernehmen-Button erscheint nur nach Antippen eines
+   Blocks, mittig über dem Spielfeld schwebend — kein Dauer-UI-Element. */
+.seatplan-mobile-court-confirm {
+  position: absolute; top: 6px; left: 50%; transform: translateX(-50%); z-index: 2;
+  padding: 4px 14px; font-size: 12px;
+}
 .seatplan-mobile-tile.selected { outline: 2px solid var(--color-brand-blue); outline-offset: 1px; }
+
+/* Detailansicht: Sitznummer direkt im (jetzt großen) Sitz-Button lesbar. */
+.seatplan-mobile-detail .seatplan-seat {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 600; color: var(--color-brand-navy);
+}
+.seatplan-mobile-detail .seatplan-seat.selected,
+.seatplan-mobile-detail .seatplan-seat.taken { color: var(--color-white); }
+
+/* Block-Name + Kategorie stehen jetzt im Header über der grauen Box, nicht mehr
+   darin — VIP-Anteil wird dort zusätzlich farblich markiert statt als Legende. */
+.seatplan-mobile-detail-title { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 
 /* Modus "seats" (Dauerkarte): Übernehmen-Button am Ende der Block-Detailansicht,
    schließt zurück zur Blockübersicht. */

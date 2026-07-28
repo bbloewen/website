@@ -221,11 +221,10 @@
 
     // Modus "blocks" (Einzelticket): kein Sitzdetail nötig (freie Platzwahl im Block) —
     // stattdessen direkt in der Übersicht einen Block antippen (Markierung) und mit
-    // "Übernehmen" 1 Ticket in den Warenkorb legen. Weitere Anpassung der Anzahl
-    // passiert danach im Warenkorb selbst (Stepper) statt hier erneut anzutippen.
-    var blocksFooter = this.mode === 'blocks'
-      ? '<div class="seatplan-mobile-add-row"><button type="button" class="btn btn-primary btn-sm" id="seatplan-mobile-add-btn"' +
-          (this.pendingBlockId ? '' : ' disabled') + '>Übernehmen</button></div>'
+    // "Übernehmen" 1 Ticket in den Warenkorb legen. Der Button erscheint nur dann,
+    // mittig über dem Spielfeld, nicht standardmäßig sichtbar.
+    var courtConfirm = (this.mode === 'blocks' && this.pendingBlockId)
+      ? '<button type="button" class="btn btn-primary btn-sm seatplan-mobile-court-confirm" id="seatplan-mobile-add-btn">Übernehmen</button>'
       : '';
 
     this.root.innerHTML =
@@ -238,13 +237,12 @@
             '<div class="seatplan-mobile-scoreboard"><span></span><i>Anzeigetafel</i><span></span></div>' +
             '<div class="seatplan-mobile-standing"><span>Steh-</span><span>platz</span></div>' +
           '</div>' +
-          '<div class="seatplan-mobile-court"><p class="t-caption" style="margin:0;color:var(--text-muted)">Spielfeld</p></div>' +
+          '<div class="seatplan-mobile-court">' + courtConfirm + '<p class="t-caption" style="margin:0;color:var(--text-muted)">Spielfeld</p></div>' +
           '<div class="seatplan-mobile-court-aside-mirror" aria-hidden="true"></div>' +
         '</div>' +
         '<div class="seatplan-mobile-tiles" style="grid-column:2;grid-row:3">' + southTiles + '</div>' +
         '<div class="seatplan-mobile-entrance vip" style="grid-column:3;grid-row:3"><i>VIP-Eingang</i></div>' +
-      '</div>' +
-      blocksFooter;
+      '</div>';
 
     this.root.querySelectorAll('.seatplan-mobile-tile[data-zone]').forEach(function (btn) {
       btn.addEventListener('click', function () {
@@ -306,8 +304,19 @@
     wrap.className = 'seatplan-mobile-detail';
     var header = document.createElement('div');
     header.className = 'seatplan-mobile-detail-header';
+    // Block-Name + Hauptkategorie stehen hier im Header, NICHT mehr als Labels in der
+    // grauen Sitzbox selbst — die Box zeigt nur noch Sitze + Reihennummern. VIP-Anteile
+    // (falls vorhanden) werden zusätzlich farblich markiert statt als eigene Legende.
+    var groups = this._categoryGroups(zone).filter(function (g) { return self.excludeCategories.indexOf(g.category) === -1; });
+    var mainCategory = groups.length ? groups[groups.length - 1].category : '';
+    var hasVip = groups.some(function (g) { return g.category === 'VIP'; });
     header.innerHTML = '<button type="button" class="seatplan-mobile-back" aria-label="Zurück zur Blockübersicht"><i data-lucide="arrow-left" class="icon-16"></i></button>' +
-      '<span class="t-body-sm" style="font-weight:600">' + zone.name + '</span><span style="width:32px"></span>';
+      '<span class="seatplan-mobile-detail-title">' +
+        '<strong class="t-body-sm">' + zone.name + '</strong>' +
+        '<span class="t-caption" style="color:var(--text-muted)">' + mainCategory +
+          (hasVip ? ' · <span style="color:rgba(179,57,44,.9);font-weight:700">VIP</span>' : '') +
+        '</span>' +
+      '</span><span style="width:32px"></span>';
     wrap.appendChild(header);
     var zoneEl = this._renderZone(zone);
     if (zoneEl) wrap.appendChild(zoneEl);
@@ -356,152 +365,59 @@
     }
   };
 
+  /* Reine Sitzbox: keine Block-/Kategorie-Labels mehr darin (die stehen jetzt im Header
+     über der Box, s. _renderMobileZoneDetail) — nur Sitze + Reihennummern. Ausrichtung
+     ist jetzt allgemeingültig statt mit Block-B-Spezialfällen: A/B/D/E sind rechtsbündig,
+     C/F (die jeweils gespiegelte Blockseite) linksbündig — alle Reihen einer Zone teilen
+     sich EINEN gemeinsamen seatplan-grid-wrap (fit-content-breit = breiteste Reihe der
+     ganzen Zone), wodurch align-items automatisch alle Reihen an derselben Kante
+     ausrichtet, ohne dass jede Reihenbreite einzeln nachgerechnet werden muss. */
   SeatPicker.prototype._renderZone = function (zone) {
     var self = this;
     var groups = this._categoryGroups(zone).filter(function (g) {
       return self.excludeCategories.indexOf(g.category) === -1;
     });
     if (groups.length === 0) return null;
-    var singleCategory = groups.length === 1 ? groups[0].category : null;
-    var isCat1 = singleCategory === 'Kategorie I';
 
     var wrap = document.createElement('div');
-    wrap.className = 'seatplan-block' + (isCat1 ? ' cat1' : '');
-    // Block B: die vielen Einzelreihen-Korrekturen (Reihe 6-12) verschieben die
-    // sichtbare Sitzmasse insgesamt leicht nach links gegenüber der Blockbox —
-    // per Messung (getBoundingClientRect) 5px asymmetrisches Padding gegensteuern,
-    // damit der gesamte Sitzplan wieder in seiner Box zentriert wirkt.
-    if (zone.zone_id === 'B') {
-      wrap.style.paddingLeft = '15px';
-      wrap.style.paddingRight = '5px';
-    }
-
-    var label = document.createElement('div');
-    label.className = 'seatplan-block-label';
-    label.textContent = zone.name;
-    wrap.appendChild(label);
-
+    wrap.className = 'seatplan-block';
     var blockMode = this.mode === 'blocks';
+    var mirrored = (zone.zone_id === 'C' || zone.zone_id === 'F');
+
+    var gridWrap = document.createElement('div');
+    gridWrap.className = 'seatplan-grid-wrap';
+    gridWrap.style.width = 'fit-content';
+    gridWrap.style.alignItems = mirrored ? 'flex-start' : 'flex-end';
+    wrap.appendChild(gridWrap);
 
     groups.forEach(function (group, gIdx) {
       var category = group.category;
       var priceInfo = self.prices[category] || { normal: 0 };
-
-      var catEl = document.createElement('div');
-      catEl.className = 'seatplan-block-cat';
-      if (gIdx > 0) catEl.style.marginTop = '10px';
-      catEl.textContent = category;
-      wrap.appendChild(catEl);
-
-      // Jede Reihe ist eine eigene, zentrierte Flex-Zeile (nicht ein einziges CSS-Grid für
-      // den ganzen Block) — reale Reihen sind unterschiedlich breit (siehe echter Saalplan),
-      // ein gemeinsames Grid mit fester Spaltenzahl würde kürzere Reihen links abschneiden
-      // bzw. mit der nächsten Reihe verschmelzen lassen statt sie sauber zu zentrieren.
-      var cols = Math.max.apply(null, group.rows.map(function (r) { return r.seats.length; }));
-      var gridWrap = document.createElement('div');
-      gridWrap.className = 'seatplan-grid-wrap';
-      // +2×(14px Reihennummer + 2px Abstand) für die Labels links/rechts jeder Reihe.
-      gridWrap.style.width = (cols * 10 - 2 + 2 * 16) + 'px';
-
-      // Block B: die VIP-Gruppe (Reihen 1-5) ist schmaler als die Kategorie-I-Gruppe
-      // darunter und wird separat zentriert — dadurch ragt ihr rechter Rand über den
-      // von Reihe 6 hinaus. Um beide Ränder rechtsbündig anzugleichen, die VIP-Gruppe
-      // insgesamt nach links verschieben (Wert per Bounding-Box-Messung ermittelt).
-      if (zone.zone_id === 'B' && category === 'VIP') {
-        gridWrap.style.transform = 'translateX(-18px)';
-      }
-
-      // Reihe 3 (19 Plätze) ist im Original schmaler als Reihe 12/1 (Blockbreite = cols),
-      // liegt aber selbst zentriert im Block — d. h. ihr Rand hat bereits einen eigenen
-      // Abstand zur Blockkante. Reihen 4+5 (12 Plätze) müssen bündig an GENAU DIESEM Rand
-      // von Reihe 3 abschließen, nicht an der äußersten Blockkante (das war der Fehler
-      // zuvor: align-self:flex-end allein richtet an der Blockkante aus, nicht an Reihe 3).
-      var row3 = group.rows.filter(function (r) { return r.row_number === '3'; })[0];
-      var row3Gap = row3 ? (cols - row3.seats.length) / 2 * 10 : 0;
-
-      // Block B, Kategorie-I-Gruppe: Reihen 6-9 (16 Plätze) sollen optisch genauso breit
-      // wirken wie Reihe 1-3 (VIP, 19 Plätze) darüber und mit Reihe 6-10 gemeinsam rechts-
-      // UND linksbündig mit Reihe 1-5 abschließen. Referenz-Margin über Reihe 6 berechnet
-      // (gleiche Technik wie row3Gap oben) — dieselbe Margin gilt dann für Reihe 6-10.
-      var kat1Ref = group.rows.filter(function (r) { return r.row_number === '6'; })[0];
-      var kat1AnchorGap = kat1Ref ? (cols - kat1Ref.seats.length) / 2 * 10 : 0;
-
       var freeCount = 0;
-      group.rows.forEach(function (row) {
+
+      group.rows.forEach(function (row, rIdx) {
         var rowLabel = row.row_label || row.row_number;
         var rowEl = document.createElement('div');
         rowEl.className = 'seatplan-row-line';
-        // Reihen 4+5 in A/B/C sind schmaler als die Reihen darüber (1-3) und liegen im
-        // Original nicht mittig, sondern bündig zu einer Seite von Reihe 3
-        // (A/B: rechte Seite, C spiegelverkehrt: linke Seite) — statt sie wie alle
-        // anderen Reihen zu zentrieren, exakt an Reihe 3s Rand ausrichten.
-        if ((zone.zone_id === 'A' || zone.zone_id === 'B') && (row.row_number === '4' || row.row_number === '5')) {
-          rowEl.style.alignSelf = 'flex-end';
-          rowEl.style.marginRight = (row3Gap - 3) + 'px';
-        } else if (zone.zone_id === 'C' && (row.row_number === '4' || row.row_number === '5')) {
-          rowEl.style.alignSelf = 'flex-start';
-          rowEl.style.marginLeft = (row3Gap - 3) + 'px';
-        }
-        // Block B: Reihen 1-3 rechts verankert (deckt sich mit ihrem bisherigen, unver-
-        // änderten rechten Rand) — die 2px-Verschiebung nach links passiert NICHT über
-        // eine Margin, sondern weiter unten über eine breitere Gang-Lücke zwischen
-        // Platz 7 und 8 (die dadurch links davon alles automatisch nach links schiebt).
-        if (zone.zone_id === 'B' && ['1', '2', '3'].indexOf(row.row_number) !== -1) {
-          rowEl.style.alignSelf = 'flex-end';
-          rowEl.style.marginRight = '-3px';
-        }
-        // Block B: Reihen 6-10 gemeinsam an derselben Kante verankern (rechtsbündig mit
-        // Reihe 1-5). Reihe 6-9 zusätzlich per größerem Sitzabstand (Anzahl bleibt gleich)
-        // auf die Breite von Reihe 1-3 aufziehen, damit sie dadurch automatisch auch
-        // linksbündig mit Reihe 1-3/10 werden. Reihe 6-9 zusätzlich 6px weiter nach
-        // links (mehr Sitzabstand, rechte Kante unverändert bei -2px Anker-Margin).
-        if (zone.zone_id === 'B' && ['6', '7', '8', '9', '10'].indexOf(row.row_number) !== -1) {
-          rowEl.style.alignSelf = 'flex-end';
-          if (row.row_number === '10') {
-            rowEl.style.marginRight = kat1AnchorGap + 'px';
-          } else {
-            rowEl.style.marginRight = (kat1AnchorGap - 2) + 'px';
-            rowEl.style.gap = '4.6033px';
-          }
-        }
-        // Block B, Reihe 11+12: komplett nach links (eigene Korrektur, unabhängig
-        // von der Reihe-1-10-Ausrichtung darüber). Als marginLeft statt transform,
-        // da transform die Reihennummer links aus der scrollbaren Blockbreite
-        // herausschiebt (unsichtbar wird) — marginLeft zählt korrekt zur Breite.
-        if (zone.zone_id === 'B' && row.row_number === '11') {
-          rowEl.style.marginLeft = '-15px';
-        }
-        if (zone.zone_id === 'B' && row.row_number === '12') {
-          rowEl.style.marginLeft = '-10px';
-        }
-        // Reihennummer links UND rechts an der Reihe, wie im Original-Saalplan.
+        // Sichtbarer Gang zwischen zwei Struktur-/Kategorie-Gruppen (z. B. Reihe 5/6).
+        if (gIdx > 0 && rIdx === 0) rowEl.style.marginTop = '22px';
+
         var rowNumLeft = document.createElement('span');
         rowNumLeft.className = 'seatplan-row-num';
         rowNumLeft.textContent = rowLabel;
         rowEl.appendChild(rowNumLeft);
-        row.seats.forEach(function (seat, cIdx) {
+        row.seats.forEach(function (seat) {
           var taken = !!(self.takenSeatGuids && self.takenSeatGuids.has(seat.seat_guid));
           if (!taken) freeCount++;
           var btn = document.createElement('button');
           btn.type = 'button';
           btn.className = 'seatplan-seat ' + catClass(category) + (taken ? ' taken' : '');
+          btn.textContent = seat.seat_number;
           // Echte Gang-Lücke innerhalb der Reihe (z. B. "1,2 | 3-22 | 23,24,25") —
           // die Sitznummerierung bleibt über den Gang hinweg durchgehend, nur die
           // Darstellung bekommt hier eine kleine zusätzliche Lücke.
           if (row.segment_breaks && row.segment_breaks.indexOf(parseInt(seat.seat_number, 10)) !== -1) {
-            // Block B, Reihe 1-3: Gang zwischen Platz 7/8 um 2px breiter — da diese
-            // Reihen rechts verankert sind (s.o.), schiebt das alles links davon
-            // (Platz 1-7 + linkes Reihenlabel) automatisch 2px weiter nach links.
-            var isWiderAisle = zone.zone_id === 'B' && ['1', '2', '3'].indexOf(row.row_number) !== -1;
-            btn.style.marginLeft = isWiderAisle ? '8px' : '6px';
-          }
-          // Block B, Reihe 11, Platz 1+2: zusätzlich 15px nach links (Einzelsitz-Korrektur).
-          if (zone.zone_id === 'B' && row.row_number === '11' && ['1', '2'].indexOf(seat.seat_number) !== -1) {
-            btn.style.transform = 'translateX(-15px)';
-          }
-          // Block B, Reihe 12, Platz 1-7: zusätzlich 2px nach links (Einzelsitz-Korrektur).
-          if (zone.zone_id === 'B' && row.row_number === '12' && ['1', '2', '3', '4', '5', '6', '7'].indexOf(seat.seat_number) !== -1) {
-            btn.style.transform = 'translateX(-2px)';
+            btn.style.marginLeft = '10px';
           }
           if (blockMode) btn.tabIndex = -1;
           btn.dataset.seatGuid = seat.seat_guid;
@@ -522,7 +438,6 @@
         rowEl.appendChild(rowNumRight);
         gridWrap.appendChild(rowEl);
       });
-      wrap.appendChild(gridWrap);
 
       if (blockMode && self.prices[category]) {
         var blockKey = zone.zone_id + '::' + category;
@@ -796,8 +711,8 @@
   };
 
   /* Direkte Block+Anzahl-Wahl im Warenkorb selbst — Alternative zum Antippen im Bild
-     oben, für Nutzer, die schon wissen, welchen Block sie wollen. Immer sichtbar,
-     unabhängig vom aktuellen Warenkorb-Inhalt. */
+     oben, für Nutzer, die schon wissen, welchen Block sie wollen. Nur sichtbar, solange
+     der Warenkorb noch leer ist (reine Einstiegshilfe, kein Dauer-UI-Element). */
   SeatPicker.prototype._renderDirectAddRow = function () {
     var self = this;
     var options = this.northZones.concat(this.southZones).map(function (id) {
@@ -837,7 +752,7 @@
     var ticketCount = lines.reduce(function (sum, l) { return sum + l.count; }, 0);
 
     this.cartEl.innerHTML = '';
-    this._renderDirectAddRow();
+    if (lines.length === 0) this._renderDirectAddRow();
 
     if (lines.length === 0) {
       var emptyEl = document.createElement('div');
