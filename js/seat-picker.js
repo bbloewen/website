@@ -202,11 +202,14 @@
       });
       var background = groups.length > 1 ? 'linear-gradient(to bottom, ' + stops.join(', ') + ')' : catColor(groups[0].category);
       // Bei gemischten Blöcken (z. B. B: VIP vorn + Kategorie I hinten) beschriftet die
-      // Kachel bewusst nur die Hauptkategorie (letzte/größte Gruppe) statt beider — die
-      // Legende wurde entfernt, VIP-Anteile bleiben rein farblich erkennbar (Farbverlauf).
+      // Kachel bewusst nur die Hauptkategorie (letzte/größte Gruppe) unten am Buchstaben —
+      // ein zusätzliches "VIP"-Label oben markiert den roten Farbverlauf-Anteil separat.
       var mainCategory = groups[groups.length - 1].category;
       var borderColor = catBorderColor(mainCategory);
+      var hasVip = groups.some(function (g) { return g.category === 'VIP'; });
+      var vipLabel = hasVip ? '<span class="seatplan-mobile-tile-vip">VIP</span>' : '';
       return '<button type="button" class="seatplan-mobile-tile" style="background:' + background + ';border-color:' + borderColor + '" data-zone="' + id + '">' +
+        vipLabel +
         '<span class="seatplan-mobile-tile-letter">' + id + '</span>' +
         '<span class="seatplan-mobile-tile-cat">' + MOBILE_CAT_LABEL[mainCategory] + '</span>' +
         '</button>';
@@ -223,13 +226,13 @@
         '<div class="seatplan-mobile-court-row" style="grid-column:2;grid-row:2">' +
           '<div class="seatplan-mobile-court-aside">' +
             '<div class="seatplan-mobile-scoreboard"><span></span><i>Anzeigetafel</i><span></span></div>' +
-            '<div class="seatplan-mobile-standing"><span>Stehplatz</span></div>' +
+            '<div class="seatplan-mobile-standing"><span>Steh</span><span>Platz</span></div>' +
           '</div>' +
           '<div class="seatplan-mobile-court"><p class="t-caption" style="margin:0;color:var(--text-muted)">Spielfeld</p></div>' +
           '<div class="seatplan-mobile-court-aside-mirror" aria-hidden="true"></div>' +
         '</div>' +
         '<div class="seatplan-mobile-tiles" style="grid-column:2;grid-row:3">' + southTiles + '</div>' +
-        '<div class="seatplan-mobile-entrance vip" style="grid-column:3;grid-row:3"><span></span><i>VIP-Eingang</i><span></span></div>' +
+        '<div class="seatplan-mobile-entrance vip" style="grid-column:3;grid-row:3"><i>VIP-Eingang</i></div>' +
       '</div>';
 
     this.root.querySelectorAll('.seatplan-mobile-tile[data-zone]').forEach(function (btn) {
