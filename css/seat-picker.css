@@ -367,7 +367,7 @@
   flex: 0 0 34px;
   align-self: center;
   height: 50%;
-  transform: translate(-15px, 20px);
+  transform: translate(-15px, 25px);
   background: transparent;
   border: 1px dashed var(--color-neutral-200);
   border-radius: var(--radius-md);

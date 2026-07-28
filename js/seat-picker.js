@@ -63,6 +63,12 @@
     this.cartEl = opts.cartEl;
     this.totalEl = opts.totalEl;
     this.ctaEl = opts.ctaEl;
+    // Modus "seats": Block-Detailansicht (alle Sitze eines Blocks) öffnet groß in einem
+    // separaten Overlay statt im kompakten Inline-Bereich, damit auch breite Blöcke
+    // (bis zu 28 Sitze/Reihe) ohne Scrollen komplett sichtbar sind. Optional — ohne
+    // diese Optionen rendert die Detailansicht wie zuvor inline in `root`.
+    this.detailBackdropEl = opts.detailBackdropEl || null;
+    this.detailRootEl = opts.detailRootEl || null;
     this.onContinue = opts.onContinue || function () {};
     this.mobileZoneId = null; // Modus "seats": null = Block-Übersicht, sonst gewählter Block (Sitzdetail offen)
     this.pendingBlockId = null; // Modus "blocks": per Tippen in der Übersicht markierter, noch nicht übernommener Block
@@ -223,14 +229,14 @@
       : '';
 
     this.root.innerHTML =
-      '<p class="t-body-sm" style="text-align:center;margin:0 0 12px;font-weight:600">Wähle deinen Block</p>' +
+      '<h3 class="t-h4" style="text-align:center;margin:0 0 12px">Wähle deinen Block</h3>' +
       '<div class="seatplan-mobile-overview">' +
         '<div class="seatplan-mobile-entrance main" style="grid-column:1;grid-row:1 / 4"><span></span><i>Haupteingang</i><span></span></div>' +
         '<div class="seatplan-mobile-tiles" style="grid-column:2;grid-row:1">' + northTiles + '</div>' +
         '<div class="seatplan-mobile-court-row" style="grid-column:2;grid-row:2">' +
           '<div class="seatplan-mobile-court-aside">' +
             '<div class="seatplan-mobile-scoreboard"><span></span><i>Anzeigetafel</i><span></span></div>' +
-            '<div class="seatplan-mobile-standing"><span>Steh</span><span>Platz</span></div>' +
+            '<div class="seatplan-mobile-standing"><span>Steh-</span><span>platz</span></div>' +
           '</div>' +
           '<div class="seatplan-mobile-court"><p class="t-caption" style="margin:0;color:var(--text-muted)">Spielfeld</p></div>' +
           '<div class="seatplan-mobile-court-aside-mirror" aria-hidden="true"></div>' +
@@ -310,8 +316,12 @@
     confirmBtn.className = 'btn btn-primary btn-sm seatplan-mobile-detail-confirm';
     confirmBtn.textContent = 'Übernehmen';
     wrap.appendChild(confirmBtn);
-    this.root.innerHTML = '';
-    this.root.appendChild(wrap);
+    // Öffnet groß in einem separaten Overlay statt im kompakten Inline-Bereich, sofern
+    // die Seite eines mitgegeben hat (Dauerkarte) — sonst Fallback: inline wie zuvor.
+    var target = this.detailRootEl || this.root;
+    target.innerHTML = '';
+    target.appendChild(wrap);
+    if (this.detailBackdropEl) this.detailBackdropEl.classList.add('open');
     if (window.lucide) window.lucide.createIcons();
     header.querySelector('.seatplan-mobile-back').addEventListener('click', function () {
       self.mobileZoneId = null;
@@ -324,6 +334,15 @@
     this._renderCart();
   };
 
+  /* Öffentliche Methode, damit die Seite (Backdrop-Klick, ESC-Taste) die
+     Detailansicht schließen kann, ohne interne Felder direkt anzufassen. */
+  SeatPicker.prototype.closeDetail = function () {
+    if (this.mode === 'seats' && this.mobileZoneId) {
+      this.mobileZoneId = null;
+      this._render();
+    }
+  };
+
   /* Blockübersicht ist die durchgehende Ansicht an jeder Breite (kein Desktop/Mobile-
      Umschalten mehr) — Modus "seats" kann in die Sitzdetailansicht eines Blocks
      wechseln, Modus "blocks" bleibt immer in der Übersicht (freie Platzwahl, kein
@@ -332,6 +351,7 @@
     if (this.mode === 'seats' && this.mobileZoneId) {
       this._renderMobileZoneDetail();
     } else {
+      if (this.detailBackdropEl) this.detailBackdropEl.classList.remove('open');
       this._renderMobileOverview();
     }
   };
