@@ -9469,7 +9469,8 @@
               },
               "category": "Kategorie I"
             }
-          ]
+          ],
+          "match_first_row_width": true
         },
         {
           "uuid": "4da59c4c-f91a-581e-85f9-b9bf828df3ed",
@@ -9642,7 +9643,8 @@
               },
               "category": "Kategorie I"
             }
-          ]
+          ],
+          "match_first_row_width": true
         },
         {
           "uuid": "8522fbfd-30bf-518b-aec5-80e34cbc7eaf",
@@ -9815,7 +9817,8 @@
               },
               "category": "Kategorie I"
             }
-          ]
+          ],
+          "match_first_row_width": true
         },
         {
           "uuid": "38858f6a-1539-58e7-a588-853ce4f3fecc",
@@ -9988,7 +9991,8 @@
               },
               "category": "Kategorie I"
             }
-          ]
+          ],
+          "match_first_row_width": true
         },
         {
           "uuid": "7960c304-2a5e-5eec-8c8a-b9850fb0ac52",
@@ -10201,7 +10205,8 @@
               },
               "category": "Kategorie I"
             }
-          ]
+          ],
+          "match_first_row_width": true
         },
         {
           "uuid": "32be158c-3325-513a-8d32-adc74d41e91d",

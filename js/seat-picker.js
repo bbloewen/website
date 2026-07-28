@@ -295,6 +295,7 @@
     this._quickAddBlock(this.pendingBlockId, 1);
     this.pendingBlockId = null;
     this._render();
+    if (this.cartEl) this.cartEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
   SeatPicker.prototype._renderMobileZoneDetail = function () {
@@ -314,7 +315,7 @@
       '<span class="seatplan-mobile-detail-title">' +
         '<strong class="t-body-sm">' + zone.name + '</strong>' +
         '<span class="t-caption" style="color:var(--text-muted)">' + mainCategory +
-          (hasVip ? ' · <span style="color:rgba(179,57,44,.9);font-weight:700">VIP</span>' : '') +
+          (hasVip ? ' (<span style="color:rgba(179,57,44,.9)">VIP</span>)' : '') +
         '</span>' +
       '</span><span style="width:32px"></span>';
     wrap.appendChild(header);
@@ -331,6 +332,10 @@
     target.innerHTML = '';
     target.appendChild(wrap);
     if (this.detailBackdropEl) this.detailBackdropEl.classList.add('open');
+    if (zoneEl) {
+      this._fixupRowWidths(zoneEl);
+      this._fitZoneScale(zoneEl);
+    }
     if (window.lucide) window.lucide.createIcons();
     header.querySelector('.seatplan-mobile-back').addEventListener('click', function () {
       self.mobileZoneId = null;
@@ -341,6 +346,69 @@
       self._render();
     });
     this._renderCart();
+  };
+
+  /* Reihen mit data-match-first (s. _renderZone) werden auf die tatsächliche,
+     gerenderte Breite von Reihe 1 gestreckt/gestaucht (justify-content:space-between
+     verteilt die Sitze dafür neu) — Messung erst möglich, wenn die Zone im echten DOM
+     hängt, deshalb ein separater Schritt statt Teil von _renderZone selbst. */
+  SeatPicker.prototype._fixupRowWidths = function (zoneEl) {
+    var rows = zoneEl.querySelectorAll('.seatplan-row-line');
+    if (!rows.length) return;
+    var targetWidth = rows[0].getBoundingClientRect().width;
+    zoneEl.querySelectorAll('.seatplan-row-line--match-first').forEach(function (row) {
+      row.style.width = targetWidth + 'px';
+      row.style.justifyContent = 'space-between';
+    });
+  };
+
+  /* Passt den kompletten Blockplan per Skalierung so ein, dass er komplett ohne
+     Scrollen in die graue Box passt — Format egal (Hochkant/Querformat), da Breite
+     UND Höhe der Box gemessen werden statt eine feste Sitzgröße anzunehmen. Ein
+     scaleWrap um den gridWrap bekommt die schon herunterskalierte Zielgröße als
+     width/height, damit die Box exakt so viel Platz reserviert wie nach dem Zoom
+     tatsächlich gebraucht wird (reines CSS-transform würde stattdessen den alten,
+     unskalierten Platzbedarf behalten und unnötigen Scroll-Leerraum erzeugen).
+     Die +/- Buttons erlauben zusätzlichen manuellen Zoom oben auf die Einpassung,
+     falls die automatische Berechnung auf einem Gerät nicht exakt passt. */
+  SeatPicker.prototype._fitZoneScale = function (zoneEl) {
+    var box = zoneEl; // zoneEl ist bereits .seatplan-block (Rückgabewert von _renderZone)
+    var scaleWrap = box.querySelector('.seatplan-scale-wrap');
+    var gridWrap = box.querySelector('.seatplan-grid-wrap');
+    if (!scaleWrap || !gridWrap) return;
+
+    scaleWrap.style.width = '';
+    scaleWrap.style.height = '';
+    gridWrap.style.transform = 'none';
+    var naturalWidth = gridWrap.scrollWidth;
+    var naturalHeight = gridWrap.scrollHeight;
+    var availWidth = box.clientWidth;
+    var availHeight = box.clientHeight;
+    if (!naturalWidth || !naturalHeight || !availWidth || !availHeight) return;
+
+    var autoFit = Math.min(1, availWidth / naturalWidth, availHeight / naturalHeight);
+    var zoom = 1;
+    var minZoom = 0.5, maxZoom = 2.5;
+
+    function apply() {
+      var scale = Math.max(0.15, autoFit * zoom);
+      gridWrap.style.transformOrigin = 'top left';
+      gridWrap.style.transform = 'scale(' + scale + ')';
+      scaleWrap.style.width = Math.ceil(naturalWidth * scale) + 'px';
+      scaleWrap.style.height = Math.ceil(naturalHeight * scale) + 'px';
+    }
+    apply();
+
+    var zoomIn = box.querySelector('.seatplan-zoom-in');
+    var zoomOut = box.querySelector('.seatplan-zoom-out');
+    if (zoomIn) zoomIn.addEventListener('click', function () {
+      zoom = Math.min(maxZoom, zoom + 0.2);
+      apply();
+    });
+    if (zoomOut) zoomOut.addEventListener('click', function () {
+      zoom = Math.max(minZoom, zoom - 0.2);
+      apply();
+    });
   };
 
   /* Öffentliche Methode, damit die Seite (Backdrop-Klick, ESC-Taste) die
@@ -388,7 +456,23 @@
     gridWrap.className = 'seatplan-grid-wrap';
     gridWrap.style.width = 'fit-content';
     gridWrap.style.alignItems = mirrored ? 'flex-start' : 'flex-end';
-    wrap.appendChild(gridWrap);
+    // scaleWrap bekommt nach dem Einfügen ins DOM (s. _fitZoneScale) eine feste,
+    // bereits herunterskalierte Größe — reserviert dadurch exakt so viel Platz im
+    // Layout, wie der Sitzplan nach dem automatischen Zoom tatsächlich braucht,
+    // statt wie bei einem reinen CSS-transform ungenutzten Scroll-Leerraum zu lassen.
+    var scaleWrap = document.createElement('div');
+    scaleWrap.className = 'seatplan-scale-wrap';
+    scaleWrap.appendChild(gridWrap);
+    wrap.appendChild(scaleWrap);
+
+    // Manueller Zoom als Rückfalloption, falls die automatische Einpassung (s.
+    // _fitZoneScale) auf einem Gerät nicht exakt passt.
+    var zoomControls = document.createElement('div');
+    zoomControls.className = 'seatplan-zoom-controls';
+    zoomControls.innerHTML =
+      '<button type="button" class="seatplan-zoom-in" aria-label="Vergrößern">+</button>' +
+      '<button type="button" class="seatplan-zoom-out" aria-label="Verkleinern">−</button>';
+    wrap.appendChild(zoomControls);
 
     groups.forEach(function (group, gIdx) {
       var category = group.category;
@@ -399,8 +483,19 @@
         var rowLabel = row.row_label || row.row_number;
         var rowEl = document.createElement('div');
         rowEl.className = 'seatplan-row-line';
+        // Reihen mit weniger/mehr Sitzen als Reihe 1 (z. B. Block B, Reihe 6-10) sollen
+        // trotzdem optisch gleich breit wirken — Breite wird nach dem Einfügen ins DOM
+        // gemessen (s. _fixupRowWidths), nicht aus einer festen Pixelzahl berechnet.
+        if (row.match_first_row_width) rowEl.classList.add('seatplan-row-line--match-first');
         // Sichtbarer Gang zwischen zwei Struktur-/Kategorie-Gruppen (z. B. Reihe 5/6).
-        if (gIdx > 0 && rIdx === 0) rowEl.style.marginTop = '22px';
+        // Bei B markiert schon der Farbwechsel (VIP/Kat. I) diese Grenze; bei den
+        // einfarbigen Blöcken A/C braucht es dafür eine eigene Trennlinie, sonst wirkt
+        // die Lücke wie ein Layout-Fehler statt wie der echte Gang.
+        if (gIdx > 0 && rIdx === 0) {
+          var aisleLine = document.createElement('div');
+          aisleLine.className = 'seatplan-aisle-line';
+          gridWrap.appendChild(aisleLine);
+        }
 
         var rowNumLeft = document.createElement('span');
         rowNumLeft.className = 'seatplan-row-num';
@@ -427,7 +522,7 @@
             btn.disabled = true;
           } else if (self.prices[category]) {
             btn.addEventListener('click', function () {
-              self._toggleSeat(seat.seat_guid, zone.name, rowLabel, seat.seat_number, category, priceInfo);
+              self._toggleSeat(btn, seat.seat_guid, zone.name, rowLabel, seat.seat_number, category, priceInfo);
             });
           }
           rowEl.appendChild(btn);
@@ -517,8 +612,7 @@
     this._renderCart();
   };
 
-  SeatPicker.prototype._toggleSeat = function (guid, zoneLabel, rowLabel, seatNumber, category, priceInfo) {
-    var btn = this.root.querySelector('.seatplan-seat[data-seat-guid="' + guid + '"]');
+  SeatPicker.prototype._toggleSeat = function (btn, guid, zoneLabel, rowLabel, seatNumber, category, priceInfo) {
     if (this.selected[guid]) {
       delete this.selected[guid];
       btn.classList.remove('selected');
@@ -730,7 +824,7 @@
       '<div style="display:flex;gap:8px">' +
         '<select id="seatplan-direct-block">' + options + '</select>' +
         '<input type="number" id="seatplan-direct-qty" min="1" value="1" aria-label="Anzahl">' +
-        '<button type="button" class="btn btn-primary btn-sm" id="seatplan-direct-add">Hinzufügen</button>' +
+        '<button type="button" class="btn btn-primary btn-sm" id="seatplan-direct-add">Auswahl übernehmen</button>' +
       '</div>';
     this.cartEl.appendChild(wrap);
     wrap.querySelector('#seatplan-direct-add').addEventListener('click', function () {

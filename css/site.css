@@ -1848,7 +1848,13 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .modal-box-blockplan {
   max-width: min(95vw, 1100px); width: 100%; max-height: min(90vh, 900px);
   display: flex; flex-direction: column; text-align: left; padding: 24px;
+  overflow-y: auto;
 }
+/* Reicht die begrenzte Höhe der Modal-Box bis zur grauen Sitzbox durch (statt eines
+   unbegrenzt wachsenden Blocks), damit _fitZoneScale eine echte, endliche Ziel-
+   höhe zum Einpassen messen kann — sonst ergäbe availHeight einfach die
+   ungebremste Inhaltshöhe und der Zoom hätte nichts zu tun. */
+#seatplan-detail-root { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
 
 /* =====================================================================
    FOOTER

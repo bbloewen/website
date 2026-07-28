@@ -44,6 +44,10 @@
    eines starren Rasters mit linksbündig "abgeschnittenen" kürzeren Reihen. */
 .seatplan-grid-wrap { display: flex; flex-direction: column; gap: 2px; align-items: center; margin: 0 auto; }
 .seatplan-row-line { display: flex; gap: 2px; justify-content: center; align-items: center; }
+/* Markiert den echten Gang zwischen zwei Reihengruppen (z. B. Reihe 5/6) als eigene
+   Linie — bei einfarbigen Blöcken (A/C) gibt es sonst keinen optischen Hinweis, dass
+   die Lücke dort Absicht ist und nicht wie ein Layout-Fehler aussieht. */
+.seatplan-aisle-line { width: 100%; height: 1px; background: var(--color-neutral-400); margin: 8px 0; }
 /* Reihennummer links UND rechts an jeder Reihe, wie im Original-Saalplan
    (dort z. B. "B7" beidseitig neben der Reihe). Feste Breite, damit die
    Sitze selbst über alle Reihen hinweg exakt zentriert bleiben. */
@@ -58,7 +62,7 @@
   position: relative; z-index: 1; pointer-events: none;
 }
 .seatplan-seat {
-  width: 8px; height: 8px; border-radius: 2px;
+  width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0;
   background: var(--color-neutral-200); border: 1px solid var(--color-neutral-300); cursor: pointer; padding: 0;
 }
 /* Sitzfarbe nach Kategorie: Kategorie I (Orange) und VIP (Rot) mit Transparenz für
@@ -409,7 +413,13 @@
 .seatplan-mobile-court > * { position: relative; }
 
 /* Detailansicht eines einzelnen Blocks: Header mit Zurück-Button, danach der
-   bestehende Zonen-Renderer, aber mit größeren, besser tappbaren Sitzen. */
+   bestehende Zonen-Renderer, aber mit größeren, besser tappbaren Sitzen.
+   display:flex + min-height:0 reicht die begrenzte Höhe der Modal-Box (s.
+   #seatplan-detail-root in site.css) bis zur grauen Box durch, damit
+   _fitZoneScale eine echte Ziel-Höhe zum Einpassen hat, egal ob Hoch- oder
+   Querformat — ohne diese Kette würde der Block einfach so hoch werden wie
+   sein Inhalt und nie etwas zum Skalieren messen. */
+.seatplan-mobile-detail { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
 .seatplan-mobile-detail-header {
   display: flex; align-items: center; justify-content: space-between;
   padding-bottom: 10px; margin-bottom: 6px; border-bottom: 1px solid var(--color-neutral-100);
@@ -430,7 +440,24 @@
 .seatplan-mobile-detail .seatplan-grid-wrap { gap: 6px; margin: 0; align-items: flex-start; }
 .seatplan-mobile-detail .seatplan-row-line { gap: 6px; justify-content: flex-start; }
 .seatplan-mobile-detail .seatplan-row-num { width: 20px; font-size: 10px; line-height: 10px; }
-.seatplan-mobile-detail .seatplan-block { padding: 14px 10px; }
+.seatplan-mobile-detail .seatplan-block {
+  padding: 14px 10px 14px 40px; position: relative;
+  flex: 1 1 auto; min-height: 0; overflow: auto;
+  display: flex; align-items: center; justify-content: center;
+}
+/* scaleWrap bekommt seine Größe per JS (_fitZoneScale) exakt passend zum
+   bereits herunterskalierten Inhalt — kein eigenes Layout-Verhalten nötig. */
+.seatplan-scale-wrap { flex-shrink: 0; }
+.seatplan-zoom-controls {
+  position: absolute; left: 6px; top: 50%; transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: 6px; z-index: 3;
+}
+.seatplan-zoom-controls button {
+  width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--color-neutral-300);
+  background: var(--color-white); font-size: 15px; font-weight: 700; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; color: var(--color-brand-navy);
+}
+.seatplan-zoom-controls button:hover { background: var(--color-neutral-100); }
 
 /* Modal-Überschrift "Sitzplatz wählen" ist in der mobilen Blockübersicht redundant
    zum Untertitel "Wähle deinen Block" (der Untertitel erscheint nur dort) — deshalb
