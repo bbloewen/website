@@ -1134,9 +1134,19 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
    orange-300 für das hervorgehobene Wort im Hero; damit liegt der kleinste
    Kontrast über alle geprüften Motive bei 3,38:1.
 
-   Bewusst NUR ab 600px: unterhalb liegt zusätzlich --hero-overlay-mobile über
-   dem Bild, dort wurden 3,91–5,90:1 gemessen — Mobil ist also ohne Eingriff
-   konform und würde durch mehr Abdunklung nur unnötig zumatschen.
+   Die stärkere Abdunklung gilt nur ab 600px: unterhalb liegt zusätzlich
+   --hero-overlay-mobile über dem Bild, und der Großteil der Zugriffe ist mobil
+   — dort würde mehr Abdunklung die Fotos unnötig zumatschen.
+
+   ACHTUNG, erste Annahme war falsch: Zunächst hatte ich hier notiert, Mobil sei
+   ohne Eingriff konform. Das stimmte nur für die anfangs geprüften Seiten. Eine
+   Messung über alle 32 Hero-Varianten bei 375px ergab fünf Durchfaller, im
+   Extrem 1,08:1. Betroffen sind Seiten mit langen oder mehrwortigen
+   Hervorhebungen, die bis an den rechten Rand laufen, wo weder der Verlauf von
+   links noch der von oben noch trägt. Daher gilt --kw-color inzwischen für alle
+   Breiten (s. u.), und flache Heroes bekommen mobil einen kräftigeren Verlauf
+   von oben. Lehre: nie von einer Stichprobe auf „alle Seiten sind sauber"
+   schließen — die Ausreißer stecken in den Sonderfällen.
 
    Zum Zurückrollen genügt es, diesen Block bis zum Ende der zweiten
    Media-Query zu entfernen. */
@@ -1149,6 +1159,19 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
    verschlechtert auf dunklem Grund nichts, es erhöht den Kontrast; deshalb
    ohne Breiten-Einschränkung. */
 .hero-photo { --kw-color: var(--color-orange-300); }
+
+/* Flache Heroes (hero-half) auf dem Handy: dort ist der Bereich nur 170px hoch,
+   die Überschrift füllt ihn fast komplett und läuft bei langen Begriffen bis an
+   den rechten Rand — "Fastbreak" auf der Newsletter-Seite kam so auf 2,43:1,
+   obwohl dort schon nur ein einzelnes Wort hervorgehoben ist. Eine kürzere
+   Hervorhebung hilft hier also nicht, nur mehr Abdunklung. Bewusst auf
+   hero-half beschränkt: bei den hohen Heroes ist der Kontrast in Ordnung, und
+   dort würde eine stärkere Abdunklung sichtbar Bildwirkung kosten. */
+@media (max-width: 599px) {
+  .hero-photo.hero-half {
+    --hero-overlay-mobile: linear-gradient(180deg, rgba(0,18,45,.94) 0%, rgba(0,18,45,.86) 45%, rgba(0,18,45,.62) 75%, rgba(0,18,45,.45) 100%);
+  }
+}
 
 @media (min-width: 600px) {
   .hero-photo {

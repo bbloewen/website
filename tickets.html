@@ -6,8 +6,8 @@
 <title>Tickets — Basketball Löwen Erfurt</title>
 <meta name="description" content="Tickets für Heimspiele der Basketball Löwen Erfurt." />
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
-<link rel="stylesheet" href="/css/colors_and_type.css?v=1785350377" />
-<link rel="stylesheet" href="/css/site.css?v=1785350377" />
+<link rel="stylesheet" href="/css/colors_and_type.css?v=1785351039" />
+<link rel="stylesheet" href="/css/site.css?v=1785351039" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 </head>
@@ -134,7 +134,7 @@
     });
     return 'https://calendar.google.com/calendar/render?' + params.toString();
   }
-  fetch('/data/heimspiele.json?v=1785350377').then(function (r) { return r.json(); }).then(function (d) {
+  fetch('/data/heimspiele.json?v=1785351039').then(function (r) { return r.json(); }).then(function (d) {
     var el = document.getElementById('heimspiele-liste');
     el.innerHTML = d.spiele.map(function (s, i) {
       var gameDate = parseDMY(s.datum);
@@ -175,7 +175,7 @@
   });
 </script>
 <script src="https://unpkg.com/lucide@latest"></script>
-<script src="/js/nav.js?v=1785350377"></script>
-<script src="/js/include.js?v=1785350377"></script>
+<script src="/js/nav.js?v=1785351039"></script>
+<script src="/js/include.js?v=1785351039"></script>
 </body>
 </html>

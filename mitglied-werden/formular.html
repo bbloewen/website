@@ -6,8 +6,8 @@
 <title>Anmelden — Basketball Löwen Erfurt</title>
 <meta name="description" content="Schließe deine Mitgliedschaft bei den Basketball Löwen Erfurt direkt online ab." />
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
-<link rel="stylesheet" href="/css/colors_and_type.css?v=1785350377" />
-<link rel="stylesheet" href="/css/site.css?v=1785350377" />
+<link rel="stylesheet" href="/css/colors_and_type.css?v=1785351039" />
+<link rel="stylesheet" href="/css/site.css?v=1785351039" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 </head>
@@ -134,8 +134,8 @@
 </main>
 <div id="site-footer-placeholder"></div>
 <script src="https://unpkg.com/lucide@latest"></script>
-<script src="/js/nav.js?v=1785350377"></script>
-<script src="/js/include.js?v=1785350377"></script>
+<script src="/js/nav.js?v=1785351039"></script>
+<script src="/js/include.js?v=1785351039"></script>
 <script>
   var TYP_HERO = {
     fan: 'Fan-Mitgliedschaft',
@@ -174,7 +174,15 @@
   function mwUpdateForTyp(typ) {
     var label = TYP_HERO[typ];
     if (label) {
-      heroHeading.innerHTML = '<span class="kw">' + label + SWOOSH + '</span>.';
+      /* Nur den Typ-Teil hervorheben, nicht die ganze Überschrift: bei
+         "Spieler:innen-Mitgliedschaft" lief das Orange sonst bis 99 % der
+         Breite und kam auf dem Handy nur auf 1,08:1 Kontrast. Getrennt wird am
+         ersten Bindestrich, sonst am ersten Wort — dasselbe Muster wie auf den
+         übrigen Seiten ("Löwen-Mitglied werden."). */
+      var trenn = label.indexOf('-') > -1 ? label.indexOf('-') : label.indexOf(' ');
+      var vorn = trenn > 0 ? label.slice(0, trenn) : label;
+      var rest = trenn > 0 ? label.slice(trenn) : '';
+      heroHeading.innerHTML = '<span class="kw">' + vorn + SWOOSH + '</span>' + rest + '.';
       typHeading.textContent = label;
       typPreis.innerHTML = TYP_PREIS[typ] + ' € / Monat · <a href="/assets/docs/beitragsordnung.pdf" target="_blank" rel="noopener">Beitragsordnung</a>';
       submitBtnDefault.textContent = label + ' anmelden';
