@@ -1406,8 +1406,13 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .hero-photo.hero-mediakit h1 { white-space: normal; max-width: 28ch; }
 
 /* Hero-Variante für die Mitgliedschafts-Seiten (Übersicht + Fan-Formular) —
-   feiernde Fans mit Maskottchen im Bus auf dem Weg zum Auswärtsspiel. */
-.hero-photo.hero-mitglied-werden { --hero-photo-url: url('/assets/img/hero-mitglied-werden.webp'); background-position: center 40%; }
+   jubelnde Fangruppe mit "Wir brüllen euch zum Sieg"-Banner auf dem Petersberg
+   (Shooting 07/2026). Ersetzt am 29.07.2026 ein KI-generiertes Bild, auf dem
+   das Vereinslogo verfälscht und die Trikot-Aufdrucke Fantasieschrift waren.
+   Die Datei ist bereits auf 2,36:1 vorgeschnitten, sodass der bei hero-half
+   sichtbare Mittelstreifen Gesichter und Banner trägt — daher center center
+   und nicht wie vorher ein Versatz. */
+.hero-photo.hero-mitglied-werden { --hero-photo-url: url('/assets/img/hero-mitglied-werden-fanshooting.webp'); background-position: center center; }
 
 /* Hero-Variante für die Newsletter-Seite. */
 .hero-photo.hero-newsletter { --hero-photo-url: url('/assets/img/hero-newsletter.webp'); background-position: center 40%; }
