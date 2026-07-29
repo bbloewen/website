@@ -13,6 +13,10 @@
 
   function fmtEUR(n) { return n.toFixed(2).replace('.', ','); }
 
+  /* Geldbeträge auf Cent runden. Fließkomma-Addition liefert sonst Werte wie
+     853.4999999999999, die als solche weitergereicht und gespeichert werden. */
+  function roundCents(n) { return Math.round(n * 100) / 100; }
+
   function catClass(category) {
     if (category === 'Kategorie I') return 'cat-kat1';
     if (category === 'Kategorie II') return 'cat-kat2';
@@ -1334,6 +1338,16 @@
       lines.push({ label: 'Gutschein ' + this.voucherInfo.label, qty: 1, unitPrice: -discount, lineTotal: -discount });
       total -= discount;
     }
+    /* Auf Cent runden, bevor der Betrag den Warenkorb verlässt. Das Aufsummieren
+       vieler Einzelpreise mit Fließkomma-Arithmetik erzeugt sonst Werte wie
+       853.4999999999999 — die landen unverändert in der Data Table und später in
+       der Lastschriftdatei. Bei Geld darf kein Rest aus der Binärdarstellung
+       übrig bleiben, deshalb hier UND je Zeile gerundet (s. roundCents). */
+    total = roundCents(total);
+    lines.forEach(function (l) {
+      if (typeof l.unitPrice === 'number') l.unitPrice = roundCents(l.unitPrice);
+      if (typeof l.lineTotal === 'number') l.lineTotal = roundCents(l.lineTotal);
+    });
     return {
       lines: lines,
       total: total,
