@@ -1329,15 +1329,15 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
    voller, jubelnder Halle ("INVESTORS" auf der Anzeigetafel). */
 .hero-photo.hero-investoren { --hero-photo-url: url('/assets/img/hero-investoren.webp'); background-position: center 40%; }
 
-/* Hero-Variante für die Löwenrudel/Fanclub-Seite — Gruppenfoto mit "Ich bin
-   ein Löwe"-T-Shirts vor dem Petersberg, Motiv über die ganze Breite verteilt.
+/* Hero-Variante für die Fanclub-Seite — Gruppenfoto mit "Ich bin ein Löwe"-
+   T-Shirts vor dem Petersberg, Motiv über die ganze Breite verteilt.
    Höhe kommt jetzt vom vereinheitlichten .hero-photo-Basiswert. */
-.hero-photo.hero-loewenrudel { --hero-photo-url: url('/assets/img/hero-loewenrudel.webp'); background-position: center 10%; }
+.hero-photo.hero-fanclub { --hero-photo-url: url('/assets/img/hero-fanclub.webp'); background-position: center 10%; }
 /* Auf schmalen Screens bricht die Überschrift auf volle Breite um (statt der
    linken Spalte bei breiten Screens) — Bildausschnitt daher etwas tiefer,
    der Verlauf selbst kommt bereits einheitlich vom .hero-photo-Basiswert. */
 @media (max-width: 599px) {
-  .hero-photo.hero-loewenrudel { background-position: center 68%; }
+  .hero-photo.hero-fanclub { background-position: center 68%; }
 }
 
 /* Hero-Variante für die Ehrenamt-Seite — Team- und Helfer:innen-Gruppenfoto
