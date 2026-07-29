@@ -400,7 +400,10 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 }
 .eyebrow.on-dark { color: #fff; }
 
-.kw { position: relative; display: inline-block; color: var(--color-brand-orange); }
+/* Akzentfarbe des hervorgehobenen Worts. Über --kw-color überschreibbar, damit
+   der Hero eine hellere Orangestufe nutzen kann (Kontrast auf Foto, s. u.);
+   ohne Überschreibung überall unverändert das Marken-Orange. */
+.kw { position: relative; display: inline-block; color: var(--kw-color, var(--color-brand-orange)); }
 /* Handgemalter Pinselstrich-Swoosh (384x41 Rasterbild) statt Vektorform —
    per CSS-Maske statt <img> eingebunden, damit die Form exakt im Marken-
    Orange (--color-brand-orange) erscheint statt im etwas abweichenden
@@ -408,7 +411,7 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
    auf die volle Breite des gehighlighteten Worts. */
 .kw .swoosh {
   position: absolute; left: -1%; bottom: -0.4em; width: 106%; height: .4em;
-  background-color: var(--color-brand-orange);
+  background-color: var(--kw-color, var(--color-brand-orange));
   -webkit-mask-image: url('/assets/icons/loewen-swoosh.webp');
   mask-image: url('/assets/icons/loewen-swoosh.webp');
   -webkit-mask-size: 100% 100%;
@@ -1116,6 +1119,47 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   background-size: cover; background-position: center;
   min-height: 480px; display: flex; align-items: center;
 }
+
+/* ===== Hero-Kontrast ab 600px (Barrierefreiheit, 29.07.2026) =====
+   Gemessen auf /verein/ueber-uns.html bei 1600px: das orange Wort der
+   Überschrift lag zwischen 41,8 % und 60 % der Bildbreite, der Verlauf oben
+   ist dort aber schon auf 0 % Deckkraft. Ergebnis war an 9 von 11 Messpunkten
+   ein Kontrast unter 3:1, im Extrem 1,01:1 — praktisch unlesbar. Gefordert
+   sind 3:1 für große Schrift (WCAG 2.1 AA / BFSG, das für uns über den
+   Ticketverkauf als Dienstleistung im elektronischen Geschäftsverkehr greift).
+
+   Zwei Stellschrauben, beide nötig: Der Verlauf allein reicht NICHT — mit dem
+   Marken-Orange #E5710B kommt selbst eine sehr kräftige Abdunklung nur auf
+   2,84:1 (über vier Motive gemessen). Deshalb zusätzlich die hellere Stufe
+   orange-300 für das hervorgehobene Wort im Hero; damit liegt der kleinste
+   Kontrast über alle geprüften Motive bei 3,38:1.
+
+   Bewusst NUR ab 600px: unterhalb liegt zusätzlich --hero-overlay-mobile über
+   dem Bild, dort wurden 3,91–5,90:1 gemessen — Mobil ist also ohne Eingriff
+   konform und würde durch mehr Abdunklung nur unnötig zumatschen.
+
+   Zum Zurückrollen genügt es, diesen Block bis zum Ende der zweiten
+   Media-Query zu entfernen. */
+@media (min-width: 600px) {
+  .hero-photo {
+    --hero-overlay: linear-gradient(90deg, rgba(0,18,45,.94) 0%, rgba(0,18,45,.80) 45%, rgba(0,18,45,.60) 70%, rgba(0,18,45,.38) 88%, rgba(0,18,45,.22) 100%);
+    --kw-color: var(--color-orange-300);
+  }
+}
+/* Lücke im Tablet-Bereich: Zwischen 600px und 1023px bricht die Überschrift
+   noch fast über die ganze Breite um wie auf dem Handy, der Verlauf von oben
+   (--hero-overlay-mobile) endet aber schon bei 599px. Genau dort fielen vier
+   Seiten mit 2,53–2,73:1 durch, während 1024px alle bestanden. Deshalb greift
+   der ohnehin vorhandene Verlauf von oben hier mit — dieselbe Mechanik wie
+   unter 600px, nur über einen Bereich mehr. */
+@media (min-width: 600px) and (max-width: 1023px) {
+  .hero-photo {
+    background-image: var(--hero-overlay-mobile), var(--hero-overlay), var(--hero-photo-url, url('/assets/img/hero-basketball.webp'));
+    background-size: cover, cover, cover;
+  }
+  .hero-media::after { background: var(--hero-overlay-mobile), var(--hero-overlay); }
+}
+
 /* Bei sehr breiten Viewports zoomt background-size:cover stärker rein
    (Höhe bleibt fix, Breite wächst) — dadurch verschwinden Himmel/Kopfbereich
    aus dem sichtbaren Ausschnitt. Größere Mindesthöhe hält auf breiten
