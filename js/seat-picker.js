@@ -143,18 +143,19 @@
   };
 
   /* Rechnet die Rabattkette transparent vor, statt nur den fertigen Endpreis zu
-     zeigen ("Normalpreis 1.000 € je Ticket, abzüglich 20 % Frühbucherrabatt,
-     abzüglich 30 % Mitgliedsrabatt (Löwen e.V.)") — der Endpreis selbst steht separat
-     rechts in der Zeile (s. _renderCart), nicht mehr hier verdoppelt. */
+     zeigen — jede Rabattzeile ("abzüglich 20 % Frühbucherrabatt", "abzüglich
+     30 % Mitgliedsrabatt (Löwen e.V.)") bekommt eine eigene, fett gedruckte
+     Zeile statt kommagetrennt in einem Satz zu verschwinden. Der Endpreis
+     selbst steht separat rechts in der Zeile (s. _renderCart), nicht hier. */
   SeatPicker.prototype._dkBreakdownText = function (priceInfo, tarif) {
     var isErmaessigt = tarif.indexOf('ermaessigt') === 0;
     var base = isErmaessigt ? priceInfo.ermaessigt : priceInfo.normal;
-    var parts = [(isErmaessigt ? 'Ermäßigt' : 'Normalpreis') + ' ' + fmtEUR(base) + ' € je Ticket'];
+    var lines = [(isErmaessigt ? 'Ermäßigt' : 'Normalpreis') + ' ' + fmtEUR(base) + ' € je Ticket'];
     if (this.dkDiscount) {
-      if (this._earlyBirdActive()) parts.push('abzüglich ' + this.dkDiscount.earlyBirdPercent + ' % Frühbucherrabatt');
-      if (tarif.indexOf('_member') !== -1) parts.push('abzüglich ' + this.dkDiscount.memberPercent + ' % Mitgliedsrabatt (Löwen e.V.)');
+      if (this._earlyBirdActive()) lines.push('<strong>abzüglich ' + this.dkDiscount.earlyBirdPercent + ' % Frühbucherrabatt</strong>');
+      if (tarif.indexOf('_member') !== -1) lines.push('<strong>abzüglich ' + this.dkDiscount.memberPercent + ' % Mitgliedsrabatt (Löwen e.V.)</strong>');
     }
-    return parts.join(', ');
+    return lines.join('<br>');
   };
 
   /* Zwei unabhängige Quellen, bewusst NICHT mehr per Promise.all gekoppelt: der
