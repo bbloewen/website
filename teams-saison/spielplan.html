@@ -7,7 +7,7 @@
 <meta name="description" content="Alle Spieltermine der Profis, Damen und U19 sowie Spielberichte der Basketball Löwen Erfurt im Überblick." />
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1786300000" />
+<link rel="stylesheet" href="/css/site.css?v=1786320000" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 </head>
@@ -20,6 +20,15 @@
     <span class="eyebrow">Saison 2026/2027</span>
     <h1>Der <span class="kw">Spielplan<span class="swoosh" aria-hidden="true"></span></span>.</h1>
     <p class="lead">Alle Termine der Profis, Damen und NBBL auf einen Blick — dazu Rückblicke nach jedem Spieltag.</p>
+    <div class="spielplan-countdown-hero" id="spielplan-countdown" hidden>
+      <span class="t-caption" style="display:block;color:rgba(255,255,255,.75);margin-bottom:8px">Nächstes Heimspiel der Profis in</span>
+      <div class="countdown-grid">
+        <div class="countdown-unit"><strong id="cd-days">00</strong><span>Tage</span></div>
+        <div class="countdown-unit"><strong id="cd-hours">00</strong><span>Std</span></div>
+        <div class="countdown-unit"><strong id="cd-mins">00</strong><span>Min</span></div>
+        <div class="countdown-unit"><strong id="cd-secs">00</strong><span>Sek</span></div>
+      </div>
+    </div>
     <a class="btn btn-primary mt-4" style="color:#fff" href="/tickets/dauerkarte.html"><i data-lucide="ticket" class="icon-16"></i> Dauerkarte kaufen</a>
     </div>
   </section>
@@ -31,6 +40,7 @@
         <button type="button" class="filter-chip" data-filter="profis">Herren Pro B</button>
         <button type="button" class="filter-chip" data-filter="damen">Damen RSLO</button>
         <button type="button" class="filter-chip" data-filter="nbbl">Herren U19 NBBL</button>
+        <label class="filter-heim-toggle"><input type="checkbox" id="spielplan-heim-only" /> Nur Heimspiele</label>
       </div>
 
       <div id="spielplan-tage"></div>
@@ -68,12 +78,39 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="/js/nav.js?v=1785398309"></script>
 <script src="/js/include.js?v=1785398309"></script>
-<script src="/js/spielplan.js?v=1785470000"></script>
+<script src="/js/spielplan.js?v=1786320000"></script>
 <script>
   function pad2(n) { return String(n).padStart(2, '0'); }
   function formatShort(d) { return pad2(d.getDate()) + '.' + pad2(d.getMonth() + 1) + '.' + d.getFullYear(); }
 
+  /* Countdown zielt bewusst nur aufs nächste Heimspiel der Profis (nicht Damen/
+     NBBL/Auswärtsspiele) — die Seite hat sonst kein sinnvolles "das nächste
+     Spiel" ohne Team-Kontext, und die Profis sind der Haupt-Ticketanlass. */
   window.addEventListener('spielplan:ready', function () {
+    var nextHeimspiel = (window.__spielplanProfisGames || []).filter(function (g) {
+      return g.heim && g.date >= window.__spielplanToday;
+    })[0];
+    var countdownBox = document.getElementById('spielplan-countdown');
+    if (nextHeimspiel && countdownBox) {
+      var timeParts = (nextHeimspiel.zeit || '00:00').split(':').map(Number);
+      var target = new Date(nextHeimspiel.date.getFullYear(), nextHeimspiel.date.getMonth(), nextHeimspiel.date.getDate(), timeParts[0], timeParts[1]).getTime();
+      var daysEl = document.getElementById('cd-days');
+      var hoursEl = document.getElementById('cd-hours');
+      var minsEl = document.getElementById('cd-mins');
+      var secsEl = document.getElementById('cd-secs');
+      function pad(n) { return String(n).padStart(2, '0'); }
+      function tick() {
+        var diff = Math.max(0, target - Date.now());
+        daysEl.textContent = pad(Math.floor(diff / 86400000));
+        hoursEl.textContent = pad(Math.floor((diff % 86400000) / 3600000));
+        minsEl.textContent = pad(Math.floor((diff % 3600000) / 60000));
+        secsEl.textContent = pad(Math.floor((diff % 60000) / 1000));
+      }
+      tick();
+      setInterval(tick, 1000);
+      countdownBox.hidden = false;
+    }
+
     var upcoming = (window.__spielplanProfisGames || []).filter(function (g) { return g.date >= window.__spielplanToday; }).slice(0, 5);
     var track = document.getElementById('spielberichte-track');
     if (!track) return;

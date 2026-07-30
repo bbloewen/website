@@ -6,7 +6,7 @@
    (NBBL-Gegner teils noch "Noch offen", s. Hinweis dort). */
 (function () {
   var MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
-  var WOCHENTAGE = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+  var WOCHENTAGE_LANG = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
   var TEAM_META = {
     profis: { label: 'Pro B', badgeClass: 'team-badge-profis', url: '/teams-saison/profis.html', tableUrl: '/teams-saison/tabelle.html#tabelle-profis' },
     damen: { label: 'RSLO', badgeClass: 'team-badge-damen', url: '/teams-saison/damen.html', tableUrl: '/teams-saison/tabelle.html#tabelle-damen' },
@@ -43,21 +43,35 @@
     var isPast = g.date < window.__spielplanToday;
     var meta = TEAM_META[g.team];
     var matchup = g.heim ? (g.teamLabel + ' – ' + g.gegner) : (g.gegner + ' – ' + g.teamLabel);
-    var venueHTML = g.heim
-      ? '<span class="venue-heim">Heimspiel</span> · <a href="' + RIETHSPORTHALLE_MAPS_URL + '" target="_blank" rel="noopener"><i data-lucide="map-pin" style="width:14px;height:14px"></i> Riethsporthalle</a>'
-      : 'Auswärts';
+    var dateTimeStr = WOCHENTAGE_LANG[g.date.getDay()] + ', ' + formatShort(g.date) + (g.zeit ? ', ' + g.zeit + ' Uhr' : '');
+    var venueHTML, statusHTML;
+    if (g.heim) {
+      venueHTML = '<div class="fixture-venue-line"><a href="' + RIETHSPORTHALLE_MAPS_URL + '" target="_blank" rel="noopener"><i data-lucide="map-pin" style="width:14px;height:14px"></i> Riethsporthalle</a></div>';
+      statusHTML = '<span class="venue-heim">Heimspiel</span>';
+    } else if (g.ort) {
+      /* g.ort ist ein best-effort abgeleiteter Ort fürs Auswärtsspiel (kein
+         exakter Hallenname), s. Hinweis in data/spielplan-saison.json — dient
+         nur als grober Orientierungslink, wie weit das Spiel von Erfurt entfernt ist. */
+      venueHTML = '<div class="fixture-venue-line"><a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(g.ort) + '" target="_blank" rel="noopener"><i data-lucide="map-pin" style="width:14px;height:14px"></i> ' + g.ort + '</a></div>';
+      statusHTML = '<span class="venue-auswaerts">Auswärts</span>';
+    } else {
+      venueHTML = '';
+      statusHTML = '<span class="venue-auswaerts">Auswärts</span>';
+    }
     var actionsHTML = '<div class="fixture-day-actions">' +
       '<div class="fixture-result-row">' +
         '<div class="fixture-result">' + (g.ergebnis || '– – : – –') + '</div>' +
         (g.spielberichtUrl ? '<a class="cal-link" href="' + g.spielberichtUrl + '" title="Zum Spielbericht"><i data-lucide="file-text" style="width:16px;height:16px"></i></a>' : '') +
         '<a class="cal-link" href="' + meta.tableUrl + '" title="Zur Tabelle"><i data-lucide="list-ordered" style="width:16px;height:16px"></i></a>' +
+        '<a class="cal-link" href="' + calendarLink(g) + '" target="_blank" rel="noopener" title="Ins Kalender eintragen"><i data-lucide="calendar-plus" style="width:16px;height:16px"></i></a>' +
       '</div>' +
       (g.ticketUrl && !isPast ? '<a class="btn btn-outline-orange btn-sm" href="' + g.ticketUrl + '">Tickets <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>' : '') +
       '</div>';
-    return '<div class="fixture-day-game' + (divider ? ' has-divider' : '') + '" data-team="' + g.team + '">' +
+    return '<div class="fixture-day-game' + (divider ? ' has-divider' : '') + '" data-team="' + g.team + '" data-heim="' + (g.heim ? '1' : '0') + '">' +
       '<div class="fixture-day-meta">' +
-        '<div class="fixture-time"><a class="cal-link" href="' + calendarLink(g) + '" target="_blank" rel="noopener" title="Ins Kalender eintragen"><i data-lucide="calendar-plus" style="width:16px;height:16px"></i></a> ' + (g.zeit || '–') + ' Uhr</div>' +
-        '<div class="fixture-venue-line">' + venueHTML + '</div>' +
+        '<div class="fixture-time">' + dateTimeStr + '</div>' +
+        venueHTML +
+        statusHTML +
       '</div>' +
       '<div class="fixture-mid">' +
         '<a class="team-badge ' + meta.badgeClass + '" href="' + meta.url + '">' + meta.label + '</a>' +
@@ -69,22 +83,8 @@
 
   function dayBoxHTML(day) {
     var teams = day.games.map(function (g) { return g.team; });
-    var byDate = {};
-    var dateOrder = [];
-    day.games.forEach(function (g) {
-      var k = dateKey(g.date);
-      if (!byDate[k]) { byDate[k] = { date: g.date, games: [] }; dateOrder.push(k); }
-      byDate[k].games.push(g);
-    });
-    var groupsHTML = dateOrder.map(function (k, gi) {
-      var grp = byDate[k];
-      var dateStr = WOCHENTAGE[grp.date.getDay()] + ', ' + formatShort(grp.date);
-      return '<div class="fixture-day-group' + (gi > 0 ? ' has-divider' : '') + '">' +
-        '<div class="fixture-day-date">' + dateStr + '</div>' +
-        grp.games.map(function (g, i) { return gameRowHTML(g, i > 0); }).join('') +
-        '</div>';
-    }).join('');
-    return '<div class="card fixture-day" data-teams="' + teams.join(' ') + '">' + groupsHTML + '</div>';
+    var rowsHTML = day.games.map(function (g, i) { return gameRowHTML(g, i > 0); }).join('');
+    return '<div class="card fixture-day" data-teams="' + teams.join(' ') + '">' + rowsHTML + '</div>';
   }
 
   function weekendKey(d) {
@@ -111,33 +111,40 @@
     });
   }
 
+  var currentTeamFilter = 'alle';
+  var onlyHeim = false;
+
   function applyFilter(filter) {
+    if (typeof filter === 'string') currentTeamFilter = filter;
     var boxes = document.querySelectorAll('#spielplan-tage .fixture-day');
     boxes.forEach(function (box) {
-      var matches = filter === 'alle' || (box.getAttribute('data-teams') || '').indexOf(filter) !== -1;
-      box.style.display = matches ? '' : 'none';
-      if (matches) {
-        var seenVisibleGroup = false;
-        box.querySelectorAll('.fixture-day-group').forEach(function (group) {
-          var seenVisible = false;
-          group.querySelectorAll('.fixture-day-game').forEach(function (row) {
-            var rowMatches = filter === 'alle' || row.getAttribute('data-team') === filter;
-            row.style.display = rowMatches ? '' : 'none';
-            if (rowMatches) {
-              row.classList.toggle('has-divider', seenVisible);
-              seenVisible = true;
-            }
-          });
-          group.style.display = seenVisible ? '' : 'none';
-          if (seenVisible) {
-            group.classList.toggle('has-divider', seenVisibleGroup);
-            seenVisibleGroup = true;
+      var teamOk = currentTeamFilter === 'alle' || (box.getAttribute('data-teams') || '').indexOf(currentTeamFilter) !== -1;
+      var seenVisible = false;
+      if (teamOk) {
+        box.querySelectorAll('.fixture-day-game').forEach(function (row) {
+          var rowTeamOk = currentTeamFilter === 'alle' || row.getAttribute('data-team') === currentTeamFilter;
+          var rowHeimOk = !onlyHeim || row.getAttribute('data-heim') === '1';
+          var rowMatches = rowTeamOk && rowHeimOk;
+          row.style.display = rowMatches ? '' : 'none';
+          if (rowMatches) {
+            row.classList.toggle('has-divider', seenVisible);
+            seenVisible = true;
           }
         });
       }
+      box.style.display = (teamOk && seenVisible) ? '' : 'none';
     });
     document.querySelectorAll('#spielplan-cal-row [data-team]').forEach(function (btn) {
-      btn.style.display = (filter === 'alle' || btn.getAttribute('data-team') === filter) ? '' : 'none';
+      btn.style.display = (currentTeamFilter === 'alle' || btn.getAttribute('data-team') === currentTeamFilter) ? '' : 'none';
+    });
+  }
+
+  function initHeimToggle() {
+    var checkbox = document.getElementById('spielplan-heim-only');
+    if (!checkbox) return;
+    checkbox.addEventListener('change', function () {
+      onlyHeim = checkbox.checked;
+      applyFilter();
     });
   }
 
@@ -166,7 +173,7 @@
 
   Promise.all([
     fetch('/data/heimspiele.json?v=1785398309').then(function (r) { return r.json(); }),
-    fetch('/data/spielplan-saison.json?v=1785398309').then(function (r) { return r.json(); })
+    fetch('/data/spielplan-saison.json?v=1786320000').then(function (r) { return r.json(); })
   ]).then(function (results) {
     var heim = results[0], saison = results[1];
 
@@ -193,6 +200,7 @@
 
     renderDayList(groupByDay(alleGames));
     initFilterChips();
+    initHeimToggle();
 
     /* Team-Seiten (Profis/Damen/U19) verlinken mit ?team=... hierher — Filter
        direkt entsprechend vorauswählen statt "Alle" zu zeigen. */
