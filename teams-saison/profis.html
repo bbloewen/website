@@ -18,13 +18,23 @@
   <section class="hero-photo hero-profis">
     <div class="container">
     <div class="hero-eyebrow-row">
-      <span class="eyebrow">Teams & Saison</span>
+      <span class="eyebrow">Saison 2026/2027</span>
       <a class="hero-league-badge" href="https://www.2basketballbundesliga.de/prob/" target="_blank" rel="noopener" title="Zur offiziellen Seite der Pro B">
         <img loading="lazy" src="/assets/logos-liga/barmer-liga.webp" alt="BARMER 2. Basketball Bundesliga Pro B"  />
       </a>
     </div>
-    <h1>Die <span class="kw">Profis<span class="swoosh" aria-hidden="true"></span></span> · Saison 2026/2027.</h1>
+    <h1>Die <span class="kw">Profis<span class="swoosh" aria-hidden="true"></span></span>.</h1>
     <p class="lead">Die Basketball Löwen Erfurt — unsere Profimannschaft tritt in der BARMER 2. Basketball Bundesliga Pro B an.</p>
+    <div class="spielplan-countdown-hero" id="profis-countdown" hidden>
+      <span class="t-caption" style="display:block;color:rgba(255,255,255,.75);margin-bottom:8px">Nächstes Heimspiel in</span>
+      <div class="countdown-grid">
+        <div class="countdown-unit"><strong id="cd-days">00</strong><span>Tage</span></div>
+        <div class="countdown-unit"><strong id="cd-hours">00</strong><span>Std</span></div>
+        <div class="countdown-unit"><strong id="cd-mins">00</strong><span>Min</span></div>
+        <div class="countdown-unit"><strong id="cd-secs">00</strong><span>Sek</span></div>
+      </div>
+    </div>
+    <a class="btn btn-primary mt-4" style="color:#fff" href="/tickets/dauerkarte.html"><i data-lucide="ticket" class="icon-16"></i> Dauerkarte kaufen</a>
     </div>
   </section>
 
@@ -366,6 +376,42 @@
     });
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') { modal.classList.remove('open'); }
+    });
+  })();
+
+  /* Countdown bis zum nächsten Heimspiel — heimspiele.json enthält ausschließlich
+     die echten Heimspieltermine der Profis, daher reicht diese eine Quelle. */
+  (function () {
+    function parseDMY(str) {
+      var p = str.split('.').map(Number);
+      return new Date(p[2], p[1] - 1, p[0]);
+    }
+    fetch('/data/heimspiele.json?v=1786321500').then(function (r) { return r.json(); }).then(function (d) {
+      var today = new Date();
+      today.setHours(0, 0, 0, 0);
+      var next = (d.spiele || [])
+        .map(function (s) { return { s: s, date: parseDMY(s.datum) }; })
+        .filter(function (g) { return g.date >= today; })
+        .sort(function (a, b) { return a.date - b.date; })[0];
+      var box = document.getElementById('profis-countdown');
+      if (!next || !box) return;
+      var timeParts = (next.s.zeit || '00:00').split(':').map(Number);
+      var target = new Date(next.date.getFullYear(), next.date.getMonth(), next.date.getDate(), timeParts[0], timeParts[1]).getTime();
+      var daysEl = document.getElementById('cd-days');
+      var hoursEl = document.getElementById('cd-hours');
+      var minsEl = document.getElementById('cd-mins');
+      var secsEl = document.getElementById('cd-secs');
+      function pad(n) { return String(n).padStart(2, '0'); }
+      function tick() {
+        var diff = Math.max(0, target - Date.now());
+        daysEl.textContent = pad(Math.floor(diff / 86400000));
+        hoursEl.textContent = pad(Math.floor((diff % 86400000) / 3600000));
+        minsEl.textContent = pad(Math.floor((diff % 3600000) / 60000));
+        secsEl.textContent = pad(Math.floor((diff % 60000) / 1000));
+      }
+      tick();
+      setInterval(tick, 1000);
+      box.hidden = false;
     });
   })();
 </script>
