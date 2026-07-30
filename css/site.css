@@ -595,109 +595,73 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .impact-stat span { display: block; margin-top: 4px; font-size: 13px; color: var(--text-secondary); }
 .impact-stat .impact-stat-note { margin-top: 2px; font-size: 11px; color: var(--text-muted); }
 
-/* LÖWENPARK-History: vertikale Zeitleiste von unten (1971) nach oben
-   (Eröffnung) — das HTML bleibt chronologisch, column-reverse dreht die
-   Anzeige. Mittellinie mit Pfeilspitze oben als Symbol für "aufwärts";
-   die Etappen wechseln sich links (history-content-top) und rechts
-   (history-content-bottom) der Linie ab. Mobil rückt die Linie an den
-   linken Rand und alle Etappen stehen rechts davon. */
-.history-timeline { position: relative; display: flex; flex-direction: column; gap: 26px; margin-top: 40px; padding: 26px 0 8px; }
-.history-timeline::before {
-  content: ''; position: absolute; top: 0; bottom: 0; left: 50%; width: 4px;
-  transform: translateX(-50%); background: rgba(255,255,255,.35);
+/* Vereinsgeschichte / LÖWENPARK-Baugeschichte: horizontale Zeitleiste,
+   chronologisch aufsteigend im DOM (ältester Eintrag links, neuester rechts).
+   Der Scroll-Container startet per JS (history-timeline.js) ganz rechts
+   (= neuester Eintrag sichtbar), man scrollt nach links für ältere Historie.
+   Eine Linie verbindet die Punkte; sie liegt als ::before auf dem Track
+   (nicht auf .history-h-outer), damit sie mit den Karten mitscrollt. */
+.history-h-outer { position: relative; }
+.history-h-scroll { overflow-x: auto; scrollbar-width: none; }
+.history-h-scroll::-webkit-scrollbar { display: none; }
+.history-h-track { position: relative; display: inline-flex; gap: 36px; padding: 34px 8px 8px; }
+.history-h-track::before {
+  content: ''; position: absolute; left: 0; right: 0; top: 40px; height: 3px;
+  background: var(--border-strong);
 }
-.history-timeline::after {
-  content: ''; position: absolute; top: -14px; left: 50%; margin-left: -8px;
-  border-left: 8px solid transparent; border-right: 8px solid transparent;
-  border-bottom: 14px solid rgba(255,255,255,.9);
-}
-.history-item { position: relative; min-height: 14px; flex-shrink: 0; }
-.history-item::before {
-  content: ''; position: absolute; top: 4px; left: 50%; transform: translateX(-50%);
+.history-h-item { flex: 0 0 220px; position: relative; padding-top: 30px; }
+.history-h-item::before {
+  content: ''; position: absolute; top: 34px; left: 0; transform: translateY(-50%);
   width: 12px; height: 12px; border-radius: 50%; background: var(--color-brand-orange);
-  border: 3px solid #fff; z-index: 2;
+  border: 3px solid var(--bg-subtle); z-index: 2;
 }
-.history-content { max-width: 380px; }
-.history-content-top { margin-left: auto; margin-right: calc(50% + 30px); text-align: right; }
-.history-content-bottom { margin-right: auto; margin-left: calc(50% + 30px); text-align: left; }
-.history-item h3 { font-family: var(--font-base); font-weight: var(--weight-extrabold); font-size: 15px; color: #fff; margin: 4px 0 6px; }
-.history-item p { font-size: 12.5px; line-height: 1.5; color: rgba(255,255,255,.78); margin: 0; }
-@media (max-width: 719px) {
-  .history-timeline::before { left: 6px; transform: none; }
-  .history-timeline::after { left: 6px; margin-left: -6.5px; }
-  .history-item::before { left: 6px; transform: none; margin-left: -6px; }
-  .history-content,
-  .history-content-top,
-  .history-content-bottom { width: auto; margin: 0 0 0 32px; text-align: left; }
-}
-
-/* Helle Variante von .history-timeline (LÖWENPARK-Geschichte auf bg-subtle,
-   wie das Geschichte-Grau bei Über uns) — die Basisfarben oben sind für den
-   dunklen Verlauf gebaut, hier nur die Text-/Linienfarben überschrieben. */
-.history-timeline-light .history-item h3 { color: var(--text-primary); }
-.history-timeline-light .history-item p { color: var(--text-secondary); }
-.history-timeline-light::before { background: var(--border-strong); }
-.history-timeline-light::after { border-bottom-color: var(--color-brand-orange); }
-
-/* LÖWENPARK-Historie: nur ~3 Punkte gleichzeitig sichtbar, Rest scrollbar
-   (neueste zuerst bleibt erhalten). Der Scroll-Wrapper liegt bewusst AUSSEN um
-   .history-timeline (statt overflow direkt auf .history-timeline zu setzen):
-   sonst wird die Linie (top:0;bottom:0) auf die sichtbare 360px-Box statt auf
-   die volle Inhaltshöhe begrenzt (Linie hört mittendrin auf), der eigene
-   padding-right verschiebt die Punkte (die die Content-Box als Breite nutzen)
-   gegenüber der Linie (die die volle Padding-Box nutzt), und der Pfeil oben
-   (top:-14px) wird vom eigenen overflow weggeschnitten. */
-.history-timeline-outer { position: relative; }
-.history-timeline-scroll { max-height: 360px; overflow-y: auto; padding-top: 18px; padding-right: 14px; }
-.history-timeline-scroll-fade {
-  position: absolute; left: 0; right: 14px; bottom: 0; height: 48px;
-  background: linear-gradient(to bottom, rgba(246,247,249,0), var(--bg-subtle));
+.history-h-item h3 { font-family: var(--font-base); font-weight: var(--weight-extrabold); font-size: 15px; color: var(--text-primary); margin: 4px 0 6px; }
+.history-h-item p { font-size: 12.5px; line-height: 1.5; color: var(--text-secondary); margin: 0; }
+/* Fade + Pfeil links: signalisieren "hier geht die Historie weiter zurück".
+   Beide blenden aus, sobald scrollLeft 0 erreicht (history-timeline.js). */
+.history-h-fade-left {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 56px;
+  background: linear-gradient(to right, var(--bg-subtle), rgba(246,247,249,0));
   pointer-events: none; transition: opacity .2s;
 }
-/* Scroll-Pfeil: v.a. für iPad/Touch gedacht, wo der Scrollbalken im
-   verschachtelten .history-timeline-scroll kaum sichtbar/greifbar ist und
-   Nutzer:innen sonst nicht merken, dass unten noch mehr Historie folgt.
-   Klick scrollt ein Stück runter; sobald das Ende erreicht ist, blendet
-   history-timeline.js Pfeil und Fade gemeinsam aus. */
-.history-timeline-scroll-arrow {
-  position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%);
-  width: 34px; height: 34px; border-radius: 50%; border: none; z-index: 1;
+.history-h-arrow {
+  position: absolute; left: 8px; top: 40px; transform: translateY(-50%);
+  width: 34px; height: 34px; border-radius: 50%; border: none; z-index: 3;
   background: var(--color-brand-orange); color: #fff; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 2px 8px rgba(0,0,0,.18); transition: opacity .2s;
   animation: history-scroll-arrow-bounce 1.6s ease-in-out infinite;
 }
-.history-timeline-scroll-arrow:hover { background: var(--color-brand-orange-dark, var(--color-brand-orange)); }
+.history-h-arrow:hover { background: var(--color-brand-orange-dark, var(--color-brand-orange)); }
 @keyframes history-scroll-arrow-bounce {
-  0%, 100% { transform: translateX(-50%) translateY(0); }
-  50% { transform: translateX(-50%) translateY(4px); }
+  0%, 100% { transform: translateY(-50%) translateX(0); }
+  50% { transform: translateY(-50%) translateX(-4px); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .history-timeline-scroll-arrow { animation: none; }
-}
-
-/* Über-uns-Geschichte: horizontale Variante auf hellem bg-subtle-Grund
-   (eigene Klassen statt .history-timeline, da diese für dunklen Hintergrund
-   mit weißer Schrift gebaut ist und auch auf der Löwenpark-Seite läuft). */
-.history-row { display: flex; gap: 22px; }
-.history-h-item { flex: 1 1 0; position: relative; padding-top: 22px; }
-.history-h-item::before {
-  content: ''; position: absolute; top: 0; left: 0; width: 32px; height: 3px;
-  background: var(--color-brand-orange); border-radius: var(--radius-full);
-}
-.history-h-item .card-label { color: var(--color-brand-orange); }
-/* min-height reserviert Platz für 2 Zeilen, damit der Absatztext bei jeder
-   Kachel auf gleicher Höhe beginnt, egal ob der Titel 1 oder 2 Zeilen braucht
-   — sonst wirkt die Reihe unruhig. text-wrap:balance verteilt zweizeilige
-   Titel gleichmäßiger statt mit einem kurzen Rest-Wort in Zeile 2. */
-.history-h-item h3 { font-family: var(--font-base); font-weight: var(--weight-extrabold); font-size: 15px; margin: 6px 0 6px; min-height: 2.6em; text-wrap: balance; }
-.history-h-item p { font-size: 13px; line-height: 1.5; color: var(--text-secondary); margin: 0; }
-@media (max-width: 899px) {
-  .history-row { flex-wrap: wrap; }
-  .history-h-item { flex: 1 1 45%; }
+  .history-h-arrow { animation: none; }
 }
 @media (max-width: 599px) {
-  .history-h-item { flex: 1 1 100%; }
+  .history-h-item { flex-basis: 180px; }
+  .history-h-track { gap: 24px; }
+}
+
+/* Saisonplatzierungen: eigener, schlankerer horizontaler Streifen unter der
+   Vereinsgeschichte-Timeline (nur auf Über-uns) — bewusst ohne Linie/Punkte,
+   damit er sich von der Erzähl-Timeline abhebt. Startet ebenfalls rechts
+   (neueste Saison), aber ohne eigenen Pfeil (reine Kachelreihe, weniger
+   Bedienelemente nötig als bei der langen Vereinsgeschichte). */
+.season-strip-outer { position: relative; margin-top: 36px; }
+.season-strip-scroll { overflow-x: auto; scrollbar-width: none; }
+.season-strip-scroll::-webkit-scrollbar { display: none; }
+.season-strip-track { display: inline-flex; gap: 14px; }
+.season-card { flex: 0 0 128px; background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 12px; text-align: center; }
+.season-card .season-label { display: block; font-size: 11px; color: var(--text-muted); font-weight: var(--weight-semibold); }
+.season-card .season-place { display: block; font-family: var(--font-base); font-weight: var(--weight-extrabold); font-size: 28px; color: var(--color-brand-orange); line-height: 1.2; margin: 4px 0; }
+.season-card .season-note { display: block; font-size: 11px; line-height: 1.35; color: var(--text-secondary); }
+.season-strip-fade-left {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 56px;
+  background: linear-gradient(to right, var(--bg-subtle), rgba(246,247,249,0));
+  pointer-events: none;
 }
 
 /* Partner-Flipcards (Löwen-Unterstützer-Seite): Mouseover dreht die Karte um die
