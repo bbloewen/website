@@ -1274,7 +1274,12 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
    wird daher aus dem Fluss genommen und frei oben rechts positioniert). */
 .hero-eyebrow-row { position: relative; }
 .hero-eyebrow-row > .hero-league-badge, .hero-eyebrow-row > .hero-badge-stack { position: absolute; top: 0; right: 0; }
-.hero-badge-stack { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+.hero-badge-stack { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+/* Zwei gestapelte Badges (z. B. NBBL-Liga-Logo + Nachwuchsstandort-Plakette auf
+   der U19-Seite) müssen kleiner sein als ein einzelnes Badge, sonst passen sie
+   nicht mehr in die seit 30.07.2026 einheitlich kompakte Hero-Höhe. */
+.hero-badge-stack .hero-league-badge img { width: 52px; }
+.hero-badge-stack .hero-badge-plain img { width: 70px; }
 .hero-league-badge {
   display: inline-flex; flex-shrink: 0; border: none; cursor: pointer; font: inherit;
   background: rgba(255,255,255,.92); padding: 6px 14px; border-radius: var(--radius-md);
@@ -1423,7 +1428,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 /* Hero-Variante für die Fanclub-Seite — Gruppenfoto mit "Ich bin ein Löwe"-
    T-Shirts vor dem Petersberg, Motiv über die ganze Breite verteilt.
    Höhe kommt jetzt vom vereinheitlichten .hero-photo-Basiswert. */
-.hero-photo.hero-fanclub { --hero-photo-url: url('/assets/img/hero-fanclub.webp'); background-position: center 10%; }
+.hero-photo.hero-fanclub { --hero-photo-url: url('/assets/img/hero-fanclub.webp'); background-position: center 55%; }
 /* Auf schmalen Screens bricht die Überschrift auf volle Breite um (statt der
    linken Spalte bei breiten Screens) — Bildausschnitt daher etwas tiefer,
    der Verlauf selbst kommt bereits einheitlich vom .hero-photo-Basiswert. */
