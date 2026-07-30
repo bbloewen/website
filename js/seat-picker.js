@@ -435,7 +435,12 @@
     var confirmBtn = document.createElement('button');
     confirmBtn.type = 'button';
     confirmBtn.className = 'btn btn-primary btn-sm seatplan-mobile-detail-confirm';
-    confirmBtn.textContent = 'Übernehmen';
+    /* "Fertig", nicht "Übernehmen": der Button schließt die Detailansicht, er legt
+       nichts in den Warenkorb — das passiert beim Antippen des Sitzes. Der alte
+       Name versprach einen Schritt, den es nicht gibt, und ließ Nutzer rätseln,
+       ob ihre Auswahl gezählt wird. Der gleichnamige Button im Blockmodus
+       (Einzelticket) übernimmt dagegen wirklich etwas und heißt weiter so. */
+    confirmBtn.textContent = 'Fertig';
     wrap.appendChild(confirmBtn);
     // Öffnet groß in einem separaten Overlay statt im kompakten Inline-Bereich, sofern
     // die Seite eines mitgegeben hat (Dauerkarte) — sonst Fallback: inline wie zuvor.
@@ -969,7 +974,13 @@
       };
       btn.classList.add('selected');
     }
-    this._renderCart();
+    /* Solange die Sitzdetailansicht offen ist, den Warenkorb NICHT bei jedem Tipp
+       neu bauen: dahinter wuchs er sonst mit jedem gewählten Platz und schob die
+       Seite — für den Nutzer sah es aus, als „springe das Bild im Hintergrund"
+       (Feedback 30.07.2026). Der Warenkorb wird beim Schließen der Ansicht
+       aufgebaut, das erledigt _renderMobileOverview. Der markierte Sitz bleibt
+       als Rückmeldung sofort sichtbar. */
+    if (!this.mobileZoneId) this._renderCart();
   };
 
   /* Nachwuchsbeitrag ist eine Pauschale pro Bestellung (nicht pro Platz/Ticket),
