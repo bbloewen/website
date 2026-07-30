@@ -6,7 +6,7 @@
    (NBBL-Gegner teils noch "Noch offen", s. Hinweis dort). */
 (function () {
   var MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
-  var WOCHENTAGE_LANG = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+  var WOCHENTAGE = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
   var TEAM_META = {
     profis: { label: 'Pro B', badgeClass: 'team-badge-profis', url: '/teams-saison/profis.html', tableUrl: '/teams-saison/tabelle.html#tabelle-profis' },
     damen: { label: 'RSLO', badgeClass: 'team-badge-damen', url: '/teams-saison/damen.html', tableUrl: '/teams-saison/tabelle.html#tabelle-damen' },
@@ -43,7 +43,7 @@
     var isPast = g.date < window.__spielplanToday;
     var meta = TEAM_META[g.team];
     var matchup = g.heim ? (g.teamLabel + ' – ' + g.gegner) : (g.gegner + ' – ' + g.teamLabel);
-    var dateTimeStr = WOCHENTAGE_LANG[g.date.getDay()] + ', ' + formatShort(g.date) + (g.zeit ? ', ' + g.zeit + ' Uhr' : '');
+    var dateTimeStr = WOCHENTAGE[g.date.getDay()] + ', ' + formatShort(g.date) + (g.zeit ? ', ' + g.zeit + ' Uhr' : '');
     var venueHTML, statusHTML;
     if (g.heim) {
       venueHTML = '<div class="fixture-venue-line"><a href="' + RIETHSPORTHALLE_MAPS_URL + '" target="_blank" rel="noopener"><i data-lucide="map-pin" style="width:14px;height:14px"></i> Riethsporthalle</a></div>';

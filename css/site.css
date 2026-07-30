@@ -1748,9 +1748,9 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .fixture-day-game.has-divider { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
 .fixture-day-meta { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 .fixture-time { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: var(--weight-bold); color: var(--text-primary); }
-.fixture-venue-line { display: flex; align-items: center; gap: 5px; font-size: 12.5px; color: var(--text-secondary); flex-wrap: wrap; row-gap: 2px; }
+.fixture-venue-line { display: flex; align-items: center; font-size: 12.5px; color: var(--text-secondary); }
+.fixture-venue-line a { display: inline-flex; align-items: center; gap: 5px; color: inherit; white-space: nowrap; }
 .fixture-venue-line i { flex-shrink: 0; }
-.fixture-venue-line a { color: inherit; }
 .fixture-venue-line a:hover { color: var(--color-brand-orange); }
 .venue-heim, .venue-auswaerts { font-weight: var(--weight-extrabold); text-transform: uppercase; letter-spacing: var(--tracking-label); font-size: 11px; }
 .venue-heim { color: var(--color-brand-orange-text); }
