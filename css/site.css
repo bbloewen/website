@@ -604,11 +604,18 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .history-h-outer { position: relative; }
 .history-h-scroll { overflow-x: auto; scrollbar-width: none; }
 .history-h-scroll::-webkit-scrollbar { display: none; }
-.history-h-track { position: relative; display: inline-flex; gap: 36px; padding: 40px 8px 8px; }
+.history-h-track { position: relative; display: inline-flex; gap: 36px; padding: 40px 18px 8px 8px; }
 .history-h-track::before {
-  content: ''; position: absolute; left: 0; right: 0; top: 40px; height: 3px;
+  content: ''; position: absolute; left: 0; right: 10px; top: 40px; height: 3px;
   transform: translateY(-50%);
   background: var(--border-strong);
+}
+/* Pfeilspitze am Ende der Linie (neuester Eintrag) — Pendant zur Pfeilspitze der
+   früheren vertikalen Zeitleiste, zeigt hier die Leserichtung "nach rechts". */
+.history-h-track::after {
+  content: ''; position: absolute; right: 0; top: 40px; transform: translateY(-50%);
+  border-top: 6px solid transparent; border-bottom: 6px solid transparent;
+  border-left: 10px solid var(--border-strong);
 }
 .history-h-item { flex: 0 0 220px; position: relative; padding-top: 26px; }
 .history-h-item::before {
