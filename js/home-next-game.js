@@ -16,8 +16,8 @@
       '<span class="eyebrow">' + (i + 1) + '. Heimspiel</span>' +
       '<h3 class="t-h4" style="margin:10px 0 6px">Basketball Löwen – ' + g.s.gegner + '</h3>' +
       '<p class="t-body-sm" style="margin-bottom:16px;display:flex;flex-direction:column;gap:4px">' +
-        '<span style="display:inline-flex;align-items:center;gap:6px"><i data-lucide="calendar" style="width:14px;height:14px"></i>' + dateStr + '</span>' +
-        '<span style="display:inline-flex;align-items:center;gap:6px"><i data-lucide="clock" style="width:14px;height:14px"></i>' + g.s.zeit + ' Uhr · Riethsporthalle</span>' +
+        '<span style="display:inline-flex;align-items:center;gap:6px"><i data-lucide="calendar" style="width:14px;height:14px"></i>' + dateStr + ', ' + g.s.zeit + ' Uhr</span>' +
+        '<span style="display:inline-flex;align-items:center;gap:6px"><i data-lucide="map-pin" style="width:14px;height:14px"></i>Riethsporthalle</span>' +
       '</p>' +
       /* Vorerst "Dauerkarte kaufen" statt "Tickets kaufen" (Saison noch nicht
          gestartet) — sobald der Spielbetrieb läuft, wieder auf Einzelticket-
