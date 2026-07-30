@@ -87,6 +87,10 @@
     // diese Optionen rendert die Detailansicht wie zuvor inline in `root`.
     this.detailBackdropEl = opts.detailBackdropEl || null;
     this.detailRootEl = opts.detailRootEl || null;
+    // Optional: Auslastungs-Kachel („noch X von Y frei" je Block) und eine Hinweiszeile
+    // für den Fall, dass ein gewählter Platz durch die nachgeladene Belegung wegfällt.
+    this.occupancyEl = opts.occupancyEl || null;
+    this.statusNoteEl = opts.statusNoteEl || null;
     this.onContinue = opts.onContinue || function () {};
     this.mobileZoneId = null; // Modus "seats": null = Block-Übersicht, sonst gewählter Block (Sitzdetail offen)
     this.pendingBlockId = null; // Modus "blocks": per Tippen in der Übersicht markierter, noch nicht übernommener Block
@@ -148,28 +152,77 @@
     return parts.join(', ');
   };
 
+  /* Zwei unabhängige Quellen, bewusst NICHT mehr per Promise.all gekoppelt: der
+     Saalplan liegt als statische JSON neben der Seite (~70 kB gzip, ~0,4 s), der
+     Sitzstatus kommt über den n8n-Proxy und braucht gemessen 3–6 s (n8n-Cold-Start +
+     pretix-API). Gemeinsam abgewartet blieb der Blockplan die ganze Zeit leer und die
+     Seite wirkte kaputt. Jetzt wird der Plan sofort gezeichnet und die Belegung
+     nachträglich eingespielt.
+
+     Schlägt der Status-Abruf fehl (Netzwerk, n8n down o.ä.), degradiert das bewusst auf
+     "keine Sitze als belegt bekannt" statt die ganze Sitzplatzwahl zu blockieren —
+     besser ein optimistischer Anzeigefehler als ein kompletter Ausfall der Seite. */
   SeatPicker.prototype._load = function () {
     var self = this;
-    var planFetch = fetch(this.planUrl).then(function (r) { return r.json(); });
-    /* Belegte Sitze kommen aus einem eigenen n8n-Proxy-Endpunkt (fragt pretix'
-       Seats-API ab, Token bleibt serverseitig). Schlägt der Abruf fehl (Netzwerk,
-       n8n down o.ä.), degradiert das bewusst auf "keine Sitze als belegt bekannt"
-       statt die ganze Sitzplatzwahl zu blockieren — besser ein optimistischer
-       Anzeigefehler als ein kompletter Ausfall der Seite. */
-    var statusFetch = this.seatStatusUrl
-      ? fetch(this.seatStatusUrl).then(function (r) { return r.ok ? r.json() : { takenSeatGuids: [] }; }).catch(function () { return { takenSeatGuids: [] }; })
-      : Promise.resolve({ takenSeatGuids: [] });
-    Promise.all([planFetch, statusFetch]).then(function (results) {
-      var plan = results[0];
-      var status = results[1] || {};
+    this.takenSeatGuids = new Set();
+    this.seatStatusLoaded = !this.seatStatusUrl;
+    this._renderSkeleton();
+
+    fetch(this.planUrl).then(function (r) { return r.json(); }).then(function (plan) {
       self.plan = plan;
-      self.takenSeatGuids = new Set(Array.isArray(status.takenSeatGuids) ? status.takenSeatGuids : []);
       self.blocks = self._deriveBlocks(plan);
       self._render();
+      self._renderOccupancy();
     }).catch(function (err) {
       self.root.innerHTML = '<p class="t-body-sm" style="color:#b3392c">Sitzplan konnte nicht geladen werden.</p>';
       console.error('Sitzplan-Fehler', err);
     });
+
+    if (!this.seatStatusUrl) return;
+    fetch(this.seatStatusUrl)
+      .then(function (r) { return r.ok ? r.json() : { takenSeatGuids: [] }; })
+      .catch(function () { return { takenSeatGuids: [] }; })
+      .then(function (status) {
+        self.takenSeatGuids = new Set(Array.isArray(status.takenSeatGuids) ? status.takenSeatGuids : []);
+        self.seatStatusLoaded = true;
+        if (!self.plan) return; // Plan rendert gleich selbst und liest den Status dann mit
+        self._dropTakenSelections();
+        self._render();
+        self._renderOccupancy();
+      });
+  };
+
+  /* Ein Platz kann in dem Fenster gewählt worden sein, in dem die Belegung noch nicht
+     bekannt war. Kommt sie an und ist der Platz schon weg, fliegt er aus der Auswahl —
+     lieber ein sichtbarer Hinweis als eine Bestellung, die im Checkout scheitert. */
+  SeatPicker.prototype._dropTakenSelections = function () {
+    if (this.mode !== 'seats') return;
+    var self = this;
+    var entfernt = [];
+    Object.keys(this.selected).forEach(function (guid) {
+      if (self.takenSeatGuids.has(guid)) {
+        var s = self.selected[guid];
+        entfernt.push(s.zoneLabel + ', Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber);
+        delete self.selected[guid];
+      }
+    });
+    if (!entfernt.length) return;
+    this._renderCart();
+    if (this.statusNoteEl) {
+      this.statusNoteEl.textContent = entfernt.length === 1
+        ? 'Der Platz ' + entfernt[0] + ' ist inzwischen belegt und wurde aus deiner Auswahl entfernt.'
+        : entfernt.length + ' deiner Plätze sind inzwischen belegt und wurden aus deiner Auswahl entfernt.';
+      this.statusNoteEl.hidden = false;
+    }
+  };
+
+  /* Platzhalter in Blockplan-Größe, damit die Stelle nicht erst leer ist und dann
+     springt, wenn der Plan da ist. */
+  SeatPicker.prototype._renderSkeleton = function () {
+    this.root.innerHTML =
+      '<div class="seatplan-skeleton" role="status" aria-live="polite">' +
+        '<span class="t-caption">Sitzplan wird geladen …</span>' +
+      '</div>';
   };
 
   /* Der Saalplan wird von uns selbst mit explizitem zone_id je Block erzeugt
@@ -376,11 +429,81 @@
      Grundlage für den Stepper-Grenzwert, sowohl beim Schnell-Hinzufügen aus der
      Übersicht/Direktwahl als auch beim +/- im Warenkorb selbst. Keine Live-Belegungs-
      prüfung (Einzelticket ist ohnehin First-Come-First-Serve vor Ort). */
+  /* Belegung eines Blocks über alle kaufbaren Kategorien zusammen: Gesamtzahl, freie
+     und belegte Plätze. _blockFreeCount liefert dasselbe "frei" pro einzelner
+     Kategorie (für die Mengen-Stepper), hier interessiert der ganze Block. */
+  SeatPicker.prototype._zoneOccupancy = function (zoneId) {
+    var self = this;
+    var zone = this._zoneById(zoneId);
+    if (!zone) return null;
+    var gesamt = 0, belegt = 0;
+    this._categoryGroups(zone)
+      .filter(function (g) { return self.excludeCategories.indexOf(g.category) === -1; })
+      .forEach(function (g) {
+        g.rows.forEach(function (r) {
+          r.seats.forEach(function (seat) {
+            gesamt++;
+            if (self.takenSeatGuids && self.takenSeatGuids.has(seat.seat_guid)) belegt++;
+          });
+        });
+      });
+    return { gesamt: gesamt, belegt: belegt, frei: gesamt - belegt };
+  };
+
+  /* Auslastung aller Blöcke als Kachelinhalt — nur wenn die Seite ein occupancyEl
+     mitgegeben hat. Solange der Sitzstatus noch nicht da ist, stünde hier "alles frei",
+     was falscher wäre als keine Zahl — deshalb erst der Ladehinweis. */
+  SeatPicker.prototype._renderOccupancy = function () {
+    if (!this.occupancyEl) return;
+    var self = this;
+    if (!this.plan) return;
+    if (!this.seatStatusLoaded) {
+      this.occupancyEl.innerHTML = '<p class="t-body-sm" style="color:var(--text-muted)">Wird geladen …</p>';
+      return;
+    }
+    var zonen = this.northZones.concat(this.southZones);
+    var zeilen = [], gesamtAlle = 0, freiAlle = 0;
+    zonen.forEach(function (id) {
+      var o = self._zoneOccupancy(id);
+      if (!o || !o.gesamt) return;
+      var zone = self._zoneById(id);
+      gesamtAlle += o.gesamt; freiAlle += o.frei;
+      var quote = Math.round((o.frei / o.gesamt) * 100);
+      zeilen.push(
+        '<li class="seatplan-occupancy-row">' +
+          '<span class="seatplan-occupancy-block">' + (zone ? zone.name : id) + '</span>' +
+          '<span class="seatplan-occupancy-bar" aria-hidden="true">' +
+            '<span style="width:' + (100 - quote) + '%"></span>' +
+          '</span>' +
+          '<span class="seatplan-occupancy-num">' + o.frei + ' von ' + o.gesamt + ' frei</span>' +
+        '</li>'
+      );
+    });
+    if (!zeilen.length) { this.occupancyEl.innerHTML = ''; return; }
+    function n(v) { return v.toLocaleString('de-DE'); }
+    this.occupancyEl.innerHTML =
+      '<ul class="seatplan-occupancy">' + zeilen.join('') + '</ul>' +
+      '<p class="t-caption" style="margin:10px 0 0;color:var(--text-muted)">' +
+        'Insgesamt noch ' + n(freiAlle) + ' von ' + n(gesamtAlle) + ' Plätzen frei.' +
+      '</p>';
+  };
+
+  /* Frei verfügbare Plätze einer Kategorie in einem Block — Obergrenze für die
+     Mengen-Stepper im Modus "blocks". Belegte Sitze werden abgezogen: vorher zählte
+     die Funktion trotz ihres Namens alle Sitze und man hätte theoretisch mehr Tickets
+     bestellen können, als der Block noch frei hat. */
   SeatPicker.prototype._blockFreeCount = function (zoneId, category) {
+    var self = this;
     var zone = this._zoneById(zoneId);
     if (!zone) return 0;
     return this._categoryGroups(zone).filter(function (g) { return g.category === category; })
-      .reduce(function (sum, g) { return sum + g.rows.reduce(function (s, r) { return s + r.seats.length; }, 0); }, 0);
+      .reduce(function (sum, g) {
+        return sum + g.rows.reduce(function (s, r) {
+          return s + r.seats.filter(function (seat) {
+            return !(self.takenSeatGuids && self.takenSeatGuids.has(seat.seat_guid));
+          }).length;
+        }, 0);
+      }, 0);
   };
 
   /* Fügt `qty` Tickets der Hauptkategorie eines Blocks zum Warenkorb hinzu (Tarif
