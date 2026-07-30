@@ -856,6 +856,19 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   cursor: pointer; transition: background var(--dur-fast) var(--ease-out);
 }
 .gallery-lightbox-close:hover { background: rgba(255,255,255,.3); }
+.gallery-lightbox-nav {
+  position: absolute; top: 50%; transform: translateY(-50%); width: 52px; height: 52px; border-radius: 50%;
+  background: rgba(255,255,255,.15); border: none; color: #fff; font-size: 34px; line-height: 1;
+  cursor: pointer; transition: background var(--dur-fast) var(--ease-out); display: flex; align-items: center; justify-content: center;
+}
+.gallery-lightbox-nav:hover { background: rgba(255,255,255,.3); }
+.gallery-lightbox-nav.prev { left: 16px; }
+.gallery-lightbox-nav.next { right: 16px; }
+@media (max-width: 599px) {
+  .gallery-lightbox-nav { width: 40px; height: 40px; font-size: 26px; }
+  .gallery-lightbox-nav.prev { left: 6px; }
+  .gallery-lightbox-nav.next { right: 6px; }
+}
 @media (prefers-reduced-motion: reduce) {
   .gallery-lightbox { transition: none; }
 }

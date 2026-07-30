@@ -46,34 +46,69 @@ function initCampGallery(containerId, campSlug, jsonPath, showComingSoon) {
 
     track.addEventListener('click', function (e) {
       var tile = e.target.closest('.camp-gallery-photo[data-lightbox-src]');
-      if (tile) openGalleryLightbox(tile.getAttribute('data-lightbox-src'), tile.getAttribute('data-lightbox-alt'));
+      if (!tile) return;
+      var tiles = Array.prototype.slice.call(track.querySelectorAll('.camp-gallery-photo[data-lightbox-src]'));
+      var items = tiles.map(function (t) { return { src: t.getAttribute('data-lightbox-src'), alt: t.getAttribute('data-lightbox-alt') }; });
+      openGalleryLightbox(items, tiles.indexOf(tile));
     });
   });
 }
 
 /* Gemeinsames Lightbox-Overlay für alle Bildergalerien — wird beim ersten Klick
-   einmalig erzeugt und danach wiederverwendet. */
-function openGalleryLightbox(src, alt) {
+   einmalig erzeugt und danach wiederverwendet. items = Fotoliste DERSELBEN
+   Galerie (nicht nur das eine angeklickte Bild), damit man in der vergrößerten
+   Ansicht selbst weiter-/zurückblättern kann, statt schließen und im Streifen
+   erneut klicken zu müssen. */
+var __galleryItems = [];
+var __galleryIndex = 0;
+
+function openGalleryLightbox(items, index) {
+  __galleryItems = items;
+  __galleryIndex = index;
   var overlay = document.getElementById('gallery-lightbox');
   if (!overlay) {
     overlay = document.createElement('div');
     overlay.id = 'gallery-lightbox';
     overlay.className = 'gallery-lightbox';
-    overlay.innerHTML = '<button type="button" class="gallery-lightbox-close" aria-label="Schließen">&times;</button><img alt="" />';
+    overlay.innerHTML =
+      '<button type="button" class="gallery-lightbox-close" aria-label="Schließen">&times;</button>' +
+      '<button type="button" class="gallery-lightbox-nav prev" aria-label="Vorheriges Foto">&lsaquo;</button>' +
+      '<img alt="" />' +
+      '<button type="button" class="gallery-lightbox-nav next" aria-label="Nächstes Foto">&rsaquo;</button>';
     document.body.appendChild(overlay);
     overlay.addEventListener('click', function (e) {
-      if (e.target === overlay || e.target.classList.contains('gallery-lightbox-close')) {
-        closeGalleryLightbox();
-      }
+      if (e.target === overlay || e.target.classList.contains('gallery-lightbox-close')) closeGalleryLightbox();
+      else if (e.target.classList.contains('prev')) showGalleryOffset(-1);
+      else if (e.target.classList.contains('next')) showGalleryOffset(1);
     });
     document.addEventListener('keydown', function (e) {
+      if (!overlay.classList.contains('open')) return;
       if (e.key === 'Escape') closeGalleryLightbox();
+      else if (e.key === 'ArrowLeft') showGalleryOffset(-1);
+      else if (e.key === 'ArrowRight') showGalleryOffset(1);
     });
   }
-  overlay.querySelector('img').src = src;
-  overlay.querySelector('img').alt = alt || '';
+  renderGalleryLightbox();
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
+}
+
+function showGalleryOffset(delta) {
+  var count = __galleryItems.length;
+  if (!count) return;
+  __galleryIndex = (__galleryIndex + delta + count) % count;
+  renderGalleryLightbox();
+}
+
+function renderGalleryLightbox() {
+  var overlay = document.getElementById('gallery-lightbox');
+  var item = __galleryItems[__galleryIndex];
+  if (!overlay || !item) return;
+  var img = overlay.querySelector('img');
+  img.src = item.src;
+  img.alt = item.alt || '';
+  var multi = __galleryItems.length > 1;
+  overlay.querySelectorAll('.gallery-lightbox-nav').forEach(function (btn) { btn.hidden = !multi; });
 }
 
 function closeGalleryLightbox() {
