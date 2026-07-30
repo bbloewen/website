@@ -117,6 +117,13 @@
 }
 @media (max-width: 900px) {
   .buy-grid { grid-template-columns: 1fr; }
+  /* Mobil zuerst Blockauswahl, dann Warenkorb, Preisliste erst ganz unten —
+     die Preise pro Kategorie erscheinen ohnehin im Header des Block-Popups
+     (s. seat-picker.js _renderMobileZoneDetail), die statische Liste oben
+     wäre vor der eigentlichen Auswahl nur redundant. */
+  .buy-thumb-col { order: 1; }
+  .buy-cart-col { order: 2; }
+  .buy-prices-col { order: 3; }
 }
 /* Cart-Spalte streckt sich auf die Höhe der Preise-/Vorschaubild-Spalte; der leere
    Zustand ("Noch keine Plätze ausgewählt") füllt den Platz, sodass der Button unten

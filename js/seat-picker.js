@@ -632,6 +632,8 @@
     var groups = this._categoryGroups(zone).filter(function (g) { return self.excludeCategories.indexOf(g.category) === -1; });
     var mainCategory = groups.length ? groups[groups.length - 1].category : '';
     var hasVip = groups.some(function (g) { return g.category === 'VIP'; });
+    var priceInfo = self.prices && self.prices[mainCategory];
+    var priceText = priceInfo ? (' – ' + fmtEUR(priceInfo.normal) + ' € (' + fmtEUR(priceInfo.ermaessigt) + ' € ermäßigt)') : '';
     /* Pfeile links/rechts vom Blocknamen statt eines Zurück-Pfeils: von hier aus lässt
        sich durch alle Blöcke blättern, ohne jedes Mal in die Übersicht und zurück. Der
        Weg zurück zur Übersicht ist der „Abbrechen"-Button unten links (plus Klick neben
@@ -646,6 +648,7 @@
         '<strong class="t-body-sm">' + zone.name + '</strong>' +
         '<span class="t-caption" style="color:var(--text-muted)">' + mainCategory +
           (hasVip ? ' (und <span style="color:rgba(179,57,44,.9)">VIP</span>)' : '') +
+          priceText +
         '</span>' +
       '</span>' +
       (nextZone
