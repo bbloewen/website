@@ -8,7 +8,7 @@
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
 <link rel="stylesheet" href="/css/site.css?v=1785800000" />
-<link rel="stylesheet" href="/css/seat-picker.css?v=1786280000" />
+<link rel="stylesheet" href="/css/seat-picker.css?v=1786290000" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 </head>
@@ -154,7 +154,7 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="/js/nav.js?v=1785398309"></script>
 <script src="/js/include.js?v=1785398309"></script>
-<script src="/js/seat-picker.js?v=1786280000"></script>
+<script src="/js/seat-picker.js?v=1786290000"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     /* Preisbox zeigt bewusst den Normalpreis (data-base) statisch an. Rabatte
@@ -190,17 +190,21 @@
     var detailBackdrop = document.getElementById('seatplan-detail-backdrop');
     detailBackdrop.addEventListener('click', function (e) { if (e.target === detailBackdrop) picker.closeDetail(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') picker.closeDetail(); });
-    /* Kampagnen-Tracking für den Dauerkarten-Start: die drei Kanäle (persönliche
-       E-Mail, Newsletter/Fastbreak, Instagram) bekommen je einen eigenen Link mit
-       ?quelle=..., damit sich hinterher zählen lässt, wer über welchen Kanal gekauft
-       hat. Ohne den Parameter (z. B. direkter Seitenaufruf über die Navigation)
+    /* Kampagnen-Tracking für den Dauerkarten-Start: die Kanäle (persönliche E-Mail,
+       Newsletter/Fastbreak, Instagram, WhatsApp) bekommen je einen eigenen Link mit
+       ?ref=..., damit sich hinterher zählen lässt, wer über welchen Kanal gekauft
+       hat. Bewusst "ref" statt eines eigenen Parameternamens: das ist der von
+       GoatCounter nativ als Kampagnen-Parameter erkannte Name (neben utm_source/src/
+       source) — ein einziger Query-Parameter reicht dadurch für Besuchszählung in
+       GoatCounter UND Kaufzählung in der Data Table, ohne zwei Parameter pflegen zu
+       müssen. Ohne den Parameter (z. B. direkter Seitenaufruf über die Navigation)
        bewusst 'webseite' statt leer — sonst fehlt die Zahl in der Auswertung.
        sessionStorage statt nur der URL: bleibt auch erhalten, wenn die Auswahl (z. B.
        durch eine Zwischenablenkung) über einen zweiten Seitenaufruf ohne den
        Parameter fortgesetzt wird. */
-    var quelleParam = new URLSearchParams(window.location.search).get('quelle');
-    if (quelleParam) sessionStorage.setItem('bl_quelle', quelleParam);
-    var quelle = sessionStorage.getItem('bl_quelle') || 'webseite';
+    var refParam = new URLSearchParams(window.location.search).get('ref');
+    if (refParam) sessionStorage.setItem('bl_ref', refParam);
+    var ref = sessionStorage.getItem('bl_ref') || 'webseite';
 
     function goToBuyerDetails() {
       var summary = picker.getSummary();
@@ -211,7 +215,7 @@
         total: summary.total,
         voucher: summary.voucher,
         notiz: summary.notiz,
-        quelle: quelle
+        ref: ref
       }));
       window.location.href = '/tickets/checkout.html';
     }
