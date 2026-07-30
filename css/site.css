@@ -1274,6 +1274,12 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
    wird daher aus dem Fluss genommen und frei oben rechts positioniert). */
 .hero-eyebrow-row { position: relative; }
 .hero-eyebrow-row > .hero-league-badge, .hero-eyebrow-row > .hero-badge-stack { position: absolute; top: 0; right: 0; }
+/* Freigestelltes Badge braucht auf schmalen Screens reservierten Platz, sonst
+   läuft der breite H1/Lead-Text (kein Grid-Nachbar wie bei Profis/Spielplan)
+   optisch unter das Badge und wird unlesbar. */
+@media (max-width: 599px) {
+  .hero-eyebrow-row ~ h1, .hero-eyebrow-row ~ p.lead { padding-right: 90px; }
+}
 .hero-badge-stack { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
 /* Zwei gestapelte Badges (z. B. NBBL-Liga-Logo + Nachwuchsstandort-Plakette auf
    der U19-Seite) müssen kleiner sein als ein einzelnes Badge, sonst passen sie
