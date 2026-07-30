@@ -1337,16 +1337,10 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .article-nav-arrow:hover { background: var(--bg-subtle); }
 .article-nav-arrow i { color: var(--color-brand-orange); }
 /* News-Artikel-Überschriften sind variabel lang (echte Meldungen statt kurzer
-   Taglines) — hier immer normal umbrechen, auch auf Desktop-Breiten. */
+   Taglines) — hier immer normal umbrechen, auch auf Desktop-Breiten. Höhe
+   selbst kommt jetzt von .hero-half wie bei allen anderen Unterseiten (nur
+   noch zwei Hero-Höhen site-weit: Start-Hero und kompakter Standard-Hero). */
 .hero-photo.hero-article h1 { white-space: normal; }
-/* Artikel-Hero grösser als der Standard-Seiten-Hero, damit die Pressefotos
-   mehr Raum bekommen und besser zur Geltung kommen. */
-.hero-photo.hero-article { min-height: 360px; }
-.hero-photo.hero-article .container { padding-top: 44px; padding-bottom: 44px; }
-@media (max-width: 599px) {
-  .hero-photo.hero-article { min-height: 260px; }
-  .hero-photo.hero-article .container { padding-top: 28px; padding-bottom: 28px; }
-}
 
 /* Editorial-Minimal-Layout für News-Artikel-Detailseiten: Kopfzeile frei auf
    Weiß statt Bild-Overlay, Foto als eigener Block darunter, schmale Textspalte
