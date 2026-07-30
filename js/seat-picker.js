@@ -465,7 +465,9 @@
       this.occupancyEl.innerHTML = '<p class="t-body-sm" style="color:var(--text-muted)">Wird geladen …</p>';
       return;
     }
-    var zonen = this.northZones.concat(this.southZones);
+    // Alphabetisch statt Nord-vor-Süd (D,E,F,A,B,C) — in der Kachel zählt die
+    // Lesbarkeit als Liste, nicht die räumliche Anordnung wie in der Blockübersicht.
+    var zonen = this.northZones.concat(this.southZones).slice().sort();
     var zeilen = [], gesamtAlle = 0, freiAlle = 0;
     zonen.forEach(function (id) {
       var o = self._zoneOccupancy(id);
@@ -664,7 +666,7 @@
     cancelBtn.textContent = 'Abbrechen';
     var confirmBtn = document.createElement('button');
     confirmBtn.type = 'button';
-    confirmBtn.className = 'btn btn-primary btn-sm seatplan-mobile-detail-confirm';
+    confirmBtn.className = 'btn btn-primary btn-sm';
     confirmBtn.textContent = 'Übernehmen';
     actions.appendChild(cancelBtn);
     actions.appendChild(confirmBtn);

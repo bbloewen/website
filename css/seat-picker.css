@@ -570,7 +570,6 @@
    Warenkorb) rechts — unten, weil das am Handy die Daumenzone ist. */
 .seatplan-mobile-detail-actions { display: flex; gap: 10px; width: 100%; margin-top: 14px; }
 .seatplan-mobile-detail-actions .btn { flex: 1; justify-content: center; }
-.seatplan-mobile-detail-confirm { display: flex; width: 100%; margin-top: 14px; justify-content: center; }
 
 /* Direkte Block+Anzahl-Wahl im Warenkorb, Alternative zum Antippen im Bild. */
 .seatplan-direct-add-row {
