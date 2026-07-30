@@ -481,7 +481,10 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 /* Icon-Liste für Vorteile-/Feature-Aufzählungen — kleine runde Icon-Badge statt
    Standard-Bullet, macht die Liste auf den ersten Blick als Liste erkennbar. */
 .benefit-list { list-style: none; }
-.benefit-list li { display: flex; align-items: center; gap: 14px; }
+/* flex-start statt center: bei mehrzeiligem Text (z. B. lange Vorteils-Beschreibungen)
+   soll das Icon oben bündig mit der ersten Zeile sitzen, nicht mittig zur ganzen
+   Zeilenhöhe — gleiche Konvention wie bei den Kacheln (.info-tile-row-head). */
+.benefit-list li { display: flex; align-items: flex-start; gap: 14px; }
 .benefit-list .benefit-icon {
   flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center; color: #fff;
