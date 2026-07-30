@@ -111,8 +111,8 @@
    interaktive Sitzplan-Popup öffnet sich erst per Klick auf das Vorschaubild. */
 .buy-grid {
   display: grid;
-  grid-template-columns: 0.9fr 1fr 1.1fr;
-  gap: 28px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
   align-items: stretch;
 }
 /* Jede der drei Spalten bekommt einen eigenen Rahmen (statt einer gemeinsamen
