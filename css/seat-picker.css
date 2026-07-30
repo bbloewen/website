@@ -153,14 +153,6 @@
 .buy-prices-col .price-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--bg-muted); font-size: 14px; }
 .buy-prices-col .price-row:last-of-type { border-bottom: none; }
 
-/* Callout "Dauerkarte trotz laufender Saison" unter "Gut zu wissen" */
-.dauerkarte-callout {
-  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
-  background: var(--color-orange-50); border: 1px solid var(--color-orange-100); border-radius: var(--radius-lg);
-  padding: 18px 20px; margin-top: 16px;
-}
-.dauerkarte-callout p { margin: 0; flex: 1; min-width: 220px; }
-
 .seatplan-court-area { display: flex; gap: 10px; align-items: stretch; margin-top: 14px; }
 .seatplan-side-strip {
   writing-mode: vertical-rl;
