@@ -34,6 +34,7 @@
           <div class="info-tile">
             <div class="insta-sidebar-block" style="margin:0;padding:0;border:none">
               <h3>Löwen-YouTube-Kanal</h3>
+              <p class="t-body-sm" id="youtube-subscribers" style="color:var(--text-muted);margin:2px 0 8px"></p>
               <div style="border-top:1px solid var(--border);margin-top:8px">
                 <a class="insta-sidebar-item" href="https://www.youtube.com/shorts/1X9RB8Xd7LI" target="_blank" rel="noopener"><img loading="lazy" src="https://i.ytimg.com/vi/1X9RB8Xd7LI/mqdefault.jpg" alt=""  /><span>Musa &amp; Léonar beim SWE Basketballcamp 2026</span></a>
                 <a class="insta-sidebar-item" href="https://www.youtube.com/watch?v=SRrVEpqkHVc" target="_blank" rel="noopener"><img loading="lazy" src="https://i.ytimg.com/vi/SRrVEpqkHVc/mqdefault.jpg" alt=""  /><span>Season Review Part 5 — Saison 2025/2026</span></a>
@@ -136,6 +137,10 @@
     }
     if (loewenpark) {
       document.getElementById('insta-followers-loewenpark').textContent = '@loewenpark.hallenmeister · ' + loewenpark.followerCount.toLocaleString('de-DE') + ' Follower';
+    }
+    var youtube = data.youtube;
+    if (youtube) {
+      document.getElementById('youtube-subscribers').textContent = youtube.subscriberCount.toLocaleString('de-DE') + ' Abonnent:innen';
     }
   });
 </script>

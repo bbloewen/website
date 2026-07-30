@@ -1,13 +1,18 @@
 {
-  "hinweis": "Manueller Follower-Zahl-Schnappschuss, nicht automatisiert. Grund: n8n-Server bekommt von Instagram serverseitig eine Login-Wand statt der echten Seite (Bot-Schutz gegen Cloud-IPs) — getestet sowohl per HTML-Abruf als auch über den internen web_profile_info-JSON-Endpoint. Die Zahl wird deshalb bei Bedarf manuell per Browser aktualisiert, nicht täglich per Workflow. Absichtlich in einer eigenen Datei, damit die täglichen n8n-Workflows (instagram-loewen.json / instagram-loewenpark.json) sie nicht überschreiben.",
+  "hinweis": "Manueller Follower-/Abonnenten-Schnappschuss, nicht automatisiert. Grund (Instagram): n8n-Server bekommt von Instagram serverseitig eine Login-Wand statt der echten Seite (Bot-Schutz gegen Cloud-IPs) — getestet sowohl per HTML-Abruf als auch über den internen web_profile_info-JSON-Endpoint. YouTube hätte zwar keine API-Sperre, wird aber auf Markos Wunsch ebenfalls manuell per Browser abgerufen statt über die YouTube-Data-API. Turnus: einmal im Monat neu abrufen und eintragen. Absichtlich in einer eigenen Datei, damit die täglichen n8n-Workflows (instagram-loewen.json / instagram-loewenpark.json) sie nicht überschreiben.",
   "basketball.loewen": {
     "displayName": "Basketball Löwen",
-    "followerCount": 5014,
-    "updatedAt": "20.07.2026"
+    "followerCount": 5010,
+    "updatedAt": "30.07.2026"
   },
   "loewenpark.hallenmeister": {
     "displayName": "Löwenpark",
-    "followerCount": 202,
-    "updatedAt": "20.07.2026"
+    "followerCount": 214,
+    "updatedAt": "30.07.2026"
+  },
+  "youtube": {
+    "displayName": "Basketball Löwen",
+    "subscriberCount": 325,
+    "updatedAt": "30.07.2026"
   }
 }
