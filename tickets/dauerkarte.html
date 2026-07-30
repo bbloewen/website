@@ -8,7 +8,7 @@
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
 <link rel="stylesheet" href="/css/site.css?v=1785800000" />
-<link rel="stylesheet" href="/css/seat-picker.css?v=1786250000" />
+<link rel="stylesheet" href="/css/seat-picker.css?v=1786270000" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 </head>
@@ -66,14 +66,6 @@
             <div class="seatplan-cart-total"><span>Gesamt</span><span id="seatplan-total">0,00 €</span></div>
             <button class="btn btn-primary btn-sm" id="seatplan-cta" style="margin-top:16px;width:100%;justify-content:center" disabled>Weiter zur Kasse</button>
           </div>
-        </div>
-      </div>
-
-      <!-- Block-Detailansicht (nur Modus "seats"): öffnet groß, damit ein ganzer Block mit
-           allen Sitzen ohne Scrollen sichtbar ist — die Blockübersicht selbst bleibt inline. -->
-      <div class="modal-backdrop" id="seatplan-detail-backdrop">
-        <div class="modal-box modal-box-blockplan" role="dialog" aria-modal="true" aria-label="Sitzplatz-Detail">
-          <div id="seatplan-detail-root"></div>
         </div>
       </div>
 
@@ -142,13 +134,27 @@
     </div>
   </section>
 
+
+<!-- Block-Detailansicht (nur Modus "seats"): öffnet groß, damit ein ganzer Block mit allen
+     Sitzen ohne Scrollen sichtbar ist — die Blockübersicht selbst bleibt inline.
+     Bewusst AUSSERHALB der <section> (aber noch in <main>, das erzeugt selbst keinen
+     Stacking-Context): jede .section bekommt per site.css position:relative; z-index:1
+     und damit einen EIGENEN Stacking-Context — darin zählte das Modal sein z-index:90 nur
+     INNERHALB dieser Section (Rang 1 im Wurzelkontext) und landete dadurch hinter dem
+     sticky Header (z-index:50, direkt im Wurzelkontext). Außerhalb der Section zählt sein
+     z-index wieder im Wurzelkontext und liegt so wie vorgesehen über dem Header. -->
+<div class="modal-backdrop" id="seatplan-detail-backdrop">
+  <div class="modal-box modal-box-blockplan" role="dialog" aria-modal="true" aria-label="Sitzplatz-Detail">
+    <div id="seatplan-detail-root"></div>
+  </div>
+</div>
 </main>
 <div id="site-footer-placeholder"></div>
 
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="/js/nav.js?v=1785398309"></script>
 <script src="/js/include.js?v=1785398309"></script>
-<script src="/js/seat-picker.js?v=1786250000"></script>
+<script src="/js/seat-picker.js?v=1786270000"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     /* Preisbox zeigt bewusst den Normalpreis (data-base) statisch an. Rabatte

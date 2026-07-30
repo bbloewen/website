@@ -554,8 +554,22 @@
    darin — VIP-Anteil wird dort zusätzlich farblich markiert statt als Legende. */
 .seatplan-mobile-detail-title { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 
-/* Modus "seats" (Dauerkarte): Übernehmen-Button am Ende der Block-Detailansicht,
-   schließt zurück zur Blockübersicht. */
+/* Vorgemerkte Plätze als Text unter dem Sitzplan ("Reihe 14, Platz 1") — Ergänzung
+   zur optischen Markierung im Raster, die bei starkem Herunterzoomen kaum zu erkennen
+   ist. */
+.seatplan-pending {
+  margin-top: 12px; padding: 10px 12px; border-radius: var(--radius-md);
+  background: var(--color-neutral-50); border: 1px solid var(--color-neutral-200);
+  text-align: center; font-size: 13px;
+}
+.seatplan-pending-empty { color: var(--text-muted); }
+.seatplan-pending-label { display: block; font-size: 11px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 3px; }
+.seatplan-pending-seats { color: var(--color-brand-navy); font-weight: 600; }
+
+/* Abbrechen (verwirft die Vormerkung) links, Übernehmen (schreibt sie in den
+   Warenkorb) rechts — unten, weil das am Handy die Daumenzone ist. */
+.seatplan-mobile-detail-actions { display: flex; gap: 10px; width: 100%; margin-top: 14px; }
+.seatplan-mobile-detail-actions .btn { flex: 1; justify-content: center; }
 .seatplan-mobile-detail-confirm { display: flex; width: 100%; margin-top: 14px; justify-content: center; }
 
 /* Direkte Block+Anzahl-Wahl im Warenkorb, Alternative zum Antippen im Bild. */

@@ -98,6 +98,11 @@
     this.nachwuchsAmount = opts.nachwuchsAmount || 2;
     this.nachwuchsChecked = true;
     this.selected = {}; // seat_guid -> {...} (Modus "seats")
+    /* Vorgemerkte Plätze, solange die Sitzdetailansicht offen ist: beim Öffnen eine
+       Kopie von `selected`, beim Antippen wird nur hier getoggelt. Erst „Übernehmen"
+       schreibt sie in `selected` (und damit in den Warenkorb), „Abbrechen" verwirft
+       sie. null = Detailansicht zu, dann ist `selected` die aktive Auswahl. */
+    this.pendingSeats = null;
     this.blockCounts = {}; // zone_id -> { normal: n, ermaessigt: n } (Modus "blocks")
     this.voucherCode = null;
     this.voucherInfo = null;
@@ -391,8 +396,7 @@
           self.pendingBlockId = self.pendingBlockId === btn.dataset.zone ? null : btn.dataset.zone;
           self._render();
         } else {
-          self.mobileZoneId = btn.dataset.zone;
-          self._render();
+          self._openZoneDetail(btn.dataset.zone);
         }
       });
     });
@@ -532,6 +536,86 @@
     if (this.cartEl) this.cartEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
+  /* Die aktive Auswahl: in der Detailansicht die Vormerkung, sonst der Warenkorb-Stand.
+     Alles, was Sitze markiert oder auflistet, fragt hier — nie direkt `selected` ab. */
+  SeatPicker.prototype._activeSeats = function () {
+    return this.pendingSeats || this.selected;
+  };
+
+  /* Sitzdetailansicht eines Blocks öffnen. Die Vormerkung startet als Kopie des
+     Warenkorb-Stands, damit bereits übernommene Plätze markiert bleiben und im Overlay
+     auch wieder abgewählt werden können — „Abbrechen" stellt dann den Stand von vorher
+     wieder her. */
+  SeatPicker.prototype._openZoneDetail = function (zoneId) {
+    if (!this.pendingSeats) {
+      var copy = {};
+      var src = this.selected;
+      Object.keys(src).forEach(function (guid) { copy[guid] = src[guid]; });
+      this.pendingSeats = copy;
+    }
+    this.mobileZoneId = zoneId;
+    this._render();
+  };
+
+  /* Blöcke als Ring in der Reihenfolge der Übersicht (Nord D-E-F, dann Süd A-B-C):
+     beide Pfeile sind dadurch immer aktiv, es gibt keine Sackgasse. Blöcke ohne
+     kaufbare Kategorie (excludeCategories) werden übersprungen — sie lassen sich in
+     der Übersicht auch nicht antippen. */
+  SeatPicker.prototype._zoneRing = function () {
+    var self = this;
+    return this.northZones.concat(this.southZones).filter(function (id) {
+      var zone = self._zoneById(id);
+      if (!zone) return false;
+      return self._categoryGroups(zone).some(function (g) {
+        return self.excludeCategories.indexOf(g.category) === -1 && self.prices[g.category];
+      });
+    });
+  };
+
+  SeatPicker.prototype._neighbourZone = function (step) {
+    var ring = this._zoneRing();
+    var i = ring.indexOf(this.mobileZoneId);
+    if (i === -1 || ring.length < 2) return null;
+    return ring[(i + step + ring.length) % ring.length];
+  };
+
+  /* Vorgemerkte Plätze als Text unter dem Sitzplan — „Reihe 14, Platz 1". Optisch ist
+     ein markierter Sitz im Raster schnell übersehen, gerade heruntergezoomt; hier steht
+     schwarz auf weiß, was „Übernehmen" in den Warenkorb legt. Plätze aus anderen Blöcken
+     (per Pfeil-Navigation dazugekommen) bekommen den Blocknamen davor, Plätze des gerade
+     gezeigten Blocks nicht — dessen Name steht schon im Header. */
+  SeatPicker.prototype._pendingListHTML = function (currentZoneName) {
+    var seats = this._activeSeats();
+    var guids = Object.keys(seats);
+    if (!guids.length) {
+      return '<span class="seatplan-pending-empty">Noch kein Platz gewählt — tippe auf einen freien Platz.</span>';
+    }
+    var labels = guids.map(function (guid) {
+      var s = seats[guid];
+      var reihe = 'Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber;
+      return s.zoneLabel === currentZoneName ? reihe : s.zoneLabel + ' · ' + reihe;
+    });
+    return '<span class="seatplan-pending-label">Deine Auswahl</span>' +
+      '<span class="seatplan-pending-seats">' + labels.join(' · ') + '</span>';
+  };
+
+  SeatPicker.prototype._renderPendingList = function (zone) {
+    var box = document.createElement('div');
+    box.className = 'seatplan-pending';
+    box.innerHTML = this._pendingListHTML(zone.name);
+    return box;
+  };
+
+  /* Nach jedem Sitz-Toggle nur die Textliste aktualisieren, statt die ganze
+     Detailansicht neu zu bauen — ein voller Re-Render würde Zoom/Scroll-Zustand des
+     Sitzplans zurücksetzen (dieselbe Sprung-Falle wie beim alten Warenkorb-Rebuild,
+     s. _toggleSeat). */
+  SeatPicker.prototype._updatePendingList = function (currentZoneName) {
+    var target = this.detailRootEl || this.root;
+    var box = target.querySelector('.seatplan-pending');
+    if (box) box.innerHTML = this._pendingListHTML(currentZoneName);
+  };
+
   SeatPicker.prototype._renderMobileZoneDetail = function () {
     var self = this;
     var zone = this._zoneById(this.mobileZoneId);
@@ -545,26 +629,46 @@
     var groups = this._categoryGroups(zone).filter(function (g) { return self.excludeCategories.indexOf(g.category) === -1; });
     var mainCategory = groups.length ? groups[groups.length - 1].category : '';
     var hasVip = groups.some(function (g) { return g.category === 'VIP'; });
-    header.innerHTML = '<button type="button" class="seatplan-mobile-back" aria-label="Zurück zur Blockübersicht"><i data-lucide="arrow-left" class="icon-16"></i></button>' +
+    /* Pfeile links/rechts vom Blocknamen statt eines Zurück-Pfeils: von hier aus lässt
+       sich durch alle Blöcke blättern, ohne jedes Mal in die Übersicht und zurück. Der
+       Weg zurück zur Übersicht ist der „Abbrechen"-Button unten links (plus Klick neben
+       das Overlay und ESC). */
+    var prevZone = this._neighbourZone(-1);
+    var nextZone = this._neighbourZone(1);
+    header.innerHTML =
+      (prevZone
+        ? '<button type="button" class="seatplan-mobile-back" data-zone-step="-1" aria-label="Vorheriger Block: ' + this._zoneById(prevZone).name + '"><i data-lucide="chevron-left" class="icon-16"></i></button>'
+        : '<span style="width:32px"></span>') +
       '<span class="seatplan-mobile-detail-title">' +
         '<strong class="t-body-sm">' + zone.name + '</strong>' +
         '<span class="t-caption" style="color:var(--text-muted)">' + mainCategory +
           (hasVip ? ' (und <span style="color:rgba(179,57,44,.9)">VIP</span>)' : '') +
         '</span>' +
-      '</span><span style="width:32px"></span>';
+      '</span>' +
+      (nextZone
+        ? '<button type="button" class="seatplan-mobile-back" data-zone-step="1" aria-label="Nächster Block: ' + this._zoneById(nextZone).name + '"><i data-lucide="chevron-right" class="icon-16"></i></button>'
+        : '<span style="width:32px"></span>');
     wrap.appendChild(header);
     var zoneEl = this._renderZone(zone);
     if (zoneEl) wrap.appendChild(zoneEl);
+    wrap.appendChild(this._renderPendingList(zone));
+    /* Abbrechen links, Übernehmen rechts: unten, weil das am Handy die Daumenzone ist.
+       Die beiden tun bewusst Verschiedenes — „Übernehmen" schreibt die Vormerkung in den
+       Warenkorb, „Abbrechen" verwirft sie. Der Kunde ist danach noch nicht fertig, er
+       landet wieder in der Blockübersicht und kann weiter wählen. */
+    var actions = document.createElement('div');
+    actions.className = 'seatplan-mobile-detail-actions';
+    var cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.className = 'btn btn-ghost btn-sm';
+    cancelBtn.textContent = 'Abbrechen';
     var confirmBtn = document.createElement('button');
     confirmBtn.type = 'button';
     confirmBtn.className = 'btn btn-primary btn-sm seatplan-mobile-detail-confirm';
-    /* "Fertig", nicht "Übernehmen": der Button schließt die Detailansicht, er legt
-       nichts in den Warenkorb — das passiert beim Antippen des Sitzes. Der alte
-       Name versprach einen Schritt, den es nicht gibt, und ließ Nutzer rätseln,
-       ob ihre Auswahl gezählt wird. Der gleichnamige Button im Blockmodus
-       (Einzelticket) übernimmt dagegen wirklich etwas und heißt weiter so. */
-    confirmBtn.textContent = 'Fertig';
-    wrap.appendChild(confirmBtn);
+    confirmBtn.textContent = 'Übernehmen';
+    actions.appendChild(cancelBtn);
+    actions.appendChild(confirmBtn);
+    wrap.appendChild(actions);
     // Öffnet groß in einem separaten Overlay statt im kompakten Inline-Bereich, sofern
     // die Seite eines mitgegeben hat (Dauerkarte) — sonst Fallback: inline wie zuvor.
     var target = this.detailRootEl || this.root;
@@ -583,13 +687,22 @@
       this._fitZoneScale(zoneEl);
     }
     if (window.lucide) window.lucide.createIcons();
-    header.querySelector('.seatplan-mobile-back').addEventListener('click', function () {
+    header.querySelectorAll('.seatplan-mobile-back').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        self.mobileZoneId = self._neighbourZone(parseInt(btn.dataset.zoneStep, 10));
+        self._render();
+      });
+    });
+    cancelBtn.addEventListener('click', function () {
+      self.pendingSeats = null;
       self.mobileZoneId = null;
       self._render();
     });
     confirmBtn.addEventListener('click', function () {
+      self.selected = self.pendingSeats;
+      self.pendingSeats = null;
       self.mobileZoneId = null;
-      self._render();
+      self._render(); // _renderMobileOverview() ruft _renderCart() bereits selbst auf
     });
     this._renderCart();
   };
@@ -867,9 +980,12 @@
   };
 
   /* Öffentliche Methode, damit die Seite (Backdrop-Klick, ESC-Taste) die
-     Detailansicht schließen kann, ohne interne Felder direkt anzufassen. */
+     Detailansicht schließen kann, ohne interne Felder direkt anzufassen. Verhält sich
+     wie „Abbrechen": die Vormerkung wird verworfen, nicht stillschweigend übernommen —
+     ein Klick daneben oder ESC ist kein bewusstes Bestätigen. */
   SeatPicker.prototype.closeDetail = function () {
     if (this.mode === 'seats' && this.mobileZoneId) {
+      this.pendingSeats = null;
       this.mobileZoneId = null;
       this._render();
     }
@@ -980,7 +1096,8 @@
           if (!taken) freeCount++;
           var btn = document.createElement('button');
           btn.type = 'button';
-          btn.className = 'seatplan-seat ' + catClass(category) + (taken ? ' taken' : '');
+          var isSelected = !taken && !!self._activeSeats()[seat.seat_guid];
+          btn.className = 'seatplan-seat ' + catClass(category) + (taken ? ' taken' : '') + (isSelected ? ' selected' : '');
           btn.textContent = seat.seat_number;
           // Echte Gang-Lücke innerhalb der Reihe (z. B. "1,2 | 3-22 | 23,24,25") —
           // die Sitznummerierung bleibt über den Gang hinweg durchgehend, nur die
@@ -1086,24 +1203,25 @@
     this._renderCart();
   };
 
+  /* _toggleSeat läuft ausschließlich innerhalb der offenen Detailansicht (der Klick-
+     Handler wird nur dort registriert, s. _renderZone) — _activeSeats() liefert hier
+     also immer die Vormerkung, nie direkt den Warenkorb. Der Warenkorb selbst (this.
+     selected) wird erst bei „Übernehmen" geschrieben; dadurch verändert Antippen die
+     Seite hinter dem Overlay nicht mehr (das war das „Bild springt im Hintergrund",
+     Feedback 30.07.2026) — es gibt schlicht nichts mehr, das dort mitwachsen könnte. */
   SeatPicker.prototype._toggleSeat = function (btn, guid, zoneLabel, rowLabel, seatNumber, category, priceInfo) {
-    if (this.selected[guid]) {
-      delete this.selected[guid];
+    var seats = this._activeSeats();
+    if (seats[guid]) {
+      delete seats[guid];
       btn.classList.remove('selected');
     } else {
-      this.selected[guid] = {
+      seats[guid] = {
         zoneLabel: zoneLabel, rowLabel: rowLabel, seatNumber: seatNumber,
         category: category, tarif: 'normal', price: this._dkPrice(priceInfo.normal, false), priceInfo: priceInfo
       };
       btn.classList.add('selected');
     }
-    /* Solange die Sitzdetailansicht offen ist, den Warenkorb NICHT bei jedem Tipp
-       neu bauen: dahinter wuchs er sonst mit jedem gewählten Platz und schob die
-       Seite — für den Nutzer sah es aus, als „springe das Bild im Hintergrund"
-       (Feedback 30.07.2026). Der Warenkorb wird beim Schließen der Ansicht
-       aufgebaut, das erledigt _renderMobileOverview. Der markierte Sitz bleibt
-       als Rückmeldung sofort sichtbar. */
-    if (!this.mobileZoneId) this._renderCart();
+    this._updatePendingList(zoneLabel);
   };
 
   /* Nachwuchsbeitrag ist eine Pauschale pro Bestellung (nicht pro Platz/Ticket),
