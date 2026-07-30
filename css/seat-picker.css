@@ -115,6 +115,14 @@
   gap: 28px;
   align-items: stretch;
 }
+/* Jede der drei Spalten bekommt einen eigenen Rahmen (statt einer gemeinsamen
+   Karte um alle drei) — macht auf Mobil, wo die Spalten untereinander stehen,
+   deutlich sichtbar, wo Preisliste/Blockauswahl/Warenkorb jeweils anfangen
+   und aufhören. Reihenfolge bleibt unverändert (s. Media Query unten). */
+.buy-prices-col, .buy-thumb-col, .buy-cart-col {
+  background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 20px;
+}
 @media (max-width: 900px) {
   .buy-grid { grid-template-columns: 1fr; }
   /* Mobil zuerst Blockauswahl, dann Warenkorb, Preisliste erst ganz unten —
