@@ -644,8 +644,8 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
    .history-h-item::after (256px/204px) auf Markos Wunsch. */
 .history-h-arrow-tip {
   position: absolute; top: 0; left: 256px; transform: translateY(-50%);
-  width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent;
-  border-left: 16px solid var(--border-strong);
+  width: 0; height: 0; border-top: 6px solid transparent; border-bottom: 6px solid transparent;
+  border-left: 10px solid var(--border-strong);
 }
 .history-h-arrow-tip::before {
   content: ''; position: absolute; top: 0; right: 100%; width: 256px; height: 3px;
