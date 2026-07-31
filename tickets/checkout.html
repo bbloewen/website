@@ -211,20 +211,55 @@
     document.getElementById('checkout-event-label').textContent = cart.eventLabel;
     if (cart.notiz) document.getElementById('cf-notiz').value = cart.notiz;
 
-    /* Gutschein-Codes sind noch nicht an pretix angebunden — feste Testcodes,
-       damit sich der Ablauf (einlösen, Rabattzeile, entfernen) schon jetzt echt
-       durchklicken lässt. Dieselben Codes wie im SeatPicker (js/seat-picker.js).
+    /* Gutschein-/Wertgutschein-Prüfung läuft serverseitig gegen die echte pretix-API
+       (derselbe n8n-Proxy wie im SeatPicker, s. js/seat-picker.js VOUCHER_CHECK_URL) —
        cart.lines/cart.total sind die einzige Wahrheitsquelle — ein Gutschein kann
        schon auf der Auswahlseite eingelöst worden sein (dann steckt die Rabattzeile
        schon in cart.lines) oder erst hier. */
-    var MOCK_VOUCHERS = {
-      'LOEWEN10': { type: 'percent', value: 10, label: 'LOEWEN10 (10 %)' },
-      'WILLKOMMEN5': { type: 'fixed', value: 5, label: 'WILLKOMMEN5 (5,00 €)' },
-      /* Testcode für einen gekauften Geschenk-Gutschein (Fanshop verkauft 50-€-
-         Gutscheine) — damit lässt sich der Fall "Gutschein höher als Warenkorb"
-         inkl. Restbetrag-Spende durchklicken. */
-      'GESCHENK50': { type: 'fixed', value: 50, label: 'GESCHENK50 (50,00 €)' }
+    var VOUCHER_CHECK_URL = 'https://blev.app.n8n.cloud/webhook/gutschein-pruefen';
+    // pretix-Item-ID -> Kategorie-Bezeichnung je Event — nötig, um einen produktgebundenen
+    // Gutschein (z.B. nur VIP) der richtigen Zeile zuzuordnen statt pauschal auf den ganzen
+    // Warenkorb wirken zu lassen. Dieselbe Zuordnung wie in tickets/dauerkarte.html.
+    var PRETIX_ITEM_CATEGORY_MAPS = {
+      dauerkarte2627: { 7: 'Kategorie I', 8: 'Kategorie II', 9: 'VIP' }
     };
+
+    function formatMoney2(n) { return n.toFixed(2).replace('.', ','); }
+
+    /* Rabatt auf Basis der normalisierten Webhook-Antwort — analog zu
+       SeatPicker.prototype._voucherDiscount, hier auf cart.lines statt this.selected/
+       this.blockCounts, weil der Warenkorb an dieser Stelle schon als flache Zeilenliste
+       vorliegt (category/type sind je Ticket-Zeile bereits gesetzt, s. getSummary()). */
+    function computeVoucherDiscount(info, total) {
+      if (info.source === 'giftcard') return Math.min(info.balance, total);
+      if (info.category) {
+        var remaining = (info.remainingUses == null) ? Infinity : info.remainingUses;
+        var discount = 0;
+        cart.lines.forEach(function (l) {
+          if (remaining <= 0) return;
+          if (l.category !== info.category || (l.type !== 'seat' && l.type !== 'block')) return;
+          var applyQty = Math.min(l.qty, remaining);
+          if (applyQty <= 0) return;
+          var perUnit = info.priceMode === 'percent' ? (l.unitPrice * info.value / 100)
+            : info.priceMode === 'subtract' ? Math.min(info.value, l.unitPrice)
+            : info.priceMode === 'set' ? Math.max(0, l.unitPrice - info.value)
+            : 0;
+          discount += perUnit * applyQty;
+          remaining -= applyQty;
+        });
+        return Math.min(Math.round(discount * 100) / 100, total);
+      }
+      var d = info.priceMode === 'percent' ? (total * info.value / 100) : info.value;
+      return Math.min(Math.round(d * 100) / 100, total);
+    }
+
+    function labelForVoucher(info) {
+      if (info.source === 'giftcard') return info.code + ' (Guthaben ' + formatMoney2(info.balance) + ' €)';
+      var amount = info.priceMode === 'percent' ? (info.value + ' %')
+        : info.priceMode === 'set' ? ('Preis ' + formatMoney2(info.value) + ' €')
+        : (formatMoney2(info.value) + ' €');
+      return info.code + ' (' + amount + (info.category ? ', ' + info.category : '') + ')';
+    }
 
     var linesEl = document.getElementById('checkout-lines');
     var totalEl = document.getElementById('checkout-total');
@@ -287,8 +322,8 @@
        nicht möglich. */
     var restPromptEl = document.getElementById('voucher-rest-prompt');
 
-    function applyVoucher(voucher, discount, donationRest) {
-      cart.lines.push({ label: 'Gutschein ' + voucher.label, qty: 1, unitPrice: -voucher.value, lineTotal: -voucher.value });
+    function applyVoucher(info, discount, donationRest) {
+      cart.lines.push({ label: 'Gutschein ' + info.label, qty: 1, unitPrice: -discount, lineTotal: -discount });
       if (donationRest > 0) {
         cart.lines.push({ label: 'Spende an Basketball Löwen e.V.', qty: 1, unitPrice: donationRest, lineTotal: donationRest });
       }
@@ -296,11 +331,11 @@
       renderSummary();
     }
 
-    function showRestPrompt(voucher) {
-      var rest = Math.round((voucher.value - cart.total) * 100) / 100;
+    function showRestPrompt(info, rawValue) {
+      var rest = Math.round((rawValue - cart.total) * 100) / 100;
       restPromptEl.innerHTML =
         '<div class="voucher-rest-box">' +
-          '<p>Dein Gutschein (' + formatMoney(voucher.value) + ') ist höher als dein Warenkorbbetrag (' + formatMoney(cart.total) + '). Ein Restguthaben können wir leider nicht ausstellen.</p>' +
+          '<p>Dein Gutschein (' + formatMoney(rawValue) + ') ist höher als dein Warenkorbbetrag (' + formatMoney(cart.total) + '). Ein Restguthaben können wir leider nicht ausstellen.</p>' +
           '<label><input type="checkbox" id="voucher-donate"> Ja, ich möchte den Restbetrag von ' + formatMoney(rest) + ' an den Basketball Löwen e.V. spenden.</label>' +
           '<button type="button" class="btn btn-ghost btn-sm" id="voucher-rest-confirm">Bestätigen</button>' +
         '</div>';
@@ -308,7 +343,7 @@
         var donate = document.getElementById('voucher-donate').checked;
         restPromptEl.innerHTML = '';
         if (donate) {
-          applyVoucher(voucher, cart.total, rest);
+          applyVoucher(info, cart.total, rest);
           voucherMsg.textContent = 'Gutschein eingelöst — danke für deine Spende!';
           voucherMsg.className = 'voucher-message success';
         } else {
@@ -321,26 +356,62 @@
 
     voucherBtn.addEventListener('click', function () {
       var code = voucherInput.value.trim().toUpperCase();
-      if (!code) return;
+      if (!code || voucherBtn.disabled) return;
       restPromptEl.innerHTML = '';
-      var voucher = MOCK_VOUCHERS[code];
-      if (voucher) {
-        var discount = voucher.type === 'percent'
-          ? Math.round(cart.total * voucher.value) / 100
-          : voucher.value;
-        if (voucher.type === 'fixed' && voucher.value > cart.total) {
-          voucherMsg.textContent = '';
-          voucherMsg.className = 'voucher-message';
-          showRestPrompt(voucher);
-          return;
-        }
-        applyVoucher(voucher, discount, 0);
-        voucherMsg.textContent = 'Gutschein eingelöst.';
-        voucherMsg.className = 'voucher-message success';
-      } else {
-        voucherMsg.textContent = 'Dieser Gutschein-Code ist ungültig oder abgelaufen.';
-        voucherMsg.className = 'voucher-message error';
-      }
+      voucherMsg.textContent = '';
+      voucherMsg.className = 'voucher-message';
+      voucherBtn.disabled = true;
+      voucherBtn.textContent = 'Wird geprüft …';
+      var event = cart.pretixEventSlug || '';
+      var url = VOUCHER_CHECK_URL + '?code=' + encodeURIComponent(code) + '&event=' + encodeURIComponent(event);
+      fetch(url)
+        .then(function (r) { return r.json(); })
+        .then(function (result) {
+          voucherBtn.disabled = false;
+          voucherBtn.textContent = 'Einlösen';
+          if (!result || !result.valid) {
+            voucherMsg.textContent = 'Dieser Gutschein-Code ist ungültig oder abgelaufen.';
+            voucherMsg.className = 'voucher-message error';
+            return;
+          }
+          var categoryMap = PRETIX_ITEM_CATEGORY_MAPS[event] || {};
+          var info = {
+            source: result.source, code: result.code, priceMode: result.priceMode, value: result.value,
+            category: (result.itemId != null && categoryMap[result.itemId]) || null,
+            remainingUses: result.remainingUses != null ? result.remainingUses : null,
+            balance: result.balance != null ? result.balance : null
+          };
+          info.label = labelForVoucher(info);
+
+          /* Ein 100%-Gutschein (Sponsoren-Freikarte) übernimmt auch den Nachwuchsbeitrag —
+             die Zeile kann schon auf der Auswahlseite in cart.lines gelandet sein, bevor
+             der Code hier eingelöst wird. */
+          if (info.priceMode === 'percent' && info.value === 100) {
+            var nwIdx = cart.lines.findIndex(function (l) { return l.type === 'nachwuchs'; });
+            if (nwIdx !== -1) {
+              cart.total = Math.round((cart.total - cart.lines[nwIdx].lineTotal) * 100) / 100;
+              cart.lines.splice(nwIdx, 1);
+            }
+          }
+
+          var rawValue = info.source === 'giftcard' ? info.balance
+            : (!info.category && info.priceMode !== 'percent') ? info.value
+            : null;
+          if (rawValue != null && rawValue > cart.total) {
+            showRestPrompt(info, rawValue);
+            return;
+          }
+          var discount = computeVoucherDiscount(info, cart.total);
+          applyVoucher(info, discount, 0);
+          voucherMsg.textContent = 'Gutschein eingelöst.';
+          voucherMsg.className = 'voucher-message success';
+        })
+        .catch(function () {
+          voucherBtn.disabled = false;
+          voucherBtn.textContent = 'Einlösen';
+          voucherMsg.textContent = 'Gutschein konnte gerade nicht geprüft werden. Bitte gleich nochmal versuchen.';
+          voucherMsg.className = 'voucher-message error';
+        });
     });
     voucherInput.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') { e.preventDefault(); voucherBtn.click(); }

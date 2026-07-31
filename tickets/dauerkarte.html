@@ -169,6 +169,11 @@
       // 404 ergibt (n8n-Bug, laut Support in 2.33.0 behoben, Ticket #35063).
       // Gültig ist immer nur .../webhook/<pfad>.
       seatStatusUrl: 'https://blev.app.n8n.cloud/webhook/dauerkarte-sitzplatz-status',
+      pretixEvent: 'dauerkarte2627',
+      // pretix-Item-ID -> Kategorie-Bezeichnung (Event dauerkarte2627, Stand 31.07.2026) —
+      // nötig, damit ein produktgebundener Gutschein (z.B. nur VIP) der richtigen
+      // Warenkorb-Zeile zugeordnet wird statt pauschal auf alles zu wirken.
+      pretixItemCategoryMap: { 7: 'Kategorie I', 8: 'Kategorie II', 9: 'VIP' },
       northZones: ['D', 'E', 'F'],
       southZones: ['A', 'B', 'C'],
       prices: {
@@ -210,6 +215,7 @@
       sessionStorage.setItem('bl_cart', JSON.stringify({
         productType: 'dauerkarte',
         eventLabel: 'Dauerkarte 2026/2027 — alle Heimspiele der Hin- und Rückrunde, außer Playoffs',
+        pretixEventSlug: 'dauerkarte2627',
         lines: summary.lines,
         total: summary.total,
         voucher: summary.voucher,

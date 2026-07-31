@@ -1,8 +1,7 @@
 /* Wiederverwendbare Sitzplatzwahl für Einzelticket- und Dauerkarten-Detailseite.
    Lädt den echten, pretix-schema-konformen Saalplan aus assets/seating/ und rendert
-   ihn als Block-Grid. Verfügbarkeit ist bis zur echten pretix-Anbindung noch nicht
-   live geprüft — alle Plätze gelten vorerst als frei (keine echten Bestellungen
-   vorhanden). Kein Limit an wählbaren Plätzen pro Bestellung.
+   ihn als Block-Grid. Belegung wird live per n8n-Proxy gegen die echte pretix-API
+   geprüft (s. seatStatusUrl). Kein Limit an wählbaren Plätzen pro Bestellung.
 
    Zwei Modi:
    - "seats" (Dauerkarte): einzelne Sitze sind klickbar, fester Platz für die Saison.
@@ -52,13 +51,11 @@
     return !!(zone && (zone.zone_id === 'C' || zone.zone_id === 'F'));
   }
 
-  /* Gutschein-Codes sind noch nicht an pretix angebunden — feste Testcodes,
-     damit sich der Ablauf schon jetzt echt durchklicken lässt. Dieselben Codes
-     wie auf der Checkout-Seite (tickets/checkout.html). */
-  var MOCK_VOUCHERS = {
-    'LOEWEN10': { type: 'percent', value: 10, label: 'LOEWEN10 (10 %)' },
-    'WILLKOMMEN5': { type: 'fixed', value: 5, label: 'WILLKOMMEN5 (5 €)' }
-  };
+  /* Gutschein-/Wertgutschein-Codes werden serverseitig geprüft (n8n-Proxy vor
+     der echten pretix-API — Voucher- und Gift-Card-Endpunkte sind nicht ohne
+     API-Token erreichbar). Webhook-URL ohne Workflow-ID im Pfad, s. Hinweis in
+     tickets/dauerkarte.html. */
+  var VOUCHER_CHECK_URL = 'https://blev.app.n8n.cloud/webhook/gutschein-pruefen';
 
   /* Dauerkarte-Tarife inkl. Mitgliedsrabatt — nur relevant, wenn opts.dauerkarteDiscount
      gesetzt ist (Einzelticket bleibt unberührt, dort bleibt es bei normal/ermaessigt). */
@@ -104,9 +101,16 @@
        sie. null = Detailansicht zu, dann ist `selected` die aktive Auswahl. */
     this.pendingSeats = null;
     this.blockCounts = {}; // zone_id -> { normal: n, ermaessigt: n } (Modus "blocks")
+    this.pretixEvent = opts.pretixEvent || null; // Event-Slug fuer die Gutschein-Pruefung (z.B. "dauerkarte2627")
+    // pretix-Item-ID -> unsere Kategorie-Bezeichnung, z.B. {9:"VIP",7:"Kategorie I",8:"Kategorie II"} —
+    // nur so kann ein an ein bestimmtes Produkt gebundener Gutschein (require item) der richtigen
+    // Warenkorb-Kategorie zugeordnet werden. Ohne Eintrag/Treffer gilt der Gutschein als Pauschalrabatt
+    // auf den gesamten Warenkorb (Verhalten wie zuvor, entspricht pretix "Beliebiges Produkt").
+    this.pretixItemCategoryMap = opts.pretixItemCategoryMap || {};
     this.voucherCode = null;
-    this.voucherInfo = null;
+    this.voucherInfo = null; // { source:'voucher'|'giftcard', code, label, priceMode, value, category, remainingUses, balance }
     this.voucherError = null;
+    this.voucherChecking = false;
     this.notiz = '';
     /* Dauerkarte: Frühbucher (automatisch, für alle) + Mitglieder des Basketball
        Löwen e.V. (30 %, Nachweis nötig, als eigene Tarif-Option wählbar).
@@ -118,12 +122,70 @@
     this._load();
   }
 
+  /* Einheiten (Sitze bzw. Block-Tarifzeilen) der Kategorie, an die ein Gutschein
+     gebunden ist (this.voucherInfo.category) — Grundlage, um einen produktgebundenen
+     Gutschein (z.B. "nur VIP") NICHT auf den ganzen Warenkorb, sondern nur auf
+     passende Zeilen anzuwenden. Frisch aus this.selected/this.blockCounts gebaut,
+     damit sie immer den aktuellen Warenkorb-Stand widerspiegeln. */
+  SeatPicker.prototype._voucherMatchingUnits = function () {
+    var self = this;
+    var category = this.voucherInfo && this.voucherInfo.category;
+    var units = []; // { qty, unitPrice }
+    if (!category) return units;
+    if (this.mode === 'blocks') {
+      Object.keys(this.blockCounts).forEach(function (key) {
+        var c = self.blockCounts[key];
+        if (c.category !== category) return;
+        if (c.normal) units.push({ qty: c.normal, unitPrice: c.priceInfo.normal });
+        if (c.ermaessigt) units.push({ qty: c.ermaessigt, unitPrice: c.priceInfo.ermaessigt });
+      });
+    } else {
+      Object.keys(this.selected).forEach(function (guid) {
+        var s = self.selected[guid];
+        if (s.category !== category) return;
+        units.push({ qty: 1, unitPrice: s.price });
+      });
+    }
+    return units;
+  };
+
   /* Rabatt für einen gegebenen Zwischensumme-Betrag (Tickets + Nachwuchsbeitrag),
-     gemeinsam für "seats"- und "blocks"-Modus sowie für getSummary(). */
+     gemeinsam für "seats"- und "blocks"-Modus sowie für getSummary(). Ein
+     Wertgutschein zieht sein Guthaben pauschal vom Gesamtbetrag ab; ein Gutschein
+     ohne Produktbindung wirkt ebenfalls pauschal (wie zuvor); ein produktgebundener
+     Gutschein (voucherInfo.category) wirkt nur auf die dazu passenden Zeilen, je
+     Einheit einmal, begrenzt auf die verbleibenden Einlösungen (remainingUses). */
   SeatPicker.prototype._voucherDiscount = function (base) {
-    if (!this.voucherInfo || base <= 0) return 0;
-    var d = this.voucherInfo.type === 'percent' ? (base * this.voucherInfo.value / 100) : this.voucherInfo.value;
+    var info = this.voucherInfo;
+    if (!info || base <= 0) return 0;
+    if (info.source === 'giftcard') return Math.min(info.balance, base);
+    if (info.category) {
+      var remaining = (info.remainingUses == null) ? Infinity : info.remainingUses;
+      var discount = 0;
+      this._voucherMatchingUnits().forEach(function (u) {
+        if (remaining <= 0) return;
+        var applyQty = Math.min(u.qty, remaining);
+        if (applyQty <= 0) return;
+        var perUnit = info.priceMode === 'percent' ? (u.unitPrice * info.value / 100)
+          : info.priceMode === 'subtract' ? Math.min(info.value, u.unitPrice)
+          : info.priceMode === 'set' ? Math.max(0, u.unitPrice - info.value)
+          : 0;
+        discount += perUnit * applyQty;
+        remaining -= applyQty;
+      });
+      return Math.min(Math.round(discount * 100) / 100, base);
+    }
+    var d = info.priceMode === 'percent' ? (base * info.value / 100) : info.value;
     return Math.min(Math.round(d * 100) / 100, base);
+  };
+
+  /* Ein 100%-Gutschein (z.B. Sponsoren-Freikarte) übernimmt auch den sonst separat
+     berechneten Nachwuchsbeitrag — bei einer vollständig kostenlosen Eintrittskarte
+     soll kein Rest-Betrag stehen bleiben. Andere Gutscheine/Wertgutscheine lassen
+     den Nachwuchsbeitrag unberührt (der bleibt ein freiwilliger Zusatzbetrag). */
+  SeatPicker.prototype._voucherIsFullComp = function () {
+    var info = this.voucherInfo;
+    return !!(info && info.priceMode === 'percent' && info.value === 100);
   };
 
   SeatPicker.prototype._earlyBirdActive = function () {
@@ -1235,7 +1297,7 @@
      Warenkorb nicht leer ist. Gemeinsam für "seats"- und "blocks"-Modus. */
   SeatPicker.prototype._appendNachwuchsRow = function () {
     var self = this;
-    if (!this.nachwuchsBeitrag) return;
+    if (!this.nachwuchsBeitrag || this._voucherIsFullComp()) return;
     var nwRow = document.createElement('label');
     nwRow.className = 'seatplan-nachwuchs-row';
     nwRow.innerHTML =
@@ -1249,8 +1311,20 @@
     });
   };
 
-  /* Gutschein-Code — gemeinsam für "seats"- und "blocks"-Modus, wird wie der
-     Nachwuchsbeitrag nur angezeigt, wenn der Warenkorb nicht leer ist. */
+  /* Baut einen sprechenden Label-Text aus der normalisierten Antwort des
+     Gutschein-Webhooks (s. VOUCHER_CHECK_URL) — für die Warenkorb-Anzeige. */
+  function labelForVoucherInfo(info) {
+    if (info.source === 'giftcard') return info.code + ' (Guthaben ' + fmtEUR(info.balance) + ' €)';
+    var amount = info.priceMode === 'percent' ? (info.value + ' %')
+      : info.priceMode === 'set' ? ('Preis ' + fmtEUR(info.value) + ' €')
+      : (fmtEUR(info.value) + ' €');
+    return info.code + ' (' + amount + (info.category ? ', ' + info.category : '') + ')';
+  }
+
+  /* Gutschein-/Wertgutschein-Code — gemeinsam für "seats"- und "blocks"-Modus,
+     wird wie der Nachwuchsbeitrag nur angezeigt, wenn der Warenkorb nicht leer
+     ist. Die Prüfung läuft serverseitig (VOUCHER_CHECK_URL, echte pretix-Daten),
+     deshalb async mit kurzem Lade-Zustand statt eines sofortigen Ergebnisses. */
   SeatPicker.prototype._appendVoucherRow = function () {
     var self = this;
     var wrap = document.createElement('div');
@@ -1273,24 +1347,44 @@
     } else {
       wrap.innerHTML =
         '<div class="seatplan-voucher-input-wrap">' +
-          '<input type="text" placeholder="Gutscheincode" id="seatplan-voucher-input">' +
-          '<button type="button" data-voucher-apply>Einlösen</button>' +
+          '<input type="text" placeholder="Gutscheincode" id="seatplan-voucher-input"' + (this.voucherChecking ? ' disabled' : '') + '>' +
+          '<button type="button" data-voucher-apply' + (this.voucherChecking ? ' disabled' : '') + '>' + (this.voucherChecking ? 'Wird geprüft …' : 'Einlösen') + '</button>' +
         '</div>' +
         (this.voucherError ? '<p class="seatplan-voucher-error">' + this.voucherError + '</p>' : '');
       this.cartEl.appendChild(wrap);
       var input = wrap.querySelector('#seatplan-voucher-input');
       var apply = function () {
         var code = input.value.trim().toUpperCase();
-        if (!code) return;
-        var match = MOCK_VOUCHERS[code];
-        if (match) {
-          self.voucherCode = code;
-          self.voucherInfo = match;
-          self.voucherError = null;
-        } else {
-          self.voucherError = 'Dieser Gutscheincode ist ungültig.';
-        }
+        if (!code || self.voucherChecking) return;
+        self.voucherChecking = true;
+        self.voucherError = null;
         self._renderCart();
+        var url = VOUCHER_CHECK_URL + '?code=' + encodeURIComponent(code) + '&event=' + encodeURIComponent(self.pretixEvent || '');
+        fetch(url)
+          .then(function (r) { return r.json(); })
+          .then(function (result) {
+            self.voucherChecking = false;
+            if (result && result.valid) {
+              var category = (result.itemId != null && self.pretixItemCategoryMap[result.itemId]) || null;
+              var info = {
+                source: result.source, code: result.code, priceMode: result.priceMode, value: result.value,
+                category: category, remainingUses: result.remainingUses != null ? result.remainingUses : null,
+                balance: result.balance != null ? result.balance : null
+              };
+              info.label = labelForVoucherInfo(info);
+              self.voucherCode = result.code;
+              self.voucherInfo = info;
+              self.voucherError = null;
+            } else {
+              self.voucherError = 'Dieser Gutscheincode ist ungültig oder abgelaufen.';
+            }
+            self._renderCart();
+          })
+          .catch(function () {
+            self.voucherChecking = false;
+            self.voucherError = 'Gutschein konnte gerade nicht geprüft werden. Bitte gleich nochmal versuchen.';
+            self._renderCart();
+          });
       };
       wrap.querySelector('[data-voucher-apply]').addEventListener('click', apply);
       input.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); apply(); } });
@@ -1402,7 +1496,7 @@
     }
 
     var total = guids.reduce(function (sum, guid) { return sum + self.selected[guid].price; }, 0);
-    if (this.nachwuchsBeitrag && this.nachwuchsChecked && guids.length > 0) total += this.nachwuchsAmount;
+    if (this.nachwuchsBeitrag && this.nachwuchsChecked && guids.length > 0 && !this._voucherIsFullComp()) total += this.nachwuchsAmount;
     total -= this._voucherDiscount(total);
     this.totalEl.textContent = fmtEUR(total) + ' €';
   };
@@ -1511,7 +1605,7 @@
     }
 
     var total = lines.reduce(function (sum, l) { return sum + l.count * l.price; }, 0);
-    if (this.nachwuchsBeitrag && this.nachwuchsChecked && ticketCount > 0) total += this.nachwuchsAmount;
+    if (this.nachwuchsBeitrag && this.nachwuchsChecked && ticketCount > 0 && !this._voucherIsFullComp()) total += this.nachwuchsAmount;
     total -= this._voucherDiscount(total);
     this.totalEl.textContent = fmtEUR(total) + ' €';
   };
@@ -1559,7 +1653,7 @@
       });
       var ticketCount = lines.reduce(function (sum, l) { return sum + l.qty; }, 0);
       var nachwuchsAmount = 0;
-      if (this.nachwuchsBeitrag && this.nachwuchsChecked && ticketCount > 0) {
+      if (this.nachwuchsBeitrag && this.nachwuchsChecked && ticketCount > 0 && !this._voucherIsFullComp()) {
         nachwuchsAmount = this.nachwuchsAmount;
         lines.push({ label: 'Unterstützung für den Nachwuchs', qty: 1, unitPrice: nachwuchsAmount, lineTotal: nachwuchsAmount, type: 'nachwuchs' });
         total += nachwuchsAmount;
@@ -1579,7 +1673,7 @@
       total += s.price;
     });
     var nwAmount = 0;
-    if (this.nachwuchsBeitrag && this.nachwuchsChecked && lines.length > 0) {
+    if (this.nachwuchsBeitrag && this.nachwuchsChecked && lines.length > 0 && !this._voucherIsFullComp()) {
       nwAmount = this.nachwuchsAmount;
       lines.push({ label: 'Unterstützung für den Nachwuchs', qty: 1, unitPrice: nwAmount, lineTotal: nwAmount, type: 'nachwuchs' });
       total += nwAmount;
