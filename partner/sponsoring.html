@@ -65,7 +65,7 @@
 <script src="/js/include.js?v=1785398309"></script>
 <script src="/js/partner-tile.js?v=1785398309"></script>
 <script>
-  fetch('/data/sponsoren.json?v=1785487025').then(function (r) { return r.json(); }).then(function (data) {
+  fetch('/data/sponsoren.json?v=1785487203').then(function (r) { return r.json(); }).then(function (data) {
     var tierRang = { top: 0, hauptsponsoren: 1, sponsoren: 2, wirkungspartner: 3 };
     function byTierUndName(a, b) {
       var diff = tierRang[a.tier] - tierRang[b.tier];
