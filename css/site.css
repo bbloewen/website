@@ -959,9 +959,12 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
    dadurch zusätzlich .is-enlarged) die orangene Randfarbe statt der blauen. */
 .partner-tile.partner-tile-wirkungspartner .partner-tile-front { padding: 22px; font-size: 20px; font-weight: var(--weight-extrabold); border: 2px solid var(--color-brand-blue); }
 .partner-tile-hauptsponsoren .partner-tile-front { padding: 8px; font-size: 18px; font-weight: var(--weight-semibold); border: 2px solid var(--color-brand-orange); }
-/* 'sponsoren' bewusst nah an der Weitere-Partner-Größe (Marko, 31.07.2026) —
-   kaum noch Unterschied zur untersten Stufe, nur der dünne Rand bleibt als
-   minimale Abgrenzung zu Hauptsponsoren. */
+/* 'sponsoren' braucht eine eigene, kleinere Kachel-Box (nicht nur weniger
+   Innenabstand) — alle Kacheln in .partner-wall teilen sich sonst dieselbe
+   Grid-Zeilenhöhe (110px), padding allein verändert die sichtbare Kachel-/
+   Logogröße kaum. Explizite Höhe zwischen Hauptsponsoren (füllt die 110px-
+   Zeile voll aus) und Weitere Partner (64px eigenes Grid) (Marko, 31.07.2026). */
+.partner-tile-sponsoren { height: 85px; align-self: center; }
 .partner-tile-sponsoren .partner-tile-front { padding: 10px; font-size: 14px; font-weight: var(--weight-medium); border: 1px solid var(--color-brand-orange); }
 .partner-tile-weitere .partner-tile-front { padding: 10px; font-size: 13px; font-weight: var(--weight-medium); }
 .partner-wall-weitere { grid-template-columns: repeat(7, 1fr); grid-auto-rows: 64px; gap: 10px; }
