@@ -1677,20 +1677,8 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 }
 .field select:required:invalid { color: var(--text-muted); }
 .field select option { color: var(--text-primary); }
-/* Mobile Browser rendern type="date" mit einer eigenen Intrinsic-Höhe statt
-   der Padding/Line-Height-Berechnung der Geschwister-Felder — je nach OS/
-   Browser-Version mal größer, mal (wie zuletzt auf iOS gemeldet) nur noch
-   halb so hoch. Feste height statt nur min-height macht das unabhängig von
-   dieser Berechnung. Placeholder wird von type="date" nicht angezeigt,
-   deshalb hier (als einzige Ausnahme im Formular) ein sichtbares <label>
-   statt sr-only. */
-.field input[type="date"] {
-  -webkit-appearance: none;
-  appearance: none;
-  height: 45px;
-  text-align: left;
-}
-.field input[type="date"]::-webkit-date-and-time-value { text-align: left; }
+.dob-group { display: flex; gap: 8px; }
+.dob-group select { flex: 1; min-width: 0; }
 .family-card { position: relative; border: 1.5px solid var(--border-strong); border-radius: var(--radius-md); padding: 16px 40px 4px 16px; margin-bottom: 12px; background: #fff; }
 .family-card .remove-btn { position: absolute; top: 8px; right: 10px; background: none; border: none; color: var(--text-muted); font-size: 20px; line-height: 1; cursor: pointer; padding: 2px 6px; }
 .family-card .remove-btn:hover { color: var(--color-error); }

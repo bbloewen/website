@@ -8,7 +8,7 @@
 <meta name="keywords" content="Basketball, Thüringen, Erfurt, Sport, Bewegung, Soziale Sportidee, Trainieren, Jugendsozialarbeit, Aufstieg, Erfolgreich, Nummer 1" />
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1786332000" />
+<link rel="stylesheet" href="/css/site.css?v=1786336000" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 </head>
@@ -60,8 +60,13 @@
               </select>
             </div>
             <div class="field">
-              <label for="mw-geburtsdatum">Geburtsdatum *</label>
-              <input type="date" id="mw-geburtsdatum" name="geburtsdatum" required />
+              <label id="mw-geburtsdatum-label">Geburtsdatum *</label>
+              <div class="dob-group">
+                <select id="mw-geburtstag" aria-labelledby="mw-geburtsdatum-label" required></select>
+                <select id="mw-geburtsmonat" aria-labelledby="mw-geburtsdatum-label" required></select>
+                <select id="mw-geburtsjahr" aria-labelledby="mw-geburtsdatum-label" required></select>
+              </div>
+              <input type="hidden" id="mw-geburtsdatum" name="geburtsdatum" />
               <p class="hint">Bei minderjährigen Mitgliedern ist zusätzlich die Unterschrift der gesetzlichen Vertreter nötig — wir melden uns dazu bei dir.</p>
             </div>
             <div class="field hidden" id="mw-erzieh-vorname-field">
@@ -207,6 +212,36 @@
   var nachnameInput = document.getElementById('mw-nachname');
   var geburtsdatumInput = document.getElementById('mw-geburtsdatum');
   var kontoinhaberInput = document.getElementById('mw-kontoinhaber');
+
+  /* Geburtsdatum als drei separate Tag/Monat/Jahr-Dropdowns statt einem
+     nativen type="date": der native Picker zwingt bei Erwachsenen-Geburts-
+     jahren zu vielen Klicks/langem Scrollen im Jahres-Dropdown (AG-Feedback,
+     29.07.2026). Die drei Werte werden bei jeder Änderung zu einem ISO-Datum
+     zusammengesetzt und in das ursprüngliche (jetzt hidden) Feld geschrieben,
+     damit sich an Validierung/Payload sonst nichts ändert. */
+  var MONATE_KURZ = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+
+  function fuelleDobSelects(tagSel, monatSel, jahrSel) {
+    var opts = '<option value="">Tag *</option>';
+    for (var t = 1; t <= 31; t++) opts += '<option value="' + t + '">' + t + '</option>';
+    tagSel.innerHTML = opts;
+
+    opts = '<option value="">Monat *</option>';
+    for (var m = 0; m < 12; m++) opts += '<option value="' + (m + 1) + '">' + MONATE_KURZ[m] + '</option>';
+    monatSel.innerHTML = opts;
+
+    var aktuellesJahr = new Date().getFullYear();
+    opts = '<option value="">Jahr *</option>';
+    for (var j = aktuellesJahr; j >= aktuellesJahr - 100; j--) opts += '<option value="' + j + '">' + j + '</option>';
+    jahrSel.innerHTML = opts;
+  }
+
+  function dobToIso(tagSel, monatSel, jahrSel) {
+    if (!tagSel.value || !monatSel.value || !jahrSel.value) return '';
+    return jahrSel.value + '-' + pad2(Number(monatSel.value)) + '-' + pad2(Number(tagSel.value));
+  }
   var kontoinhaberTouched = false;
   kontoinhaberInput.addEventListener('input', function () { kontoinhaberTouched = true; });
 
@@ -256,8 +291,19 @@
   nachnameInput.addEventListener('input', updateKontoinhaberVorschlag);
   erziehVornameInput.addEventListener('input', updateKontoinhaberVorschlag);
   erziehNachnameInput.addEventListener('input', updateKontoinhaberVorschlag);
-  geburtsdatumInput.addEventListener('input', function () { updateErziehVisibility(); updateKontoinhaberVorschlag(); });
-  geburtsdatumInput.addEventListener('change', function () { updateErziehVisibility(); updateKontoinhaberVorschlag(); });
+  var geburtstagSelect = document.getElementById('mw-geburtstag');
+  var geburtsmonatSelect = document.getElementById('mw-geburtsmonat');
+  var geburtsjahrSelect = document.getElementById('mw-geburtsjahr');
+  fuelleDobSelects(geburtstagSelect, geburtsmonatSelect, geburtsjahrSelect);
+
+  function onGeburtsdatumSelectChange() {
+    geburtsdatumInput.value = dobToIso(geburtstagSelect, geburtsmonatSelect, geburtsjahrSelect);
+    updateErziehVisibility();
+    updateKontoinhaberVorschlag();
+  }
+  geburtstagSelect.addEventListener('change', onGeburtsdatumSelectChange);
+  geburtsmonatSelect.addEventListener('change', onGeburtsdatumSelectChange);
+  geburtsjahrSelect.addEventListener('change', onGeburtsdatumSelectChange);
 
   // ===== Familienmitglieder (nur Fan-Mitgliedschaft) =====
   var MAX_FAMILY = 3;
@@ -284,9 +330,29 @@
       '<button type="button" class="remove-btn" data-remove-fam="' + idx + '" title="Entfernen">&times;</button>' +
       '<div class="field"><label class="sr-only">Vorname</label><input type="text" data-fam="' + idx + '" data-field="vorname" placeholder="Vorname *" /></div>' +
       '<div class="field"><label class="sr-only">Nachname</label><input type="text" data-fam="' + idx + '" data-field="nachname" placeholder="Nachname *" /></div>' +
-      '<div class="field"><label>Geburtsdatum *</label><input type="date" data-fam="' + idx + '" data-field="geburtsdatum" /></div>' +
+      '<div class="field"><label id="mw-fam-dob-label-' + idx + '">Geburtsdatum *</label>' +
+        '<div class="dob-group">' +
+          '<select data-fam="' + idx + '" data-field="tag" aria-labelledby="mw-fam-dob-label-' + idx + '" required></select>' +
+          '<select data-fam="' + idx + '" data-field="monat" aria-labelledby="mw-fam-dob-label-' + idx + '" required></select>' +
+          '<select data-fam="' + idx + '" data-field="jahr" aria-labelledby="mw-fam-dob-label-' + idx + '" required></select>' +
+        '</div>' +
+        '<input type="hidden" data-fam="' + idx + '" data-field="geburtsdatum" />' +
+      '</div>' +
       '<div class="field" style="margin-bottom:0"><label class="sr-only">Geschlecht</label><select data-fam="' + idx + '" data-field="geschlecht"><option value="">Geschlecht (optional)</option><option value="weiblich">Weiblich</option><option value="maennlich">Männlich</option><option value="keine_angabe">Keine Angabe</option></select></div>';
     familyCardsEl.appendChild(card);
+
+    var famTagSel = card.querySelector('[data-field="tag"]');
+    var famMonatSel = card.querySelector('[data-field="monat"]');
+    var famJahrSel = card.querySelector('[data-field="jahr"]');
+    var famGeburtsdatumHidden = card.querySelector('[data-field="geburtsdatum"]');
+    fuelleDobSelects(famTagSel, famMonatSel, famJahrSel);
+    function onFamDobChange() {
+      famGeburtsdatumHidden.value = dobToIso(famTagSel, famMonatSel, famJahrSel);
+    }
+    famTagSel.addEventListener('change', onFamDobChange);
+    famMonatSel.addEventListener('change', onFamDobChange);
+    famJahrSel.addEventListener('change', onFamDobChange);
+
     card.querySelector('[data-remove-fam="' + idx + '"]').addEventListener('click', function () {
       card.remove();
       updateFamilyAddBtn();
