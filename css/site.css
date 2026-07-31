@@ -635,19 +635,25 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
    früheren vertikalen Zeitleiste, zeigt hier die Leserichtung "nach rechts".
    Echtes <span> statt Pseudo-Element auf der letzten Kachel, aus demselben
    Grund wie oben relativ zur einzelnen (definiert breiten) Kachel positioniert.
-   left:20px (kurzer fester Abstand vom letzten Punkt) statt left:100% (rechter
-   Rand der ganzen, 220px breiten Kachel) — sonst klafft zwischen dem letzten
-   Punkt und der Pfeilspitze eine große leere Lücke ohne Linie (31.07.2026,
-   von Marko auf Desktop-Chrome bemerkt: "nur ein Pfeil, keine Linie"). Die
-   ::before-Linie davor schließt die Lücke zum Punkt. */
+   left:256px (fester Abstand vom letzten Punkt, exakt gleich lang wie die
+   übrigen Punkt-zu-Punkt-Connectoren) statt left:100% (rechter Rand der
+   ganzen, 220px breiten Kachel) — sonst klafft zwischen dem letzten Punkt
+   und der Pfeilspitze eine große leere Lücke ohne Linie (31.07.2026, von
+   Marko auf Desktop-Chrome bemerkt: "nur ein Pfeil, keine Linie"). Die
+   ::before-Linie davor schließt die Lücke zum Punkt, exakt so lang wie
+   .history-h-item::after (256px/204px) auf Markos Wunsch. */
 .history-h-arrow-tip {
-  position: absolute; top: 0; left: 20px; transform: translateY(-50%);
-  width: 0; height: 0; border-top: 6px solid transparent; border-bottom: 6px solid transparent;
-  border-left: 10px solid var(--border-strong);
+  position: absolute; top: 0; left: 256px; transform: translateY(-50%);
+  width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent;
+  border-left: 16px solid var(--border-strong);
 }
 .history-h-arrow-tip::before {
-  content: ''; position: absolute; top: 0; right: 100%; width: 20px; height: 3px;
+  content: ''; position: absolute; top: 0; right: 100%; width: 256px; height: 3px;
   transform: translateY(-1.5px); background: var(--border-strong);
+}
+@media (max-width: 599px) {
+  .history-h-arrow-tip { left: 204px; }
+  .history-h-arrow-tip::before { width: 204px; }
 }
 .history-h-item h3 { font-family: var(--font-base); font-weight: var(--weight-extrabold); font-size: 15px; color: var(--text-primary); margin: 4px 0 6px; }
 .history-h-item p { font-size: 12.5px; line-height: 1.5; color: var(--text-secondary); margin: 0; }
