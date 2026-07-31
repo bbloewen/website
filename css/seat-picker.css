@@ -121,7 +121,7 @@
    und aufhören. Reihenfolge bleibt unverändert (s. Media Query unten). */
 .buy-prices-col, .buy-thumb-col, .buy-cart-col {
   background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg);
-  padding: 20px;
+  padding: 20px; min-width: 0;
 }
 @media (max-width: 900px) {
   .buy-grid { grid-template-columns: 1fr; }
