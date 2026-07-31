@@ -8,7 +8,7 @@
 <meta name="keywords" content="Basketball, Thüringen, Erfurt, Sport, Bewegung, Soziale Sportidee, Trainieren, Jugendsozialarbeit, Aufstieg, Erfolgreich, Nummer 1" />
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1785487025" />
+<link rel="stylesheet" href="/css/site.css?v=1785487731" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 </head>
@@ -28,7 +28,7 @@
     <div class="container">
       <div class="filter-row" role="group" aria-label="Nach Kategorie filtern">
         <button type="button" class="filter-chip is-active" data-filter="alle" aria-pressed="true">Alle</button>
-        <button type="button" class="filter-chip" data-filter="top" aria-pressed="false">PremiumSponsoren</button>
+        <button type="button" class="filter-chip" data-filter="top" aria-pressed="false">Premiumsponsoren</button>
         <button type="button" class="filter-chip" data-filter="hauptsponsoren" aria-pressed="false">Hauptsponsoren</button>
         <button type="button" class="filter-chip" data-filter="sponsoren" aria-pressed="false">Sponsoren</button>
         <button type="button" class="filter-chip" data-filter="wirkungspartner" aria-pressed="false">Förderpartner</button>
@@ -65,7 +65,7 @@
 <script src="/js/include.js?v=1785398309"></script>
 <script src="/js/partner-tile.js?v=1785398309"></script>
 <script>
-  fetch('/data/sponsoren.json?v=1785487458').then(function (r) { return r.json(); }).then(function (data) {
+  fetch('/data/sponsoren.json?v=1785487795').then(function (r) { return r.json(); }).then(function (data) {
     var tierRang = { top: 0, hauptsponsoren: 1, sponsoren: 2, wirkungspartner: 3 };
     function byTierUndName(a, b) {
       var diff = tierRang[a.tier] - tierRang[b.tier];
