@@ -17,6 +17,7 @@
 <link rel="stylesheet" href="/css/seat-picker.css?v=1785398309" />
 <style>
   .checkout-grid { display: grid; grid-template-columns: 380px 1fr; gap: 32px; align-items: start; }
+  .checkout-grid.hidden { display: none; }
   #order-summary-card { position: sticky; top: 20px; }
   @media (max-width: 900px) {
     .checkout-grid { grid-template-columns: 1fr; }
@@ -52,6 +53,7 @@
     display: flex; align-items: flex-start; gap: 12px; border: 1px solid var(--border);
     border-radius: var(--radius-md); padding: 14px; margin-bottom: 10px; cursor: pointer;
   }
+  .payment-method-card.hidden { display: none; }
   .payment-method-card:has(input:checked) { border-color: var(--color-brand-orange); background: #fdf7f1; }
   .payment-method-card input { margin-top: 3px; width: 16px; height: 16px; accent-color: var(--color-brand-orange); flex-shrink: 0; }
   .payment-method-card strong { display: block; font-size: 14px; }
@@ -137,6 +139,7 @@
             <p class="t-caption" style="color:var(--text-muted);margin:14px 0">Mit dem Absenden akzeptierst du unsere <a href="/agb.html">AGB</a> und die <a href="/datenschutz.html">Datenschutzerklärung</a>.</p>
 
             <button class="btn btn-primary btn-sm" type="submit" id="pay-btn" style="width:100%;justify-content:center">Jetzt bezahlen</button>
+            <div id="paypal-button-container" class="hidden" style="margin-top:4px"></div>
           </form>
         </div>
       </div>
@@ -162,6 +165,10 @@
     }
     document.getElementById('payment-content').style.display = 'grid';
     document.getElementById('payment-event-label').textContent = cart.eventLabel;
+
+    var buyerRaw = sessionStorage.getItem('bl_buyer');
+    var buyer = null;
+    try { buyer = buyerRaw ? JSON.parse(buyerRaw) : null; } catch (eBuyer) {}
 
     var linesEl = document.getElementById('payment-lines');
     function formatMoney(n) { return n.toFixed(2).replace('.', ',') + ' €'; }
@@ -197,6 +204,56 @@
       document.getElementById('sepa-fields').style.display = 'block';
     }
 
+    /* Einzelticket: echte PayPal-Buttons statt Formular-Submit. Der Order-Erstellen-
+       Webhook berechnet den Preis serverseitig neu (inkl. Gutschein-Pruefung) und
+       liefert eine echte PayPal-Order-ID; erst nach PayPal-Bestaetigung (Capture)
+       wird die pretix-Order angelegt. */
+    if (cart.productType === 'einzelticket') {
+      document.getElementById('pay-btn').classList.add('hidden');
+      var paypalContainer = document.getElementById('paypal-button-container');
+      paypalContainer.classList.remove('hidden');
+
+      var PAYPAL_CLIENT_ID = 'BAAOl2K5Out1-IOUhPHJZYF4dKreSwFFEmJQxB8VP8L0fpOm95gxlfqppYMfyu7RLiIaWukS6Ei5doDvVI';
+      var ORDER_CREATE_URL = 'https://blev.app.n8n.cloud/webhook/einzelticket-paypal-order-erstellen';
+      var CAPTURE_URL = 'https://blev.app.n8n.cloud/webhook/einzelticket-paypal-capture-erfassen';
+
+      var sdkScript = document.createElement('script');
+      sdkScript.src = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(PAYPAL_CLIENT_ID) + '&currency=EUR&intent=capture';
+      sdkScript.onload = function () {
+        var currentReference = null;
+        paypal.Buttons({
+          style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
+          createOrder: function () {
+            return fetch(ORDER_CREATE_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ buyer: buyer, cart: cart })
+            }).then(function (res) { return res.json(); }).then(function (data) {
+              if (!data.ok) throw new Error(data.error || 'Die Bestellung konnte nicht vorbereitet werden.');
+              currentReference = data.reference;
+              return data.orderId;
+            });
+          },
+          onApprove: function () {
+            return fetch(CAPTURE_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ reference: currentReference })
+            }).then(function (res) { return res.json(); }).then(function (result) {
+              if (!result.ok) throw new Error(result.error || 'Die Zahlung konnte nicht bestätigt werden.');
+              var order = { orderNumber: result.reference, cart: cart, buyer: buyer, paymentMethod: 'paypal' };
+              sessionStorage.setItem('bl_order', JSON.stringify(order));
+              window.location.href = '/tickets/confirmation.html';
+            });
+          },
+          onError: function (err) {
+            alert((err && err.message) || 'Es gab ein Problem mit der PayPal-Zahlung. Bitte versuche es erneut oder schreib uns direkt an info@basketball-loewen.com.');
+          }
+        }).render('#paypal-button-container');
+      };
+      document.body.appendChild(sdkScript);
+    }
+
     var sepaFields = document.getElementById('sepa-fields');
     document.querySelectorAll('input[name="paymethod"]').forEach(function (radio) {
       radio.addEventListener('change', function () {
@@ -206,6 +263,10 @@
 
     document.getElementById('payment-form').addEventListener('submit', function (e) {
       e.preventDefault();
+      /* Einzelticket laeuft ueber die PayPal-Buttons oben (siehe initEinzelticketPayPal-Block),
+         nicht ueber diesen Formular-Submit — der Submit-Button ist dafuer ausgeblendet. */
+      if (cart.productType === 'einzelticket') return;
+
       var method = document.querySelector('input[name="paymethod"]:checked').value;
       var kontoinhaber = '', iban = '';
       if (method === 'sepa') {
@@ -218,21 +279,13 @@
         }
       }
 
-      var raw = sessionStorage.getItem('bl_buyer');
-      var buyer = null;
-      try { buyer = raw ? JSON.parse(raw) : null; } catch (e2) {}
-
       /* Dauerkarte läuft asynchron über n8n: Bestellung landet zuerst in einer
          Data Table, die eigentliche pretix-Buchung folgt als Folgeschritt.
          Deshalb hier kein lokal erzeugter Fake-Bestellcode, sondern die vom
          Workflow zurückgegebene Mandatsreferenz. */
-      if (cart.productType === 'dauerkarte' || cart.productType === 'einzelticket') {
-        var webhookUrl = cart.productType === 'dauerkarte'
-          ? 'https://blev.app.n8n.cloud/webhook/dauerkarte-bestellung'
-          : 'https://blev.app.n8n.cloud/webhook/einzelticket-bestellung';
-        var payload = cart.productType === 'dauerkarte'
-          ? { buyer: buyer, cart: cart, sepa: { kontoinhaber: kontoinhaber, iban: iban } }
-          : { buyer: buyer, cart: cart };
+      if (cart.productType === 'dauerkarte') {
+        var webhookUrl = 'https://blev.app.n8n.cloud/webhook/dauerkarte-bestellung';
+        var payload = { buyer: buyer, cart: cart, sepa: { kontoinhaber: kontoinhaber, iban: iban } };
         var payBtn = document.getElementById('pay-btn');
         var originalBtnText = payBtn.textContent;
         payBtn.disabled = true;

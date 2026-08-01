@@ -85,6 +85,10 @@
     this.northZones = opts.northZones; // z.B. ["D", "E", "F"]
     this.southZones = opts.southZones; // z.B. ["A", "B", "C"]
     this.excludeCategories = opts.excludeCategories || []; // z.B. ["VIP"] — Reihen dieser Kategorie werden gar nicht angezeigt (kein Produkt dafür)
+    // Fuer die Insgesamt-Auslastungszahl zaehlt die tatsaechliche Hallenkapazitaet,
+    // auch wenn eine Kategorie hier nicht einzeln kaufbar ist (excludeCategories) —
+    // daher ein eigener, standardmaessig leerer Ausschluss statt excludeCategories.
+    this.occupancyExcludeCategories = opts.occupancyExcludeCategories || [];
     this.cartEl = opts.cartEl;
     this.totalEl = opts.totalEl;
     this.ctaEl = opts.ctaEl;
@@ -515,7 +519,7 @@
     if (!zone) return null;
     var gesamt = 0, belegt = 0;
     this._categoryGroups(zone)
-      .filter(function (g) { return self.excludeCategories.indexOf(g.category) === -1; })
+      .filter(function (g) { return self.occupancyExcludeCategories.indexOf(g.category) === -1; })
       .forEach(function (g) {
         g.rows.forEach(function (r) {
           r.seats.forEach(function (seat) {
