@@ -33,12 +33,20 @@
   .fanshop-product h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; line-height: 1.3; }
   .fanshop-product .fanshop-price { font-weight: 700; margin-bottom: 10px; }
   .fanshop-product .seatplan-stepper { width: 100%; justify-content: center; }
-  .fanshop-more-card {
-    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
-    background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius-lg);
-    padding: 18px 20px; margin-top: 20px;
+  a.fanshop-teaser { text-decoration: none; color: inherit; display: block; }
+  a.fanshop-teaser:hover { border-color: var(--color-brand-orange); }
+  .fanshop-teaser-img { position: relative; }
+  .fanshop-teaser-stamp {
+    position: absolute; top: 22%; left: -12%; width: 124%;
+    background: var(--color-brand-navy); color: #fff; text-align: center;
+    font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em;
+    padding: 6px 0; transform: rotate(-10deg); box-shadow: 0 2px 8px rgba(0,0,0,.3);
   }
-  .fanshop-more-card p { margin: 0; flex: 1; min-width: 220px; }
+  .fanshop-teaser-shop {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 13px; font-weight: 600; color: var(--color-brand-orange-text);
+  }
+  a.fanshop-teaser:hover .fanshop-teaser-shop { text-decoration: underline; }
   .fanshop-giftcard-card { display: grid; grid-template-columns: 260px 1fr; gap: 8px 24px; padding: 20px; margin-bottom: 24px; align-items: center; }
   @media (max-width: 680px) { .fanshop-giftcard-card { grid-template-columns: 1fr; } }
   .fanshop-giftcard-heading { grid-column: 1 / -1; }
@@ -84,12 +92,6 @@
           </div>
 
           <div class="fanshop-products mt-6" id="fanshop-products"></div>
-
-          <div class="fanshop-more-card">
-            <i data-lucide="shopping-bag" class="icon-28" style="color:var(--color-brand-orange);flex-shrink:0"></i>
-            <p class="t-body-sm">Weitere Produkte und unsere Design-Linie findest du in unserem Fanshop von Erfurt-Mitte.</p>
-            <a class="btn btn-primary btn-sm" href="https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt" target="_blank" rel="noopener">Weitere Produkte <i data-lucide="arrow-up-right" class="icon-16"></i></a>
-          </div>
         </div>
 
         <div class="card" id="order-summary-card" style="padding:24px;background:var(--bg-subtle)">
@@ -127,6 +129,13 @@
       { id: 'gutschein-20', name: 'Gutschein 20,00 €', price: 20.00, category: 'gutschein' },
       { id: 'gutschein-50', name: 'Gutschein 50,00 €', price: 50.00, category: 'gutschein' }
     ];
+    /* Teaser-Kacheln fuer Produkte, die (noch) nicht im eigenen Fanshop bestellbar sind,
+       sondern bei Kooperationspartnern - verlinken raus statt Warenkorb-Funktion. */
+    var TEASERS = [
+      { name: 'Kaffee-Kollektion', image: '/assets/img/shop-kaffee-loewen.webp', shopName: 'DenkMahl', shopUrl: 'https://denkmahl-kaffee.de/' },
+      { name: 'Pullover-Kollektion', image: '/assets/img/stock-shop-hoodie.webp', shopName: 'Erfurt Mitte', shopUrl: 'https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt' },
+      { name: 'T-Shirt-Kollektion', image: '/assets/img/stock-shop-tshirt.webp', shopName: 'Rays Shop', shopUrl: '' }
+    ];
     var cart = {}; // id -> qty
 
     function formatMoney(n) { return n.toFixed(2).replace('.', ',') + ' €'; }
@@ -154,6 +163,15 @@
         '<div class="fanshop-price">' + formatMoney(p.price) + '</div>' +
         stepperHtml(p) +
       '</div>';
+    }).join('') + TEASERS.map(function (t) {
+      return '<a class="card fanshop-product fanshop-teaser" style="padding:16px" href="' + t.shopUrl + '" target="_blank" rel="noopener">' +
+        '<div class="fanshop-product-img fanshop-teaser-img">' +
+          '<img loading="lazy" src="' + t.image + '" alt="' + t.name + '" />' +
+          '<span class="fanshop-teaser-stamp">Bald auch hier zu bestellen</span>' +
+        '</div>' +
+        '<h4>' + t.name + '</h4>' +
+        '<span class="fanshop-teaser-shop">Zum Shop von ' + t.shopName + ' <i data-lucide="arrow-up-right" class="icon-14"></i></span>' +
+      '</a>';
     }).join('');
     if (window.lucide) window.lucide.createIcons();
 
@@ -227,7 +245,7 @@
             : '<button type="button" data-remove="' + l.id + '">entfernen</button>';
           return '<div class="seatplan-cart-item">' +
             '<div>' + l.qty + '× ' + l.label + '<br><span class="t-caption">' + formatMoney(l.unitPrice) + ' je Stück</span></div>' +
-            '<div class="seatplan-cart-item-right"><span>' + formatMoney(l.lineTotal) + '</span>' + qtyControl + '</div>' +
+            '<div class="seatplan-cart-item-right">' + qtyControl + '<span>' + formatMoney(l.lineTotal) + '</span></div>' +
           '</div>';
         }).join('');
         ctaEl.disabled = false;
