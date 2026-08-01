@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Spenden — Basketball Löwen Erfurt</title>
-<meta name="description" content="Unterstütze die Basketball Löwen Erfurt mit einer Spende." />
+<meta name="description" content="Unterstütze die Basketball Löwen Erfurt mit einer Spende — für den LÖWENPARK oder unsere soziale Sportidee." />
 <meta name="keywords" content="Basketball, Thüringen, Erfurt, Sport, Bewegung, Soziale Sportidee, Trainieren, Jugendsozialarbeit, Aufstieg, Erfolgreich, Nummer 1" />
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png" />
@@ -23,16 +23,80 @@
   <section class="hero-photo hero-half">
     <div class="container">
     <span class="eyebrow">Spenden</span>
-    <h1>Hilf uns, groß zu werden.</h1>
+    <h1>Hilf uns, <span class="kw">groß<span class="swoosh" aria-hidden="true"></span></span> zu werden.</h1>
     <p class="lead">Deine Spende hilft zum Beispiel beim LÖWENPARK oder unserer sozialen Sportidee (BasKIDball, SPORT VERNETZT, WAID-Löwen).</p>
     </div>
     <span class="photo-note">Platzhalterbild — echtes Foto folgt</span>
   </section>
-  <section class="section">
-    <div class="container">
-      <div class="cta-panel">
-        <a class="btn btn-primary" href="#" aria-disabled="true" onclick="return false;">Online spenden (folgt in Kürze)</a>
-        <p class="mt-4">Du möchtest jetzt schon spenden? Schreib uns: <a href="mailto:info@basketball-loewen.com">info@basketball-loewen.com</a></p>
+
+  <section class="section bg-subtle">
+    <div class="container container-narrow">
+      <div class="card form-panel" id="spenden-panel">
+
+        <div class="field">
+          <span style="display:block;font-weight:var(--weight-semibold);margin-bottom:10px">Betrag</span>
+          <div class="filter-row" id="spenden-betrag-row" role="group" aria-label="Spendenbetrag auswählen">
+            <button type="button" class="filter-chip" data-amount="20">20 €</button>
+            <button type="button" class="filter-chip" data-amount="50">50 €</button>
+            <button type="button" class="filter-chip is-active" data-amount="100">100 €</button>
+            <button type="button" class="filter-chip" data-amount="250">250 €</button>
+            <button type="button" class="filter-chip" data-amount="500">500 €</button>
+          </div>
+          <label class="sr-only" for="spenden-betrag-custom">Individueller Betrag in Euro</label>
+          <input type="number" id="spenden-betrag-custom" min="1" step="1" placeholder="oder individueller Betrag in €" style="margin-top:10px" />
+        </div>
+
+        <div class="field">
+          <label for="spenden-zweck">Zweck</label>
+          <select id="spenden-zweck">
+            <option value="allgemein" selected>Nicht zweckgebunden — dort, wo es am meisten hilft</option>
+            <option value="loewenpark">LÖWENPARK</option>
+            <option value="baskidball">BasKIDball</option>
+            <option value="sportvernetzt">SPORT VERNETZT</option>
+            <option value="waidloewen">WAID-Löwen</option>
+          </select>
+        </div>
+
+        <div class="field-checkbox" style="align-items:flex-start;margin:16px 0 8px">
+          <input type="checkbox" id="spenden-bescheinigung" class="mt-1" />
+          <label for="spenden-bescheinigung" class="t-body-sm">Zuwendungsbestätigung erhalten (für die Steuererklärung)</label>
+        </div>
+
+        <div id="spenden-bescheinigung-felder" class="hidden">
+          <div class="field">
+            <label class="sr-only" for="spenden-vorname">Vorname</label>
+            <input type="text" id="spenden-vorname" autocomplete="given-name" placeholder="Vorname" />
+          </div>
+          <div class="field">
+            <label class="sr-only" for="spenden-nachname">Nachname</label>
+            <input type="text" id="spenden-nachname" autocomplete="family-name" placeholder="Nachname" />
+          </div>
+          <div class="field">
+            <label class="sr-only" for="spenden-strasse">Straße und Hausnummer</label>
+            <input type="text" id="spenden-strasse" autocomplete="street-address" placeholder="Straße und Hausnummer" />
+          </div>
+          <div class="field">
+            <label class="sr-only" for="spenden-plz">PLZ</label>
+            <input type="text" id="spenden-plz" autocomplete="postal-code" placeholder="PLZ" />
+          </div>
+          <div class="field">
+            <label class="sr-only" for="spenden-ort">Ort</label>
+            <input type="text" id="spenden-ort" autocomplete="address-level2" placeholder="Ort" />
+          </div>
+          <div class="field">
+            <label class="sr-only" for="spenden-email">E-Mail</label>
+            <input type="email" id="spenden-email" autocomplete="email" placeholder="E-Mail" />
+          </div>
+          <p class="hint">Wir nutzen diese Angaben ausschließlich, um dir die Zuwendungsbestätigung zuzusenden. Mehr dazu in unserer <a href="/datenschutz.html">Datenschutzerklärung</a>.</p>
+        </div>
+
+        <a href="#" class="btn btn-primary btn-block" id="spenden-paypal-btn" aria-disabled="true" title="PayPal-Spende folgt in Kürze">Mit PayPal spenden (folgt in Kürze)</a>
+
+        <div class="mt-6" style="text-align:center;padding-top:20px;border-top:1px solid var(--border)">
+          <p class="t-body-sm" style="font-weight:var(--weight-semibold);margin-bottom:6px">Lieber per Überweisung spenden?</p>
+          <p class="t-body-sm" style="margin-bottom:6px">Empfänger: Basketball Löwen e.V.<br />IBAN: DE68 8205 1000 0163 1313 76</p>
+          <p class="hint">Bitte gib als Verwendungszweck deinen Namen und bei Bedarf den Zweck an (z. B. „LÖWENPARK"). Für eine Zuwendungsbestätigung schreib uns zusätzlich kurz an <a href="mailto:info@basketball-loewen.com">info@basketball-loewen.com</a>.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -41,5 +105,70 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="/js/nav.js?v=1785398309"></script>
 <script src="/js/include.js?v=1785398309"></script>
+<script>
+  /* PayPal-Spendenbutton: sobald Markos PayPal-Business-Konto steht, hier die
+     echte Business-E-Mail/ID eintragen und die Zeilen mit "aria-disabled"
+     entfernen — der Rest der Seite (Betrag/Zweck/Bescheinigung) ist bereits
+     voll funktionsfähig und muss dafür nicht angefasst werden. */
+  var PAYPAL_BUSINESS_ID = '';
+
+  var betragRow = document.getElementById('spenden-betrag-row');
+  var customInput = document.getElementById('spenden-betrag-custom');
+  var selectedAmount = 100;
+
+  betragRow.querySelectorAll('.filter-chip').forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      betragRow.querySelectorAll('.filter-chip').forEach(function (c) { c.classList.remove('is-active'); });
+      chip.classList.add('is-active');
+      selectedAmount = Number(chip.dataset.amount);
+      customInput.value = '';
+    });
+  });
+  customInput.addEventListener('input', function () {
+    if (customInput.value) {
+      betragRow.querySelectorAll('.filter-chip').forEach(function (c) { c.classList.remove('is-active'); });
+      selectedAmount = Number(customInput.value);
+    }
+  });
+
+  var bescheinigungCheck = document.getElementById('spenden-bescheinigung');
+  var bescheinigungFelder = document.getElementById('spenden-bescheinigung-felder');
+  bescheinigungCheck.addEventListener('change', function () {
+    bescheinigungFelder.classList.toggle('hidden', !this.checked);
+  });
+
+  var ZWECK_LABEL = {
+    allgemein: '',
+    loewenpark: 'LÖWENPARK',
+    baskidball: 'BasKIDball',
+    sportvernetzt: 'SPORT VERNETZT',
+    waidloewen: 'WAID-Löwen'
+  };
+
+  document.getElementById('spenden-paypal-btn').addEventListener('click', function (e) {
+    e.preventDefault();
+    if (!PAYPAL_BUSINESS_ID) return;
+
+    var amount = selectedAmount > 0 ? selectedAmount : 100;
+    var zweck = document.getElementById('spenden-zweck').value;
+    var itemName = 'Spende Basketball Löwen Erfurt' + (ZWECK_LABEL[zweck] ? ' — ' + ZWECK_LABEL[zweck] : '');
+
+    var custom = '';
+    if (bescheinigungCheck.checked) {
+      var vorname = document.getElementById('spenden-vorname').value;
+      var nachname = document.getElementById('spenden-nachname').value;
+      var strasse = document.getElementById('spenden-strasse').value;
+      var plz = document.getElementById('spenden-plz').value;
+      var ort = document.getElementById('spenden-ort').value;
+      var email = document.getElementById('spenden-email').value;
+      custom = 'Zuwendungsbestätigung: ' + vorname + ' ' + nachname + ', ' + strasse + ', ' + plz + ' ' + ort + ', ' + email;
+    }
+
+    var paypalUrl = 'https://www.paypal.com/donate?business=' + encodeURIComponent(PAYPAL_BUSINESS_ID) +
+      '&amount=' + amount + '&currency_code=EUR&item_name=' + encodeURIComponent(itemName);
+    if (custom) paypalUrl += '&custom=' + encodeURIComponent(custom);
+    window.open(paypalUrl, '_blank', 'noopener');
+  });
+</script>
 </body>
 </html>
