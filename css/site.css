@@ -2204,7 +2204,7 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
   /* Über-uns: Soziale Sportidee + Werte sollen mobil einspaltig stehen (die
      globale 2-Spalten-Regel oben ist für andere .grid-4 wie das Partner-Logo-
      Raster auf der Startseite gedacht) — deshalb hier gezielt überschrieben. */
-  #soziale-sportidee .grid-4, #werte .grid-4 { grid-template-columns: 1fr; }
+  #soziale-sportidee .grid-4, #werte .grid-4, #warum-partner .grid-4 { grid-template-columns: 1fr; }
   /* Die Desktop-Regel für die 4er-Reihe (width: 25%) greift rechnerisch auch
      hier, sobald die Positions-/Teileranzahl zufällig passt — bei 2 Spalten
      muss die Lücke aber die Hälfte statt ein Viertel der Breite bekommen,
