@@ -39,15 +39,16 @@
     padding: 18px 20px; margin-top: 20px;
   }
   .fanshop-more-card p { margin: 0; flex: 1; min-width: 220px; }
-  .fanshop-giftcard-card { display: grid; grid-template-columns: 220px 1fr; gap: 24px; padding: 20px; margin-bottom: 24px; }
-  @media (max-width: 600px) { .fanshop-giftcard-card { grid-template-columns: 1fr; } }
-  .fanshop-giftcard-img { border-radius: var(--radius-md); overflow: hidden; background: var(--color-brand-navy); }
+  .fanshop-giftcard-card { display: flex; flex-direction: column; gap: 20px; padding: 20px; margin-bottom: 24px; }
+  .fanshop-giftcard-img { border-radius: var(--radius-md); overflow: hidden; line-height: 0; }
+  .fanshop-giftcard-img img { width: 100%; height: auto; display: block; }
   .fanshop-giftcard-amount-row {
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
     padding: 10px 0; border-bottom: 1px solid var(--bg-muted);
   }
   .fanshop-giftcard-amount-row:last-child { border-bottom: none; }
   .fanshop-giftcard-amount-row strong { font-size: 15px; }
+  .giftcard-toggle-btn { min-width: 132px; justify-content: center; }
 </style>
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
@@ -71,26 +72,7 @@
         <div>
           <div class="card fanshop-giftcard-card">
             <div class="fanshop-giftcard-img">
-              <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block">
-                <defs>
-                  <linearGradient id="gcGrad" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stop-color="#00122D" />
-                    <stop offset="100%" stop-color="#0028AA" />
-                  </linearGradient>
-                </defs>
-                <rect width="220" height="220" fill="url(#gcGrad)" />
-                <g transform="rotate(-7 110 112)">
-                  <rect x="20" y="80" width="180" height="112" rx="14" fill="#fff" />
-                  <rect x="20" y="80" width="180" height="26" rx="14" fill="#E5710B" />
-                  <rect x="20" y="93" width="180" height="13" fill="#E5710B" />
-                  <circle cx="164" cy="152" r="26" fill="none" stroke="#00122D" stroke-width="3" />
-                  <path d="M164 126 A26 26 0 0 1 164 178" fill="none" stroke="#00122D" stroke-width="1.5" />
-                  <line x1="138" y1="152" x2="190" y2="152" stroke="#00122D" stroke-width="1.5" />
-                  <text x="34" y="140" font-family="Lexend, sans-serif" font-weight="700" font-size="19" fill="#00122D">GUTSCHEIN</text>
-                  <text x="34" y="162" font-family="Lexend, sans-serif" font-weight="400" font-size="10" fill="#8a8f9a">Basketball Löwen Erfurt</text>
-                </g>
-                <path d="M10,206 C70,190 150,222 210,204" stroke="#E5710B" stroke-width="3" fill="none" opacity=".7" />
-              </svg>
+              <img src="/assets/img/fanshop-gutschein-karte.webp" alt="Löwen-Gutschein — Schenk was Großes. Erhältlich im Wert von 10 €, 20 € oder 50 €." width="1000" height="616" loading="lazy" />
             </div>
             <div>
               <h4 class="t-h4 mb-2">Der Löwen-Gutschein</h4>
@@ -175,8 +157,29 @@
 
     var giftcardRows = document.getElementById('fanshop-giftcard-rows');
     giftcardRows.innerHTML = PRODUCTS.filter(function (p) { return p.category === 'gutschein'; }).map(function (p) {
-      return '<div class="fanshop-giftcard-amount-row"><strong>' + formatMoney(p.price) + '</strong>' + stepperHtml(p) + '</div>';
+      return '<div class="fanshop-giftcard-amount-row"><strong>' + formatMoney(p.price) + '</strong>' +
+        '<button type="button" class="btn btn-sm btn-outline-orange giftcard-toggle-btn" data-product="' + p.id + '" aria-pressed="false">' +
+          '<i data-lucide="plus" class="icon-16"></i>Hinzufügen' +
+        '</button></div>';
     }).join('');
+
+    function syncGiftcardButton(btn) {
+      var selected = (cart[btn.dataset.product] || 0) > 0;
+      btn.setAttribute('aria-pressed', String(selected));
+      btn.classList.toggle('btn-outline-orange', !selected);
+      btn.classList.toggle('btn-primary', selected);
+      btn.innerHTML = selected
+        ? '<i data-lucide="check" class="icon-16"></i>Ausgewählt'
+        : '<i data-lucide="plus" class="icon-16"></i>Hinzufügen';
+    }
+
+    document.querySelectorAll('.giftcard-toggle-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = this.dataset.product;
+        var selected = (cart[id] || 0) > 0;
+        setQty(id, selected ? 0 : 1);
+      });
+    });
 
     var cartEl = document.getElementById('fanshop-cart');
     var totalEl = document.getElementById('fanshop-total');
@@ -231,6 +234,9 @@
 
       ctaEl.dataset.lines = JSON.stringify(lines);
       ctaEl.dataset.total = total;
+
+      document.querySelectorAll('.giftcard-toggle-btn').forEach(syncGiftcardButton);
+      if (window.lucide) window.lucide.createIcons();
     }
     renderCart();
 
