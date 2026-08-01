@@ -159,7 +159,7 @@
     wall.innerHTML = hauptPartner.map(partnerTileHTML).join('');
 
     var wallSponsoren = document.getElementById('partner-wall-sponsoren');
-    var sponsorenPartner = data.partner.filter(function (p) { return p.tier === 'sponsoren'; }).sort(byName);
+    var sponsorenPartner = data.partner.filter(function (p) { return p.tier === 'sponsoren'; });
     wallSponsoren.innerHTML = sponsorenPartner.map(partnerTileHTML).join('');
 
     var wallFoerderpartner = document.getElementById('partner-wall-foerderpartner');
@@ -167,7 +167,7 @@
     wallFoerderpartner.innerHTML = foerderpartner.map(partnerTileHTML).join('');
 
     var wallWeitere = document.getElementById('partner-wall-weitere');
-    var weiterePartner = data.partner.filter(function (p) { return p.tier === 'weitere'; }).sort(byName);
+    var weiterePartner = data.partner.filter(function (p) { return p.tier === 'weitere'; });
     wallWeitere.innerHTML = weiterePartner.map(partnerTileHTML).join('');
 
     var chips = document.querySelectorAll('.filter-chip');
