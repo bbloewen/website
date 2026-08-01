@@ -920,6 +920,10 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .contact-person-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .contact-person-photo span { font-size: 10px; text-align: center; line-height: 1.2; }
 .contact-person-card-centered { justify-content: center; }
+/* Nur auf der Sponsoren-Seite: André-Foto sitzt im Originalfoto zu hoch im Kreis,
+   Ausschnitt nach unten verschieben (Marko, 01.08.2026). Eigene Klasse statt an
+   .contact-person-photo zu drehen, weil die Basisklasse auf 12 weiteren Seiten läuft. */
+.contact-person-photo-andre img { object-position: center 30%; }
 
 /* Rückblick-Sektion Camps-Seite: Artikel + 4er-Foto-Grid in einer gemeinsamen
    Card, Fotos exakt so hoch wie der Artikeltext (align-items:stretch) statt
@@ -961,7 +965,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   perspective: 1200px; cursor: pointer; display: block; text-decoration: none; color: inherit;
 }
 .partner-tile[hidden] { display: none; }
-.partner-tile-top, .partner-tile-wirkungspartner, .partner-tile.is-enlarged { grid-column: span 2; }
+.partner-tile-top, .partner-tile.is-enlarged { grid-column: span 2; }
 .partner-tile-inner {
   position: relative; width: 100%; height: 100%;
   transition: transform var(--dur-flip) var(--ease-out); transform-style: preserve-3d;
@@ -985,17 +989,17 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 }
 .partner-tile-front img { max-width: 100%; max-height: 100%; object-fit: contain; }
 .partner-tile-top .partner-tile-front, .partner-tile.is-enlarged .partner-tile-front { padding: 22px; font-size: 20px; font-weight: var(--weight-extrabold); border: 2px solid var(--color-brand-orange); }
-/* .partner-tile.partner-tile-wirkungspartner (statt nur .partner-tile-wirkungspartner)
-   für gleiche Selektor-Spezifität wie .partner-tile.is-enlarged oben — sonst
-   gewinnt bei gefilterten Ansichten (Förderpartner als letzte Einzelkachel,
-   dadurch zusätzlich .is-enlarged) die orangene Randfarbe statt der blauen. */
-.partner-tile.partner-tile-wirkungspartner .partner-tile-front { padding: 22px; font-size: 20px; font-weight: var(--weight-extrabold); border: 2px solid var(--color-brand-blue); }
 .partner-tile-hauptsponsoren .partner-tile-front { padding: 8px; font-size: 18px; font-weight: var(--weight-semibold); border: 2px solid var(--color-brand-orange); }
+/* Förderpartner (wirkungspartner): eigenes dreispaltiges Grid seit 01.08.2026,
+   da genau drei Partner (Kinnings Foundation, KoWo, Salus BKK) — jede Kachel
+   füllt exakt eine Spalte, alle drei blau umrandet statt orange. */
+.partner-wall-foerderpartner { grid-template-columns: repeat(3, 1fr); grid-auto-rows: 110px; gap: 16px; }
+.partner-tile-wirkungspartner .partner-tile-front { padding: 22px; font-size: 20px; font-weight: var(--weight-extrabold); border: 2px solid var(--color-brand-blue); }
 /* 'sponsoren' braucht eine eigene, kleinere Kachel-Box (nicht nur weniger
-   Innenabstand) — alle Kacheln in .partner-wall teilen sich sonst dieselbe
-   Grid-Zeilenhöhe (110px), padding allein verändert die sichtbare Kachel-/
-   Logogröße kaum. Explizite Höhe zwischen Hauptsponsoren (füllt die 110px-
-   Zeile voll aus) und Weitere Partner (64px eigenes Grid) (Marko, 31.07.2026). */
+   Innenabstand) — eigenes sechsspaltiges Grid seit 01.08.2026 (statt vier
+   Logos passen jetzt sechs pro Zeile), getrennt von Hauptsponsoren/Top, die
+   ihre größere Kachelgröße in .partner-wall behalten. */
+.partner-wall-sponsoren { grid-template-columns: repeat(6, 1fr); grid-auto-rows: 85px; gap: 12px; }
 .partner-tile-sponsoren { height: 85px; align-self: center; }
 .partner-tile-sponsoren .partner-tile-front { padding: 10px; font-size: 14px; font-weight: var(--weight-medium); border: 1px solid var(--color-brand-orange); }
 .partner-tile-weitere .partner-tile-front { padding: 10px; font-size: 13px; font-weight: var(--weight-medium); }
@@ -1011,7 +1015,9 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .partner-tile-back .partner-desc { font-size: 12px; color: rgba(255,255,255,.8); line-height: 1.35; }
 @media (max-width: 700px) {
   .partner-wall { grid-template-columns: repeat(2, 1fr); }
-  .partner-tile-top, .partner-tile-wirkungspartner, .partner-tile.is-enlarged { grid-column: span 2; }
+  .partner-tile-top, .partner-tile.is-enlarged { grid-column: span 2; }
+  .partner-wall-foerderpartner { grid-template-columns: repeat(1, 1fr); }
+  .partner-wall-sponsoren { grid-template-columns: repeat(3, 1fr); }
 }
 
 /* Business-Club-Wand: 10 anonyme Platzhalter-Kacheln (noch keine echten
@@ -1542,12 +1548,15 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 }
 
 /* Hero-Variante für die Sponsoren-Seite — Maskottchen klatscht mit Fans in der Kurve,
-   Motiv sitzt rechts im Bild, links freie Wand für den Text. */
-.hero-photo.hero-sponsoring { --hero-photo-url: url('/assets/img/hero-sponsoring.webp'); background-position: 68% 38%; }
+   Motiv sitzt rechts im Bild, links freie Wand für den Text.
+   Vorübergehend (Marko, 01.08.2026): nutzt das Club-der-100-Hero-Bild als Platzhalter,
+   bis ein eigenes Foto für diese Seite da ist — einfach die URL unten zurücktauschen,
+   sobald das echte Bild vorliegt. */
+.hero-photo.hero-sponsoring { --hero-photo-url: url('/assets/img/hero-loewen-unterstuetzer.webp'); background-position: center 55%; }
 @media (max-width: 599px) {
   /* Gleiches Prinzip wie beim Freundeskreis-Hero: Bildausschnitt auf Mobil
      etwas verschoben, damit die Textbox nicht übers Maskottchen-Foto läuft. */
-  .hero-photo.hero-sponsoring { background-position: 82% 34%; }
+  .hero-photo.hero-sponsoring { background-position: center 55%; }
   /* Überschrift ist lang ("Unsere Sponsoren & Förderpartner.") — ohne
      Breitenbegrenzung würde jede umgebrochene Zeile die volle Containerbreite
      nutzen und dabei übers Foto rechts laufen. */
