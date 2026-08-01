@@ -1,9 +1,8 @@
 {
   "hinweis": "Manueller Schnappschuss aus der Notion-Kontakte-DB (View 'Freundeskreis'). Sterne sind additiv: gruen = Freundeskreis (alle), sponsor = Sponsor-Stern (orange), gesellschafter = Gesellschafter-Stern (gold) -- jemand kann mehrere/alle drei gleichzeitig haben. Zuordnung von Marko direkt bestaetigt am 21.07.2026 (nicht automatisch aus dem Unternehmen-Status abgeleitet -- vor jedem Update kurz mit Marko gegenpruefen). Kein Foto-Feld in Notion vorhanden -- optionales 'foto'-Feld hier im Snapshot, faellt auf 'initialen' zurueck wenn nicht gesetzt.",
-  "updatedAt": "27.07.2026",
+  "updatedAt": "01.08.2026",
   "mitglieder": [
     { "vorname": "Simon", "initialen": "SW", "foto": "/assets/img/freundeskreis-sw.webp", "sponsor": false, "gesellschafter": false },
-    { "vorname": "Matthias", "initialen": "MH", "foto": "/assets/img/freundeskreis-mh.webp", "sponsor": false, "gesellschafter": false },
     { "vorname": "Marko", "initialen": "MF", "foto": "/assets/img/freundeskreis-mf.webp", "sponsor": false, "gesellschafter": true },
     { "vorname": "Patrick", "initialen": "PC", "foto": "/assets/img/freundeskreis-pc.webp", "sponsor": true, "gesellschafter": false },
     { "vorname": "Wolfgang", "initialen": "WS", "foto": "/assets/img/freundeskreis-ws.webp", "sponsor": true, "gesellschafter": true },
