@@ -217,15 +217,27 @@
         ctaEl.disabled = true;
       } else {
         cartEl.innerHTML = lines.map(function (l) {
+          var qtyControl = l.category === 'gutschein'
+            ? '<span class="seatplan-stepper">' +
+                '<button type="button" data-cart-step="-1" data-cart-product="' + l.id + '" aria-label="weniger ' + l.label + '">−</button>' +
+                '<span style="min-width:20px;text-align:center;font-weight:700;font-size:11px">' + l.qty + '</span>' +
+                '<button type="button" data-cart-step="1" data-cart-product="' + l.id + '" aria-label="mehr ' + l.label + '">+</button>' +
+              '</span>'
+            : '<button type="button" data-remove="' + l.id + '">entfernen</button>';
           return '<div class="seatplan-cart-item">' +
             '<div>' + l.qty + '× ' + l.label + '<br><span class="t-caption">' + formatMoney(l.unitPrice) + ' je Stück</span></div>' +
-            '<div class="seatplan-cart-item-right"><span>' + formatMoney(l.lineTotal) + '</span>' +
-            '<button type="button" data-remove="' + l.id + '">entfernen</button></div>' +
+            '<div class="seatplan-cart-item-right"><span>' + formatMoney(l.lineTotal) + '</span>' + qtyControl + '</div>' +
           '</div>';
         }).join('');
         ctaEl.disabled = false;
         cartEl.querySelectorAll('[data-remove]').forEach(function (b) {
           b.addEventListener('click', function () { setQty(this.dataset.remove, 0); });
+        });
+        cartEl.querySelectorAll('[data-cart-step]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            var id = this.dataset.cartProduct;
+            setQty(id, (cart[id] || 0) + parseInt(this.dataset.cartStep, 10));
+          });
         });
       }
 
