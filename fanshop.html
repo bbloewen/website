@@ -39,8 +39,9 @@
     padding: 18px 20px; margin-top: 20px;
   }
   .fanshop-more-card p { margin: 0; flex: 1; min-width: 220px; }
-  .fanshop-giftcard-card { display: grid; grid-template-columns: 260px 1fr; gap: 24px; padding: 20px; margin-bottom: 24px; align-items: center; }
+  .fanshop-giftcard-card { display: grid; grid-template-columns: 260px 1fr; gap: 8px 24px; padding: 20px; margin-bottom: 24px; align-items: center; }
   @media (max-width: 680px) { .fanshop-giftcard-card { grid-template-columns: 1fr; } }
+  .fanshop-giftcard-heading { grid-column: 1 / -1; }
   .fanshop-giftcard-img { border-radius: var(--radius-md); overflow: hidden; line-height: 0; }
   .fanshop-giftcard-img img { width: 100%; height: auto; display: block; }
   .fanshop-giftcard-amount-row {
@@ -72,14 +73,14 @@
       <div class="fanshop-grid-wrap">
         <div>
           <div class="card fanshop-giftcard-card">
+            <div class="fanshop-giftcard-heading">
+              <h4 class="t-h4 mb-2">Der Löwen-Gutschein</h4>
+              <p class="t-body-sm" style="color:var(--text-muted)">Für alle, die nicht wissen, was sie schenken sollen: einlösbar für Tickets und alle eigenen Artikel im Fanshop.</p>
+            </div>
             <div class="fanshop-giftcard-img">
               <img src="/assets/img/fanshop-gutschein-karte.webp" alt="Löwen-Gutschein — Schenk was Großes. Erhältlich im Wert von 10 €, 20 € oder 50 €." width="1000" height="616" loading="lazy" />
             </div>
-            <div>
-              <h4 class="t-h4 mb-2">Der Löwen-Gutschein</h4>
-              <p class="t-body-sm" style="color:var(--text-muted);margin-bottom:12px">Für alle, die nicht wissen, was sie schenken sollen: einlösbar für Tickets und alle eigenen Artikel im Fanshop.</p>
-              <div id="fanshop-giftcard-rows"></div>
-            </div>
+            <div id="fanshop-giftcard-rows"></div>
           </div>
 
           <div class="fanshop-products mt-6" id="fanshop-products"></div>
