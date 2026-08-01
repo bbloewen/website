@@ -28,11 +28,8 @@
     aspect-ratio: 1; border-radius: var(--radius-md); background: var(--bg-subtle);
     display: flex; align-items: center; justify-content: center; margin-bottom: 12px;
   }
-  .fanshop-product-img i { width: 36px; height: 36px; color: var(--color-brand-orange); }
   .fanshop-product-img img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-md); }
   .fanshop-product h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; line-height: 1.3; }
-  .fanshop-product .fanshop-price { font-weight: 700; margin-bottom: 10px; }
-  .fanshop-product .seatplan-stepper { width: 100%; justify-content: center; }
   a.fanshop-teaser { text-decoration: none; color: inherit; display: block; }
   a.fanshop-teaser:hover { border-color: var(--color-brand-orange); }
   .fanshop-teaser-img { position: relative; }
@@ -50,7 +47,7 @@
   .fanshop-giftcard-card { display: grid; grid-template-columns: 260px 1fr; gap: 8px 24px; padding: 20px; margin-bottom: 24px; align-items: center; }
   @media (max-width: 680px) { .fanshop-giftcard-card { grid-template-columns: 1fr; } }
   .fanshop-giftcard-heading { grid-column: 1 / -1; }
-  .fanshop-giftcard-img { border-radius: var(--radius-md); overflow: hidden; line-height: 0; }
+  .fanshop-giftcard-img { border-radius: var(--radius-md); overflow: hidden; line-height: 0; background: var(--bg-subtle); padding: 16px; }
   .fanshop-giftcard-img img { width: 100%; height: auto; display: block; }
   .fanshop-giftcard-amount-row {
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
@@ -114,17 +111,6 @@
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     var PRODUCTS = [
-      { id: 'tshirt-logo', name: 'T-Shirt LOGO', price: 29.00, icon: 'shirt', image: '/assets/img/stock-shop-tshirt.webp' },
-      { id: 'tshirt-damen-logo', name: 'T-Shirt Damen LOGO', price: 29.00, icon: 'shirt', image: '/assets/img/stock-shop-tshirt.webp' },
-      { id: 'tshirt-kinder-logo', name: 'T-Shirt Kinder LOGO', price: 25.00, icon: 'baby', image: '/assets/img/stock-shop-tshirt.webp' },
-      { id: 'hoodie-stamp', name: 'Hoodie STAMP (unisex)', price: 59.00, icon: 'shirt', image: '/assets/img/stock-shop-hoodie.webp' },
-      { id: 'pullover-logo', name: 'Pullover LOGO (unisex)', price: 45.00, icon: 'shirt', image: '/assets/img/stock-shop-hoodie.webp' },
-      { id: 'sweatjacke-herren-logo', name: 'Sweatjacke Herren LOGO', price: 59.00, icon: 'shirt' },
-      { id: 'fanschal', name: 'Fanschal', price: 17.00, icon: 'gift' },
-      { id: 'tasse', name: 'Tasse', price: 9.90, icon: 'coffee', image: '/assets/img/shop-tasse-logo.webp' },
-      { id: 'pin', name: 'Pin', price: 4.95, icon: 'tag' },
-      { id: 'aufkleberbogen', name: 'Aufkleberbogen', price: 3.00, icon: 'package' },
-      { id: 'kaffee', name: 'Löwen-Kaffee, 250g', price: 9.00, icon: 'coffee', image: '/assets/img/shop-kaffee-loewen.webp' },
       { id: 'gutschein-10', name: 'Gutschein 10,00 €', price: 10.00, category: 'gutschein' },
       { id: 'gutschein-20', name: 'Gutschein 20,00 €', price: 20.00, category: 'gutschein' },
       { id: 'gutschein-50', name: 'Gutschein 50,00 €', price: 50.00, category: 'gutschein' }
@@ -140,30 +126,8 @@
 
     function formatMoney(n) { return n.toFixed(2).replace('.', ',') + ' €'; }
 
-    function stepperHtml(p) {
-      return '<span class="seatplan-stepper">' +
-          '<button type="button" data-step="-1" data-product="' + p.id + '" aria-label="weniger ' + p.name + '">−</button>' +
-          '<input type="number" inputmode="numeric" min="0" max="20" value="0" data-count="' + p.id + '" data-product="' + p.id + '" aria-label="Anzahl ' + p.name + '">' +
-          '<button type="button" data-step="1" data-product="' + p.id + '" aria-label="mehr ' + p.name + '">+</button>' +
-        '</span>';
-    }
-
-    /* Löwen-Kaffee immer direkt nach dem Gutschein (also an erster Stelle im Produkt-Grid),
-       der Rest dahinter aufsteigend nach Preis sortiert. */
-    var mainProducts = PRODUCTS.filter(function (p) { return p.category !== 'gutschein'; });
-    var kaffeeProduct = mainProducts.find(function (p) { return p.id === 'kaffee'; });
-    var restSorted = mainProducts.filter(function (p) { return p.id !== 'kaffee'; }).sort(function (a, b) { return a.price - b.price; });
-    var orderedProducts = kaffeeProduct ? [kaffeeProduct].concat(restSorted) : restSorted;
-
     var grid = document.getElementById('fanshop-products');
-    grid.innerHTML = orderedProducts.map(function (p) {
-      return '<div class="card fanshop-product" style="padding:16px">' +
-        '<div class="fanshop-product-img">' + (p.image ? '<img loading="lazy" src="' + p.image + '" alt="' + p.name + '" />' : '<i data-lucide="' + p.icon + '"></i>') + '</div>' +
-        '<h4>' + p.name + '</h4>' +
-        '<div class="fanshop-price">' + formatMoney(p.price) + '</div>' +
-        stepperHtml(p) +
-      '</div>';
-    }).join('') + TEASERS.map(function (t) {
+    grid.innerHTML = TEASERS.map(function (t) {
       return '<a class="card fanshop-product fanshop-teaser" style="padding:16px" href="' + t.shopUrl + '" target="_blank" rel="noopener">' +
         '<div class="fanshop-product-img fanshop-teaser-img">' +
           '<img loading="lazy" src="' + t.image + '" alt="' + t.name + '" />' +
@@ -206,26 +170,9 @@
     var ctaEl = document.getElementById('fanshop-cta');
 
     function setQty(id, value) {
-      var next = Math.max(0, Math.min(20, value));
-      cart[id] = next;
-      var input = document.querySelector('[data-count="' + id + '"]');
-      if (input) input.value = String(next);
+      cart[id] = Math.max(0, Math.min(20, value));
       renderCart();
     }
-
-    document.querySelectorAll('[data-step]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var id = this.dataset.product;
-        setQty(id, (cart[id] || 0) + parseInt(this.dataset.step, 10));
-      });
-    });
-    document.querySelectorAll('input[data-count]').forEach(function (input) {
-      input.addEventListener('change', function () {
-        var value = parseInt(this.value, 10);
-        if (isNaN(value)) value = 0;
-        setQty(this.dataset.product, value);
-      });
-    });
 
     function renderCart() {
       var lines = PRODUCTS.filter(function (p) { return cart[p.id] > 0; })
