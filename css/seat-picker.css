@@ -231,7 +231,16 @@
   padding: 10px 0; border-bottom: 1px solid var(--color-neutral-100); font-size: 13px; gap: 10px;
 }
 .seatplan-cart-item:last-of-type { border-bottom: none; }
-.seatplan-cart-item-right { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.seatplan-cart-item > div:first-child { min-width: 0; flex: 1 1 auto; }
+.seatplan-cart-item-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; max-width: 100%; }
+.seatplan-cart-item-right > span { white-space: nowrap; }
+/* Entfernen-Button + Preis (Einzelplatz-Zeile): Button steht optisch vor dem
+   Preis (row-reverse auf DOM-Reihenfolge Preis-dann-Button), damit bei zu
+   wenig Platz der Preis in Zeile 1 bleibt und nur der Button in Zeile 2
+   darunter umbricht, statt dass beide gemeinsam aus der Box laufen
+   (Marko, 01.08.2026). Nicht auf die Mengen-Stepper-Variante (Blockauswahl)
+   anwenden, da dort Stepper+Preis in der bestehenden Reihenfolge bleiben sollen. */
+.seatplan-cart-item-right-removable { flex-direction: row-reverse; justify-content: flex-end; gap: 4px 8px; }
 .seatplan-cart-item button {
   background: none; border: none; color: var(--color-error); font-size: 12px; cursor: pointer; padding: 2px 4px;
 }

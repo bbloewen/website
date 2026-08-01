@@ -1465,7 +1465,7 @@
             }).join('') +
             '</select>' : '') +
           '</div>' +
-          '<div class="seatplan-cart-item-right"><span>' + fmtEUR(s.price) + ' €</span>' +
+          '<div class="seatplan-cart-item-right seatplan-cart-item-right-removable"><span>' + fmtEUR(s.price) + ' €</span>' +
           '<button type="button" data-remove="' + guid + '">entfernen</button></div>';
         self.cartEl.appendChild(row);
       });
