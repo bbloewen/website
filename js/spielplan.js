@@ -204,7 +204,8 @@
 
     /* Team-Seiten (Profis/Damen/U19) verlinken mit ?team=... hierher — Filter
        direkt entsprechend vorauswählen statt "Alle" zu zeigen. */
-    var urlTeam = new URLSearchParams(location.search).get('team');
+    var urlParams = new URLSearchParams(location.search);
+    var urlTeam = urlParams.get('team');
     if (urlTeam && TEAM_META[urlTeam]) {
       var filterRow = document.getElementById('spielplan-filter');
       var chip = filterRow && filterRow.querySelector('.filter-chip[data-filter="' + urlTeam + '"]');
@@ -212,6 +213,16 @@
         filterRow.querySelectorAll('.filter-chip').forEach(function (c) { c.classList.remove('is-active'); });
         chip.classList.add('is-active');
         applyFilter(urlTeam);
+      }
+    }
+
+    /* Sponsoring-Seite verlinkt mit ?heim=1 hierher (Sichtbarkeit-Kachel) —
+       "Nur Heimspiele" direkt vorauswählen. */
+    if (urlParams.get('heim') === '1') {
+      var heimCheckbox = document.getElementById('spielplan-heim-only');
+      if (heimCheckbox) {
+        heimCheckbox.checked = true;
+        heimCheckbox.dispatchEvent(new Event('change'));
       }
     }
 
