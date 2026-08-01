@@ -72,6 +72,10 @@
             <input type="text" id="spenden-nachname" autocomplete="family-name" placeholder="Nachname" />
           </div>
           <div class="field">
+            <label class="sr-only" for="spenden-firma">Firma (optional)</label>
+            <input type="text" id="spenden-firma" autocomplete="organization" placeholder="Firma (optional)" />
+          </div>
+          <div class="field">
             <label class="sr-only" for="spenden-strasse">Straße und Hausnummer</label>
             <input type="text" id="spenden-strasse" autocomplete="street-address" placeholder="Straße und Hausnummer" />
           </div>
@@ -153,11 +157,12 @@
     if (bescheinigungCheck.checked) {
       var vorname = document.getElementById('spenden-vorname').value;
       var nachname = document.getElementById('spenden-nachname').value;
+      var firma = document.getElementById('spenden-firma').value;
       var strasse = document.getElementById('spenden-strasse').value;
       var plz = document.getElementById('spenden-plz').value;
       var ort = document.getElementById('spenden-ort').value;
       var email = document.getElementById('spenden-email').value;
-      custom = 'Zuwendungsbestätigung: ' + vorname + ' ' + nachname + ', ' + strasse + ', ' + plz + ' ' + ort + ', ' + email;
+      custom = 'Zuwendungsbestätigung: ' + vorname + ' ' + nachname + (firma ? ' (' + firma + ')' : '') + ', ' + strasse + ', ' + plz + ' ' + ort + ', ' + email;
     }
 
     var paypalUrl = 'https://www.paypal.com/donate?business=' + encodeURIComponent(PAYPAL_BUSINESS_ID) +
