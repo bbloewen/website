@@ -85,6 +85,12 @@
           </div>
         </div>
 
+        <div class="card hidden" id="confirmation-giftcard-card" style="padding:24px;margin-top:20px;text-align:center;background:var(--bg-subtle)">
+          <p class="t-caption" style="color:var(--text-muted);margin-bottom:6px">Dein Gutschein-Code</p>
+          <p class="t-h3" id="confirmation-giftcard-code" style="letter-spacing:.04em"></p>
+          <p class="t-caption" style="color:var(--text-muted);margin-top:6px">Einlösbar bei Tickets und im Fanshop. Wir haben dir den Code zusätzlich per E-Mail geschickt.</p>
+        </div>
+
         <div class="card" style="padding:24px;margin-top:20px">
           <h3 class="t-h4 mb-1">Deine Bestellung</h3>
           <p class="t-caption" style="color:var(--text-muted);margin-bottom:14px" id="confirmation-event-label"></p>
@@ -131,6 +137,12 @@
 
     var isFanshop = cart.productType === 'fanshop';
     var isDauerkarte = cart.productType === 'dauerkarte';
+    var isGutschein = isFanshop && !!order.giftcardSecret;
+
+    if (isGutschein) {
+      document.getElementById('confirmation-giftcard-code').textContent = order.giftcardSecret;
+      document.getElementById('confirmation-giftcard-card').classList.remove('hidden');
+    }
 
     function formatMoney(n) { return n.toFixed(2).replace('.', ',') + ' €'; }
 
@@ -140,20 +152,24 @@
     document.getElementById('confirmation-method').textContent = order.paymentMethod === 'sepa' ? 'SEPA-Lastschrift' : 'PayPal';
     document.getElementById('confirmation-event-label').textContent = cart.eventLabel;
 
-    var fulfillmentNote = isFanshop
-      ? 'Wir bereiten deine Bestellung vor und schicken sie dir in den nächsten Tagen an deine Adresse.'
-      : isDauerkarte
-        ? 'Wir haben deine Dauerkarten-Bestellung erhalten und legen sie jetzt für dich an.'
-        : 'Wir haben deine Bestellung erhalten und schicken dir deine Tickets in Kürze per E-Mail.';
+    var fulfillmentNote = isGutschein
+      ? 'Dein Gutschein-Code ist ab sofort gültig.'
+      : isFanshop
+        ? 'Wir bereiten deine Bestellung vor und schicken sie dir in den nächsten Tagen an deine Adresse.'
+        : isDauerkarte
+          ? 'Wir haben deine Dauerkarten-Bestellung erhalten und legen sie jetzt für dich an.'
+          : 'Wir haben deine Bestellung erhalten und schicken dir deine Tickets in Kürze per E-Mail.';
     document.getElementById('confirmation-lead').textContent = buyer.vorname ? ('Danke, ' + buyer.vorname + '! ' + fulfillmentNote) : ('Vielen Dank! ' + fulfillmentNote);
 
-    document.getElementById('confirmation-fulfillment-text').innerHTML = isFanshop
-      ? 'Wir bearbeiten deine Bestellung, sobald die Zahlung bestätigt ist, und schicken dir eine Versandbestätigung an <strong id="confirmation-email-2"></strong>.'
-      : isDauerkarte
-        ? 'Du bekommst von uns eine E-Mail mit den Lastschrift-Details und deiner Dauerkarte an <strong id="confirmation-email-2"></strong>, sobald alles bereit ist.'
-        : 'Deine Tickets als QR-Code gehen an <strong id="confirmation-email-2"></strong>, sobald die Zahlung bestätigt ist.';
+    document.getElementById('confirmation-fulfillment-text').innerHTML = isGutschein
+      ? 'Den Code findest du oben und zusätzlich in der Bestätigungsmail an <strong id="confirmation-email-2"></strong>.'
+      : isFanshop
+        ? 'Wir bearbeiten deine Bestellung, sobald die Zahlung bestätigt ist, und schicken dir eine Versandbestätigung an <strong id="confirmation-email-2"></strong>.'
+        : isDauerkarte
+          ? 'Du bekommst von uns eine E-Mail mit den Lastschrift-Details und deiner Dauerkarte an <strong id="confirmation-email-2"></strong>, sobald alles bereit ist.'
+          : 'Deine Tickets als QR-Code gehen an <strong id="confirmation-email-2"></strong>, sobald die Zahlung bestätigt ist.';
     document.getElementById('confirmation-email-2').textContent = buyer.email || 'deiner E-Mail-Adresse';
-    document.querySelector('#confirmation-fulfillment-icon i').setAttribute('data-lucide', isFanshop ? 'package' : 'mail');
+    document.querySelector('#confirmation-fulfillment-icon i').setAttribute('data-lucide', isGutschein ? 'gift' : isFanshop ? 'package' : 'mail');
     if (window.lucide) window.lucide.createIcons();
 
     document.getElementById('confirmation-lines').innerHTML = cart.lines.map(function (l) {

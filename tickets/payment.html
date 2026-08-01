@@ -254,6 +254,58 @@
       document.body.appendChild(sdkScript);
     }
 
+    /* Fanshop-Gutschein: echte PayPal-Buttons wie beim Einzelticket. Nur wenn der
+       Warenkorb ausschließlich aus Gutschein-Zeilen besteht — physische Artikel
+       laufen vorerst weiter über den alten Formular-Submit (Partner-Fulfillment
+       folgt als eigener Baustein). */
+    var istReinerGutscheinKauf = cart.productType === 'fanshop' && cart.lines.length > 0 &&
+      cart.lines.every(function (l) { return l.category === 'gutschein'; });
+    if (istReinerGutscheinKauf) {
+      document.getElementById('pay-btn').classList.add('hidden');
+      var paypalContainerFanshop = document.getElementById('paypal-button-container');
+      paypalContainerFanshop.classList.remove('hidden');
+
+      var PAYPAL_CLIENT_ID_FANSHOP = 'BAAOl2K5Out1-IOUhPHJZYF4dKreSwFFEmJQxB8VP8L0fpOm95gxlfqppYMfyu7RLiIaWukS6Ei5doDvVI';
+      var GUTSCHEIN_ORDER_CREATE_URL = 'https://blev.app.n8n.cloud/webhook/fanshop-gutschein-order-erstellen';
+      var GUTSCHEIN_CAPTURE_URL = 'https://blev.app.n8n.cloud/webhook/fanshop-gutschein-capture-erfassen';
+
+      var sdkScriptFanshop = document.createElement('script');
+      sdkScriptFanshop.src = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(PAYPAL_CLIENT_ID_FANSHOP) + '&currency=EUR&intent=capture';
+      sdkScriptFanshop.onload = function () {
+        var currentReference = null;
+        paypal.Buttons({
+          style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
+          createOrder: function () {
+            return fetch(GUTSCHEIN_ORDER_CREATE_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ buyer: buyer, cart: cart })
+            }).then(function (res) { return res.json(); }).then(function (data) {
+              if (!data.ok) throw new Error(data.error || 'Die Bestellung konnte nicht vorbereitet werden.');
+              currentReference = data.reference;
+              return data.orderId;
+            });
+          },
+          onApprove: function () {
+            return fetch(GUTSCHEIN_CAPTURE_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ reference: currentReference })
+            }).then(function (res) { return res.json(); }).then(function (result) {
+              if (!result.ok) throw new Error(result.error || 'Die Zahlung konnte nicht bestätigt werden.');
+              var order = { orderNumber: result.reference, cart: cart, buyer: buyer, paymentMethod: 'paypal', giftcardSecret: result.giftcardSecret || '' };
+              sessionStorage.setItem('bl_order', JSON.stringify(order));
+              window.location.href = '/tickets/confirmation.html';
+            });
+          },
+          onError: function (err) {
+            alert((err && err.message) || 'Es gab ein Problem mit der PayPal-Zahlung. Bitte versuche es erneut oder schreib uns direkt an info@basketball-loewen.com.');
+          }
+        }).render('#paypal-button-container');
+      };
+      document.body.appendChild(sdkScriptFanshop);
+    }
+
     var sepaFields = document.getElementById('sepa-fields');
     document.querySelectorAll('input[name="paymethod"]').forEach(function (radio) {
       radio.addEventListener('change', function () {
@@ -263,9 +315,9 @@
 
     document.getElementById('payment-form').addEventListener('submit', function (e) {
       e.preventDefault();
-      /* Einzelticket laeuft ueber die PayPal-Buttons oben (siehe initEinzelticketPayPal-Block),
-         nicht ueber diesen Formular-Submit — der Submit-Button ist dafuer ausgeblendet. */
-      if (cart.productType === 'einzelticket') return;
+      /* Einzelticket und reine Gutschein-Bestellungen laufen ueber die PayPal-Buttons
+         oben, nicht ueber diesen Formular-Submit — der Submit-Button ist dafuer ausgeblendet. */
+      if (cart.productType === 'einzelticket' || istReinerGutscheinKauf) return;
 
       var method = document.querySelector('input[name="paymethod"]:checked').value;
       var kontoinhaber = '', iban = '';

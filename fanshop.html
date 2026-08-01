@@ -206,7 +206,7 @@
 
     function renderCart() {
       var lines = PRODUCTS.filter(function (p) { return cart[p.id] > 0; })
-        .map(function (p) { return { id: p.id, label: p.name, qty: cart[p.id], unitPrice: p.price, lineTotal: Math.round(cart[p.id] * p.price * 100) / 100 }; });
+        .map(function (p) { return { id: p.id, label: p.name, category: p.category || '', qty: cart[p.id], unitPrice: p.price, lineTotal: Math.round(cart[p.id] * p.price * 100) / 100 }; });
 
       if (lines.length === 0) {
         cartEl.innerHTML = '<div class="seatplan-cart-empty">Noch keine Artikel ausgewählt.</div>';
@@ -236,7 +236,7 @@
 
     ctaEl.addEventListener('click', function () {
       var lines = JSON.parse(ctaEl.dataset.lines || '[]').map(function (l) {
-        return { label: l.label, qty: l.qty, unitPrice: l.unitPrice, lineTotal: l.lineTotal };
+        return { id: l.id, label: l.label, category: l.category || '', qty: l.qty, unitPrice: l.unitPrice, lineTotal: l.lineTotal };
       });
       sessionStorage.setItem('bl_cart', JSON.stringify({
         productType: 'fanshop',
