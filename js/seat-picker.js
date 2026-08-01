@@ -10,6 +10,16 @@
 (function () {
   'use strict';
 
+  /* Der Belegungsstatus wird nur einmal beim Laden der Seite geholt (s. _load) und nie
+     erneut nachgefragt. Kommt ein Nutzer nach abgeschlossenem Checkout per Zurück-Button
+     auf diese Seite zurück, liefert der Browser sie oft aus dem bfcache aus — mit exakt
+     dem eingefrorenen (jetzt veralteten) Belegungsstand von vor der Bestellung. Sichtbar
+     wurde das, als zwei Käuferinnen ihre gerade gekauften Plätze weiterhin als frei sahen.
+     event.persisted erkennt genau diesen bfcache-Fall; ein Reload holt den echten Stand. */
+  window.addEventListener('pageshow', function (event) {
+    if (event.persisted) window.location.reload();
+  });
+
   function fmtEUR(n) { return n.toFixed(2).replace('.', ','); }
 
   /* Geldbeträge auf Cent runden. Fließkomma-Addition liefert sonst Werte wie
