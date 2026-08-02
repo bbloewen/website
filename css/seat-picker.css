@@ -85,6 +85,15 @@
   border-color: var(--color-neutral-500);
   opacity: 1; cursor: not-allowed;
 }
+/* Für Ehrenamtliche reserviert (z.B. Block A, Reihe 1-3) — bewusst KEINE Schraffur wie
+   .taken: das sind keine verkauften Plätze, sondern von vornherein nicht zum Verkauf
+   freigegebene. Eigene, ruhige Füllfarbe (Löwen-Orange, hell) mit "EA"-Beschriftung
+   statt Sitznummer macht den Unterschied zu "vergeben" auf einen Blick klar. */
+.seatplan-seat.reserved {
+  background-color: var(--color-orange-100, #F6BE86);
+  border-color: var(--color-orange-300, #E5710B);
+  opacity: 1; cursor: not-allowed;
+}
 /* Deine Auswahl — dasselbe dunkle Blau wie die Flächen neben dem Spielfeld. */
 .seatplan-seat.selected { background: var(--color-brand-blue); border-color: var(--color-brand-navy); }
 .seatplan-seat:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 1px; }

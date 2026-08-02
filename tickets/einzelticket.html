@@ -189,6 +189,8 @@
           ? 'https://blev.app.n8n.cloud/webhook/einzelticket-sitzplatz-status?subevent=' + info.subeventId
           : null,
         pretixEvent: 'einzeltickets2627',
+        // Block A, Reihe 1-3: für Ehrenamtliche reserviert, s. tickets/dauerkarte.html.
+        reservedSeats: [{ zone: 'A', rows: ['1', '2', '3'] }],
         northZones: ['D', 'E', 'F'],
         southZones: ['A', 'B', 'C'],
         excludeCategories: ['VIP'],
