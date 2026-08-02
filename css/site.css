@@ -455,8 +455,8 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
   height: 140px; display: flex; align-items: center; justify-content: center;
   color: #fff;
 }
-.card-media.tint-blue { background: var(--gradient-blue); }
-.card-media.tint-violet { background: var(--gradient-violet); }
+.card-media.tint-blue { background: linear-gradient(135deg, var(--color-blue-50), var(--color-blue-100)); color: var(--color-blue-700); }
+.card-media.tint-violet { background: linear-gradient(135deg, #ECEAFB, #C7BEF0); color: #4A3F8C; }
 .card-media.tint-orange { background: linear-gradient(135deg, #FDF1E6, #F6BE86); color: var(--color-orange-700); }
 .card-media.tint-neutral { background: linear-gradient(135deg, #ECEEF2, #C2C8D5); color: var(--color-neutral-700); }
 .card-body { padding: 20px; }
