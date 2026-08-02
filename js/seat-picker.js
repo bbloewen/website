@@ -152,7 +152,11 @@
         if (range.zone !== zone.zone_id) return;
         zone.rows.forEach(function (row) {
           if (range.rows.indexOf(row.row_number) === -1) return;
-          row.seats.forEach(function (seat) { guids.add(seat.seat_guid); });
+          row.seats.forEach(function (seat) {
+            // maxSeatNumber: nur ein Teil der Reihe reservieren (z.B. Reihe 3, Platz 1-7).
+            if (range.maxSeatNumber && parseInt(seat.seat_number, 10) > range.maxSeatNumber) return;
+            guids.add(seat.seat_guid);
+          });
         });
       });
     });
