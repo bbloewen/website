@@ -174,12 +174,14 @@
       // nötig, damit ein produktgebundener Gutschein (z.B. nur VIP) der richtigen
       // Warenkorb-Zeile zugeordnet wird statt pauschal auf alles zu wirken.
       pretixItemCategoryMap: { 7: 'Kategorie I', 8: 'Kategorie II', 9: 'VIP' },
-      // Block A, Reihe 1-2 komplett + Reihe 3 Platz 1-7: für Ehrenamtliche reserviert
-      // (noch nicht verkaufte Plätze dort sind nicht buchbar, s. seat-picker.js
-      // _computeReservedSeatGuids). Reihe 3 ab Platz 8 bewusst wieder frei — sonst
-      // wären es zu viele reservierte Plätze.
+      // Block A, Reihe 1 komplett + Reihe 2 (außer Platz 15-17) + Reihe 3 Platz 1-7:
+      // für Ehrenamtliche reserviert (noch nicht verkaufte Plätze dort sind nicht
+      // buchbar, s. seat-picker.js _computeReservedSeatGuids). Reihe 3 ab Platz 8 und
+      // Reihe 2 Platz 15-17 bewusst wieder frei — sonst wären es zu viele reservierte
+      // Plätze.
       reservedSeats: [
-        { zone: 'A', rows: ['1', '2'] },
+        { zone: 'A', rows: ['1'] },
+        { zone: 'A', rows: ['2'], excludeSeatNumbers: ['15', '16', '17'] },
         { zone: 'A', rows: ['3'], maxSeatNumber: 7 }
       ],
       northZones: ['D', 'E', 'F'],

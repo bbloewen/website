@@ -155,6 +155,9 @@
           row.seats.forEach(function (seat) {
             // maxSeatNumber: nur ein Teil der Reihe reservieren (z.B. Reihe 3, Platz 1-7).
             if (range.maxSeatNumber && parseInt(seat.seat_number, 10) > range.maxSeatNumber) return;
+            // excludeSeatNumbers: einzelne Plätze innerhalb der Reihe ausnehmen
+            // (z.B. Reihe 2, Platz 15-17 wieder freigeben).
+            if (range.excludeSeatNumbers && range.excludeSeatNumbers.indexOf(seat.seat_number) !== -1) return;
             guids.add(seat.seat_guid);
           });
         });
