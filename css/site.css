@@ -1567,6 +1567,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 
 /* Hero-Variante für die Profi-Team-Seite — echtes Mannschaftsfoto */
 .hero-photo.hero-profis { --hero-photo-url: url('/assets/img/team-prob-hero-blur.webp'); background-position: center 20%; }
+.hero-photo.hero-nachwuchs { --hero-photo-url: url('/assets/img/hero-nachwuchs.webp'); background-position: center center; }
 /* Profis-Hero: ab Tablet-Breite bleibt die Zwei-Spalten-Aufteilung erhalten (statt wie
    sonst unter 1023px auf eine Spalte zu stapeln) und bekommt mehr Platz fuer Countdown +
    Button + Liga-Logo als der Standard-Split (1.3fr .8fr) — sonst blieb dort viel
