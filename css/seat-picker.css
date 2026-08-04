@@ -94,6 +94,18 @@
   border-color: var(--color-orange-300, #E5710B);
   opacity: 1; cursor: not-allowed;
 }
+/* "Nicht verfügbar" (NV, z.B. Block A Reihe 1-3 Sitz 1-7) — anders als .reserved (EA)
+   Plätze, die für Ehrenamtliche vorgehalten sind, ist das ein Platz, den der Verein
+   später separat vergeben will. Gleiche Orange-Familie wie .reserved (beide sind
+   "vom Verein zurückgehalten"), zusätzlich schraffiert wie .taken, damit auf einen
+   Blick klar ist: weder frei verkäuflich noch schon regulär verkauft. */
+.seatplan-seat.nv {
+  background-color: var(--color-orange-100, #F6BE86);
+  background-image: repeating-linear-gradient(45deg,
+    rgba(229, 113, 11, .55) 0 1.5px, transparent 1.5px 4.5px);
+  border-color: var(--color-orange-300, #E5710B);
+  opacity: 1; cursor: not-allowed;
+}
 /* Rollstuhlplatz (z.B. Block D/E/F, Reihe 6) — rein visuelle Zusatz-Markierung, der Platz
    bleibt ganz normal buchbar (keine .reserved/.taken-Logik). Auffälliger blauer Rand
    (Rollstuhl-Piktogramm-Blau) statt Füllfarbe, damit die Kategoriefarbe weiter erkennbar

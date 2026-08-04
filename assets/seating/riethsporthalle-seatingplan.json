@@ -6193,7 +6193,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": -9
+              "x_units": -10
             },
             {
               "seat_number": "2",
@@ -6204,7 +6204,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": -8
+              "x_units": -9
             },
             {
               "seat_number": "3",
@@ -6215,7 +6215,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": -7
+              "x_units": -8
             },
             {
               "seat_number": "4",
@@ -6226,7 +6226,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": -6
+              "x_units": -7
             },
             {
               "seat_number": "5",
@@ -6237,7 +6237,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": -5
+              "x_units": -6
             },
             {
               "seat_number": "6",
@@ -6248,7 +6248,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": -4
+              "x_units": -5
             },
             {
               "seat_number": "7",
@@ -6259,7 +6259,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": -3
+              "x_units": -4
             },
             {
               "seat_number": "8",
@@ -6417,7 +6417,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": -9
+              "x_units": -10
             },
             {
               "seat_number": "2",
@@ -6428,7 +6428,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": -8
+              "x_units": -9
             },
             {
               "seat_number": "3",
@@ -6439,7 +6439,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": -7
+              "x_units": -8
             },
             {
               "seat_number": "4",
@@ -6450,7 +6450,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": -6
+              "x_units": -7
             },
             {
               "seat_number": "5",
@@ -6461,7 +6461,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": -5
+              "x_units": -6
             },
             {
               "seat_number": "6",
@@ -6472,7 +6472,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": -4
+              "x_units": -5
             },
             {
               "seat_number": "7",
@@ -6483,7 +6483,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": -3
+              "x_units": -4
             },
             {
               "seat_number": "8",
@@ -6641,7 +6641,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": -9
+              "x_units": -10
             },
             {
               "seat_number": "2",
@@ -6652,7 +6652,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": -8
+              "x_units": -9
             },
             {
               "seat_number": "3",
@@ -6663,7 +6663,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": -7
+              "x_units": -8
             },
             {
               "seat_number": "4",
@@ -6674,7 +6674,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": -6
+              "x_units": -7
             },
             {
               "seat_number": "5",
@@ -6685,7 +6685,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": -5
+              "x_units": -6
             },
             {
               "seat_number": "6",
@@ -6696,7 +6696,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": -4
+              "x_units": -5
             },
             {
               "seat_number": "7",
@@ -6707,7 +6707,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": -3
+              "x_units": -4
             },
             {
               "seat_number": "8",
@@ -8563,7 +8563,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": 10
+              "x_units": 12
             },
             {
               "seat_number": "24",
@@ -8574,7 +8574,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": 11
+              "x_units": 13
             },
             {
               "seat_number": "25",
@@ -8585,7 +8585,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": 12
+              "x_units": 14
             }
           ]
         },
@@ -8843,7 +8843,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": 7
+              "x_units": 8
             },
             {
               "seat_number": "23",
@@ -8854,7 +8854,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": 8
+              "x_units": 9
             },
             {
               "seat_number": "24",
@@ -8865,7 +8865,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": 9
+              "x_units": 10
             },
             {
               "seat_number": "25",
@@ -8876,7 +8876,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": 10
+              "x_units": 11
             },
             {
               "seat_number": "26",
@@ -8887,7 +8887,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": 11
+              "x_units": 12
             },
             {
               "seat_number": "27",
@@ -8898,7 +8898,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": 12
+              "x_units": 13
             },
             {
               "seat_number": "28",
@@ -8909,7 +8909,7 @@
                 "y": 0
               },
               "category": "Kategorie II",
-              "x_units": 13
+              "x_units": 14
             }
           ]
         }

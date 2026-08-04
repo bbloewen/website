@@ -137,15 +137,18 @@
     // unabhängig vom Ticket-Typ (Dauerkarte + Einzelticket), daher über Zone+Reihe
     // statt einzelner Sitz-GUIDs angegeben; s. _computeReservedSeatGuids.
     this.reservedSeats = opts.reservedSeats || [];
+    // "Nicht verfügbar" (NV) — z.B. Block A Reihe 1-3 Sitz 1-7: Plätze, die der Verein
+    // später separat vergeben will, anders als .reservedSeats (für Ehrenamtliche). Gleiche
+    // Zone+Reihen-Angaben-Syntax, s. _computeSeatGuidsForRanges.
+    this.nvSeats = opts.nvSeats || [];
     this._load();
   }
 
-  /* Löst this.reservedSeats (Zone+Reihen-Angaben) gegen den geladenen Saalplan auf.
-     Über Zone/Reihe statt fester Sitz-GUIDs, damit die Regel eine geänderte
-     Sitzplan-Datei übersteht und an einer Stelle lesbar bleibt. */
-  SeatPicker.prototype._computeReservedSeatGuids = function (plan) {
+  /* Löst eine Liste von Zone+Reihen-Angaben (this.reservedSeats ODER this.nvSeats)
+     gegen den geladenen Saalplan auf. Über Zone/Reihe statt fester Sitz-GUIDs, damit die
+     Regel eine geänderte Sitzplan-Datei übersteht und an einer Stelle lesbar bleibt. */
+  SeatPicker.prototype._computeSeatGuidsForRanges = function (ranges, plan) {
     var guids = new Set();
-    var ranges = this.reservedSeats;
     if (!ranges.length || !plan) return guids;
     plan.zones.forEach(function (zone) {
       ranges.forEach(function (range) {
@@ -153,7 +156,7 @@
         zone.rows.forEach(function (row) {
           if (range.rows.indexOf(row.row_number) === -1) return;
           row.seats.forEach(function (seat) {
-            // maxSeatNumber: nur ein Teil der Reihe reservieren (z.B. Reihe 3, Platz 1-7).
+            // maxSeatNumber: nur ein Teil der Reihe erfassen (z.B. Reihe 3, Platz 1-7).
             if (range.maxSeatNumber && parseInt(seat.seat_number, 10) > range.maxSeatNumber) return;
             // excludeSeatNumbers: einzelne Plätze innerhalb der Reihe ausnehmen
             // (z.B. Reihe 2, Platz 15-17 wieder freigeben).
@@ -166,13 +169,15 @@
     return guids;
   };
 
-  /* Für Zählung/Sperrung zählt ein für Ehrenamtliche reservierter Platz genauso wie
-     ein verkaufter — beides ist "nicht verfügbar". Nur bei der Beschriftung (s.
-     _renderZone) wird unterschieden: ein BEREITS verkaufter Platz zeigt weiterhin
-     "vergeben", nicht "EA" — die Reservierung gilt nur für noch freie Plätze. */
+  /* Für Zählung/Sperrung zählen ein für Ehrenamtliche reservierter, ein "nicht
+     verfügbarer" und ein verkaufter Platz alle gleich — alles ist "nicht verfügbar".
+     Nur bei der Beschriftung (s. _renderZone) wird unterschieden: ein BEREITS
+     verkaufter Platz zeigt weiterhin "vergeben", nicht "EA"/"NV" — die Reservierung
+     gilt nur für noch freie Plätze. */
   SeatPicker.prototype._isBlocked = function (seatGuid) {
     return !!((this.takenSeatGuids && this.takenSeatGuids.has(seatGuid)) ||
-      (this.reservedSeatGuids && this.reservedSeatGuids.has(seatGuid)));
+      (this.reservedSeatGuids && this.reservedSeatGuids.has(seatGuid)) ||
+      (this.nvSeatGuids && this.nvSeatGuids.has(seatGuid)));
   };
 
   /* Einheiten (Sitze bzw. Block-Tarifzeilen) der Kategorie, an die ein Gutschein
@@ -291,7 +296,8 @@
 
     fetch(this.planUrl).then(function (r) { return r.json(); }).then(function (plan) {
       self.plan = plan;
-      self.reservedSeatGuids = self._computeReservedSeatGuids(plan);
+      self.reservedSeatGuids = self._computeSeatGuidsForRanges(self.reservedSeats, plan);
+      self.nvSeatGuids = self._computeSeatGuidsForRanges(self.nvSeats, plan);
       self.blocks = self._deriveBlocks(plan);
       self._render();
       self._renderOccupancy();
@@ -1298,19 +1304,25 @@
         rowEl.appendChild(rowNumLeft);
         row.seats.forEach(function (seat) {
           var taken = !!(self.takenSeatGuids && self.takenSeatGuids.has(seat.seat_guid));
-          // Reserviert gilt nur für noch nicht verkaufte Plätze — ein bereits verkaufter
-          // Platz in Block A Reihe 1-3 bleibt "vergeben", nicht "EA" (s. _isBlocked).
+          // Reserviert/NV gelten nur für noch nicht verkaufte Plätze — ein bereits
+          // verkaufter Platz bleibt "vergeben", nicht "EA"/"NV" (s. _isBlocked).
           var reserved = !taken && !!(self.reservedSeatGuids && self.reservedSeatGuids.has(seat.seat_guid));
-          if (!taken && !reserved) freeCount++;
+          // "Nicht verfügbar" (NV) — vom Verein zurückgehalten, um später separat vergeben
+          // zu werden (z.B. Block A Reihe 1-3 Sitz 1-7). Anders als EA (Ehrenamtliche) ein
+          // eigener Grund, deshalb eigenes Label/eigene Optik statt Wiederverwendung von
+          // .reserved. Zählt genau wie EA in die Gesamtzahl, aber nicht als frei/buchbar.
+          var nv = !taken && !reserved && !!(self.nvSeatGuids && self.nvSeatGuids.has(seat.seat_guid));
+          if (!taken && !reserved && !nv) freeCount++;
           var btn = document.createElement('button');
           btn.type = 'button';
-          var isSelected = !taken && !reserved && !!self._activeSeats()[seat.seat_guid];
+          var isSelected = !taken && !reserved && !nv && !!self._activeSeats()[seat.seat_guid];
           var isWheelchair = !!seat.wheelchair;
-          btn.className = 'seatplan-seat ' + catClass(category) + (reserved ? ' reserved' : (taken ? ' taken' : '')) + (isSelected ? ' selected' : '') + (isWheelchair ? ' wheelchair' : '');
-          // Für Ehrenamtliche reservierte Plätze zeigen "EA" statt der Sitznummer und
-          // bekommen keine Verkauft-Schraffur (s. .seatplan-seat.reserved) — sie sind
-          // nie verkauft gewesen, sondern von vornherein nicht zum Verkauf freigegeben.
-          btn.textContent = reserved ? 'EA' : seat.seat_number;
+          btn.className = 'seatplan-seat ' + catClass(category) + (reserved ? ' reserved' : (nv ? ' nv' : (taken ? ' taken' : ''))) + (isSelected ? ' selected' : '') + (isWheelchair ? ' wheelchair' : '');
+          // Für Ehrenamtliche reservierte Plätze zeigen "EA", NV-Plätze "NV" statt der
+          // Sitznummer und bekommen keine Verkauft-Schraffur wie .taken (s.
+          // .seatplan-seat.reserved/.nv) — sie sind nie verkauft gewesen, sondern von
+          // vornherein nicht zum freien Verkauf freigegeben.
+          btn.textContent = reserved ? 'EA' : (nv ? 'NV' : seat.seat_number);
           // Echte Gang-Lücke innerhalb der Reihe (z. B. "1,2 | 3-22 | 23,24,25") —
           // die Sitznummerierung bleibt über den Gang hinweg durchgehend, nur die
           // Darstellung bekommt hier eine kleine zusätzliche Lücke.
@@ -1320,8 +1332,8 @@
           if (blockMode) btn.tabIndex = -1;
           btn.dataset.seatGuid = seat.seat_guid;
           var seatLabel = zone.name + ', Reihe ' + rowLabel + ', Platz ' + seat.seat_number + (isWheelchair ? ' (Rollstuhlplatz)' : '');
-          btn.setAttribute('aria-label', seatLabel + (reserved ? ' (reserviert für Ehrenamtliche)' : taken ? ' (vergeben)' : ' (frei)'));
-          if (taken || reserved || blockMode) {
+          btn.setAttribute('aria-label', seatLabel + (reserved ? ' (reserviert für Ehrenamtliche)' : nv ? ' (nicht verfügbar)' : taken ? ' (vergeben)' : ' (frei)'));
+          if (taken || reserved || nv || blockMode) {
             btn.disabled = true;
           } else if (self.prices[category]) {
             btn.addEventListener('click', function () {

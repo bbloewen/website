@@ -182,10 +182,23 @@ block_F = [
 #     zuvor per align_target_seat). Segment 1-7 zusätzlich um -1 Einheit verschoben
 #     (segment_shifts={0:-1}), damit Sitz 7 exakt auf Sitz 4 der Reihe 11 fluchtet.
 # Herleitung/Algebra vollständig in reference_sitzplan_riethsporthalle-Memory dokumentiert.
+#
+# Nachschärfung 04.08.2026 (Marko, zweite Runde):
+#   - Reihen 1-3: Randsegment 1-7 zusätzlich um -1 Einheit verschoben (segment_shifts=
+#     {0:-1}), damit Sitz 1-7 exakt auf Sitz 1-7 der Reihe 6 fluchten (vorher lag das
+#     Segment durchgängig 1 Einheit zu weit rechts, weil es nur dem einheitlichen
+#     x_offset der ganzen Reihe folgte statt einem eigenen Fluchtpunkt).
+#   - Reihe 11: Randsegment 23-25 zusätzlich um +2 Einheiten verschoben (Schlüssel 2 in
+#     segment_shifts), Reihe 12: Randsegment 22-28 um +1 Einheit (Schlüssel 2). Marko
+#     nannte für beide "ein Sitz nach rechts" — die exakte Fluchtpunkt-Vorgabe (Sitz
+#     25/R11 = Sitz 28/R12; Sitz 22/R12 = Sitz 21/R11, unverschobenes Mittelsegment)
+#     ergibt rechnerisch aber +2 für R11 und +1 für R12, weil beide Verschiebungen
+#     gleichzeitig auf dieselbe Zielbeziehung wirken (mit +1/+1 bliebe der bisherige
+#     1-Einheit-Versatz zwischen den beiden Sitzen bestehen) — volle Algebra im Memory.
 block_A = [
-    (1, [7, 12], KAT2, {"x_offset": -9}),
-    (2, [7, 12], KAT2, {"x_offset": -9}),
-    (3, [7, 12], KAT2, {"x_offset": -9}),
+    (1, [7, 12], KAT2, {"x_offset": -9, "segment_shifts": {0: -1}}),
+    (2, [7, 12], KAT2, {"x_offset": -9, "segment_shifts": {0: -1}}),
+    (3, [7, 12], KAT2, {"x_offset": -9, "segment_shifts": {0: -1}}),
     (4, [12], KAT2, {"x_offset": -2}),
     (5, [12], KAT2, {"x_offset": -2}),
     (6, [20], KAT2, {"x_offset": -10}),
@@ -193,8 +206,8 @@ block_A = [
     (8, [20], KAT2, {"x_offset": -10}),
     (9, [20], KAT2, {"x_offset": -10}),
     (10, [20], KAT2, {"x_offset": -10}),
-    (11, [2, 20, 3], KAT2, {"x_offset": -12, "segment_shifts": {0: -3}}),
-    (12, [7, 14, 7], KAT2, {"x_offset": -14, "segment_shifts": {0: -1}}),
+    (11, [2, 20, 3], KAT2, {"x_offset": -12, "segment_shifts": {0: -3, 2: 2}}),
+    (12, [7, 14, 7], KAT2, {"x_offset": -14, "segment_shifts": {0: -1, 2: 1}}),
 ]
 block_B = [
     (1, [7, 12], VIP),
