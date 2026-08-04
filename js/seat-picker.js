@@ -1147,21 +1147,88 @@
       // Label-Overhead mehr abzuziehen, nur der eigene Segment-Zwischenraum.
       var availableForSeats = targetWidth - gapUnitsPx * (segCounts.length - 1);
       var seatIdx = 0;
+      var firstWrapper = null;
       segCounts.forEach(function (count, i) {
         var wrapper = document.createElement('div');
         wrapper.style.display = 'flex';
         wrapper.style.justifyContent = 'space-between';
         wrapper.style.width = (availableForSeats * count / totalCount) + 'px';
         if (i > 0) wrapper.style.marginLeft = gapPx + 'px';
+        else firstWrapper = wrapper;
         var firstSeat = seatEls[seatIdx];
         firstSeat.parentNode.insertBefore(wrapper, firstSeat);
         for (var k = 0; k < count; k++) { wrapper.appendChild(seatEls[seatIdx]); seatIdx++; }
       });
-      // Row-eigenes marginLeft aus x_offset — positioniert die ganze Reihe (inkl. Labels)
-      // relativ zur Zonen-Kante, analog zu den Pro-Sitz-Reihen oben.
-      if (row && typeof row.x_offset === 'number') {
-        rowEl.style.marginLeft = (row.x_offset - zoneMinUnits) * unitPx + 'px';
+      // Positionierung aus x_offset kommt auf den ERSTEN Sitz-Wrapper, NICHT auf rowEl
+      // selbst — sonst würde sich die Reihennummer (ebenfalls Flex-Kind von rowEl, s.
+      // _renderZone) mitverschieben. Marko: die Reihennummern von 6-10 sollen auf einer
+      // Linie mit denen der anderen Reihen bleiben, nur die Sitze selbst wandern.
+      if (row && typeof row.x_offset === 'number' && firstWrapper) {
+        firstWrapper.style.marginLeft = (row.x_offset - zoneMinUnits) * unitPx + 'px';
       }
+    });
+
+    // ZULETZT: live_stretch/live_shift — Segmente, die an Sitzen einer match_first_
+    // row_width-Reihe ausgerichtet werden (s. gen_seatplan.py). Solche Zielsitze haben
+    // KEINE x_units (kein festes Sitzraster), ihre Position ist erst jetzt, nach dem
+    // Rendern, per DOM-Messung bekannt — deshalb ein eigener, expliziter Pass statt
+    // reiner Einheiten-Rechnung. live_stretch läuft VOR live_shift: Block B Reihe 12
+    // richtet sich an Reihe 11 Sitz 14 aus, der seinerseits erst durch Reihe 11s
+    // live_stretch seine finale Position bekommt.
+    function findSeatEl(rowNum, seatNum) {
+      var rEl = Array.from(rowEls).find(function (r) { return r.dataset.rowNumber === String(rowNum); });
+      if (!rEl) return null;
+      return Array.from(rEl.querySelectorAll('.seatplan-seat')).find(function (s) {
+        return s.textContent.trim() === String(seatNum);
+      });
+    }
+    function segSeatNumbers(row, segIdx) {
+      var breaks = row.segment_breaks || [];
+      var segStarts = [1].concat(breaks);
+      var segEnds = breaks.concat([row.seats.length + 1]);
+      var nums = [];
+      for (var n = segStarts[segIdx]; n < segEnds[segIdx]; n++) nums.push(n);
+      return nums;
+    }
+    zone.rows.forEach(function (row) {
+      if (!row.live_stretch) return;
+      Object.keys(row.live_stretch).forEach(function (segIdxStr) {
+        var spec = row.live_stretch[segIdxStr];
+        var firstTarget = findSeatEl(spec.first.row, spec.first.seat);
+        var lastTarget = findSeatEl(spec.last.row, spec.last.seat);
+        if (!firstTarget || !lastTarget) return;
+        var firstLeft = firstTarget.getBoundingClientRect().left;
+        var lastLeft = lastTarget.getBoundingClientRect().left;
+        var nums = segSeatNumbers(row, parseInt(segIdxStr, 10));
+        var seatEls = nums.map(function (n) { return findSeatEl(row.row_number, n); });
+        if (!seatEls.length || seatEls.some(function (e) { return !e; })) return;
+        var count = seatEls.length;
+        seatEls.forEach(function (seatEl, i) {
+          var desiredLeft = count > 1 ? firstLeft + (lastLeft - firstLeft) * (i / (count - 1)) : firstLeft;
+          var prevEl = i === 0 ? seatEl.previousElementSibling : seatEls[i - 1];
+          var refRight = prevEl ? prevEl.getBoundingClientRect().right : desiredLeft - flexGapPx;
+          // KEIN Math.max(0, …) hier: das Ziel-Intervall (Sitz 11 bis Sitz 16 der Reihe 10)
+          // ist oft ENGER als der normale Sitzabstand (Reihe 10 selbst ist ja gestaucht/
+          // gestreckt, s. segment_gap_units) — die Sitze müssen dann NÄHER zusammenrücken
+          // als der normale Flex-Fluss von sich aus vorsieht, brauchen also ein negatives
+          // Margin. Ein Klammern auf 0 hätte genau das verhindert und die Sitze immer
+          // weiter nach rechts driften lassen (live gefunden: Sitz 14 landete 7px zu weit
+          // rechts, weil die nötige Stauchung stillschweigend auf 0 gerundet wurde).
+          seatEl.style.marginLeft = (desiredLeft - refRight - flexGapPx) + 'px';
+        });
+      });
+    });
+    zone.rows.forEach(function (row) {
+      if (!row.live_shift) return;
+      Object.keys(row.live_shift).forEach(function (segIdxStr) {
+        var spec = row.live_shift[segIdxStr];
+        var anchorEl = findSeatEl(row.row_number, spec.anchor_seat);
+        var targetEl = findSeatEl(spec.target_row, spec.target_seat);
+        if (!anchorEl || !targetEl) return;
+        var delta = targetEl.getBoundingClientRect().left - anchorEl.getBoundingClientRect().left;
+        var currentMargin = parseFloat(anchorEl.style.marginLeft) || 0;
+        anchorEl.style.marginLeft = Math.max(0, currentMargin + delta) + 'px';
+      });
     });
   };
 

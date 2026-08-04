@@ -10852,7 +10852,19 @@
           "explicit_shift_segments": [
             0,
             1
-          ]
+          ],
+          "live_stretch": {
+            "2": {
+              "first": {
+                "row": "10",
+                "seat": 11
+              },
+              "last": {
+                "row": "10",
+                "seat": 16
+              }
+            }
+          }
         },
         {
           "uuid": "edaebdfb-31c7-52d3-b980-056553355a0f",
@@ -10949,7 +10961,7 @@
                 "y": 0
               },
               "category": "Kategorie I",
-              "x_units": -6
+              "x_units": -7
             },
             {
               "seat_number": "9",
@@ -10960,7 +10972,7 @@
                 "y": 0
               },
               "category": "Kategorie I",
-              "x_units": -5
+              "x_units": -6
             },
             {
               "seat_number": "10",
@@ -10971,7 +10983,7 @@
                 "y": 0
               },
               "category": "Kategorie I",
-              "x_units": -4
+              "x_units": -5
             },
             {
               "seat_number": "11",
@@ -11086,8 +11098,16 @@
           ],
           "x_offset": -13,
           "explicit_shift_segments": [
-            0
-          ]
+            0,
+            1
+          ],
+          "live_shift": {
+            "2": {
+              "anchor_seat": 11,
+              "target_row": "11",
+              "target_seat": 9
+            }
+          }
         }
       ],
       "layout": "anchored"

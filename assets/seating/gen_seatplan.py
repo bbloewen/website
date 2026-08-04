@@ -24,7 +24,8 @@ def mkseat(zone_id, row_number, n, category, wheelchair=False):
 
 def mkrow(zone_id, row_number, segments, category, y, section_break=False, wheelchair=False,
           align_reference_seat=None, align_target_seat=None, match_first_row_width=None,
-          segment_align=None, x_offset=None, segment_shifts=None, segment_gap_units=None):
+          segment_align=None, x_offset=None, segment_shifts=None, segment_gap_units=None,
+          live_stretch=None, live_shift=None):
     # segments: list of aisle-separated cluster widths, e.g. [2, 20, 3] for a row
     # split by two aisles — seat numbering stays continuous across the aisles
     # (matches the real Saalplan PDF), only the VISUAL rendering gets a gap.
@@ -97,6 +98,21 @@ def mkrow(zone_id, row_number, segments, category, y, section_break=False, wheel
     # normalen kleinen dekorativen Lücke (ein Segment reicht dafür sowieso nicht).
     if segment_gap_units is not None:
         row["segment_gap_units"] = segment_gap_units
+    # live_stretch/live_shift: für Segmente, die an Sitzen einer match_first_row_width-
+    # Reihe (z.B. Block B Reihe 10) ausgerichtet werden müssen — solche Sitze haben KEINE
+    # x_units (kein festes Sitzraster, s.o.), ihre Position ist erst nach dem Rendern per
+    # DOM-Messung bekannt (s. seat-picker.js _applyAnchoredLayout, Live-Ausrichtungs-Pass).
+    # live_stretch staucht/streckt EIN Segment intern (gleichmäßig verteilt), sodass dessen
+    # ERSTER und LETZTER Sitz exakt auf zwei live gemessene Zielsitze fluchten (z.B. Reihe
+    # 11 Segment 2: Sitz 9-14 zusammengestaucht zwischen Sitz 11 und Sitz 16 der Reihe 10).
+    # live_shift verschiebt ein Segment GLEICHMÄSSIG (wie segment_shifts), aber der nötige
+    # Versatz kommt aus einer Live-Messung statt aus einer festen Einheiten-Zahl (z.B.
+    # Reihe 12 Segment 4: Sitz 16-20 verschoben, bis Sitz 16 auf Sitz 14 der Reihe 11 liegt
+    # — Reihe 11s Sitz 14 selbst ist ja gerade erst per live_stretch bestimmt worden).
+    if live_stretch:
+        row["live_stretch"] = live_stretch
+    if live_shift:
+        row["live_shift"] = live_shift
     return row
 
 def build_zone(zone_id, name, row_specs, position, break_before=None, align_edge=None, layout=None):
@@ -285,8 +301,29 @@ block_B = [
     # (-8, s.u. — hält weiterhin "Sitz 3 = Sitz 1 Reihe 10" aus der letzten Runde).
     # Sitz 1 Reihe 12 = -13 (x_offset) + 0 - 2 (Segment-Shift) = -15.
     # Unverschobener Sitz 1 Reihe 11 (x_offset=-4, Index 0) läge bei -4 → Shift=-15-(-4)=-11.
-    (11, [2, 6, 6, 3], KAT1, {"x_offset": -4, "segment_shifts": {0: -11, 1: -8}}),
-    (12, [7, 3, 3, 2, 5], KAT1, {"x_offset": -13, "segment_shifts": {0: -2}}),
+    # Segment 2 (Sitze 9-14, Marko fünfte Runde): Sitz 9 auf Sitz 11 der Reihe 10, Sitz 14
+    # auf Sitz 16 der Reihe 10 — beides Sitze einer match_first_row_width-Reihe OHNE
+    # x_units, also nicht aus der Datenlage berechenbar. live_stretch staucht die 6 Sitze
+    # gleichmäßig verteilt zwischen die beiden live gemessenen Zielpositionen (s.
+    # seat-picker.js).
+    (11, [2, 6, 6, 3], KAT1, {"x_offset": -4, "segment_shifts": {0: -11, 1: -8},
+        "live_stretch": {2: {"first": {"row": "10", "seat": 11}, "last": {"row": "10", "seat": 16}}}}),
+    # Reihe 12 (Marko, fünfte Runde): Segment 1 (Sitze 8-10) einen Platz [Einheit] nach
+    # links, damit Sitz 8 exakt auf Sitz 6 der Reihe 11 fluchtet.
+    # Sitz 6 Reihe 11 (Segment 1, Shift -8) = -4 + 5 - 8 = -7.
+    # Unverschobener Sitz 8 Reihe 12 (Segment 1, x_offset=-13, Index 7) = -13+7 = -6.
+    # Shift = -7-(-6) = -1 (genau "ein Platz nach links", wie von Marko angegeben).
+    # Ab Sitz 11 (Marko, sechste Runde: "ab Platz 11 sollen alle Sitze der Reihe 12 nach
+    # rechts verschoben werden") wandern Segmente 2+3+4 (Sitze 11-20) GEMEINSAM als ein
+    # Block — ein einziger live_shift auf den ERSTEN betroffenen Sitz (11) reicht: die
+    # Marge verschiebt über den normalen Flex-Fluss automatisch auch alles danach mit,
+    # solange kein späterer Sitz einen eigenen Shift bekommt. Ersetzt den früheren
+    # segment4-live_shift (Sitz 16 auf Sitz 14 Reihe 11) — der ist jetzt Teil dieses
+    # größeren, ab Sitz 11 beginnenden Blocks. Ziel: Sitz 11 auf Sitz 9 der Reihe 11
+    # (selbst live-bestimmt per Reihe 11s live_stretch, s.o.) — daher wieder live_shift
+    # statt fester Einheiten-Rechnung.
+    (12, [7, 3, 3, 2, 5], KAT1, {"x_offset": -13, "segment_shifts": {0: -2, 1: -1},
+        "live_shift": {2: {"anchor_seat": 11, "target_row": "11", "target_seat": 9}}}),
 ]
 block_C = [
     (1, [12, 7], KAT2),
