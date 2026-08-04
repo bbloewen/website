@@ -11389,7 +11389,10 @@
               },
               "category": "Kategorie II"
             }
-          ]
+          ],
+          "segment_gap_seats": {
+            "1": 1
+          }
         },
         {
           "uuid": "6f06a8e8-f2ad-57aa-b1eb-f0ce1a401ace",
@@ -11590,7 +11593,10 @@
               },
               "category": "Kategorie II"
             }
-          ]
+          ],
+          "segment_gap_seats": {
+            "1": 1
+          }
         },
         {
           "uuid": "44f02a28-f517-56d7-9151-dcc81b26e81d",
@@ -11791,7 +11797,10 @@
               },
               "category": "Kategorie II"
             }
-          ]
+          ],
+          "segment_gap_seats": {
+            "1": 1
+          }
         },
         {
           "uuid": "bbe36312-94bf-536b-8552-c3a61e124cc9",
@@ -13663,7 +13672,11 @@
               "category": "Kategorie II"
             }
           ],
-          "align_target_seat": 6
+          "align_target_seat": 6,
+          "segment_gap_seats": {
+            "1": 1,
+            "2": 1
+          }
         }
       ],
       "align_edge": "leading"

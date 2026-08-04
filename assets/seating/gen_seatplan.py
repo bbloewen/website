@@ -26,7 +26,7 @@ def mkrow(zone_id, row_number, segments, category, y, section_break=False, wheel
           align_reference_seat=None, align_target_seat=None, match_first_row_width=None,
           segment_align=None, x_offset=None, segment_shifts=None, segment_gap_units=None,
           live_stretch=None, live_shift=None, live_stretch2=None, wheelchair_seats=None,
-          label_before_seat=None, live_fit=None, live_fit2=None):
+          label_before_seat=None, live_fit=None, live_fit2=None, segment_gap_seats=None):
     # segments: list of aisle-separated cluster widths, e.g. [2, 20, 3] for a row
     # split by two aisles — seat numbering stays continuous across the aisles
     # (matches the real Saalplan PDF), only the VISUAL rendering gets a gap.
@@ -145,6 +145,15 @@ def mkrow(zone_id, row_number, segments, category, y, section_break=False, wheel
     # den anderen Reihennummern fluchten, nicht mit dem Zusatzsitz mitwandern).
     if label_before_seat is not None:
         row["label_before_seat"] = label_before_seat
+    # segment_gap_seats: {segmentIndex: N} — fügt an einer Segmentgrenze eine echte,
+    # in Sitzbreiten-Einheiten skalierende Lücke von N Sitzen ein, GENERISCH für jedes
+    # Zonen-Layout (auch das alte align_edge/segment_align-System, z.B. Block C) — anders
+    # als segment_shifts (nur für "layout":"anchored"-Zonen) und segment_gap_units (nur
+    # für match_first_row_width-Reihen). Ersetzt die sonst greifende kleine, nicht
+    # skalierende 10px-Dekorlücke an dieser Segmentgrenze (s. seat-picker.js
+    # _applySegmentGapSeats).
+    if segment_gap_seats:
+        row["segment_gap_seats"] = segment_gap_seats
     return row
 
 def build_zone(zone_id, name, row_specs, position, break_before=None, align_edge=None, layout=None):
@@ -398,9 +407,11 @@ block_B = [
         }}),
 ]
 block_C = [
-    (1, [12, 7], KAT2),
-    (2, [12, 7], KAT2),
-    (3, [12, 7], KAT2),
+    # Reihe 1-3 (Marko): echte Ein-Platz-Lücke zwischen Sitz 12 und 13 (Segment 1 beginnt
+    # bei Sitz 13, s. segments [12,7]).
+    (1, [12, 7], KAT2, {"segment_gap_seats": {1: 1}}),
+    (2, [12, 7], KAT2, {"segment_gap_seats": {1: 1}}),
+    (3, [12, 7], KAT2, {"segment_gap_seats": {1: 1}}),
     (4, [12], KAT2),
     (5, [12], KAT2),
     (6, [20], KAT2),
@@ -409,7 +420,9 @@ block_C = [
     (9, [20], KAT2),
     (10, [20], KAT2, {"align_reference_seat": True}),
     (11, [2, 20, 2], KAT2, {"align_target_seat": 3, "segment_align": {"1": {"row": "12", "seat": 1}, "23": {"row": "12", "seat": 27}}}),
-    (12, [7, 14, 7], KAT2, {"align_target_seat": 6}),
+    # Reihe 12 (Marko): echte Ein-Platz-Lücken zwischen Sitz 7/8 (Segment 1) und 21/22
+    # (Segment 2).
+    (12, [7, 14, 7], KAT2, {"align_target_seat": 6, "segment_gap_seats": {1: 1, 2: 1}}),
 ]
 
 plan = {

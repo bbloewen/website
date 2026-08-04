@@ -839,7 +839,42 @@
      gerenderte Breite von Reihe 1 gestreckt/gestaucht (justify-content:space-between
      verteilt die Sitze dafür neu) — Messung erst möglich, wenn die Zone im echten DOM
      hängt, deshalb ein separater Schritt statt Teil von _renderZone selbst. */
+  /* segment_gap_seats (s. gen_seatplan.py mkrow()): fügt an einer Segmentgrenze eine
+     echte, in Sitzbreiten-Einheiten skalierende Lücke von N Sitzen ein — unabhängig
+     vom Zonen-Layout (alt align_edge/segment_align ODER neu "anchored"). Ersetzt die
+     sonst an jeder Segmentgrenze greifende kleine, NICHT skalierende 10px-Dekorlücke
+     (s. _renderZone, inline `btn.style.marginLeft='10px'`), die ohne dieses Feld die
+     einzige Lücke wäre. Muss VOR jeder anderen Positionierung laufen (ganz am Anfang
+     von _fixupRowWidths), damit nachfolgende Live-Messungen (z.B. segment_align,
+     _applyAnchoredLayout) die bereits korrekte, breitere Lücke sehen. */
+  SeatPicker.prototype._applySegmentGapSeats = function (zoneEl, zone) {
+    var rowsByNumber = {};
+    zone.rows.forEach(function (row) { rowsByNumber[String(row.row_number)] = row; });
+    var rowEls = zoneEl.querySelectorAll('.seatplan-row-line');
+    var sampleSeat = zoneEl.querySelector('.seatplan-seat');
+    if (!rowEls.length || !sampleSeat) return;
+    var flexGapPx = parseFloat(getComputedStyle(rowEls[0]).gap) || 0;
+    var unitPx = sampleSeat.getBoundingClientRect().width + flexGapPx;
+    rowEls.forEach(function (rowEl) {
+      var row = rowsByNumber[rowEl.dataset.rowNumber];
+      if (!row || !row.segment_gap_seats) return;
+      var breaks = row.segment_breaks || [];
+      var seatEls = rowEl.querySelectorAll('.seatplan-seat');
+      Object.keys(row.segment_gap_seats).forEach(function (segIdxStr) {
+        var breakSeatNum = breaks[parseInt(segIdxStr, 10) - 1];
+        if (breakSeatNum === undefined) return;
+        var seatEl = Array.from(seatEls).find(function (s) { return s.textContent.trim() === String(breakSeatNum); });
+        if (!seatEl) return;
+        seatEl.style.marginLeft = (row.segment_gap_seats[segIdxStr] * unitPx) + 'px';
+      });
+    });
+  };
+
   SeatPicker.prototype._fixupRowWidths = function (zoneEl, zone) {
+    // segment_gap_seats gilt GENERISCH für jedes Zonen-Layout (auch das alte
+    // align_edge/segment_align-System, z.B. Block C) — deshalb ganz vorn, vor der
+    // Weiche unten, ausgeführt.
+    this._applySegmentGapSeats(zoneEl, zone);
     // Zonen mit "layout":"anchored" (bisher nur Block A) brauchen keine Laufzeit-Messung
     // à la align_target_seat/segment_align: jeder Sitz trägt seine absolute Position
     // (x_units, s. gen_seatplan.py) schon in den Daten, relativ zu EINEM festen Anker
