@@ -243,45 +243,49 @@ block_A = [
 #     verschoben (segment_shifts={0:-1}) — Marko, 04.08.2026 (zweite Runde): "zwischen
 #     Platz 7 und 8 ist ein Platz [Sitzbreite] Space", ein echter Fluchtpunkt-Gang statt
 #     der pauschalen kleinen Dekor-Lücke.
-#   - Reihen 4-5 ([12]): x_offset=-9, identisch zu Reihe 1-3 — Marko: "Reihe 4/5 müssen
-#     die Sitzplätze genau über den Sitzplätzen der Reihe 3 stehen, Sitz 10 fluchtet mit
-#     Sitz 10" (Sitz-für-Sitz-Gleichlauf mit Reihe 1-3, NICHT nur mit deren zweitem
-#     Segment — ursprünglich x_offset=-2 angenommen, war falsch).
-#   - Reihen 6-10 (match_first_row_width, Marko: "in der Breite so gestreckt, dass sie
-#     genau der Breite von Reihe 1 bis 5 entspricht" bzw. "Reihe 10 muss exakt die
-#     gleiche Breite wie Reihe 9 haben"): x_offset=-9 wie Reihe 1 — NUR für die Reihen-
-#     Position, kein x_units pro Sitz (kein festes Sitzraster, s. mkrow()).
-#   - Reihe 11: vorläufig unverändert (Marko, 04.08.2026 zweite Runde: "Platz 3 bis 8 ist
-#     ja Platz 3 bis 8" — bestätigt die bestehende Verschiebung, weitere Absprache folgt).
-#   - Reihe 12: x_offset=-9 ("komplett nach links", Marko) — Sitz 7 (Segment 0, mit dem
-#     bestehenden segment_shift -2) fluchtet damit auf Sitz 7 der Reihe 11:
-#     Sitz 7 Reihe 11 = -4 (x_offset) + 6 (Index) - 7 (Segment-Shift Reihe 11) = -5.
-#     Sitz 7 Reihe 12 = x_offset + 6 - 2 (Segment-Shift) = x_offset + 4 → x_offset=-9.
+#   - Reihen 4-5 ([12]): x_offset=-2 — Marko korrigierte sich in einer dritten Runde
+#     (04.08.2026): "Platz 1 liegt exakt über Platz 8 [der Reihe 3]" (der vorherige
+#     Versuch, Sitz-für-Sitz mit der GANZEN Reihe 1-3 gleichzulaufen, war falsch — es ist
+#     wieder das zweite Segment/die Rückreihe: Sitz 8 der Reihe 3 = -9+7+0 = -2).
+#   - Reihen 6-10 (match_first_row_width): x_offset=-10 (NICHT -9) — Marko (dritte Runde):
+#     "Reihe 6 bis 9: Platz 1 liegt exakt über Platz 1 der Reihe 1, Platz 16 über Platz 19
+#     der Reihe 1." Reihe 1 hat durch ihren eigenen segment_shift (-1 auf Segment 0) ihren
+#     Sitz 1 bei Einheit -10 (=-9-1), NICHT bei -9 — Reihen 6-10 müssen daher ebenfalls bei
+#     -10 ansetzen, sonst liegt ihr Sitz 1 einen Einheit zu weit rechts.
+#   - Reihe 10: "Abstand zwischen den Plätzen in Reihe 10 ist gut, auch die Lücke in der
+#     Mitte" (Marko) — segment_gap_units bleibt unverändert, nur der Reihen-x_offset
+#     wandert mit auf -10.
+#   - Reihe 11: x_offset unverändert (-4), aber segment_shifts von {0:-7,1:-7} auf
+#     {0:-8,1:-8} nachgezogen — reine Konsequenz aus Reihe 10s neuem x_offset (-10 statt
+#     -9), damit "Sitz 3 fluchtet auf Sitz 1 der Reihe 10" weiter stimmt. Marko wollte im
+#     nächsten Schritt noch grundsätzlich über Reihe 11 sprechen (Nachricht brach an der
+#     Stelle ab) — hier nur die Konsistenz zu Reihe 10 gewahrt, keine neue Entscheidung.
+#   - Reihe 12: Marko korrigierte die Fluchtpunkt-Angabe direkt im Anschluss (dritte
+#     Runde): "Platz 6 [nicht 7] liegt über Platz 3 der Reihe 11" — deckt sich mit dem
+#     Fluchtpunkt aus dem alten, vor-anchored System (dort: segment_align Sitz 6 → Reihe
+#     11 Sitz 3). Sitz 3 Reihe 11 = -4 (x_offset) + 2 (Index) - 8 (Segment-Shift) = -10.
+#     Sitz 6 Reihe 12 = x_offset + 5 (Index) - 2 (Segment-Shift) = x_offset + 3 → x_offset
+#     = -13 (ersetzt den vorherigen "Sitz 7 = Sitz 7"-Versuch, der mit derselben
+#     Segmentstruktur nicht gleichzeitig gelten kann — Sitz 6/7 liegen in Reihe 12 immer
+#     genau 1 Einheit auseinander, Sitz 3/7 in Reihe 11 aber 4 Einheiten).
 block_B = [
     (1, [7, 12], VIP, {"x_offset": -9, "segment_shifts": {0: -1}}),
     (2, [7, 12], VIP, {"x_offset": -9, "segment_shifts": {0: -1}}),
     (3, [7, 12], VIP, {"x_offset": -9, "segment_shifts": {0: -1}}),
-    (4, [12], VIP, {"x_offset": -9}),
-    (5, [12], VIP, {"x_offset": -9}),
-    (6, [16], KAT1, {"match_first_row_width": True, "x_offset": -9}),
-    (7, [16], KAT1, {"match_first_row_width": True, "x_offset": -9}),
-    (8, [16], KAT1, {"match_first_row_width": True, "x_offset": -9}),
-    (9, [16], KAT1, {"match_first_row_width": True, "x_offset": -9}),
-    # Reihe 10 (Marko, 04.08.2026): "in Reihe 10 sind die Plätze etwas weiter zusammen,
-    # also weniger Lücken" als in Reihe 9 — die zwei 8er-Segmente werden UNABHÄNGIG
-    # voneinander gestreckt (nicht wie sonst als ein durchgehender 16er-Lauf), mit einer
-    # eigenen, größeren Lücke dazwischen statt der pauschalen 10px (s.
-    # seat-picker.js _applyAnchoredLayout). segment_gap_units grob aus Markos Fluchtpunkten
-    # hergeleitet (Sitz 8 zwischen Sitz 6/7 der Reihe 9, Sitz 9 zwischen Sitz 10/11 der
-    # Reihe 9) — nach Deploy live nachmessen und ggf. nachschärfen.
-    (10, [8, 8], KAT1, {"match_first_row_width": True, "x_offset": -9, "segment_gap_units": 4.2}),
+    (4, [12], VIP, {"x_offset": -2}),
+    (5, [12], VIP, {"x_offset": -2}),
+    (6, [16], KAT1, {"match_first_row_width": True, "x_offset": -10}),
+    (7, [16], KAT1, {"match_first_row_width": True, "x_offset": -10}),
+    (8, [16], KAT1, {"match_first_row_width": True, "x_offset": -10}),
+    (9, [16], KAT1, {"match_first_row_width": True, "x_offset": -10}),
+    (10, [8, 8], KAT1, {"match_first_row_width": True, "x_offset": -10, "segment_gap_units": 4.2}),
     # Reihe 11 (Marko): Sitze 1-8 (Segment 0+1 zusammen) nach links verschoben, damit
     # Sitz 3 exakt auf Sitz 1 der Reihe 10 liegt. Sitz 1 einer match_first_row_width-Reihe
     # sitzt immer exakt an deren eigenem x_offset (erstes Segment beginnt bei Bruchteil 0
-    # des gestreckten Laufs) — x_offset(Reihe 10)=-9 ist damit der Zielwert für Sitz 3.
-    # Unverschobener Sitz 3 (x_offset=-4, Index 2) läge bei -2 → Shift=-9-(-2)=-7.
-    (11, [2, 6, 6, 3], KAT1, {"x_offset": -4, "segment_shifts": {0: -7, 1: -7}}),
-    (12, [7, 3, 3, 2, 5], KAT1, {"x_offset": -9, "segment_shifts": {0: -2}}),
+    # des gestreckten Laufs) — x_offset(Reihe 10)=-10 (s.o.) ist damit der Zielwert für
+    # Sitz 3. Unverschobener Sitz 3 (x_offset=-4, Index 2) läge bei -2 → Shift=-10-(-2)=-8.
+    (11, [2, 6, 6, 3], KAT1, {"x_offset": -4, "segment_shifts": {0: -8, 1: -8}}),
+    (12, [7, 3, 3, 2, 5], KAT1, {"x_offset": -13, "segment_shifts": {0: -2}}),
 ]
 block_C = [
     (1, [12, 7], KAT2),
