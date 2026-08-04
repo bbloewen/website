@@ -27,7 +27,7 @@ def mkrow(zone_id, row_number, segments, category, y, section_break=False, wheel
           segment_align=None, x_offset=None, segment_shifts=None, segment_gap_units=None,
           live_stretch=None, live_shift=None, live_stretch2=None, wheelchair_seats=None,
           label_before_seat=None, live_fit=None, live_fit2=None, segment_gap_seats=None,
-          renumber_seats=None):
+          renumber_seats=None, trailing_gap_units=None):
     # segments: list of aisle-separated cluster widths, e.g. [2, 20, 3] for a row
     # split by two aisles — seat numbering stays continuous across the aisles
     # (matches the real Saalplan PDF), only the VISUAL rendering gets a gap.
@@ -175,6 +175,14 @@ def mkrow(zone_id, row_number, segments, category, y, section_break=False, wheel
                 seat["seat_guid"] = stable_uuid(zone_id, row_number, new_num, "seat_guid")
                 seat["uuid"] = stable_uuid(zone_id, row_number, new_num, "uuid")
         row["segment_breaks"] = [int(renumber_seats.get(str(b), b)) for b in row["segment_breaks"]]
+    # trailing_gap_units: zusätzlicher Abstand (in Sitzbreiten-Einheiten) zwischen dem
+    # letzten Sitz und der rechten Reihennummer — für Reihen, die durch echte
+    # segment_gap_seats-Lücken (z.B. Rollstuhlplätze mit Zwischenraum) INSGESAMT weniger
+    # Einheiten breit sind als die anderen Reihen der Zone, wodurch ihre rechte
+    # Reihennummer sonst zu weit links landet (nicht auf einer Linie mit den anderen
+    # Reihennummern, s. seat-picker.js _applyTrailingGapUnits).
+    if trailing_gap_units:
+        row["trailing_gap_units"] = trailing_gap_units
     return row
 
 def build_zone(zone_id, name, row_specs, position, break_before=None, align_edge=None, layout=None):
@@ -260,19 +268,48 @@ block_D = [
         "renumber_seats": {"12": "13", "13": "15", "14": "17", "15": "19"}
     }),
 ]
+    # Reihe 12/13/14 (Marko, Korrekturrunde 05.08.2026 — ursprünglich fälschlich auf
+    # Block F angewendet, dort zurückgerollt): durchgehende Bestuhlung in der Mitte —
+    # zwischen (dem bis dahin durchgehend nummerierten) Platz 10 und 11 fehlten bisher
+    # Sitze gegenüber der Realität. Eingefügt: Reihe 12 +4, Reihe 13/14 je +6 (Reihe 11
+    # bleibt unverändert, von Marko nicht genannt). Bei Reihe 12/14 liegt die Einfügestelle
+    # GENAU auf einer bestehenden Segmentgrenze (Sitz 10 = Ende eines Segments, Sitz 11 =
+    # Anfang des nächsten) — die neuen Sitze verlängern dort das VORDERE Segment. Bei
+    # Reihe 13 liegt Sitz 10/11 MITTEN in Segment 3 (9-14) — das Segment selbst wächst.
+    # Jede Einfügung verschiebt ALLE nachfolgenden Sitznummern DERSELBEN Reihe um den
+    # Einfüge-Betrag — deshalb müssen ALLE `segment_align`-Keys (eigene Segment-
+    # Startnummern) UND referenzierten Zielsitze in ANDEREN Reihen von Block E neu
+    # berechnet werden (die Reihen hängen hier enger ineinander als in Block F: Reihe 14
+    # referenziert 12+13, Reihe 13 referenziert 12, Reihe 12 referenziert 11). Reihe 11
+    # bekommt selbst keine neuen Sitze, aber ihr Verweis auf Reihe 14 Sitz 18 muss trotzdem
+    # auf 24 aktualisiert werden (der physische Zielsitz in Reihe 14 hat sich verschoben).
+    # Reihe 13/14: die Segment-Fluchtpunkte "8"→Reihe 13/6 (Reihe 14) bzw. "1"→Reihe 14/1
+    # (Reihe 13) erzeugten je eine überflüssige, sichtbare Lücke (Sitz 7/8 in Reihe 14 um
+    # 1 Einheit, Sitz 2/3 in Reihe 13 um 4 Einheiten zu breit) — Marko: "durchgehende
+    # Bestuhlung", diese Lücken müssen geschlossen werden. Entfernt (Reihe 11/12 behalten
+    # ihre analogen "1"-Einträge unverändert, waren nicht Teil der Rückmeldung).
 block_E = [
-    (14, [7, 3, 3, 7], KAT1, {"align_target_seat": 6, "segment_align": {"8": {"row": "13", "seat": 6}, "11": {"row": "12", "seat": 13}, "14": {"row": "13", "seat": 13}}}),
-    (13, [2, 6, 6, 3], KAT1, {"align_target_seat": 3, "segment_align": {"1": {"row": "14", "seat": 1}, "9": {"row": "12", "seat": 13}, "15": {"row": "14", "seat": 18}}}),
-    (12, [2, 8, 8, 3], KAT1, {"align_target_seat": 3, "segment_align": {"1": {"row": "14", "seat": 1}, "11": {"row": "11", "seat": 15}, "19": {"row": "14", "seat": 18}}}),
-    (11, [2, 20, 3], KAT1, {"align_target_seat": 3, "segment_align": {"1": {"row": "14", "seat": 1}, "23": {"row": "14", "seat": 18}}}),
+    (14, [7, 9, 3, 7], KAT1, {"align_target_seat": 6, "segment_align": {"17": {"row": "12", "seat": 17}, "20": {"row": "13", "seat": 19}}}),
+    (13, [2, 6, 12, 3], KAT1, {"align_target_seat": 3, "segment_align": {"9": {"row": "12", "seat": 17}, "21": {"row": "14", "seat": 24}}}),
+    (12, [2, 12, 8, 3], KAT1, {"align_target_seat": 3, "segment_align": {"1": {"row": "14", "seat": 1}, "15": {"row": "11", "seat": 15}, "23": {"row": "14", "seat": 24}}}),
+    (11, [2, 20, 3], KAT1, {"align_target_seat": 3, "segment_align": {"1": {"row": "14", "seat": 1}, "23": {"row": "14", "seat": 24}}}),
     (10, [20], KAT1, {"align_reference_seat": True}),
     (9, [20], KAT1),
     (8, [20], KAT1),
     (7, [20], KAT1),
-    # Neu 04.08.2026 (Transkript): Reihe 6 fehlte bisher komplett, analog zu D/F die
-    # vorderste Reihe am Spielfeld, komplett Rollstuhlplätze. Seatzahl (10, wie D/F)
-    # ist eine Annahme mangels expliziter Angabe — bei Bedarf korrigieren.
-    (6, [10], KAT1, {"wheelchair": True}),
+    # Reihe 6 (Marko, Korrekturrunde): weiterhin 10 Rollstuhlplätze insgesamt, aber jetzt
+    # mit einer echten Ein-Platz-Lücke ZWISCHEN jeweils zweien (nicht vor dem ersten) —
+    # 10 Einzel-Segmente, segment_gap_seats vor Segment 1-9 (nicht vor Segment 0/Sitz 1).
+    # Die 9 eingefügten Lücken machen die Reihe insgesamt nur 19 statt 20 Einheiten breit
+    # (10 Sitze + 9×1 Lücke = 19) — ohne Korrektur landet die rechte Reihennummer dadurch
+    # 1 Einheit zu weit links (nicht auf einer Linie mit Reihe 7-10, von Marko live
+    # gefunden: "Zeilennummer 6 rutscht in den Platzbereich"). trailing_gap_units=1
+    # gleicht das aus.
+    (6, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], KAT1, {
+        "wheelchair": True,
+        "segment_gap_seats": {1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1},
+        "trailing_gap_units": 1
+    }),
 ]
 block_F = [
     (14, [7, 14, 7], KAT2, {"align_target_seat": 23}),

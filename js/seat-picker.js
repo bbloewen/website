@@ -857,16 +857,28 @@
     var unitPx = sampleSeat.getBoundingClientRect().width + flexGapPx;
     rowEls.forEach(function (rowEl) {
       var row = rowsByNumber[rowEl.dataset.rowNumber];
-      if (!row || !row.segment_gap_seats) return;
-      var breaks = row.segment_breaks || [];
-      var seatEls = rowEl.querySelectorAll('.seatplan-seat');
-      Object.keys(row.segment_gap_seats).forEach(function (segIdxStr) {
-        var breakSeatNum = breaks[parseInt(segIdxStr, 10) - 1];
-        if (breakSeatNum === undefined) return;
-        var seatEl = Array.from(seatEls).find(function (s) { return s.textContent.trim() === String(breakSeatNum); });
-        if (!seatEl) return;
-        seatEl.style.marginLeft = (row.segment_gap_seats[segIdxStr] * unitPx) + 'px';
-      });
+      if (!row) return;
+      if (row.segment_gap_seats) {
+        var breaks = row.segment_breaks || [];
+        var seatEls = rowEl.querySelectorAll('.seatplan-seat');
+        Object.keys(row.segment_gap_seats).forEach(function (segIdxStr) {
+          var breakSeatNum = breaks[parseInt(segIdxStr, 10) - 1];
+          if (breakSeatNum === undefined) return;
+          var seatEl = Array.from(seatEls).find(function (s) { return s.textContent.trim() === String(breakSeatNum); });
+          if (!seatEl) return;
+          seatEl.style.marginLeft = (row.segment_gap_seats[segIdxStr] * unitPx) + 'px';
+        });
+      }
+      // trailing_gap_units (s. gen_seatplan.py mkrow()): Reihen, die durch
+      // segment_gap_seats insgesamt weniger Einheiten breit sind als andere Reihen der
+      // Zone (z.B. Rollstuhlplätze mit echten Zwischenräumen statt durchgehender
+      // Sitze), bekommen hier zusätzlichen Abstand VOR der rechten Reihennummer, damit
+      // diese trotzdem auf einer Linie mit den anderen Reihennummern bleibt.
+      if (row.trailing_gap_units) {
+        var labels = rowEl.querySelectorAll('.seatplan-row-num');
+        var trailingLabel = labels[labels.length - 1];
+        if (trailingLabel) trailingLabel.style.marginLeft = (row.trailing_gap_units * unitPx) + 'px';
+      }
     });
   };
 
