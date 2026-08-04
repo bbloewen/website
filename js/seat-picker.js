@@ -1222,7 +1222,8 @@
           var btn = document.createElement('button');
           btn.type = 'button';
           var isSelected = !taken && !reserved && !!self._activeSeats()[seat.seat_guid];
-          btn.className = 'seatplan-seat ' + catClass(category) + (reserved ? ' reserved' : (taken ? ' taken' : '')) + (isSelected ? ' selected' : '');
+          var isWheelchair = !!seat.wheelchair;
+          btn.className = 'seatplan-seat ' + catClass(category) + (reserved ? ' reserved' : (taken ? ' taken' : '')) + (isSelected ? ' selected' : '') + (isWheelchair ? ' wheelchair' : '');
           // Für Ehrenamtliche reservierte Plätze zeigen "EA" statt der Sitznummer und
           // bekommen keine Verkauft-Schraffur (s. .seatplan-seat.reserved) — sie sind
           // nie verkauft gewesen, sondern von vornherein nicht zum Verkauf freigegeben.
@@ -1235,7 +1236,7 @@
           }
           if (blockMode) btn.tabIndex = -1;
           btn.dataset.seatGuid = seat.seat_guid;
-          var seatLabel = zone.name + ', Reihe ' + rowLabel + ', Platz ' + seat.seat_number;
+          var seatLabel = zone.name + ', Reihe ' + rowLabel + ', Platz ' + seat.seat_number + (isWheelchair ? ' (Rollstuhlplatz)' : '');
           btn.setAttribute('aria-label', seatLabel + (reserved ? ' (reserviert für Ehrenamtliche)' : taken ? ' (vergeben)' : ' (frei)'));
           if (taken || reserved || blockMode) {
             btn.disabled = true;

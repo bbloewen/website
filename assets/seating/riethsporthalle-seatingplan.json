@@ -2027,7 +2027,8 @@
                 "x": 0,
                 "y": 0
               },
-              "category": "Kategorie II"
+              "category": "Kategorie II",
+              "wheelchair": true
             },
             {
               "seat_number": "2",
@@ -2037,7 +2038,8 @@
                 "x": 25,
                 "y": 0
               },
-              "category": "Kategorie II"
+              "category": "Kategorie II",
+              "wheelchair": true
             },
             {
               "seat_number": "3",
@@ -2047,7 +2049,8 @@
                 "x": 50,
                 "y": 0
               },
-              "category": "Kategorie II"
+              "category": "Kategorie II",
+              "wheelchair": true
             },
             {
               "seat_number": "4",
@@ -2057,7 +2060,8 @@
                 "x": 75,
                 "y": 0
               },
-              "category": "Kategorie II"
+              "category": "Kategorie II",
+              "wheelchair": true
             },
             {
               "seat_number": "5",
@@ -2067,7 +2071,8 @@
                 "x": 100,
                 "y": 0
               },
-              "category": "Kategorie II"
+              "category": "Kategorie II",
+              "wheelchair": true
             },
             {
               "seat_number": "6",
@@ -2077,7 +2082,8 @@
                 "x": 125,
                 "y": 0
               },
-              "category": "Kategorie II"
+              "category": "Kategorie II",
+              "wheelchair": true
             },
             {
               "seat_number": "7",
@@ -2087,7 +2093,8 @@
                 "x": 150,
                 "y": 0
               },
-              "category": "Kategorie II"
+              "category": "Kategorie II",
+              "wheelchair": true
             },
             {
               "seat_number": "8",
@@ -2097,7 +2104,8 @@
                 "x": 175,
                 "y": 0
               },
-              "category": "Kategorie II"
+              "category": "Kategorie II",
+              "wheelchair": true
             },
             {
               "seat_number": "9",
@@ -2107,7 +2115,8 @@
                 "x": 200,
                 "y": 0
               },
-              "category": "Kategorie II"
+              "category": "Kategorie II",
+              "wheelchair": true
             },
             {
               "seat_number": "10",
@@ -2117,7 +2126,8 @@
                 "x": 225,
                 "y": 0
               },
-              "category": "Kategorie II"
+              "category": "Kategorie II",
+              "wheelchair": true
             }
           ],
           "align_reference_seat": true
@@ -3937,6 +3947,129 @@
                 "y": 0
               },
               "category": "Kategorie I"
+            }
+          ]
+        },
+        {
+          "uuid": "27bd714a-de63-5eef-b80a-9218e2598078",
+          "position": {
+            "x": 0,
+            "y": 320
+          },
+          "row_number": "6",
+          "row_number_position": "both",
+          "section_break": false,
+          "segment_breaks": [],
+          "seats": [
+            {
+              "seat_number": "1",
+              "seat_guid": "d0b41d26-c817-51e4-b422-b07964855deb",
+              "uuid": "4c1a39f1-29e0-557d-88aa-cf68b4885c6b",
+              "position": {
+                "x": 0,
+                "y": 0
+              },
+              "category": "Kategorie I",
+              "wheelchair": true
+            },
+            {
+              "seat_number": "2",
+              "seat_guid": "8758b90a-8aad-5545-accb-68687b60bdb9",
+              "uuid": "12738fac-8285-5990-a8f9-f9045bcdb7eb",
+              "position": {
+                "x": 25,
+                "y": 0
+              },
+              "category": "Kategorie I",
+              "wheelchair": true
+            },
+            {
+              "seat_number": "3",
+              "seat_guid": "585b979c-8671-5458-af4f-e4cea0659e7b",
+              "uuid": "9982355f-4767-5adc-9f9a-e6f1ea5d2543",
+              "position": {
+                "x": 50,
+                "y": 0
+              },
+              "category": "Kategorie I",
+              "wheelchair": true
+            },
+            {
+              "seat_number": "4",
+              "seat_guid": "2fd9150f-6838-51f9-8d88-738f5ca97d6a",
+              "uuid": "3e343015-be1f-5950-bd43-867bed0d4854",
+              "position": {
+                "x": 75,
+                "y": 0
+              },
+              "category": "Kategorie I",
+              "wheelchair": true
+            },
+            {
+              "seat_number": "5",
+              "seat_guid": "aebcf1e4-080b-5258-9a03-bd7d3cfbe7f5",
+              "uuid": "811999c7-68c6-5ffb-ab14-2c50ad519295",
+              "position": {
+                "x": 100,
+                "y": 0
+              },
+              "category": "Kategorie I",
+              "wheelchair": true
+            },
+            {
+              "seat_number": "6",
+              "seat_guid": "8637cf1a-825e-50ae-a979-36d909ca63e5",
+              "uuid": "f674c2d1-52c6-5573-b7a0-beadd603d3aa",
+              "position": {
+                "x": 125,
+                "y": 0
+              },
+              "category": "Kategorie I",
+              "wheelchair": true
+            },
+            {
+              "seat_number": "7",
+              "seat_guid": "0cbe901f-7f0c-58f2-9c7a-b701d382886d",
+              "uuid": "d75b14b1-58cd-5671-89e7-99227aa04f54",
+              "position": {
+                "x": 150,
+                "y": 0
+              },
+              "category": "Kategorie I",
+              "wheelchair": true
+            },
+            {
+              "seat_number": "8",
+              "seat_guid": "dbc6928f-0f72-5389-bf2f-8c5e0cb1e7aa",
+              "uuid": "000fbf62-4644-5263-b4ea-ccccb652581b",
+              "position": {
+                "x": 175,
+                "y": 0
+              },
+              "category": "Kategorie I",
+              "wheelchair": true
+            },
+            {
+              "seat_number": "9",
+              "seat_guid": "0fc6a96d-0ed1-5d7a-a684-b97afcbbc921",
+              "uuid": "2ac62986-99b5-528d-9231-3d018f73f6c6",
+              "position": {
+                "x": 200,
+                "y": 0
+              },
+              "category": "Kategorie I",
+              "wheelchair": true
+            },
+            {
+              "seat_number": "10",
+              "seat_guid": "a4ce11de-657f-5dc4-8bfc-50f63c1175df",
+              "uuid": "d8ac849d-e120-51dc-a280-0a81332e9332",
+              "position": {
+                "x": 225,
+                "y": 0
+              },
+              "category": "Kategorie I",
+              "wheelchair": true
             }
           ]
         }
@@ -5922,7 +6055,8 @@
                 "x": 0,
                 "y": 0
               },
-              "category": "Kategorie II"
+              "category": "Kategorie II",
+              "wheelchair": true
             },
             {
               "seat_number": "2",
@@ -5932,7 +6066,8 @@
                 "x": 25,
                 "y": 0
               },
-              "category": "Kategorie II"
+              "category": "Kategorie II",
+              "wheelchair": true
             },
             {
               "seat_number": "3",
@@ -5942,7 +6077,8 @@
                 "x": 50,
                 "y": 0
               },
-              "category": "Kategorie II"
+              "category": "Kategorie II",
+              "wheelchair": true
             },
             {
               "seat_number": "4",
@@ -5952,7 +6088,8 @@
                 "x": 75,
                 "y": 0
               },
-              "category": "Kategorie II"
+              "category": "Kategorie II",
+              "wheelchair": true
             },
             {
               "seat_number": "5",
@@ -5962,7 +6099,8 @@
                 "x": 100,
                 "y": 0
               },
-              "category": "Kategorie II"
+              "category": "Kategorie II",
+              "wheelchair": true
             },
             {
               "seat_number": "6",
@@ -5972,7 +6110,8 @@
                 "x": 125,
                 "y": 0
               },
-              "category": "Kategorie II"
+              "category": "Kategorie II",
+              "wheelchair": true
             },
             {
               "seat_number": "7",
@@ -5982,7 +6121,8 @@
                 "x": 150,
                 "y": 0
               },
-              "category": "Kategorie II"
+              "category": "Kategorie II",
+              "wheelchair": true
             },
             {
               "seat_number": "8",
@@ -5992,7 +6132,8 @@
                 "x": 175,
                 "y": 0
               },
-              "category": "Kategorie II"
+              "category": "Kategorie II",
+              "wheelchair": true
             },
             {
               "seat_number": "9",
@@ -6002,7 +6143,8 @@
                 "x": 200,
                 "y": 0
               },
-              "category": "Kategorie II"
+              "category": "Kategorie II",
+              "wheelchair": true
             },
             {
               "seat_number": "10",
@@ -6012,7 +6154,8 @@
                 "x": 225,
                 "y": 0
               },
-              "category": "Kategorie II"
+              "category": "Kategorie II",
+              "wheelchair": true
             }
           ]
         }
@@ -10137,7 +10280,9 @@
           "row_number": "10",
           "row_number_position": "both",
           "section_break": false,
-          "segment_breaks": [],
+          "segment_breaks": [
+            9
+          ],
           "seats": [
             {
               "seat_number": "1",
@@ -10298,46 +10443,6 @@
                 "y": 0
               },
               "category": "Kategorie I"
-            },
-            {
-              "seat_number": "17",
-              "seat_guid": "f69b446a-3fa9-58b6-97fa-64ccee1ebb74",
-              "uuid": "36c0d0a7-293f-5d81-bae6-6f3ab5bac124",
-              "position": {
-                "x": 400,
-                "y": 0
-              },
-              "category": "Kategorie I"
-            },
-            {
-              "seat_number": "18",
-              "seat_guid": "3a0cf744-0c39-5d12-9947-2e6213c44c3f",
-              "uuid": "cd12209d-9176-580f-b1b6-134b6779e89d",
-              "position": {
-                "x": 425,
-                "y": 0
-              },
-              "category": "Kategorie I"
-            },
-            {
-              "seat_number": "19",
-              "seat_guid": "2fe81e35-f6e8-56c9-8543-1c3eb96e3c56",
-              "uuid": "53204855-b9e3-50af-85d1-26c285e41437",
-              "position": {
-                "x": 450,
-                "y": 0
-              },
-              "category": "Kategorie I"
-            },
-            {
-              "seat_number": "20",
-              "seat_guid": "a50961bd-f627-57e2-a883-b9e85c4b45b5",
-              "uuid": "2680ea24-b9cc-59b3-bbb0-35edf189bf53",
-              "position": {
-                "x": 475,
-                "y": 0
-              },
-              "category": "Kategorie I"
             }
           ],
           "match_first_row_width": true,
@@ -10354,7 +10459,8 @@
           "section_break": false,
           "segment_breaks": [
             3,
-            23
+            9,
+            15
           ],
           "seats": [
             {
@@ -10526,89 +10632,9 @@
                 "y": 0
               },
               "category": "Kategorie I"
-            },
-            {
-              "seat_number": "18",
-              "seat_guid": "5ad14bfb-1f17-5362-be8d-1ea349b94286",
-              "uuid": "f53e2950-b6c1-505a-9e74-e61d28cca328",
-              "position": {
-                "x": 425,
-                "y": 0
-              },
-              "category": "Kategorie I"
-            },
-            {
-              "seat_number": "19",
-              "seat_guid": "ee4d436c-d1eb-57ea-831a-1947ec8e1339",
-              "uuid": "f1eb1374-5ee2-5253-b48f-391394f86756",
-              "position": {
-                "x": 450,
-                "y": 0
-              },
-              "category": "Kategorie I"
-            },
-            {
-              "seat_number": "20",
-              "seat_guid": "ffcc4b66-63a5-5859-be7c-18c66f0d7b96",
-              "uuid": "e7d71828-afff-55f0-a2ce-0e3ecd16114b",
-              "position": {
-                "x": 475,
-                "y": 0
-              },
-              "category": "Kategorie I"
-            },
-            {
-              "seat_number": "21",
-              "seat_guid": "ddd8e021-e63b-5a41-8178-68c67c185542",
-              "uuid": "22031ca3-f3f2-52b7-aa82-eed91bf003b1",
-              "position": {
-                "x": 500,
-                "y": 0
-              },
-              "category": "Kategorie I"
-            },
-            {
-              "seat_number": "22",
-              "seat_guid": "62b62ffe-70bc-5ab7-ba19-0ca0a23dd688",
-              "uuid": "d76dd415-a193-5c4b-8b6f-405ade005e77",
-              "position": {
-                "x": 525,
-                "y": 0
-              },
-              "category": "Kategorie I"
-            },
-            {
-              "seat_number": "23",
-              "seat_guid": "343c3349-b3c2-58e0-94b8-f49cec9e2c26",
-              "uuid": "299eca4a-de62-51d0-88d8-e576c3a03551",
-              "position": {
-                "x": 550,
-                "y": 0
-              },
-              "category": "Kategorie I"
-            },
-            {
-              "seat_number": "24",
-              "seat_guid": "8781d840-445c-548b-8013-ddec26178580",
-              "uuid": "197549c5-1c0e-5ce3-80d3-ac943fb09cc8",
-              "position": {
-                "x": 575,
-                "y": 0
-              },
-              "category": "Kategorie I"
-            },
-            {
-              "seat_number": "25",
-              "seat_guid": "23336a1e-4727-5c62-9a78-2c86d4aa4560",
-              "uuid": "29ff9526-98d1-5ec2-a92e-f98528a0ed16",
-              "position": {
-                "x": 600,
-                "y": 0
-              },
-              "category": "Kategorie I"
             }
           ],
-          "align_target_seat": 22
+          "align_target_seat": 14
         },
         {
           "uuid": "edaebdfb-31c7-52d3-b980-056553355a0f",
@@ -10621,7 +10647,9 @@
           "section_break": false,
           "segment_breaks": [
             8,
-            22
+            11,
+            14,
+            16
           ],
           "seats": [
             {
@@ -10823,89 +10851,15 @@
                 "y": 0
               },
               "category": "Kategorie I"
-            },
-            {
-              "seat_number": "21",
-              "seat_guid": "4ea4df97-9c89-51df-b004-e9ba68fe8502",
-              "uuid": "ec769279-71fc-5d19-9a4e-d58537e66b1d",
-              "position": {
-                "x": 500,
-                "y": 0
-              },
-              "category": "Kategorie I"
-            },
-            {
-              "seat_number": "22",
-              "seat_guid": "f9d1d226-17d6-5678-ba11-f12908fb8c9d",
-              "uuid": "5eb3bc3d-50c8-5af9-9ed4-c077a900266d",
-              "position": {
-                "x": 525,
-                "y": 0
-              },
-              "category": "Kategorie I"
-            },
-            {
-              "seat_number": "23",
-              "seat_guid": "348427ab-331e-52d7-b8e1-39691ef89365",
-              "uuid": "2bb359c6-67ba-5911-be6e-0d8a953e0f10",
-              "position": {
-                "x": 550,
-                "y": 0
-              },
-              "category": "Kategorie I"
-            },
-            {
-              "seat_number": "24",
-              "seat_guid": "5b59e551-599a-5c1b-945a-8a5ba3e106d0",
-              "uuid": "2bcfb0c7-8874-5c15-aee5-26e8c1349c19",
-              "position": {
-                "x": 575,
-                "y": 0
-              },
-              "category": "Kategorie I"
-            },
-            {
-              "seat_number": "25",
-              "seat_guid": "31b457e1-05bc-502d-b24f-3c3f27994497",
-              "uuid": "4a877113-1c59-54b3-b33d-e4237fd8f32d",
-              "position": {
-                "x": 600,
-                "y": 0
-              },
-              "category": "Kategorie I"
-            },
-            {
-              "seat_number": "26",
-              "seat_guid": "61a616ba-7a82-57f7-bc8d-acf24e06e843",
-              "uuid": "1b843a3f-d77a-5997-a759-1e0c8d6af920",
-              "position": {
-                "x": 625,
-                "y": 0
-              },
-              "category": "Kategorie I"
-            },
-            {
-              "seat_number": "27",
-              "seat_guid": "ec8093a4-b8a4-58c4-ae8b-b8bedefc0caa",
-              "uuid": "486288c6-2ffb-58e6-a5a3-f3beb1de609d",
-              "position": {
-                "x": 650,
-                "y": 0
-              },
-              "category": "Kategorie I"
-            },
-            {
-              "seat_number": "28",
-              "seat_guid": "eafadb4f-2f33-5f22-8ec5-6b4004bf7756",
-              "uuid": "fbdc51da-7380-589a-b051-172c4c3be845",
-              "position": {
-                "x": 675,
-                "y": 0
-              },
-              "category": "Kategorie I"
             }
           ],
-          "align_target_seat": 24
+          "align_target_seat": 15,
+          "segment_align": {
+            "6": {
+              "row": "11",
+              "seat": 3
+            }
+          }
         }
       ],
       "align_edge": "trailing"
