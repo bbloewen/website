@@ -1037,41 +1037,124 @@
   SeatPicker.prototype._applyAnchoredLayout = function (zoneEl, zone) {
     var rowEls = zoneEl.querySelectorAll('.seatplan-row-line');
     if (!rowEls.length) return;
+
+    var rowsByNumber = {};
+    zone.rows.forEach(function (row) { rowsByNumber[String(row.row_number)] = row; });
+
+    var flexGapPx = parseFloat(getComputedStyle(rowEls[0]).gap) || 0;
     var sampleSeat = zoneEl.querySelector('.seatplan-seat');
     if (!sampleSeat) return;
     // Sitzbreite + Reihenabstand ergeben zusammen EINE Einheit — je nach Ansicht
     // (winzige Übersichtskachel vs. große Detailansicht) unterschiedlich groß, deshalb
     // live gemessen statt hart codiert (s. CSS .seatplan-seat/.seatplan-row-line).
-    var unitPx = sampleSeat.getBoundingClientRect().width + (parseFloat(getComputedStyle(rowEls[0]).gap) || 0);
+    var unitPx = sampleSeat.getBoundingClientRect().width + flexGapPx;
     if (!unitPx) return;
+
+    // match_first_row_width-Reihen (z.B. Block B Reihe 6-10) haben kein festes Sitzraster
+    // — sie werden auf die tatsächliche gerenderte Breite von Reihe 1 gestreckt (s.
+    // gen_seatplan.py mkrow()). Das MUSS vor jeder Margin-Vergabe gemessen werden: eine
+    // später gesetzte Randverschiebung an Reihe 1 selbst würde deren gerenderte Breite
+    // sonst verfälschen (die Marge vergrößert die Row-Line-Box, wenn sie schon gesetzt
+    // ist, bevor gemessen wird).
+    var targetWidth = rowEls[0].getBoundingClientRect().width;
+    zoneEl.querySelectorAll('.seatplan-row-line--match-first').forEach(function (rowEl) {
+      var row = rowsByNumber[rowEl.dataset.rowNumber];
+      var breaks = (row && row.segment_breaks) || [];
+      // Jede match_first_row_width-Reihe bekommt ihre Sitze in einem inneren Wrapper-Div
+      // statt direkt als Flex-Kind von rowEl — nur so lässt sich die Sitz-Breite EXAKT
+      // auf Reihe 1 abstimmen, ohne die Reihennummern-Labels (auch Flex-Kinder von rowEl,
+      // s. _renderZone) versehentlich mitzustrecken. Ohne Segmentgrenzen (segment_breaks
+      // leer) ist das genau EIN Wrapper über die volle Breite — deckt damit auch die
+      // einfachen Fälle (z.B. Block B Reihe 6-9) mit demselben Code ab. segment_gap_units
+      // (nur bei mehreren Segmenten relevant, z.B. Reihe 10, [8,8]) gibt statt der
+      // pauschalen kleinen Gang-Lücke einen expliziten, in Einheiten skalierten
+      // Zwischenraum zwischen den Segmenten vor.
+      var seatEls = Array.from(rowEl.querySelectorAll('.seatplan-seat'));
+      var segStarts = [1].concat(breaks);
+      var segEnds = breaks.concat([seatEls.length + 1]);
+      var segCounts = segStarts.map(function (s, i) { return segEnds[i] - s; });
+      var totalCount = segCounts.reduce(function (a, b) { return a + b; }, 0);
+      var gapUnitsPx = (row && typeof row.segment_gap_units === 'number' ? row.segment_gap_units : 0) * unitPx;
+      // Der ROW-eigene Flex-gap (s. CSS .seatplan-row-line) liegt schon automatisch
+      // zwischen je zwei Flex-Kindern (Label/Wrapper) — vom expliziten Zwischenraum
+      // abziehen, sonst wäre die Lücke insgesamt zu groß.
+      var gapPx = Math.max(0, gapUnitsPx - flexGapPx);
+      // targetWidth ist die GESAMTE gerenderte Breite von Reihe 1 (Label-zu-Label, inkl.
+      // deren eigener Flex-Gaps) — davon müssen die BEIDEN Reihennummern-Labels dieser
+      // Reihe UND ihre eigenen Flex-Gaps abgezogen werden, sonst zählt das Label/Gap-
+      // Overhead doppelt und die Reihe wird breiter als Reihe 1.
+      var labelWidth = rowEl.querySelector('.seatplan-row-num') ? rowEl.querySelector('.seatplan-row-num').getBoundingClientRect().width : 0;
+      var availableForSeats = targetWidth - 2 * labelWidth - 2 * flexGapPx - gapUnitsPx * (segCounts.length - 1);
+      var seatIdx = 0;
+      segCounts.forEach(function (count, i) {
+        var wrapper = document.createElement('div');
+        wrapper.style.display = 'flex';
+        wrapper.style.justifyContent = 'space-between';
+        wrapper.style.width = (availableForSeats * count / totalCount) + 'px';
+        if (i > 0) wrapper.style.marginLeft = gapPx + 'px';
+        var firstSeat = seatEls[seatIdx];
+        firstSeat.parentNode.insertBefore(wrapper, firstSeat);
+        for (var k = 0; k < count; k++) { wrapper.appendChild(seatEls[seatIdx]); seatIdx++; }
+      });
+    });
 
     var allUnits = [];
     zone.rows.forEach(function (row) {
       (row.seats || []).forEach(function (s) {
         if (typeof s.x_units === 'number') allUnits.push(s.x_units);
       });
+      if (typeof row.x_offset === 'number') allUnits.push(row.x_offset);
     });
     if (!allUnits.length) return;
     var zoneMinUnits = Math.min.apply(null, allUnits);
 
-    var rowsByNumber = {};
-    zone.rows.forEach(function (row) { rowsByNumber[String(row.row_number)] = row; });
-
     rowEls.forEach(function (rowEl) {
       var row = rowsByNumber[rowEl.dataset.rowNumber];
       if (!row) return;
+      if (row.match_first_row_width) {
+        // Kein festes Sitzraster: die ganze Reihe (inkl. der Reihennummern-Labels, die
+        // als Flex-Geschwister der Sitze mitgerendert werden, s. _renderZone) bekommt
+        // EIN gemeinsames marginLeft aus x_offset — die Sitzabstände selbst kommen aus
+        // justify-content:space-between oben, nicht aus einzelnen Sitz-Margins.
+        if (typeof row.x_offset === 'number') {
+          rowEl.style.marginLeft = (row.x_offset - zoneMinUnits) * unitPx + 'px';
+        }
+        return;
+      }
       var seatEls = rowEl.querySelectorAll('.seatplan-seat');
       var prevUnits = null;
       seatEls.forEach(function (seatEl, i) {
         var seatData = row.seats[i];
         if (!seatData || typeof seatData.x_units !== 'number') return;
         var units = seatData.x_units;
-        // Erster Sitz der Reihe: Abstand zur linken Zonen-Kante (zoneMinUnits). Jeder
-        // weitere Sitz: normaler Sitzabstand (1 Einheit) ist schon Teil des Flex-Flusses
-        // — nur wenn zwischen zwei Sitzen MEHR als 1 Einheit liegt (Gang, oder ein per
-        // segment_shifts verschobenes Segment), kommt die Differenz als Zusatz-Margin
-        // oben drauf.
-        var margin = prevUnits === null ? (units - zoneMinUnits) * unitPx : Math.max(0, units - prevUnits - 1) * unitPx;
+        var margin;
+        if (prevUnits === null) {
+          // Erster Sitz der Reihe: Abstand zur linken Zonen-Kante (zoneMinUnits).
+          margin = (units - zoneMinUnits) * unitPx;
+        } else {
+          // Jeder weitere Sitz: normaler Sitzabstand (1 Einheit) ist schon Teil des
+          // Flex-Flusses — nur wenn zwischen zwei Sitzen MEHR als 1 Einheit liegt (Gang,
+          // oder ein per segment_shifts verschobenes Segment), kommt die Differenz als
+          // Zusatz-Margin oben drauf.
+          var gapUnits = Math.max(0, units - prevUnits - 1);
+          margin = gapUnits * unitPx;
+          // Ein Gang OHNE eigenen segment_shift (gapUnits genau 0) bekommt trotzdem die
+          // klassische kleine, NICHT mitskalierende Gang-Lücke — sonst verschwindet der
+          // sichtbare Gang komplett, sobald keine Fluchtpunkt-Verschiebung nötig ist (z.B.
+          // Block B Reihe 1-3, deren Segmente einheitenmäßig lückenlos aneinanderstoßen).
+          // Bei einem echten Fluchtpunkt-Shift (gapUnits > 0) ist die Lücke bereits exakt
+          // berechnet — hier NICHT nochmal 10px addieren, sonst stimmt die Flucht nicht mehr.
+          // Sonderfall: gapUnits kann auch bei einem EXPLIZITEN Shift zufällig genau 0
+          // ergeben (z.B. Block B Reihe 11, Segment 0+1 beide um denselben Betrag
+          // verschoben, damit sie als ein Block zusammenbleiben) — row.explicit_shift_
+          // segments (s. gen_seatplan.py) verrät, ob für DIESES Segment bewusst ein Shift
+          // angegeben wurde; nur wenn nicht, greift die Dekor-Lücke.
+          var breakIdx = row.segment_breaks ? row.segment_breaks.indexOf(parseInt(seatData.seat_number, 10)) : -1;
+          var isSegStart = breakIdx !== -1;
+          var segIndex = breakIdx + 1; // Segment 0 beginnt vor jedem Break, s. Python seg_of
+          var hasExplicitShift = row.explicit_shift_segments && row.explicit_shift_segments.indexOf(segIndex) !== -1;
+          if (isSegStart && gapUnits === 0 && !hasExplicitShift) margin += 10;
+        }
         seatEl.style.marginLeft = margin + 'px';
         prevUnits = units;
       });

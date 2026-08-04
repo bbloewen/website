@@ -24,7 +24,7 @@ def mkseat(zone_id, row_number, n, category, wheelchair=False):
 
 def mkrow(zone_id, row_number, segments, category, y, section_break=False, wheelchair=False,
           align_reference_seat=None, align_target_seat=None, match_first_row_width=None,
-          segment_align=None, x_offset=None, segment_shifts=None):
+          segment_align=None, x_offset=None, segment_shifts=None, segment_gap_units=None):
     # segments: list of aisle-separated cluster widths, e.g. [2, 20, 3] for a row
     # split by two aisles — seat numbering stays continuous across the aisles
     # (matches the real Saalplan PDF), only the VISUAL rendering gets a gap.
@@ -58,20 +58,45 @@ def mkrow(zone_id, row_number, segments, category, y, section_break=False, wheel
     if segment_align:
         row["segment_align"] = segment_align
     # x_offset/segment_shifts: neues Koordinatensystem für Zonen mit "layout":"anchored"
-    # (bisher nur Block A) — jeder Sitz bekommt eine ABSOLUTE Position in Sitzbreiten-
-    # Einheiten relativ zu EINEM festen Zonen-Anker (s. build_zone("A", ...)), statt sich
-    # per align_target_seat/segment_align auf eine andere Reihe zu beziehen. x_offset gilt
-    # gleichmäßig für die ganze Reihe (= Position von Sitz 1 ohne Segment-Verschiebung),
-    # segment_shifts verschiebt EIN Segment (0-indiziert, z.B. das isolierte Randsegment
-    # vor der ersten Gang-Lücke) zusätzlich dazu, wenn es nicht lückenlos am Nachbar-
-    # segment kleben soll, sondern an einem Sitz einer ANDEREN Reihe fluchten muss.
+    # (bisher Block A, jetzt auch B) — jeder Sitz bekommt eine ABSOLUTE Position in
+    # Sitzbreiten-Einheiten relativ zu EINEM festen Zonen-Anker (s. build_zone("A", ...)),
+    # statt sich per align_target_seat/segment_align auf eine andere Reihe zu beziehen.
+    # x_offset gilt gleichmäßig für die ganze Reihe (= Position von Sitz 1 ohne Segment-
+    # Verschiebung), segment_shifts verschiebt EIN Segment (0-indiziert, z.B. das
+    # isolierte Randsegment vor der ersten Gang-Lücke) zusätzlich dazu, wenn es nicht
+    # lückenlos am Nachbarsegment kleben soll, sondern an einem Sitz einer ANDEREN Reihe
+    # fluchten muss.
+    # match_first_row_width-Reihen (z.B. Block B Reihe 6-10) haben KEIN einheitliches
+    # Sitzraster — sie werden per CSS auf die exakte gerenderte Breite von Reihe 1
+    # gestreckt (s. seat-picker.js _applyAnchoredLayout), einzelne Sitze bekommen daher
+    # bewusst KEIN x_units (das würde ein festes Sitzraster voraussetzen, das es hier
+    # nicht gibt) — nur die Reihe selbst bekommt x_offset für ihre eigene Positionierung.
     if x_offset is not None:
-        seg_shifts = segment_shifts or {}
-        seg_of = []
-        for i, w in enumerate(segments):
-            seg_of.extend([i] * w)
-        for idx, seat in enumerate(row["seats"]):
-            seat["x_units"] = x_offset + idx + seg_shifts.get(seg_of[idx], 0)
+        row["x_offset"] = x_offset
+        if not match_first_row_width:
+            seg_shifts = segment_shifts or {}
+            seg_of = []
+            for i, w in enumerate(segments):
+                seg_of.extend([i] * w)
+            for idx, seat in enumerate(row["seats"]):
+                seat["x_units"] = x_offset + idx + seg_shifts.get(seg_of[idx], 0)
+            # explicit_shift_segments: welche Segmente (Index) einen EIGENEN Fluchtpunkt-
+            # Shift bekommen haben — auch wenn der resultierende Abstand zur Nachbarreihe
+            # zufällig genau 0 Einheiten ergibt (z.B. wenn zwei benachbarte Segmente um
+            # denselben Betrag verschoben werden, damit sie als ein Block zusammenbleiben,
+            # s. Block B Reihe 11 Segment 0+1). Ohne diese Liste kann seat-picker.js nicht
+            # unterscheiden, ob so ein Nulllücken-Übergang bewusst so gewollt ist oder ob
+            # einfach GAR KEIN Shift angegeben wurde (dann greift die kleine Dekor-Lücke).
+            if seg_shifts:
+                row["explicit_shift_segments"] = sorted(seg_shifts.keys())
+    # segment_gap_units: für match_first_row_width-Reihen MIT mehreren Segmenten (z.B.
+    # Block B Reihe 10, [8,8]) reicht die normale kleine Gang-Lücke nicht — jedes Segment
+    # wird UNABHÄNGIG vom anderen gestreckt (eigene Breite proportional zur Sitzzahl),
+    # mit einer eigenen, in Einheiten skalierten Lücke dazwischen statt der pauschalen
+    # 10px (s. seat-picker.js _applyAnchoredLayout). Ohne Angabe bleibt es bei der
+    # normalen kleinen dekorativen Lücke (ein Segment reicht dafür sowieso nicht).
+    if segment_gap_units is not None:
+        row["segment_gap_units"] = segment_gap_units
     return row
 
 def build_zone(zone_id, name, row_specs, position, break_before=None, align_edge=None, layout=None):
@@ -209,25 +234,54 @@ block_A = [
     (11, [2, 20, 3], KAT2, {"x_offset": -12, "segment_shifts": {0: -3, 2: 2}}),
     (12, [7, 14, 7], KAT2, {"x_offset": -14, "segment_shifts": {0: -1, 2: 1}}),
 ]
+# Block B auf absolutes Koordinaten-Layout umgestellt (04.08.2026, Marko): neuer Anker,
+# weil B strukturell anders ist als A (die "Treppe" vorn + gestreckte Reihen 6-10 statt
+# durchgehender 20er-Reihen). Anker: die Grenze zwischen Sitz 9 und Sitz 10 der Reihe 1
+# (die Reihe 1 liegt damit horizontal zentriert im Block) = Einheit 0.
+#   - Reihen 1-3 ([7,12], "die Treppe"): x_offset=-9, damit die Sitz9/10-Grenze bei jeder
+#     der drei exakt auf Einheit 0 liegt. Segment 0 (Sitze 1-7) zusätzlich um -1 Einheit
+#     verschoben (segment_shifts={0:-1}) — Marko, 04.08.2026 (zweite Runde): "zwischen
+#     Platz 7 und 8 ist ein Platz [Sitzbreite] Space", ein echter Fluchtpunkt-Gang statt
+#     der pauschalen kleinen Dekor-Lücke.
+#   - Reihen 4-5 ([12]): x_offset=-9, identisch zu Reihe 1-3 — Marko: "Reihe 4/5 müssen
+#     die Sitzplätze genau über den Sitzplätzen der Reihe 3 stehen, Sitz 10 fluchtet mit
+#     Sitz 10" (Sitz-für-Sitz-Gleichlauf mit Reihe 1-3, NICHT nur mit deren zweitem
+#     Segment — ursprünglich x_offset=-2 angenommen, war falsch).
+#   - Reihen 6-10 (match_first_row_width, Marko: "in der Breite so gestreckt, dass sie
+#     genau der Breite von Reihe 1 bis 5 entspricht" bzw. "Reihe 10 muss exakt die
+#     gleiche Breite wie Reihe 9 haben"): x_offset=-9 wie Reihe 1 — NUR für die Reihen-
+#     Position, kein x_units pro Sitz (kein festes Sitzraster, s. mkrow()).
+#   - Reihe 11: vorläufig unverändert (Marko, 04.08.2026 zweite Runde: "Platz 3 bis 8 ist
+#     ja Platz 3 bis 8" — bestätigt die bestehende Verschiebung, weitere Absprache folgt).
+#   - Reihe 12: x_offset=-9 ("komplett nach links", Marko) — Sitz 7 (Segment 0, mit dem
+#     bestehenden segment_shift -2) fluchtet damit auf Sitz 7 der Reihe 11:
+#     Sitz 7 Reihe 11 = -4 (x_offset) + 6 (Index) - 7 (Segment-Shift Reihe 11) = -5.
+#     Sitz 7 Reihe 12 = x_offset + 6 - 2 (Segment-Shift) = x_offset + 4 → x_offset=-9.
 block_B = [
-    (1, [7, 12], VIP),
-    (2, [7, 12], VIP),
-    (3, [7, 12], VIP),
-    (4, [12], VIP),
-    (5, [12], VIP),
-    (6, [16], KAT1, {"match_first_row_width": True}),
-    (7, [16], KAT1, {"match_first_row_width": True}),
-    (8, [16], KAT1, {"match_first_row_width": True}),
-    (9, [16], KAT1, {"match_first_row_width": True}),
-    (10, [8, 8], KAT1, {"match_first_row_width": True, "align_reference_seat": True}),
-    # Kein segment_align auf Sitz 3 (→ Reihe 10, Sitz 1): Reihe 10 ist die globale
-    # Bezugsreihe (align_reference_seat) und hat selbst KEIN align_target_seat, das
-    # deltaToAnchor()/segment_align aber zwingend braucht — der Verweis liefe ins
-    # Leere und wuerde die 10px-Segmentluecke vor Sitz 3 stillschweigend auf 0 setzen,
-    # ohne einen Ersatzwert zu berechnen (live verifiziert 04.08.2026). Primaerer Anker
-    # (align_target_seat=14) reicht fuer eine korrekte Grundausrichtung der Reihe.
-    (11, [2, 6, 6, 3], KAT1, {"align_target_seat": 14}),
-    (12, [7, 3, 3, 2, 5], KAT1, {"align_target_seat": 15, "segment_align": {"6": {"row": "11", "seat": 3}}}),
+    (1, [7, 12], VIP, {"x_offset": -9, "segment_shifts": {0: -1}}),
+    (2, [7, 12], VIP, {"x_offset": -9, "segment_shifts": {0: -1}}),
+    (3, [7, 12], VIP, {"x_offset": -9, "segment_shifts": {0: -1}}),
+    (4, [12], VIP, {"x_offset": -9}),
+    (5, [12], VIP, {"x_offset": -9}),
+    (6, [16], KAT1, {"match_first_row_width": True, "x_offset": -9}),
+    (7, [16], KAT1, {"match_first_row_width": True, "x_offset": -9}),
+    (8, [16], KAT1, {"match_first_row_width": True, "x_offset": -9}),
+    (9, [16], KAT1, {"match_first_row_width": True, "x_offset": -9}),
+    # Reihe 10 (Marko, 04.08.2026): "in Reihe 10 sind die Plätze etwas weiter zusammen,
+    # also weniger Lücken" als in Reihe 9 — die zwei 8er-Segmente werden UNABHÄNGIG
+    # voneinander gestreckt (nicht wie sonst als ein durchgehender 16er-Lauf), mit einer
+    # eigenen, größeren Lücke dazwischen statt der pauschalen 10px (s.
+    # seat-picker.js _applyAnchoredLayout). segment_gap_units grob aus Markos Fluchtpunkten
+    # hergeleitet (Sitz 8 zwischen Sitz 6/7 der Reihe 9, Sitz 9 zwischen Sitz 10/11 der
+    # Reihe 9) — nach Deploy live nachmessen und ggf. nachschärfen.
+    (10, [8, 8], KAT1, {"match_first_row_width": True, "x_offset": -9, "segment_gap_units": 4.2}),
+    # Reihe 11 (Marko): Sitze 1-8 (Segment 0+1 zusammen) nach links verschoben, damit
+    # Sitz 3 exakt auf Sitz 1 der Reihe 10 liegt. Sitz 1 einer match_first_row_width-Reihe
+    # sitzt immer exakt an deren eigenem x_offset (erstes Segment beginnt bei Bruchteil 0
+    # des gestreckten Laufs) — x_offset(Reihe 10)=-9 ist damit der Zielwert für Sitz 3.
+    # Unverschobener Sitz 3 (x_offset=-4, Index 2) läge bei -2 → Shift=-9-(-2)=-7.
+    (11, [2, 6, 6, 3], KAT1, {"x_offset": -4, "segment_shifts": {0: -7, 1: -7}}),
+    (12, [7, 3, 3, 2, 5], KAT1, {"x_offset": -9, "segment_shifts": {0: -2}}),
 ]
 block_C = [
     (1, [12, 7], KAT2),
@@ -260,7 +314,7 @@ plan = {
         build_zone("E", "Block E", block_E, {"x": 350, "y": 0}, align_edge="leading"),
         build_zone("F", "Block F", block_F, {"x": 700, "y": 0}, align_edge="trailing"),
         build_zone("A", "Block A", block_A, {"x": 0, "y": 600}, break_before={"6"}, layout="anchored"),
-        build_zone("B", "Block B", block_B, {"x": 350, "y": 600}, break_before={"6"}, align_edge="trailing"),
+        build_zone("B", "Block B", block_B, {"x": 350, "y": 600}, break_before={"6"}, layout="anchored"),
         build_zone("C", "Block C", block_C, {"x": 700, "y": 600}, break_before={"6"}, align_edge="leading"),
     ]
 }

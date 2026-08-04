@@ -6393,6 +6393,10 @@
               "category": "Kategorie II",
               "x_units": 9
             }
+          ],
+          "x_offset": -9,
+          "explicit_shift_segments": [
+            0
           ]
         },
         {
@@ -6617,6 +6621,10 @@
               "category": "Kategorie II",
               "x_units": 9
             }
+          ],
+          "x_offset": -9,
+          "explicit_shift_segments": [
+            0
           ]
         },
         {
@@ -6841,6 +6849,10 @@
               "category": "Kategorie II",
               "x_units": 9
             }
+          ],
+          "x_offset": -9,
+          "explicit_shift_segments": [
+            0
           ]
         },
         {
@@ -6986,7 +6998,8 @@
               "category": "Kategorie II",
               "x_units": 9
             }
-          ]
+          ],
+          "x_offset": -2
         },
         {
           "uuid": "6a4b676a-004e-550f-9034-8579c0dd2900",
@@ -7131,7 +7144,8 @@
               "category": "Kategorie II",
               "x_units": 9
             }
-          ]
+          ],
+          "x_offset": -2
         },
         {
           "uuid": "bcf9b92a-9095-5024-8932-ad19a4168be0",
@@ -7364,7 +7378,8 @@
               "category": "Kategorie II",
               "x_units": 9
             }
-          ]
+          ],
+          "x_offset": -10
         },
         {
           "uuid": "d28bb49e-8ba4-5114-a38c-958822f82221",
@@ -7597,7 +7612,8 @@
               "category": "Kategorie II",
               "x_units": 9
             }
-          ]
+          ],
+          "x_offset": -10
         },
         {
           "uuid": "96067925-f731-5114-9d0f-e627a96cb49f",
@@ -7830,7 +7846,8 @@
               "category": "Kategorie II",
               "x_units": 9
             }
-          ]
+          ],
+          "x_offset": -10
         },
         {
           "uuid": "d53e1883-cd6c-5627-96bf-4da47f93c34a",
@@ -8063,7 +8080,8 @@
               "category": "Kategorie II",
               "x_units": 9
             }
-          ]
+          ],
+          "x_offset": -10
         },
         {
           "uuid": "9731fe45-4dcb-5b2a-862b-d871eb883a6c",
@@ -8296,7 +8314,8 @@
               "category": "Kategorie II",
               "x_units": 9
             }
-          ]
+          ],
+          "x_offset": -10
         },
         {
           "uuid": "4ad361b9-a738-5c2e-a519-39d178d43248",
@@ -8587,6 +8606,11 @@
               "category": "Kategorie II",
               "x_units": 14
             }
+          ],
+          "x_offset": -12,
+          "explicit_shift_segments": [
+            0,
+            2
           ]
         },
         {
@@ -8911,6 +8935,11 @@
               "category": "Kategorie II",
               "x_units": 14
             }
+          ],
+          "x_offset": -14,
+          "explicit_shift_segments": [
+            0,
+            2
           ]
         }
       ],
@@ -8946,7 +8975,8 @@
                 "x": 0,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -10
             },
             {
               "seat_number": "2",
@@ -8956,7 +8986,8 @@
                 "x": 25,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -9
             },
             {
               "seat_number": "3",
@@ -8966,7 +8997,8 @@
                 "x": 50,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -8
             },
             {
               "seat_number": "4",
@@ -8976,7 +9008,8 @@
                 "x": 75,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -7
             },
             {
               "seat_number": "5",
@@ -8986,7 +9019,8 @@
                 "x": 100,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -6
             },
             {
               "seat_number": "6",
@@ -8996,7 +9030,8 @@
                 "x": 125,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -5
             },
             {
               "seat_number": "7",
@@ -9006,7 +9041,8 @@
                 "x": 150,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -4
             },
             {
               "seat_number": "8",
@@ -9016,7 +9052,8 @@
                 "x": 175,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -2
             },
             {
               "seat_number": "9",
@@ -9026,7 +9063,8 @@
                 "x": 200,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -1
             },
             {
               "seat_number": "10",
@@ -9036,7 +9074,8 @@
                 "x": 225,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 0
             },
             {
               "seat_number": "11",
@@ -9046,7 +9085,8 @@
                 "x": 250,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 1
             },
             {
               "seat_number": "12",
@@ -9056,7 +9096,8 @@
                 "x": 275,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 2
             },
             {
               "seat_number": "13",
@@ -9066,7 +9107,8 @@
                 "x": 300,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 3
             },
             {
               "seat_number": "14",
@@ -9076,7 +9118,8 @@
                 "x": 325,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 4
             },
             {
               "seat_number": "15",
@@ -9086,7 +9129,8 @@
                 "x": 350,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 5
             },
             {
               "seat_number": "16",
@@ -9096,7 +9140,8 @@
                 "x": 375,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 6
             },
             {
               "seat_number": "17",
@@ -9106,7 +9151,8 @@
                 "x": 400,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 7
             },
             {
               "seat_number": "18",
@@ -9116,7 +9162,8 @@
                 "x": 425,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 8
             },
             {
               "seat_number": "19",
@@ -9126,8 +9173,13 @@
                 "x": 450,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 9
             }
+          ],
+          "x_offset": -9,
+          "explicit_shift_segments": [
+            0
           ]
         },
         {
@@ -9151,7 +9203,8 @@
                 "x": 0,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -10
             },
             {
               "seat_number": "2",
@@ -9161,7 +9214,8 @@
                 "x": 25,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -9
             },
             {
               "seat_number": "3",
@@ -9171,7 +9225,8 @@
                 "x": 50,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -8
             },
             {
               "seat_number": "4",
@@ -9181,7 +9236,8 @@
                 "x": 75,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -7
             },
             {
               "seat_number": "5",
@@ -9191,7 +9247,8 @@
                 "x": 100,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -6
             },
             {
               "seat_number": "6",
@@ -9201,7 +9258,8 @@
                 "x": 125,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -5
             },
             {
               "seat_number": "7",
@@ -9211,7 +9269,8 @@
                 "x": 150,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -4
             },
             {
               "seat_number": "8",
@@ -9221,7 +9280,8 @@
                 "x": 175,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -2
             },
             {
               "seat_number": "9",
@@ -9231,7 +9291,8 @@
                 "x": 200,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -1
             },
             {
               "seat_number": "10",
@@ -9241,7 +9302,8 @@
                 "x": 225,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 0
             },
             {
               "seat_number": "11",
@@ -9251,7 +9313,8 @@
                 "x": 250,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 1
             },
             {
               "seat_number": "12",
@@ -9261,7 +9324,8 @@
                 "x": 275,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 2
             },
             {
               "seat_number": "13",
@@ -9271,7 +9335,8 @@
                 "x": 300,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 3
             },
             {
               "seat_number": "14",
@@ -9281,7 +9346,8 @@
                 "x": 325,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 4
             },
             {
               "seat_number": "15",
@@ -9291,7 +9357,8 @@
                 "x": 350,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 5
             },
             {
               "seat_number": "16",
@@ -9301,7 +9368,8 @@
                 "x": 375,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 6
             },
             {
               "seat_number": "17",
@@ -9311,7 +9379,8 @@
                 "x": 400,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 7
             },
             {
               "seat_number": "18",
@@ -9321,7 +9390,8 @@
                 "x": 425,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 8
             },
             {
               "seat_number": "19",
@@ -9331,8 +9401,13 @@
                 "x": 450,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 9
             }
+          ],
+          "x_offset": -9,
+          "explicit_shift_segments": [
+            0
           ]
         },
         {
@@ -9356,7 +9431,8 @@
                 "x": 0,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -10
             },
             {
               "seat_number": "2",
@@ -9366,7 +9442,8 @@
                 "x": 25,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -9
             },
             {
               "seat_number": "3",
@@ -9376,7 +9453,8 @@
                 "x": 50,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -8
             },
             {
               "seat_number": "4",
@@ -9386,7 +9464,8 @@
                 "x": 75,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -7
             },
             {
               "seat_number": "5",
@@ -9396,7 +9475,8 @@
                 "x": 100,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -6
             },
             {
               "seat_number": "6",
@@ -9406,7 +9486,8 @@
                 "x": 125,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -5
             },
             {
               "seat_number": "7",
@@ -9416,7 +9497,8 @@
                 "x": 150,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -4
             },
             {
               "seat_number": "8",
@@ -9426,7 +9508,8 @@
                 "x": 175,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -2
             },
             {
               "seat_number": "9",
@@ -9436,7 +9519,8 @@
                 "x": 200,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -1
             },
             {
               "seat_number": "10",
@@ -9446,7 +9530,8 @@
                 "x": 225,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 0
             },
             {
               "seat_number": "11",
@@ -9456,7 +9541,8 @@
                 "x": 250,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 1
             },
             {
               "seat_number": "12",
@@ -9466,7 +9552,8 @@
                 "x": 275,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 2
             },
             {
               "seat_number": "13",
@@ -9476,7 +9563,8 @@
                 "x": 300,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 3
             },
             {
               "seat_number": "14",
@@ -9486,7 +9574,8 @@
                 "x": 325,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 4
             },
             {
               "seat_number": "15",
@@ -9496,7 +9585,8 @@
                 "x": 350,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 5
             },
             {
               "seat_number": "16",
@@ -9506,7 +9596,8 @@
                 "x": 375,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 6
             },
             {
               "seat_number": "17",
@@ -9516,7 +9607,8 @@
                 "x": 400,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 7
             },
             {
               "seat_number": "18",
@@ -9526,7 +9618,8 @@
                 "x": 425,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 8
             },
             {
               "seat_number": "19",
@@ -9536,8 +9629,13 @@
                 "x": 450,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 9
             }
+          ],
+          "x_offset": -9,
+          "explicit_shift_segments": [
+            0
           ]
         },
         {
@@ -9559,7 +9657,8 @@
                 "x": 0,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -9
             },
             {
               "seat_number": "2",
@@ -9569,7 +9668,8 @@
                 "x": 25,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -8
             },
             {
               "seat_number": "3",
@@ -9579,7 +9679,8 @@
                 "x": 50,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -7
             },
             {
               "seat_number": "4",
@@ -9589,7 +9690,8 @@
                 "x": 75,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -6
             },
             {
               "seat_number": "5",
@@ -9599,7 +9701,8 @@
                 "x": 100,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -5
             },
             {
               "seat_number": "6",
@@ -9609,7 +9712,8 @@
                 "x": 125,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -4
             },
             {
               "seat_number": "7",
@@ -9619,7 +9723,8 @@
                 "x": 150,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -3
             },
             {
               "seat_number": "8",
@@ -9629,7 +9734,8 @@
                 "x": 175,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -2
             },
             {
               "seat_number": "9",
@@ -9639,7 +9745,8 @@
                 "x": 200,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -1
             },
             {
               "seat_number": "10",
@@ -9649,7 +9756,8 @@
                 "x": 225,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 0
             },
             {
               "seat_number": "11",
@@ -9659,7 +9767,8 @@
                 "x": 250,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 1
             },
             {
               "seat_number": "12",
@@ -9669,9 +9778,11 @@
                 "x": 275,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 2
             }
-          ]
+          ],
+          "x_offset": -9
         },
         {
           "uuid": "a01eb039-5e2b-5f2b-af5b-64f2ee4e6165",
@@ -9692,7 +9803,8 @@
                 "x": 0,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -9
             },
             {
               "seat_number": "2",
@@ -9702,7 +9814,8 @@
                 "x": 25,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -8
             },
             {
               "seat_number": "3",
@@ -9712,7 +9825,8 @@
                 "x": 50,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -7
             },
             {
               "seat_number": "4",
@@ -9722,7 +9836,8 @@
                 "x": 75,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -6
             },
             {
               "seat_number": "5",
@@ -9732,7 +9847,8 @@
                 "x": 100,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -5
             },
             {
               "seat_number": "6",
@@ -9742,7 +9858,8 @@
                 "x": 125,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -4
             },
             {
               "seat_number": "7",
@@ -9752,7 +9869,8 @@
                 "x": 150,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -3
             },
             {
               "seat_number": "8",
@@ -9762,7 +9880,8 @@
                 "x": 175,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -2
             },
             {
               "seat_number": "9",
@@ -9772,7 +9891,8 @@
                 "x": 200,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": -1
             },
             {
               "seat_number": "10",
@@ -9782,7 +9902,8 @@
                 "x": 225,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 0
             },
             {
               "seat_number": "11",
@@ -9792,7 +9913,8 @@
                 "x": 250,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 1
             },
             {
               "seat_number": "12",
@@ -9802,9 +9924,11 @@
                 "x": 275,
                 "y": 0
               },
-              "category": "VIP"
+              "category": "VIP",
+              "x_units": 2
             }
-          ]
+          ],
+          "x_offset": -9
         },
         {
           "uuid": "d8e728f6-ab0a-5307-a90e-4fe0b0a424a6",
@@ -9978,7 +10102,8 @@
               "category": "Kategorie I"
             }
           ],
-          "match_first_row_width": true
+          "match_first_row_width": true,
+          "x_offset": -9
         },
         {
           "uuid": "4da59c4c-f91a-581e-85f9-b9bf828df3ed",
@@ -10152,7 +10277,8 @@
               "category": "Kategorie I"
             }
           ],
-          "match_first_row_width": true
+          "match_first_row_width": true,
+          "x_offset": -9
         },
         {
           "uuid": "8522fbfd-30bf-518b-aec5-80e34cbc7eaf",
@@ -10326,7 +10452,8 @@
               "category": "Kategorie I"
             }
           ],
-          "match_first_row_width": true
+          "match_first_row_width": true,
+          "x_offset": -9
         },
         {
           "uuid": "38858f6a-1539-58e7-a588-853ce4f3fecc",
@@ -10500,7 +10627,8 @@
               "category": "Kategorie I"
             }
           ],
-          "match_first_row_width": true
+          "match_first_row_width": true,
+          "x_offset": -9
         },
         {
           "uuid": "7960c304-2a5e-5eec-8c8a-b9850fb0ac52",
@@ -10676,8 +10804,9 @@
               "category": "Kategorie I"
             }
           ],
-          "align_reference_seat": true,
-          "match_first_row_width": true
+          "match_first_row_width": true,
+          "x_offset": -9,
+          "segment_gap_units": 4.2
         },
         {
           "uuid": "32be158c-3325-513a-8d32-adc74d41e91d",
@@ -10702,7 +10831,8 @@
                 "x": 0,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": -11
             },
             {
               "seat_number": "2",
@@ -10712,7 +10842,8 @@
                 "x": 25,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": -10
             },
             {
               "seat_number": "3",
@@ -10722,7 +10853,8 @@
                 "x": 50,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": -9
             },
             {
               "seat_number": "4",
@@ -10732,7 +10864,8 @@
                 "x": 75,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": -8
             },
             {
               "seat_number": "5",
@@ -10742,7 +10875,8 @@
                 "x": 100,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": -7
             },
             {
               "seat_number": "6",
@@ -10752,7 +10886,8 @@
                 "x": 125,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": -6
             },
             {
               "seat_number": "7",
@@ -10762,7 +10897,8 @@
                 "x": 150,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": -5
             },
             {
               "seat_number": "8",
@@ -10772,7 +10908,8 @@
                 "x": 175,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": -4
             },
             {
               "seat_number": "9",
@@ -10782,7 +10919,8 @@
                 "x": 200,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": 4
             },
             {
               "seat_number": "10",
@@ -10792,7 +10930,8 @@
                 "x": 225,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": 5
             },
             {
               "seat_number": "11",
@@ -10802,7 +10941,8 @@
                 "x": 250,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": 6
             },
             {
               "seat_number": "12",
@@ -10812,7 +10952,8 @@
                 "x": 275,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": 7
             },
             {
               "seat_number": "13",
@@ -10822,7 +10963,8 @@
                 "x": 300,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": 8
             },
             {
               "seat_number": "14",
@@ -10832,7 +10974,8 @@
                 "x": 325,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": 9
             },
             {
               "seat_number": "15",
@@ -10842,7 +10985,8 @@
                 "x": 350,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": 10
             },
             {
               "seat_number": "16",
@@ -10852,7 +10996,8 @@
                 "x": 375,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": 11
             },
             {
               "seat_number": "17",
@@ -10862,10 +11007,15 @@
                 "x": 400,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": 12
             }
           ],
-          "align_target_seat": 14
+          "x_offset": -4,
+          "explicit_shift_segments": [
+            0,
+            1
+          ]
         },
         {
           "uuid": "edaebdfb-31c7-52d3-b980-056553355a0f",
@@ -10891,7 +11041,8 @@
                 "x": 0,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": -11
             },
             {
               "seat_number": "2",
@@ -10901,7 +11052,8 @@
                 "x": 25,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": -10
             },
             {
               "seat_number": "3",
@@ -10911,7 +11063,8 @@
                 "x": 50,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": -9
             },
             {
               "seat_number": "4",
@@ -10921,7 +11074,8 @@
                 "x": 75,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": -8
             },
             {
               "seat_number": "5",
@@ -10931,7 +11085,8 @@
                 "x": 100,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": -7
             },
             {
               "seat_number": "6",
@@ -10941,7 +11096,8 @@
                 "x": 125,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": -6
             },
             {
               "seat_number": "7",
@@ -10951,7 +11107,8 @@
                 "x": 150,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": -5
             },
             {
               "seat_number": "8",
@@ -10961,7 +11118,8 @@
                 "x": 175,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": -2
             },
             {
               "seat_number": "9",
@@ -10971,7 +11129,8 @@
                 "x": 200,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": -1
             },
             {
               "seat_number": "10",
@@ -10981,7 +11140,8 @@
                 "x": 225,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": 0
             },
             {
               "seat_number": "11",
@@ -10991,7 +11151,8 @@
                 "x": 250,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": 1
             },
             {
               "seat_number": "12",
@@ -11001,7 +11162,8 @@
                 "x": 275,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": 2
             },
             {
               "seat_number": "13",
@@ -11011,7 +11173,8 @@
                 "x": 300,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": 3
             },
             {
               "seat_number": "14",
@@ -11021,7 +11184,8 @@
                 "x": 325,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": 4
             },
             {
               "seat_number": "15",
@@ -11031,7 +11195,8 @@
                 "x": 350,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": 5
             },
             {
               "seat_number": "16",
@@ -11041,7 +11206,8 @@
                 "x": 375,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": 6
             },
             {
               "seat_number": "17",
@@ -11051,7 +11217,8 @@
                 "x": 400,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": 7
             },
             {
               "seat_number": "18",
@@ -11061,7 +11228,8 @@
                 "x": 425,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": 8
             },
             {
               "seat_number": "19",
@@ -11071,7 +11239,8 @@
                 "x": 450,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": 9
             },
             {
               "seat_number": "20",
@@ -11081,19 +11250,17 @@
                 "x": 475,
                 "y": 0
               },
-              "category": "Kategorie I"
+              "category": "Kategorie I",
+              "x_units": 10
             }
           ],
-          "align_target_seat": 15,
-          "segment_align": {
-            "6": {
-              "row": "11",
-              "seat": 3
-            }
-          }
+          "x_offset": -9,
+          "explicit_shift_segments": [
+            0
+          ]
         }
       ],
-      "align_edge": "trailing"
+      "layout": "anchored"
     },
     {
       "zone_id": "C",
