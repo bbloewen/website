@@ -902,6 +902,14 @@
     // Reihen 6-10 linksbündig, Sitz 3 der Reihen 11-13 und Sitz 6 der Reihe 14 liegen
     // dann genau über Sitz 1 der Reihe 6.
     var leading = isLeadingEdge(zone);
+    // seatsBox: der row-level Shift (anchorAll(), s.u.) greift NUR auf den inneren
+    // Sitz-Wrapper (.seatplan-row-seats, s. _renderZone), NICHT auf die ganze Reihe —
+    // sonst würde er die Reihennummer-Labels (Flex-Geschwister des Wrappers)
+    // mitverschieben. Zeilen ohne Wrapper (sollte nicht vorkommen, s. _renderZone)
+    // fallen auf die Reihe selbst zurück.
+    function seatsBox(row) {
+      return row.querySelector('.seatplan-row-seats') || row;
+    }
     var referenceRow = zoneEl.querySelector('.seatplan-row-line--align-reference');
     var referenceSeats = referenceRow ? referenceRow.querySelectorAll('.seatplan-seat') : null;
     var referenceSeat = referenceSeats && referenceSeats.length
@@ -914,7 +922,7 @@
       // — absolute Koordinaten würden dadurch schon während der Schleife veralten.
       // Reihenintern gemessene Abstände sind davon unabhängig, und da alle Reihen an
       // derselben Kante hängen, deckt gleicher Abstand auch gleiche Position.
-      var refRowRect = referenceRow.getBoundingClientRect();
+      var refRowRect = seatsBox(referenceRow).getBoundingClientRect();
       var refSeatRect = referenceSeat.getBoundingClientRect();
       var refOffset = leading ? (refSeatRect.left - refRowRect.left) : (refRowRect.right - refSeatRect.right);
 
@@ -924,30 +932,29 @@
         });
       }
       // Die Verschiebungen werden erst gesammelt und dann gemeinsam so normalisiert,
-      // dass die kleinste 0 ist (alle Reihen MIT eigenem Fluchtpunkt-Ziel um denselben
-      // Betrag mitverschoben — die Ausrichtung untereinander bleibt dadurch erhalten).
-      // Grund: eine NEGATIVE Margin lässt die Reihe über die Containerkante
-      // hinausragen, und Überlauf nach links zählt nicht in scrollWidth — die
-      // automatische Einpassung (_fitZoneScale) würde ihn übersehen und Sitz 1
-      // abschneiden.
-      // Reihen OHNE eigenes align_target_seat UND ohne Bezugsreihen-Rolle (z.B. Block C
-      // Reihe 1-9) bekommen NICHT diesen gemeinsamen Normalisierungs-Shift, sondern
-      // bleiben bei 0 — sie haben keinen Fluchtpunkt-Bezug, der sie verschieben müsste,
-      // und sollen mit den Reihennummern der Fluchtpunkt-Reihen auf einer Linie liegen
-      // (Marko: "Reihe 1 bis 10 noch nach links"). Die Bezugsreihe (align-reference,
-      // hier Reihe 10) MUSS dagegen weiter den gemeinsamen Shift bekommen: refOffset
-      // (s.o.) wurde aus ihrer ungeshifteten Rohposition berechnet, und die Differenz
-      // v_Ziel - v_Referenz muss GENAU dem Rohwert entsprechen, damit die Fluchtpunkte
-      // stimmen — das gilt nur, wenn beide Seiten denselben "-min"-Anteil tragen (der
-      // sich in der Differenz aufhebt). Nimmt man ihn nur der Referenzreihe weg, bricht
-      // die Flucht um exakt "-min" (live gefunden: Reihe 10 Sitz 1 wich 105px von
-      // Reihe 11 Sitz 3 ab, bis dieser Fall separat behandelt wurde).
+      // dass die kleinste 0 ist (ALLE Reihen um denselben Betrag mitverschoben — die
+      // Ausrichtung untereinander bleibt dadurch erhalten, s.u. warum das für JEDE
+      // Reihe gelten muss, nicht nur die Fluchtpunkt-Reihen). Grund: eine NEGATIVE
+      // Margin lässt die Reihe über die Containerkante hinausragen, und Überlauf nach
+      // links zählt nicht in scrollWidth — die automatische Einpassung
+      // (_fitZoneScale) würde ihn übersehen und Sitz 1 abschneiden.
+      //
+      // WICHTIG (live kaputt gefunden und zurückgerollt): ein früherer Versuch gab
+      // Reihen OHNE eigenes align_target_seat pauschal v=0 statt des gemeinsamen
+      // Shifts, um ihre Reihennummern optisch anzugleichen — das verschob dabei aber
+      // auch ihre SITZE und riss echte Fluchtpunkte auseinander (Block C Reihe 1-9
+      // saß danach nicht mehr auf einer Linie mit Reihe 10-12; Block D Reihe 7-10
+      // nicht mehr mit Reihe 6). row-level marginLeft/marginRight bewegt IMMER Label
+      // UND Sitze gemeinsam (beide sind Flex-Geschwister im selben Element) — eine
+      // rein kosmetische Label-Verschiebung ohne Sitz-Versatz braucht zwingend einen
+      // eigenen Wrapper NUR um die Sitze (s. _renderZone, .seatplan-row-seats), auf
+      // den sich dieser Shift jetzt bezieht statt auf die ganze Reihe.
       function anchorAll() {
         var margins = [];
         zoneEl.querySelectorAll('[data-align-target-seat]').forEach(function (row) {
           var targetSeat = seatIn(row, row.dataset.alignTargetSeat);
           if (!targetSeat) return;
-          var rowRect = row.getBoundingClientRect();
+          var rowRect = seatsBox(row).getBoundingClientRect();
           var seatRect = targetSeat.getBoundingClientRect();
           var targetOffset = leading ? (seatRect.left - rowRect.left) : (rowRect.right - seatRect.right);
           margins.push({ row: row, value: -(targetOffset - refOffset) });
@@ -957,10 +964,10 @@
         var byRow = new Map();
         margins.forEach(function (m) { byRow.set(m.row, m.value); });
         zoneEl.querySelectorAll('.seatplan-row-line').forEach(function (row) {
-          var isReference = row.classList.contains('seatplan-row-line--align-reference');
-          var v = byRow.has(row) ? (byRow.get(row) - min) : (isReference ? -min : 0);
-          if (leading) row.style.marginLeft = v + 'px';
-          else row.style.marginRight = v + 'px';
+          var v = (byRow.get(row) || 0) - min;
+          var target = seatsBox(row);
+          if (leading) target.style.marginLeft = v + 'px';
+          else target.style.marginRight = v + 'px';
         });
       }
       anchorAll();

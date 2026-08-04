@@ -26,7 +26,8 @@ def mkrow(zone_id, row_number, segments, category, y, section_break=False, wheel
           align_reference_seat=None, align_target_seat=None, match_first_row_width=None,
           segment_align=None, x_offset=None, segment_shifts=None, segment_gap_units=None,
           live_stretch=None, live_shift=None, live_stretch2=None, wheelchair_seats=None,
-          label_before_seat=None, live_fit=None, live_fit2=None, segment_gap_seats=None):
+          label_before_seat=None, live_fit=None, live_fit2=None, segment_gap_seats=None,
+          renumber_seats=None):
     # segments: list of aisle-separated cluster widths, e.g. [2, 20, 3] for a row
     # split by two aisles — seat numbering stays continuous across the aisles
     # (matches the real Saalplan PDF), only the VISUAL rendering gets a gap.
@@ -154,6 +155,26 @@ def mkrow(zone_id, row_number, segments, category, y, section_break=False, wheel
     # _applySegmentGapSeats).
     if segment_gap_seats:
         row["segment_gap_seats"] = segment_gap_seats
+    # renumber_seats: {"originalNumber": "newNumber"} — vergibt einzelnen Sitzen NACH
+    # der normalen, durchgehenden Nummerierung eine ANDERE Sitznummer (z.B. Block D
+    # Reihe 6: 5 Rollstuhlplätze behalten ihre historischen, durchgehend-mit-Lücke
+    # nummerierten Plätze 11/13/15/17/19 statt 11-15, weil "Platz 12/14/16/18/20"
+    # dort physisch gar nicht existiert — s. segment_gap_seats für die zugehörige
+    # echte Sitzbreiten-Lücke). seat_guid/uuid werden aus der NEUEN Nummer neu
+    # berechnet (Identität hängt an der finalen, sichtbaren Sitznummer, nicht am
+    # internen Zähler) — sonst würde ein künftiger Umbenennungs-Fall bestehende
+    # Reservierungen unter der falschen Nummer weiterführen. segment_breaks wird
+    # NACH demselben Mapping aktualisiert, sonst findet seat-picker.js (das die
+    # sichtbare Sitznummer zum Abgleich nutzt, z.B. segment_gap_seats) die
+    # umbenannten Sitze nicht mehr an ihrer Segmentgrenze.
+    if renumber_seats:
+        for seat in row["seats"]:
+            new_num = renumber_seats.get(seat["seat_number"])
+            if new_num is not None:
+                seat["seat_number"] = new_num
+                seat["seat_guid"] = stable_uuid(zone_id, row_number, new_num, "seat_guid")
+                seat["uuid"] = stable_uuid(zone_id, row_number, new_num, "uuid")
+        row["segment_breaks"] = [int(renumber_seats.get(str(b), b)) for b in row["segment_breaks"]]
     return row
 
 def build_zone(zone_id, name, row_specs, position, break_before=None, align_edge=None, layout=None):
@@ -220,10 +241,24 @@ block_D = [
     (9, [20], KAT2),
     (8, [20], KAT2),
     (7, [20], KAT2),
-    # Reihe 6 (Marko): die bisherigen 10 Rollstuhlplätze werden normale Sitze — Reihe 6
-    # wächst auf 20 Sitze (wie 7-10), davon 5 Rollstuhlplätze gleichmäßig verteilt über
-    # Sitz 11-20 (jeder zweite Sitz: 11/13/15/17/19).
-    (6, [20], KAT2, {"align_reference_seat": True, "wheelchair_seats": [11, 13, 15, 17, 19]}),
+    # Reihe 6 (Marko, Korrekturrunde): die bisherigen 10 Rollstuhlplätze werden normale
+    # Sitze (1-10, wie gehabt). Danach 5 ECHTE Rollstuhlplätze OHNE normale Sitze
+    # dazwischen — sie behalten ihre historischen Nummern 11/13/15/17/19 (12/14/16/18/20
+    # existieren dort nicht mehr als Sitz), mit einer echten Ein-Platz-Lücke VOR jedem
+    # von ihnen (auch vor Sitz 11, direkt nach Sitz 10) — "keine normalen Sitze mehr
+    # dazwischen", aber "gleichverteilt über die verbleibende Breite der Plätze 11 bis
+    # 20". Segmente: [10] normale Sitze, dann 5×[1] für die Rollstuhlplätze (zunächst
+    # sequenziell 11-15 durchnummeriert, per renumber_seats auf 11/13/15/17/19
+    # umbenannt). segment_gap_seats=1 vor JEDEM der 5 Segmente ergibt: Sitz "11" bei
+    # Einheit 12, "13" bei 14, "15" bei 16, "17" bei 18, "19" bei 20 — Sitz "19" landet
+    # damit exakt unter Sitz 20 der Reihe 7 (Marko: "Rollstuhlplatz 19 direkt unter
+    # Platz 20 der Reihe 7").
+    (6, [10, 1, 1, 1, 1, 1], KAT2, {
+        "align_reference_seat": True,
+        "wheelchair_seats": [11, 12, 13, 14, 15],
+        "segment_gap_seats": {1: 1, 2: 1, 3: 1, 4: 1, 5: 1},
+        "renumber_seats": {"12": "13", "13": "15", "14": "17", "15": "19"}
+    }),
 ]
 block_E = [
     (14, [7, 3, 3, 7], KAT1, {"align_target_seat": 6, "segment_align": {"8": {"row": "13", "seat": 6}, "11": {"row": "12", "seat": 13}, "14": {"row": "13", "seat": 13}}}),
