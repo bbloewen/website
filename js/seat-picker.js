@@ -1123,6 +1123,12 @@
     var targetWidth = row0Seats[row0Seats.length - 1].getBoundingClientRect().right - row0Seats[0].getBoundingClientRect().left;
     zoneEl.querySelectorAll('.seatplan-row-line--match-first').forEach(function (rowEl) {
       var row = rowsByNumber[rowEl.dataset.rowNumber];
+      // Reihen mit live_fit (z.B. Block B Reihe 10) bekommen ihre Sitzpositionen NICHT
+      // über den Wrapper-Streck-Mechanismus, sondern direkt per Live-Messung (s.u.,
+      // runLiveFit) — kein Wrapper-Div, keine space-between-Streckung, sonst würde
+      // runLiveFit gegen die falschen (Wrapper-relativen statt Flex-Geschwister-)
+      // Margins arbeiten.
+      if (row && row.live_fit) return;
       var breaks = (row && row.segment_breaks) || [];
       // Jede match_first_row_width-Reihe bekommt ihre Sitze in einem inneren Wrapper-Div
       // statt direkt als Flex-Kind von rowEl — nur so lässt sich die Sitz-Breite EXAKT
@@ -1190,34 +1196,92 @@
       for (var n = segStarts[segIdx]; n < segEnds[segIdx]; n++) nums.push(n);
       return nums;
     }
-    zone.rows.forEach(function (row) {
-      if (!row.live_stretch) return;
-      Object.keys(row.live_stretch).forEach(function (segIdxStr) {
-        var spec = row.live_stretch[segIdxStr];
-        var firstTarget = findSeatEl(spec.first.row, spec.first.seat);
-        var lastTarget = findSeatEl(spec.last.row, spec.last.seat);
-        if (!firstTarget || !lastTarget) return;
-        var firstLeft = firstTarget.getBoundingClientRect().left;
-        var lastLeft = lastTarget.getBoundingClientRect().left;
-        var nums = segSeatNumbers(row, parseInt(segIdxStr, 10));
-        var seatEls = nums.map(function (n) { return findSeatEl(row.row_number, n); });
-        if (!seatEls.length || seatEls.some(function (e) { return !e; })) return;
-        var count = seatEls.length;
-        seatEls.forEach(function (seatEl, i) {
-          var desiredLeft = count > 1 ? firstLeft + (lastLeft - firstLeft) * (i / (count - 1)) : firstLeft;
-          var prevEl = i === 0 ? seatEl.previousElementSibling : seatEls[i - 1];
-          var refRight = prevEl ? prevEl.getBoundingClientRect().right : desiredLeft - flexGapPx;
-          // KEIN Math.max(0, …) hier: das Ziel-Intervall (Sitz 11 bis Sitz 16 der Reihe 10)
-          // ist oft ENGER als der normale Sitzabstand (Reihe 10 selbst ist ja gestaucht/
-          // gestreckt, s. segment_gap_units) — die Sitze müssen dann NÄHER zusammenrücken
-          // als der normale Flex-Fluss von sich aus vorsieht, brauchen also ein negatives
-          // Margin. Ein Klammern auf 0 hätte genau das verhindert und die Sitze immer
-          // weiter nach rechts driften lassen (live gefunden: Sitz 14 landete 7px zu weit
-          // rechts, weil die nötige Stauchung stillschweigend auf 0 gerundet wurde).
-          seatEl.style.marginLeft = (desiredLeft - refRight - flexGapPx) + 'px';
+    function runLiveStretch(fieldName) {
+      zone.rows.forEach(function (row) {
+        if (!row[fieldName]) return;
+        Object.keys(row[fieldName]).forEach(function (segIdxStr) {
+          var spec = row[fieldName][segIdxStr];
+          var firstTarget = findSeatEl(spec.first.row, spec.first.seat);
+          var lastTarget = findSeatEl(spec.last.row, spec.last.seat);
+          if (!firstTarget || !lastTarget) return;
+          var firstLeft = firstTarget.getBoundingClientRect().left;
+          var lastLeft = lastTarget.getBoundingClientRect().left;
+          var nums = segSeatNumbers(row, parseInt(segIdxStr, 10));
+          var seatEls = nums.map(function (n) { return findSeatEl(row.row_number, n); });
+          if (!seatEls.length || seatEls.some(function (e) { return !e; })) return;
+          var count = seatEls.length;
+          seatEls.forEach(function (seatEl, i) {
+            var desiredLeft = count > 1 ? firstLeft + (lastLeft - firstLeft) * (i / (count - 1)) : firstLeft;
+            var prevEl = i === 0 ? seatEl.previousElementSibling : seatEls[i - 1];
+            var refRight = prevEl ? prevEl.getBoundingClientRect().right : desiredLeft - flexGapPx;
+            // KEIN Math.max(0, …) hier: das Ziel-Intervall kann ENGER sein als der normale
+            // Sitzabstand (die Zielreihe ist ggf. selbst gestaucht/gestreckt) — die Sitze
+            // müssen dann NÄHER zusammenrücken als der normale Flex-Fluss vorsieht, brauchen
+            // also ein negatives Margin. Ein Klammern auf 0 hätte genau das verhindert und
+            // die Sitze immer weiter nach rechts driften lassen (live gefunden: ein Sitz
+            // landete 7px zu weit rechts, weil die nötige Stauchung auf 0 gerundet wurde).
+            seatEl.style.marginLeft = (desiredLeft - refRight - flexGapPx) + 'px';
+          });
         });
       });
-    });
+    }
+    // live_fit: allgemeinerer Mechanismus als live_stretch — mehrere "Pins" (Sitz N
+    // dieser Reihe = live gemessene Position von Sitz M einer anderen Reihe) werden
+    // stückweise linear verbunden (Marko, achte Runde für Reihe 10: Sitz 1/6 auf Sitz
+    // 3/8 der Reihe 11 gepinnt, Reihe 12 analog mit 3 Pins). extend_forward/
+    // reverse_extend setzen die Steigung des jeweils äußersten Pin-Intervalls über
+    // dessen Rand hinaus fort (Reihe 10: Sitz 7-8 vorwärts, Sitz 9-15 rückwärts von
+    // einem unabhängigen zweiten Anker — reverse_anchor — aus, da Reihe 10 nur EINE
+    // durchgehende Sitzteilung hat, aber ZWEI unabhängige, live gemessene Fixpunkte:
+    // Sitz 1/6 aus Reihe 11 UND Sitz 16 aus Reihe 9).
+    function runLiveFit(fieldName) {
+      zone.rows.forEach(function (row) {
+        if (!row[fieldName]) return;
+        var spec = row[fieldName];
+        var desired = {}; // seatNum -> gewünschte absolute left-Position (px)
+        var pins = (spec.pins || []).map(function (p) {
+          var targetEl = findSeatEl(p.target.row, p.target.seat);
+          return targetEl ? { seat: p.seat, left: targetEl.getBoundingClientRect().left } : null;
+        });
+        if (pins.some(function (p) { return !p; })) return;
+        for (var i = 0; i < pins.length - 1; i++) {
+          var a = pins[i], b = pins[i + 1];
+          var pitch = (b.left - a.left) / (b.seat - a.seat);
+          for (var n = a.seat; n <= b.seat; n++) desired[n] = a.left + (n - a.seat) * pitch;
+        }
+        if (spec.extend_forward && pins.length >= 2) {
+          var last = pins[pins.length - 1], prev = pins[pins.length - 2];
+          var fPitch = (last.left - prev.left) / (last.seat - prev.seat);
+          spec.extend_forward.forEach(function (n) { desired[n] = last.left + (n - last.seat) * fPitch; });
+        }
+        if (spec.reverse_anchor) {
+          var ra = spec.reverse_anchor;
+          var raTargetEl = findSeatEl(ra.target.row, ra.target.seat);
+          if (raTargetEl && pins.length >= 2) {
+            var raLeft = raTargetEl.getBoundingClientRect().left;
+            var rPitch = (pins[1].left - pins[0].left) / (pins[1].seat - pins[0].seat);
+            desired[ra.seat] = raLeft;
+            (spec.reverse_extend || []).forEach(function (n) { desired[n] = raLeft + (n - ra.seat) * rPitch; });
+          }
+        }
+        var nums = Object.keys(desired).map(function (n) { return parseInt(n, 10); }).sort(function (x, y) { return x - y; });
+        nums.forEach(function (n) {
+          var seatEl = findSeatEl(row.row_number, n);
+          if (!seatEl) return;
+          // KEIN Filter auf .seatplan-seat: ist Sitz N das erste Kind der Reihe (z.B.
+          // Sitz 1 in Reihe 10), ist der direkte Flex-Vorgänger die Reihennummer-Beschriftung
+          // (span.seatplan-row-num, s. _renderZone) — genau die zählt für den Flex-Fluss,
+          // NICHT übersprungen werden darf sie (Bug gefunden: Sitz 1 landete sonst bei
+          // Margin 0 statt an seiner Zielposition, s. Marko — "Platz 1 in Reihe 10 ist
+          // nicht mehr an seinem Platz").
+          var prevEl = seatEl.previousElementSibling;
+          var refRight = prevEl ? prevEl.getBoundingClientRect().right : desired[n] - flexGapPx;
+          seatEl.style.marginLeft = (desired[n] - refRight - flexGapPx) + 'px';
+        });
+      });
+    }
+    runLiveFit('live_fit');
+    runLiveStretch('live_stretch');
     zone.rows.forEach(function (row) {
       if (!row.live_shift) return;
       Object.keys(row.live_shift).forEach(function (segIdxStr) {
@@ -1227,9 +1291,19 @@
         if (!anchorEl || !targetEl) return;
         var delta = targetEl.getBoundingClientRect().left - anchorEl.getBoundingClientRect().left;
         var currentMargin = parseFloat(anchorEl.style.marginLeft) || 0;
-        anchorEl.style.marginLeft = Math.max(0, currentMargin + delta) + 'px';
+        // Kein Math.max(0, …): ein negativer Gesamtversatz ist ebenso legitim wie bei
+        // live_stretch (s.o.) — der Zielsitz kann links vom Anker liegen.
+        anchorEl.style.marginLeft = (currentMargin + delta) + 'px';
       });
     });
+    // live_fit2: wie live_fit, aber erst NACH live_shift/live_stretch — für Reihen, deren
+    // Pin-Ziele selbst erst durch Reihe 11s live_stretch ihre finale Position bekommen
+    // (Block B Reihe 12, neunte Runde).
+    runLiveFit('live_fit2');
+    // live_stretch2: identischer Mechanismus wie live_stretch, aber erst NACH live_shift
+    // ausgeführt — für Ziele, die selbst erst durch live_shift ihre finale Position
+    // bekommen (s. gen_seatplan.py, Block B Reihe 11 Segment 3).
+    runLiveStretch('live_stretch2');
   };
 
   /* Passt den kompletten Blockplan per Skalierung so ein, dass er komplett ohne
@@ -1456,6 +1530,7 @@
         rowNumLeft.className = 'seatplan-row-num';
         rowNumLeft.textContent = rowLabel;
         rowEl.appendChild(rowNumLeft);
+        var labelInsertBeforeEl = null;
         row.seats.forEach(function (seat) {
           var taken = !!(self.takenSeatGuids && self.takenSeatGuids.has(seat.seat_guid));
           // Reserviert/NV gelten nur für noch nicht verkaufte Plätze — ein bereits
@@ -1494,12 +1569,21 @@
               self._toggleSeat(btn, seat.seat_guid, zone.name, rowLabel, seat.seat_number, category, priceInfo);
             });
           }
+          // label_before_seat (z.B. Block A Reihe 1, wegen des neuen Rollstuhlplatzes am
+          // Ende): merkt sich den Button des angegebenen Sitzes, damit die rechte
+          // Reihennummer GLEICH danach (s.u.) davor statt ganz am Ende eingefügt wird —
+          // sie soll mit den Reihennummern der anderen Reihen fluchten, nicht mit dem
+          // "freien"/nachgestellten Zusatzsitz mitwandern.
+          if (row.label_before_seat && String(row.label_before_seat) === seat.seat_number) {
+            labelInsertBeforeEl = btn;
+          }
           rowEl.appendChild(btn);
         });
         var rowNumRight = document.createElement('span');
         rowNumRight.className = 'seatplan-row-num';
         rowNumRight.textContent = rowLabel;
-        rowEl.appendChild(rowNumRight);
+        if (labelInsertBeforeEl) rowEl.insertBefore(rowNumRight, labelInsertBeforeEl);
+        else rowEl.appendChild(rowNumRight);
         gridWrap.appendChild(rowEl);
       });
 

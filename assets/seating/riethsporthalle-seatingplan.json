@@ -6181,7 +6181,8 @@
           "row_number_position": "both",
           "section_break": false,
           "segment_breaks": [
-            8
+            8,
+            20
           ],
           "seats": [
             {
@@ -6392,12 +6393,26 @@
               },
               "category": "Kategorie II",
               "x_units": 9
+            },
+            {
+              "seat_number": "20",
+              "seat_guid": "b0f578dd-418a-53f1-bca6-694e6e962100",
+              "uuid": "a512097e-a62f-5dad-906b-b767ab5f3b9e",
+              "position": {
+                "x": 475,
+                "y": 0
+              },
+              "category": "Kategorie II",
+              "wheelchair": true,
+              "x_units": 11
             }
           ],
           "x_offset": -9,
           "explicit_shift_segments": [
-            0
-          ]
+            0,
+            2
+          ],
+          "label_before_seat": 20
         },
         {
           "uuid": "a0973c40-8276-5c6f-8cfb-0c6381649568",
@@ -10806,7 +10821,44 @@
           ],
           "match_first_row_width": true,
           "x_offset": -10,
-          "segment_gap_units": 4.2
+          "live_fit": {
+            "pins": [
+              {
+                "seat": 1,
+                "target": {
+                  "row": "11",
+                  "seat": 3
+                }
+              },
+              {
+                "seat": 6,
+                "target": {
+                  "row": "11",
+                  "seat": 8
+                }
+              }
+            ],
+            "extend_forward": [
+              7,
+              8
+            ],
+            "reverse_anchor": {
+              "seat": 16,
+              "target": {
+                "row": "9",
+                "seat": 16
+              }
+            },
+            "reverse_extend": [
+              15,
+              14,
+              13,
+              12,
+              11,
+              10,
+              9
+            ]
+          }
         },
         {
           "uuid": "32be158c-3325-513a-8d32-adc74d41e91d",
@@ -11025,6 +11077,18 @@
               "last": {
                 "row": "10",
                 "seat": 16
+              }
+            }
+          },
+          "live_stretch2": {
+            "3": {
+              "first": {
+                "row": "12",
+                "seat": 18
+              },
+              "last": {
+                "row": "12",
+                "seat": 20
               }
             }
           }
@@ -11276,6 +11340,11 @@
               "anchor_seat": 11,
               "target_row": "11",
               "target_seat": 9
+            },
+            "3": {
+              "anchor_seat": 14,
+              "target_row": "11",
+              "target_seat": 13
             }
           }
         }

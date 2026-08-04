@@ -25,7 +25,8 @@ def mkseat(zone_id, row_number, n, category, wheelchair=False):
 def mkrow(zone_id, row_number, segments, category, y, section_break=False, wheelchair=False,
           align_reference_seat=None, align_target_seat=None, match_first_row_width=None,
           segment_align=None, x_offset=None, segment_shifts=None, segment_gap_units=None,
-          live_stretch=None, live_shift=None):
+          live_stretch=None, live_shift=None, live_stretch2=None, wheelchair_seats=None,
+          label_before_seat=None, live_fit=None, live_fit2=None):
     # segments: list of aisle-separated cluster widths, e.g. [2, 20, 3] for a row
     # split by two aisles — seat numbering stays continuous across the aisles
     # (matches the real Saalplan PDF), only the VISUAL rendering gets a gap.
@@ -35,6 +36,10 @@ def mkrow(zone_id, row_number, segments, category, y, section_break=False, wheel
     # pass-through kwargs here rather than re-deriving them, since they encode real,
     # hand-verified Fluchtpunkte from the technical Saalplan/live measurements — not
     # something this generator can compute from the segment widths alone.
+    # wheelchair_seats: einzelne Sitznummern innerhalb der Reihe als Rollstuhlplatz
+    # markieren (im Unterschied zu `wheelchair`, das die GANZE Reihe markiert, z.B.
+    # Block D/E/F Reihe 6) — z.B. Block A Reihe 1, ein einzelner Rollstuhlplatz am Ende.
+    wc_seats = set(wheelchair_seats or [])
     total = sum(segments)
     breaks = []
     acc = 0
@@ -48,7 +53,7 @@ def mkrow(zone_id, row_number, segments, category, y, section_break=False, wheel
         "row_number_position": "both",
         "section_break": section_break,
         "segment_breaks": breaks,
-        "seats": [mkseat(zone_id, row_number, n, category, wheelchair) for n in range(1, total + 1)]
+        "seats": [mkseat(zone_id, row_number, n, category, wheelchair or n in wc_seats) for n in range(1, total + 1)]
     }
     if align_reference_seat:
         row["align_reference_seat"] = True
@@ -113,6 +118,33 @@ def mkrow(zone_id, row_number, segments, category, y, section_break=False, wheel
         row["live_stretch"] = live_stretch
     if live_shift:
         row["live_shift"] = live_shift
+    # live_stretch2: wie live_stretch, läuft aber NACH live_shift statt davor — für Fälle,
+    # in denen der Zielsitz selbst erst per live_shift bestimmt wird (z.B. Block B Reihe
+    # 11 Segment 3 [Sitz 15-17], das an Reihe 12s Sitz 18/20 ausgerichtet wird — Reihe 12s
+    # Sitze 16-20 hängen ihrerseits an Reihe 12s live_shift, der wiederum von Reihe 11s
+    # SEGMENT-2-live_stretch abhängt). Reihenfolge im JS: stretch → shift → stretch2.
+    if live_stretch2:
+        row["live_stretch2"] = live_stretch2
+    # live_fit/live_fit2: allgemeinerer Live-Ausrichtungs-Mechanismus als live_stretch —
+    # mehrere "Pins" (Sitz N dieser Reihe = live gemessene Position von Sitz M einer
+    # anderen Reihe) werden stückweise linear verbunden, statt nur zwischen genau ZWEI
+    # Endpunkten zu interpolieren. extend_forward/reverse_extend setzen die Steigung des
+    # äußersten Pin-Intervalls über dessen Rand hinaus fort. reverse_anchor ist ein davon
+    # UNABHÄNGIGER zweiter Fixpunkt (eigene Live-Messung, nicht Teil der Pin-Kette) —
+    # nötig für Reihen mit einer durchgehenden Sitzfolge, aber zwei unabhängigen
+    # Fluchtpunkten aus verschiedenen Nachbarreihen (Block B Reihe 10, neunte Runde: Sitz
+    # 1/6 aus Reihe 11 gepinnt, Sitz 16 unabhängig aus Reihe 9). live_fit läuft VOR
+    # live_stretch, live_fit2 NACH live_shift (s. seat-picker.js _applyAnchoredLayout).
+    if live_fit:
+        row["live_fit"] = live_fit
+    if live_fit2:
+        row["live_fit2"] = live_fit2
+    # label_before_seat: die RECHTE Reihennummer wird vor dem angegebenen Sitz eingefügt
+    # statt ganz ans Ende der Reihe — z.B. Block A Reihe 1, wo ein zusätzlicher
+    # Rollstuhlplatz hinter einer Lücke sitzt (Marko: die Reihennummer soll weiter mit
+    # den anderen Reihennummern fluchten, nicht mit dem Zusatzsitz mitwandern).
+    if label_before_seat is not None:
+        row["label_before_seat"] = label_before_seat
     return row
 
 def build_zone(zone_id, name, row_specs, position, break_before=None, align_edge=None, layout=None):
@@ -237,7 +269,12 @@ block_F = [
 #     gleichzeitig auf dieselbe Zielbeziehung wirken (mit +1/+1 bliebe der bisherige
 #     1-Einheit-Versatz zwischen den beiden Sitzen bestehen) — volle Algebra im Memory.
 block_A = [
-    (1, [7, 12], KAT2, {"x_offset": -9, "segment_shifts": {0: -1}}),
+    # Reihe 1 (Marko, 04.08.2026): zusätzlicher Rollstuhlplatz ganz rechts, mit einer
+    # vollen Sitzbreite Lücke zu Sitz 19 (dort, wo bisher nur die Reihennummer stand) —
+    # neues Segment [1] (Sitz 20), Shift +1 (Segment 2) für die volle Lücke, analog zum
+    # "ein Platz Space" bei Block B Reihe 1-3.
+    (1, [7, 12, 1], KAT2, {"x_offset": -9, "segment_shifts": {0: -1, 2: 1}, "wheelchair_seats": [20],
+        "label_before_seat": 20}),
     (2, [7, 12], KAT2, {"x_offset": -9, "segment_shifts": {0: -1}}),
     (3, [7, 12], KAT2, {"x_offset": -9, "segment_shifts": {0: -1}}),
     (4, [12], KAT2, {"x_offset": -2}),
@@ -294,7 +331,20 @@ block_B = [
     (7, [16], KAT1, {"match_first_row_width": True, "x_offset": -10}),
     (8, [16], KAT1, {"match_first_row_width": True, "x_offset": -10}),
     (9, [16], KAT1, {"match_first_row_width": True, "x_offset": -10}),
-    (10, [8, 8], KAT1, {"match_first_row_width": True, "x_offset": -10, "segment_gap_units": 4.2}),
+    # Reihe 10 komplett neu (Marko, neunte Runde, ersetzt segment_gap_units-Ansatz): EIN
+    # durchgehender Sitzabstand für die ganze Reihe, hergeleitet aus "Sitz 1-6 genau über
+    # Sitz 3-8 der Reihe 11" (pins) — Sitz 7-8 laufen mit demselben Abstand weiter
+    # (extend_forward). Sitz 16 liegt UNABHÄNGIG davon exakt auf Sitz 16 der Reihe 9
+    # (reverse_anchor), Sitz 9-15 laufen davon rückwärts mit dem GLEICHEN, aus Sitz 1-6
+    # hergeleiteten Abstand (reverse_extend) — nicht mit Reihe 11 verknüpft, wie Marko
+    # explizit klargestellt hat.
+    (10, [8, 8], KAT1, {"match_first_row_width": True, "x_offset": -10,
+        "live_fit": {
+            "pins": [{"seat": 1, "target": {"row": "11", "seat": 3}}, {"seat": 6, "target": {"row": "11", "seat": 8}}],
+            "extend_forward": [7, 8],
+            "reverse_anchor": {"seat": 16, "target": {"row": "9", "seat": 16}},
+            "reverse_extend": [15, 14, 13, 12, 11, 10, 9]
+        }}),
     # Reihe 11 (Marko, vierte Runde): Segment 0 (Sitze 1-2) NICHT mehr zusammen mit
     # Segment 1 (Sitze 3-8) verschoben, sondern eigenständig weiter nach links, sodass
     # Sitz 1/2 exakt auf Sitz 1/2 der Reihe 12 fluchten. Segment 1 behält seinen Shift
@@ -306,24 +356,35 @@ block_B = [
     # x_units, also nicht aus der Datenlage berechenbar. live_stretch staucht die 6 Sitze
     # gleichmäßig verteilt zwischen die beiden live gemessenen Zielpositionen (s.
     # seat-picker.js).
+    # Segment 3 (Sitze 15-17, Marko siebte Runde): Sitz 15 auf Sitz 18, Sitz 17 auf Sitz 20
+    # der Reihe 12 (Sitz 16 auf Sitz 19 ergibt sich automatisch aus der gleichmäßigen
+    # Verteilung dazwischen). Reihe 12s Sitz 18-20 hängen ihrerseits an deren live_shift
+    # (s.u.), der wiederum von Reihe 11 Segment 2 (oben) abhängt — deshalb live_stretch2
+    # (läuft NACH live_shift, nicht davor, s. mkrow()).
     (11, [2, 6, 6, 3], KAT1, {"x_offset": -4, "segment_shifts": {0: -11, 1: -8},
-        "live_stretch": {2: {"first": {"row": "10", "seat": 11}, "last": {"row": "10", "seat": 16}}}}),
+        "live_stretch": {2: {"first": {"row": "10", "seat": 11}, "last": {"row": "10", "seat": 16}}},
+        "live_stretch2": {3: {"first": {"row": "12", "seat": 18}, "last": {"row": "12", "seat": 20}}}}),
     # Reihe 12 (Marko, fünfte Runde): Segment 1 (Sitze 8-10) einen Platz [Einheit] nach
     # links, damit Sitz 8 exakt auf Sitz 6 der Reihe 11 fluchtet.
     # Sitz 6 Reihe 11 (Segment 1, Shift -8) = -4 + 5 - 8 = -7.
     # Unverschobener Sitz 8 Reihe 12 (Segment 1, x_offset=-13, Index 7) = -13+7 = -6.
     # Shift = -7-(-6) = -1 (genau "ein Platz nach links", wie von Marko angegeben).
-    # Ab Sitz 11 (Marko, sechste Runde: "ab Platz 11 sollen alle Sitze der Reihe 12 nach
-    # rechts verschoben werden") wandern Segmente 2+3+4 (Sitze 11-20) GEMEINSAM als ein
-    # Block — ein einziger live_shift auf den ERSTEN betroffenen Sitz (11) reicht: die
-    # Marge verschiebt über den normalen Flex-Fluss automatisch auch alles danach mit,
-    # solange kein späterer Sitz einen eigenen Shift bekommt. Ersetzt den früheren
-    # segment4-live_shift (Sitz 16 auf Sitz 14 Reihe 11) — der ist jetzt Teil dieses
-    # größeren, ab Sitz 11 beginnenden Blocks. Ziel: Sitz 11 auf Sitz 9 der Reihe 11
-    # (selbst live-bestimmt per Reihe 11s live_stretch, s.o.) — daher wieder live_shift
-    # statt fester Einheiten-Rechnung.
+    # Neunte Runde (ersetzt die siebte/achte Runde komplett): ZWEI feste Segment-Verschiebungen
+    # statt Pin-Interpolation — Marko bestätigte, dass Segment 2 (Sitz 11-13) UNGESTRECKT als
+    # Block verschoben wird: "Sitz 12 ist direkt über Sitz 10 der Reihe 11, Sitz 13 direkt über
+    # Sitz 11" — bei konstantem Versatz (kein Stretch) ergibt sich das automatisch, sobald nur
+    # der erste Sitz (11) live auf Sitz 9 der Reihe 11 verschoben wird (Reihe 11 hat dort
+    # dieselbe Sitzteilung/-breite wie Reihe 12, s. live_stretch oben). Segment 3+4 (Sitz
+    # 14-20) analog als EIN Block ab Sitz 14 verschoben, bis Sitz 14 auf Sitz 13 der Reihe 11
+    # liegt — "Sitz 14 bis 20 haben den gleichen Sitzabstand wie Sitz 11 bis 13", also normale,
+    # ungestreckte Reihenfolge, kein Extra-Pin nötig. live_shift statt live_fit2, da Reihe 11s
+    # Sitz 9/13 selbst erst durch Reihe 11s live_stretch (Segment 2) ihre finale Position
+    # bekommen — läuft NACH live_stretch (s. mkrow()).
     (12, [7, 3, 3, 2, 5], KAT1, {"x_offset": -13, "segment_shifts": {0: -2, 1: -1},
-        "live_shift": {2: {"anchor_seat": 11, "target_row": "11", "target_seat": 9}}}),
+        "live_shift": {
+            2: {"anchor_seat": 11, "target_row": "11", "target_seat": 9},
+            3: {"anchor_seat": 14, "target_row": "11", "target_seat": 13}
+        }}),
 ]
 block_C = [
     (1, [12, 7], KAT2),
