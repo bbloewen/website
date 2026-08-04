@@ -834,6 +834,14 @@
      verteilt die Sitze dafür neu) — Messung erst möglich, wenn die Zone im echten DOM
      hängt, deshalb ein separater Schritt statt Teil von _renderZone selbst. */
   SeatPicker.prototype._fixupRowWidths = function (zoneEl, zone) {
+    // Zonen mit "layout":"anchored" (bisher nur Block A) brauchen keine Laufzeit-Messung
+    // à la align_target_seat/segment_align: jeder Sitz trägt seine absolute Position
+    // (x_units, s. gen_seatplan.py) schon in den Daten, relativ zu EINEM festen Anker
+    // der ganzen Zone. S. _applyAnchoredLayout für die Umsetzung.
+    if (zone && zone.layout === 'anchored') {
+      this._applyAnchoredLayout(zoneEl, zone);
+      return;
+    }
     var rows = zoneEl.querySelectorAll('.seatplan-row-line');
     if (!rows.length) return;
     var targetWidth = rows[0].getBoundingClientRect().width;
@@ -1009,6 +1017,61 @@
     }
   };
 
+  /* Positioniert alle Sitze einer Zone mit "layout":"anchored" (bisher nur Block A)
+     direkt aus den Daten, statt Reihen zur Laufzeit gegeneinander zu vermessen wie
+     _fixupRowWidths es oben für die übrigen Blöcke tut. Jeder Sitz trägt bereits eine
+     absolute Position in Sitzbreiten-Einheiten (seat.x_units, s. gen_seatplan.py),
+     relativ zu EINEM festen Anker der ganzen Zone (Block A: Grenze Sitz 10/11 der Reihe
+     6 = Einheit 0) — nicht mehr relativ zu einer anderen Reihe. Das schließt beide
+     bisherigen Bugklassen strukturell aus: es gibt keine Kette von Reihen-Verweisen
+     mehr, die ins Leere laufen kann (s. Block-B-Bug), und keine Laufzeitmessung, die
+     von CSS-Eigenheiten wie negativen Margins ausgetrickst werden kann (s.
+     _fitZoneScale-Bug) — die einzige Messung hier ist die Breite EINES Sitzes plus
+     Reihenabstand, um Einheiten in Pixel umzurechnen. */
+  SeatPicker.prototype._applyAnchoredLayout = function (zoneEl, zone) {
+    var rowEls = zoneEl.querySelectorAll('.seatplan-row-line');
+    if (!rowEls.length) return;
+    var sampleSeat = zoneEl.querySelector('.seatplan-seat');
+    if (!sampleSeat) return;
+    // Sitzbreite + Reihenabstand ergeben zusammen EINE Einheit — je nach Ansicht
+    // (winzige Übersichtskachel vs. große Detailansicht) unterschiedlich groß, deshalb
+    // live gemessen statt hart codiert (s. CSS .seatplan-seat/.seatplan-row-line).
+    var unitPx = sampleSeat.getBoundingClientRect().width + (parseFloat(getComputedStyle(rowEls[0]).gap) || 0);
+    if (!unitPx) return;
+
+    var allUnits = [];
+    zone.rows.forEach(function (row) {
+      (row.seats || []).forEach(function (s) {
+        if (typeof s.x_units === 'number') allUnits.push(s.x_units);
+      });
+    });
+    if (!allUnits.length) return;
+    var zoneMinUnits = Math.min.apply(null, allUnits);
+
+    var rowsByNumber = {};
+    zone.rows.forEach(function (row) { rowsByNumber[String(row.row_number)] = row; });
+
+    rowEls.forEach(function (rowEl) {
+      var row = rowsByNumber[rowEl.dataset.rowNumber];
+      if (!row) return;
+      var seatEls = rowEl.querySelectorAll('.seatplan-seat');
+      var prevUnits = null;
+      seatEls.forEach(function (seatEl, i) {
+        var seatData = row.seats[i];
+        if (!seatData || typeof seatData.x_units !== 'number') return;
+        var units = seatData.x_units;
+        // Erster Sitz der Reihe: Abstand zur linken Zonen-Kante (zoneMinUnits). Jeder
+        // weitere Sitz: normaler Sitzabstand (1 Einheit) ist schon Teil des Flex-Flusses
+        // — nur wenn zwischen zwei Sitzen MEHR als 1 Einheit liegt (Gang, oder ein per
+        // segment_shifts verschobenes Segment), kommt die Differenz als Zusatz-Margin
+        // oben drauf.
+        var margin = prevUnits === null ? (units - zoneMinUnits) * unitPx : Math.max(0, units - prevUnits - 1) * unitPx;
+        seatEl.style.marginLeft = margin + 'px';
+        prevUnits = units;
+      });
+    });
+  };
+
   /* Passt den kompletten Blockplan per Skalierung so ein, dass er komplett ohne
      Scrollen in die graue Box passt — Format egal (Hochkant/Querformat), da Breite
      UND Höhe der Box gemessen werden statt eine feste Sitzgröße anzunehmen. Ein
@@ -1165,7 +1228,11 @@
     var gridWrap = document.createElement('div');
     gridWrap.className = 'seatplan-grid-wrap';
     gridWrap.style.width = 'fit-content';
-    gridWrap.style.alignItems = leading ? 'flex-start' : 'flex-end';
+    // Zonen mit "layout":"anchored" (bisher nur Block A) bekommen ihre Reihenposition
+    // direkt aus den Daten (x_units, s. _applyAnchoredLayout) statt aus align-items —
+    // jede Reihe trägt ihre absolute Position schon als eigenes marginLeft, ein
+    // zusätzliches flex-end würde das wieder verschieben.
+    gridWrap.style.alignItems = zone.layout === 'anchored' ? 'flex-start' : (leading ? 'flex-start' : 'flex-end');
     // scaleWrap bekommt nach dem Einfügen ins DOM (s. _fitZoneScale) eine feste,
     // bereits herunterskalierte Größe — reserviert dadurch exakt so viel Platz im
     // Layout, wie der Sitzplan nach dem automatischen Zoom tatsächlich braucht,

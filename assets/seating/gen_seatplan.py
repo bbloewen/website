@@ -24,7 +24,7 @@ def mkseat(zone_id, row_number, n, category, wheelchair=False):
 
 def mkrow(zone_id, row_number, segments, category, y, section_break=False, wheelchair=False,
           align_reference_seat=None, align_target_seat=None, match_first_row_width=None,
-          segment_align=None):
+          segment_align=None, x_offset=None, segment_shifts=None):
     # segments: list of aisle-separated cluster widths, e.g. [2, 20, 3] for a row
     # split by two aisles — seat numbering stays continuous across the aisles
     # (matches the real Saalplan PDF), only the VISUAL rendering gets a gap.
@@ -57,9 +57,24 @@ def mkrow(zone_id, row_number, segments, category, y, section_break=False, wheel
         row["match_first_row_width"] = True
     if segment_align:
         row["segment_align"] = segment_align
+    # x_offset/segment_shifts: neues Koordinatensystem für Zonen mit "layout":"anchored"
+    # (bisher nur Block A) — jeder Sitz bekommt eine ABSOLUTE Position in Sitzbreiten-
+    # Einheiten relativ zu EINEM festen Zonen-Anker (s. build_zone("A", ...)), statt sich
+    # per align_target_seat/segment_align auf eine andere Reihe zu beziehen. x_offset gilt
+    # gleichmäßig für die ganze Reihe (= Position von Sitz 1 ohne Segment-Verschiebung),
+    # segment_shifts verschiebt EIN Segment (0-indiziert, z.B. das isolierte Randsegment
+    # vor der ersten Gang-Lücke) zusätzlich dazu, wenn es nicht lückenlos am Nachbar-
+    # segment kleben soll, sondern an einem Sitz einer ANDEREN Reihe fluchten muss.
+    if x_offset is not None:
+        seg_shifts = segment_shifts or {}
+        seg_of = []
+        for i, w in enumerate(segments):
+            seg_of.extend([i] * w)
+        for idx, seat in enumerate(row["seats"]):
+            seat["x_units"] = x_offset + idx + seg_shifts.get(seg_of[idx], 0)
     return row
 
-def build_zone(zone_id, name, row_specs, position, break_before=None, align_edge=None):
+def build_zone(zone_id, name, row_specs, position, break_before=None, align_edge=None, layout=None):
     # row_specs: list of (row_number, [segment_widths], category), front-to-back order.
     # break_before: set of row_numbers (as strings) that get a purely visual gap
     # before them, independent of category — echoes the original plan's structural
@@ -81,6 +96,8 @@ def build_zone(zone_id, name, row_specs, position, break_before=None, align_edge
     }
     if align_edge:
         zone["align_edge"] = align_edge
+    if layout:
+        zone["layout"] = layout
     return zone
 
 # Real per-row seat counts AND aisle-segment structure extracted from the official
@@ -146,30 +163,39 @@ block_F = [
     (7, [20], KAT2),
     (6, [10], KAT2, {"wheelchair": True}),
 ]
+# Block A komplett auf absolute Koordinaten umgestellt (04.08.2026, Marko): EIN fester
+# Anker statt Reihen-zu-Reihen-Fluchtpunkten, die seat-picker.js zur Laufzeit aus dem
+# DOM misst. Anker: die Grenze zwischen Sitz 10 und Sitz 11 der Reihe 6 (die vorderste,
+# durchgehende 20er-Reihe, praktisch in der Blockmitte) = Einheit 0. Jede Reihe bekommt
+# einen x_offset (Sitzbreiten-Einheiten, positiv=rechts), aus dem sich die Position
+# JEDES Sitzes direkt ergibt (x_offset + Sitzindex + ggf. segment_shifts) — hergeleitet
+# so, dass die vorher live verifizierte rechtsbündige Flucht exakt erhalten bleibt:
+#   - Reihen 6-10 (durchgehend 20 Sitze): x_offset=-10 → rechte Kante bei Einheit 10.
+#   - Reihen 1-3 ([7,12], 19 Sitze) und 4-5 ([12]): rechte Kante ebenfalls auf Einheit 10
+#     ausgerichtet (x_offset=-9 bzw. -2) — Reihen 1-3s zweites Segment (12 Sitze) deckt
+#     sich dadurch exakt mit Reihe 4/5.
+#   - Reihe 11 ([2,20,3]): Mittelsegment (Sitze 3-22) deckungsgleich mit Reihen 6-10
+#     (Einheit -10 bis 10), x_offset=-12. Randsegment 1-2 zusätzlich um -3 Einheiten
+#     verschoben (segment_shifts={0:-3}), damit Sitz 1 exakt auf Sitz 1 der Reihe 12
+#     fluchtet (Marko, live nachgeschärft 04.08.2026).
+#   - Reihe 12 ([7,14,7]): Mittel-/Endsegment x_offset=-14 (Sitz 24 auf Einheit 10, wie
+#     zuvor per align_target_seat). Segment 1-7 zusätzlich um -1 Einheit verschoben
+#     (segment_shifts={0:-1}), damit Sitz 7 exakt auf Sitz 4 der Reihe 11 fluchtet.
+# Herleitung/Algebra vollständig in reference_sitzplan_riethsporthalle-Memory dokumentiert.
 block_A = [
-    (1, [7, 12], KAT2),
-    (2, [7, 12], KAT2),
-    (3, [7, 12], KAT2),
-    (4, [12], KAT2),
-    (5, [12], KAT2),
-    (6, [20], KAT2),
-    (7, [20], KAT2),
-    (8, [20], KAT2),
-    (9, [20], KAT2),
-    (10, [20], KAT2, {"align_reference_seat": True}),
-    # Fluchtpunkte 04.08.2026 (Marko, live nachgeschaerft): Sitz 1 der Reihe 11 auf
-    # Sitz 1 der Reihe 12 (verschiebt nur das isolierte 1,2-Segment, s. row12); Sitz 7
-    # der Reihe 12 auf Sitz 4 der Reihe 11 (verschiebt nur das isolierte 1-7-Segment).
-    # Beide Verweise sind sicher, weil Reihe 11 UND Reihe 12 jeweils ein eigenes
-    # align_target_seat haben (anders als der Reihe-10-Bug, s. Block B weiter oben).
-    (11, [2, 20, 3], KAT2, {"align_target_seat": 22, "segment_align": {"1": {"row": "12", "seat": 1}}}),
-    (12, [7, 14, 7], KAT2, {"align_target_seat": 24, "segment_align": {"7": {"row": "11", "seat": 4}}}),
+    (1, [7, 12], KAT2, {"x_offset": -9}),
+    (2, [7, 12], KAT2, {"x_offset": -9}),
+    (3, [7, 12], KAT2, {"x_offset": -9}),
+    (4, [12], KAT2, {"x_offset": -2}),
+    (5, [12], KAT2, {"x_offset": -2}),
+    (6, [20], KAT2, {"x_offset": -10}),
+    (7, [20], KAT2, {"x_offset": -10}),
+    (8, [20], KAT2, {"x_offset": -10}),
+    (9, [20], KAT2, {"x_offset": -10}),
+    (10, [20], KAT2, {"x_offset": -10}),
+    (11, [2, 20, 3], KAT2, {"x_offset": -12, "segment_shifts": {0: -3}}),
+    (12, [7, 14, 7], KAT2, {"x_offset": -14, "segment_shifts": {0: -1}}),
 ]
-# Reihen 10-12 korrigiert 04.08.2026 (Transkript) — Reihe 10 hat nur 16 statt 20 Sitze
-# (Lücke von 4 vor Sitz 9), Reihe 11 nur 17 statt 25 (zwei große Lücken), Reihe 12 nur
-# 20 statt 28 (Säulenlücken bei Sitz 8 und 11 bzw. dem alten Muster). Alignment-Werte
-# (align_target_seat/segment_align) sind aus den genannten Fluchtpunkten abgeleitet,
-# noch nicht live nachgemessen wie bei C/F am 28.07. — nach Deploy per Screenshot prüfen.
 block_B = [
     (1, [7, 12], VIP),
     (2, [7, 12], VIP),
@@ -220,7 +246,7 @@ plan = {
         build_zone("D", "Block D", block_D, {"x": 0, "y": 0}, align_edge="leading"),
         build_zone("E", "Block E", block_E, {"x": 350, "y": 0}, align_edge="leading"),
         build_zone("F", "Block F", block_F, {"x": 700, "y": 0}, align_edge="trailing"),
-        build_zone("A", "Block A", block_A, {"x": 0, "y": 600}, break_before={"6"}, align_edge="trailing"),
+        build_zone("A", "Block A", block_A, {"x": 0, "y": 600}, break_before={"6"}, layout="anchored"),
         build_zone("B", "Block B", block_B, {"x": 350, "y": 600}, break_before={"6"}, align_edge="trailing"),
         build_zone("C", "Block C", block_C, {"x": 700, "y": 600}, break_before={"6"}, align_edge="leading"),
     ]
