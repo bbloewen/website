@@ -924,11 +924,24 @@
         });
       }
       // Die Verschiebungen werden erst gesammelt und dann gemeinsam so normalisiert,
-      // dass die kleinste 0 ist (alle Reihen um denselben Betrag mitverschoben — die
-      // Ausrichtung untereinander bleibt dadurch erhalten). Grund: eine NEGATIVE
-      // Margin lässt die Reihe über die Containerkante hinausragen, und Überlauf nach
-      // links zählt nicht in scrollWidth — die automatische Einpassung (_fitZoneScale)
-      // würde ihn übersehen und Sitz 1 abschneiden.
+      // dass die kleinste 0 ist (alle Reihen MIT eigenem Fluchtpunkt-Ziel um denselben
+      // Betrag mitverschoben — die Ausrichtung untereinander bleibt dadurch erhalten).
+      // Grund: eine NEGATIVE Margin lässt die Reihe über die Containerkante
+      // hinausragen, und Überlauf nach links zählt nicht in scrollWidth — die
+      // automatische Einpassung (_fitZoneScale) würde ihn übersehen und Sitz 1
+      // abschneiden.
+      // Reihen OHNE eigenes align_target_seat UND ohne Bezugsreihen-Rolle (z.B. Block C
+      // Reihe 1-9) bekommen NICHT diesen gemeinsamen Normalisierungs-Shift, sondern
+      // bleiben bei 0 — sie haben keinen Fluchtpunkt-Bezug, der sie verschieben müsste,
+      // und sollen mit den Reihennummern der Fluchtpunkt-Reihen auf einer Linie liegen
+      // (Marko: "Reihe 1 bis 10 noch nach links"). Die Bezugsreihe (align-reference,
+      // hier Reihe 10) MUSS dagegen weiter den gemeinsamen Shift bekommen: refOffset
+      // (s.o.) wurde aus ihrer ungeshifteten Rohposition berechnet, und die Differenz
+      // v_Ziel - v_Referenz muss GENAU dem Rohwert entsprechen, damit die Fluchtpunkte
+      // stimmen — das gilt nur, wenn beide Seiten denselben "-min"-Anteil tragen (der
+      // sich in der Differenz aufhebt). Nimmt man ihn nur der Referenzreihe weg, bricht
+      // die Flucht um exakt "-min" (live gefunden: Reihe 10 Sitz 1 wich 105px von
+      // Reihe 11 Sitz 3 ab, bis dieser Fall separat behandelt wurde).
       function anchorAll() {
         var margins = [];
         zoneEl.querySelectorAll('[data-align-target-seat]').forEach(function (row) {
@@ -944,7 +957,8 @@
         var byRow = new Map();
         margins.forEach(function (m) { byRow.set(m.row, m.value); });
         zoneEl.querySelectorAll('.seatplan-row-line').forEach(function (row) {
-          var v = (byRow.get(row) || 0) - min;
+          var isReference = row.classList.contains('seatplan-row-line--align-reference');
+          var v = byRow.has(row) ? (byRow.get(row) - min) : (isReference ? -min : 0);
           if (leading) row.style.marginLeft = v + 'px';
           else row.style.marginRight = v + 'px';
         });
