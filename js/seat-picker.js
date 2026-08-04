@@ -1618,8 +1618,12 @@
           // Für Ehrenamtliche reservierte Plätze zeigen "EA", NV-Plätze "NV" statt der
           // Sitznummer und bekommen keine Verkauft-Schraffur wie .taken (s.
           // .seatplan-seat.reserved/.nv) — sie sind nie verkauft gewesen, sondern von
-          // vornherein nicht zum freien Verkauf freigegeben.
-          btn.textContent = reserved ? 'EA' : (nv ? 'NV' : seat.seat_number);
+          // vornherein nicht zum freien Verkauf freigegeben. Rollstuhlplätze zeigen GAR
+          // keine Nummer (Marko, site-weit) — das ♿-Symbol kommt stattdessen zentriert
+          // per CSS (s. .seatplan-seat.wheelchair::after); der Sitz bleibt intern ganz
+          // normal nummeriert (seat_number) und zählt normal in die Gesamtzahl mit, nur
+          // die sichtbare Beschriftung entfällt.
+          btn.textContent = reserved ? 'EA' : (nv ? 'NV' : (isWheelchair ? '' : seat.seat_number));
           // Echte Gang-Lücke innerhalb der Reihe (z. B. "1,2 | 3-22 | 23,24,25") —
           // die Sitznummerierung bleibt über den Gang hinweg durchgehend, nur die
           // Darstellung bekommt hier eine kleine zusätzliche Lücke.

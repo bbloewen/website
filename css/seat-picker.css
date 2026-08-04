@@ -107,16 +107,18 @@
   opacity: 1; cursor: not-allowed;
 }
 /* Rollstuhlplatz (z.B. Block D/E/F, Reihe 6) — rein visuelle Zusatz-Markierung, der Platz
-   bleibt ganz normal buchbar (keine .reserved/.taken-Logik). Auffälliger blauer Rand
-   (Rollstuhl-Piktogramm-Blau) statt Füllfarbe, damit die Kategoriefarbe weiter erkennbar
-   bleibt; das ♿-Symbol kommt als kleines Badge oben rechts dazu, sobald der Sitz groß
-   genug gerendert wird (Mobile-Detailansicht), in der winzigen Übersichtskachel bleibt es
-   beim Rand allein, weil ein Symbol bei 8px sonst nur zu einem unlesbaren Fleck würde. */
+   bleibt ganz normal buchbar (keine .reserved/.taken-Logik) und zählt normal in die
+   Gesamtzahl verfügbarer Plätze mit. Auffälliger blauer Rand (Rollstuhl-Piktogramm-Blau)
+   statt Füllfarbe, damit die Kategoriefarbe weiter erkennbar bleibt. Keine Sitznummer
+   (Marko: Rollstuhlplätze bleiben unnummeriert, site-weit) — das ♿-Symbol sitzt dafür
+   MITTIG im Quadrat statt als Badge daneben, sobald der Sitz groß genug gerendert wird
+   (Mobile-Detailansicht); in der winzigen Übersichtskachel bleibt es beim Rand allein,
+   weil ein Symbol bei 8px sonst nur zu einem unlesbaren Fleck würde. */
 .seatplan-seat.wheelchair { border-width: 2px; border-color: #2E7BC4; }
 .seatplan-mobile-detail .seatplan-seat.wheelchair { position: relative; }
 .seatplan-mobile-detail .seatplan-seat.wheelchair::after {
-  content: "♿"; position: absolute; top: -6px; right: -6px; font-size: 9px; line-height: 1;
-  pointer-events: none;
+  content: "♿"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  font-size: 12px; line-height: 1; pointer-events: none;
 }
 /* Deine Auswahl — dasselbe dunkle Blau wie die Flächen neben dem Spielfeld. */
 .seatplan-seat.selected { background: var(--color-brand-blue); border-color: var(--color-brand-navy); }
