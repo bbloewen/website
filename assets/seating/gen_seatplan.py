@@ -290,7 +290,7 @@ block_D = [
     # ihre analogen "1"-Einträge unverändert, waren nicht Teil der Rückmeldung).
 block_E = [
     (14, [7, 9, 3, 7], KAT1, {"align_target_seat": 6, "segment_align": {"17": {"row": "12", "seat": 17}, "20": {"row": "13", "seat": 19}}}),
-    (13, [2, 6, 12, 3], KAT1, {"align_target_seat": 3, "segment_align": {"9": {"row": "12", "seat": 17}, "21": {"row": "14", "seat": 24}}}),
+    (13, [2, 6, 12, 3], KAT1, {"align_target_seat": 3, "segment_align": {"9": {"row": "12", "seat": 9}, "21": {"row": "14", "seat": 24}}}),
     (12, [2, 12, 8, 3], KAT1, {"align_target_seat": 3, "segment_align": {"1": {"row": "14", "seat": 1}, "15": {"row": "11", "seat": 15}, "23": {"row": "14", "seat": 24}}}),
     (11, [2, 20, 3], KAT1, {"align_target_seat": 3, "segment_align": {"1": {"row": "14", "seat": 1}, "23": {"row": "14", "seat": 24}}}),
     (10, [20], KAT1, {"align_reference_seat": True}),
@@ -311,8 +311,16 @@ block_E = [
         "trailing_gap_units": 1
     }),
 ]
+    # Reihe 14 (Marko, 05.08.2026): Sitz 1-5 rücken nach links, sodass Sitz 5 direkt über
+    # Sitz 3 der Reihe 13 liegt (Sitz 5 wird dafür zum Segment-Anfang, s. segment_align
+    # "5") — Sitz 1-4 sind Teil des NEUEN Sitz-5-7-Segments-Vorgängers und bleiben an
+    # ihrer bisherigen Position (nicht explizit mitverschoben, da segment_align nur
+    # Segment-ANFÄNGE ausrichten kann; bei Bedarf mit Marko live nachschärfen, falls das
+    # falsch aussieht). Echte Ein-Platz-Lücken zwischen Sitz 7/8 und 21/22 (beides schon
+    # bestehende Segmentgrenzen, jetzt über segment_gap_seats statt der kleinen
+    # Dekorlücke).
 block_F = [
-    (14, [7, 14, 7], KAT2, {"align_target_seat": 23}),
+    (14, [4, 3, 14, 7], KAT2, {"align_target_seat": 23, "segment_gap_seats": {1: 0, 2: 1, 3: 1}}),
     (13, [2, 20, 2], KAT2, {"align_target_seat": 22, "segment_align": {"1": {"row": "14", "seat": 1}, "23": {"row": "14", "seat": 27}}}),
     (12, [2, 20, 2], KAT2, {"align_target_seat": 22, "segment_align": {"1": {"row": "14", "seat": 1}, "23": {"row": "14", "seat": 27}}}),
     (11, [2, 20, 2], KAT2, {"align_target_seat": 22, "segment_align": {"1": {"row": "14", "seat": 1}, "23": {"row": "14", "seat": 27}}}),
@@ -320,7 +328,33 @@ block_F = [
     (9, [20], KAT2),
     (8, [20], KAT2),
     (7, [20], KAT2),
-    (6, [10], KAT2, {"wheelchair": True}),
+    # Reihe 6 (Marko, mehrfach nachgeschärft): die bisherigen 10 Rollstuhlplätze werden
+    # normale Sitze, NUMMERIERT 1-10 (nicht 6-15!) — davor (physisch links) kommen 5 NEUE
+    # Rollstuhlplätze (unnummeriert dargestellt, s. site-weite Regel), physisch zuerst
+    # generiert (Sitz 1-5) und per renumber_seats auf die finalen Nummern der Reihe
+    # verschoben: die letzten 10 (physisch 6-15) werden zu "1".."10". Die ersten 5
+    # (physisch 1-5, Rollstuhl) werden BEWUSST MIT auf 11-15 umbenannt statt bei ihrer
+    # rohen Nummer 1-5 zu bleiben — sonst kollidiert ihre (unsichtbare) Nummer mit den
+    # NEUEN Nummern der Normalsitze: seat_guid wird aus der finalen Nummer berechnet (s.
+    # renumber_seats-Docstring), zwei Sitze derselben Reihe mit derselben finalen Nummer
+    # bekämen sonst denselben guid (Buchung des einen würde den anderen mitbuchen!). Da
+    # Rollstuhlplätze ohnehin unnummeriert dargestellt werden, ist 11-15 rein intern.
+    # Fluchtpunkte (beide von Marko explizit gefordert): erster Rollstuhlplatz unter Sitz 1
+    # der Reihe 7, UND Sitz "10" (letzter normaler Sitz) unter Sitz 20 der Reihe 7 — macht
+    # die Reihe exakt so breit (19 Einheiten Spannweite) wie die 20er-Reihen. Echte
+    # Ein-Platz-Lücke zwischen JEDEM der 5 Rollstuhlplätze UND zwischen dem letzten
+    # Rollstuhlplatz und dem ersten normalen Sitz (segment_gap_seats vor Segment 1-5) —
+    # ergibt rechnerisch genau die passende Gesamtbreite, kein trailing_gap_units mehr
+    # nötig.
+    (6, [1, 1, 1, 1, 1, 10], KAT2, {
+        "wheelchair_seats": [1, 2, 3, 4, 5],
+        "segment_gap_seats": {1: 1, 2: 1, 3: 1, 4: 1, 5: 1},
+        "renumber_seats": {
+            "1": "11", "2": "12", "3": "13", "4": "14", "5": "15",
+            "6": "1", "7": "2", "8": "3", "9": "4", "10": "5",
+            "11": "6", "12": "7", "13": "8", "14": "9", "15": "10",
+        },
+    }),
 ]
 # Block A komplett auf absolute Koordinaten umgestellt (04.08.2026, Marko): EIN fester
 # Anker statt Reihen-zu-Reihen-Fluchtpunkten, die seat-picker.js zur Laufzeit aus dem

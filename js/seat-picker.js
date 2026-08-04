@@ -860,13 +860,34 @@
       if (!row) return;
       if (row.segment_gap_seats) {
         var breaks = row.segment_breaks || [];
-        var seatEls = rowEl.querySelectorAll('.seatplan-seat');
-        Object.keys(row.segment_gap_seats).forEach(function (segIdxStr) {
-          var breakSeatNum = breaks[parseInt(segIdxStr, 10) - 1];
+        var seatEls = Array.from(rowEl.querySelectorAll('.seatplan-seat'));
+        // segIdxStr aufsteigend abarbeiten und dabei einen Suchcursor (searchFrom)
+        // NUR vorwärts bewegen: renumber_seats kann dazu führen, dass eine finale
+        // Sitznummer INNERHALB derselben Reihe mehrfach vorkommt (z.B. Block F Reihe 6 —
+        // die 5 unveränderten Rollstuhlplätze 1-5 UND die umbenannten Normalsitze 1-10
+        // teilen sich die Nummern 1-5). Segmentgrenzen liegen aber immer streng in
+        // DOM-Reihenfolge hintereinander, deshalb liefert "ab der zuletzt gefundenen
+        // Position weitersuchen" garantiert den richtigen (nächsten) Treffer statt
+        // immer auf den ERSTEN Sitz mit passender Nummer zurückzuspringen.
+        var searchFrom = 0;
+        Object.keys(row.segment_gap_seats).map(Number).sort(function (a, b) { return a - b; }).forEach(function (idx) {
+          var breakSeatNum = breaks[idx - 1];
           if (breakSeatNum === undefined) return;
-          var seatEl = Array.from(seatEls).find(function (s) { return s.textContent.trim() === String(breakSeatNum); });
-          if (!seatEl) return;
-          seatEl.style.marginLeft = (row.segment_gap_seats[segIdxStr] * unitPx) + 'px';
+          var foundAt = -1;
+          for (var i = searchFrom; i < seatEls.length; i++) {
+            if (seatEls[i].dataset.seatNumber === String(breakSeatNum)) { foundAt = i; break; }
+          }
+          if (foundAt === -1) return;
+          var seatEl = seatEls[foundAt];
+          searchFrom = foundAt + 1;
+          var gapPx = row.segment_gap_seats[idx] * unitPx;
+          seatEl.style.marginLeft = gapPx + 'px';
+          // Stabile Basis für segmentPass (s. dort): falls ein Segment VOR dem Anker
+          // einer anderen Reihe zusätzlich genau auf DIESEM Sitz landet (gapSeatFor),
+          // muss dessen Verschiebung additiv auf diese ECHTE Lücke draufkommen, nicht
+          // auf den aktuellen (ggf. schon einmal addierten) Style-Wert — sonst zählt ein
+          // zweiter segmentPass()-Durchlauf denselben Betrag doppelt.
+          seatEl.dataset.gapBasePx = gapPx;
         });
       }
       // trailing_gap_units (s. gen_seatplan.py mkrow()): Reihen, die durch
@@ -940,7 +961,7 @@
 
       function seatIn(row, num) {
         return Array.from(row.querySelectorAll('.seatplan-seat')).find(function (s) {
-          return s.textContent === String(num);
+          return s.dataset.seatNumber === String(num);
         });
       }
       // Die Verschiebungen werden erst gesammelt und dann gemeinsam so normalisiert,
@@ -1050,12 +1071,27 @@
             if (d !== null) want[segNum] = d;
           });
 
+          // Segmentanfänge, die von segment_gap_seats verwaltet werden (s. gen_seatplan.py
+          // mkrow(), _applySegmentGapSeats), dürfen HIER weder genullt noch neu berechnet
+          // werden — sonst überschreibt dieser Pass ihre bereits korrekt gesetzte, echte
+          // Lücke wieder mit 0 (segStarts enthält sie trotzdem, weil sie strukturell
+          // Segmentanfänge sind). Live gefunden bei Block F Reihe 14: Lücken bei Sitz 8/22
+          // verschwanden wieder, sobald die Reihe zusätzlich einen segment_align-Eintrag
+          // bekam.
+          var rowData = zone.rows.find(function (r) { return String(r.row_number) === row.dataset.rowNumber; });
+          var gapProtected = {};
+          if (rowData && rowData.segment_gap_seats) {
+            Object.keys(rowData.segment_gap_seats).forEach(function (segIdxStr) {
+              var idx = parseInt(segIdxStr, 10);
+              if (segStarts[idx] !== undefined) gapProtected[String(segStarts[idx])] = true;
+            });
+          }
           // Lücken auf 0 und natürliche Abstände zum Ankersitz messen. Genullt werden
           // muss jeder Sitz, der später eine Lücke tragen kann — also auch die
           // Segmentanfänge, die aus segment_breaks kommen (die tragen aus dem Rendern
-          // noch die feste 10px-Lücke).
+          // noch die feste 10px-Lücke) — AUSSER den oben geschützten.
           var starts = Object.keys(spec).concat([anchorNum]).concat(segStarts.map(String));
-          starts.forEach(function (n) { var s = seatIn(row, n); if (s) s.style.marginLeft = '0px'; });
+          starts.forEach(function (n) { if (gapProtected[n]) return; var s = seatIn(row, n); if (s) s.style.marginLeft = '0px'; });
           var nat = {};
           starts.forEach(function (n) { nat[n] = deltaToAnchor(row, n); });
 
@@ -1077,8 +1113,24 @@
               seatEl.style.marginLeft = gap + 'px';
               applied += gap;
             } else {
-              var gapSeat = seatIn(row, gapSeatFor(segNumInt));
-              if (gapSeat) gapSeat.style.marginLeft = Math.max(0, -missing) + 'px';
+              var gapSeatNum = gapSeatFor(segNumInt);
+              var gapSeat = seatIn(row, gapSeatNum);
+              if (gapSeat) {
+                // Ein von segment_gap_seats verwalteter Sitz (s.o.) trägt hier schon
+                // seine echte, feste Lücke (z.B. Block F Reihe 14 Sitz 8) — die
+                // zusätzlich hier berechnete Verschiebung (für ein Segment VOR dem
+                // Anker, z.B. Sitz 5) kommt ADDITIV oben drauf, statt sie zu
+                // überschreiben, sonst verschwindet entweder die feste Lücke (bei
+                // Overwrite) oder die Fluchtpunkt-Verschiebung (beim einfachen
+                // Überspringen) — live an genau diesem Fall gefunden.
+                var extra = Math.max(0, -missing);
+                if (gapProtected[gapSeatNum]) {
+                  var base = parseFloat(gapSeat.dataset.gapBasePx) || 0;
+                  gapSeat.style.marginLeft = (base + extra) + 'px';
+                } else {
+                  gapSeat.style.marginLeft = extra + 'px';
+                }
+              }
             }
           });
         });
@@ -1253,7 +1305,7 @@
       var rEl = Array.from(rowEls).find(function (r) { return r.dataset.rowNumber === String(rowNum); });
       if (!rEl) return null;
       return Array.from(rEl.querySelectorAll('.seatplan-seat')).find(function (s) {
-        return s.textContent.trim() === String(seatNum);
+        return s.dataset.seatNumber === String(seatNum);
       });
     }
     function segSeatNumbers(row, segIdx) {
@@ -1599,6 +1651,27 @@
         rowNumLeft.textContent = rowLabel;
         rowEl.appendChild(rowNumLeft);
         var labelInsertBeforeEl = null;
+        // Welche PHYSISCHEN Sitze echte Segmentgrenzen sind, per seat_guid statt per
+        // Nummer festhalten: renumber_seats kann eine finale Sitznummer mehrfach in
+        // derselben Reihe vergeben (z. B. Block F Reihe 6 — Rollstuhlplätze 1-5 UND die
+        // umbenannten Normalsitze 1-10 teilen sich 1-5), ein reiner Nummernvergleich
+        // (indexOf) träfe dann fälschlich JEDEN Sitz mit passender Nummer statt nur den
+        // tatsächlichen Segmentanfang. Der Cursor läuft nur vorwärts durch die physische
+        // (Array-)Reihenfolge, die von renumber_seats nie verändert wird, und liefert so
+        // pro Grenzwert garantiert den richtigen (nächsten) Sitz.
+        var breakGuids = {};
+        if (row.segment_breaks && row.segment_breaks.length) {
+          var breakCursor = 0;
+          row.segment_breaks.forEach(function (breakNum) {
+            for (; breakCursor < row.seats.length; breakCursor++) {
+              if (String(row.seats[breakCursor].seat_number) === String(breakNum)) {
+                breakGuids[row.seats[breakCursor].seat_guid] = true;
+                breakCursor++;
+                break;
+              }
+            }
+          });
+        }
         row.seats.forEach(function (seat) {
           var taken = !!(self.takenSeatGuids && self.takenSeatGuids.has(seat.seat_guid));
           // Reserviert/NV gelten nur für noch nicht verkaufte Plätze — ein bereits
@@ -1627,11 +1700,16 @@
           // Echte Gang-Lücke innerhalb der Reihe (z. B. "1,2 | 3-22 | 23,24,25") —
           // die Sitznummerierung bleibt über den Gang hinweg durchgehend, nur die
           // Darstellung bekommt hier eine kleine zusätzliche Lücke.
-          if (row.segment_breaks && row.segment_breaks.indexOf(parseInt(seat.seat_number, 10)) !== -1) {
+          if (breakGuids[seat.seat_guid]) {
             btn.style.marginLeft = '10px';
           }
           if (blockMode) btn.tabIndex = -1;
           btn.dataset.seatGuid = seat.seat_guid;
+          // Stabiler Anker für DOM-Sitzsuchen (_applySegmentGapSeats, seatIn, findSeatEl):
+          // textContent ist für Rollstuhlplätze absichtlich leer (s.o.), darf also NICHT
+          // als Suchschlüssel dienen — sonst greift eine Suche nach der Rollstuhlplatz-
+          // Nummer irrtümlich einen anderen Sitz mit zufällig gleicher Anzeige-Nummer.
+          btn.dataset.seatNumber = seat.seat_number;
           var seatLabel = zone.name + ', Reihe ' + rowLabel + ', Platz ' + seat.seat_number + (isWheelchair ? ' (Rollstuhlplatz)' : '');
           btn.setAttribute('aria-label', seatLabel + (reserved ? ' (reserviert für Ehrenamtliche)' : nv ? ' (nicht verfügbar)' : taken ? ' (vergeben)' : ' (frei)'));
           if (taken || reserved || nv || blockMode) {
