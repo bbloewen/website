@@ -323,7 +323,11 @@
               "category": "Kategorie II"
             }
           ],
-          "align_target_seat": 6
+          "align_target_seat": 6,
+          "segment_gap_seats": {
+            "1": 1,
+            "2": 1
+          }
         },
         {
           "uuid": "d1b73400-2c56-516f-af8e-0668b4300087",
@@ -2027,8 +2031,7 @@
                 "x": 0,
                 "y": 0
               },
-              "category": "Kategorie II",
-              "wheelchair": true
+              "category": "Kategorie II"
             },
             {
               "seat_number": "2",
@@ -2038,8 +2041,7 @@
                 "x": 25,
                 "y": 0
               },
-              "category": "Kategorie II",
-              "wheelchair": true
+              "category": "Kategorie II"
             },
             {
               "seat_number": "3",
@@ -2049,8 +2051,7 @@
                 "x": 50,
                 "y": 0
               },
-              "category": "Kategorie II",
-              "wheelchair": true
+              "category": "Kategorie II"
             },
             {
               "seat_number": "4",
@@ -2060,8 +2061,7 @@
                 "x": 75,
                 "y": 0
               },
-              "category": "Kategorie II",
-              "wheelchair": true
+              "category": "Kategorie II"
             },
             {
               "seat_number": "5",
@@ -2071,8 +2071,7 @@
                 "x": 100,
                 "y": 0
               },
-              "category": "Kategorie II",
-              "wheelchair": true
+              "category": "Kategorie II"
             },
             {
               "seat_number": "6",
@@ -2082,8 +2081,7 @@
                 "x": 125,
                 "y": 0
               },
-              "category": "Kategorie II",
-              "wheelchair": true
+              "category": "Kategorie II"
             },
             {
               "seat_number": "7",
@@ -2093,8 +2091,7 @@
                 "x": 150,
                 "y": 0
               },
-              "category": "Kategorie II",
-              "wheelchair": true
+              "category": "Kategorie II"
             },
             {
               "seat_number": "8",
@@ -2104,8 +2101,7 @@
                 "x": 175,
                 "y": 0
               },
-              "category": "Kategorie II",
-              "wheelchair": true
+              "category": "Kategorie II"
             },
             {
               "seat_number": "9",
@@ -2115,8 +2111,7 @@
                 "x": 200,
                 "y": 0
               },
-              "category": "Kategorie II",
-              "wheelchair": true
+              "category": "Kategorie II"
             },
             {
               "seat_number": "10",
@@ -2126,8 +2121,112 @@
                 "x": 225,
                 "y": 0
               },
+              "category": "Kategorie II"
+            },
+            {
+              "seat_number": "11",
+              "seat_guid": "67527ab4-8ab5-58be-aca7-751c28e77fe0",
+              "uuid": "dc078ffa-460b-5259-9d99-8f1e38878b04",
+              "position": {
+                "x": 250,
+                "y": 0
+              },
               "category": "Kategorie II",
               "wheelchair": true
+            },
+            {
+              "seat_number": "12",
+              "seat_guid": "ce31c152-bff2-5c0c-813d-03e54d9f17a9",
+              "uuid": "75336537-f44d-5b24-bc38-fd8afa73ae4a",
+              "position": {
+                "x": 275,
+                "y": 0
+              },
+              "category": "Kategorie II"
+            },
+            {
+              "seat_number": "13",
+              "seat_guid": "f5c000e1-f2bc-5f2e-a26b-ef193547c339",
+              "uuid": "7237ebd6-c964-5b82-af20-e8268cdc361e",
+              "position": {
+                "x": 300,
+                "y": 0
+              },
+              "category": "Kategorie II",
+              "wheelchair": true
+            },
+            {
+              "seat_number": "14",
+              "seat_guid": "6c457f7e-1bcf-5c5a-b3d9-740c94def990",
+              "uuid": "fe81f954-98a2-5ad8-a49f-6dafc36a4701",
+              "position": {
+                "x": 325,
+                "y": 0
+              },
+              "category": "Kategorie II"
+            },
+            {
+              "seat_number": "15",
+              "seat_guid": "22eddc35-9c31-5caa-b1e2-7d9cfee9efc0",
+              "uuid": "5d78ae0e-5a79-5d01-bb24-ba4c1bc12718",
+              "position": {
+                "x": 350,
+                "y": 0
+              },
+              "category": "Kategorie II",
+              "wheelchair": true
+            },
+            {
+              "seat_number": "16",
+              "seat_guid": "f54ee10f-1898-5945-a7ee-6e4eb29f4a7d",
+              "uuid": "55126f99-16aa-54c0-b606-37018e2cda79",
+              "position": {
+                "x": 375,
+                "y": 0
+              },
+              "category": "Kategorie II"
+            },
+            {
+              "seat_number": "17",
+              "seat_guid": "533e8a29-521a-54dd-a94d-a203e15813ae",
+              "uuid": "a9c5e359-7800-5ba5-bd57-81ab5b1ed8d1",
+              "position": {
+                "x": 400,
+                "y": 0
+              },
+              "category": "Kategorie II",
+              "wheelchair": true
+            },
+            {
+              "seat_number": "18",
+              "seat_guid": "697bf60c-9446-5ebd-bfa9-438255aa5c7d",
+              "uuid": "e019c1d6-4dd4-525f-b537-43ebaef28e38",
+              "position": {
+                "x": 425,
+                "y": 0
+              },
+              "category": "Kategorie II"
+            },
+            {
+              "seat_number": "19",
+              "seat_guid": "9bac63a5-2c2a-5bbd-9d2f-c81233b3202b",
+              "uuid": "b1cb4b31-07da-534f-bb6d-ecae50330c1c",
+              "position": {
+                "x": 450,
+                "y": 0
+              },
+              "category": "Kategorie II",
+              "wheelchair": true
+            },
+            {
+              "seat_number": "20",
+              "seat_guid": "f666e898-a404-5f2c-aa7f-b57bedeca49a",
+              "uuid": "18749632-4f38-5e74-bc7a-d3389b76a75d",
+              "position": {
+                "x": 475,
+                "y": 0
+              },
+              "category": "Kategorie II"
             }
           ],
           "align_reference_seat": true

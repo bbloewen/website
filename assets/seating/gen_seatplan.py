@@ -210,7 +210,9 @@ VIP = "VIP"
 # Rollstuhlplätze (Korrektur 04.08.2026, Transkript) — visuell markiert (seat.wheelchair),
 # aber ganz normal buchbar, keine Sonderbehandlung im Kaufprozess.
 block_D = [
-    (14, [7, 14, 7], KAT2, {"align_target_seat": 6}),
+    # Reihe 14 (Marko): echte Ein-Platz-Lücken zwischen Sitz 7/8 und 21/22 (analog Block C
+    # Reihe 12).
+    (14, [7, 14, 7], KAT2, {"align_target_seat": 6, "segment_gap_seats": {1: 1, 2: 1}}),
     (13, [2, 20, 3], KAT2, {"align_target_seat": 3, "segment_align": {"1": {"row": "14", "seat": 1}, "23": {"row": "14", "seat": 26}}}),
     (12, [2, 20, 3], KAT2, {"align_target_seat": 3, "segment_align": {"1": {"row": "14", "seat": 1}, "23": {"row": "14", "seat": 26}}}),
     (11, [2, 20, 3], KAT2, {"align_target_seat": 3, "segment_align": {"1": {"row": "14", "seat": 1}, "23": {"row": "14", "seat": 26}}}),
@@ -218,7 +220,10 @@ block_D = [
     (9, [20], KAT2),
     (8, [20], KAT2),
     (7, [20], KAT2),
-    (6, [10], KAT2, {"wheelchair": True, "align_reference_seat": True}),
+    # Reihe 6 (Marko): die bisherigen 10 Rollstuhlplätze werden normale Sitze — Reihe 6
+    # wächst auf 20 Sitze (wie 7-10), davon 5 Rollstuhlplätze gleichmäßig verteilt über
+    # Sitz 11-20 (jeder zweite Sitz: 11/13/15/17/19).
+    (6, [20], KAT2, {"align_reference_seat": True, "wheelchair_seats": [11, 13, 15, 17, 19]}),
 ]
 block_E = [
     (14, [7, 3, 3, 7], KAT1, {"align_target_seat": 6, "segment_align": {"8": {"row": "13", "seat": 6}, "11": {"row": "12", "seat": 13}, "14": {"row": "13", "seat": 13}}}),
