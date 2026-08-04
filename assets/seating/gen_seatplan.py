@@ -279,12 +279,13 @@ block_B = [
     (8, [16], KAT1, {"match_first_row_width": True, "x_offset": -10}),
     (9, [16], KAT1, {"match_first_row_width": True, "x_offset": -10}),
     (10, [8, 8], KAT1, {"match_first_row_width": True, "x_offset": -10, "segment_gap_units": 4.2}),
-    # Reihe 11 (Marko): Sitze 1-8 (Segment 0+1 zusammen) nach links verschoben, damit
-    # Sitz 3 exakt auf Sitz 1 der Reihe 10 liegt. Sitz 1 einer match_first_row_width-Reihe
-    # sitzt immer exakt an deren eigenem x_offset (erstes Segment beginnt bei Bruchteil 0
-    # des gestreckten Laufs) — x_offset(Reihe 10)=-10 (s.o.) ist damit der Zielwert für
-    # Sitz 3. Unverschobener Sitz 3 (x_offset=-4, Index 2) läge bei -2 → Shift=-10-(-2)=-8.
-    (11, [2, 6, 6, 3], KAT1, {"x_offset": -4, "segment_shifts": {0: -8, 1: -8}}),
+    # Reihe 11 (Marko, vierte Runde): Segment 0 (Sitze 1-2) NICHT mehr zusammen mit
+    # Segment 1 (Sitze 3-8) verschoben, sondern eigenständig weiter nach links, sodass
+    # Sitz 1/2 exakt auf Sitz 1/2 der Reihe 12 fluchten. Segment 1 behält seinen Shift
+    # (-8, s.u. — hält weiterhin "Sitz 3 = Sitz 1 Reihe 10" aus der letzten Runde).
+    # Sitz 1 Reihe 12 = -13 (x_offset) + 0 - 2 (Segment-Shift) = -15.
+    # Unverschobener Sitz 1 Reihe 11 (x_offset=-4, Index 0) läge bei -4 → Shift=-15-(-4)=-11.
+    (11, [2, 6, 6, 3], KAT1, {"x_offset": -4, "segment_shifts": {0: -11, 1: -8}}),
     (12, [7, 3, 3, 2, 5], KAT1, {"x_offset": -13, "segment_shifts": {0: -2}}),
 ]
 block_C = [
