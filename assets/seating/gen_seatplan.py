@@ -271,9 +271,13 @@ block_F = [
 block_A = [
     # Reihe 1 (Marko, 04.08.2026): zusätzlicher Rollstuhlplatz ganz rechts, mit einer
     # vollen Sitzbreite Lücke zu Sitz 19 (dort, wo bisher nur die Reihennummer stand) —
-    # neues Segment [1] (Sitz 20), Shift +1 (Segment 2) für die volle Lücke, analog zum
-    # "ein Platz Space" bei Block B Reihe 1-3.
-    (1, [7, 12, 1], KAT2, {"x_offset": -9, "segment_shifts": {0: -1, 2: 1}, "wheelchair_seats": [20],
+    # neues Segment [1] (Sitz 20). Shift 0 (nicht mehr +1, Marko-Korrektur): +1 ergab eine
+    # ZWEI Einheiten breite Lücke (ein leerer Sitzplatz PLUS die Reihennummer obendrauf) —
+    # "nur ein Platz als Lücke" heißt genau EINE Einheit Abstand (Standard-Sitzabstand),
+    # in die die Reihennummer hineinpasst. Shift 0 bleibt trotzdem in explicit_shift_
+    # segments (expliziter Eintrag, s. mkrow()) — unterdrückt die sonst greifende
+    # 10px-Dekorlücke, die sonst oben draufkäme.
+    (1, [7, 12, 1], KAT2, {"x_offset": -9, "segment_shifts": {0: -1, 2: 0}, "wheelchair_seats": [20],
         "label_before_seat": 20}),
     (2, [7, 12], KAT2, {"x_offset": -9, "segment_shifts": {0: -1}}),
     (3, [7, 12], KAT2, {"x_offset": -9, "segment_shifts": {0: -1}}),
@@ -380,7 +384,14 @@ block_B = [
     # ungestreckte Reihenfolge, kein Extra-Pin nötig. live_shift statt live_fit2, da Reihe 11s
     # Sitz 9/13 selbst erst durch Reihe 11s live_stretch (Segment 2) ihre finale Position
     # bekommen — läuft NACH live_stretch (s. mkrow()).
-    (12, [7, 3, 3, 2, 5], KAT1, {"x_offset": -13, "segment_shifts": {0: -2, 1: -1},
+    # Zehnte Runde: Segment 4 (Sitz 16-20) bekam bisher zusätzlich zur normalen Steigung
+    # noch die pauschale 10px-Dekorlücke an der Segmentgrenze (Sitz 16 hat keinen eigenen
+    # live_shift/segment_shift-Eintrag, s. explicit_shift_segments-Logik in seat-picker.js)
+    # — Marko: Abstand zwischen Sitz 15/16 muss GENAU der gleiche sein wie zwischen 14/15.
+    # Fix: expliziter Shift 0 für Segment 4 unterdrückt die Dekorlücke, ohne die tatsächliche
+    # Steigung zu ändern (Sitz 16 bleibt weiterhin 1 Einheit hinter Sitz 15, jetzt ohne
+    # Zusatz-Px).
+    (12, [7, 3, 3, 2, 5], KAT1, {"x_offset": -13, "segment_shifts": {0: -2, 1: -1, 4: 0},
         "live_shift": {
             2: {"anchor_seat": 11, "target_row": "11", "target_seat": 9},
             3: {"anchor_seat": 14, "target_row": "11", "target_seat": 13}

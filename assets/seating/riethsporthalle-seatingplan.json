@@ -6404,7 +6404,7 @@
               },
               "category": "Kategorie II",
               "wheelchair": true,
-              "x_units": 11
+              "x_units": 10
             }
           ],
           "x_offset": -9,
@@ -11333,7 +11333,8 @@
           "x_offset": -13,
           "explicit_shift_segments": [
             0,
-            1
+            1,
+            4
           ],
           "live_shift": {
             "2": {
