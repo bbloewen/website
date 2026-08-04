@@ -8259,7 +8259,13 @@
               "category": "Kategorie II"
             }
           ],
-          "align_target_seat": 22
+          "align_target_seat": 22,
+          "segment_align": {
+            "1": {
+              "row": "12",
+              "seat": 1
+            }
+          }
         },
         {
           "uuid": "b91d68c0-aaa2-5182-be12-59ef38bfafb7",
@@ -8551,7 +8557,13 @@
               "category": "Kategorie II"
             }
           ],
-          "align_target_seat": 24
+          "align_target_seat": 24,
+          "segment_align": {
+            "7": {
+              "row": "11",
+              "seat": 4
+            }
+          }
         }
       ],
       "align_edge": "trailing"

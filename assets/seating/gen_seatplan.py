@@ -157,8 +157,13 @@ block_A = [
     (8, [20], KAT2),
     (9, [20], KAT2),
     (10, [20], KAT2, {"align_reference_seat": True}),
-    (11, [2, 20, 3], KAT2, {"align_target_seat": 22}),
-    (12, [7, 14, 7], KAT2, {"align_target_seat": 24}),
+    # Fluchtpunkte 04.08.2026 (Marko, live nachgeschaerft): Sitz 1 der Reihe 11 auf
+    # Sitz 1 der Reihe 12 (verschiebt nur das isolierte 1,2-Segment, s. row12); Sitz 7
+    # der Reihe 12 auf Sitz 4 der Reihe 11 (verschiebt nur das isolierte 1-7-Segment).
+    # Beide Verweise sind sicher, weil Reihe 11 UND Reihe 12 jeweils ein eigenes
+    # align_target_seat haben (anders als der Reihe-10-Bug, s. Block B weiter oben).
+    (11, [2, 20, 3], KAT2, {"align_target_seat": 22, "segment_align": {"1": {"row": "12", "seat": 1}}}),
+    (12, [7, 14, 7], KAT2, {"align_target_seat": 24, "segment_align": {"7": {"row": "11", "seat": 4}}}),
 ]
 # Reihen 10-12 korrigiert 04.08.2026 (Transkript) — Reihe 10 hat nur 16 statt 20 Sitze
 # (Lücke von 4 vor Sitz 9), Reihe 11 nur 17 statt 25 (zwei große Lücken), Reihe 12 nur

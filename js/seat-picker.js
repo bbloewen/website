@@ -1027,8 +1027,24 @@
     scaleWrap.style.width = '';
     scaleWrap.style.height = '';
     gridWrap.style.transform = 'none';
-    var naturalWidth = gridWrap.scrollWidth;
-    var naturalHeight = gridWrap.scrollHeight;
+    // scrollWidth/-Height zaehlen Ueberlauf durch NEGATIVE Margins strukturell nicht mit
+    // (bekannter CSS-Fallstrick, s. reference_sitzplan_riethsporthalle-Memory) — die
+    // segment_align-Fluchtpunkte (s. _fixupRowWidths) koennen genau das erzeugen, wenn
+    // ein vorderes Segment weiter nach aussen geschoben wird als die Reihe von sich aus
+    // breit ist. Deshalb zusaetzlich die tatsaechlichen Kindposition-Extremwerte messen
+    // und den groesseren Wert nehmen, statt scrollWidth blind zu vertrauen.
+    var gwRect = gridWrap.getBoundingClientRect();
+    var minLeft = gwRect.left, maxRight = gwRect.right, minTop = gwRect.top, maxBottom = gwRect.bottom;
+    gridWrap.querySelectorAll('.seatplan-row-line').forEach(function (el) {
+      var r = el.getBoundingClientRect();
+      if (!r.width && !r.height) return;
+      if (r.left < minLeft) minLeft = r.left;
+      if (r.right > maxRight) maxRight = r.right;
+      if (r.top < minTop) minTop = r.top;
+      if (r.bottom > maxBottom) maxBottom = r.bottom;
+    });
+    var naturalWidth = Math.max(gridWrap.scrollWidth, maxRight - minLeft);
+    var naturalHeight = Math.max(gridWrap.scrollHeight, maxBottom - minTop);
     var availWidth = box.clientWidth;
     var availHeight = box.clientHeight;
     if (!naturalWidth || !naturalHeight || !availWidth || !availHeight) return;
