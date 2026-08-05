@@ -14225,5 +14225,10 @@
       ],
       "align_edge": "leading"
     }
-  ]
+  ],
+  "standing": {
+    "name": "Stehplatz",
+    "capacity": 248,
+    "available": 0
+  }
 }

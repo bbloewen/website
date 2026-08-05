@@ -467,7 +467,10 @@
 }
 /* Stehplatz: nur halb so hoch wie das Spielfeld und mittig in der Aside-Gruppe
    (nicht wie die Anzeigetafel über die volle Höhe gestreckt). Label "Steh"/"Platz"
-   steht als zwei vertikale Spalten nebeneinander statt einem langen Wort. */
+   steht als zwei vertikale Spalten nebeneinander statt einem langen Wort. Ist jetzt ein
+   <button> (antippbar, s. seat-picker.js) statt eines reinen <div> — Browser-Button-
+   Defaults (Rahmen/Hintergrund/Schrift/Cursor) zurückgesetzt, damit es weiter wie die
+   bisherige Platzhalter-Box aussieht. */
 .seatplan-mobile-standing {
   flex: 0 0 34px;
   align-self: center;
@@ -477,7 +480,12 @@
   border: 1px dashed var(--color-neutral-200);
   border-radius: var(--radius-md);
   display: flex; align-items: center; justify-content: center; gap: 2px;
+  padding: 0; font: inherit; cursor: pointer;
 }
+/* --blocked: Stehplätze zählen zur Gesamtkapazität, sind aber aktuell nicht buchbar
+   (s. gen_seatplan.py "standing", available:0) — Cursor signalisiert das, ohne die
+   Fläche unsichtbar/undeutbar zu machen (Klick erklärt den Grund, s. seat-picker.js). */
+.seatplan-mobile-standing--blocked { cursor: not-allowed; }
 .seatplan-mobile-standing span {
   font-size: 8px; font-weight: 600; letter-spacing: .04em; color: var(--text-muted);
   writing-mode: vertical-rl; transform: rotate(180deg);

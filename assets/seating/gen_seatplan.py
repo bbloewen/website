@@ -546,6 +546,24 @@ plan = {
     ]
 }
 
+# Stehplatz (Marko, 05.08.2026): kein Sitzblock, sondern ein reiner Mengen-Bereich ohne
+# Einzelplatz-Nummerierung (entspricht der Realität — Stehplätze haben keine feste
+# Position) — deshalb bewusst KEINE eigene Zone im seatbasierten Pretix-Schema, sondern
+# ein einzelnes Top-Level-Feld. Kapazität wird aus der Ziel-Gesamtkapazität der Halle
+# (1.500) abzüglich der tatsächlichen Sitzplatzzahl berechnet, nicht hart codiert —
+# ändert sich die Sitzplatzzahl künftig (z.B. weitere Korrekturen wie in dieser Session),
+# bleibt die Gesamtkapazität automatisch bei 1.500, ohne dass diese Zahl von Hand
+# nachgezogen werden muss. `available:0`: Stehplätze sind aktuell bewusst blockiert/
+# reserviert (noch nicht verkaufbar, s. seat-picker.js _renderMobileOverview/
+# _renderOccupancy) — zählen aber schon zur Gesamtkapazität.
+TOTAL_CAPACITY_TARGET = 1500
+seat_total = sum(len(r["seats"]) for z in plan["zones"] for r in z["rows"])
+plan["standing"] = {
+    "name": "Stehplatz",
+    "capacity": TOTAL_CAPACITY_TARGET - seat_total,
+    "available": 0
+}
+
 out_path = "/Users/marko/Documents/claude/Projects/website/assets/seating/riethsporthalle-seatingplan.json"
 with open(out_path, "w") as f:
     json.dump(plan, f, ensure_ascii=False, indent=2)
@@ -554,7 +572,10 @@ with open(out_path, "w") as f:
 # false auf jeder Ebene) — section_break/segment_breaks sind unsere eigenen, für Pretix
 # unbekannten Felder und müssen für einen echten Upload raus. Alles andere bleibt exakt
 # gleich (gleiche seat_guid/uuid-Werte, damit beide Dateien dieselben Sitze referenzieren).
+# "standing" ist ebenfalls kein Pretix-Schema-Feld (Pretix kennt nur seatbasierte Zonen)
+# und muss für einen echten Upload ebenso raus.
 pretix_plan = copy.deepcopy(plan)
+pretix_plan.pop("standing", None)
 for z in pretix_plan["zones"]:
     for r in z["rows"]:
         r.pop("section_break", None)
@@ -570,4 +591,5 @@ for z in plan["zones"]:
         for s in r["seats"]:
             totals[s["category"]] = totals.get(s["category"], 0) + 1
 print("Seat totals per category:", totals)
+print("Stehplatz:", plan["standing"], "-> Gesamtkapazität:", seat_total + plan["standing"]["capacity"])
 print("Zones:", [(z["zone_id"], len(z["rows"]), sum(len(r["seats"]) for r in z["rows"])) for z in plan["zones"]])

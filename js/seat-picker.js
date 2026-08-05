@@ -296,6 +296,11 @@
 
     fetch(this.planUrl).then(function (r) { return r.json(); }).then(function (plan) {
       self.plan = plan;
+      // Stehplatz (s. gen_seatplan.py): reiner Mengen-Bereich ohne Einzelplatz-Wahl,
+      // zählt zur Gesamtkapazität, ist aber aktuell komplett blockiert/reserviert
+      // (available:0) — noch kein verkaufbares Produkt (s. _renderMobileOverview,
+      // _renderOccupancy).
+      self.standing = plan.standing || null;
       self.reservedSeatGuids = self._computeSeatGuidsForRanges(self.reservedSeats, plan);
       self.nvSeatGuids = self._computeSeatGuidsForRanges(self.nvSeats, plan);
       self.blocks = self._deriveBlocks(plan);
@@ -504,7 +509,10 @@
         '<div class="seatplan-mobile-court-row" style="grid-column:2;grid-row:3">' +
           '<div class="seatplan-mobile-court-aside">' +
             '<div class="seatplan-mobile-scoreboard"><span></span><i>Anzeigetafel</i><span></span></div>' +
-            '<div class="seatplan-mobile-standing"><span>Steh-</span><span>platz</span></div>' +
+            '<button type="button" class="seatplan-mobile-standing seatplan-mobile-standing--blocked" ' +
+              'aria-label="Stehplatz' + (self.standing ? ' (' + self.standing.capacity + ' Plätze, aktuell nicht buchbar)' : '') + '">' +
+              '<span>Steh-</span><span>platz</span>' +
+            '</button>' +
           '</div>' +
           '<div class="seatplan-mobile-court">' + courtConfirm + '<p class="t-caption" style="margin:0;color:var(--text-muted)">Spielfeld</p></div>' +
           '<div class="seatplan-mobile-court-aside-mirror" aria-hidden="true"></div>' +
@@ -526,6 +534,18 @@
     if (this.mode === 'blocks') {
       var addBtn = this.root.querySelector('#seatplan-mobile-add-btn');
       if (addBtn) addBtn.addEventListener('click', function () { self._addPendingBlock(); });
+    }
+    // Stehplatz ist bewusst antippbar (Marko: "muss im Bereich Stehplatz mit ausgewählt
+    // werden können"), aber noch nicht verkaufbar — ein Klick erklärt das kurz statt
+    // stillschweigend nichts zu tun, statt eines eigenen Auswahl-Dialogs (der erst mit
+    // #222 kommt).
+    var standingBtn = this.root.querySelector('.seatplan-mobile-standing');
+    if (standingBtn) {
+      standingBtn.addEventListener('click', function () {
+        if (!self.statusNoteEl) return;
+        self.statusNoteEl.textContent = 'Stehplätze sind aktuell noch nicht buchbar.';
+        self.statusNoteEl.hidden = false;
+      });
     }
     this._fixupStandingBox();
     this._renderCart();
@@ -608,6 +628,18 @@
         '</li>'
       );
     });
+    // Stehplatz zählt zur Gesamtkapazität mit, ist aber aktuell komplett blockiert
+    // (0 frei) — eigene Zeile statt in die Block-Liste gemischt, weil es kein Block ist.
+    if (this.standing && this.standing.capacity) {
+      gesamtAlle += this.standing.capacity;
+      zeilen.push(
+        '<li class="seatplan-occupancy-row">' +
+          '<span class="seatplan-occupancy-block">' + this.standing.name + '</span>' +
+          '<span class="seatplan-occupancy-bar" aria-hidden="true"><span style="width:100%"></span></span>' +
+          '<span class="seatplan-occupancy-num">noch nicht buchbar</span>' +
+        '</li>'
+      );
+    }
     if (!zeilen.length) { this.occupancyEl.innerHTML = ''; return; }
     function n(v) { return v.toLocaleString('de-DE'); }
     this.occupancyEl.innerHTML =
