@@ -1,4 +1,4 @@
-import json, uuid, copy
+import json, uuid
 
 # Feste Namespace-UUID für deterministische seat_guid/uuid-Vergabe: dieselbe Reihe/
 # derselbe Sitz bekommt bei jedem Skriptlauf exakt dieselbe ID, statt bei jeder
@@ -569,17 +569,33 @@ with open(out_path, "w") as f:
     json.dump(plan, f, ensure_ascii=False, indent=2)
 
 # Pretix-taugliche Variante: Pretix' Sitzplan-Schema ist strikt (additionalProperties:
-# false auf jeder Ebene) — section_break/segment_breaks sind unsere eigenen, für Pretix
-# unbekannten Felder und müssen für einen echten Upload raus. Alles andere bleibt exakt
-# gleich (gleiche seat_guid/uuid-Werte, damit beide Dateien dieselben Sitze referenzieren).
-# "standing" ist ebenfalls kein Pretix-Schema-Feld (Pretix kennt nur seatbasierte Zonen)
-# und muss für einen echten Upload ebenso raus.
-pretix_plan = copy.deepcopy(plan)
-pretix_plan.pop("standing", None)
-for z in pretix_plan["zones"]:
-    for r in z["rows"]:
-        r.pop("section_break", None)
-        r.pop("segment_breaks", None)
+# false auf jeder Ebene) und kennt nur eine Handvoll Felder pro Ebene (empirisch gegen den
+# tatsaechlich live in pretix gespeicherten Plan geprueft: zone_id/uuid/name/position/rows,
+# row_number/row_number_position/uuid/position/seats, seat_number/seat_guid/uuid/position/
+# category). Alle eigenen Layout-Hilfsfelder (align_edge, segment_align, live_fit, section_break,
+# wheelchair, ...) sind Pretix unbekannt und muessen fuer einen echten Upload raus — deshalb hier
+# ein Allowlist-Rebuild statt einer Pop-Liste. seat_guid/uuid bleiben unveraendert, damit beide
+# Dateien dieselben Sitze referenzieren. "standing" kennt Pretix ebenfalls nicht (nur seatbasierte
+# Zonen) und entfaellt komplett.
+def pretix_seat(seat):
+    return {k: seat[k] for k in ("seat_number", "seat_guid", "uuid", "position", "category")}
+
+def pretix_row(row):
+    return {k: row[k] for k in ("uuid", "position", "row_number", "row_number_position") if k in row} | {
+        "seats": [pretix_seat(s) for s in row["seats"]]
+    }
+
+def pretix_zone(zone):
+    return {k: zone[k] for k in ("zone_id", "uuid", "name", "position") if k in zone} | {
+        "rows": [pretix_row(r) for r in zone["rows"]]
+    }
+
+pretix_plan = {
+    "name": plan["name"],
+    "categories": plan["categories"],
+    "size": plan["size"],
+    "zones": [pretix_zone(z) for z in plan["zones"]]
+}
 
 pretix_out_path = "/Users/marko/Documents/claude/Projects/website/assets/seating/riethsporthalle-seatingplan.pretix.json"
 with open(pretix_out_path, "w") as f:
