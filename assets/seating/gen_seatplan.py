@@ -289,8 +289,8 @@ block_D = [
     # Bestuhlung", diese Lücken müssen geschlossen werden. Entfernt (Reihe 11/12 behalten
     # ihre analogen "1"-Einträge unverändert, waren nicht Teil der Rückmeldung).
 block_E = [
-    (14, [7, 9, 3, 7], KAT1, {"align_target_seat": 6, "segment_align": {"17": {"row": "12", "seat": 17}, "20": {"row": "13", "seat": 19}}}),
-    (13, [2, 6, 12, 3], KAT1, {"align_target_seat": 3, "segment_align": {"9": {"row": "12", "seat": 9}, "21": {"row": "14", "seat": 24}}}),
+    (14, [7, 14, 7], KAT1, {"align_target_seat": 6, "segment_gap_seats": {1: 1, 2: 1}}),
+    (13, [2, 6, 14, 3], KAT1, {"align_target_seat": 3, "segment_align": {"1": {"row": "12", "seat": 1}, "9": {"row": "12", "seat": 9}, "23": {"row": "14", "seat": 24}}}),
     (12, [2, 12, 8, 3], KAT1, {"align_target_seat": 3, "segment_align": {"1": {"row": "14", "seat": 1}, "15": {"row": "11", "seat": 15}, "23": {"row": "14", "seat": 24}}}),
     (11, [2, 20, 3], KAT1, {"align_target_seat": 3, "segment_align": {"1": {"row": "14", "seat": 1}, "23": {"row": "14", "seat": 24}}}),
     (10, [20], KAT1, {"align_reference_seat": True}),

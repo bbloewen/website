@@ -2217,8 +2217,7 @@
           "section_break": false,
           "segment_breaks": [
             8,
-            17,
-            20
+            22
           ],
           "seats": [
             {
@@ -2480,18 +2479,32 @@
                 "y": 0
               },
               "category": "Kategorie I"
+            },
+            {
+              "seat_number": "27",
+              "seat_guid": "2fad37a9-d9dd-5f03-9f5d-fc57fd43dc5d",
+              "uuid": "2f72c50e-8860-5a4a-bf99-2e4f429a67ca",
+              "position": {
+                "x": 650,
+                "y": 0
+              },
+              "category": "Kategorie I"
+            },
+            {
+              "seat_number": "28",
+              "seat_guid": "81601c5f-5523-57fd-b431-7d0f676ff21b",
+              "uuid": "1ef836f7-820a-5a30-ae75-d2d0f8985e28",
+              "position": {
+                "x": 675,
+                "y": 0
+              },
+              "category": "Kategorie I"
             }
           ],
           "align_target_seat": 6,
-          "segment_align": {
-            "17": {
-              "row": "12",
-              "seat": 17
-            },
-            "20": {
-              "row": "13",
-              "seat": 19
-            }
+          "segment_gap_seats": {
+            "1": 1,
+            "2": 1
           }
         },
         {
@@ -2506,7 +2519,7 @@
           "segment_breaks": [
             3,
             9,
-            21
+            23
           ],
           "seats": [
             {
@@ -2738,15 +2751,39 @@
                 "y": 0
               },
               "category": "Kategorie I"
+            },
+            {
+              "seat_number": "24",
+              "seat_guid": "b58b577c-d804-561b-9d4a-a14f9fe860da",
+              "uuid": "07dd4c08-bf11-5818-8e22-6f436ca2e0bb",
+              "position": {
+                "x": 575,
+                "y": 0
+              },
+              "category": "Kategorie I"
+            },
+            {
+              "seat_number": "25",
+              "seat_guid": "9d5b50eb-b0c7-55b1-839e-0042a0e6638a",
+              "uuid": "4fafdcdd-f465-5f48-b03b-a1d28546ba8e",
+              "position": {
+                "x": 600,
+                "y": 0
+              },
+              "category": "Kategorie I"
             }
           ],
           "align_target_seat": 3,
           "segment_align": {
+            "1": {
+              "row": "12",
+              "seat": 1
+            },
             "9": {
               "row": "12",
               "seat": 9
             },
-            "21": {
+            "23": {
               "row": "14",
               "seat": 24
             }
