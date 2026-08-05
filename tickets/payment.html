@@ -339,9 +339,22 @@
         var webhookUrl = 'https://blev.app.n8n.cloud/webhook/dauerkarte-bestellung';
         var payload = { buyer: buyer, cart: cart, sepa: { kontoinhaber: kontoinhaber, iban: iban } };
         var payBtn = document.getElementById('pay-btn');
+        /* Schutz gegen Doppel-Bestellungen: das blosse payBtn.disabled reicht nur
+           innerhalb desselben Seitenaufrufs. Bei einem Reload (z.B. nach langsamer
+           Antwort, Zurueck-Button) ist der Button wieder aktiv, das Formular aber
+           inhaltlich identisch — das hat schon zu einer echten Doppel-Bestellung
+           gefuehrt. Ueber sessionStorage bleibt der "bereits gesendet"-Zustand auch
+           ueber einen Reload im selben Tab erhalten. */
+        if (payBtn.disabled) return;
+        var payloadKey = JSON.stringify(payload);
+        if (sessionStorage.getItem('bl_dauerkarte_sent') === payloadKey) {
+          alert('Diese Bestellung wurde bereits gesendet. Bitte prüfe dein Postfach auf die Bestätigungs-E-Mail, bevor du es erneut versuchst. Bei Fragen schreib uns gerne an info@basketball-loewen.com.');
+          return;
+        }
         var originalBtnText = payBtn.textContent;
         payBtn.disabled = true;
         payBtn.textContent = 'Wird gesendet …';
+        sessionStorage.setItem('bl_dauerkarte_sent', payloadKey);
         fetch(webhookUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -354,6 +367,7 @@
           sessionStorage.setItem('bl_order', JSON.stringify(order));
           window.location.href = '/tickets/confirmation.html';
         }).catch(function () {
+          sessionStorage.removeItem('bl_dauerkarte_sent');
           payBtn.disabled = false;
           payBtn.textContent = originalBtnText;
           alert('Deine Bestellung konnte nicht gesendet werden. Bitte versuche es gleich noch einmal oder schreib uns direkt an info@basketball-loewen.com.');
