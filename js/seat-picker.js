@@ -636,7 +636,7 @@
         '<li class="seatplan-occupancy-row">' +
           '<span class="seatplan-occupancy-block">' + this.standing.name + '</span>' +
           '<span class="seatplan-occupancy-bar" aria-hidden="true"><span style="width:100%"></span></span>' +
-          '<span class="seatplan-occupancy-num">noch nicht buchbar</span>' +
+          '<span class="seatplan-occupancy-num">nicht buchbar</span>' +
         '</li>'
       );
     }
