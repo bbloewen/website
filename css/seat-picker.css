@@ -108,15 +108,15 @@
 }
 /* Rollstuhlplatz (z.B. Block D/E/F, Reihe 6) — rein visuelle Zusatz-Markierung, der Platz
    bleibt ganz normal buchbar (keine .reserved/.taken-Logik) und zählt normal in die
-   Gesamtzahl verfügbarer Plätze mit. Auffälliger Rand statt Füllfarbe, damit die
-   Kategoriefarbe weiter erkennbar bleibt — bewusst NICHT blau (Marko: sieht sonst wie
-   .selected/bereits gebucht aus), stattdessen Marken-Navy, das für keinen anderen
-   Sitz-Status verwendet wird. Keine Sitznummer (Marko: Rollstuhlplätze bleiben
+   Gesamtzahl verfügbarer Plätze mit. Nur der Rand wird dicker, die Randfarbe bleibt
+   die der jeweiligen Kategorie (.cat-kat1/.cat-kat2/.cat-vip, s.o.) — KEINE eigene
+   Randfarbe (Marko: erst Blau sah wie .selected aus, dann wirkte Navy wie Schwarz —
+   beides zu auffällig/verwirrend). Keine Sitznummer (Marko: Rollstuhlplätze bleiben
    unnummeriert, site-weit) — das ♿-Symbol sitzt dafür MITTIG im Quadrat statt als
    Badge daneben, sobald der Sitz groß genug gerendert wird (Mobile-Detailansicht); in
-   der winzigen Übersichtskachel bleibt es beim Rand allein, weil ein Symbol bei 8px
-   sonst nur zu einem unlesbaren Fleck würde. */
-.seatplan-seat.wheelchair { border-width: 2px; border-color: var(--color-brand-navy); }
+   der winzigen Übersichtskachel bleibt es beim dickeren Rand allein, weil ein Symbol
+   bei 8px sonst nur zu einem unlesbaren Fleck würde. */
+.seatplan-seat.wheelchair { border-width: 2px; }
 .seatplan-mobile-detail .seatplan-seat.wheelchair { position: relative; }
 .seatplan-mobile-detail .seatplan-seat.wheelchair::after {
   content: "♿"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);

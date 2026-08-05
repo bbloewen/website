@@ -290,9 +290,9 @@ block_D = [
     # ihre analogen "1"-Einträge unverändert, waren nicht Teil der Rückmeldung).
 block_E = [
     (14, [7, 14, 7], KAT1, {"align_target_seat": 6, "segment_gap_seats": {1: 1, 2: 1}}),
-    (13, [2, 6, 14, 3], KAT1, {"align_target_seat": 3, "segment_align": {"1": {"row": "12", "seat": 1}, "9": {"row": "12", "seat": 9}, "25": {"row": "14", "seat": 28}}}),
-    (12, [2, 12, 8, 3], KAT1, {"align_target_seat": 3, "segment_align": {"1": {"row": "14", "seat": 1}, "15": {"row": "11", "seat": 15}, "25": {"row": "14", "seat": 28}}}),
-    (11, [2, 20, 3], KAT1, {"align_target_seat": 3, "segment_align": {"1": {"row": "14", "seat": 1}, "25": {"row": "14", "seat": 28}}}),
+    (13, [2, 6, 14, 3], KAT1, {"align_target_seat": 3, "segment_align": {"1": {"row": "12", "seat": 1}, "9": {"row": "12", "seat": 9}, "23": {"row": "14", "seat": 26}}}),
+    (12, [2, 12, 8, 3], KAT1, {"align_target_seat": 3, "segment_align": {"1": {"row": "14", "seat": 1}, "15": {"row": "11", "seat": 15}, "23": {"row": "14", "seat": 26}}}),
+    (11, [2, 20, 3], KAT1, {"align_target_seat": 3, "segment_align": {"1": {"row": "14", "seat": 1}, "23": {"row": "14", "seat": 26}}}),
     (10, [20], KAT1, {"align_reference_seat": True}),
     (9, [20], KAT1),
     (8, [20], KAT1),
