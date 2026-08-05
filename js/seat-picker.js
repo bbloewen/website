@@ -935,14 +935,6 @@
     // Reihen 6-10 linksbündig, Sitz 3 der Reihen 11-13 und Sitz 6 der Reihe 14 liegen
     // dann genau über Sitz 1 der Reihe 6.
     var leading = isLeadingEdge(zone);
-    // seatsBox: der row-level Shift (anchorAll(), s.u.) greift NUR auf den inneren
-    // Sitz-Wrapper (.seatplan-row-seats, s. _renderZone), NICHT auf die ganze Reihe —
-    // sonst würde er die Reihennummer-Labels (Flex-Geschwister des Wrappers)
-    // mitverschieben. Zeilen ohne Wrapper (sollte nicht vorkommen, s. _renderZone)
-    // fallen auf die Reihe selbst zurück.
-    function seatsBox(row) {
-      return row.querySelector('.seatplan-row-seats') || row;
-    }
     var referenceRow = zoneEl.querySelector('.seatplan-row-line--align-reference');
     var referenceSeats = referenceRow ? referenceRow.querySelectorAll('.seatplan-seat') : null;
     var referenceSeat = referenceSeats && referenceSeats.length
@@ -955,7 +947,7 @@
       // — absolute Koordinaten würden dadurch schon während der Schleife veralten.
       // Reihenintern gemessene Abstände sind davon unabhängig, und da alle Reihen an
       // derselben Kante hängen, deckt gleicher Abstand auch gleiche Position.
-      var refRowRect = seatsBox(referenceRow).getBoundingClientRect();
+      var refRowRect = referenceRow.getBoundingClientRect();
       var refSeatRect = referenceSeat.getBoundingClientRect();
       var refOffset = leading ? (refSeatRect.left - refRowRect.left) : (refRowRect.right - refSeatRect.right);
 
@@ -978,16 +970,15 @@
       // auch ihre SITZE und riss echte Fluchtpunkte auseinander (Block C Reihe 1-9
       // saß danach nicht mehr auf einer Linie mit Reihe 10-12; Block D Reihe 7-10
       // nicht mehr mit Reihe 6). row-level marginLeft/marginRight bewegt IMMER Label
-      // UND Sitze gemeinsam (beide sind Flex-Geschwister im selben Element) — eine
-      // rein kosmetische Label-Verschiebung ohne Sitz-Versatz braucht zwingend einen
-      // eigenen Wrapper NUR um die Sitze (s. _renderZone, .seatplan-row-seats), auf
-      // den sich dieser Shift jetzt bezieht statt auf die ganze Reihe.
+      // UND Sitze gemeinsam (beide sind Flex-Geschwister derselben Reihe) — ALLE
+      // Reihen bekommen deshalb hier denselben gemeinsamen Shift, nicht nur die mit
+      // eigenem align_target_seat.
       function anchorAll() {
         var margins = [];
         zoneEl.querySelectorAll('[data-align-target-seat]').forEach(function (row) {
           var targetSeat = seatIn(row, row.dataset.alignTargetSeat);
           if (!targetSeat) return;
-          var rowRect = seatsBox(row).getBoundingClientRect();
+          var rowRect = row.getBoundingClientRect();
           var seatRect = targetSeat.getBoundingClientRect();
           var targetOffset = leading ? (seatRect.left - rowRect.left) : (rowRect.right - seatRect.right);
           margins.push({ row: row, value: -(targetOffset - refOffset) });
@@ -998,9 +989,8 @@
         margins.forEach(function (m) { byRow.set(m.row, m.value); });
         zoneEl.querySelectorAll('.seatplan-row-line').forEach(function (row) {
           var v = (byRow.get(row) || 0) - min;
-          var target = seatsBox(row);
-          if (leading) target.style.marginLeft = v + 'px';
-          else target.style.marginRight = v + 'px';
+          if (leading) row.style.marginLeft = v + 'px';
+          else row.style.marginRight = v + 'px';
         });
       }
       anchorAll();
