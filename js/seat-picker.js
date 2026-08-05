@@ -1245,32 +1245,24 @@
       // auf Reihe 1 abstimmen, ohne die Reihennummern-Labels (auch Flex-Kinder von rowEl,
       // s. _renderZone) versehentlich mitzustrecken. Ohne Segmentgrenzen (segment_breaks
       // leer) ist das genau EIN Wrapper über die volle Breite — deckt damit auch die
-      // einfachen Fälle (z.B. Block B Reihe 6-9) mit demselben Code ab. segment_gap_units
-      // (nur bei mehreren Segmenten relevant, z.B. Reihe 10, [8,8]) gibt statt der
-      // pauschalen kleinen Gang-Lücke einen expliziten, in Einheiten skalierten
-      // Zwischenraum zwischen den Segmenten vor.
+      // einfachen Fälle (z.B. Block B Reihe 6-9) mit demselben Code ab. Mehrere Segmente
+      // (z.B. Reihe 10, [8,8]) bekommen zwischen sich die normale kleine, dekorative
+      // Gang-Lücke (flexGapPx), keine eigene skalierende Lücke.
       var seatEls = Array.from(rowEl.querySelectorAll('.seatplan-seat'));
       var segStarts = [1].concat(breaks);
       var segEnds = breaks.concat([seatEls.length + 1]);
       var segCounts = segStarts.map(function (s, i) { return segEnds[i] - s; });
       var totalCount = segCounts.reduce(function (a, b) { return a + b; }, 0);
-      var gapUnitsPx = (row && typeof row.segment_gap_units === 'number' ? row.segment_gap_units : 0) * unitPx;
-      // Der ROW-eigene Flex-gap (s. CSS .seatplan-row-line) liegt schon automatisch
-      // zwischen je zwei Flex-Kindern (Label/Wrapper) — vom expliziten Zwischenraum
-      // abziehen, sonst wäre die Lücke insgesamt zu groß.
-      var gapPx = Math.max(0, gapUnitsPx - flexGapPx);
       // targetWidth ist bereits die reine Sitz-Spanne von Reihe 1 (s.o.) — kein
-      // Label-Overhead mehr abzuziehen, nur der eigene Segment-Zwischenraum.
-      var availableForSeats = targetWidth - gapUnitsPx * (segCounts.length - 1);
+      // Label-Overhead abzuziehen.
       var seatIdx = 0;
       var firstWrapper = null;
       segCounts.forEach(function (count, i) {
         var wrapper = document.createElement('div');
         wrapper.style.display = 'flex';
         wrapper.style.justifyContent = 'space-between';
-        wrapper.style.width = (availableForSeats * count / totalCount) + 'px';
-        if (i > 0) wrapper.style.marginLeft = gapPx + 'px';
-        else firstWrapper = wrapper;
+        wrapper.style.width = (targetWidth * count / totalCount) + 'px';
+        if (i === 0) firstWrapper = wrapper;
         var firstSeat = seatEls[seatIdx];
         firstSeat.parentNode.insertBefore(wrapper, firstSeat);
         for (var k = 0; k < count; k++) { wrapper.appendChild(seatEls[seatIdx]); seatIdx++; }
@@ -1406,10 +1398,6 @@
         anchorEl.style.marginLeft = (currentMargin + delta) + 'px';
       });
     });
-    // live_fit2: wie live_fit, aber erst NACH live_shift/live_stretch — für Reihen, deren
-    // Pin-Ziele selbst erst durch Reihe 11s live_stretch ihre finale Position bekommen
-    // (Block B Reihe 12, neunte Runde).
-    runLiveFit('live_fit2');
     // live_stretch2: identischer Mechanismus wie live_stretch, aber erst NACH live_shift
     // ausgeführt — für Ziele, die selbst erst durch live_shift ihre finale Position
     // bekommen (s. gen_seatplan.py, Block B Reihe 11 Segment 3).

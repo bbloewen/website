@@ -24,9 +24,9 @@ def mkseat(zone_id, row_number, n, category, wheelchair=False):
 
 def mkrow(zone_id, row_number, segments, category, y, section_break=False, wheelchair=False,
           align_reference_seat=None, align_target_seat=None, match_first_row_width=None,
-          segment_align=None, x_offset=None, segment_shifts=None, segment_gap_units=None,
+          segment_align=None, x_offset=None, segment_shifts=None,
           live_stretch=None, live_shift=None, live_stretch2=None, wheelchair_seats=None,
-          label_before_seat=None, live_fit=None, live_fit2=None, segment_gap_seats=None,
+          label_before_seat=None, live_fit=None, segment_gap_seats=None,
           renumber_seats=None, trailing_gap_units=None):
     # segments: list of aisle-separated cluster widths, e.g. [2, 20, 3] for a row
     # split by two aisles — seat numbering stays continuous across the aisles
@@ -96,14 +96,6 @@ def mkrow(zone_id, row_number, segments, category, y, section_break=False, wheel
             # einfach GAR KEIN Shift angegeben wurde (dann greift die kleine Dekor-Lücke).
             if seg_shifts:
                 row["explicit_shift_segments"] = sorted(seg_shifts.keys())
-    # segment_gap_units: für match_first_row_width-Reihen MIT mehreren Segmenten (z.B.
-    # Block B Reihe 10, [8,8]) reicht die normale kleine Gang-Lücke nicht — jedes Segment
-    # wird UNABHÄNGIG vom anderen gestreckt (eigene Breite proportional zur Sitzzahl),
-    # mit einer eigenen, in Einheiten skalierten Lücke dazwischen statt der pauschalen
-    # 10px (s. seat-picker.js _applyAnchoredLayout). Ohne Angabe bleibt es bei der
-    # normalen kleinen dekorativen Lücke (ein Segment reicht dafür sowieso nicht).
-    if segment_gap_units is not None:
-        row["segment_gap_units"] = segment_gap_units
     # live_stretch/live_shift: für Segmente, die an Sitzen einer match_first_row_width-
     # Reihe (z.B. Block B Reihe 10) ausgerichtet werden müssen — solche Sitze haben KEINE
     # x_units (kein festes Sitzraster, s.o.), ihre Position ist erst nach dem Rendern per
@@ -126,20 +118,18 @@ def mkrow(zone_id, row_number, segments, category, y, section_break=False, wheel
     # SEGMENT-2-live_stretch abhängt). Reihenfolge im JS: stretch → shift → stretch2.
     if live_stretch2:
         row["live_stretch2"] = live_stretch2
-    # live_fit/live_fit2: allgemeinerer Live-Ausrichtungs-Mechanismus als live_stretch —
-    # mehrere "Pins" (Sitz N dieser Reihe = live gemessene Position von Sitz M einer
-    # anderen Reihe) werden stückweise linear verbunden, statt nur zwischen genau ZWEI
+    # live_fit: allgemeinerer Live-Ausrichtungs-Mechanismus als live_stretch — mehrere
+    # "Pins" (Sitz N dieser Reihe = live gemessene Position von Sitz M einer anderen
+    # Reihe) werden stückweise linear verbunden, statt nur zwischen genau ZWEI
     # Endpunkten zu interpolieren. extend_forward/reverse_extend setzen die Steigung des
     # äußersten Pin-Intervalls über dessen Rand hinaus fort. reverse_anchor ist ein davon
     # UNABHÄNGIGER zweiter Fixpunkt (eigene Live-Messung, nicht Teil der Pin-Kette) —
     # nötig für Reihen mit einer durchgehenden Sitzfolge, aber zwei unabhängigen
     # Fluchtpunkten aus verschiedenen Nachbarreihen (Block B Reihe 10, neunte Runde: Sitz
     # 1/6 aus Reihe 11 gepinnt, Sitz 16 unabhängig aus Reihe 9). live_fit läuft VOR
-    # live_stretch, live_fit2 NACH live_shift (s. seat-picker.js _applyAnchoredLayout).
+    # live_stretch (s. seat-picker.js _applyAnchoredLayout).
     if live_fit:
         row["live_fit"] = live_fit
-    if live_fit2:
-        row["live_fit2"] = live_fit2
     # label_before_seat: die RECHTE Reihennummer wird vor dem angegebenen Sitz eingefügt
     # statt ganz ans Ende der Reihe — z.B. Block A Reihe 1, wo ein zusätzlicher
     # Rollstuhlplatz hinter einer Lücke sitzt (Marko: die Reihennummer soll weiter mit
@@ -149,8 +139,7 @@ def mkrow(zone_id, row_number, segments, category, y, section_break=False, wheel
     # segment_gap_seats: {segmentIndex: N} — fügt an einer Segmentgrenze eine echte,
     # in Sitzbreiten-Einheiten skalierende Lücke von N Sitzen ein, GENERISCH für jedes
     # Zonen-Layout (auch das alte align_edge/segment_align-System, z.B. Block C) — anders
-    # als segment_shifts (nur für "layout":"anchored"-Zonen) und segment_gap_units (nur
-    # für match_first_row_width-Reihen). Ersetzt die sonst greifende kleine, nicht
+    # als segment_shifts (nur für "layout":"anchored"-Zonen). Ersetzt die sonst greifende kleine, nicht
     # skalierende 10px-Dekorlücke an dieser Segmentgrenze (s. seat-picker.js
     # _applySegmentGapSeats).
     if segment_gap_seats:
