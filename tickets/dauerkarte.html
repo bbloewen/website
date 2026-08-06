@@ -69,15 +69,12 @@
 
       <span class="eyebrow" style="display:block;margin-top:40px;margin-bottom:16px">Wissenswertes</span>
       <div class="grid-3">
-        <!-- Auslastung: Zahlen kommen live aus dem Sitzstatus (n8n-Proxy → pretix), gefüllt
-             von seat-picker.js über occupancyEl. Ohne erreichbaren Status bleibt bewusst
-             „Wird geladen …" stehen, statt alle Blöcke als komplett frei zu zeigen. -->
         <div class="info-tile info-tile-row info-tile-row-divided">
           <div class="info-tile-row-head">
-            <div class="tile-icon"><i data-lucide="chart-no-axes-column"></i></div>
-            <h3 class="t-h4">Auslastung</h3>
+            <div class="tile-icon"><i data-lucide="percent"></i></div>
+            <h3 class="t-h4">Ermäßigungen</h3>
           </div>
-          <div id="seatplan-occupancy"><p class="t-body-sm" style="color:var(--text-muted)">Wird geladen …</p></div>
+          <p class="t-body-sm">Bei der Dauerkarte gilt der ermäßigte Satz für Studierende, Azubis, FSJ, Menschen mit Behinderung ab 50&nbsp;%, Rentner*innen und Mitglieder unserer Kooperationsvereine. Mitglieder des Basketball Löwen e.V. erhalten 30&nbsp;% Rabatt auf die Dauerkarte.</p>
         </div>
         <div class="info-tile info-tile-row info-tile-row-divided">
           <div class="info-tile-row-head">
@@ -85,13 +82,6 @@
             <h3 class="t-h4">Vorteile</h3>
           </div>
           <p class="t-body-sm">Dein <strong>fester Sitzplatz</strong> gilt für die komplette Hin- und Rückrunde der Saison, außer Playoffs — immer derselbe Platz bei jedem Heimspiel. Weitere Vorteile deiner Dauerkarte: Ermäßigungen und dein digitales Ticket direkt aufs Handy — mehr dazu in den Kacheln unten.</p>
-        </div>
-        <div class="info-tile info-tile-row info-tile-row-divided">
-          <div class="info-tile-row-head">
-            <div class="tile-icon"><i data-lucide="percent"></i></div>
-            <h3 class="t-h4">Ermäßigungen</h3>
-          </div>
-          <p class="t-body-sm">Bei der Dauerkarte gilt der ermäßigte Satz für Studierende, Azubis, FSJ, Menschen mit Behinderung ab 50&nbsp;%, Rentner*innen und Mitglieder unserer Kooperationsvereine. Mitglieder des Basketball Löwen e.V. erhalten 30&nbsp;% Rabatt auf die Dauerkarte.</p>
         </div>
         <div class="info-tile info-tile-row info-tile-row-divided">
           <div class="info-tile-row-head">
@@ -113,6 +103,16 @@
             <h3 class="t-h4">Rechtliches</h3>
           </div>
           <p class="t-body-sm">Alle Regelungen zu Kauf, Rücknahme und Verlust findest du in unseren <a href="/agb.html">AGB</a>.</p>
+        </div>
+        <!-- Auslastung: Zahlen kommen live aus dem Sitzstatus (n8n-Proxy → pretix), gefüllt
+             von seat-picker.js über occupancyEl. Ohne erreichbaren Status bleibt bewusst
+             „Wird geladen …" stehen, statt alle Blöcke als komplett frei zu zeigen. -->
+        <div class="info-tile info-tile-row info-tile-row-divided">
+          <div class="info-tile-row-head">
+            <div class="tile-icon"><i data-lucide="chart-no-axes-column"></i></div>
+            <h3 class="t-h4">Auslastung</h3>
+          </div>
+          <div id="seatplan-occupancy"><p class="t-body-sm" style="color:var(--text-muted)">Wird geladen …</p></div>
         </div>
       </div>
     </div>
