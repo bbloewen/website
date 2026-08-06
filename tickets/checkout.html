@@ -221,8 +221,10 @@
     // pretix-Item-ID -> Kategorie-Bezeichnung je Event — nötig, um einen produktgebundenen
     // Gutschein (z.B. nur VIP) der richtigen Zeile zuzuordnen statt pauschal auf den ganzen
     // Warenkorb wirken zu lassen. Dieselbe Zuordnung wie in tickets/dauerkarte.html.
+    // Dauerkarte (20/21/22) und Einzelticket (24/25) teilen sich seit 05.08.2026 dasselbe
+    // pretix-Event saison2627, haben aber unterschiedliche Item-IDs je Produkttyp.
     var PRETIX_ITEM_CATEGORY_MAPS = {
-      dauerkarte2627: { 7: 'Kategorie I', 8: 'Kategorie II', 9: 'VIP' }
+      saison2627: { 20: 'Kategorie I', 21: 'Kategorie II', 22: 'VIP', 24: 'Kategorie I', 25: 'Kategorie II' }
     };
 
     function formatMoney2(n) { return n.toFixed(2).replace('.', ','); }
