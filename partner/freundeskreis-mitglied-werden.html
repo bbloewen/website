@@ -141,7 +141,7 @@
       kontoinhaber: form.kontoinhaber.value,
       iban: form.iban.value
     };
-    fetch('https://blev.app.n8n.cloud/webhook/freundeskreis-anmeldung', {
+    fetch('https://poetic-patience-production-9290.up.railway.app/webhook/freundeskreis-anmeldung', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
