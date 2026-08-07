@@ -214,8 +214,8 @@
       paypalContainer.classList.remove('hidden');
 
       var PAYPAL_CLIENT_ID = 'BAAOl2K5Out1-IOUhPHJZYF4dKreSwFFEmJQxB8VP8L0fpOm95gxlfqppYMfyu7RLiIaWukS6Ei5doDvVI';
-      var ORDER_CREATE_URL = 'https://blev.app.n8n.cloud/webhook/einzelticket-paypal-order-erstellen';
-      var CAPTURE_URL = 'https://blev.app.n8n.cloud/webhook/einzelticket-paypal-capture-erfassen';
+      var ORDER_CREATE_URL = 'https://poetic-patience-production-9290.up.railway.app/webhook/einzelticket-paypal-order-erstellen';
+      var CAPTURE_URL = 'https://poetic-patience-production-9290.up.railway.app/webhook/einzelticket-paypal-capture-erfassen';
 
       var sdkScript = document.createElement('script');
       sdkScript.src = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(PAYPAL_CLIENT_ID) + '&currency=EUR&intent=capture';
@@ -266,8 +266,8 @@
       paypalContainerFanshop.classList.remove('hidden');
 
       var PAYPAL_CLIENT_ID_FANSHOP = 'BAAOl2K5Out1-IOUhPHJZYF4dKreSwFFEmJQxB8VP8L0fpOm95gxlfqppYMfyu7RLiIaWukS6Ei5doDvVI';
-      var GUTSCHEIN_ORDER_CREATE_URL = 'https://blev.app.n8n.cloud/webhook/fanshop-gutschein-order-erstellen';
-      var GUTSCHEIN_CAPTURE_URL = 'https://blev.app.n8n.cloud/webhook/fanshop-gutschein-capture-erfassen';
+      var GUTSCHEIN_ORDER_CREATE_URL = 'https://poetic-patience-production-9290.up.railway.app/webhook/fanshop-gutschein-order-erstellen';
+      var GUTSCHEIN_CAPTURE_URL = 'https://poetic-patience-production-9290.up.railway.app/webhook/fanshop-gutschein-capture-erfassen';
 
       var sdkScriptFanshop = document.createElement('script');
       sdkScriptFanshop.src = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(PAYPAL_CLIENT_ID_FANSHOP) + '&currency=EUR&intent=capture';
@@ -336,7 +336,7 @@
          Deshalb hier kein lokal erzeugter Fake-Bestellcode, sondern die vom
          Workflow zurückgegebene Mandatsreferenz. */
       if (cart.productType === 'dauerkarte') {
-        var webhookUrl = 'https://blev.app.n8n.cloud/webhook/dauerkarte-bestellung';
+        var webhookUrl = 'https://poetic-patience-production-9290.up.railway.app/webhook/dauerkarte-bestellung';
         var payload = { buyer: buyer, cart: cart, sepa: { kontoinhaber: kontoinhaber, iban: iban } };
         var payBtn = document.getElementById('pay-btn');
         /* Schutz gegen Doppel-Bestellungen: das blosse payBtn.disabled reicht nur

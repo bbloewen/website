@@ -65,7 +65,7 @@
      der echten pretix-API — Voucher- und Gift-Card-Endpunkte sind nicht ohne
      API-Token erreichbar). Webhook-URL ohne Workflow-ID im Pfad, s. Hinweis in
      tickets/dauerkarte.html. */
-  var VOUCHER_CHECK_URL = 'https://blev.app.n8n.cloud/webhook/gutschein-pruefen';
+  var VOUCHER_CHECK_URL = 'https://poetic-patience-production-9290.up.railway.app/webhook/gutschein-pruefen';
 
   /* Dauerkarte-Tarife inkl. Mitgliedsrabatt — nur relevant, wenn opts.dauerkarteDiscount
      gesetzt ist (Einzelticket bleibt unberührt, dort bleibt es bei normal/ermaessigt). */
