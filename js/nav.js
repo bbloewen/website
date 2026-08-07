@@ -303,7 +303,7 @@ window.initNav = function initNav() {
       var submitBtn = feedbackForm.querySelector('.feedback-widget-submit');
       submitBtn.disabled = true;
       submitBtn.textContent = 'Wird gesendet …';
-      fetch('https://blev.app.n8n.cloud/webhook/website-feedback', {
+      fetch('https://poetic-patience-production-9290.up.railway.app/webhook/website-feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: message, contact: contact, context: context, page: window.location.href })
