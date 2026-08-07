@@ -76,7 +76,7 @@
     submitBtn.disabled = true;
     submitBtn.textContent = 'Wird gesendet …';
     var payload = { vorname: form.vorname.value, email: form.email.value };
-    fetch('https://blev.app.n8n.cloud/webhook/newsletter-anmeldung', {
+    fetch('https://poetic-patience-production-9290.up.railway.app/webhook/newsletter-anmeldung', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)

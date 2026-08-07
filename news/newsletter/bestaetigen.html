@@ -50,7 +50,7 @@
   if (!token) {
     showResult(false, 'Es fehlt ein Bestätigungs-Code in diesem Link. Bitte nutze den Link direkt aus der E-Mail.');
   } else {
-    fetch('https://blev.app.n8n.cloud/webhook/newsletter-bestaetigen', {
+    fetch('https://poetic-patience-production-9290.up.railway.app/webhook/newsletter-bestaetigen', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: token })
