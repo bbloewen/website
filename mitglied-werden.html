@@ -185,7 +185,7 @@
       erziehNachname: form.erziehNachname.value,
       grund: form.grund.value
     };
-    fetch('https://blev.app.n8n.cloud/webhook/mitglied-kuendigung', {
+    fetch('https://poetic-patience-production-9290.up.railway.app/webhook/mitglied-kuendigung', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)

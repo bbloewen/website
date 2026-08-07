@@ -408,7 +408,7 @@
       iban: form.iban.value,
       familyMembers: collectFamilyMembers()
     };
-    fetch('https://blev.app.n8n.cloud/webhook/mitglied-werden-antrag', {
+    fetch('https://poetic-patience-production-9290.up.railway.app/webhook/mitglied-werden-antrag', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
