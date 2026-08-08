@@ -311,6 +311,23 @@
   background: none; border: none; color: var(--text-muted); font-size: 12px;
   font-weight: 400; cursor: pointer; padding: 2px 4px; text-decoration: underline;
 }
+.seatplan-member-check { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
+.seatplan-member-check input {
+  flex: 1; min-width: 160px; font-size: 13px; font-family: inherit; padding: 6px 8px;
+  border: 1px solid var(--color-neutral-200); border-radius: var(--radius-md);
+}
+.seatplan-member-check button {
+  flex-shrink: 0; font-size: 12px; font-weight: 600; padding: 6px 12px;
+  border: 1px solid var(--color-brand-navy); border-radius: var(--radius-md);
+  background: var(--color-white); color: var(--color-brand-navy); cursor: pointer;
+}
+.seatplan-member-check button:hover { background: var(--color-brand-navy); color: var(--color-white); }
+.seatplan-member-check button:disabled { opacity: .6; cursor: default; }
+.seatplan-member-check-error { flex-basis: 100%; color: var(--color-error); font-size: 12px; margin: 4px 0 0; }
+.seatplan-member-check-ok {
+  margin-top: 6px; display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--color-heart-green); font-weight: 600;
+}
 .seatplan-cart-total {
   display: flex; justify-content: space-between; font-weight: 700; font-size: 15px;
   margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--color-neutral-100);

@@ -67,6 +67,14 @@
      tickets/dauerkarte.html. */
   var VOUCHER_CHECK_URL = 'https://poetic-patience-production-9290.up.railway.app/webhook/gutschein-pruefen';
 
+  /* Mitgliedsrabatt (30 % Löwen e.V.) braucht pro Sitzplatz eine Namensprüfung gegen
+     die aktiven Mitglieder — sonst könnte ein Käufer den Rabatt für beliebig viele
+     fremde Plätze mitnehmen (nur weil er selbst Mitglied ist). Die Prüfung ist final:
+     bei Treffer wird der Rabatt für diesen Namen+diese Saison serverseitig gesperrt,
+     ein zweiter Versuch mit demselben Namen schlägt danach bewusst fehl. */
+  var MITGLIEDSRABATT_PRUEFEN_URL = 'https://poetic-patience-production-9290.up.railway.app/webhook/mitgliedsrabatt-pruefen';
+  var MITGLIEDSRABATT_SAISON = '2026/2027';
+
   /* Dauerkarte-Tarife inkl. Mitgliedsrabatt — nur relevant, wenn opts.dauerkarteDiscount
      gesetzt ist (Einzelticket bleibt unberührt, dort bleibt es bei normal/ermaessigt). */
   var DK_TARIF_LABELS = {
@@ -1918,7 +1926,14 @@
           .then(function (r) { return r.json(); })
           .then(function (result) {
             self.voucherChecking = false;
-            if (result && result.valid) {
+            /* Wertgutscheine werden hier nur geprüft, nie eingelöst (kein Abbuchen) —
+               das reale Einlösen (inkl. Guthaben-Abbuchung) passiert ausschließlich im
+               Checkout, s. tickets/checkout.html VOUCHER_EINLOESEN_URL. Ein hier
+               eingegebener Wertgutschein-Code würde sonst nur eine Schein-Zeile im
+               Warenkorb erzeugen, ohne dass das Guthaben je wirklich verrechnet wird. */
+            if (result && result.valid && result.source === 'giftcard') {
+              self.voucherError = 'Wertgutscheine bitte an der Kasse einlösen (nächster Schritt).';
+            } else if (result && result.valid) {
               var category = (result.itemId != null && self.pretixItemCategoryMap[result.itemId]) || null;
               var info = {
                 source: result.source, code: result.code, priceMode: result.priceMode, value: result.value,
@@ -2010,6 +2025,22 @@
         if (self.dkDiscount) {
           tarifOptions = tarifOptions.concat(['normal_member'], hasErmaessigt ? ['ermaessigt_member'] : []);
         }
+        /* Mitgliedsrabatt gilt pro Person, nicht pro Bestellung — ein Käufer könnte
+           sonst seinen eigenen Mitgliedsstatus für beliebig viele fremde Plätze
+           mitnehmen. Deshalb pro _member-Tarif-Platz Name abfragen + serverseitig
+           prüfen (final, s. MITGLIEDSRABATT_PRUEFEN_URL), bevor der Rabatt gilt. */
+        var isMemberTarif = s.tarif.indexOf('_member') !== -1;
+        var memberBlock = '';
+        if (isMemberTarif && s.memberChecked) {
+          memberBlock = '<div class="seatplan-member-check seatplan-member-check-ok">' +
+            '<i data-lucide="check" style="width:14px;height:14px"></i> Mitgliedschaft von ' + s.memberName + ' bestätigt</div>';
+        } else if (isMemberTarif) {
+          memberBlock = '<div class="seatplan-member-check">' +
+            '<input type="text" placeholder="Name der Person auf diesem Platz" data-member-name="' + guid + '" value="' + (s.memberName ? String(s.memberName).replace(/"/g, '&quot;') : '') + '"' + (s.memberChecking ? ' disabled' : '') + '>' +
+            '<button type="button" data-member-check="' + guid + '"' + (s.memberChecking ? ' disabled' : '') + '>' + (s.memberChecking ? 'Wird geprüft …' : 'Jetzt prüfen') + '</button>' +
+            (s.memberCheckError ? '<p class="seatplan-member-check-error">' + s.memberCheckError + '</p>' : '') +
+            '</div>';
+        }
         row.innerHTML =
           '<div>' + s.zoneLabel + ' · Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber +
           '<br><span class="t-caption">' + self._dkBreakdownText(s.priceInfo, s.tarif) + '</span>' +
@@ -2018,6 +2049,7 @@
               return '<option value="' + t + '"' + (s.tarif === t ? ' selected' : '') + '>' + DK_TARIF_LABELS[t] + '</option>';
             }).join('') +
             '</select>' : '') +
+          memberBlock +
           '</div>' +
           '<div class="seatplan-cart-item-right seatplan-cart-item-right-removable"><span>' + fmtEUR(s.price) + ' €</span>' +
           '<button type="button" data-remove="' + guid + '">entfernen</button></div>';
@@ -2027,7 +2059,11 @@
       this._appendNachwuchsRow();
       this._appendVoucherRow();
       this._appendNotizRow();
-      this.ctaEl.disabled = false;
+      var hasUncheckedMemberTarif = guids.some(function (guid) {
+        var s = self.selected[guid];
+        return s.tarif.indexOf('_member') !== -1 && !s.memberChecked;
+      });
+      this.ctaEl.disabled = hasUncheckedMemberTarif;
 
       this.cartEl.querySelectorAll('[data-tarif]').forEach(function (sel) {
         sel.addEventListener('change', function () {
@@ -2035,7 +2071,62 @@
           var s = self.selected[guid];
           s.tarif = this.value;
           s.price = self._dkTarifPrice(s.priceInfo, s.tarif);
+          /* Tarifwechsel entwertet eine vorherige Mitgliedsprüfung — bei erneuter
+             Wahl von "..._member" muss der Name erneut geprüft werden. */
+          s.memberChecked = false;
+          s.memberCheckError = null;
           self._renderCart();
+        });
+      });
+      this.cartEl.querySelectorAll('[data-member-check]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var guid = this.dataset.memberCheck;
+          var s = self.selected[guid];
+          var input = self.cartEl.querySelector('[data-member-name="' + guid + '"]');
+          var name = input ? input.value.trim() : '';
+          if (!name || s.memberChecking) return;
+          s.memberName = name;
+          s.memberChecking = true;
+          s.memberCheckError = null;
+          self._renderCart();
+          fetch(MITGLIEDSRABATT_PRUEFEN_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: name, saison: MITGLIEDSRABATT_SAISON })
+          })
+            .then(function (r) { return r.json(); })
+            .then(function (result) {
+              s.memberChecking = false;
+              if (result && result.valid) {
+                s.memberChecked = true;
+                s.memberCheckError = null;
+              } else {
+                /* Kein eindeutiger Treffer: automatisch auf den Tarif ohne
+                   Mitgliedsrabatt zurückstufen — die Bestellung bleibt möglich,
+                   nur eben zum regulären Preis. Serverseitig wird das beim
+                   Bestellabschluss ohnehin nochmal unabhängig geprüft. */
+                s.tarif = s.tarif.replace('_member', '');
+                s.price = self._dkTarifPrice(s.priceInfo, s.tarif);
+                s.memberChecked = false;
+                s.memberCheckError = 'Mitgliedschaft konnte nicht bestätigt werden — Tarif wurde auf den regulären Preis zurückgestuft. Bei Rückfragen wende dich an uns.';
+              }
+              self._renderCart();
+            })
+            .catch(function () {
+              s.memberChecking = false;
+              s.memberCheckError = 'Prüfung gerade nicht möglich. Bitte gleich nochmal versuchen.';
+              self._renderCart();
+            });
+        });
+      });
+      this.cartEl.querySelectorAll('[data-member-name]').forEach(function (inp) {
+        inp.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            var guid = this.dataset.memberName;
+            var btn = self.cartEl.querySelector('[data-member-check="' + guid + '"]');
+            if (btn) btn.click();
+          }
         });
       });
       this.cartEl.querySelectorAll('[data-remove]').forEach(function (b) {
@@ -2222,7 +2313,10 @@
         qty: 1, unitPrice: s.price, lineTotal: s.price,
         // Maschinenlesbare Felder für die echte Pretix-Order-Erstellung (n8n) —
         // category/tarif bestimmen dort Item+Variation, seatGuid den Sitz.
-        type: 'seat', seatGuid: guid, category: s.category, tarif: s.tarif
+        // memberName geht in die serverseitige Mitgliedsrabatt-Nachprüfung ein
+        // (n8n verifiziert unabhängig, ob dieser Name wirklich freigeschaltet ist).
+        type: 'seat', seatGuid: guid, category: s.category, tarif: s.tarif,
+        memberName: s.tarif.indexOf('_member') !== -1 ? (s.memberName || '') : undefined
       });
       total += s.price;
     });
