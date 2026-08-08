@@ -79,7 +79,7 @@
               <textarea id="nachricht" name="nachricht" required></textarea>
             </div>
             <button type="submit" class="btn btn-primary btn-block">Nachricht senden</button>
-            <div class="form-status success" id="contact-status">Danke für deine Nachricht, wir melden uns bei dir.</div>
+            <div class="form-status" id="contact-status"></div>
           </form>
         </div>
       </div>
@@ -93,7 +93,38 @@
 <script>
   document.getElementById('contact-form').addEventListener('submit', function (e) {
     e.preventDefault();
-    document.getElementById('contact-status').classList.add('visible');
+    var form = e.target;
+    var submitBtn = form.querySelector('button[type="submit"]');
+    var statusEl = document.getElementById('contact-status');
+    statusEl.classList.remove('visible', 'success', 'error');
+    submitBtn.disabled = true;
+    fetch('https://poetic-patience-production-9290.up.railway.app/webhook/kontaktformular', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        betreff: document.getElementById('betreff').value.trim(),
+        name: document.getElementById('name').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        nachricht: document.getElementById('nachricht').value.trim()
+      })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (result) {
+        submitBtn.disabled = false;
+        if (result && result.ok) {
+          form.reset();
+          statusEl.textContent = result.message || 'Danke für deine Nachricht, wir melden uns bei dir.';
+          statusEl.classList.add('visible', 'success');
+        } else {
+          statusEl.textContent = 'Deine Nachricht konnte gerade nicht gesendet werden. Bitte versuch es gleich nochmal oder schreib uns direkt an info@basketball-loewen.com.';
+          statusEl.classList.add('visible', 'error');
+        }
+      })
+      .catch(function () {
+        submitBtn.disabled = false;
+        statusEl.textContent = 'Deine Nachricht konnte gerade nicht gesendet werden. Bitte versuch es gleich nochmal oder schreib uns direkt an info@basketball-loewen.com.';
+        statusEl.classList.add('visible', 'error');
+      });
   });
   /* Vorbelegung des Betreffs per URL-Param (z.B. von der Schulprogramm-Seite
      aus verlinkt), damit Absender:innen nicht selbst den Betreff formulieren
