@@ -154,7 +154,8 @@
 
     document.getElementById('lm-name-out').textContent = (pVorname + ' ' + pNachname).trim() || '–';
     document.getElementById('lm-art-out').textContent = ART_LABEL[pArt] || '–';
-    document.getElementById('lm-betrag-out').textContent = pBetrag ? (Number(pBetrag).toFixed(2).replace('.', ',') + ' € / Jahr') : '–';
+    var betragNum = Number(pBetrag);
+    document.getElementById('lm-betrag-out').textContent = (pBetrag && !isNaN(betragNum)) ? (betragNum.toFixed(2).replace('.', ',') + ' € / Jahr') : '–';
     summary.style.display = 'flex';
 
     if (pVorname.trim() || pNachname.trim()) kontoinhaberInput.value = (pVorname + ' ' + pNachname).trim();

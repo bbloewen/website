@@ -14,7 +14,7 @@
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
 <link rel="stylesheet" href="/css/site.css?v=1785495458" />
-<link rel="stylesheet" href="/css/seat-picker.css?v=1785398309" />
+<link rel="stylesheet" href="/css/seat-picker.css?v=1786400000" />
 <style>
   .checkout-grid { display: grid; grid-template-columns: 380px 1fr; gap: 32px; align-items: start; }
   .checkout-grid.hidden { display: none; }
@@ -74,13 +74,6 @@
   .voucher-message.success { color: #1B8A3D; }
   .voucher-message.error { color: #b3392c; }
   .seatplan-cart-item.discount { color: #1B8A3D; }
-  .voucher-rest-box {
-    margin-top: 10px; padding: 12px 14px; border: 1px solid var(--border);
-    border-radius: var(--radius-md); background: #fff; font-size: 13px;
-  }
-  .voucher-rest-box p { margin: 0 0 10px; }
-  .voucher-rest-box label { display: flex; align-items: flex-start; gap: 8px; cursor: pointer; margin-bottom: 12px; }
-  .voucher-rest-box input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--color-brand-orange); flex-shrink: 0; margin-top: 2px; }
 </style>
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
@@ -287,6 +280,11 @@
             cart.total -= cart.lines[idx].lineTotal;
             cart.lines.splice(idx, 1);
           }
+          if (cart._removedNachwuchsLine) {
+            cart.lines.push(cart._removedNachwuchsLine);
+            cart.total += cart._removedNachwuchsLine.lineTotal;
+            delete cart._removedNachwuchsLine;
+          }
           cart.total = Math.round(cart.total * 100) / 100;
           delete cart.voucher;
           voucherInput.value = '';
@@ -339,6 +337,9 @@
           if (result.source === 'voucher' && result.priceMode === 'percent' && result.value === 100) {
             var nwIdx = cart.lines.findIndex(function (l) { return l.type === 'nachwuchs'; });
             if (nwIdx !== -1) {
+              // Für "entfernen" gemerkt (s. voucher-remove-Handler) — sonst ist die
+              // Nachwuchs-Spende nach dem Entfernen eines 100%-Gutscheins dauerhaft weg.
+              cart._removedNachwuchsLine = cart.lines[nwIdx];
               cart.total = Math.round((cart.total - cart.lines[nwIdx].lineTotal) * 100) / 100;
               cart.lines.splice(nwIdx, 1);
             }

@@ -26,6 +26,12 @@
      853.4999999999999, die als solche weitergereicht und gespeichert werden. */
   function roundCents(n) { return Math.round(n * 100) / 100; }
 
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
   function catClass(category) {
     if (category === 'Kategorie I') return 'cat-kat1';
     if (category === 'Kategorie II') return 'cat-kat2';
@@ -123,7 +129,7 @@
        sie. null = Detailansicht zu, dann ist `selected` die aktive Auswahl. */
     this.pendingSeats = null;
     this.blockCounts = {}; // zone_id -> { normal: n, ermaessigt: n } (Modus "blocks")
-    this.pretixEvent = opts.pretixEvent || null; // Event-Slug fuer die Gutschein-Pruefung (z.B. "dauerkarte2627")
+    this.pretixEvent = opts.pretixEvent || null; // Event-Slug fuer die Gutschein-Pruefung (z.B. "saison2627")
     // pretix-Item-ID -> unsere Kategorie-Bezeichnung, z.B. {9:"VIP",7:"Kategorie I",8:"Kategorie II"} —
     // nur so kann ein an ein bestimmtes Produkt gebundener Gutschein (require item) der richtigen
     // Warenkorb-Kategorie zugeordnet werden. Ohne Eintrag/Treffer gilt der Gutschein als Pauschalrabatt
@@ -2033,10 +2039,10 @@
         var memberBlock = '';
         if (isMemberTarif && s.memberChecked) {
           memberBlock = '<div class="seatplan-member-check seatplan-member-check-ok">' +
-            '<i data-lucide="check" style="width:14px;height:14px"></i> Mitgliedschaft von ' + s.memberName + ' bestätigt</div>';
+            '<i data-lucide="check" style="width:14px;height:14px"></i> Mitgliedschaft von ' + escapeHtml(s.memberName) + ' bestätigt</div>';
         } else if (isMemberTarif) {
           memberBlock = '<div class="seatplan-member-check">' +
-            '<input type="text" placeholder="Name der Person auf diesem Platz" data-member-name="' + guid + '" value="' + (s.memberName ? String(s.memberName).replace(/"/g, '&quot;') : '') + '"' + (s.memberChecking ? ' disabled' : '') + '>' +
+            '<input type="text" placeholder="Name der Person auf diesem Platz" data-member-name="' + guid + '" value="' + escapeHtml(s.memberName || '') + '"' + (s.memberChecking ? ' disabled' : '') + '>' +
             '<button type="button" data-member-check="' + guid + '"' + (s.memberChecking ? ' disabled' : '') + '>' + (s.memberChecking ? 'Wird geprüft …' : 'Jetzt prüfen') + '</button>' +
             (s.memberCheckError ? '<p class="seatplan-member-check-error">' + s.memberCheckError + '</p>' : '') +
             '</div>';
@@ -2352,7 +2358,11 @@
       lines: lines,
       total: total,
       nachwuchsBeitrag: { checked: this.nachwuchsChecked, amount: nachwuchsAmount },
-      voucher: discount > 0 ? { code: this.voucherCode, label: this.voucherInfo.label, amount: discount } : null,
+      // Gleiche Form wie das Gutschein-Objekt aus tickets/checkout.html (dort per
+      // /webhook/gutschein-einloesen befuellt): {code, discountAmount, category, label}.
+      // Der Bestell-Workflow liest ohnehin nur .code und rechnet den Rabatt serverseitig
+      // neu — die einheitliche Form ist reine Hygiene, kein Funktions-Unterschied.
+      voucher: discount > 0 ? { code: this.voucherCode, discountAmount: discount, category: this.voucherInfo.category || null, label: this.voucherInfo.label } : null,
       notiz: this.notiz || ''
     };
   };
