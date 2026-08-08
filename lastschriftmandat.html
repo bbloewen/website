@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SEPA-Lastschriftmandat erteilen — Basketball Löwen Erfurt</title>
+<meta name="description" content="Erteile dem Basketball Löwen e.V. dein SEPA-Lastschriftmandat für deinen Mitgliedsbeitrag." />
+<meta name="keywords" content="Basketball, Thüringen, Erfurt, Sport, Bewegung, Soziale Sportidee, Trainieren, Jugendsozialarbeit, Aufstieg, Erfolgreich, Nummer 1" />
+<meta name="robots" content="noindex, nofollow" />
+<link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/logo/favicon-16.png" />
+<link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+<link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
+<link rel="stylesheet" href="/css/site.css?v=1785495458" />
+<style>
+  /* Zwei Status-Varianten des Hinweisbanners, je nachdem ob das E-Mail-Link
+     status=offen (Mandat fehlt) oder status=bezahlt (schon überwiesen, Mandat
+     erst für zukünftige Perioden) mitgegeben hat — s. lastschriftmandat.html-
+     Aufruf aus dem Nachfass-Mailing. */
+  .mandat-banner { border-radius: var(--radius-md); padding: 14px 16px; font-size: 14px; line-height: 1.5; margin-bottom: 20px; }
+  .mandat-banner.status-offen { background: var(--color-info-bg); color: #001B70; }
+  .mandat-banner.status-bezahlt { background: var(--color-success-bg); color: #0E5A36; }
+  .mandat-fallback-notice { background: var(--color-warning-bg); color: #6B4E00; border-radius: var(--radius-md); padding: 14px 16px; font-size: 14px; line-height: 1.5; margin-bottom: 20px; display: none; }
+  .mandat-summary { display: none; gap: 24px; flex-wrap: wrap; margin-bottom: 20px; padding: 14px 16px; background: var(--bg-subtle); border-radius: var(--radius-md); }
+  .mandat-summary div span { display: block; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 2px; }
+  .mandat-summary div strong { font-size: 15px; }
+</style>
+<script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
+        async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
+</head>
+<body data-nav-group="">
+<a class="skip-link" href="#main">Zum Inhalt springen</a>
+<div id="site-header-placeholder"></div>
+<main id="main">
+  <section class="section-sm bg-subtle">
+    <div class="container container-narrow text-center">
+      <span class="eyebrow">Mitgliedsbeitrag</span>
+      <h1 class="t-h2" style="margin:6px 0 12px">SEPA-Lastschriftmandat erteilen.</h1>
+      <p class="t-body-sm" style="max-width:52ch;margin:0 auto;color:var(--text-secondary)">Damit dein Mitgliedsbeitrag künftig automatisch eingezogen wird, brauchen wir einmalig dein Lastschriftmandat — das geht hier in unter einer Minute.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container container-narrow">
+      <div class="card" style="padding:24px">
+
+        <div class="mandat-banner" id="lm-banner"></div>
+
+        <div class="mandat-fallback-notice" id="lm-fallback-notice">Wir konnten dich über diesen Link nicht automatisch zuordnen. Bitte öffne die Seite über den Link aus unserer E-Mail — oder trag unten deine Daten selbst ein, dann ordnen wir es manuell zu.</div>
+
+        <div class="mandat-summary" id="lm-summary">
+          <div><span>Für</span><strong id="lm-name-out">–</strong></div>
+          <div><span>Mitgliedschaft</span><strong id="lm-art-out">–</strong></div>
+          <div><span>Beitrag</span><strong id="lm-betrag-out">–</strong></div>
+        </div>
+
+        <span class="eyebrow" style="display:block;text-align:center">Deine Bankverbindung</span>
+        <h3 class="t-h4" style="margin:6px 0 16px;text-align:center">Mandat erteilen</h3>
+
+        <form class="form-panel" id="lm-form">
+          <input type="hidden" id="lm-ref" name="ref" value="" />
+          <input type="hidden" id="lm-betrag" name="betrag" value="" />
+          <input type="hidden" id="lm-art" name="mitgliedschaftsart" value="" />
+
+          <div class="field" id="lm-vorname-field">
+            <label class="sr-only" for="lm-vorname">Vorname</label>
+            <input type="text" id="lm-vorname" name="vorname" autocomplete="given-name" placeholder="Vorname *" />
+          </div>
+          <div class="field" id="lm-nachname-field">
+            <label class="sr-only" for="lm-nachname">Nachname</label>
+            <input type="text" id="lm-nachname" name="nachname" autocomplete="family-name" placeholder="Nachname *" />
+          </div>
+          <div class="field" id="lm-email-field">
+            <label class="sr-only" for="lm-email">E-Mail</label>
+            <input type="email" id="lm-email" name="email" autocomplete="email" placeholder="E-Mail *" />
+          </div>
+
+          <div class="field">
+            <label class="sr-only" for="lm-kontoinhaber">Name des Kontoinhabers</label>
+            <input type="text" id="lm-kontoinhaber" name="kontoinhaber" required placeholder="Name des Kontoinhabers *" />
+          </div>
+          <div class="field">
+            <label class="sr-only" for="lm-iban">IBAN</label>
+            <input type="text" id="lm-iban" name="iban" required autocomplete="off" placeholder="IBAN *" />
+          </div>
+
+          <div class="field-checkbox" style="align-items:flex-start;margin:16px 0 8px">
+            <input type="checkbox" id="lm-consent-sepa" name="consentSepa" required class="mt-1" />
+            <label for="lm-consent-sepa" class="t-body-sm">Ich ermächtige den Basketball Löwen e.V. (Gläubiger-ID DE46ZZZ00002312785), Zahlungen von meinem Konto mittels SEPA-Lastschrift einzuziehen, und weise mein Kreditinstitut an, diese Lastschriften einzulösen.</label>
+          </div>
+          <div class="field-checkbox" style="align-items:flex-start;margin:0 0 16px">
+            <input type="checkbox" id="lm-consent-daten" name="consentDaten" required class="mt-1" />
+            <label for="lm-consent-daten" class="t-body-sm">Ich willige in die Verarbeitung meiner Daten gemäß der <a href="/datenschutz.html">Datenschutzerklärung</a> ein. Diese Einwilligung kann ich jederzeit widerrufen.</label>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="lm-submit-btn">Mandat erteilen</button>
+          <div class="form-status success" id="lm-status">Vielen Dank! Dein Lastschriftmandat ist bei uns eingegangen.</div>
+          <div class="form-status error" id="lm-error">Senden hat leider nicht geklappt — bitte versuche es später noch einmal oder schreib uns direkt an <a href="mailto:info@basketball-loewen.com">info@basketball-loewen.com</a>.</div>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+<div id="site-footer-placeholder"></div>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="/js/nav.js?v=1785398309"></script>
+<script src="/js/include.js?v=1785398309"></script>
+<script>
+  var ART_LABEL = {
+    fan: 'Fan-Mitgliedschaft',
+    spieler: 'Spieler:innen-Mitgliedschaft',
+    schul: 'Schul-Mitgliedschaft',
+    foerder: 'Förder-Mitgliedschaft',
+    ordentlich: 'Mitgliedschaft für stimmberechtigte Mitglieder'
+  };
+
+  var params = new URLSearchParams(window.location.search);
+  var pRef = params.get('ref') || '';
+  var pVorname = params.get('vorname') || '';
+  var pNachname = params.get('nachname') || '';
+  var pEmail = params.get('email') || '';
+  var pBetrag = params.get('betrag') || '';
+  var pArt = params.get('art') || '';
+  var pStatus = params.get('status') || 'offen';
+
+  var banner = document.getElementById('lm-banner');
+  var fallbackNotice = document.getElementById('lm-fallback-notice');
+  var summary = document.getElementById('lm-summary');
+
+  var refInput = document.getElementById('lm-ref');
+  var betragInput = document.getElementById('lm-betrag');
+  var artInput = document.getElementById('lm-art');
+  var vornameInput = document.getElementById('lm-vorname');
+  var nachnameInput = document.getElementById('lm-nachname');
+  var emailInput = document.getElementById('lm-email');
+  var kontoinhaberInput = document.getElementById('lm-kontoinhaber');
+
+  if (pRef) {
+    refInput.value = pRef;
+    betragInput.value = pBetrag;
+    artInput.value = pArt;
+
+    vornameInput.value = pVorname;
+    nachnameInput.value = pNachname;
+    emailInput.value = pEmail;
+    vornameInput.readOnly = true;
+    nachnameInput.readOnly = true;
+    emailInput.readOnly = true;
+    document.getElementById('lm-vorname-field').style.display = 'none';
+    document.getElementById('lm-nachname-field').style.display = 'none';
+    document.getElementById('lm-email-field').style.display = 'none';
+
+    document.getElementById('lm-name-out').textContent = (pVorname + ' ' + pNachname).trim() || '–';
+    document.getElementById('lm-art-out').textContent = ART_LABEL[pArt] || '–';
+    document.getElementById('lm-betrag-out').textContent = pBetrag ? (Number(pBetrag).toFixed(2).replace('.', ',') + ' € / Jahr') : '–';
+    summary.style.display = 'flex';
+
+    if (pVorname.trim() || pNachname.trim()) kontoinhaberInput.value = (pVorname + ' ' + pNachname).trim();
+  } else {
+    fallbackNotice.style.display = 'block';
+    vornameInput.required = true;
+    nachnameInput.required = true;
+    emailInput.required = true;
+  }
+
+  var kontoinhaberTouched = false;
+  kontoinhaberInput.addEventListener('input', function () { kontoinhaberTouched = true; });
+  function updateKontoinhaberVorschlag() {
+    if (kontoinhaberTouched || pRef) return;
+    var name = (vornameInput.value.trim() + ' ' + nachnameInput.value.trim()).trim();
+    kontoinhaberInput.value = name;
+  }
+  vornameInput.addEventListener('input', updateKontoinhaberVorschlag);
+  nachnameInput.addEventListener('input', updateKontoinhaberVorschlag);
+
+  if (pStatus === 'bezahlt') {
+    banner.className = 'mandat-banner status-bezahlt';
+    banner.innerHTML = 'Vielen Dank für deine Überweisung für die aktuelle Beitragsperiode! Damit wir uns die Arbeit für die Zukunft erleichtern können, bitten wir dich zusätzlich um ein SEPA-Lastschriftmandat. <strong>Für die aktuelle Periode wird dadurch nichts erneut abgebucht</strong> — dein Mandat gilt erst ab der nächsten Fälligkeit.';
+  } else {
+    banner.className = 'mandat-banner status-offen';
+    banner.textContent = 'Uns fehlt noch dein SEPA-Lastschriftmandat für deinen Mitgliedsbeitrag. Trag unten kurz deine Bankverbindung ein — das erleichtert uns die Arbeit sehr.';
+  }
+
+  document.getElementById('lm-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var form = e.target;
+    var statusOk = document.getElementById('lm-status');
+    var statusError = document.getElementById('lm-error');
+    var submitBtn = form.querySelector('button[type="submit"]');
+    statusOk.classList.remove('visible');
+    statusError.classList.remove('visible');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Wird gesendet …';
+    var payload = {
+      ref: form.ref.value,
+      vorname: form.vorname.value,
+      nachname: form.nachname.value,
+      email: form.email.value,
+      betrag: form.betrag.value,
+      mitgliedschaftsart: form.mitgliedschaftsart.value,
+      kontoinhaber: form.kontoinhaber.value,
+      iban: form.iban.value
+    };
+    fetch('https://poetic-patience-production-9290.up.railway.app/webhook/lastschriftmandat-nachtrag', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function (res) {
+      if (!res.ok) throw new Error('Webhook antwortete mit Fehler');
+      form.reset();
+      if (pRef) {
+        refInput.value = pRef;
+        betragInput.value = pBetrag;
+        artInput.value = pArt;
+        vornameInput.value = pVorname;
+        nachnameInput.value = pNachname;
+        emailInput.value = pEmail;
+      }
+      kontoinhaberTouched = false;
+      statusOk.classList.add('visible');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Mandat erteilen';
+    }).catch(function () {
+      statusError.classList.add('visible');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Mandat erteilen';
+    });
+  });
+</script>
+</body>
+</html>
