@@ -92,6 +92,10 @@
               <input type="text" id="fk-iban" name="iban" required autocomplete="off" placeholder="IBAN *" />
             </div>
 
+            <div style="position:absolute;left:-9999px" aria-hidden="true">
+              <label for="fk-webseite">Webseite</label>
+              <input type="text" id="fk-webseite" name="webseite" tabindex="-1" autocomplete="off">
+            </div>
             <div class="field-checkbox" style="align-items:flex-start;margin:16px 0 8px">
               <input type="checkbox" id="fk-consent-unterstuetzung" name="consentUnterstuetzung" required class="mt-1" />
               <label for="fk-consent-unterstuetzung" class="t-body-sm">Ich möchte Teil des Freundeskreises werden und unterstütze die Löwen mit 1.200,00 € pro Saison, in zwei Raten à 600,00 € (Juli und Januar).</label>
@@ -119,6 +123,7 @@
 <script src="/js/nav.js?v=1785398309"></script>
 <script src="/js/include.js?v=1785398309"></script>
 <script>
+  var freundeskreisFormLoadedAt = Date.now();
   document.getElementById('freundeskreis-form').addEventListener('submit', function (e) {
     e.preventDefault();
     var form = e.target;
@@ -139,7 +144,9 @@
       email: form.email.value,
       telefon: form.telefon.value,
       kontoinhaber: form.kontoinhaber.value,
-      iban: form.iban.value
+      iban: form.iban.value,
+      webseite: document.getElementById('fk-webseite').value.trim(),
+      elapsedMs: Date.now() - freundeskreisFormLoadedAt
     };
     fetch('https://poetic-patience-production-9290.up.railway.app/webhook/freundeskreis-anmeldung', {
       method: 'POST',
