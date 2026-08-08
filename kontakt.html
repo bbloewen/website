@@ -78,6 +78,10 @@
               <label for="nachricht">Nachricht</label>
               <textarea id="nachricht" name="nachricht" required></textarea>
             </div>
+            <div style="position:absolute;left:-9999px" aria-hidden="true">
+              <label for="kontakt-firma">Firma</label>
+              <input type="text" id="kontakt-firma" name="firma" tabindex="-1" autocomplete="off">
+            </div>
             <button type="submit" class="btn btn-primary btn-block">Nachricht senden</button>
             <div class="form-status" id="contact-status"></div>
           </form>
@@ -91,6 +95,7 @@
 <script src="/js/nav.js?v=1785398309"></script>
 <script src="/js/include.js?v=1785398309"></script>
 <script>
+  var contactFormLoadedAt = Date.now();
   document.getElementById('contact-form').addEventListener('submit', function (e) {
     e.preventDefault();
     var form = e.target;
@@ -105,7 +110,9 @@
         betreff: document.getElementById('betreff').value.trim(),
         name: document.getElementById('name').value.trim(),
         email: document.getElementById('email').value.trim(),
-        nachricht: document.getElementById('nachricht').value.trim()
+        nachricht: document.getElementById('nachricht').value.trim(),
+        firma: document.getElementById('kontakt-firma').value.trim(),
+        elapsedMs: Date.now() - contactFormLoadedAt
       })
     })
       .then(function (r) { return r.json(); })
