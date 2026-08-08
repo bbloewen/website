@@ -143,6 +143,10 @@
             <label class="sr-only" for="kg-grund">Grund (optional)</label>
             <textarea id="kg-grund" name="grund" placeholder="Grund (optional)"></textarea>
           </div>
+          <div style="position:absolute;left:-9999px" aria-hidden="true">
+            <label for="kg-webseite">Webseite</label>
+            <input type="text" id="kg-webseite" name="webseite" tabindex="-1" autocomplete="off">
+          </div>
           <div class="field-checkbox" style="align-items:flex-start;margin:0 0 16px">
             <input type="checkbox" id="kg-consent" name="consent" required class="mt-1" />
             <label for="kg-consent" class="t-body-sm">Ich erkläre hiermit meinen Austritt aus dem Basketball Löwen e.V.</label>
@@ -168,6 +172,7 @@
     kgToggle.setAttribute('aria-expanded', String(!isOpen));
   });
 
+  var kuendigungFormLoadedAt = Date.now();
   document.getElementById('kuendigung-form').addEventListener('submit', function (e) {
     e.preventDefault();
     var form = e.target;
@@ -183,7 +188,9 @@
       nachname: form.nachname.value,
       email: form.email.value,
       erziehNachname: form.erziehNachname.value,
-      grund: form.grund.value
+      grund: form.grund.value,
+      webseite: document.getElementById('kg-webseite').value.trim(),
+      elapsedMs: Date.now() - kuendigungFormLoadedAt
     };
     fetch('https://poetic-patience-production-9290.up.railway.app/webhook/mitglied-kuendigung', {
       method: 'POST',

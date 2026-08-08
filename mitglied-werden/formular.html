@@ -121,6 +121,10 @@
               <input type="text" id="mw-iban" name="iban" required autocomplete="off" placeholder="IBAN *" />
             </div>
 
+            <div style="position:absolute;left:-9999px" aria-hidden="true">
+              <label for="mw-webseite">Webseite</label>
+              <input type="text" id="mw-webseite" name="webseite" tabindex="-1" autocomplete="off">
+            </div>
             <div class="field-checkbox" style="align-items:flex-start;margin:16px 0 8px">
               <input type="checkbox" id="mw-consent-beitrag" name="consentBeitrag" required class="mt-1" />
               <label for="mw-consent-beitrag" class="t-body-sm">Ich melde mich für die gewählte Mitgliedschaft an und akzeptiere die <a href="/satzung.html" target="_blank" rel="noopener">Satzung</a> sowie den damit verbundenen Mitgliedsbeitrag gemäß <a href="/beitragsordnung.html" target="_blank" rel="noopener">Beitragsordnung</a>.</label>
@@ -378,6 +382,7 @@
     return members;
   }
 
+  var mitgliedFormLoadedAt = Date.now();
   document.getElementById('mitglied-form').addEventListener('submit', function (e) {
     e.preventDefault();
     var form = e.target;
@@ -406,7 +411,9 @@
       telefon: form.telefon.value,
       kontoinhaber: form.kontoinhaber.value,
       iban: form.iban.value,
-      familyMembers: collectFamilyMembers()
+      familyMembers: collectFamilyMembers(),
+      webseite: document.getElementById('mw-webseite').value.trim(),
+      elapsedMs: Date.now() - mitgliedFormLoadedAt
     };
     fetch('https://poetic-patience-production-9290.up.railway.app/webhook/mitglied-werden-antrag', {
       method: 'POST',
