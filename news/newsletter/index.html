@@ -42,6 +42,10 @@
             <label for="nl-email">E-Mail *</label>
             <input type="email" id="nl-email" name="email" required autocomplete="email" />
           </div>
+          <div style="position:absolute;left:-9999px" aria-hidden="true">
+            <label for="nl-firma">Firma</label>
+            <input type="text" id="nl-firma" name="firma" tabindex="-1" autocomplete="off">
+          </div>
           <button type="submit" class="btn btn-primary btn-block">Jetzt anmelden</button>
           <p class="t-caption" style="margin-top:16px;color:var(--text-muted)">Du bist erst endgültig zum Newsletter angemeldet und bekommst die nächste Ausgabe, sobald du deine E-Mail-Adresse über den Bestätigungslink bestätigst, den wir dir direkt nach der Anmeldung schicken.</p>
           <div class="form-status success" id="newsletter-status">Fast geschafft — wir haben dir eine Bestätigungs-E-Mail geschickt. Bitte klicke den Link darin an, um die Anmeldung abzuschließen.</div>
@@ -65,6 +69,7 @@
 <script src="/js/nav.js?v=1785398309"></script>
 <script src="/js/include.js?v=1785398309"></script>
 <script>
+  var newsletterFormLoadedAt = Date.now();
   document.getElementById('newsletter-form').addEventListener('submit', function (e) {
     e.preventDefault();
     var form = e.target;
@@ -75,7 +80,12 @@
     statusError.classList.remove('visible');
     submitBtn.disabled = true;
     submitBtn.textContent = 'Wird gesendet …';
-    var payload = { vorname: form.vorname.value, email: form.email.value };
+    var payload = {
+      vorname: form.vorname.value,
+      email: form.email.value,
+      firma: document.getElementById('nl-firma').value.trim(),
+      elapsedMs: Date.now() - newsletterFormLoadedAt
+    };
     fetch('https://poetic-patience-production-9290.up.railway.app/webhook/newsletter-anmeldung', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
