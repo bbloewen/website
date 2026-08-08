@@ -176,6 +176,11 @@
               <span>Newsletter abonnieren</span>
             </label>
 
+            <div style="position:absolute;left:-9999px" aria-hidden="true">
+              <label for="cf-webseite">Webseite</label>
+              <input type="text" id="cf-webseite" name="webseite" tabindex="-1" autocomplete="off">
+            </div>
+
             <button class="btn btn-primary btn-sm" type="submit" style="width:100%;justify-content:center;margin-top:8px">Weiter zur Zahlung</button>
           </form>
         </div>
@@ -191,6 +196,7 @@
 <script src="/js/nav.js?v=1785398309"></script>
 <script src="/js/include.js?v=1785398309"></script>
 <script>
+  var checkoutFormLoadedAt = Date.now();
   document.addEventListener('DOMContentLoaded', function () {
     var raw = sessionStorage.getItem('bl_cart');
     var cart = null;
@@ -379,7 +385,9 @@
         strasse: document.getElementById('cf-strasse').value.trim(),
         plz: document.getElementById('cf-plz').value.trim(),
         ort: document.getElementById('cf-ort').value.trim(),
-        newsletter: document.getElementById('cf-newsletter').checked
+        newsletter: document.getElementById('cf-newsletter').checked,
+        webseite: document.getElementById('cf-webseite').value.trim(),
+        elapsedMs: Date.now() - checkoutFormLoadedAt
       };
       sessionStorage.setItem('bl_buyer', JSON.stringify(buyer));
       sessionStorage.setItem('bl_cart', JSON.stringify(cart));
