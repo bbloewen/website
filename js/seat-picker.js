@@ -2042,7 +2042,7 @@
             '<i data-lucide="check" style="width:14px;height:14px"></i> Mitgliedschaft von ' + escapeHtml(s.memberName) + ' bestätigt</div>';
         } else if (isMemberTarif) {
           memberBlock = '<div class="seatplan-member-check">' +
-            '<input type="text" placeholder="Name der Person auf diesem Platz" data-member-name="' + guid + '" value="' + escapeHtml(s.memberName || '') + '"' + (s.memberChecking ? ' disabled' : '') + '>' +
+            '<input type="text" placeholder="Vor- und Nachname" data-member-name="' + guid + '" value="' + escapeHtml(s.memberName || '') + '"' + (s.memberChecking ? ' disabled' : '') + '>' +
             '<button type="button" data-member-check="' + guid + '"' + (s.memberChecking ? ' disabled' : '') + '>' + (s.memberChecking ? 'Wird geprüft …' : 'Jetzt prüfen') + '</button>' +
             (s.memberCheckError ? '<p class="seatplan-member-check-error">' + s.memberCheckError + '</p>' : '') +
             '</div>';
@@ -2107,14 +2107,21 @@
                 s.memberChecked = true;
                 s.memberCheckError = null;
               } else {
-                /* Kein eindeutiger Treffer: automatisch auf den Tarif ohne
-                   Mitgliedsrabatt zurückstufen — die Bestellung bleibt möglich,
-                   nur eben zum regulären Preis. Serverseitig wird das beim
-                   Bestellabschluss ohnehin nochmal unabhängig geprüft. */
-                s.tarif = s.tarif.replace('_member', '');
-                s.price = self._dkTarifPrice(s.priceInfo, s.tarif);
-                s.memberChecked = false;
-                s.memberCheckError = 'Mitgliedschaft konnte nicht bestätigt werden — Tarif wurde auf den regulären Preis zurückgestuft. Bei Rückfragen wende dich an uns.';
+                /* Tarif bewusst NICHT automatisch zurückstufen: das würde den
+                   ganzen memberBlock (inkl. dieser Fehlermeldung) beim nächsten
+                   Render verschwinden lassen, da isMemberTarif dann false wäre —
+                   der Nutzer sähe nur einen stillen Rückfall auf den Normalpreis
+                   ohne jede Erklärung. Stattdessen bleibt der Mitgliedstarif samt
+                   Eingabefeld sichtbar; wer kein Mitglied ist, wechselt oben
+                   bewusst selbst auf einen Tarif ohne Rabatt. */
+                var reasonMessages = {
+                  not_found: 'Keine aktive Mitgliedschaft mit diesem Namen gefunden. Bitte Schreibweise prüfen — oder oben einen Tarif ohne Mitgliedsrabatt wählen.',
+                  ambiguous: 'Zu diesem Namen gibt es mehrere Mitgliedschaften. Bitte melde dich bei uns, damit wir das zuordnen können.',
+                  already_used: 'Der Mitgliedsrabatt für diesen Namen wurde für die Saison ' + MITGLIEDSRABATT_SAISON + ' bereits genutzt.',
+                  rate_limited: 'Gerade zu viele Prüfungen. Bitte in ein paar Minuten nochmal versuchen.'
+                };
+                s.memberCheckError = (result && reasonMessages[result.reason]) ||
+                  'Mitgliedschaft konnte nicht bestätigt werden. Bitte Schreibweise prüfen — oder oben einen Tarif ohne Mitgliedsrabatt wählen.';
               }
               self._renderCart();
             })
