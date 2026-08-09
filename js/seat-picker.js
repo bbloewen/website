@@ -2164,7 +2164,7 @@
      der Warenkorb noch leer ist (reine Einstiegshilfe, kein Dauer-UI-Element). */
   SeatPicker.prototype._renderDirectAddRow = function () {
     var self = this;
-    var options = this.northZones.concat(this.southZones).map(function (id) {
+    var options = this.northZones.concat(this.southZones).slice().sort().map(function (id) {
       var zone = self._zoneById(id);
       if (!zone) return '';
       var groups = self._categoryGroups(zone).filter(function (g) { return self.excludeCategories.indexOf(g.category) === -1; });
