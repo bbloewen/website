@@ -26,8 +26,9 @@ def mkrow(zone_id, row_number, segments, category, y, section_break=False, wheel
           align_reference_seat=None, align_target_seat=None, match_first_row_width=None,
           segment_align=None, x_offset=None, segment_shifts=None,
           live_stretch=None, live_shift=None, live_stretch2=None, wheelchair_seats=None,
-          label_before_seat=None, live_fit=None, segment_gap_seats=None,
-          renumber_seats=None, trailing_gap_units=None, category_label=None):
+          label_before_seat=None, live_fit=None, live_fit_gap=None, live_fit_scaled=None,
+          segment_gap_seats=None, renumber_seats=None, trailing_gap_units=None,
+          category_label=None):
     # segments: list of aisle-separated cluster widths, e.g. [2, 20, 3] for a row
     # split by two aisles — seat numbering stays continuous across the aisles
     # (matches the real Saalplan PDF), only the VISUAL rendering gets a gap.
@@ -130,6 +131,25 @@ def mkrow(zone_id, row_number, segments, category, y, section_break=False, wheel
     # live_stretch (s. seat-picker.js _applyAnchoredLayout).
     if live_fit:
         row["live_fit"] = live_fit
+    # live_fit_gap: einfacherer Spezialfall von live_fit für genau ZWEI live gemessene
+    # Endpunkte (first/last) MIT einer einzelnen echten Lücke irgendwo dazwischen
+    # (gap_before_seat/gap_units) — z.B. Block B Reihe 10: Sitz 1 = Reihe 9 Sitz 1, Sitz 16
+    # = Reihe 9 Sitz 16, mit einer 4er-Lücke vor Sitz 9. live_fit selbst kann das nicht
+    # ausdrücken (seine Pins interpolieren nur zwischen ECHTEN Zielsitzen anderer Reihen,
+    # nicht zwischen einem Sitz und einer rein rechnerischen Zwischenposition). Der
+    # resultierende Sitzabstand ist automatisch AUTOMATISCH kleiner als der von Reihe 9
+    # selbst (19 statt 15 Einheiten über dieselbe Spannweite verteilt) — genau das von
+    # Marko beobachtete "Reihe 10 hat einen geringeren Sitzabstand".
+    if live_fit_gap:
+        row["live_fit_gap"] = live_fit_gap
+    # live_fit_scaled: wie live_fit_gap, aber für eine Spanne mit MEHREREN, unterschied-
+    # lich großen Lücken (relative_units) statt einer einzelnen — die alte relative
+    # Struktur wird proportional auf zwei neue Live-Anker gestreckt/gestaucht (s.
+    # seat-picker.js runLiveFitScaled). Z.B. Block B Reihe 11 Sitz 3-17: die "8 Plätze"-
+    # und "treppensepariert"-Lücke bleiben im VERHÄLTNIS zueinander erhalten, nur die
+    # absolute Größe passt sich den neuen Fluchtpunkten an.
+    if live_fit_scaled:
+        row["live_fit_scaled"] = live_fit_scaled
     # label_before_seat: die RECHTE Reihennummer wird vor dem angegebenen Sitz eingefügt
     # statt ganz ans Ende der Reihe — z.B. Block A Reihe 1, wo ein zusätzlicher
     # Rollstuhlplatz hinter einer Lücke sitzt (Marko: die Reihennummer soll weiter mit
@@ -457,51 +477,52 @@ block_B = [
     (3, [7, 12], VIP, {"x_offset": -9, "segment_shifts": {0: -1}}),
     (4, [12], VIP, {"x_offset": -2}),
     (5, [12], VIP, {"x_offset": -2}),
-    (6, [16], KAT1, {"match_first_row_width": True, "x_offset": -10}),
-    (7, [16], KAT1, {"match_first_row_width": True, "x_offset": -10}),
-    (8, [16], KAT1, {"match_first_row_width": True, "x_offset": -10}),
-    (9, [16], KAT1, {"match_first_row_width": True, "x_offset": -10}),
-    # Reihe 10/11/12 komplett neu aufgebaut (Marko, 10.08.2026, per Diktat): der bisherige
-    # live_fit/live_stretch/live_shift-Mechanismus (Laufzeit-DOM-Messung) hat sich als
-    # fehlerhaft erwiesen — Sitz-Margins wurden bei mehrstufiger Verkettung teils falsch
-    # berechnet (Sitze überlappten sich sichtbar, Reihen wirkten dadurch wie "zu wenig
-    # Plätze"). ERSTER Ersatzversuch mit segment_gap_seats scheiterte ebenfalls (echter
-    # Bug in _applyAnchoredLayout gefunden: deren generischer Pro-Sitz-Durchgang
-    # überschreibt für ALLE Zonen mit layout:"anchored" jedes marginLeft NACHTRÄGLICH rein
-    # aus den x_units-Differenzen — segment_gap_seats lief zwar VOR diesem Durchgang,
-    # wurde von ihm aber sofort wieder auf 0 zurückgesetzt, weil die x_units selbst
-    # bewusst lückenlos gewählt waren). Endgültiger, korrekter Ansatz: die Lücke direkt in
-    # die segment_shifts-Werte einrechnen (dasselbe Prinzip, mit dem z.B. Reihe 11 Segment
-    # 0/1 schon immer ihre Lücke bekommen haben) — kein segment_gap_seats mehr auf
-    # anchored-Zonen, keine Live-Messung, nur reine x_units-Arithmetik.
-    #
-    # Reihe 10 (Marko-Diktat): "1-8, 4er-Lücke, dann 9-16; Platz 8 liegt zwischen 6/7 der
-    # Reihe 11; Platz 9 liegt zwischen 10/11 der Reihe 11." Segment 0 (Sitz 1-8) an Sitz 8
-    # verankert: Sitz 6 Reihe 11 = -4+5-8=-7, Sitz 7 Reihe 11 = -4+6-8=-6, Mittelpunkt=-6,5.
-    # x_offset=-10 (Kontinuität mit Reihe 6-9), daraus Shift0=-3,5 (Sitz 8 = -10+7-3,5=-6,5).
-    # Segment 1 (Sitz 9-16): Shift1 = Shift0 + 4 (die geforderte "4er-Lücke", 4 leere
-    # Sitzbreiten zwischen Sitz 8 und 9) = 0,5. Reihe nicht mehr match_first_row_width/
-    # live_fit — läuft jetzt im selben festen Einheiten-Raster wie Reihe 11/12 (sichtbarer
-    # Nebeneffekt: Reihe 10s Sitzabstand entspricht jetzt Reihe 11/12s Abstand, nicht mehr
-    # dem breiteren Abstand von Reihe 6-9 — bei Bedarf mit Marko gegenprüfen).
+    # Reihe 6-12 (Marko, 10.08.2026, vierte Korrektur): Reihe 10 ist der FESTE Referenz-
+    # punkt und bleibt unangetastet ("in Reihe 10 darfst du den Abstand weder vergrößern
+    # noch verkleinern"). Stattdessen werden Reihe 6-9 (bisher match_first_row_width, an
+    # Reihe 1 gekoppelt) jetzt live an Reihe 10 gekoppelt (Sitz 1/16 exakt fluchtend) —
+    # das ERGIBT automatisch einen größeren Sitzabstand als Reihe 10 (Reihe 10 hat wegen
+    # der 4er-Lücke 19 statt 15 Einheiten über dieselbe Spannweite verteilt, also einen
+    # ENGEREN Abstand) — exakt das von Marko beobachtete Verhältnis, nur mit vertauschten
+    # Rollen (Reihe 6-9 zieht sich an Reihe 10, nicht umgekehrt).
+    (6, [16], KAT1, {"x_offset": -10,
+        "live_stretch": {0: {"first": {"row": "10", "seat": 1}, "last": {"row": "10", "seat": 16}}}}),
+    (7, [16], KAT1, {"x_offset": -10,
+        "live_stretch": {0: {"first": {"row": "10", "seat": 1}, "last": {"row": "10", "seat": 16}}}}),
+    (8, [16], KAT1, {"x_offset": -10,
+        "live_stretch": {0: {"first": {"row": "10", "seat": 1}, "last": {"row": "10", "seat": 16}}}}),
+    (9, [16], KAT1, {"x_offset": -10,
+        "live_stretch": {0: {"first": {"row": "10", "seat": 1}, "last": {"row": "10", "seat": 16}}}}),
+    # Reihe 10 (Marko-Diktat, unverändert seit der Korrektur — NICHT mehr anfassen):
+    # "1-8, 4er-Lücke, dann 9-16", reines festes Einheiten-Raster, keine Live-Messung.
     (10, [8, 8], KAT1, {"x_offset": -10, "segment_shifts": {0: -3.5, 1: 0.5}}),
-    # Reihe 11 (Marko-Diktat): "separate 1-2; dann 3-8 (3 liegt über 1 der Reihe darunter);
-    # 8 Plätze Lücke; 9-14; treppensepariert 15-17." Segment 0/1-Shifts (-11/-8) unverändert
-    # aus vorheriger Runde übernommen (Sitz 1/2 auf Sitz 1/2 Reihe 12, Sitz 3 auf Sitz 1
-    # Reihe 10 — beide Fluchtpunkte nicht Teil dieses Diktats, daher nicht angetastet).
-    # Segment 2 (Sitz 9-14): Shift2 = Shift1 + 8 (die geforderte "8 Plätze Lücke" vor Sitz
-    # 9) = 0. Segment 3 (Sitz 15-17, "treppensepariert"): Shift3 = Shift2 + 2 = 2 —
-    # Lückengröße (2 Einheiten) mangels genauer Diktat-Angabe geschätzt (kein Einheiten-
-    # Wert genannt), bei Marko live gegenprüfen und bei Bedarf nachschärfen.
-    (11, [2, 6, 6, 3], KAT1, {"x_offset": -4, "segment_shifts": {0: -11, 1: -8, 2: 0, 3: 2}}),
-    # Reihe 12 (Marko-Diktat): "1-5; 6-7 (6 liegt über 3 darunter); Säulenplatz als Lücke;
-    # 8-10; identische Lücke wie darunter; 11-13; 1 Platz Lücke (Säule); 14-15; 16-20."
-    # Segment 0 (Sitz 1-7, Shift -2) unverändert aus vorheriger Runde (Sitz 1 = -15,
-    # historisch verifiziert). Jede der drei Säulenplatz-Lücken (vor Sitz 8/11/14, laut
-    # Diktat alle "1 Platz"/"identisch") addiert 1 Einheit auf den kumulierten Shift:
-    # Shift1=-1, Shift2=0, Shift3=1. Segment 4 (Sitz 16-20) OHNE eigene Lücke (Diktat nennt
-    # dort keine) — Shift4=Shift3=1, reine Fortsetzung.
-    (12, [7, 3, 3, 2, 5], KAT1, {"x_offset": -13, "segment_shifts": {0: -2, 1: -1, 2: 0, 3: 1, 4: 1}}),
+    # Reihe 11 (Marko, 10.08.2026): "Platz 3 liegt genau über Platz 1 der Reihen 6-10,
+    # Platz 16 genau über Platz 16 der Reihen 6-10." Segment 0 (Sitz 1-2, Shift -11)
+    # unverändert (Fluchtpunkt zu Reihe 12 Sitz 1/2, nicht Teil dieser Korrektur). Sitz
+    # 3-17 laufen jetzt per live_fit_scaled (s. seat-picker.js): relative_units ist die
+    # aus der VORHERIGEN Runde (Shifts {1:-8,2:0,3:2}, s. Git-Historie) errechnete
+    # Referenz-Struktur (Sitz 3=0, ..., Sitz 8=5, Sitz 9=14 ["8 Plätze Lücke"], ...,
+    # Sitz 14=19, Sitz 15=22 ["treppensepariert"], Sitz 16=23, Sitz 17=24) — wird
+    # PROPORTIONAL auf die neue Spannweite (Sitz3→Reihe10/Sitz1, Sitz16→Reihe10/Sitz16)
+    # gestreckt/gestaucht, damit beide neuen Fluchtpunkte exakt erfüllt sind, OHNE die
+    # relativen Lückengrößen zueinander willkürlich zu verwerfen.
+    (11, [2, 6, 6, 3], KAT1, {"x_offset": -4, "segment_shifts": {0: -11, 1: -8, 2: 0, 3: 2},
+        "live_fit_scaled": {
+            "first": {"row": "10", "seat": 1}, "last": {"row": "10", "seat": 16},
+            "anchor_first_seat": 3, "anchor_last_seat": 16,
+            "relative_units": {3: 0, 4: 1, 5: 2, 6: 3, 7: 4, 8: 5, 9: 14, 10: 15, 11: 16,
+                                12: 17, 13: 18, 14: 19, 15: 22, 16: 23, 17: 24}
+        }}),
+    # Reihe 12 (Marko, 10.08.2026): "Verschiebe Platz 11 bis Platz 20 so, dass Platz 20
+    # über Platz 17 der Reihe 11 liegt." Segment 0/1 (Sitz 1-10, Shifts -2/-1) unverändert
+    # (Fluchtpunkt Sitz 6=Sitz3 Reihe 11, nicht Teil dieser Korrektur). Segmente 2-4 (Sitz
+    # 11-20) behalten ihre ALTEN relativen Shifts (0/1/1, s. Git-Historie) als Ausgangs-
+    # basis — live_shift verschiebt diesen kompletten Block (anchor_seat=11) NACHTRÄGLICH
+    # als starre Einheit, bis via_seat=20 exakt auf Reihe 11 Sitz 17 liegt (der seinerseits
+    # erst durch Reihe 11s live_fit_scaled, s.o., seine finale Position bekommt — daher
+    # Reihenfolge im JS: live_fit_scaled läuft VOR live_shift).
+    (12, [7, 3, 3, 2, 5], KAT1, {"x_offset": -13, "segment_shifts": {0: -2, 1: -1, 2: 0, 3: 1, 4: 1},
+        "live_shift": {2: {"anchor_seat": 11, "via_seat": 20, "target_row": "11", "target_seat": 17}}}),
 ]
 block_C = [
     # Produkt-Split (Marko, 09.08.2026, korrigiert 09.08.2026 nach Rückfrage): Reihe 1-5

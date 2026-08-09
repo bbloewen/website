@@ -1454,12 +1454,12 @@
     var targetWidth = row0Seats[row0Seats.length - 1].getBoundingClientRect().right - row0Seats[0].getBoundingClientRect().left;
     zoneEl.querySelectorAll('.seatplan-row-line--match-first').forEach(function (rowEl) {
       var row = rowsByNumber[rowEl.dataset.rowNumber];
-      // Reihen mit live_fit (z.B. Block B Reihe 10) bekommen ihre Sitzpositionen NICHT
-      // über den Wrapper-Streck-Mechanismus, sondern direkt per Live-Messung (s.u.,
-      // runLiveFit) — kein Wrapper-Div, keine space-between-Streckung, sonst würde
-      // runLiveFit gegen die falschen (Wrapper-relativen statt Flex-Geschwister-)
-      // Margins arbeiten.
-      if (row && row.live_fit) return;
+      // Reihen mit live_fit/live_fit_gap (z.B. Block B Reihe 10) bekommen ihre
+      // Sitzpositionen NICHT über den Wrapper-Streck-Mechanismus, sondern direkt per
+      // Live-Messung (s.u., runLiveFit/runLiveFitGap) — kein Wrapper-Div, keine
+      // space-between-Streckung, sonst würde die Live-Messung gegen die falschen
+      // (Wrapper-relativen statt Flex-Geschwister-) Margins arbeiten.
+      if (row && (row.live_fit || row.live_fit_gap)) return;
       var breaks = (row && row.segment_breaks) || [];
       // Jede match_first_row_width-Reihe bekommt ihre Sitze in einem inneren Wrapper-Div
       // statt direkt als Flex-Kind von rowEl — nur so lässt sich die Sitz-Breite EXAKT
@@ -1603,16 +1603,108 @@
         });
       });
     }
+    // live_fit_gap: Spezialfall von live_fit für genau ZWEI live gemessene Endpunkte
+    // (first/last) MIT einer einzelnen echten Lücke irgendwo dazwischen (gap_before_seat/
+    // gap_units) — z.B. Block B Reihe 10: Sitz 1 = Reihe 9 Sitz 1, Sitz 16 = Reihe 9 Sitz
+    // 16, 4er-Lücke vor Sitz 9. Gesamtspannweite wird auf (Sitzanzahl-2+gap_units) gleiche
+    // Einheiten verteilt (die normale 1-Einheit-Lücke an der Bruchstelle wird durch
+    // gap_units ERSETZT, nicht addiert) — seat-picker.js kennt aus gen_seatplan.py nur die
+    // Ziel-Sitze, nicht Reihe 9s tatsächliche Breite; die kommt erst hier per Live-Messung.
+    function runLiveFitGap(fieldName) {
+      zone.rows.forEach(function (row) {
+        var spec = row[fieldName];
+        if (!spec) return;
+        var firstTarget = findSeatEl(spec.first.row, spec.first.seat);
+        var lastTarget = findSeatEl(spec.last.row, spec.last.seat);
+        if (!firstTarget || !lastTarget) return;
+        var firstLeft = firstTarget.getBoundingClientRect().left;
+        var lastLeft = lastTarget.getBoundingClientRect().left;
+        var count = row.seats.length;
+        var gapBefore = spec.gap_before_seat;
+        var gapUnits = spec.gap_units;
+        var totalUnits = (count - 2) + gapUnits;
+        var pitch = (lastLeft - firstLeft) / totalUnits;
+        function unitsFromFirst(seatNum) {
+          if (seatNum <= gapBefore - 1) return seatNum - 1;
+          return (gapBefore - 2 + gapUnits) + (seatNum - gapBefore);
+        }
+        for (var seatNum = 1; seatNum <= count; seatNum++) {
+          var seatEl = findSeatEl(row.row_number, seatNum);
+          if (!seatEl) continue;
+          var desiredLeft = firstLeft + unitsFromFirst(seatNum) * pitch;
+          var prevEl = seatEl.previousElementSibling;
+          var refRight = prevEl ? prevEl.getBoundingClientRect().right : desiredLeft - flexGapPx;
+          seatEl.style.marginLeft = (desiredLeft - refRight - flexGapPx) + 'px';
+        }
+      });
+    }
+    // live_fit_scaled: rescaled Variante von live_fit_gap für MEHRERE, unterschiedlich
+    // große Lücken innerhalb einer Spanne (z.B. Block B Reihe 11 Sitz 3-17: die aus
+    // früheren Diktat-Runden stammenden relativen Sitzabstände — inkl. der "8 Plätze"-
+    // und "treppensepariert"-Lücke — werden PROPORTIONAL auf die neue, live gemessene
+    // Gesamtspannweite gestreckt/gestaucht). relative_units ist eine feste, in
+    // gen_seatplan.py aus der vorherigen segment_shifts-Struktur errechnete Referenz
+    // (keine neue Zahl, nur umgerechnet) — die neuen Anker ändern die GRÖSSE der alten
+    // Lücken proportional mit, nicht deren Verhältnis zueinander.
+    function runLiveFitScaled(fieldName) {
+      // Sitzbreite EINMAL gemessen — für Sitz 2..N wird NICHT mehr per erneutem
+      // getBoundingClientRect() am gerade erst modifizierten Vorgänger-Sitz gemessen
+      // (das lieferte live nachweislich noch die Position VOR dessen eigenem Margin-
+      // Update zurück — Sitz 4 landete dadurch auf Basis von Sitz 3s ALTER statt neuer
+      // Position, mit aufschaukelndem Fehler über die ganze Kette). Stattdessen läuft
+      // die Kette rein rechnerisch (deriveLeft(n) - deriveLeft(n-1) - Sitzbreite), nur
+      // der ALLERERSTE Sitz der Spanne liest noch einmal live seinen (unberührten)
+      // Vorgänger, um an die bereits fertig positionierten Sitze davor anzuschließen.
+      var seatWidth = zoneEl.querySelector('.seatplan-seat').getBoundingClientRect().width;
+      zone.rows.forEach(function (row) {
+        var spec = row[fieldName];
+        if (!spec) return;
+        var firstTarget = findSeatEl(spec.first.row, spec.first.seat);
+        var lastTarget = findSeatEl(spec.last.row, spec.last.seat);
+        if (!firstTarget || !lastTarget) return;
+        var firstLeft = firstTarget.getBoundingClientRect().left;
+        var lastLeft = lastTarget.getBoundingClientRect().left;
+        var rel = spec.relative_units;
+        var firstUnits = rel[spec.anchor_first_seat];
+        var lastUnits = rel[spec.anchor_last_seat];
+        var pitch = (lastLeft - firstLeft) / (lastUnits - firstUnits);
+        var nums = Object.keys(rel).map(function (s) { return parseInt(s, 10); }).sort(function (a, b) { return a - b; });
+        var prevDesired = null;
+        nums.forEach(function (n, i) {
+          var seatEl = findSeatEl(row.row_number, n);
+          if (!seatEl) return;
+          var desiredLeft = firstLeft + (rel[String(n)] - firstUnits) * pitch;
+          var refRight;
+          if (i === 0) {
+            var prevEl = seatEl.previousElementSibling;
+            refRight = prevEl ? prevEl.getBoundingClientRect().right : desiredLeft - flexGapPx;
+          } else {
+            refRight = prevDesired + seatWidth;
+          }
+          seatEl.style.marginLeft = (desiredLeft - refRight - flexGapPx) + 'px';
+          prevDesired = desiredLeft;
+        });
+      });
+    }
     runLiveFit('live_fit');
+    runLiveFitGap('live_fit_gap');
     runLiveStretch('live_stretch');
+    runLiveFitScaled('live_fit_scaled');
     zone.rows.forEach(function (row) {
       if (!row.live_shift) return;
       Object.keys(row.live_shift).forEach(function (segIdxStr) {
         var spec = row.live_shift[segIdxStr];
+        // via_seat: optionaler zweiter Sitz, dessen AKTUELLE Position (statt der des
+        // Ankers selbst) über den Zielabstand entscheidet — z.B. Block B Reihe 12:
+        // Sitz 11 (Anker, dessen Margin gesetzt wird, verschiebt per Flex-Fluss ALLES
+        // danach mit) soll so verschoben werden, dass Sitz 20 (via_seat) exakt auf sein
+        // Ziel trifft — nicht Sitz 11 selbst. Ohne via_seat identisch zum bisherigen
+        // Verhalten (Anker IST der Referenzsitz).
         var anchorEl = findSeatEl(row.row_number, spec.anchor_seat);
+        var viaEl = findSeatEl(row.row_number, spec.via_seat || spec.anchor_seat);
         var targetEl = findSeatEl(spec.target_row, spec.target_seat);
-        if (!anchorEl || !targetEl) return;
-        var delta = targetEl.getBoundingClientRect().left - anchorEl.getBoundingClientRect().left;
+        if (!anchorEl || !viaEl || !targetEl) return;
+        var delta = targetEl.getBoundingClientRect().left - viaEl.getBoundingClientRect().left;
         var currentMargin = parseFloat(anchorEl.style.marginLeft) || 0;
         // Kein Math.max(0, …): ein negativer Gesamtversatz ist ebenso legitim wie bei
         // live_stretch (s.o.) — der Zielsitz kann links vom Anker liegen.
