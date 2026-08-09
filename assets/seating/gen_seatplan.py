@@ -461,47 +461,67 @@ block_B = [
     (7, [16], KAT1, {"match_first_row_width": True, "x_offset": -10}),
     (8, [16], KAT1, {"match_first_row_width": True, "x_offset": -10}),
     (9, [16], KAT1, {"match_first_row_width": True, "x_offset": -10}),
-    # Reihe 10/11/12 komplett neu aufgebaut (Marko, 10.08.2026, per Diktat): der bisherige
-    # live_fit/live_stretch/live_shift-Mechanismus (Laufzeit-DOM-Messung) hat sich als
-    # fehlerhaft erwiesen — Sitz-Margins wurden bei mehrstufiger Verkettung teils falsch
-    # berechnet (Sitze überlappten sich sichtbar, Reihen wirkten dadurch wie "zu wenig
-    # Plätze"). ERSTER Ersatzversuch mit segment_gap_seats scheiterte ebenfalls (echter
-    # Bug in _applyAnchoredLayout gefunden: deren generischer Pro-Sitz-Durchgang
-    # überschreibt für ALLE Zonen mit layout:"anchored" jedes marginLeft NACHTRÄGLICH rein
-    # aus den x_units-Differenzen — segment_gap_seats lief zwar VOR diesem Durchgang,
-    # wurde von ihm aber sofort wieder auf 0 zurückgesetzt, weil die x_units selbst
-    # bewusst lückenlos gewählt waren). Endgültiger, korrekter Ansatz: die Lücke direkt in
-    # die segment_shifts-Werte einrechnen (dasselbe Prinzip, mit dem z.B. Reihe 11 Segment
-    # 0/1 schon immer ihre Lücke bekommen haben) — kein segment_gap_seats mehr auf
-    # anchored-Zonen, keine Live-Messung, nur reine x_units-Arithmetik.
-    #
-    # Reihe 10 (Marko-Diktat): "1-8, 4er-Lücke, dann 9-16; Platz 8 liegt zwischen 6/7 der
-    # Reihe 11; Platz 9 liegt zwischen 10/11 der Reihe 11." Segment 0 (Sitz 1-8) an Sitz 8
-    # verankert: Sitz 6 Reihe 11 = -4+5-8=-7, Sitz 7 Reihe 11 = -4+6-8=-6, Mittelpunkt=-6,5.
-    # x_offset=-10 (Kontinuität mit Reihe 6-9), daraus Shift0=-3,5 (Sitz 8 = -10+7-3,5=-6,5).
-    # Segment 1 (Sitz 9-16): Shift1 = Shift0 + 4 (die geforderte "4er-Lücke", 4 leere
-    # Sitzbreiten zwischen Sitz 8 und 9) = 0,5. Reihe nicht mehr match_first_row_width/
-    # live_fit — läuft jetzt im selben festen Einheiten-Raster wie Reihe 11/12 (sichtbarer
-    # Nebeneffekt: Reihe 10s Sitzabstand entspricht jetzt Reihe 11/12s Abstand, nicht mehr
-    # dem breiteren Abstand von Reihe 6-9 — bei Bedarf mit Marko gegenprüfen).
-    (10, [8, 8], KAT1, {"x_offset": -10, "segment_shifts": {0: -3.5, 1: 0.5}}),
-    # Reihe 11 (Marko-Diktat): "separate 1-2; dann 3-8 (3 liegt über 1 der Reihe darunter);
-    # 8 Plätze Lücke; 9-14; treppensepariert 15-17." Segment 0/1-Shifts (-11/-8) unverändert
-    # aus vorheriger Runde übernommen (Sitz 1/2 auf Sitz 1/2 Reihe 12, Sitz 3 auf Sitz 1
-    # Reihe 10 — beide Fluchtpunkte nicht Teil dieses Diktats, daher nicht angetastet).
-    # Segment 2 (Sitz 9-14): Shift2 = Shift1 + 8 (die geforderte "8 Plätze Lücke" vor Sitz
-    # 9) = 0. Segment 3 (Sitz 15-17, "treppensepariert"): Shift3 = Shift2 + 2 = 2 —
-    # Lückengröße (2 Einheiten) mangels genauer Diktat-Angabe geschätzt (kein Einheiten-
-    # Wert genannt), bei Marko live gegenprüfen und bei Bedarf nachschärfen.
-    (11, [2, 6, 6, 3], KAT1, {"x_offset": -4, "segment_shifts": {0: -11, 1: -8, 2: 0, 3: 2}}),
-    # Reihe 12 (Marko-Diktat): "1-5; 6-7 (6 liegt über 3 darunter); Säulenplatz als Lücke;
-    # 8-10; identische Lücke wie darunter; 11-13; 1 Platz Lücke (Säule); 14-15; 16-20."
-    # Segment 0 (Sitz 1-7, Shift -2) unverändert aus vorheriger Runde (Sitz 1 = -15,
-    # historisch verifiziert). Jede der drei Säulenplatz-Lücken (vor Sitz 8/11/14, laut
-    # Diktat alle "1 Platz"/"identisch") addiert 1 Einheit auf den kumulierten Shift:
-    # Shift1=-1, Shift2=0, Shift3=1. Segment 4 (Sitz 16-20) OHNE eigene Lücke (Diktat nennt
-    # dort keine) — Shift4=Shift3=1, reine Fortsetzung.
-    (12, [7, 3, 3, 2, 5], KAT1, {"x_offset": -13, "segment_shifts": {0: -2, 1: -1, 2: 0, 3: 1, 4: 1}}),
+    # Reihe 10 komplett neu (Marko, neunte Runde, ersetzt segment_gap_units-Ansatz): EIN
+    # durchgehender Sitzabstand für die ganze Reihe, hergeleitet aus "Sitz 1-6 genau über
+    # Sitz 3-8 der Reihe 11" (pins) — Sitz 7-8 laufen mit demselben Abstand weiter
+    # (extend_forward). Sitz 16 liegt UNABHÄNGIG davon exakt auf Sitz 16 der Reihe 9
+    # (reverse_anchor), Sitz 9-15 laufen davon rückwärts mit dem GLEICHEN, aus Sitz 1-6
+    # hergeleiteten Abstand (reverse_extend) — nicht mit Reihe 11 verknüpft, wie Marko
+    # explizit klargestellt hat.
+    (10, [8, 8], KAT1, {"match_first_row_width": True, "x_offset": -10,
+        "live_fit": {
+            "pins": [{"seat": 1, "target": {"row": "11", "seat": 3}}, {"seat": 6, "target": {"row": "11", "seat": 8}}],
+            "extend_forward": [7, 8],
+            "reverse_anchor": {"seat": 16, "target": {"row": "9", "seat": 16}},
+            "reverse_extend": [15, 14, 13, 12, 11, 10, 9]
+        }}),
+    # Reihe 11 (Marko, vierte Runde): Segment 0 (Sitze 1-2) NICHT mehr zusammen mit
+    # Segment 1 (Sitze 3-8) verschoben, sondern eigenständig weiter nach links, sodass
+    # Sitz 1/2 exakt auf Sitz 1/2 der Reihe 12 fluchten. Segment 1 behält seinen Shift
+    # (-8, s.u. — hält weiterhin "Sitz 3 = Sitz 1 Reihe 10" aus der letzten Runde).
+    # Sitz 1 Reihe 12 = -13 (x_offset) + 0 - 2 (Segment-Shift) = -15.
+    # Unverschobener Sitz 1 Reihe 11 (x_offset=-4, Index 0) läge bei -4 → Shift=-15-(-4)=-11.
+    # Segment 2 (Sitze 9-14, Marko fünfte Runde): Sitz 9 auf Sitz 11 der Reihe 10, Sitz 14
+    # auf Sitz 16 der Reihe 10 — beides Sitze einer match_first_row_width-Reihe OHNE
+    # x_units, also nicht aus der Datenlage berechenbar. live_stretch staucht die 6 Sitze
+    # gleichmäßig verteilt zwischen die beiden live gemessenen Zielpositionen (s.
+    # seat-picker.js).
+    # Segment 3 (Sitze 15-17, Marko siebte Runde): Sitz 15 auf Sitz 18, Sitz 17 auf Sitz 20
+    # der Reihe 12 (Sitz 16 auf Sitz 19 ergibt sich automatisch aus der gleichmäßigen
+    # Verteilung dazwischen). Reihe 12s Sitz 18-20 hängen ihrerseits an deren live_shift
+    # (s.u.), der wiederum von Reihe 11 Segment 2 (oben) abhängt — deshalb live_stretch2
+    # (läuft NACH live_shift, nicht davor, s. mkrow()).
+    (11, [2, 6, 6, 3], KAT1, {"x_offset": -4, "segment_shifts": {0: -11, 1: -8},
+        "live_stretch": {2: {"first": {"row": "10", "seat": 11}, "last": {"row": "10", "seat": 16}}},
+        "live_stretch2": {3: {"first": {"row": "12", "seat": 18}, "last": {"row": "12", "seat": 20}}}}),
+    # Reihe 12 (Marko, fünfte Runde): Segment 1 (Sitze 8-10) einen Platz [Einheit] nach
+    # links, damit Sitz 8 exakt auf Sitz 6 der Reihe 11 fluchtet.
+    # Sitz 6 Reihe 11 (Segment 1, Shift -8) = -4 + 5 - 8 = -7.
+    # Unverschobener Sitz 8 Reihe 12 (Segment 1, x_offset=-13, Index 7) = -13+7 = -6.
+    # Shift = -7-(-6) = -1 (genau "ein Platz nach links", wie von Marko angegeben).
+    # Neunte Runde (ersetzt die siebte/achte Runde komplett): ZWEI feste Segment-Verschiebungen
+    # statt Pin-Interpolation — Marko bestätigte, dass Segment 2 (Sitz 11-13) UNGESTRECKT als
+    # Block verschoben wird: "Sitz 12 ist direkt über Sitz 10 der Reihe 11, Sitz 13 direkt über
+    # Sitz 11" — bei konstantem Versatz (kein Stretch) ergibt sich das automatisch, sobald nur
+    # der erste Sitz (11) live auf Sitz 9 der Reihe 11 verschoben wird (Reihe 11 hat dort
+    # dieselbe Sitzteilung/-breite wie Reihe 12, s. live_stretch oben). Segment 3+4 (Sitz
+    # 14-20) analog als EIN Block ab Sitz 14 verschoben, bis Sitz 14 auf Sitz 13 der Reihe 11
+    # liegt — "Sitz 14 bis 20 haben den gleichen Sitzabstand wie Sitz 11 bis 13", also normale,
+    # ungestreckte Reihenfolge, kein Extra-Pin nötig. live_shift statt live_fit2, da Reihe 11s
+    # Sitz 9/13 selbst erst durch Reihe 11s live_stretch (Segment 2) ihre finale Position
+    # bekommen — läuft NACH live_stretch (s. mkrow()).
+    # Zehnte Runde: Segment 4 (Sitz 16-20) bekam bisher zusätzlich zur normalen Steigung
+    # noch die pauschale 10px-Dekorlücke an der Segmentgrenze (Sitz 16 hat keinen eigenen
+    # live_shift/segment_shift-Eintrag, s. explicit_shift_segments-Logik in seat-picker.js)
+    # — Marko: Abstand zwischen Sitz 15/16 muss GENAU der gleiche sein wie zwischen 14/15.
+    # Fix: expliziter Shift 0 für Segment 4 unterdrückt die Dekorlücke, ohne die tatsächliche
+    # Steigung zu ändern (Sitz 16 bleibt weiterhin 1 Einheit hinter Sitz 15, jetzt ohne
+    # Zusatz-Px).
+    (12, [7, 3, 3, 2, 5], KAT1, {"x_offset": -13, "segment_shifts": {0: -2, 1: -1, 4: 0},
+        "live_shift": {
+            2: {"anchor_seat": 11, "target_row": "11", "target_seat": 9},
+            3: {"anchor_seat": 14, "target_row": "11", "target_seat": 13}
+        }}),
 ]
 block_C = [
     # Produkt-Split (Marko, 09.08.2026, korrigiert 09.08.2026 nach Rückfrage): Reihe 1-5

@@ -11015,8 +11015,7 @@
                 "x": 0,
                 "y": 0
               },
-              "category": "Kategorie I",
-              "x_units": -13.5
+              "category": "Kategorie I"
             },
             {
               "seat_number": "2",
@@ -11026,8 +11025,7 @@
                 "x": 25,
                 "y": 0
               },
-              "category": "Kategorie I",
-              "x_units": -12.5
+              "category": "Kategorie I"
             },
             {
               "seat_number": "3",
@@ -11037,8 +11035,7 @@
                 "x": 50,
                 "y": 0
               },
-              "category": "Kategorie I",
-              "x_units": -11.5
+              "category": "Kategorie I"
             },
             {
               "seat_number": "4",
@@ -11048,8 +11045,7 @@
                 "x": 75,
                 "y": 0
               },
-              "category": "Kategorie I",
-              "x_units": -10.5
+              "category": "Kategorie I"
             },
             {
               "seat_number": "5",
@@ -11059,8 +11055,7 @@
                 "x": 100,
                 "y": 0
               },
-              "category": "Kategorie I",
-              "x_units": -9.5
+              "category": "Kategorie I"
             },
             {
               "seat_number": "6",
@@ -11070,8 +11065,7 @@
                 "x": 125,
                 "y": 0
               },
-              "category": "Kategorie I",
-              "x_units": -8.5
+              "category": "Kategorie I"
             },
             {
               "seat_number": "7",
@@ -11081,8 +11075,7 @@
                 "x": 150,
                 "y": 0
               },
-              "category": "Kategorie I",
-              "x_units": -7.5
+              "category": "Kategorie I"
             },
             {
               "seat_number": "8",
@@ -11092,8 +11085,7 @@
                 "x": 175,
                 "y": 0
               },
-              "category": "Kategorie I",
-              "x_units": -6.5
+              "category": "Kategorie I"
             },
             {
               "seat_number": "9",
@@ -11103,8 +11095,7 @@
                 "x": 200,
                 "y": 0
               },
-              "category": "Kategorie I",
-              "x_units": -1.5
+              "category": "Kategorie I"
             },
             {
               "seat_number": "10",
@@ -11114,8 +11105,7 @@
                 "x": 225,
                 "y": 0
               },
-              "category": "Kategorie I",
-              "x_units": -0.5
+              "category": "Kategorie I"
             },
             {
               "seat_number": "11",
@@ -11125,8 +11115,7 @@
                 "x": 250,
                 "y": 0
               },
-              "category": "Kategorie I",
-              "x_units": 0.5
+              "category": "Kategorie I"
             },
             {
               "seat_number": "12",
@@ -11136,8 +11125,7 @@
                 "x": 275,
                 "y": 0
               },
-              "category": "Kategorie I",
-              "x_units": 1.5
+              "category": "Kategorie I"
             },
             {
               "seat_number": "13",
@@ -11147,8 +11135,7 @@
                 "x": 300,
                 "y": 0
               },
-              "category": "Kategorie I",
-              "x_units": 2.5
+              "category": "Kategorie I"
             },
             {
               "seat_number": "14",
@@ -11158,8 +11145,7 @@
                 "x": 325,
                 "y": 0
               },
-              "category": "Kategorie I",
-              "x_units": 3.5
+              "category": "Kategorie I"
             },
             {
               "seat_number": "15",
@@ -11169,8 +11155,7 @@
                 "x": 350,
                 "y": 0
               },
-              "category": "Kategorie I",
-              "x_units": 4.5
+              "category": "Kategorie I"
             },
             {
               "seat_number": "16",
@@ -11180,15 +11165,49 @@
                 "x": 375,
                 "y": 0
               },
-              "category": "Kategorie I",
-              "x_units": 5.5
+              "category": "Kategorie I"
             }
           ],
+          "match_first_row_width": true,
           "x_offset": -10,
-          "explicit_shift_segments": [
-            0,
-            1
-          ]
+          "live_fit": {
+            "pins": [
+              {
+                "seat": 1,
+                "target": {
+                  "row": "11",
+                  "seat": 3
+                }
+              },
+              {
+                "seat": 6,
+                "target": {
+                  "row": "11",
+                  "seat": 8
+                }
+              }
+            ],
+            "extend_forward": [
+              7,
+              8
+            ],
+            "reverse_anchor": {
+              "seat": 16,
+              "target": {
+                "row": "9",
+                "seat": 16
+              }
+            },
+            "reverse_extend": [
+              15,
+              14,
+              13,
+              12,
+              11,
+              10,
+              9
+            ]
+          }
         },
         {
           "uuid": "32be158c-3325-513a-8d32-adc74d41e91d",
@@ -11368,7 +11387,7 @@
                 "y": 0
               },
               "category": "Kategorie I",
-              "x_units": 12
+              "x_units": 10
             },
             {
               "seat_number": "16",
@@ -11379,7 +11398,7 @@
                 "y": 0
               },
               "category": "Kategorie I",
-              "x_units": 13
+              "x_units": 11
             },
             {
               "seat_number": "17",
@@ -11390,16 +11409,38 @@
                 "y": 0
               },
               "category": "Kategorie I",
-              "x_units": 14
+              "x_units": 12
             }
           ],
           "x_offset": -4,
           "explicit_shift_segments": [
             0,
-            1,
-            2,
-            3
-          ]
+            1
+          ],
+          "live_stretch": {
+            "2": {
+              "first": {
+                "row": "10",
+                "seat": 11
+              },
+              "last": {
+                "row": "10",
+                "seat": 16
+              }
+            }
+          },
+          "live_stretch2": {
+            "3": {
+              "first": {
+                "row": "12",
+                "seat": 18
+              },
+              "last": {
+                "row": "12",
+                "seat": 20
+              }
+            }
+          }
         },
         {
           "uuid": "edaebdfb-31c7-52d3-b980-056553355a0f",
@@ -11569,7 +11610,7 @@
                 "y": 0
               },
               "category": "Kategorie I",
-              "x_units": 1
+              "x_units": 0
             },
             {
               "seat_number": "15",
@@ -11580,7 +11621,7 @@
                 "y": 0
               },
               "category": "Kategorie I",
-              "x_units": 2
+              "x_units": 1
             },
             {
               "seat_number": "16",
@@ -11591,7 +11632,7 @@
                 "y": 0
               },
               "category": "Kategorie I",
-              "x_units": 3
+              "x_units": 2
             },
             {
               "seat_number": "17",
@@ -11602,7 +11643,7 @@
                 "y": 0
               },
               "category": "Kategorie I",
-              "x_units": 4
+              "x_units": 3
             },
             {
               "seat_number": "18",
@@ -11613,7 +11654,7 @@
                 "y": 0
               },
               "category": "Kategorie I",
-              "x_units": 5
+              "x_units": 4
             },
             {
               "seat_number": "19",
@@ -11624,7 +11665,7 @@
                 "y": 0
               },
               "category": "Kategorie I",
-              "x_units": 6
+              "x_units": 5
             },
             {
               "seat_number": "20",
@@ -11635,17 +11676,27 @@
                 "y": 0
               },
               "category": "Kategorie I",
-              "x_units": 7
+              "x_units": 6
             }
           ],
           "x_offset": -13,
           "explicit_shift_segments": [
             0,
             1,
-            2,
-            3,
             4
-          ]
+          ],
+          "live_shift": {
+            "2": {
+              "anchor_seat": 11,
+              "target_row": "11",
+              "target_seat": 9
+            },
+            "3": {
+              "anchor_seat": 14,
+              "target_row": "11",
+              "target_seat": 13
+            }
+          }
         }
       ],
       "layout": "anchored"
