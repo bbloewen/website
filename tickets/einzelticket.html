@@ -137,7 +137,7 @@
 
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="/js/nav.js?v=1785398309"></script>
-<script src="/js/include.js?v=1785398309"></script><script src="/js/seat-picker.js?v=1786530100"></script>
+<script src="/js/include.js?v=1785398309"></script><script src="/js/seat-picker.js?v=1786530200"></script>
 <script>
   /* Die Seite gilt für JEDES Heimspiel, nicht nur für das erste. Welches gemeint
      ist, steht in ?spiel=<slug> (z. B. ?spiel=2026-10-11) und wird gegen
@@ -201,8 +201,15 @@
         pretixEvent: 'saison2627',
         // pretix-Item-ID -> Kategorie-Bezeichnung, analog tickets/dauerkarte.html — nötig,
         // damit ein produktgebundener Gutschein (z.B. nur Kategorie II) der richtigen
-        // Warenkorb-Zeile zugeordnet wird statt pauschal auf alles zu wirken.
-        pretixItemCategoryMap: { 24: 'Kategorie I', 25: 'Kategorie II' },
+        // Warenkorb-Zeile zugeordnet wird statt pauschal auf alles zu wirken. 24/25 sind
+        // die ursprünglichen, seit dem Block-Split (09.08.2026) deaktivierten Sammel-Items
+        // für Kategorie I/II — bleiben hier stehen für evtl. noch offene Alt-Gutscheine.
+        pretixItemCategoryMap: {
+          24: 'Kategorie I', 25: 'Kategorie II',
+          27: 'Fanblock', 28: 'Kategorie III',
+          29: 'Kategorie II', 30: 'Kategorie II', 31: 'Kategorie II', 32: 'C unten',
+          33: 'Kategorie I', 34: 'Rollstuhlplatz', 35: 'Kategorie I'
+        },
         // Block A, Reihe 1 Platz 8-19: für Ehrenamtliche reserviert; Reihe 1-3 Platz 1-7
         // separat als "nicht verfügbar" (NV) markiert, s. tickets/dauerkarte.html. Platz 20
         // (Rollstuhlplatz) bewusst ausgenommen — normal buchbar, keine EA-Reservierung.

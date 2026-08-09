@@ -50,7 +50,14 @@
             <div class="price-row"><span>Kategorie 1 (ermäßigt)</span><strong id="dk-price-kat1-erm" data-base="182">182,00 €</strong></div>
             <div class="price-row"><span>Kategorie 2</span><strong id="dk-price-kat2" data-base="156">156,00 €</strong></div>
             <div class="price-row"><span>Kategorie 2 (ermäßigt)</span><strong id="dk-price-kat2-erm" data-base="115">115,00 €</strong></div>
-            <div class="price-row"><span>VIP</span><strong id="dk-price-vip" data-base="1000">1.000,00 €</strong></div>
+            <div class="price-row"><span>Kategorie 3</span><strong id="dk-price-kat3" data-base="130">130,00 €</strong></div>
+            <div class="price-row"><span>Kategorie 3 (ermäßigt)</span><strong id="dk-price-kat3-erm" data-base="104">104,00 €</strong></div>
+            <div class="price-row"><span>Kategorie 3 (Kinder 7–14)</span><strong id="dk-price-kat3-kind" data-base="71.5">71,50 €</strong></div>
+            <div class="price-row"><span>Fanblock</span><strong id="dk-price-fanblock" data-base="136.5">136,50 €</strong></div>
+            <div class="price-row"><span>Fanblock (ermäßigt)</span><strong id="dk-price-fanblock-erm" data-base="104">104,00 €</strong></div>
+            <div class="price-row"><span>Rollstuhlfahrer<br><span class="t-caption" style="color:var(--text-muted)">nur Block A, D, E, F</span></span><strong id="dk-price-rollstuhl" data-base="104">104,00 €</strong></div>
+            <div class="price-row"><span>VIP</span><strong id="dk-price-vip" data-base="1290">1.290,00 €</strong></div>
+            <div class="price-row"><span>VIP (ermäßigt)</span><strong id="dk-price-vip-erm" data-base="495">495,00 €</strong></div>
           </div>
           <div class="buy-thumb-col">
             <div id="seatplan-root"></div>
@@ -153,7 +160,7 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="/js/nav.js?v=1785398309"></script>
 <script src="/js/include.js?v=1785398309"></script>
-<script src="/js/seat-picker.js?v=1786530100"></script>
+<script src="/js/seat-picker.js?v=1786530200"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     /* Preisbox zeigt bewusst den Normalpreis (data-base) statisch an. Rabatte
@@ -170,10 +177,13 @@
       // Gültig ist immer nur .../webhook/<pfad>.
       seatStatusUrl: 'https://poetic-patience-production-9290.up.railway.app/webhook/dauerkarte-sitzplatz-status',
       pretixEvent: 'saison2627',
-      // pretix-Item-ID -> Kategorie-Bezeichnung (Event saison2627, Stand 05.08.2026) —
+      // pretix-Item-ID -> Kategorie-Bezeichnung (Event saison2627, Stand 09.08.2026) —
       // nötig, damit ein produktgebundener Gutschein (z.B. nur VIP) der richtigen
       // Warenkorb-Zeile zugeordnet wird statt pauschal auf alles zu wirken.
-      pretixItemCategoryMap: { 20: 'Kategorie I', 21: 'Kategorie II', 22: 'VIP' },
+      // VIP (ermaessigt) ist bewusst ein EIGENES Item (36), keine Variation von 22 —
+      // pretix erlaubt es nicht, einem bestehenden Item ohne Variationen nachträglich
+      // eine Variation hinzuzufügen (Marko, 09.08.2026: neuer VIP-Ermäßigt-Tarif).
+      pretixItemCategoryMap: { 20: 'Kategorie I', 21: 'Kategorie II', 22: 'VIP', 36: 'VIP', 37: 'Kategorie III', 38: 'Fanblock', 39: 'Rollstuhlplatz' },
       // Block A, Reihe 1 Platz 8-19: für Ehrenamtliche reserviert (noch nicht verkaufte
       // Plätze dort sind nicht buchbar, s. seat-picker.js _computeSeatGuidsForRanges).
       // Reihe 2/3 ab Platz 8 bewusst frei — sonst wären es zu viele reservierte Plätze.
@@ -190,10 +200,18 @@
       ],
       northZones: ['D', 'E', 'F'],
       southZones: ['A', 'B', 'C'],
+      // Kategorie III/Fanblock/Rollstuhlplatz/VIP (ermaessigt) sind in pretix als Items
+      // 37/38/39/36 bereits angelegt (Preise s. Preisliste oben + gen_seatplan-Kommentar),
+      // aber ABSICHTLICH noch nicht in `prices` — ihnen fehlt noch ein Kontingent. Erst
+      // klären, ob das Kontingent mit den gleichnamigen Einzelticket-Items geteilt wird
+      // (damit Dauerkarte + Einzelticket nicht zusammen über die real vorhandenen Plätze
+      // hinaus verkaufen, analog Kategorie I/II) oder eigenständig ist — dann Preise +
+      // Sitze hier freischalten. Bis dahin bleiben die betroffenen Sitze bewusst
+      // ausgegraut (s. _renderZone-Disable-Gate: kein Preis = kein Kauf).
       prices: {
         'Kategorie I': { normal: 208, ermaessigt: 182 },
         'Kategorie II': { normal: 156, ermaessigt: 115 },
-        'VIP': { normal: 1000 }
+        'VIP': { normal: 1290 }
       },
       dauerkarteDiscount: { earlyBirdPercent: 20, earlyBirdUntil: '2026-08-31', memberPercent: 30 },
       cartEl: document.getElementById('seatplan-cart'),

@@ -92,8 +92,10 @@
   var DK_TARIF_LABELS = {
     normal: 'Normalpreis',
     ermaessigt: 'Ermäßigt',
+    kind: 'Kinder 7–14',
     normal_member: 'Normalpreis mit Mitgliedsrabatt (Löwen e.V.)',
-    ermaessigt_member: 'Ermäßigt mit Mitgliedsrabatt (Löwen e.V.)'
+    ermaessigt_member: 'Ermäßigt mit Mitgliedsrabatt (Löwen e.V.)',
+    kind_member: 'Kinder 7–14 mit Mitgliedsrabatt (Löwen e.V.)'
   };
 
   /* Tarife im Modus "blocks" (Einzelticket) — "kind" bisher nur für Kategorie III
@@ -305,7 +307,9 @@
   };
 
   SeatPicker.prototype._dkTarifPrice = function (priceInfo, tarif) {
-    var base = tarif.indexOf('ermaessigt') === 0 ? priceInfo.ermaessigt : priceInfo.normal;
+    var base = tarif.indexOf('kind') === 0 ? priceInfo.kind
+      : tarif.indexOf('ermaessigt') === 0 ? priceInfo.ermaessigt
+      : priceInfo.normal;
     return this._dkPrice(base, tarif.indexOf('_member') !== -1);
   };
 
@@ -315,9 +319,11 @@
      Zeile statt kommagetrennt in einem Satz zu verschwinden. Der Endpreis
      selbst steht separat rechts in der Zeile (s. _renderCart), nicht hier. */
   SeatPicker.prototype._dkBreakdownText = function (priceInfo, tarif) {
-    var isErmaessigt = tarif.indexOf('ermaessigt') === 0;
-    var base = isErmaessigt ? priceInfo.ermaessigt : priceInfo.normal;
-    var lines = [(isErmaessigt ? 'Ermäßigt' : 'Normalpreis') + ' ' + fmtEUR(base) + ' € je Ticket'];
+    var isKind = tarif.indexOf('kind') === 0;
+    var isErmaessigt = !isKind && tarif.indexOf('ermaessigt') === 0;
+    var base = isKind ? priceInfo.kind : isErmaessigt ? priceInfo.ermaessigt : priceInfo.normal;
+    var label = isKind ? DK_TARIF_LABELS.kind : isErmaessigt ? 'Ermäßigt' : 'Normalpreis';
+    var lines = [label + ' ' + fmtEUR(base) + ' € je Ticket'];
     if (this.dkDiscount) {
       if (this._earlyBirdActive()) lines.push('<strong>abzüglich ' + this.dkDiscount.earlyBirdPercent + ' % Frühbucherrabatt</strong>');
       if (tarif.indexOf('_member') !== -1) lines.push('<strong>abzüglich ' + this.dkDiscount.memberPercent + ' % Mitgliedsrabatt (Löwen e.V.)</strong>');
@@ -2223,9 +2229,10 @@
         var row = document.createElement('div');
         row.className = 'seatplan-cart-item';
         var hasErmaessigt = s.priceInfo.ermaessigt !== undefined;
-        var tarifOptions = ['normal'].concat(hasErmaessigt ? ['ermaessigt'] : []);
+        var hasKind = s.priceInfo.kind !== undefined;
+        var tarifOptions = ['normal'].concat(hasErmaessigt ? ['ermaessigt'] : []).concat(hasKind ? ['kind'] : []);
         if (self.dkDiscount) {
-          tarifOptions = tarifOptions.concat(['normal_member'], hasErmaessigt ? ['ermaessigt_member'] : []);
+          tarifOptions = tarifOptions.concat(['normal_member'], hasErmaessigt ? ['ermaessigt_member'] : [], hasKind ? ['kind_member'] : []);
         }
         /* Mitgliedsrabatt gilt pro Person, nicht pro Bestellung — ein Käufer könnte
            sonst seinen eigenen Mitgliedsstatus für beliebig viele fremde Plätze
