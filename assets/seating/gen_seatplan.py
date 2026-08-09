@@ -389,11 +389,12 @@ block_F = [
 #     gleichzeitig auf dieselbe Zielbeziehung wirken (mit +1/+1 bliebe der bisherige
 #     1-Einheit-Versatz zwischen den beiden Sitzen bestehen) — volle Algebra im Memory.
 block_A = [
-    # Kategorie/Fanblock-Split (Marko, 09.08.2026): Reihe 1-5 (die bisherige "obere"
-    # Gruppe, ohnehin schon per break_before={"6"} optisch abgesetzt) ist jetzt Kategorie
-    # III, Reihe 6-12 ("untere" Gruppe) ist Fanblock — zwei eigene Produkte statt beide
-    # Kategorie II. Geometrie/Sitzdaten bleiben unverändert, nur die category-Zuordnung
-    # ändert sich.
+    # Kategorie/Fanblock-Split (Marko, 09.08.2026, korrigiert 09.08.2026 nach Rückfrage):
+    # Reihe 1-5 ist Fanblock, Reihe 6-12 (bereits per break_before={"6"} optisch abgesetzt)
+    # ist Kategorie III — zwei eigene Produkte statt beide Kategorie II. Ursprünglich
+    # hatte ich das vertauscht (Reihe 1-5 als Kategorie III, Reihe 6-12 als Fanblock) —
+    # Marko: "Block A 1 bis 5 ist Fanblock." Geometrie/Sitzdaten bleiben unverändert, nur
+    # die category-Zuordnung.
     # Reihe 1 (Marko, 04.08.2026): zusätzlicher Rollstuhlplatz ganz rechts, mit einer
     # vollen Sitzbreite Lücke zu Sitz 19 (dort, wo bisher nur die Reihennummer stand) —
     # neues Segment [1] (Sitz 20). Shift 0 (nicht mehr +1, Marko-Korrektur): +1 ergab eine
@@ -402,19 +403,19 @@ block_A = [
     # in die die Reihennummer hineinpasst. Shift 0 bleibt trotzdem in explicit_shift_
     # segments (expliziter Eintrag, s. mkrow()) — unterdrückt die sonst greifende
     # 10px-Dekorlücke, die sonst oben draufkäme.
-    (1, [7, 12, 1], KAT3, {"x_offset": -9, "segment_shifts": {0: -1, 2: 0}, "wheelchair_seats": [20],
+    (1, [7, 12, 1], FANBLOCK, {"x_offset": -9, "segment_shifts": {0: -1, 2: 0}, "wheelchair_seats": [20],
         "label_before_seat": 20}),
-    (2, [7, 12], KAT3, {"x_offset": -9, "segment_shifts": {0: -1}}),
-    (3, [7, 12], KAT3, {"x_offset": -9, "segment_shifts": {0: -1}}),
-    (4, [12], KAT3, {"x_offset": -2}),
-    (5, [12], KAT3, {"x_offset": -2}),
-    (6, [20], FANBLOCK, {"x_offset": -10}),
-    (7, [20], FANBLOCK, {"x_offset": -10}),
-    (8, [20], FANBLOCK, {"x_offset": -10}),
-    (9, [20], FANBLOCK, {"x_offset": -10}),
-    (10, [20], FANBLOCK, {"x_offset": -10}),
-    (11, [2, 20, 3], FANBLOCK, {"x_offset": -12, "segment_shifts": {0: -3, 2: 2}}),
-    (12, [7, 14, 7], FANBLOCK, {"x_offset": -14, "segment_shifts": {0: -1, 2: 1}}),
+    (2, [7, 12], FANBLOCK, {"x_offset": -9, "segment_shifts": {0: -1}}),
+    (3, [7, 12], FANBLOCK, {"x_offset": -9, "segment_shifts": {0: -1}}),
+    (4, [12], FANBLOCK, {"x_offset": -2}),
+    (5, [12], FANBLOCK, {"x_offset": -2}),
+    (6, [20], KAT3, {"x_offset": -10}),
+    (7, [20], KAT3, {"x_offset": -10}),
+    (8, [20], KAT3, {"x_offset": -10}),
+    (9, [20], KAT3, {"x_offset": -10}),
+    (10, [20], KAT3, {"x_offset": -10}),
+    (11, [2, 20, 3], KAT3, {"x_offset": -12, "segment_shifts": {0: -3, 2: 2}}),
+    (12, [7, 14, 7], KAT3, {"x_offset": -14, "segment_shifts": {0: -1, 2: 1}}),
 ]
 # Block B auf absolutes Koordinaten-Layout umgestellt (04.08.2026, Marko): neuer Anker,
 # weil B strukturell anders ist als A (die "Treppe" vorn + gestreckte Reihen 6-10 statt
@@ -523,28 +524,29 @@ block_B = [
         }}),
 ]
 block_C = [
-    # Produkt-Split (Marko, 09.08.2026, zweite Runde): Reihe 1-5 bleibt "Kategorie II",
-    # Reihe 6-12 (bereits per break_before={"6"} optisch abgesetzt) wird "C unten" — ein
-    # ECHTES eigenes Produkt (eigenes pretix-Item/-Kontingent) mit eigenem Preis: 75,00 €
-    # Einzelticket, kein Ermäßigt-Tarif — wie VIP behandelt (Marko, 09.08.2026: "C unten
-    # bekommt VIP-Preis"), s. opts.prices in tickets/einzelticket.html und CATEGORY_META
-    # in seat-picker.js (dort auch optisch wie VIP dargestellt).
+    # Produkt-Split (Marko, 09.08.2026, korrigiert 09.08.2026 nach Rückfrage): Reihe 1-5
+    # ist "C unten" (eigenes Produkt, eigener Preis: 75,00 € Einzelticket, kein Ermäßigt-
+    # Tarif, wie VIP behandelt, s. opts.prices in tickets/einzelticket.html und
+    # CATEGORY_META in seat-picker.js), Reihe 6-12 (bereits per break_before={"6"} optisch
+    # abgesetzt) bleibt "Kategorie II". Ursprünglich hatte ich das vertauscht (Reihe 1-5
+    # als Kategorie II, Reihe 6-12 als C unten) — Marko: "Block C 1 bis 5 ist Block C
+    # unten."
     # Reihe 1-3 (Marko): echte Ein-Platz-Lücke zwischen Sitz 12 und 13 (Segment 1 beginnt
     # bei Sitz 13, s. segments [12,7]).
-    (1, [12, 7], KAT2, {"segment_gap_seats": {1: 1}}),
-    (2, [12, 7], KAT2, {"segment_gap_seats": {1: 1}}),
-    (3, [12, 7], KAT2, {"segment_gap_seats": {1: 1}}),
-    (4, [12], KAT2),
-    (5, [12], KAT2),
-    (6, [20], C_UNTEN),
-    (7, [20], C_UNTEN),
-    (8, [20], C_UNTEN),
-    (9, [20], C_UNTEN),
-    (10, [20], C_UNTEN, {"align_reference_seat": True}),
-    (11, [2, 20, 2], C_UNTEN, {"align_target_seat": 3, "segment_align": {"1": {"row": "12", "seat": 1}, "23": {"row": "12", "seat": 27}}}),
+    (1, [12, 7], C_UNTEN, {"segment_gap_seats": {1: 1}}),
+    (2, [12, 7], C_UNTEN, {"segment_gap_seats": {1: 1}}),
+    (3, [12, 7], C_UNTEN, {"segment_gap_seats": {1: 1}}),
+    (4, [12], C_UNTEN),
+    (5, [12], C_UNTEN),
+    (6, [20], KAT2),
+    (7, [20], KAT2),
+    (8, [20], KAT2),
+    (9, [20], KAT2),
+    (10, [20], KAT2, {"align_reference_seat": True}),
+    (11, [2, 20, 2], KAT2, {"align_target_seat": 3, "segment_align": {"1": {"row": "12", "seat": 1}, "23": {"row": "12", "seat": 27}}}),
     # Reihe 12 (Marko): echte Ein-Platz-Lücken zwischen Sitz 7/8 (Segment 1) und 21/22
     # (Segment 2).
-    (12, [7, 14, 7], C_UNTEN, {"align_target_seat": 6, "segment_gap_seats": {1: 1, 2: 1}}),
+    (12, [7, 14, 7], KAT2, {"align_target_seat": 6, "segment_gap_seats": {1: 1, 2: 1}}),
 ]
 
 plan = {
