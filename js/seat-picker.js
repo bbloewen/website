@@ -58,7 +58,7 @@
     // VIP. Optik bleibt daher wie Kategorie II. shortLabel = Anzeigename auf der Website
     // (Marko, 09.08.2026: nicht mehr "C unten" zeigen) — der interne Schlüssel "C unten"
     // bleibt unverändert (Preise/pretixItemCategoryMap referenzieren ihn weiter so).
-    'C unten': { cls: 'cat-kat2', color: cssVar('--seatplan-cat-kat2', '#D9DEE3'), borderColor: cssVar('--seatplan-cat-kat2-border', '#B9C1C8'), shortLabel: 'C Courtside, Kategorie 2' },
+    'C unten': { cls: 'cat-kat2', color: cssVar('--seatplan-cat-kat2', '#D9DEE3'), borderColor: cssVar('--seatplan-cat-kat2-border', '#B9C1C8'), shortLabel: 'C (courtside) Kat. II' },
     'VIP': { cls: 'cat-vip', color: cssVar('--seatplan-cat-vip', 'rgba(179,57,44,.55)'), borderColor: cssVar('--seatplan-cat-vip-border', 'rgba(179,57,44,.9)') }
   };
   function catMeta(category) { return CATEGORY_META[category] || {}; }
