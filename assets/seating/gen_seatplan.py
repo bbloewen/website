@@ -507,11 +507,14 @@ block_B = [
     # auseinanderliegen (Sitz 3→8 in Reihe 11 = Sitz 1→6 in Reihe 10 = je 5 Schritte).
     # Segment 2 (Sitz 9-14): "8 Plätze Lücke" vor Sitz 9 unverändert aus dem Ur-Diktat
     # (Shift2 = Shift1 + 8 = -3,5). Segment 3 (Sitz 15-17): "treppensepariert"-Lücke
-    # unverändert geschätzt (Shift3 = Shift2 + 2 = -1,5). Segment 0 (Sitz 1-2): Marko
-    # wollte sie "nach rechts geschoben", weg von der (jetzt zu großen) Lücke zu Sitz 3 —
-    # Shift0 = -12 (Schätzung ohne exakte Diktat-Zahl, ergibt eine sichtbare, aber
-    # moderate ~1,5-Einheiten-Lücke; bei Bedarf mit Marko live nachschärfen).
-    (11, [2, 6, 6, 3], KAT1, {"x_offset": -4, "segment_shifts": {0: -12, 1: -11.5, 2: -3.5, 3: -1.5}}),
+    # unverändert geschätzt (Shift3 = Shift2 + 2 = -1,5).
+    # Segment 0 (Sitz 1-2), sechste Korrektur (Marko, 10.08.2026): "Sitz 1/2 fluchten mit
+    # Sitz 1/2 der Reihe 12, danach 3 Plätze frei (große Lücke) vor Sitz 3." Reihe 12 Sitz 1
+    # = -13 (x_offset) + 0 - 5,5 (Shift0, s.u.) = -18,5 → Shift0 Reihe 11 = -18,5 - (-4) =
+    # -14,5. Ergibt automatisch eine 4-Einheiten-Lücke zu Sitz 3 (-13,5 - (-17,5) = 4 =
+    # "3 Plätze frei"), exakt wie gefordert — reiner Nebeneffekt der Reihe-12-Fluchtung,
+    # keine eigene Lückengröße nötig.
+    (11, [2, 6, 6, 3], KAT1, {"x_offset": -4, "segment_shifts": {0: -14.5, 1: -11.5, 2: -3.5, 3: -1.5}}),
     # Reihe 12 (Marko, 10.08.2026, fünfte Korrektur): "Plätze 1 bis 10 nach links, sodass
     # Platz 10 genau über Platz 8 der Reihe 11 liegt." Segment 0+1 (Sitz 1-10) als STARRER
     # Block verschoben (ihr bisheriger relativer Versatz zueinander, -2/-1 = 1 Einheit
