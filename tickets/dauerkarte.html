@@ -160,7 +160,7 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="/js/nav.js?v=1785398309"></script>
 <script src="/js/include.js?v=1785398309"></script>
-<script src="/js/seat-picker.js?v=1786583000"></script>
+<script src="/js/seat-picker.js?v=1786584000"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     /* Preisbox zeigt bewusst den Normalpreis (data-base) statisch an. Rabatte
@@ -170,7 +170,7 @@
     var picker = new SeatPicker(document.getElementById('seatplan-root'), {
       nachwuchsBeitrag: true,
       nachwuchsAmount: 2,
-      planUrl: '/assets/seating/riethsporthalle-seatingplan.json?v=1786583000',
+      planUrl: '/assets/seating/riethsporthalle-seatingplan.json?v=1786584000',
       // Webhook-URL ohne Workflow-ID im Pfad! Das n8n-MCP-Tool liefert die
       // Produktions-URL fälschlich als .../webhook/<workflow-id>/<pfad> zurück, was
       // 404 ergibt (n8n-Bug, laut Support in 2.33.0 behoben, Ticket #35063).

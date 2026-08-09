@@ -496,32 +496,31 @@ block_B = [
     # Reihe 10 (Marko-Diktat, unverändert seit der Korrektur — NICHT mehr anfassen):
     # "1-8, 4er-Lücke, dann 9-16", reines festes Einheiten-Raster, keine Live-Messung.
     (10, [8, 8], KAT1, {"x_offset": -10, "segment_shifts": {0: -3.5, 1: 0.5}}),
-    # Reihe 11 (Marko, 10.08.2026): "Platz 3 liegt genau über Platz 1 der Reihen 6-10,
-    # Platz 16 genau über Platz 16 der Reihen 6-10." Segment 0 (Sitz 1-2, Shift -11)
-    # unverändert (Fluchtpunkt zu Reihe 12 Sitz 1/2, nicht Teil dieser Korrektur). Sitz
-    # 3-17 laufen jetzt per live_fit_scaled (s. seat-picker.js): relative_units ist die
-    # aus der VORHERIGEN Runde (Shifts {1:-8,2:0,3:2}, s. Git-Historie) errechnete
-    # Referenz-Struktur (Sitz 3=0, ..., Sitz 8=5, Sitz 9=14 ["8 Plätze Lücke"], ...,
-    # Sitz 14=19, Sitz 15=22 ["treppensepariert"], Sitz 16=23, Sitz 17=24) — wird
-    # PROPORTIONAL auf die neue Spannweite (Sitz3→Reihe10/Sitz1, Sitz16→Reihe10/Sitz16)
-    # gestreckt/gestaucht, damit beide neuen Fluchtpunkte exakt erfüllt sind, OHNE die
-    # relativen Lückengrößen zueinander willkürlich zu verwerfen.
-    (11, [2, 6, 6, 3], KAT1, {"x_offset": -4, "segment_shifts": {0: -11, 1: -8, 2: 0, 3: 2},
-        "live_fit_scaled": {
-            "first": {"row": "10", "seat": 1}, "last": {"row": "10", "seat": 16},
-            "anchor_first_seat": 3, "anchor_last_seat": 16,
-            "relative_units": {3: 0, 4: 1, 5: 2, 6: 3, 7: 4, 8: 5, 9: 14, 10: 15, 11: 16,
-                                12: 17, 13: 18, 14: 19, 15: 22, 16: 23, 17: 24}
-        }}),
-    # Reihe 12 (Marko, 10.08.2026): "Verschiebe Platz 11 bis Platz 20 so, dass Platz 20
-    # über Platz 17 der Reihe 11 liegt." Segment 0/1 (Sitz 1-10, Shifts -2/-1) unverändert
-    # (Fluchtpunkt Sitz 6=Sitz3 Reihe 11, nicht Teil dieser Korrektur). Segmente 2-4 (Sitz
-    # 11-20) behalten ihre ALTEN relativen Shifts (0/1/1, s. Git-Historie) als Ausgangs-
-    # basis — live_shift verschiebt diesen kompletten Block (anchor_seat=11) NACHTRÄGLICH
-    # als starre Einheit, bis via_seat=20 exakt auf Reihe 11 Sitz 17 liegt (der seinerseits
-    # erst durch Reihe 11s live_fit_scaled, s.o., seine finale Position bekommt — daher
-    # Reihenfolge im JS: live_fit_scaled läuft VOR live_shift).
-    (12, [7, 3, 3, 2, 5], KAT1, {"x_offset": -13, "segment_shifts": {0: -2, 1: -1, 2: 0, 3: 1, 4: 1},
+    # Reihe 11 (Marko, 10.08.2026, fünfte Korrektur): live_fit_scaled komplett verworfen —
+    # der gestauchte Abstand (19/23-Skalierung) widersprach der neuen Vorgabe, dass der
+    # NORMALE Sitzabstand in Reihe 11/12 überall dort, wo keine Lücke ist (1-2, 3-8, 9-14,
+    # 15-17), IDENTISCH mit Reihe 10s Abstand sein muss — reine Einheiten-Arithmetik statt
+    # Live-Messung, das war die ganze Zeit über schon möglich (Reihe 10 ist fest/bekannt).
+    # Segment 1 (Sitz 3-8): Shift1 = -11,5, damit Sitz 3 = Reihe 10 Sitz 1 (-13,5) —
+    # daraus ergibt sich Sitz 8 = Reihe 10 Sitz 6 (-8,5) automatisch (Marko: "Platz 8
+    # genau über Platz 6 der Reihe 10"), OHNE jede Stauchung, weil beide je 5 Einheiten
+    # auseinanderliegen (Sitz 3→8 in Reihe 11 = Sitz 1→6 in Reihe 10 = je 5 Schritte).
+    # Segment 2 (Sitz 9-14): "8 Plätze Lücke" vor Sitz 9 unverändert aus dem Ur-Diktat
+    # (Shift2 = Shift1 + 8 = -3,5). Segment 3 (Sitz 15-17): "treppensepariert"-Lücke
+    # unverändert geschätzt (Shift3 = Shift2 + 2 = -1,5). Segment 0 (Sitz 1-2): Marko
+    # wollte sie "nach rechts geschoben", weg von der (jetzt zu großen) Lücke zu Sitz 3 —
+    # Shift0 = -12 (Schätzung ohne exakte Diktat-Zahl, ergibt eine sichtbare, aber
+    # moderate ~1,5-Einheiten-Lücke; bei Bedarf mit Marko live nachschärfen).
+    (11, [2, 6, 6, 3], KAT1, {"x_offset": -4, "segment_shifts": {0: -12, 1: -11.5, 2: -3.5, 3: -1.5}}),
+    # Reihe 12 (Marko, 10.08.2026, fünfte Korrektur): "Plätze 1 bis 10 nach links, sodass
+    # Platz 10 genau über Platz 8 der Reihe 11 liegt." Segment 0+1 (Sitz 1-10) als STARRER
+    # Block verschoben (ihr bisheriger relativer Versatz zueinander, -2/-1 = 1 Einheit
+    # Säulen-Lücke, bleibt erhalten) — Delta aus Sitz 10s neuem Ziel hergeleitet: Sitz 10
+    # (Index 9, Segment 1) soll auf Reihe 11 Sitz 8 (-8,5) liegen → Shift1_neu = -8,5-13+9
+    # = -4,5 (statt bisher -1) → Delta = -3,5, gleichermaßen auf Shift0 angewendet
+    # (-2 → -5,5). Segmente 2-4 (Sitz 11-20) unverändert, live_shift (unverändert, misst
+    # Reihe 11 Sitz 17 weiterhin live) verschiebt sie weiter automatisch korrekt nach.
+    (12, [7, 3, 3, 2, 5], KAT1, {"x_offset": -13, "segment_shifts": {0: -5.5, 1: -4.5, 2: 0, 3: 1, 4: 1},
         "live_shift": {2: {"anchor_seat": 11, "via_seat": 20, "target_row": "11", "target_seat": 17}}}),
 ]
 block_C = [
