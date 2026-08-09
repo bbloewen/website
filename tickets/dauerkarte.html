@@ -182,8 +182,17 @@
       // Warenkorb-Zeile zugeordnet wird statt pauschal auf alles zu wirken.
       // VIP (ermaessigt) ist bewusst ein EIGENES Item (36), keine Variation von 22 —
       // pretix erlaubt es nicht, einem bestehenden Item ohne Variationen nachträglich
-      // eine Variation hinzuzufügen (Marko, 09.08.2026: neuer VIP-Ermäßigt-Tarif).
-      pretixItemCategoryMap: { 20: 'Kategorie I', 21: 'Kategorie II', 22: 'VIP', 36: 'VIP', 37: 'Kategorie III', 38: 'Fanblock', 39: 'Rollstuhlplatz' },
+      // eine Variation hinzuzufügen. 20/21 sind die alten, jetzt deaktivierten
+      // Sammel-Items für Kategorie I/II — bleiben stehen für evtl. noch offene
+      // Alt-Gutscheine. 41/44 (Kategorie I) und 43/45/42/46 (Kategorie II) sind die
+      // neuen Block-eigenen Dauerkarte-Items (Block E/B bzw. D/F/C oben/C unten).
+      pretixItemCategoryMap: {
+        20: 'Kategorie I', 21: 'Kategorie II',
+        41: 'Kategorie I', 44: 'Kategorie I',
+        43: 'Kategorie II', 45: 'Kategorie II', 42: 'Kategorie II', 46: 'Kategorie II',
+        22: 'VIP', 36: 'VIP',
+        37: 'Kategorie III', 38: 'Fanblock', 39: 'Rollstuhlplatz'
+      },
       // Block A, Reihe 1 Platz 8-19: für Ehrenamtliche reserviert (noch nicht verkaufte
       // Plätze dort sind nicht buchbar, s. seat-picker.js _computeSeatGuidsForRanges).
       // Reihe 2/3 ab Platz 8 bewusst frei — sonst wären es zu viele reservierte Plätze.
@@ -200,18 +209,20 @@
       ],
       northZones: ['D', 'E', 'F'],
       southZones: ['A', 'B', 'C'],
-      // Kategorie III/Fanblock/Rollstuhlplatz/VIP (ermaessigt) sind in pretix als Items
-      // 37/38/39/36 bereits angelegt (Preise s. Preisliste oben + gen_seatplan-Kommentar),
-      // aber ABSICHTLICH noch nicht in `prices` — ihnen fehlt noch ein Kontingent. Erst
-      // klären, ob das Kontingent mit den gleichnamigen Einzelticket-Items geteilt wird
-      // (damit Dauerkarte + Einzelticket nicht zusammen über die real vorhandenen Plätze
-      // hinaus verkaufen, analog Kategorie I/II) oder eigenständig ist — dann Preise +
-      // Sitze hier freischalten. Bis dahin bleiben die betroffenen Sitze bewusst
-      // ausgegraut (s. _renderZone-Disable-Gate: kein Preis = kein Kauf).
+      // Kontingente pro Block (Marko, 09.08.2026, Regel 1: "Dauerkarten und Einzeltickets
+      // teilen sich immer ein Kontingent, aber nur in dem jeweiligen Block") — jeder Block
+      // hat sein eigenes pretix-Kontingent, geteilt zwischen Dauerkarte- und
+      // Einzelticket-Item (13 Kontingente pro Block, eins je Heimspiel). Kategorie I/II
+      // waren vorher über gepoolte Sammel-Items (20/21) geregelt, die jetzt deaktiviert
+      // sind — Block E/Block B(Kat.1)/Block D/Block F/Block C oben/Block C unten haben
+      // seither jeweils ein eigenes Dauerkarte-Item (41/44/43/45/42/46).
       prices: {
         'Kategorie I': { normal: 208, ermaessigt: 182 },
         'Kategorie II': { normal: 156, ermaessigt: 115 },
-        'VIP': { normal: 1290 }
+        'Kategorie III': { normal: 130, ermaessigt: 104, kind: 71.5 },
+        'Fanblock': { normal: 136.5, ermaessigt: 104 },
+        'Rollstuhlplatz': { normal: 104 },
+        'VIP': { normal: 1290, ermaessigt: 495 }
       },
       dauerkarteDiscount: { earlyBirdPercent: 20, earlyBirdUntil: '2026-08-31', memberPercent: 30 },
       cartEl: document.getElementById('seatplan-cart'),

@@ -55,6 +55,7 @@
             <div class="price-row"><span>Fanblock (ermäßigt)</span><strong>8,00 €</strong></div>
             <div class="price-row" id="preis-stehplatz"><span>Stehplatz</span><strong>8,00 €</strong></div>
             <div class="price-row"><span>Rollstuhlfahrer (inkl. Begleitkarte)<br><span class="t-caption" style="color:var(--text-muted)">nur Block A, D, E, F</span></span><strong>8,00 €</strong></div>
+            <div class="price-row"><span>VIP</span><strong>119,00 €</strong></div>
           </div>
           <div class="buy-thumb-col">
             <div id="seatplan-root"></div>
@@ -207,7 +208,7 @@
           24: 'Kategorie I', 25: 'Kategorie II',
           27: 'Fanblock', 28: 'Kategorie III',
           29: 'Kategorie II', 30: 'Kategorie II', 31: 'Kategorie II', 32: 'C unten',
-          33: 'Kategorie I', 34: 'Rollstuhlplatz', 35: 'Kategorie I'
+          33: 'Kategorie I', 34: 'Rollstuhlplatz', 35: 'Kategorie I', 40: 'VIP'
         },
         // Block A, Reihe 1 Platz 8-19: für Ehrenamtliche reserviert; Reihe 1-3 Platz 1-7
         // separat als "nicht verfügbar" (NV) markiert, s. tickets/dauerkarte.html. Platz 20
@@ -220,7 +221,6 @@
         ],
         northZones: ['D', 'E', 'F'],
         southZones: ['A', 'B', 'C'],
-        excludeCategories: ['VIP'],
         prices: {
           'Kategorie I': { normal: 16, ermaessigt: 14 },
           'Kategorie II': { normal: 12, ermaessigt: 8.5 },
@@ -238,7 +238,10 @@
           // Preis inkl. Begleitkarte, überschreibt bei Dauerkarte den Blockpreis für
           // seat.wheelchair-Sitze (s. seat-picker.js _renderZone), bei Einzelticket nur
           // über die Direktwahl-Dropdown wählbar (s. _renderDirectAddRow).
-          'Rollstuhlplatz': { normal: 8 }
+          'Rollstuhlplatz': { normal: 8 },
+          // VIP (Block B, Reihe 1-5): seit 09.08.2026 auch als Einzelticket buchbar
+          // (vorher excludeCategories, nur Dauerkarte). Kein Ermäßigt-Tarif.
+          'VIP': { normal: 119 }
         },
         // Stehplatz (s. #222): eigenes pretix-Produkt (Item 23), kein Sitz, keine
         // Ermäßigung — reiner Mengen-Posten, Preis muss zum n8n-Bestellworkflow passen.
