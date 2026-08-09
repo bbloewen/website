@@ -55,8 +55,10 @@
     // C unten: eigenes Produkt/Kontingent seit 09.08.2026, aber Preis bleibt Kategorie II
     // (12,00 €/8,50 €) — Marko hat den anfangs erwogenen VIP-Preis wieder verworfen
     // ("Block C unten ist kein VIP-Bereich, sondern Kategorie 2"). Nur Block B unten ist
-    // VIP. Optik bleibt daher wie Kategorie II.
-    'C unten': { cls: 'cat-kat2', color: cssVar('--seatplan-cat-kat2', '#D9DEE3'), borderColor: cssVar('--seatplan-cat-kat2-border', '#B9C1C8') },
+    // VIP. Optik bleibt daher wie Kategorie II. shortLabel = Anzeigename auf der Website
+    // (Marko, 09.08.2026: nicht mehr "C unten" zeigen) — der interne Schlüssel "C unten"
+    // bleibt unverändert (Preise/pretixItemCategoryMap referenzieren ihn weiter so).
+    'C unten': { cls: 'cat-kat2', color: cssVar('--seatplan-cat-kat2', '#D9DEE3'), borderColor: cssVar('--seatplan-cat-kat2-border', '#B9C1C8'), shortLabel: 'C Courtside, Kategorie 2' },
     'VIP': { cls: 'cat-vip', color: cssVar('--seatplan-cat-vip', 'rgba(179,57,44,.55)'), borderColor: cssVar('--seatplan-cat-vip-border', 'rgba(179,57,44,.9)') }
   };
   function catMeta(category) { return CATEGORY_META[category] || {}; }
@@ -64,6 +66,16 @@
   function catColor(category) { return catMeta(category).color || '#D9DEE3'; }
   function catBorderColor(category) { return catMeta(category).borderColor || '#B9C1C8'; }
   function catShortLabel(category) { return catMeta(category).shortLabel || category; }
+
+  /* Zerlegt einen Kachel-/Vormerk-Schlüssel ("A::Fanblock" oder schlicht "A") in Zone
+     und Kategorie — Blöcke mit nur einem kaufbaren Bereich (D/E/F) haben keinen "::"
+     Teil, category ist dann null. Gemeinsame Stelle für alle Schlüssel-Parser (vorher
+     mehrfach dieselbe indexOf('::')-Logik an verschiedenen Stellen, s. History). */
+  function splitZoneKey(key) {
+    if (!key) return { zoneId: null, category: null };
+    var sep = key.indexOf('::');
+    return sep === -1 ? { zoneId: key, category: null } : { zoneId: key.slice(0, sep), category: key.slice(sep + 2) };
+  }
 
   /* An welcher Kante die Reihen eines Blocks ausgerichtet sind. Steht als align_edge
      in den Zonendaten, weil es pro Blockseite unterschiedlich ist: A/B/F richten sich
@@ -133,6 +145,7 @@
     this.statusNoteEl = opts.statusNoteEl || null;
     this.onContinue = opts.onContinue || function () {};
     this.mobileZoneId = null; // Modus "seats": null = Block-Übersicht, sonst gewählter Block (Sitzdetail offen)
+    this.mobileCategory = null; // bei Blöcken mit mehreren kaufbaren Kategorien (z.B. Block A: Fanblock/Kategorie III): welche davon gerade offen ist — null bei Blöcken mit genau einer Kategorie
     this.pendingBlockId = null; // Modus "blocks": per Tippen in der Übersicht markierter, noch nicht übernommener Block
     this.nachwuchsBeitrag = !!opts.nachwuchsBeitrag; // Pauschale pro Bestellung, standardmäßig an, unabhängig von Anzahl Plätze/Tickets
     this.nachwuchsAmount = opts.nachwuchsAmount || 2;
@@ -458,13 +471,13 @@
   };
 
   /* Kaufbare Kategorien eines Blocks, in physischer Reihenfolge (oben→unten) und ohne
-     Duplikate — Grundlage für die Direktwahl-Dropdown UND für die Tipp-Erkennung auf
-     der Kachel (s. _tappedCategory). Ein Block kann mehrere ECHTE Produkte enthalten
-     (z.B. Block A: Kategorie III oben, Fanblock unten — beide eigene Preise) oder
-     mehrere Gruppen mit IDENTISCHER Kategorie (z.B. Block C: oben "Kategorie II", unten
-     "C unten" — dieselbe Kategorie/derselbe Preis, nur anders beschriftet) — im zweiten
-     Fall bleibt es bei genau EINEM Eintrag (Dedupe nach category), weil es kommerziell
-     nur ein Produkt ist. VIP-Anteile ohne Preis (excludeCategories, z.B. Block B beim
+     Duplikate — Grundlage für die Direktwahl-Dropdown UND für die separaten Kacheln in
+     der Übersicht (s. blockTile in _renderMobileOverview). Ein Block kann mehrere ECHTE
+     Produkte enthalten (z.B. Block A: Kategorie III oben, Fanblock unten; Block C:
+     Kategorie II oben, C unten — seit 09.08.2026 eigenes Kontingent/eigene Kachel, auch
+     wenn der Preis identisch zu Kategorie II bleibt). Dedupe nach category greift nur
+     noch, falls dieselbe Kategorie tatsächlich mehrfach im selben Block vorkommt (z.B.
+     zwei getrennte Gruppen). VIP-Anteile ohne Preis (excludeCategories, z.B. Block B beim
      Einzelticket) fallen ganz raus, wie bisher bei _quickAddBlock. */
   SeatPicker.prototype._purchasableCategories = function (zoneId) {
     var self = this;
@@ -482,31 +495,6 @@
     return result;
   };
 
-  /* Welche Kategorie eines mehrdeutigen Blocks (z.B. Block A: Kategorie III oben,
-     Fanblock unten) wurde angetippt — anhand der vertikalen Tipp-Position relativ zur
-     Kachel, nach demselben Reihenanzahl-Verhältnis wie der Farbverlauf in blockTile()
-     (s. dort), damit Tippfläche und sichtbare Trennlinie exakt übereinstimmen. Trifft
-     der Tipp eine Gruppe, die gar nicht kaufbar ist (z.B. der VIP-Anteil von Block B
-     beim Einzelticket), weicht die Funktion auf die letzte kaufbare Kategorie aus —
-     entspricht dem bisherigen Verhalten (ganze Kachel = eine Kategorie). */
-  SeatPicker.prototype._tappedCategory = function (zoneId, tileEl, event, purchasable) {
-    var zone = this._zoneById(zoneId);
-    var allGroups = this._categoryGroups(zone);
-    var total = allGroups.reduce(function (sum, g) { return sum + g.rows.length; }, 0);
-    var rect = tileEl.getBoundingClientRect();
-    var relY = rect.height ? (event.clientY - rect.top) / rect.height : 0;
-    var isNorth = this.northZones.indexOf(zoneId) !== -1;
-    var ordered = isNorth ? allGroups.slice().reverse() : allGroups;
-    var hitCategory = ordered[ordered.length - 1].category;
-    var acc = 0;
-    for (var i = 0; i < ordered.length; i++) {
-      acc += ordered[i].rows.length / total;
-      if (relY <= acc || i === ordered.length - 1) { hitCategory = ordered[i].category; break; }
-    }
-    var match = purchasable.filter(function (p) { return p.category === hitCategory; })[0];
-    return match ? match.category : purchasable[purchasable.length - 1].category;
-  };
-
   SeatPicker.prototype._zoneById = function (id) {
     return this.blocks[id];
   };
@@ -517,89 +505,29 @@
     function blockTile(id, isNorth) {
       var zone = self._zoneById(id);
       if (!zone) return '';
-      // allGroups (ungefiltert) ist nur für die Optik da: der VIP-Anteil eines Blocks
-      // (z. B. B) soll im Floorplan sichtbar bleiben, auch wenn er hier gar nicht kaufbar
-      // ist (excludeCategories) — sonst wirkt der Block als wäre er komplett Kategorie I.
-      // groups (gefiltert) bleibt die Grundlage für Hauptkategorie/Kaufbarkeit der Kachel.
-      var allGroups = self._categoryGroups(zone);
-      var groups = allGroups.filter(function (g) {
-        return self.excludeCategories.indexOf(g.category) === -1;
-      });
-      if (!groups.length) return '<div class="seatplan-mobile-tile" style="visibility:hidden"></div>';
-      // Gewichtung nach REIHENANZAHL, nicht nach Sitzanzahl: der Gang liegt bei A/B/C
-      // physisch auf derselben Tiefe (nach Reihe 5 von 12) — mit sitzanzahl-basierter
-      // Gewichtung würde die Trennlinie je Block leicht unterschiedlich hoch landen,
-      // weil einzelne Reihen unterschiedlich viele Sitze haben.
-      var total = allGroups.reduce(function (sum, g) { return sum + g.rows.length; }, 0);
-      // Reihenfolge in den Rohdaten: erste Gruppe = Reihen nächst dem Spielfeld. Bei
-      // Nordblöcken (D/E/F) ist "nächst Spielfeld" die UNTERE Kante der Kachel (Spielfeld
-      // liegt darunter), bei Südblöcken (A/B/C) die OBERE Kante (Spielfeld liegt darüber).
-      var ordered = isNorth ? allGroups.slice().reverse() : allGroups;
-      var stops = [];
-      var boundaries = [];
-      var acc = 0;
-      ordered.forEach(function (g, idx) {
-        var count = g.rows.length;
-        var pct = Math.round((count / total) * 1000) / 10;
-        stops.push(catColor(g.category) + ' ' + acc + '%');
-        acc += pct;
-        stops.push(catColor(g.category) + ' ' + acc + '%');
-        if (idx < ordered.length - 1) boundaries.push(acc);
-      });
-      var colorBackground = allGroups.length > 1 ? 'linear-gradient(to bottom, ' + stops.join(', ') + ')' : catColor(allGroups[0].category);
-      // Gang-Trennlinie (wie in der Detailansicht, s. .seatplan-aisle-line) auch schon
-      // in der kleinen Übersichtskachel andeuten — bei A/C sonst unsichtbar, weil dort
-      // beide Gruppen dieselbe Kategoriefarbe haben und nur der Farbverlauf allein
-      // (s.o.) keine Grenze zeigt.
-      var lineBackground = '';
-      if (boundaries.length) {
-        // Block B liegt auf orangem/rotem Farbverlauf — dort darf die Trennlinie
-        // in derselben Orange-Akzentfarbe stehen statt im neutralen Grau von A/C.
-        var lineColor = id === 'B' ? 'rgba(232,119,34,.9)' : 'var(--color-neutral-400)';
-        var half = 0.9;
-        var lineStops = [];
-        boundaries.forEach(function (pos) {
-          var from = Math.max(0, pos - half);
-          var to = Math.min(100, pos + half);
-          lineStops.push('transparent ' + from + '%', lineColor + ' ' + from + '%', lineColor + ' ' + to + '%', 'transparent ' + to + '%');
-        });
-        lineBackground = 'linear-gradient(to bottom, ' + lineStops.join(', ') + ')';
+      // Seit 09.08.2026 (Marko: "Die Bereiche sollen getrennt werden ... Bilder sollen
+      // nicht mehr zusammen angezeigt werden") zeigt ein Block mit mehreren kaufbaren
+      // Bereichen (z.B. Block A: Fanblock + Kategorie III) NICHT mehr eine einzelne
+      // Kachel mit Farbverlauf, sondern einen Stapel aus genau so vielen eigenständigen,
+      // einfarbigen Kacheln wie er Bereiche hat — physische Reihenfolge (oben→unten)
+      // entspricht der Reihenfolge in _purchasableCategories (erste Gruppe = Reihen
+      // nächst dem Spielfeld). Blöcke mit nur einem Bereich (D/E/F) bleiben eine Kachel.
+      var purchasable = self._purchasableCategories(id);
+      if (!purchasable.length) {
+        return '<div class="seatplan-mobile-tile-group' + (isNorth ? '' : ' seatplan-mobile-tile-group-south') + '" style="visibility:hidden"></div>';
       }
-      var background = lineBackground ? (lineBackground + ', ' + colorBackground) : colorBackground;
-      // Bei gemischten Blöcken (z. B. B: VIP vorn + Kategorie I hinten, A: Kategorie III
-      // oben + Fanblock unten) beschriftet die Kachel unten am Buchstaben nur die
-      // LETZTE Gruppe (mainCategory) — ein zusätzliches Label oben markiert den ersten
-      // (oberen) Farbverlauf-Anteil separat, unabhängig davon, ob er selbst kaufbar ist
-      // (VIP bei B: nicht kaufbar, nur zur Einordnung gezeigt) oder ein eigenes Produkt
-      // (Kategorie III bei A: genauso kaufbar wie Fanblock).
-      var mainGroup = groups[groups.length - 1];
-      var mainCategory = mainGroup.category;
-      var borderColor = catBorderColor(mainCategory);
-      var extraGroup = allGroups.length > 1 ? allGroups[0] : null;
-      // Ohne die Gang-Trennlinie stand Buchstabe+Kategorie mittig in der ganzen
-      // Kachel — jetzt, wo die Linie eine sichtbare Grenze zieht, gehört das Label
-      // mittig in den UNTEREN Abschnitt. padding-top schiebt den Inhaltsbereich genau
-      // auf die Linie, die (per CSS) mittige Ausrichtung zentriert das Label dann im
-      // Rest darunter. Bei den quadratischen Süd-Kacheln (aspect-ratio:1) ist ein
-      // %-Wert dafür korrekt, weil Breite und Höhe dort gleich sind.
-      var lineBoundary = boundaries.length ? boundaries[0] : null;
-      var extraTop = lineBoundary !== null ? (lineBoundary / 2) : 9;
-      var extraStyle = (lineBoundary !== null
-        ? 'top:' + extraTop + '%;transform:translateY(-50%)'
-        : 'top:' + extraTop + 'px') + ';color:' + (extraGroup ? catBorderColor(extraGroup.category) : '');
-      var extraLabel = extraGroup
-        ? '<span class="seatplan-mobile-tile-extra-label" style="' + extraStyle + '">' + escapeHtml(extraGroup.label || catShortLabel(extraGroup.category)) + '</span>'
-        : '';
-      var isPending = self.mode === 'blocks' && !!self.pendingBlockId &&
-        (self.pendingBlockId === id || self.pendingBlockId.indexOf(id + '::') === 0);
-      var tileClass = 'seatplan-mobile-tile' + (isNorth ? '' : ' seatplan-mobile-tile-south') + (isPending ? ' selected' : '');
-      var tileStyle = 'background:' + background + ';border-color:' + borderColor +
-        (lineBoundary !== null ? ';padding-top:' + lineBoundary + '%' : '');
-      return '<button type="button" class="' + tileClass + '" style="' + tileStyle + '" data-zone="' + id + '">' +
-        extraLabel +
-        '<span class="seatplan-mobile-tile-letter">' + id + '</span>' +
-        '<span class="seatplan-mobile-tile-cat">' + escapeHtml(mainGroup.label || catShortLabel(mainCategory)) + '</span>' +
-        '</button>';
+      var multi = purchasable.length > 1;
+      var tiles = purchasable.map(function (p) {
+        var key = multi ? id + '::' + p.category : id;
+        var isPending = self.mode === 'blocks' && self.pendingBlockId === key;
+        var tileClass = 'seatplan-mobile-tile' + (isNorth ? '' : ' seatplan-mobile-tile-south') + (isPending ? ' selected' : '');
+        var tileStyle = 'background:' + catColor(p.category) + ';border-color:' + catBorderColor(p.category);
+        return '<button type="button" class="' + tileClass + '" style="' + tileStyle + '" data-zone="' + key + '">' +
+          '<span class="seatplan-mobile-tile-letter">' + id + '</span>' +
+          '<span class="seatplan-mobile-tile-cat">' + escapeHtml(p.label) + '</span>' +
+          '</button>';
+      }).join('');
+      return '<div class="seatplan-mobile-tile-group' + (isNorth ? '' : ' seatplan-mobile-tile-group-south') + '">' + tiles + '</div>';
     }
 
     var northTiles = this.northZones.map(function (id) { return blockTile(id, true); }).join('');
@@ -614,9 +542,9 @@
     // Hälfte nicht erkennbar, welches der beiden Produkte gerade vorgemerkt ist.
     var courtConfirm = '';
     if (this.mode === 'blocks' && this.pendingBlockId) {
-      var sep = this.pendingBlockId.indexOf('::');
-      var pendingZoneId = sep === -1 ? this.pendingBlockId : this.pendingBlockId.slice(0, sep);
-      var pendingCategory = sep === -1 ? null : this.pendingBlockId.slice(sep + 2);
+      var pendingKey = splitZoneKey(this.pendingBlockId);
+      var pendingZoneId = pendingKey.zoneId;
+      var pendingCategory = pendingKey.category;
       var pendingPurchasable = pendingZoneId === 'STEHPLATZ' ? [] : this._purchasableCategories(pendingZoneId);
       var pendingMatch = pendingCategory && pendingPurchasable.length > 1
         ? pendingPurchasable.filter(function (p) { return p.category === pendingCategory; })[0]
@@ -667,26 +595,17 @@
     // echten Block, kein eigener Mechanismus (s. #222).
     this.root.querySelectorAll('.seatplan-mobile-tile[data-zone], .seatplan-mobile-standing[data-zone]').forEach(function (btn) {
       btn.addEventListener('click', function (e) {
-        var zoneId = btn.dataset.zone;
+        var key = btn.dataset.zone;
         if (self.mode === 'blocks') {
-          // Blöcke mit mehr als einer kaufbaren Kategorie (z.B. Block A: Kategorie III
-          // oben, Fanblock unten) brauchen eine Tipp-Positions-Erkennung, um zu wissen,
-          // welches der beiden Produkte gemeint ist — Stehplatz und Blöcke mit genau
-          // einer kaufbaren Kategorie (D/E/F/B/C) bleiben beim bisherigen Verhalten
-          // (ganze Kachel = eine Kategorie).
-          var id = zoneId;
-          if (zoneId !== 'STEHPLATZ') {
-            var purchasable = self._purchasableCategories(zoneId);
-            var category = purchasable.length <= 1
-              ? (purchasable[0] && purchasable[0].category)
-              : self._tappedCategory(zoneId, btn, e, purchasable);
-            if (!category) return;
-            id = zoneId + '::' + category;
-          }
-          self.pendingBlockId = self.pendingBlockId === id ? null : id;
+          // Jede kaufbare Kategorie hat jetzt ihre eigene Kachel (data-zone bereits
+          // der zusammengesetzte Schlüssel "zoneId::category", bzw. nur "zoneId" bei
+          // genau einer Kategorie oder Stehplatz) — kein Tipp-Positions-Mechanismus
+          // mehr nötig.
+          self.pendingBlockId = self.pendingBlockId === key ? null : key;
           self._render();
         } else {
-          self._openZoneDetail(zoneId);
+          var parts = splitZoneKey(key);
+          self._openZoneDetail(parts.zoneId, parts.category);
         }
       });
     });
@@ -857,8 +776,8 @@
      eigene Kategorie "Stehplatz", kein Ermaessigt-Tarif, Preis aus standingPrice.
      `category` ist optional: ohne Angabe (Rückwärtskompatibilität) greift die letzte
      kaufbare Kategorie des Blocks — bei Blöcken mit mehreren echten Produkten (z.B.
-     Block A: Kategorie III/Fanblock) rufen Klick-Handler und Direktwahl-Dropdown die
-     Kategorie aber immer explizit auf (s. _tappedCategory/_renderDirectAddRow). */
+     Block A: Kategorie III/Fanblock) haben Klick-Handler und Direktwahl-Dropdown die
+     Kategorie aber immer schon explizit im data-zone-Schlüssel (s. _renderDirectAddRow). */
   SeatPicker.prototype._quickAddBlock = function (zoneId, qty, category) {
     var self = this;
     if (zoneId === 'STEHPLATZ') {
@@ -899,10 +818,8 @@
 
   SeatPicker.prototype._addPendingBlock = function () {
     if (!this.pendingBlockId) return;
-    var sep = this.pendingBlockId.indexOf('::');
-    var zoneId = sep === -1 ? this.pendingBlockId : this.pendingBlockId.slice(0, sep);
-    var category = sep === -1 ? undefined : this.pendingBlockId.slice(sep + 2);
-    this._quickAddBlock(zoneId, 1, category);
+    var pendingKey = splitZoneKey(this.pendingBlockId);
+    this._quickAddBlock(pendingKey.zoneId, 1, pendingKey.category);
     this.pendingBlockId = null;
     this._render();
     if (this.cartEl) this.cartEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -918,7 +835,7 @@
      Warenkorb-Stands, damit bereits übernommene Plätze markiert bleiben und im Overlay
      auch wieder abgewählt werden können — „Abbrechen" stellt dann den Stand von vorher
      wieder her. */
-  SeatPicker.prototype._openZoneDetail = function (zoneId) {
+  SeatPicker.prototype._openZoneDetail = function (zoneId, category) {
     if (!this.pendingSeats) {
       var copy = {};
       var src = this.selected;
@@ -926,27 +843,36 @@
       this.pendingSeats = copy;
     }
     this.mobileZoneId = zoneId;
+    this.mobileCategory = category || null;
     this._render();
   };
 
-  /* Blöcke als Ring in der Reihenfolge der Übersicht (Nord D-E-F, dann Süd A-B-C):
-     beide Pfeile sind dadurch immer aktiv, es gibt keine Sackgasse. Blöcke ohne
-     kaufbare Kategorie (excludeCategories) werden übersprungen — sie lassen sich in
-     der Übersicht auch nicht antippen. */
+  /* Kaufbare Bereiche als Ring in der Reihenfolge der Übersicht (Nord D-E-F, dann Süd
+     A-B-C): beide Pfeile sind dadurch immer aktiv, es gibt keine Sackgasse. Blöcke mit
+     mehreren kaufbaren Kategorien (z.B. Block A: Fanblock/Kategorie III) tragen dabei
+     mit einem eigenen Ring-Eintrag pro Kategorie bei — seit der Trennung der Kacheln
+     (09.08.2026) sind das eigenständige, separat anzeigbare Bereiche, keine gemeinsame
+     Block-Detailansicht mehr. Schlüssel-Format wie überall: "zoneId" bei genau einer
+     kaufbaren Kategorie, sonst "zoneId::category" (s. splitZoneKey). */
   SeatPicker.prototype._zoneRing = function () {
     var self = this;
-    return this.northZones.concat(this.southZones).filter(function (id) {
-      var zone = self._zoneById(id);
-      if (!zone) return false;
-      return self._categoryGroups(zone).some(function (g) {
-        return self.excludeCategories.indexOf(g.category) === -1 && self.prices[g.category];
-      });
+    var ring = [];
+    this.northZones.concat(this.southZones).forEach(function (id) {
+      var purchasable = self._purchasableCategories(id);
+      if (!purchasable.length) return;
+      if (purchasable.length === 1) {
+        ring.push(id);
+      } else {
+        purchasable.forEach(function (p) { ring.push(id + '::' + p.category); });
+      }
     });
+    return ring;
   };
 
   SeatPicker.prototype._neighbourZone = function (step) {
     var ring = this._zoneRing();
-    var i = ring.indexOf(this.mobileZoneId);
+    var currentKey = this.mobileCategory ? this.mobileZoneId + '::' + this.mobileCategory : this.mobileZoneId;
+    var i = ring.indexOf(currentKey);
     if (i === -1 || ring.length < 2) return null;
     return ring[(i + step + ring.length) % ring.length];
   };
@@ -1008,9 +934,15 @@
     // Gruppe des Blocks bekommt ihren eigenen Eintrag mit Preis (statt früher nur die
     // Hauptkategorie + "(und VIP)" ohne Preis) — z.B. Block A: "Kategorie III – 10,00 €
     // (8,00 € ermäßigt) · Fanblock – 10,50 € (8,00 € ermäßigt)".
-    var groups = this._categoryGroups(zone).filter(function (g) { return self.excludeCategories.indexOf(g.category) === -1; });
+    // Nur noch die Gruppe(n) der gerade offenen Kategorie — bei Blöcken mit mehreren
+    // kaufbaren Kategorien (z.B. Block A: Fanblock/Kategorie III) zeigt die Detailansicht
+    // seit der Trennung der Kacheln (09.08.2026) ausschließlich den angetippten Bereich,
+    // nicht mehr den ganzen physischen Block gemischt.
+    var groups = this._categoryGroups(zone).filter(function (g) {
+      return self.excludeCategories.indexOf(g.category) === -1 && (!self.mobileCategory || g.category === self.mobileCategory);
+    });
     function categoryHeaderText(g) {
-      var label = g.label || g.category;
+      var label = g.label || catShortLabel(g.category);
       var priceInfo = self.prices && self.prices[g.category];
       if (!priceInfo) return escapeHtml(label);
       var text = escapeHtml(label) + ' – ' + fmtEUR(priceInfo.normal) + ' €';
@@ -1018,22 +950,31 @@
       return text;
     }
     var headerText = groups.map(categoryHeaderText).join(' · ');
+    var titleText = this.mobileCategory ? zone.name + ' · ' + catShortLabel(this.mobileCategory) : zone.name;
+    /* Anzeigename eines Ring-Nachbarn (kann ein anderer Block ODER eine andere Kategorie
+       desselben Blocks sein, s. _zoneRing) fürs aria-label der Pfeile. */
+    function neighbourName(key) {
+      var parts = splitZoneKey(key);
+      var z = self._zoneById(parts.zoneId);
+      if (!z) return '';
+      return parts.category ? z.name + ' · ' + catShortLabel(parts.category) : z.name;
+    }
     /* Pfeile links/rechts vom Blocknamen statt eines Zurück-Pfeils: von hier aus lässt
-       sich durch alle Blöcke blättern, ohne jedes Mal in die Übersicht und zurück. Der
+       sich durch alle Bereiche blättern, ohne jedes Mal in die Übersicht und zurück. Der
        Weg zurück zur Übersicht ist der „Abbrechen"-Button unten links (plus Klick neben
        das Overlay und ESC). */
     var prevZone = this._neighbourZone(-1);
     var nextZone = this._neighbourZone(1);
     header.innerHTML =
       (prevZone
-        ? '<button type="button" class="seatplan-mobile-back" data-zone-step="-1" aria-label="Vorheriger Block: ' + this._zoneById(prevZone).name + '"><i data-lucide="chevron-left" class="icon-16"></i></button>'
+        ? '<button type="button" class="seatplan-mobile-back" data-zone-step="-1" aria-label="Vorheriger Bereich: ' + neighbourName(prevZone) + '"><i data-lucide="chevron-left" class="icon-16"></i></button>'
         : '<span style="width:32px"></span>') +
       '<span class="seatplan-mobile-detail-title">' +
-        '<strong class="t-body-sm">' + zone.name + '</strong>' +
+        '<strong class="t-body-sm">' + titleText + '</strong>' +
         '<span class="t-caption" style="color:var(--text-muted)">' + headerText + '</span>' +
       '</span>' +
       (nextZone
-        ? '<button type="button" class="seatplan-mobile-back" data-zone-step="1" aria-label="Nächster Block: ' + this._zoneById(nextZone).name + '"><i data-lucide="chevron-right" class="icon-16"></i></button>'
+        ? '<button type="button" class="seatplan-mobile-back" data-zone-step="1" aria-label="Nächster Bereich: ' + neighbourName(nextZone) + '"><i data-lucide="chevron-right" class="icon-16"></i></button>'
         : '<span style="width:32px"></span>');
     wrap.appendChild(header);
     var zoneEl = this._renderZone(zone);
@@ -1076,19 +1017,24 @@
     if (window.lucide) window.lucide.createIcons();
     header.querySelectorAll('.seatplan-mobile-back').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        self.mobileZoneId = self._neighbourZone(parseInt(btn.dataset.zoneStep, 10));
+        var key = self._neighbourZone(parseInt(btn.dataset.zoneStep, 10));
+        var parts = splitZoneKey(key);
+        self.mobileZoneId = parts.zoneId;
+        self.mobileCategory = parts.category;
         self._render();
       });
     });
     cancelBtn.addEventListener('click', function () {
       self.pendingSeats = null;
       self.mobileZoneId = null;
+      self.mobileCategory = null;
       self._render();
     });
     confirmBtn.addEventListener('click', function () {
       self.selected = self.pendingSeats;
       self.pendingSeats = null;
       self.mobileZoneId = null;
+      self.mobileCategory = null;
       self._render(); // _renderMobileOverview() ruft _renderCart() bereits selbst auf
     });
     this._renderCart();
@@ -1779,6 +1725,7 @@
     if (this.mode === 'seats' && this.mobileZoneId) {
       this.pendingSeats = null;
       this.mobileZoneId = null;
+      this.mobileCategory = null;
       this._render();
     }
   };
@@ -1806,8 +1753,12 @@
      ausrichtet, ohne dass jede Reihenbreite einzeln nachgerechnet werden muss. */
   SeatPicker.prototype._renderZone = function (zone) {
     var self = this;
+    // mobileCategory eingeschränkt auf die gerade offene Kategorie (s. _openZoneDetail)
+    // — bei Blöcken mit mehreren kaufbaren Kategorien (z.B. Block A: Fanblock/Kategorie
+    // III) werden dadurch nur noch deren eigene Reihen gezeichnet, nicht mehr der ganze
+    // physische Block gemischt.
     var groups = this._categoryGroups(zone).filter(function (g) {
-      return self.excludeCategories.indexOf(g.category) === -1;
+      return self.excludeCategories.indexOf(g.category) === -1 && (!self.mobileCategory || g.category === self.mobileCategory);
     });
     if (groups.length === 0) return null;
 
@@ -2371,10 +2322,9 @@
     var options = '';
     this.northZones.concat(this.southZones).slice().sort().forEach(function (id) {
       var purchasable = self._purchasableCategories(id);
-      // Ein Eintrag pro kaufbarer Kategorie — bei Blöcken mit nur EINER (die meisten,
-      // auch wenn sie optisch in 2 Gruppen mit gleichem Preis geteilt sind, z.B. Block
-      // C: "Kategorie II"/"C unten") bleibt das der bisherige einzelne "Block X"-Eintrag;
-      // bei mehreren ECHTEN Produkten (z.B. Block A: Kategorie III/Fanblock) je einer.
+      // Ein Eintrag pro kaufbarer Kategorie — bei Blöcken mit nur EINER bleibt das der
+      // bisherige einzelne "Block X"-Eintrag; bei mehreren (z.B. Block A: Kategorie
+      // III/Fanblock, Block C: Kategorie II/C unten) je einer.
       if (purchasable.length === 1) {
         options += '<option value="' + id + '">Block ' + id + '</option>';
       } else {
@@ -2410,10 +2360,8 @@
       var raw = wrap.querySelector('#seatplan-direct-block').value;
       var qty = parseInt(wrap.querySelector('#seatplan-direct-qty').value, 10);
       if (!raw || !qty || qty < 1) return;
-      var sep = raw.indexOf('::');
-      var zoneId = sep === -1 ? raw : raw.slice(0, sep);
-      var category = sep === -1 ? undefined : raw.slice(sep + 2);
-      self._quickAddBlock(zoneId, qty, category);
+      var key = splitZoneKey(raw);
+      self._quickAddBlock(key.zoneId, qty, key.category);
     });
   };
 

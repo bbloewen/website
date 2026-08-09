@@ -294,9 +294,28 @@
   gap: 8px;
   min-width: 0;
 }
+/* Ein Grid-"Slot" (A/B/C bzw. D/E/F) enthält seit 09.08.2026 nicht mehr eine einzelne
+   Kachel mit Farbverlauf für mehrere Bereiche, sondern einen Stapel aus GENAU SO
+   VIELEN eigenständigen, einfarbigen Kacheln, wie der Block kaufbare Bereiche hat
+   (z.B. Block A: Fanblock oben + Kategorie III unten, je eigene Kachel) — Marko:
+   "Die Bereiche sollen getrennt werden ... Bilder sollen nicht mehr zusammen
+   angezeigt werden." Blöcke mit nur einem Bereich (D/E/F) zeigen weiterhin genau
+   eine Kachel, die die ganze Gruppe füllt.
+   Der Slot selbst behält Größe/Seitenverhältnis der früheren Einzelkachel bei
+   (Nordblöcke unten um ein Drittel gekürzt, Südblöcke quadratisch), die Aufteilung
+   auf die einzelnen Kacheln übernimmt flex (gleich hoch je Bereich). */
+.seatplan-mobile-tile-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.seatplan-mobile-tile-group.seatplan-mobile-tile-group-south { aspect-ratio: 1; }
+.seatplan-mobile-tile-group:not(.seatplan-mobile-tile-group-south) { aspect-ratio: 3 / 2; }
 .seatplan-mobile-tile {
   position: relative;
-  aspect-ratio: 1;
+  flex: 1 1 0;
+  min-height: 0;
   border-radius: var(--radius-md);
   border: 1.5px solid;
   color: var(--color-brand-navy);
@@ -305,29 +324,10 @@
   transition: transform .12s ease;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
 }
-/* Nordblöcke (D/E/F) unten um ein Drittel gekürzt (Grid-Zeile ist "auto" hoch, d.h.
-   die Kachel-Oberkante bleibt exakt an ihrer Stelle, nur die Höhe schrumpft) — der
-   dadurch freiwerdende Platz zum Spielfeld hin bleibt vorerst leer und wird in
-   einem nächsten Schritt gefüllt. Südblöcke (A/B/C) bleiben unverändert quadratisch. */
-.seatplan-mobile-tile:not(.seatplan-mobile-tile-south) { aspect-ratio: 3 / 2; }
 .seatplan-mobile-tile:active { transform: scale(.96); }
 .seatplan-mobile-tile:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 2px; }
 .seatplan-mobile-tile-letter { font-size: 15px; font-weight: 700; }
-/* Ersetzt die frühere separate Legende: die Kategorie steht jetzt direkt an der
-   Kachel, bei gemischten Blöcken (z. B. B) nur die Hauptkategorie als Text. */
-.seatplan-mobile-tile-cat { font-size: 8px; font-weight: 600; letter-spacing: .02em; opacity: .8; }
-/* Hinweis: die früheren 5px Tiefer-Versatz bei den Südblöcken sind entfallen — seit die
-   Gang-Trennlinie existiert, positioniert das padding-top der Kachel (s. seat-picker.js)
-   das Label mittig im Abschnitt unter der Linie; ein zusätzlicher Versatz schob es
-   sichtbar zu weit nach unten. */
-/* Zusätzliches Label oben in der Kachel für den ERSTEN Farbverlauf-Anteil eines
-   mehrteiligen Blocks (z.B. VIP bei Block B, Kategorie III bei Block A, Kategorie II
-   bei Block C) — Farbe kommt als Inline-Style aus JS (catBorderColor der jeweiligen
-   Gruppe, s. seat-picker.js blockTile()), hier nur Position/Typografie. */
-.seatplan-mobile-tile-extra-label {
-  position: absolute; top: 9px; left: 0; right: 0; text-align: center;
-  font-size: 9px; font-weight: 700; letter-spacing: .04em;
-}
+.seatplan-mobile-tile-cat { font-size: 8px; font-weight: 600; letter-spacing: .02em; opacity: .8; text-align: center; padding: 0 4px; }
 
 /* Eingangs-Markierung: eine durchgehende Linie, die vom Label unterbrochen wird,
    statt eines Labels, das die Grafik zusätzlich verlängert. VIP-Eingang (s. u.)

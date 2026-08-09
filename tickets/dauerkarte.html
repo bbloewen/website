@@ -13,7 +13,7 @@
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
 <link rel="stylesheet" href="/css/site.css?v=1785495458" />
-<link rel="stylesheet" href="/css/seat-picker.css?v=1786530100" />
+<link rel="stylesheet" href="/css/seat-picker.css?v=1786532000" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 </head>
@@ -160,7 +160,7 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="/js/nav.js?v=1785398309"></script>
 <script src="/js/include.js?v=1785398309"></script>
-<script src="/js/seat-picker.js?v=1786531100"></script>
+<script src="/js/seat-picker.js?v=1786532000"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     /* Preisbox zeigt bewusst den Normalpreis (data-base) statisch an. Rabatte
@@ -219,6 +219,11 @@
       prices: {
         'Kategorie I': { normal: 208, ermaessigt: 182 },
         'Kategorie II': { normal: 156, ermaessigt: 115 },
+        // C unten: eigenes Kontingent/Produkt, aber Preis bleibt identisch zu Kategorie II
+        // (Marko, 09.08.2026: "Kategorie 2 Pricing") — ohne eigenen Eintrag hier würde
+        // _purchasableCategories() diese Kategorie als "kein Preis" herausfiltern und die
+        // Kachel/Sitze wären in dieser Datei gar nicht buchbar.
+        'C unten': { normal: 156, ermaessigt: 115 },
         'Kategorie III': { normal: 130, ermaessigt: 104, kind: 71.5 },
         'Fanblock': { normal: 136.5, ermaessigt: 104 },
         'Rollstuhlplatz': { normal: 104 },
