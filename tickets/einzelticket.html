@@ -48,6 +48,7 @@
             <div class="price-row"><span>Kategorie 1 (ermäßigt)</span><strong>14,00 €</strong></div>
             <div class="price-row"><span>Kategorie 2</span><strong>12,00 €</strong></div>
             <div class="price-row"><span>Kategorie 2 (ermäßigt)</span><strong>8,50 €</strong></div>
+            <div class="price-row" id="preis-stehplatz"><span>Stehplatz</span><strong>8,50 €</strong></div>
           </div>
           <div class="buy-thumb-col">
             <div id="seatplan-root"></div>
@@ -213,12 +214,20 @@
         },
         // Stehplatz (s. #222): eigenes pretix-Produkt (Item 23), kein Sitz, keine
         // Ermäßigung — reiner Mengen-Posten, Preis muss zum n8n-Bestellworkflow passen.
+        // stehplatzBuchbar:false in heimspiele.json schaltet Stehplatz für EIN Spiel ab,
+        // ohne pretix anzufassen (Marko: das Produkt bleibt dort einfach aktiv stehen).
         standingPrice: 8.5,
+        standingBookable: game.stehplatzBuchbar !== false,
         cartEl: document.getElementById('seatplan-cart'),
         totalEl: document.getElementById('seatplan-total'),
         ctaEl: document.getElementById('seatplan-cta'),
         occupancyEl: document.getElementById('seatplan-occupancy')
       });
+
+      var preisStehplatzEl = document.getElementById('preis-stehplatz');
+      if (preisStehplatzEl) {
+        preisStehplatzEl.classList.toggle('price-row--unavailable', game.stehplatzBuchbar === false);
+      }
 
       document.getElementById('seatplan-cta').addEventListener('click', function () {
         var summary = picker.getSummary();

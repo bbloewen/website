@@ -189,6 +189,9 @@
 }
 .buy-prices-col .price-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--bg-muted); font-size: 14px; }
 .buy-prices-col .price-row:last-of-type { border-bottom: none; }
+/* Nicht buchbar fuer das aktuelle Spiel (s. #222, z.B. Stehplatz) — Zeile bleibt sichtbar,
+   aber durchgestrichen statt entfernt, damit klar bleibt, dass es das Produkt grundsaetzlich gibt. */
+.buy-prices-col .price-row--unavailable { text-decoration: line-through; color: var(--text-muted); }
 
 .seatplan-court-area { display: flex; gap: 10px; align-items: stretch; margin-top: 14px; }
 .seatplan-side-strip {
@@ -499,6 +502,10 @@
   display: flex; align-items: center; justify-content: center; gap: 2px;
   padding: 0; font: inherit; cursor: pointer;
 }
+.seatplan-mobile-standing.selected { outline: 2px solid var(--color-brand-blue); outline-offset: 1px; }
+/* Nicht buchbar (pro Spiel, s. #222): Box bleibt sichtbar (zeigt weiter Position+Kapazität),
+   aber nicht antippbar — kein data-zone, deshalb greift kein Klick-Handler. */
+.seatplan-mobile-standing--unavailable { cursor: not-allowed; opacity: .45; }
 .seatplan-mobile-standing span {
   font-size: 8px; font-weight: 600; letter-spacing: .04em; color: var(--text-muted);
   writing-mode: vertical-rl; transform: rotate(180deg);
