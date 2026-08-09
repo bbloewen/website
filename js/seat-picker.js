@@ -32,31 +32,31 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
-  function catClass(category) {
-    if (category === 'Kategorie I') return 'cat-kat1';
-    if (category === 'Kategorie II') return 'cat-kat2';
-    if (category === 'VIP') return 'cat-vip';
-    return '';
+  /* Liest eine CSS-Variable aus :root (s. seat-picker.css) statt Farbwerte hier ein
+     zweites Mal fest zu codieren — fallback nur als Sicherheitsnetz, falls die
+     Variable einmal fehlt (z.B. CSS-Datei noch nicht geladen). */
+  function cssVar(name, fallback) {
+    var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+    return v ? v.trim() : fallback;
   }
 
-  /* Dieselben Farbwerte wie die .seatplan-seat.cat-* Regeln in seat-picker.css —
-     für die Block-Mini-Kacheln der mobilen Übersicht, die per JS-Gradient statt
-     CSS-Klasse eingefärbt werden (mehrere Kategorien in einer einzigen Kachel). */
-  function catColor(category) {
-    if (category === 'Kategorie I') return 'rgba(232,119,34,.55)';
-    if (category === 'VIP') return 'rgba(179,57,44,.55)';
-    return '#D9DEE3'; // Kategorie II
-  }
-  function catBorderColor(category) {
-    if (category === 'Kategorie I') return 'rgba(232,119,34,.9)';
-    if (category === 'VIP') return 'rgba(179,57,44,.9)';
-    return '#B9C1C8';
-  }
-  function catShortLabel(category) {
-    if (category === 'Kategorie I') return 'Kat. I';
-    if (category === 'Kategorie II') return 'Kat. II';
-    return category;
-  }
+  /* Kategorie-Metadaten an einer Stelle statt vier separaten if/else-Ketten für
+     dieselben drei Kategorien. Farb-/Randwerte kommen per CSS-Variable aus
+     seat-picker.css (s. dort :root) — JS färbt damit zusätzlich die Block-Mini-
+     Kacheln der mobilen Übersicht per Gradient ein (mehrere Kategorien in einer
+     einzigen Kachel, keine CSS-Klasse möglich). Fehlt ein Eintrag (z.B. eine
+     unbekannte Kategorie), liefern die Wrapper unten dieselben Fallbacks wie zuvor
+     die eigenständigen Funktionen. */
+  var CATEGORY_META = {
+    'Kategorie I': { cls: 'cat-kat1', color: cssVar('--seatplan-cat-kat1', 'rgba(232,119,34,.55)'), borderColor: cssVar('--seatplan-cat-kat1-border', 'rgba(232,119,34,.9)'), shortLabel: 'Kat. I' },
+    'Kategorie II': { cls: 'cat-kat2', color: cssVar('--seatplan-cat-kat2', '#D9DEE3'), borderColor: cssVar('--seatplan-cat-kat2-border', '#B9C1C8'), shortLabel: 'Kat. II' },
+    'VIP': { cls: 'cat-vip', color: cssVar('--seatplan-cat-vip', 'rgba(179,57,44,.55)'), borderColor: cssVar('--seatplan-cat-vip-border', 'rgba(179,57,44,.9)') }
+  };
+  function catMeta(category) { return CATEGORY_META[category] || {}; }
+  function catClass(category) { return catMeta(category).cls || ''; }
+  function catColor(category) { return catMeta(category).color || '#D9DEE3'; }
+  function catBorderColor(category) { return catMeta(category).borderColor || '#B9C1C8'; }
+  function catShortLabel(category) { return catMeta(category).shortLabel || category; }
 
   /* An welcher Kante die Reihen eines Blocks ausgerichtet sind. Steht als align_edge
      in den Zonendaten, weil es pro Blockseite unterschiedlich ist: A/B/F richten sich
@@ -268,6 +268,17 @@
   SeatPicker.prototype._voucherIsFullComp = function () {
     var info = this.voucherInfo;
     return !!(info && info.priceMode === 'percent' && info.value === 100);
+  };
+
+  /* Nachwuchsbeitrag-Betrag für den aktuellen Warenkorb: 0, wenn die Pauschale nicht
+     greift (nicht aktiviert, abgewählt, Warenkorb leer, oder ein 100%-Gutschein
+     übernimmt auch den Nachwuchsbeitrag, s. _voucherIsFullComp), sonst nachwuchsAmount.
+     Eine Stelle statt derselben Bedingung an vier Stellen (_renderCart,
+     _renderCartBlocks, getSummary zweimal) — sonst müsste eine künftige Änderung der
+     Regel an jeder Stelle einzeln nachgezogen werden. */
+  SeatPicker.prototype._nachwuchsAmountFor = function (hasItems) {
+    if (!this.nachwuchsBeitrag || !this.nachwuchsChecked || !hasItems || this._voucherIsFullComp()) return 0;
+    return this.nachwuchsAmount;
   };
 
   SeatPicker.prototype._earlyBirdActive = function () {
@@ -2021,36 +2032,7 @@
     textarea.addEventListener('input', function () { self.notiz = this.value; });
   };
 
-  /* Live-Vorschau der aktuellen Auswahl direkt im Spielfeld-Bereich (neben der
-     Legende) — Reihe+Platz bei "seats", Anzahl je Block bei "blocks". */
-  SeatPicker.prototype._updateCourtSelection = function () {
-    var el = this.courtSelectionEl;
-    if (!el) return;
-    var self = this;
-    var lines = [];
-    if (this.mode === 'blocks') {
-      Object.keys(this.blockCounts).forEach(function (key) {
-        var c = self.blockCounts[key];
-        var qty = (c.normal || 0) + (c.ermaessigt || 0);
-        if (qty > 0) lines.push(qty + '× ' + c.zoneLabel);
-      });
-    } else {
-      Object.keys(this.selected).forEach(function (guid) {
-        var s = self.selected[guid];
-        lines.push(s.zoneLabel + ', Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber);
-      });
-    }
-    if (lines.length === 0) {
-      el.textContent = '';
-    } else if (lines.length <= 4) {
-      el.textContent = 'Deine Auswahl: ' + lines.join(' · ');
-    } else {
-      el.textContent = 'Deine Auswahl: ' + lines.length + ' Plätze';
-    }
-  };
-
   SeatPicker.prototype._renderCart = function () {
-    this._updateCourtSelection();
     if (this.mode === 'blocks') { this._renderCartBlocks(); return; }
 
     var self = this;
@@ -2192,7 +2174,7 @@
     }
 
     var total = guids.reduce(function (sum, guid) { return sum + self.selected[guid].price; }, 0);
-    if (this.nachwuchsBeitrag && this.nachwuchsChecked && guids.length > 0 && !this._voucherIsFullComp()) total += this.nachwuchsAmount;
+    total += this._nachwuchsAmountFor(guids.length > 0);
     total -= this._voucherDiscount(total);
     this.totalEl.textContent = fmtEUR(total) + ' €';
   };
@@ -2307,7 +2289,7 @@
     });
 
     var total = lines.reduce(function (sum, l) { return sum + l.count * l.price; }, 0);
-    if (this.nachwuchsBeitrag && this.nachwuchsChecked && ticketCount > 0 && !this._voucherIsFullComp()) total += this.nachwuchsAmount;
+    total += this._nachwuchsAmountFor(ticketCount > 0);
     total -= this._voucherDiscount(total);
     this.totalEl.textContent = fmtEUR(total) + ' €';
   };
@@ -2358,9 +2340,8 @@
       // behandelt sie als ganz normale Kategorie (s. #222, Marko: "nichts Eigenes
       // erfinden ... integriert sich hundertprozentig in den Bestellworkflow").
       var ticketCount = lines.reduce(function (sum, l) { return sum + l.qty; }, 0);
-      var nachwuchsAmount = 0;
-      if (this.nachwuchsBeitrag && this.nachwuchsChecked && ticketCount > 0 && !this._voucherIsFullComp()) {
-        nachwuchsAmount = this.nachwuchsAmount;
+      var nachwuchsAmount = this._nachwuchsAmountFor(ticketCount > 0);
+      if (nachwuchsAmount > 0) {
         lines.push({ label: 'Unterstützung für den Nachwuchs', qty: 1, unitPrice: nachwuchsAmount, lineTotal: nachwuchsAmount, type: 'nachwuchs' });
         total += nachwuchsAmount;
       }
@@ -2381,9 +2362,8 @@
       });
       total += s.price;
     });
-    var nwAmount = 0;
-    if (this.nachwuchsBeitrag && this.nachwuchsChecked && lines.length > 0 && !this._voucherIsFullComp()) {
-      nwAmount = this.nachwuchsAmount;
+    var nwAmount = this._nachwuchsAmountFor(lines.length > 0);
+    if (nwAmount > 0) {
       lines.push({ label: 'Unterstützung für den Nachwuchs', qty: 1, unitPrice: nwAmount, lineTotal: nwAmount, type: 'nachwuchs' });
       total += nwAmount;
     }

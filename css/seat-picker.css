@@ -1,33 +1,18 @@
 /* Styles für die wiederverwendbare Sitzplatzwahl (js/seat-picker.js).
    Nutzt die bestehenden Marken-Tokens aus colors_and_type.css. */
-.banner-note {
-  background: var(--color-orange-50);
-  border: 1px solid var(--color-orange-100);
-  color: var(--color-orange-700);
-  font-size: 13px;
-  border-radius: var(--radius-md);
-  padding: 10px 14px;
-  margin-bottom: 20px;
+/* Kategorie-Farben einmal hier definiert — js/seat-picker.js liest dieselben Werte
+   per getComputedStyle (s. dort CATEGORY_META) für die Block-Mini-Kacheln der
+   mobilen Übersicht, die per JS-Gradient statt CSS-Klasse eingefärbt werden
+   (mehrere Kategorien in einer einzigen Kachel). Ändert sich eine Farbe, reicht
+   die Änderung an dieser einen Stelle. */
+:root {
+  --seatplan-cat-kat1: rgba(232, 119, 34, .55);
+  --seatplan-cat-kat1-border: rgba(232, 119, 34, .9);
+  --seatplan-cat-kat2: #D9DEE3;
+  --seatplan-cat-kat2-border: #B9C1C8;
+  --seatplan-cat-vip: rgba(179, 57, 44, .55);
+  --seatplan-cat-vip-border: rgba(179, 57, 44, .9);
 }
-.seatplan-strip {
-  background: var(--color-brand-navy);
-  color: var(--color-white);
-  text-align: center;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  border-radius: 6px;
-  padding: 6px 0;
-  margin-bottom: 10px;
-}
-.seatplan-strip-south { margin-top: 10px; margin-bottom: 0; }
-.seatplan-row {
-  display: flex;
-  gap: 14px;
-}
-/* Flex statt festem 3-Spalten-Grid: eine Zeile kann auch nur 2 Blöcke enthalten
-   (z. B. Einzelticket ohne VIP-Block B) und teilt den Platz trotzdem gleichmäßig auf. */
-.seatplan-row .seatplan-block { flex: 1 1 0; min-width: 0; }
 .seatplan-block {
   background: var(--color-neutral-50);
   border: 1px solid var(--color-neutral-200);
@@ -35,10 +20,6 @@
   padding: 10px;
   overflow-x: auto;
 }
-.seatplan-block.cat1 { background: var(--color-orange-50); border-color: var(--color-orange-100); }
-.seatplan-block-label { text-align: center; font-size: 12px; font-weight: 700; margin-bottom: 2px; }
-.seatplan-block-cat { text-align: center; font-size: 10px; color: var(--text-muted); margin-bottom: 8px; }
-.seatplan-grid { display: grid; gap: 3px; justify-content: center; width: max-content; margin: 0 auto; }
 /* Jede Reihe eine eigene zentrierte Flex-Zeile — reale Reihen sind unterschiedlich breit,
    das ergibt automatisch die typische, zum Spielfeld hin verjüngte Tribünenform statt
    eines starren Rasters mit linksbündig "abgeschnittenen" kürzeren Reihen. */
@@ -69,9 +50,9 @@
 }
 /* Sitzfarbe nach Kategorie: Kategorie I (Orange) und VIP (Rot) mit Transparenz für
    einen helleren Eindruck, Kategorie II in hellem Grau — auf Wunsch abgestimmt. */
-.seatplan-seat.cat-kat1 { background: rgba(232, 119, 34, .55); border-color: rgba(232, 119, 34, .9); }
-.seatplan-seat.cat-kat2 { background: #D9DEE3; border-color: #B9C1C8; }
-.seatplan-seat.cat-vip { background: rgba(179, 57, 44, .55); border-color: rgba(179, 57, 44, .9); }
+.seatplan-seat.cat-kat1 { background: var(--seatplan-cat-kat1); border-color: var(--seatplan-cat-kat1-border); }
+.seatplan-seat.cat-kat2 { background: var(--seatplan-cat-kat2); border-color: var(--seatplan-cat-kat2-border); }
+.seatplan-seat.cat-vip { background: var(--seatplan-cat-vip); border-color: var(--seatplan-cat-vip-border); }
 .seatplan-seat[disabled] { opacity: .35; cursor: not-allowed; }
 /* Vergeben (sobald echte Bestellungen vorliegen) — diagonale Schraffur in Grau.
    Bewusst NICHT blau: Blau ist ausschließlich "Deine Auswahl". Zwei Blautöne für zwei
@@ -175,95 +156,11 @@
    immer mit der Unterkante von Preistabelle und Floorplan abschließt. */
 .buy-cart-col { display: flex; flex-direction: column; }
 .buy-cart-col #seatplan-cart { flex: 1; }
-.buy-thumb-btn {
-  display: block; width: 100%; height: 100%; padding: 0; border: 1px solid var(--border);
-  border-radius: var(--radius-md); background: none; cursor: pointer; position: relative;
-  overflow: hidden;
-}
-.buy-thumb-btn img { width: 100%; height: 100%; display: block; object-fit: cover; object-position: center; }
-.buy-thumb-cta {
-  position: absolute; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(0deg, rgba(0,18,45,.82), rgba(0,18,45,0));
-  color: var(--color-white); font-size: 13px; font-weight: 600;
-  padding: 24px 12px 10px; display: flex; align-items: center; justify-content: center; gap: 6px;
-}
 .buy-prices-col .price-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--bg-muted); font-size: 14px; }
 .buy-prices-col .price-row:last-of-type { border-bottom: none; }
 /* Nicht buchbar fuer das aktuelle Spiel (s. #222, z.B. Stehplatz) — Zeile bleibt sichtbar,
    aber durchgestrichen statt entfernt, damit klar bleibt, dass es das Produkt grundsaetzlich gibt. */
 .buy-prices-col .price-row--unavailable { text-decoration: line-through; color: var(--text-muted); }
-
-.seatplan-court-area { display: flex; gap: 10px; align-items: stretch; margin-top: 14px; }
-.seatplan-side-strip {
-  writing-mode: vertical-rl;
-  background: var(--color-brand-blue);
-  color: var(--color-white);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  border-radius: 6px;
-  padding: 8px 4px;
-  text-align: center;
-  white-space: nowrap;
-}
-/* Stehblock — im Original-Saalplan eine eigene große Fläche links neben dem Spielfeld,
-   nicht buchbar (kein Ticket-Produkt), nur zur räumlichen Einordnung gezeigt. */
-.seatplan-side-strip.stehblock {
-  writing-mode: horizontal-tb;
-  background: #6A4C93;
-  flex: 0 0 84px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; letter-spacing: 0.04em;
-}
-.seatplan-side-strip.entrance { flex: 0 0 24px; }
-.seatplan-court {
-  position: relative;
-  flex: 1;
-  border: 1px solid var(--color-neutral-200);
-  border-radius: var(--radius-md);
-  min-height: 220px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
-  color: var(--text-muted); font-size: 12px; font-weight: 600; letter-spacing: 0.05em;
-  background: var(--color-white);
-}
-/* "Spielfeld"-Label wandert nach oben und wird aus dem normalen Fluss genommen, damit
-   sich Legende + Auswahl-Vorschau darunter als eigene Gruppe zentrieren, statt alles
-   gemeinsam als ein Block mittig zu stehen. */
-.seatplan-court > span:first-child { position: absolute; top: 16px; left: 0; right: 0; text-align: center; }
-/* Legende sitzt wie im Original-Saalplan mitten im Spielfeld-Bereich. */
-.seatplan-court .seatplan-legend { justify-content: center; overflow-x: visible; white-space: normal; }
-/* Live-Vorschau der aktuellen Auswahl (Reihe+Platz bzw. Block-Anzahl), ebenfalls
-   im Spielfeld-Bereich, direkt unter der Legende. */
-.seatplan-court-selection {
-  margin: 4px 0 0; font-size: 11px; font-weight: 700; color: var(--color-brand-navy);
-  text-align: center; max-width: 90%;
-}
-
-/* Fußzeile des Sitzplan-Popups: "Übernehmen"-Button zentriert, in der Breite eines
-   einzelnen Blocks (die Legende sitzt jetzt wie im Original im Spielfeld, der Button
-   muss deshalb nicht mehr die volle Breite einnehmen). */
-.seatplan-footer-row { display: flex; justify-content: center; margin-top: 6px; }
-.seatplan-footer-row #seatplan-modal-confirm { width: 100%; max-width: 340px; justify-content: center; }
-
-/* Eine einzige, zeilenbündige Legende — Kategorie-Farben und Status (frei/vergeben/Auswahl)
-   nebeneinander statt in zwei getrennten, uneinheitlich gestylten Boxen. */
-.seatplan-legend {
-  display: flex; gap: 12px; font-size: 11px; color: var(--text-muted);
-  flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; padding-bottom: 2px;
-}
-.seatplan-legend span { display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; }
-.seatplan-legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
-.seatplan-legend .cat-kat1 i { background: rgba(232, 119, 34, .55); border: 1px solid rgba(232, 119, 34, .9); }
-.seatplan-legend .cat-kat2 i { background: #D9DEE3; border: 1px solid #B9C1C8; }
-.seatplan-legend .cat-vip i { background: rgba(179, 57, 44, .55); border: 1px solid rgba(179, 57, 44, .9); }
-.seatplan-legend .taken i {
-  background-color: var(--color-neutral-300);
-  background-image: repeating-linear-gradient(45deg,
-    rgba(107, 116, 136, .55) 0 1.5px, transparent 1.5px 4.5px);
-  border: 1px solid var(--color-neutral-500);
-}
-.seatplan-legend .sel i { background: var(--color-brand-blue); border: 1px solid var(--color-brand-navy); }
-.seatplan-legend .fcfs { color: var(--text-muted); }
 
 .seatplan-cart-empty { font-size: 13px; color: var(--text-muted); padding: 12px 0; }
 .seatplan-cart-item {
@@ -343,10 +240,6 @@
 }
 .seatplan-notiz-row textarea::placeholder { color: var(--text-muted); opacity: .7; }
 .seatplan-notiz-row textarea:focus { outline: 2px solid var(--color-brand-blue); outline-offset: 1px; }
-
-@media (max-width: 720px) {
-  .seatplan-row { grid-template-columns: 1fr; }
-}
 
 /* Mobile Blockübersicht (< 720px, Modus "seats"): statt aller Sitzreihen nebeneinander
    zuerst eine schematische Hallenübersicht zum Block-Antippen, danach Detailansicht
@@ -604,14 +497,6 @@
   display: flex; align-items: center; justify-content: center; color: var(--color-brand-navy);
 }
 .seatplan-zoom-controls button:hover { background: var(--color-neutral-100); }
-
-/* Modal-Überschrift "Sitzplatz wählen" ist in der mobilen Blockübersicht redundant
-   zum Untertitel "Wähle deinen Block" (der Untertitel erscheint nur dort) — deshalb
-   nur hier per ID ausgeblendet, Desktop und Einzelticket-Modal ("Block wählen")
-   bleiben unberührt. */
-@media (max-width: 720px) {
-  #seatplan-modal-title { display: none; }
-}
 
 /* Modus "blocks" (Einzelticket): Übernehmen-Button erscheint nur nach Antippen eines
    Blocks, mittig über dem Spielfeld schwebend — kein Dauer-UI-Element. */
