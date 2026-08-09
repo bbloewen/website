@@ -499,10 +499,6 @@
   display: flex; align-items: center; justify-content: center; gap: 2px;
   padding: 0; font: inherit; cursor: pointer;
 }
-/* --blocked: Stehplätze zählen zur Gesamtkapazität, sind aber aktuell nicht buchbar
-   (s. gen_seatplan.py "standing", available:0) — Cursor signalisiert das, ohne die
-   Fläche unsichtbar/undeutbar zu machen (Klick erklärt den Grund, s. seat-picker.js). */
-.seatplan-mobile-standing--blocked { cursor: not-allowed; }
 .seatplan-mobile-standing span {
   font-size: 8px; font-weight: 600; letter-spacing: .04em; color: var(--text-muted);
   writing-mode: vertical-rl; transform: rotate(180deg);

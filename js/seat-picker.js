@@ -129,6 +129,12 @@
        sie. null = Detailansicht zu, dann ist `selected` die aktive Auswahl. */
     this.pendingSeats = null;
     this.blockCounts = {}; // zone_id -> { normal: n, ermaessigt: n } (Modus "blocks")
+    // Stehplatz: reiner Mengen-Posten ohne Sitzwahl (s. #222) — eigenes pretix-Produkt,
+    // eigenes Kontingent pro Spieltag. standingAvailable kommt zusammen mit den
+    // belegten Sitzen vom selben Status-Endpunkt (s. _load), bis dahin null.
+    this.standingPrice = opts.standingPrice || 0;
+    this.standingQty = 0;
+    this.standingAvailable = null;
     this.pretixEvent = opts.pretixEvent || null; // Event-Slug fuer die Gutschein-Pruefung (z.B. "saison2627")
     // pretix-Item-ID -> unsere Kategorie-Bezeichnung, z.B. {9:"VIP",7:"Kategorie I",8:"Kategorie II"} —
     // nur so kann ein an ein bestimmtes Produkt gebundener Gutschein (require item) der richtigen
@@ -311,9 +317,8 @@
     fetch(this.planUrl).then(function (r) { return r.json(); }).then(function (plan) {
       self.plan = plan;
       // Stehplatz (s. gen_seatplan.py): reiner Mengen-Bereich ohne Einzelplatz-Wahl,
-      // zählt zur Gesamtkapazität, ist aber aktuell komplett blockiert/reserviert
-      // (available:0) — noch kein verkaufbares Produkt (s. _renderMobileOverview,
-      // _renderOccupancy).
+      // zählt zur Gesamtkapazität; Preis/Menge werden ueber die Warenkorb-Zeile
+      // verkauft (s. _appendStehplatzRow), freie Menge kommt live vom Status-Endpunkt.
       self.standing = plan.standing || null;
       self.reservedSeatGuids = self._computeSeatGuidsForRanges(self.reservedSeats, plan);
       self.nvSeatGuids = self._computeSeatGuidsForRanges(self.nvSeats, plan);
@@ -331,6 +336,10 @@
       .catch(function () { return { takenSeatGuids: [] }; })
       .then(function (status) {
         self.takenSeatGuids = new Set(Array.isArray(status.takenSeatGuids) ? status.takenSeatGuids : []);
+        if (typeof status.standingAvailable === 'number') {
+          self.standingAvailable = status.standingAvailable;
+          if (self.standingQty > self.standingAvailable) self.standingQty = self.standingAvailable;
+        }
         self.seatStatusLoaded = true;
         if (!self.plan) return; // Plan rendert gleich selbst und liest den Status dann mit
         self._dropTakenSelections();
@@ -523,8 +532,8 @@
         '<div class="seatplan-mobile-court-row" style="grid-column:2;grid-row:3">' +
           '<div class="seatplan-mobile-court-aside">' +
             '<div class="seatplan-mobile-scoreboard"><span></span><i>Anzeigetafel</i><span></span></div>' +
-            '<button type="button" class="seatplan-mobile-standing seatplan-mobile-standing--blocked" ' +
-              'aria-label="Stehplatz' + (self.standing ? ' (' + self.standing.capacity + ' Plätze, aktuell nicht buchbar)' : '') + '">' +
+            '<button type="button" class="seatplan-mobile-standing" ' +
+              'aria-label="Stehplatz' + (self.standing ? ' (' + self.standing.capacity + ' Plätze)' : '') + '">' +
               '<span>Steh-</span><span>platz</span>' +
             '</button>' +
           '</div>' +
@@ -549,15 +558,14 @@
       var addBtn = this.root.querySelector('#seatplan-mobile-add-btn');
       if (addBtn) addBtn.addEventListener('click', function () { self._addPendingBlock(); });
     }
-    // Stehplatz ist bewusst antippbar (Marko: "muss im Bereich Stehplatz mit ausgewählt
-    // werden können"), aber noch nicht verkaufbar — ein Klick erklärt das kurz statt
-    // stillschweigend nichts zu tun, statt eines eigenen Auswahl-Dialogs (der erst mit
-    // #222 kommt).
+    // Stehplatz ist im Bild nur der Positions-Hinweis (kein Sitz, keine Detailansicht
+    // möglich) — die eigentliche Mengenwahl passiert seit #222 als eigene Warenkorb-
+    // Zeile (s. _appendStehplatzRow), ein Klick hier erklärt kurz, wo das geht.
     var standingBtn = this.root.querySelector('.seatplan-mobile-standing');
     if (standingBtn) {
       standingBtn.addEventListener('click', function () {
         if (!self.statusNoteEl) return;
-        self.statusNoteEl.textContent = 'Stehplätze sind aktuell noch nicht buchbar.';
+        self.statusNoteEl.textContent = 'Stehplätze kannst du unten im Warenkorb hinzufügen.';
         self.statusNoteEl.hidden = false;
       });
     }
@@ -642,15 +650,20 @@
         '</li>'
       );
     });
-    // Stehplatz zählt zur Gesamtkapazität mit, ist aber aktuell komplett blockiert
-    // (0 frei) — eigene Zeile statt in die Block-Liste gemischt, weil es kein Block ist.
+    // Stehplatz zählt zur Gesamtkapazität mit — eigene Zeile statt in die Block-Liste
+    // gemischt, weil es kein Block mit Reihen/Sitzen ist, sondern ein reiner Mengen-Posten.
     if (this.standing && this.standing.capacity) {
       gesamtAlle += this.standing.capacity;
+      var stehplatzFrei = typeof this.standingAvailable === 'number' ? this.standingAvailable : this.standing.capacity;
+      freiAlle += stehplatzFrei;
+      var stehplatzQuote = Math.round((stehplatzFrei / this.standing.capacity) * 100);
       zeilen.push(
         '<li class="seatplan-occupancy-row">' +
           '<span class="seatplan-occupancy-block">' + this.standing.name + '</span>' +
-          '<span class="seatplan-occupancy-bar" aria-hidden="true"><span style="width:100%"></span></span>' +
-          '<span class="seatplan-occupancy-num">nicht buchbar</span>' +
+          '<span class="seatplan-occupancy-bar" aria-hidden="true">' +
+            '<span style="width:' + (100 - stehplatzQuote) + '%"></span>' +
+          '</span>' +
+          '<span class="seatplan-occupancy-num">' + stehplatzFrei + ' von ' + this.standing.capacity + ' frei</span>' +
         '</li>'
       );
     }
@@ -1860,6 +1873,38 @@
     this._updatePendingList(zoneLabel);
   };
 
+  /* Stehplatz (s. #222): reiner Mengen-Posten ohne Sitzwahl, eigenes pretix-Produkt
+     mit eigenem Kontingent pro Spieltag — funktional wie eine Block-Kategorie-Zeile,
+     nur ohne Reihe/Platz und ohne Ermäßigt-Option. Erscheint als eigene Warenkorb-
+     Zeile (nur "blocks"-Modus, also Einzelticket), Menge begrenzt durch das live
+     abgefragte Kontingent (standingAvailable), bis dahin durch die Hallenkapazität. */
+  SeatPicker.prototype._appendStehplatzRow = function () {
+    var self = this;
+    var max = typeof this.standingAvailable === 'number' ? this.standingAvailable : this.standing.capacity;
+    var row = document.createElement('div');
+    row.className = 'seatplan-cart-item';
+    row.innerHTML =
+      '<div>' + escapeHtml(this.standing.name) +
+      '<br><span class="t-caption">' + fmtEUR(this.standingPrice) + ' € je Ticket</span></div>' +
+      '<div class="seatplan-cart-item-right">' +
+        '<span class="seatplan-stepper">' +
+          '<button type="button" data-standing-step="-1" aria-label="weniger Stehplätze">−</button>' +
+          '<span style="min-width:16px;text-align:center;font-weight:700">' + this.standingQty + '</span>' +
+          '<button type="button" data-standing-step="1" aria-label="mehr Stehplätze"' + (this.standingQty >= max ? ' disabled' : '') + '>+</button>' +
+        '</span>' +
+        '<span>' + fmtEUR(this.standingQty * this.standingPrice) + ' €</span></div>';
+    this.cartEl.appendChild(row);
+    row.querySelectorAll('[data-standing-step]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var delta = parseInt(this.dataset.standingStep, 10);
+        var next = Math.max(0, Math.min(max, self.standingQty + delta));
+        if (next === self.standingQty) return;
+        self.standingQty = next;
+        self._renderCart();
+      });
+    });
+  };
+
   /* Nachwuchsbeitrag ist eine Pauschale pro Bestellung (nicht pro Platz/Ticket),
      standardmäßig aktiviert, mit Opt-out-Checkbox. Wird nur angezeigt, wenn der
      Warenkorb nicht leer ist. Gemeinsam für "seats"- und "blocks"-Modus. */
@@ -2199,6 +2244,8 @@
       if (c.ermaessigt > 0) lines.push({ blockKey: blockKey, tarif: 'ermaessigt', label: 'Ermäßigt', count: c.ermaessigt, price: c.priceInfo.ermaessigt, zoneLabel: c.zoneLabel });
     });
     var ticketCount = lines.reduce(function (sum, l) { return sum + l.count; }, 0);
+    var hasStanding = !!(this.standing && this.standingPrice);
+    var isEmpty = lines.length === 0 && this.standingQty === 0;
 
     this.cartEl.innerHTML = '';
     if (lines.length === 0) this._renderDirectAddRow();
@@ -2208,7 +2255,6 @@
       emptyEl.className = 'seatplan-cart-empty';
       emptyEl.textContent = 'Noch keine Tickets ausgewählt.';
       this.cartEl.appendChild(emptyEl);
-      this.ctaEl.disabled = true;
     } else {
       lines.forEach(function (l) {
         var row = document.createElement('div');
@@ -2232,38 +2278,45 @@
             '<span>' + fmtEUR(l.count * l.price) + ' €</span></div>';
         self.cartEl.appendChild(row);
       });
+    }
 
+    // Stehplatz ist unabhängig von der Sitzauswahl immer sichtbar (auch bei leerem
+    // Warenkorb) — sonst gäbe es keinen Weg, eine reine Stehplatz-Bestellung zu starten.
+    if (hasStanding) this._appendStehplatzRow();
+
+    if (!isEmpty) {
       this._appendNachwuchsRow();
       this._appendVoucherRow();
       this._appendNotizRow();
-      this.ctaEl.disabled = false;
-
-      this.cartEl.querySelectorAll('[data-cart-step]').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var blockKey = this.dataset.zone;
-          var tarif = this.dataset.tarif;
-          var delta = parseInt(this.dataset.cartStep, 10);
-          var c = self.blockCounts[blockKey];
-          var freeCount = self._blockFreeCount(blockKey.split('::')[0], c.category);
-          self._stepBlock(blockKey, c.zoneLabel, c.category, c.priceInfo, tarif, delta, freeCount);
-        });
-      });
-      this.cartEl.querySelectorAll('[data-block-tarif-select]').forEach(function (sel) {
-        sel.addEventListener('change', function () {
-          var blockKey = this.dataset.zone;
-          var oldTarif = this.dataset.tarif;
-          var newTarif = this.value;
-          if (newTarif === oldTarif) return;
-          var counts = self.blockCounts[blockKey];
-          counts[newTarif] = (counts[newTarif] || 0) + counts[oldTarif];
-          counts[oldTarif] = 0;
-          self._renderCart();
-        });
-      });
     }
+    this.ctaEl.disabled = isEmpty;
+
+    this.cartEl.querySelectorAll('[data-cart-step]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var blockKey = this.dataset.zone;
+        var tarif = this.dataset.tarif;
+        var delta = parseInt(this.dataset.cartStep, 10);
+        var c = self.blockCounts[blockKey];
+        var freeCount = self._blockFreeCount(blockKey.split('::')[0], c.category);
+        self._stepBlock(blockKey, c.zoneLabel, c.category, c.priceInfo, tarif, delta, freeCount);
+      });
+    });
+    this.cartEl.querySelectorAll('[data-block-tarif-select]').forEach(function (sel) {
+      sel.addEventListener('change', function () {
+        var blockKey = this.dataset.zone;
+        var oldTarif = this.dataset.tarif;
+        var newTarif = this.value;
+        if (newTarif === oldTarif) return;
+        var counts = self.blockCounts[blockKey];
+        counts[newTarif] = (counts[newTarif] || 0) + counts[oldTarif];
+        counts[oldTarif] = 0;
+        self._renderCart();
+      });
+    });
 
     var total = lines.reduce(function (sum, l) { return sum + l.count * l.price; }, 0);
-    if (this.nachwuchsBeitrag && this.nachwuchsChecked && ticketCount > 0 && !this._voucherIsFullComp()) total += this.nachwuchsAmount;
+    if (hasStanding) total += this.standingQty * this.standingPrice;
+    if (this.nachwuchsBeitrag && this.nachwuchsChecked && (ticketCount > 0 || this.standingQty > 0) && !this._voucherIsFullComp()) total += this.nachwuchsAmount;
     total -= this._voucherDiscount(total);
     this.totalEl.textContent = fmtEUR(total) + ' €';
   };
@@ -2309,9 +2362,19 @@
           }
         });
       });
-      var ticketCount = lines.reduce(function (sum, l) { return sum + l.qty; }, 0);
+      if (this.standing && this.standingPrice && this.standingQty > 0) {
+        lines.push({
+          label: this.standing.name,
+          qty: this.standingQty, unitPrice: this.standingPrice, lineTotal: this.standingQty * this.standingPrice,
+          // Eigener Line-Item-Typ: reine Menge, kein Sitz/keine Kategorie/kein Tarif —
+          // der Bestell-Workflow baut daraus eigene pretix-Positionen (Item 23).
+          type: 'standing', qty: this.standingQty
+        });
+        total += this.standingQty * this.standingPrice;
+      }
+      var ticketCount = lines.reduce(function (sum, l) { return sum + (l.type === 'block' ? l.qty : 0); }, 0);
       var nachwuchsAmount = 0;
-      if (this.nachwuchsBeitrag && this.nachwuchsChecked && ticketCount > 0 && !this._voucherIsFullComp()) {
+      if (this.nachwuchsBeitrag && this.nachwuchsChecked && (ticketCount > 0 || this.standingQty > 0) && !this._voucherIsFullComp()) {
         nachwuchsAmount = this.nachwuchsAmount;
         lines.push({ label: 'Unterstützung für den Nachwuchs', qty: 1, unitPrice: nachwuchsAmount, lineTotal: nachwuchsAmount, type: 'nachwuchs' });
         total += nachwuchsAmount;

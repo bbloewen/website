@@ -211,6 +211,9 @@
           'Kategorie I': { normal: 16, ermaessigt: 14 },
           'Kategorie II': { normal: 12, ermaessigt: 8.5 }
         },
+        // Stehplatz (s. #222): eigenes pretix-Produkt (Item 23), kein Sitz, keine
+        // Ermäßigung — reiner Mengen-Posten, Preis muss zum n8n-Bestellworkflow passen.
+        standingPrice: 8.5,
         cartEl: document.getElementById('seatplan-cart'),
         totalEl: document.getElementById('seatplan-total'),
         ctaEl: document.getElementById('seatplan-cta'),
