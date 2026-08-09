@@ -52,10 +52,11 @@
     'Kategorie II': { cls: 'cat-kat2', color: cssVar('--seatplan-cat-kat2', '#D9DEE3'), borderColor: cssVar('--seatplan-cat-kat2-border', '#B9C1C8'), shortLabel: 'Kat. II' },
     'Kategorie III': { cls: 'cat-kat3', color: cssVar('--seatplan-cat-kat3', 'rgba(42,157,143,.55)'), borderColor: cssVar('--seatplan-cat-kat3-border', 'rgba(42,157,143,.9)'), shortLabel: 'Kat. III' },
     'Fanblock': { cls: 'cat-fanblock', color: cssVar('--seatplan-cat-fanblock', 'rgba(244,163,0,.55)'), borderColor: cssVar('--seatplan-cat-fanblock-border', 'rgba(244,163,0,.9)') },
-    // C unten: eigenes Produkt seit 09.08.2026 (eigenes pretix-Item/-Kontingent), eigener
-    // Preis (75,00 €, kein Ermäßigt-Tarif) — wie VIP behandelt (Marko: "C unten bekommt
-    // VIP-Preis"), daher auch optisch wie VIP dargestellt.
-    'C unten': { cls: 'cat-vip', color: cssVar('--seatplan-cat-vip', 'rgba(179,57,44,.55)'), borderColor: cssVar('--seatplan-cat-vip-border', 'rgba(179,57,44,.9)') },
+    // C unten: eigenes Produkt/Kontingent seit 09.08.2026, aber Preis bleibt Kategorie II
+    // (12,00 €/8,50 €) — Marko hat den anfangs erwogenen VIP-Preis wieder verworfen
+    // ("Block C unten ist kein VIP-Bereich, sondern Kategorie 2"). Nur Block B unten ist
+    // VIP. Optik bleibt daher wie Kategorie II.
+    'C unten': { cls: 'cat-kat2', color: cssVar('--seatplan-cat-kat2', '#D9DEE3'), borderColor: cssVar('--seatplan-cat-kat2-border', '#B9C1C8') },
     'VIP': { cls: 'cat-vip', color: cssVar('--seatplan-cat-vip', 'rgba(179,57,44,.55)'), borderColor: cssVar('--seatplan-cat-vip-border', 'rgba(179,57,44,.9)') }
   };
   function catMeta(category) { return CATEGORY_META[category] || {}; }

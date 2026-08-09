@@ -53,7 +53,6 @@
             <div class="price-row"><span>Kategorie 3 (Kinder 7–14)</span><strong>5,50 €</strong></div>
             <div class="price-row"><span>Fanblock</span><strong>10,50 €</strong></div>
             <div class="price-row"><span>Fanblock (ermäßigt)</span><strong>8,00 €</strong></div>
-            <div class="price-row"><span>C unten</span><strong>75,00 €</strong></div>
             <div class="price-row" id="preis-stehplatz"><span>Stehplatz</span><strong>8,00 €</strong></div>
             <div class="price-row"><span>Rollstuhlfahrer (inkl. Begleitkarte)<br><span class="t-caption" style="color:var(--text-muted)">nur Block A, D, E, F</span></span><strong>8,00 €</strong></div>
           </div>
@@ -137,7 +136,7 @@
 
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="/js/nav.js?v=1785398309"></script>
-<script src="/js/include.js?v=1785398309"></script><script src="/js/seat-picker.js?v=1786530200"></script>
+<script src="/js/include.js?v=1785398309"></script><script src="/js/seat-picker.js?v=1786531100"></script>
 <script>
   /* Die Seite gilt für JEDES Heimspiel, nicht nur für das erste. Welches gemeint
      ist, steht in ?spiel=<slug> (z. B. ?spiel=2026-10-11) und wird gegen
@@ -230,10 +229,11 @@
           'Kategorie III': { normal: 10, ermaessigt: 8, kind: 5.5 },
           // Block A unten: eigenes Produkt, kein Kinder-Tarif.
           'Fanblock': { normal: 10.5, ermaessigt: 8 },
-          // Block C unten (Marko, 09.08.2026: "C unten bekommt VIP-Preis"): eigenes
-          // Produkt, eigener Festpreis, kein Ermäßigt-Tarif — analog VIP behandelt
-          // (s. CATEGORY_META in seat-picker.js, dort auch optisch wie VIP dargestellt).
-          'C unten': { normal: 75 },
+          // Block C unten: eigenes pretix-Item/-Kontingent seit 09.08.2026, Preis bleibt
+          // aber Kategorie II (Marko hat den anfangs erwogenen VIP-Preis wieder
+          // verworfen — nur Block B unten ist VIP). Deshalb kein eigener Preisliste-
+          // Eintrag oben, nur die Kategorie-Zuordnung hier für den Warenkorb.
+          'C unten': { normal: 12, ermaessigt: 8.5 },
           // Sitzplanweit (Block A/D/E/F, s. Preisliste "nur Block A, D, E, F") — fester
           // Preis inkl. Begleitkarte, überschreibt bei Dauerkarte den Blockpreis für
           // seat.wheelchair-Sitze (s. seat-picker.js _renderZone), bei Einzelticket nur
