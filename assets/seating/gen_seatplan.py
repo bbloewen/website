@@ -173,10 +173,11 @@ def mkrow(zone_id, row_number, segments, category, y, section_break=False, wheel
     if trailing_gap_units:
         row["trailing_gap_units"] = trailing_gap_units
     # category_label: reine Anzeige-Beschriftung für die Website (Blockkachel/Detail-
-    # Header), OHNE die tatsächliche `category` (= Preis/Produkt) zu ändern — z.B. Block
-    # C unten: bleibt Kategorie II (gleicher Preis), soll aber als "C unten" statt
-    # "Kategorie II" beschriftet werden (Marko, 09.08.2026). Nur auf der ERSTEN Reihe
-    # einer Gruppe gesetzt, s. seat-picker.js _categoryGroups.
+    # Header), OHNE die tatsächliche `category` (= Preis/Produkt) zu ändern — für Gruppen,
+    # deren Anzeigename vom Kategorienamen abweichen soll, deren Preis aber identisch
+    # bleibt. Aktuell ungenutzt (Block C unten ist inzwischen eine echte eigene Kategorie
+    # mit eigenem Preis, s. C_UNTEN). Nur auf der ERSTEN Reihe einer Gruppe gesetzt, s.
+    # seat-picker.js _categoryGroups.
     if category_label:
         row["category_label"] = category_label
     return row
@@ -227,6 +228,7 @@ KAT1 = "Kategorie I"
 KAT2 = "Kategorie II"
 KAT3 = "Kategorie III"
 FANBLOCK = "Fanblock"
+C_UNTEN = "C unten"
 VIP = "VIP"
 
 # Nordtribüne: Reihe 6 (bzw. 7) ist die vorderste, am Spielfeld — das Spielfeld
@@ -521,10 +523,12 @@ block_B = [
         }}),
 ]
 block_C = [
-    # Anzeige-Split (Marko, 09.08.2026): Reihe 1-5 bleibt "Kategorie II", Reihe 6-12
-    # (bereits per break_before={"6"} optisch abgesetzt) wird auf der Website als
-    # "C unten" beschriftet — SELBE Kategorie/SELBER Preis, nur ein eigener Anzeigename
-    # (anders als bei Block A: hier ändert sich das tatsächliche Produkt nicht).
+    # Produkt-Split (Marko, 09.08.2026, zweite Runde): Reihe 1-5 bleibt "Kategorie II",
+    # Reihe 6-12 (bereits per break_before={"6"} optisch abgesetzt) wird "C unten" — ein
+    # ECHTES eigenes Produkt (eigenes pretix-Item/-Kontingent) mit eigenem Preis: 75,00 €
+    # Einzelticket, kein Ermäßigt-Tarif — wie VIP behandelt (Marko, 09.08.2026: "C unten
+    # bekommt VIP-Preis"), s. opts.prices in tickets/einzelticket.html und CATEGORY_META
+    # in seat-picker.js (dort auch optisch wie VIP dargestellt).
     # Reihe 1-3 (Marko): echte Ein-Platz-Lücke zwischen Sitz 12 und 13 (Segment 1 beginnt
     # bei Sitz 13, s. segments [12,7]).
     (1, [12, 7], KAT2, {"segment_gap_seats": {1: 1}}),
@@ -532,15 +536,15 @@ block_C = [
     (3, [12, 7], KAT2, {"segment_gap_seats": {1: 1}}),
     (4, [12], KAT2),
     (5, [12], KAT2),
-    (6, [20], KAT2, {"category_label": "C unten"}),
-    (7, [20], KAT2),
-    (8, [20], KAT2),
-    (9, [20], KAT2),
-    (10, [20], KAT2, {"align_reference_seat": True}),
-    (11, [2, 20, 2], KAT2, {"align_target_seat": 3, "segment_align": {"1": {"row": "12", "seat": 1}, "23": {"row": "12", "seat": 27}}}),
+    (6, [20], C_UNTEN),
+    (7, [20], C_UNTEN),
+    (8, [20], C_UNTEN),
+    (9, [20], C_UNTEN),
+    (10, [20], C_UNTEN, {"align_reference_seat": True}),
+    (11, [2, 20, 2], C_UNTEN, {"align_target_seat": 3, "segment_align": {"1": {"row": "12", "seat": 1}, "23": {"row": "12", "seat": 27}}}),
     # Reihe 12 (Marko): echte Ein-Platz-Lücken zwischen Sitz 7/8 (Segment 1) und 21/22
     # (Segment 2).
-    (12, [7, 14, 7], KAT2, {"align_target_seat": 6, "segment_gap_seats": {1: 1, 2: 1}}),
+    (12, [7, 14, 7], C_UNTEN, {"align_target_seat": 6, "segment_gap_seats": {1: 1, 2: 1}}),
 ]
 
 plan = {
@@ -550,6 +554,7 @@ plan = {
         {"name": "Kategorie II", "color": "#1D3557"},
         {"name": "Kategorie III", "color": "#2A9D8F"},
         {"name": "Fanblock", "color": "#F4A300"},
+        {"name": "C unten", "color": "#8E44AD"},
         {"name": "VIP", "color": "#8E44AD"}
     ],
     # Gesamt-Canvas für Pretix' eigenen Sitzplan-Editor/-Viewer (nur dort relevant —
