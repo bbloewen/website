@@ -490,7 +490,10 @@
       if (!self.prices[g.category]) return;
       if (seen[g.category]) return;
       seen[g.category] = true;
-      result.push({ category: g.category, label: g.label || catShortLabel(g.category) });
+      // rows: Reihenzahl der Gruppe — Grundlage für den Höhenanteil der Kachel in
+      // blockTile() (z.B. Fanblock 5 Reihen vs. Kategorie III 7 Reihen im selben Block:
+      // die Kachel-Höhe soll das widerspiegeln statt beide gleich hoch zu zeigen).
+      result.push({ category: g.category, label: g.label || catShortLabel(g.category), rows: g.rows.length });
     });
     return result;
   };
@@ -517,24 +520,27 @@
         return '<div class="seatplan-mobile-tile-group' + (isNorth ? '' : ' seatplan-mobile-tile-group-south') + '" style="visibility:hidden"></div>';
       }
       var multi = purchasable.length > 1;
-      // Fanblock/VIP/C unten (Marko, 09.08.2026): keine eigene Block-Buchstaben-Zeile
-      // mehr, nur noch der Kategorie-Name — bei "C unten" als Wortspiel "Courtside" mit
-      // fett gesetztem C statt eines separaten Blockbuchstabens. Alle anderen Kacheln
-      // (Kat. I/II/III, D/E/F) behalten Buchstabe + Kategorie wie bisher.
-      function soloLabel(category) {
-        if (category === 'C unten') return '<strong>C</strong>ourtside';
-        return escapeHtml(category);
-      }
+      // Fanblock/VIP (Marko, 09.08.2026): keine eigene Block-Buchstaben-Zeile mehr, nur
+      // noch der Kategorie-Name, etwas kleiner als die alte Buchstaben-Größe. "C unten"
+      // heißt hier "Courtside" — Schriftgröße/-grad wie die übrige Kat.-Beschriftung
+      // (Marko: "wie bei Kategorie 2"), nur das C fett statt eines eigenen Buchstabens.
       var tiles = purchasable.map(function (p) {
         var key = multi ? id + '::' + p.category : id;
         var isPending = self.mode === 'blocks' && self.pendingBlockId === key;
         var tileClass = 'seatplan-mobile-tile' + (isNorth ? '' : ' seatplan-mobile-tile-south') + (isPending ? ' selected' : '');
-        var tileStyle = 'background:' + catColor(p.category) + ';border-color:' + catBorderColor(p.category);
-        var solo = p.category === 'Fanblock' || p.category === 'VIP' || p.category === 'C unten';
-        var inner = solo
-          ? '<span class="seatplan-mobile-tile-cat seatplan-mobile-tile-cat-solo">' + soloLabel(p.category) + '</span>'
-          : '<span class="seatplan-mobile-tile-letter">' + id + '</span>' +
+        // flex-grow proportional zur Reihenzahl: Fanblock/VIP/Courtside haben immer nur
+        // 5 Reihen, ihr Gegenstück (Kat. I/II/III) mehr — die Kachel-Höhe soll das
+        // abbilden statt beide Hälften eines Blocks gleich hoch zu zeigen.
+        var tileStyle = 'background:' + catColor(p.category) + ';border-color:' + catBorderColor(p.category) + ';flex:' + p.rows + ' 1 0';
+        var inner;
+        if (p.category === 'Fanblock' || p.category === 'VIP') {
+          inner = '<span class="seatplan-mobile-tile-cat seatplan-mobile-tile-cat-solo">' + escapeHtml(p.category) + '</span>';
+        } else if (p.category === 'C unten') {
+          inner = '<span class="seatplan-mobile-tile-cat seatplan-mobile-tile-cat-courtside"><strong>C</strong>ourtside</span>';
+        } else {
+          inner = '<span class="seatplan-mobile-tile-letter">' + id + '</span>' +
             '<span class="seatplan-mobile-tile-cat">' + escapeHtml(p.label) + '</span>';
+        }
         return '<button type="button" class="' + tileClass + '" style="' + tileStyle + '" data-zone="' + key + '">' + inner + '</button>';
       }).join('');
       return '<div class="seatplan-mobile-tile-group' + (isNorth ? '' : ' seatplan-mobile-tile-group-south') + '">' + tiles + '</div>';
