@@ -346,9 +346,9 @@
 }
 /* "Haupteingang" wirkte optisch nicht ganz zentriert (Marko, 09.08.2026) — der obere
    Strich etwas kürzer, der untere etwas länger, damit das Label ein paar Pixel nach
-   oben rückt. */
-.seatplan-mobile-entrance span:first-child { flex: 0.85; }
-.seatplan-mobile-entrance span:last-child { flex: 1.15; }
+   oben rückt (danach nochmal 2px zurück nach unten korrigiert). */
+.seatplan-mobile-entrance span:first-child { flex: 0.87; }
+.seatplan-mobile-entrance span:last-child { flex: 1.13; }
 .seatplan-mobile-entrance i {
   font-style: normal; font-size: 9px; font-weight: 600; letter-spacing: .04em;
   color: var(--text-muted); white-space: nowrap;
