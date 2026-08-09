@@ -520,10 +520,10 @@
         return '<div class="seatplan-mobile-tile-group' + (isNorth ? '' : ' seatplan-mobile-tile-group-south') + '" style="visibility:hidden"></div>';
       }
       var multi = purchasable.length > 1;
-      // Fanblock/VIP (Marko, 09.08.2026): keine eigene Block-Buchstaben-Zeile mehr, nur
-      // noch der Kategorie-Name, etwas kleiner als die alte Buchstaben-Größe. "C unten"
-      // heißt hier "Courtside" — Schriftgröße/-grad wie die übrige Kat.-Beschriftung
-      // (Marko: "wie bei Kategorie 2"), nur das C fett statt eines eigenen Buchstabens.
+      // Fanblock/VIP/C unten (Marko, 09.08.2026): keine eigene Block-Buchstaben-Zeile
+      // mehr, nur noch der Kategorie-Name — gleiche Schriftgröße/-grad wie die übrige
+      // Kat.-Beschriftung (Marko: "wie bei Kategorie 2"). "C unten" heißt hier
+      // "Courtside", mit fett gesetztem C statt eines eigenen Buchstabens.
       var tiles = purchasable.map(function (p) {
         var key = multi ? id + '::' + p.category : id;
         var isPending = self.mode === 'blocks' && self.pendingBlockId === key;
@@ -534,9 +534,9 @@
         var tileStyle = 'background:' + catColor(p.category) + ';border-color:' + catBorderColor(p.category) + ';flex:' + p.rows + ' 1 0';
         var inner;
         if (p.category === 'Fanblock' || p.category === 'VIP') {
-          inner = '<span class="seatplan-mobile-tile-cat seatplan-mobile-tile-cat-solo">' + escapeHtml(p.category) + '</span>';
+          inner = '<span class="seatplan-mobile-tile-cat">' + escapeHtml(p.category) + '</span>';
         } else if (p.category === 'C unten') {
-          inner = '<span class="seatplan-mobile-tile-cat seatplan-mobile-tile-cat-courtside"><strong>C</strong>ourtside</span>';
+          inner = '<span class="seatplan-mobile-tile-cat"><strong>C</strong>ourtside</span>';
         } else {
           inner = '<span class="seatplan-mobile-tile-letter">' + id + '</span>' +
             '<span class="seatplan-mobile-tile-cat">' + escapeHtml(p.label) + '</span>';

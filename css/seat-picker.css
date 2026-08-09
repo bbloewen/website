@@ -328,16 +328,10 @@
 .seatplan-mobile-tile:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 2px; }
 .seatplan-mobile-tile-letter { font-size: 15px; font-weight: 700; }
 .seatplan-mobile-tile-cat { font-size: 8px; font-weight: 600; letter-spacing: .02em; opacity: .8; text-align: center; padding: 0 4px; }
-/* Fanblock/VIP: einzige Beschriftung der Kachel statt Zusatzzeile unter dem
-   Blockbuchstaben — etwas größer/fetter als die sonstige Kategorie-Unterzeile, aber
-   (Marko, 09.08.2026) kleiner als zuvor, damit es in die jetzt niedrigere Kachel passt
-   (s. flex-grow nach Reihenzahl in blockTile()). */
-.seatplan-mobile-tile-cat-solo { font-size: 11px; font-weight: 700; opacity: 1; }
-/* "Courtside" (C unten): Schriftgröße/-grad wie die normale Kategorie-Unterzeile
-   (Marko: "wie bei Kategorie 2") — nur das führende C fett, als Ersatz für den sonst
-   separaten Blockbuchstaben. */
-.seatplan-mobile-tile-cat-courtside { font-size: 8px; font-weight: 600; letter-spacing: .02em; opacity: .8; text-align: center; padding: 0 4px; }
-.seatplan-mobile-tile-cat-courtside strong { font-weight: 700; }
+/* "Courtside" (C unten): nur das führende C fett, als Ersatz für den sonst separaten
+   Blockbuchstaben — Fanblock/VIP/Courtside laufen alle in derselben Schriftgröße/-grad
+   wie die normale Kategorie-Unterzeile (Marko, 09.08.2026: "wie bei Kategorie 2"). */
+.seatplan-mobile-tile-cat strong { font-weight: 700; }
 
 /* Eingangs-Markierung: eine durchgehende Linie, die vom Label unterbrochen wird,
    statt eines Labels, das die Grafik zusätzlich verlängert. VIP-Eingang (s. u.)
@@ -350,6 +344,11 @@
   flex: 1; width: 3px; border-radius: 2px; min-height: 8px;
   background: var(--color-neutral-200);
 }
+/* "Haupteingang" wirkte optisch nicht ganz zentriert (Marko, 09.08.2026) — der obere
+   Strich etwas kürzer, der untere etwas länger, damit das Label ein paar Pixel nach
+   oben rückt. */
+.seatplan-mobile-entrance span:first-child { flex: 0.85; }
+.seatplan-mobile-entrance span:last-child { flex: 1.15; }
 .seatplan-mobile-entrance i {
   font-style: normal; font-size: 9px; font-weight: 600; letter-spacing: .04em;
   color: var(--text-muted); white-space: nowrap;
