@@ -517,15 +517,25 @@
         return '<div class="seatplan-mobile-tile-group' + (isNorth ? '' : ' seatplan-mobile-tile-group-south') + '" style="visibility:hidden"></div>';
       }
       var multi = purchasable.length > 1;
+      // Fanblock/VIP/C unten (Marko, 09.08.2026): keine eigene Block-Buchstaben-Zeile
+      // mehr, nur noch der Kategorie-Name — bei "C unten" als Wortspiel "Courtside" mit
+      // fett gesetztem C statt eines separaten Blockbuchstabens. Alle anderen Kacheln
+      // (Kat. I/II/III, D/E/F) behalten Buchstabe + Kategorie wie bisher.
+      function soloLabel(category) {
+        if (category === 'C unten') return '<strong>C</strong>ourtside';
+        return escapeHtml(category);
+      }
       var tiles = purchasable.map(function (p) {
         var key = multi ? id + '::' + p.category : id;
         var isPending = self.mode === 'blocks' && self.pendingBlockId === key;
         var tileClass = 'seatplan-mobile-tile' + (isNorth ? '' : ' seatplan-mobile-tile-south') + (isPending ? ' selected' : '');
         var tileStyle = 'background:' + catColor(p.category) + ';border-color:' + catBorderColor(p.category);
-        return '<button type="button" class="' + tileClass + '" style="' + tileStyle + '" data-zone="' + key + '">' +
-          '<span class="seatplan-mobile-tile-letter">' + id + '</span>' +
-          '<span class="seatplan-mobile-tile-cat">' + escapeHtml(p.label) + '</span>' +
-          '</button>';
+        var solo = p.category === 'Fanblock' || p.category === 'VIP' || p.category === 'C unten';
+        var inner = solo
+          ? '<span class="seatplan-mobile-tile-cat seatplan-mobile-tile-cat-solo">' + soloLabel(p.category) + '</span>'
+          : '<span class="seatplan-mobile-tile-letter">' + id + '</span>' +
+            '<span class="seatplan-mobile-tile-cat">' + escapeHtml(p.label) + '</span>';
+        return '<button type="button" class="' + tileClass + '" style="' + tileStyle + '" data-zone="' + key + '">' + inner + '</button>';
       }).join('');
       return '<div class="seatplan-mobile-tile-group' + (isNorth ? '' : ' seatplan-mobile-tile-group-south') + '">' + tiles + '</div>';
     }

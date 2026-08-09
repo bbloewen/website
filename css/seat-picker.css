@@ -328,6 +328,14 @@
 .seatplan-mobile-tile:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 2px; }
 .seatplan-mobile-tile-letter { font-size: 15px; font-weight: 700; }
 .seatplan-mobile-tile-cat { font-size: 8px; font-weight: 600; letter-spacing: .02em; opacity: .8; text-align: center; padding: 0 4px; }
+/* Fanblock/VIP/Courtside: einzige Beschriftung der Kachel statt Zusatzzeile unter dem
+   Blockbuchstaben — braucht darum deutlich mehr Größe/Gewicht als die sonstige
+   Kategorie-Unterzeile. */
+.seatplan-mobile-tile-cat-solo { font-size: 13px; font-weight: 700; opacity: 1; }
+/* "Courtside" (C unten): das C soll als Block-Buchstaben-Ersatz sichtbar herausstechen —
+   ohne dieses Extra-Gewicht wirkt "Courtside" nur wie Fettschrift durchgängig, ohne den
+   Bezug zum Buchstaben C. */
+.seatplan-mobile-tile-cat-solo strong { font-weight: 900; }
 
 /* Eingangs-Markierung: eine durchgehende Linie, die vom Label unterbrochen wird,
    statt eines Labels, das die Grafik zusätzlich verlängert. VIP-Eingang (s. u.)
