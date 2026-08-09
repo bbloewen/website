@@ -50,6 +50,8 @@
   var CATEGORY_META = {
     'Kategorie I': { cls: 'cat-kat1', color: cssVar('--seatplan-cat-kat1', 'rgba(232,119,34,.55)'), borderColor: cssVar('--seatplan-cat-kat1-border', 'rgba(232,119,34,.9)'), shortLabel: 'Kat. I' },
     'Kategorie II': { cls: 'cat-kat2', color: cssVar('--seatplan-cat-kat2', '#D9DEE3'), borderColor: cssVar('--seatplan-cat-kat2-border', '#B9C1C8'), shortLabel: 'Kat. II' },
+    'Kategorie III': { cls: 'cat-kat3', color: cssVar('--seatplan-cat-kat3', 'rgba(42,157,143,.55)'), borderColor: cssVar('--seatplan-cat-kat3-border', 'rgba(42,157,143,.9)'), shortLabel: 'Kat. III' },
+    'Fanblock': { cls: 'cat-fanblock', color: cssVar('--seatplan-cat-fanblock', 'rgba(244,163,0,.55)'), borderColor: cssVar('--seatplan-cat-fanblock-border', 'rgba(244,163,0,.9)') },
     'VIP': { cls: 'cat-vip', color: cssVar('--seatplan-cat-vip', 'rgba(179,57,44,.55)'), borderColor: cssVar('--seatplan-cat-vip-border', 'rgba(179,57,44,.9)') }
   };
   function catMeta(category) { return CATEGORY_META[category] || {}; }
@@ -89,6 +91,12 @@
     normal_member: 'Normalpreis mit Mitgliedsrabatt (Löwen e.V.)',
     ermaessigt_member: 'Ermäßigt mit Mitgliedsrabatt (Löwen e.V.)'
   };
+
+  /* Tarife im Modus "blocks" (Einzelticket) — "kind" bisher nur für Kategorie III
+     (Preis kommt aus priceInfo.kind, s. opts.prices), aber generisch benannt: jede
+     Kategorie mit einem "kind"-Preis bekommt automatisch diese dritte Tarifzeile,
+     ohne dass der Code nach Kategorie-Namen unterscheiden müsste. */
+  var BLOCK_TARIF_LABELS = { normal: 'Normalpreis', ermaessigt: 'Ermäßigt', kind: 'Kinder 7–14' };
 
   function SeatPicker(root, opts) {
     this.root = root;
@@ -427,10 +435,65 @@
       if (last && last.category === category && !row.section_break) {
         last.rows.push(row);
       } else {
-        groups.push({ category: category, rows: [row] });
+        // label: optionale Anzeige-Beschriftung (row.category_label, s. gen_seatplan.py)
+        // für Gruppen, die zwar dieselbe Kategorie/denselben Preis wie eine andere Gruppe
+        // im selben Block haben, aber eigenständig benannt werden sollen (z.B. Block C
+        // unten: bleibt "Kategorie II", heißt auf der Website aber "C unten"). null, wenn
+        // keine Überschreibung nötig ist — dann greift überall catShortLabel(category).
+        groups.push({ category: category, label: row.category_label || null, rows: [row] });
       }
     });
     return groups;
+  };
+
+  /* Kaufbare Kategorien eines Blocks, in physischer Reihenfolge (oben→unten) und ohne
+     Duplikate — Grundlage für die Direktwahl-Dropdown UND für die Tipp-Erkennung auf
+     der Kachel (s. _tappedCategory). Ein Block kann mehrere ECHTE Produkte enthalten
+     (z.B. Block A: Kategorie III oben, Fanblock unten — beide eigene Preise) oder
+     mehrere Gruppen mit IDENTISCHER Kategorie (z.B. Block C: oben "Kategorie II", unten
+     "C unten" — dieselbe Kategorie/derselbe Preis, nur anders beschriftet) — im zweiten
+     Fall bleibt es bei genau EINEM Eintrag (Dedupe nach category), weil es kommerziell
+     nur ein Produkt ist. VIP-Anteile ohne Preis (excludeCategories, z.B. Block B beim
+     Einzelticket) fallen ganz raus, wie bisher bei _quickAddBlock. */
+  SeatPicker.prototype._purchasableCategories = function (zoneId) {
+    var self = this;
+    var zone = this._zoneById(zoneId);
+    if (!zone) return [];
+    var seen = {};
+    var result = [];
+    this._categoryGroups(zone).forEach(function (g) {
+      if (self.excludeCategories.indexOf(g.category) !== -1) return;
+      if (!self.prices[g.category]) return;
+      if (seen[g.category]) return;
+      seen[g.category] = true;
+      result.push({ category: g.category, label: g.label || catShortLabel(g.category) });
+    });
+    return result;
+  };
+
+  /* Welche Kategorie eines mehrdeutigen Blocks (z.B. Block A: Kategorie III oben,
+     Fanblock unten) wurde angetippt — anhand der vertikalen Tipp-Position relativ zur
+     Kachel, nach demselben Reihenanzahl-Verhältnis wie der Farbverlauf in blockTile()
+     (s. dort), damit Tippfläche und sichtbare Trennlinie exakt übereinstimmen. Trifft
+     der Tipp eine Gruppe, die gar nicht kaufbar ist (z.B. der VIP-Anteil von Block B
+     beim Einzelticket), weicht die Funktion auf die letzte kaufbare Kategorie aus —
+     entspricht dem bisherigen Verhalten (ganze Kachel = eine Kategorie). */
+  SeatPicker.prototype._tappedCategory = function (zoneId, tileEl, event, purchasable) {
+    var zone = this._zoneById(zoneId);
+    var allGroups = this._categoryGroups(zone);
+    var total = allGroups.reduce(function (sum, g) { return sum + g.rows.length; }, 0);
+    var rect = tileEl.getBoundingClientRect();
+    var relY = rect.height ? (event.clientY - rect.top) / rect.height : 0;
+    var isNorth = this.northZones.indexOf(zoneId) !== -1;
+    var ordered = isNorth ? allGroups.slice().reverse() : allGroups;
+    var hitCategory = ordered[ordered.length - 1].category;
+    var acc = 0;
+    for (var i = 0; i < ordered.length; i++) {
+      acc += ordered[i].rows.length / total;
+      if (relY <= acc || i === ordered.length - 1) { hitCategory = ordered[i].category; break; }
+    }
+    var match = purchasable.filter(function (p) { return p.category === hitCategory; })[0];
+    return match ? match.category : purchasable[purchasable.length - 1].category;
   };
 
   SeatPicker.prototype._zoneById = function (id) {
@@ -492,13 +555,16 @@
         lineBackground = 'linear-gradient(to bottom, ' + lineStops.join(', ') + ')';
       }
       var background = lineBackground ? (lineBackground + ', ' + colorBackground) : colorBackground;
-      // Bei gemischten Blöcken (z. B. B: VIP vorn + Kategorie I hinten) beschriftet die
-      // Kachel bewusst nur die kaufbare Hauptkategorie (letzte/größte gefilterte Gruppe)
-      // unten am Buchstaben — ein zusätzliches "VIP"-Label oben markiert den roten
-      // Farbverlauf-Anteil separat, auch wenn VIP hier nicht kaufbar ist.
-      var mainCategory = groups[groups.length - 1].category;
+      // Bei gemischten Blöcken (z. B. B: VIP vorn + Kategorie I hinten, A: Kategorie III
+      // oben + Fanblock unten) beschriftet die Kachel unten am Buchstaben nur die
+      // LETZTE Gruppe (mainCategory) — ein zusätzliches Label oben markiert den ersten
+      // (oberen) Farbverlauf-Anteil separat, unabhängig davon, ob er selbst kaufbar ist
+      // (VIP bei B: nicht kaufbar, nur zur Einordnung gezeigt) oder ein eigenes Produkt
+      // (Kategorie III bei A: genauso kaufbar wie Fanblock).
+      var mainGroup = groups[groups.length - 1];
+      var mainCategory = mainGroup.category;
       var borderColor = catBorderColor(mainCategory);
-      var hasVip = allGroups.some(function (g) { return g.category === 'VIP'; });
+      var extraGroup = allGroups.length > 1 ? allGroups[0] : null;
       // Ohne die Gang-Trennlinie stand Buchstabe+Kategorie mittig in der ganzen
       // Kachel — jetzt, wo die Linie eine sichtbare Grenze zieht, gehört das Label
       // mittig in den UNTEREN Abschnitt. padding-top schiebt den Inhaltsbereich genau
@@ -506,19 +572,22 @@
       // Rest darunter. Bei den quadratischen Süd-Kacheln (aspect-ratio:1) ist ein
       // %-Wert dafür korrekt, weil Breite und Höhe dort gleich sind.
       var lineBoundary = boundaries.length ? boundaries[0] : null;
-      var vipTop = lineBoundary !== null ? (lineBoundary / 2) : 9;
-      var vipStyle = lineBoundary !== null
-        ? 'top:' + vipTop + '%;transform:translateY(-50%)'
-        : 'top:' + vipTop + 'px';
-      var vipLabel = hasVip ? '<span class="seatplan-mobile-tile-vip" style="' + vipStyle + '">VIP</span>' : '';
-      var isPending = self.mode === 'blocks' && self.pendingBlockId === id;
+      var extraTop = lineBoundary !== null ? (lineBoundary / 2) : 9;
+      var extraStyle = (lineBoundary !== null
+        ? 'top:' + extraTop + '%;transform:translateY(-50%)'
+        : 'top:' + extraTop + 'px') + ';color:' + (extraGroup ? catBorderColor(extraGroup.category) : '');
+      var extraLabel = extraGroup
+        ? '<span class="seatplan-mobile-tile-extra-label" style="' + extraStyle + '">' + escapeHtml(extraGroup.label || catShortLabel(extraGroup.category)) + '</span>'
+        : '';
+      var isPending = self.mode === 'blocks' && !!self.pendingBlockId &&
+        (self.pendingBlockId === id || self.pendingBlockId.indexOf(id + '::') === 0);
       var tileClass = 'seatplan-mobile-tile' + (isNorth ? '' : ' seatplan-mobile-tile-south') + (isPending ? ' selected' : '');
       var tileStyle = 'background:' + background + ';border-color:' + borderColor +
         (lineBoundary !== null ? ';padding-top:' + lineBoundary + '%' : '');
       return '<button type="button" class="' + tileClass + '" style="' + tileStyle + '" data-zone="' + id + '">' +
-        vipLabel +
+        extraLabel +
         '<span class="seatplan-mobile-tile-letter">' + id + '</span>' +
-        '<span class="seatplan-mobile-tile-cat">' + catShortLabel(mainCategory) + '</span>' +
+        '<span class="seatplan-mobile-tile-cat">' + escapeHtml(mainGroup.label || catShortLabel(mainCategory)) + '</span>' +
         '</button>';
     }
 
@@ -528,10 +597,22 @@
     // Modus "blocks" (Einzelticket): kein Sitzdetail nötig (freie Platzwahl im Block) —
     // stattdessen direkt in der Übersicht einen Block antippen (Markierung) und mit
     // "Übernehmen" 1 Ticket in den Warenkorb legen. Der Button erscheint nur dann,
-    // mittig über dem Spielfeld, nicht standardmäßig sichtbar.
-    var courtConfirm = (this.mode === 'blocks' && this.pendingBlockId)
-      ? '<button type="button" class="btn btn-primary btn-sm seatplan-mobile-court-confirm" id="seatplan-mobile-add-btn">Übernehmen</button>'
-      : '';
+    // mittig über dem Spielfeld, nicht standardmäßig sichtbar. Enthält bei Blöcken mit
+    // mehr als einer kaufbaren Kategorie (z.B. Block A: Kategorie III/Fanblock) die
+    // konkrete Kategorie im Button-Text — sonst wäre nach dem Antippen einer Kachel-
+    // Hälfte nicht erkennbar, welches der beiden Produkte gerade vorgemerkt ist.
+    var courtConfirm = '';
+    if (this.mode === 'blocks' && this.pendingBlockId) {
+      var sep = this.pendingBlockId.indexOf('::');
+      var pendingZoneId = sep === -1 ? this.pendingBlockId : this.pendingBlockId.slice(0, sep);
+      var pendingCategory = sep === -1 ? null : this.pendingBlockId.slice(sep + 2);
+      var pendingPurchasable = pendingZoneId === 'STEHPLATZ' ? [] : this._purchasableCategories(pendingZoneId);
+      var pendingMatch = pendingCategory && pendingPurchasable.length > 1
+        ? pendingPurchasable.filter(function (p) { return p.category === pendingCategory; })[0]
+        : null;
+      courtConfirm = '<button type="button" class="btn btn-primary btn-sm seatplan-mobile-court-confirm" id="seatplan-mobile-add-btn">Übernehmen' +
+        (pendingMatch ? ': ' + escapeHtml(pendingMatch.label) : '') + '</button>';
+    }
 
     this.root.innerHTML =
       '<h3 class="t-h4" style="text-align:center;margin:0 0 12px">Wähle deinen Block</h3>' +
@@ -574,12 +655,27 @@
     // nur vorhanden wenn buchbar) — tippen/bestätigen läuft dadurch exakt wie bei einem
     // echten Block, kein eigener Mechanismus (s. #222).
     this.root.querySelectorAll('.seatplan-mobile-tile[data-zone], .seatplan-mobile-standing[data-zone]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
+      btn.addEventListener('click', function (e) {
+        var zoneId = btn.dataset.zone;
         if (self.mode === 'blocks') {
-          self.pendingBlockId = self.pendingBlockId === btn.dataset.zone ? null : btn.dataset.zone;
+          // Blöcke mit mehr als einer kaufbaren Kategorie (z.B. Block A: Kategorie III
+          // oben, Fanblock unten) brauchen eine Tipp-Positions-Erkennung, um zu wissen,
+          // welches der beiden Produkte gemeint ist — Stehplatz und Blöcke mit genau
+          // einer kaufbaren Kategorie (D/E/F/B/C) bleiben beim bisherigen Verhalten
+          // (ganze Kachel = eine Kategorie).
+          var id = zoneId;
+          if (zoneId !== 'STEHPLATZ') {
+            var purchasable = self._purchasableCategories(zoneId);
+            var category = purchasable.length <= 1
+              ? (purchasable[0] && purchasable[0].category)
+              : self._tappedCategory(zoneId, btn, e, purchasable);
+            if (!category) return;
+            id = zoneId + '::' + category;
+          }
+          self.pendingBlockId = self.pendingBlockId === id ? null : id;
           self._render();
         } else {
-          self._openZoneDetail(btn.dataset.zone);
+          self._openZoneDetail(zoneId);
         }
       });
     });
@@ -698,6 +794,25 @@
       '</p>';
   };
 
+  /* Anzahl Rollstuhlplätze eines Blocks — sitzplanweit dasselbe Sonderprodukt
+     "Rollstuhlplatz" (8,00 €, s. Preisliste), unabhängig von der sonstigen Block-
+     kategorie (aktuell physisch nur in A/D/E/F vorhanden). onlyFree=true zählt nur
+     noch nicht belegte Plätze (Obergrenze für den Kauf), sonst alle. */
+  SeatPicker.prototype._wheelchairSeatCount = function (zoneId, onlyFree) {
+    var self = this;
+    var zone = this._zoneById(zoneId);
+    if (!zone) return 0;
+    var count = 0;
+    zone.rows.forEach(function (row) {
+      row.seats.forEach(function (seat) {
+        if (!seat.wheelchair) return;
+        if (onlyFree && self._isBlocked(seat.seat_guid)) return;
+        count++;
+      });
+    });
+    return count;
+  };
+
   /* Frei verfügbare Plätze einer Kategorie in einem Block — Obergrenze für die
      Mengen-Stepper im Modus "blocks". Belegte Sitze werden abgezogen: vorher zählte
      die Funktion trotz ihres Namens alle Sitze und man hätte theoretisch mehr Tickets
@@ -709,6 +824,9 @@
     if (zoneId === 'STEHPLATZ') {
       return typeof this.standingAvailable === 'number' ? this.standingAvailable : (this.standing ? this.standing.capacity : 0);
     }
+    // Rollstuhlplatz ist keine eigene Reihen-Kategorie, sondern einzelne, über den
+    // Block verteilte Sitze (seat.wheelchair) — eigene Zählung statt _categoryGroups.
+    if (category === 'Rollstuhlplatz') return this._wheelchairSeatCount(zoneId, true);
     var zone = this._zoneById(zoneId);
     if (!zone) return 0;
     return this._categoryGroups(zone).filter(function (g) { return g.category === category; })
@@ -721,36 +839,59 @@
       }, 0);
   };
 
-  /* Fügt `qty` Tickets der Hauptkategorie eines Blocks zum Warenkorb hinzu (Tarif
+  /* Fügt `qty` Tickets einer Kategorie eines Blocks zum Warenkorb hinzu (Tarif
      "normal" als Default, im Warenkorb danach umstellbar) — gemeinsame Grundlage für
      "Übernehmen" in der Übersicht UND die Direktwahl (Block+Anzahl) im Warenkorb.
      Stehplatz (zoneId "STEHPLATZ") laeuft ueber denselben Pfad wie ein echter Block —
-     eigene Kategorie "Stehplatz", kein Ermaessigt-Tarif, Preis aus standingPrice. */
-  SeatPicker.prototype._quickAddBlock = function (zoneId, qty) {
+     eigene Kategorie "Stehplatz", kein Ermaessigt-Tarif, Preis aus standingPrice.
+     `category` ist optional: ohne Angabe (Rückwärtskompatibilität) greift die letzte
+     kaufbare Kategorie des Blocks — bei Blöcken mit mehreren echten Produkten (z.B.
+     Block A: Kategorie III/Fanblock) rufen Klick-Handler und Direktwahl-Dropdown die
+     Kategorie aber immer explizit auf (s. _tappedCategory/_renderDirectAddRow). */
+  SeatPicker.prototype._quickAddBlock = function (zoneId, qty, category) {
     var self = this;
     if (zoneId === 'STEHPLATZ') {
       if (!this.standing || !this.standingPrice || !this.standingBookable) return;
       var stehplatzFree = this._blockFreeCount('STEHPLATZ', 'Stehplatz');
-      var stehplatzCounts = this.blockCounts.STEHPLATZ || { normal: 0, ermaessigt: 0 };
+      var stehplatzCounts = this.blockCounts.STEHPLATZ || {};
       this._setBlockCount('STEHPLATZ', this.standing.name, 'Stehplatz', { normal: this.standingPrice }, 'normal', (stehplatzCounts.normal || 0) + qty, stehplatzFree);
       return;
     }
     var zone = this._zoneById(zoneId);
     if (!zone) return;
-    var groups = this._categoryGroups(zone).filter(function (g) { return self.excludeCategories.indexOf(g.category) === -1; });
-    if (!groups.length) return;
-    var category = groups[groups.length - 1].category;
+    // Rollstuhlplatz (sitzplanweit, s. Preisliste): eigenes Sonderprodukt, nur über die
+    // Direktwahl-Dropdown erreichbar (kein eigenes Tipp-Ziel auf der Grafik-Kachel — zu
+    // wenige/verstreute Plätze für eine dritte antippbare Kachel-Zone), quotiert über
+    // die tatsächlichen Rollstuhlplätze des Blocks statt über _categoryGroups.
+    if (category === 'Rollstuhlplatz') {
+      if (!this.prices['Rollstuhlplatz']) return;
+      var wcFree = this._blockFreeCount(zoneId, 'Rollstuhlplatz');
+      var wcBlockKey = zoneId + '::Rollstuhlplatz';
+      var wcCounts = this.blockCounts[wcBlockKey] || {};
+      this._setBlockCount(wcBlockKey, zone.name + ' - Rollstuhlplatz', 'Rollstuhlplatz', this.prices['Rollstuhlplatz'], 'normal', (wcCounts.normal || 0) + qty, wcFree);
+      return;
+    }
+    var purchasable = this._purchasableCategories(zoneId);
+    if (!purchasable.length) return;
+    var chosen = category
+      ? purchasable.filter(function (p) { return p.category === category; })[0]
+      : purchasable[purchasable.length - 1]; // Fallback: letzte kaufbare Kategorie (bisheriges Verhalten)
+    if (!chosen) return;
+    category = chosen.category;
     var total = this._blockFreeCount(zoneId, category);
     var priceInfo = this.prices[category] || { normal: 0 };
     var blockKey = zoneId + '::' + category;
-    var counts = this.blockCounts[blockKey] || { normal: 0, ermaessigt: 0 };
-    var zoneLabel = zone.name + ' - ' + catShortLabel(category);
+    var counts = this.blockCounts[blockKey] || {};
+    var zoneLabel = zone.name + ' - ' + chosen.label;
     this._setBlockCount(blockKey, zoneLabel, category, priceInfo, 'normal', (counts.normal || 0) + qty, total);
   };
 
   SeatPicker.prototype._addPendingBlock = function () {
     if (!this.pendingBlockId) return;
-    this._quickAddBlock(this.pendingBlockId, 1);
+    var sep = this.pendingBlockId.indexOf('::');
+    var zoneId = sep === -1 ? this.pendingBlockId : this.pendingBlockId.slice(0, sep);
+    var category = sep === -1 ? undefined : this.pendingBlockId.slice(sep + 2);
+    this._quickAddBlock(zoneId, 1, category);
     this.pendingBlockId = null;
     this._render();
     if (this.cartEl) this.cartEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -815,8 +956,16 @@
       var reihe = 'Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber;
       return s.zoneLabel === currentZoneName ? reihe : s.zoneLabel + ' · ' + reihe;
     });
+    // Rollstuhlplatz ist "inkl. Begleitkarte" (s. Preisliste) — die Begleitperson braucht
+    // trotzdem einen echten Sitzplatz im selben Block, den es hier (anders als beim
+    // Einzelticket ohne feste Platzwahl) tatsächlich auszuwählen gibt. Reiner Hinweis,
+    // keine harte Validierung/Kopplung an einen bestimmten Nachbarsitz.
+    var hasWheelchair = guids.some(function (guid) { return seats[guid].category === 'Rollstuhlplatz'; });
+    var hint = hasWheelchair
+      ? '<span class="seatplan-pending-hint">Für die Begleitperson bitte zusätzlich einen Sitzplatz im selben Block wählen.</span>'
+      : '';
     return '<span class="seatplan-pending-label">Deine Auswahl</span>' +
-      '<span class="seatplan-pending-seats">' + labels.join(' · ') + '</span>';
+      '<span class="seatplan-pending-seats">' + labels.join(' · ') + '</span>' + hint;
   };
 
   SeatPicker.prototype._renderPendingList = function (zone) {
@@ -843,14 +992,21 @@
     wrap.className = 'seatplan-mobile-detail';
     var header = document.createElement('div');
     header.className = 'seatplan-mobile-detail-header';
-    // Block-Name + Hauptkategorie stehen hier im Header, NICHT mehr als Labels in der
-    // grauen Sitzbox selbst — die Box zeigt nur noch Sitze + Reihennummern. VIP-Anteile
-    // (falls vorhanden) werden zusätzlich farblich markiert statt als eigene Legende.
+    // Block-Name + Kategorien stehen hier im Header, NICHT mehr als Labels in der
+    // grauen Sitzbox selbst — die Box zeigt nur noch Sitze + Reihennummern. Jede
+    // Gruppe des Blocks bekommt ihren eigenen Eintrag mit Preis (statt früher nur die
+    // Hauptkategorie + "(und VIP)" ohne Preis) — z.B. Block A: "Kategorie III – 10,00 €
+    // (8,00 € ermäßigt) · Fanblock – 10,50 € (8,00 € ermäßigt)".
     var groups = this._categoryGroups(zone).filter(function (g) { return self.excludeCategories.indexOf(g.category) === -1; });
-    var mainCategory = groups.length ? groups[groups.length - 1].category : '';
-    var hasVip = groups.some(function (g) { return g.category === 'VIP'; });
-    var priceInfo = self.prices && self.prices[mainCategory];
-    var priceText = priceInfo ? (' – ' + fmtEUR(priceInfo.normal) + ' € (' + fmtEUR(priceInfo.ermaessigt) + ' € ermäßigt)') : '';
+    function categoryHeaderText(g) {
+      var label = g.label || g.category;
+      var priceInfo = self.prices && self.prices[g.category];
+      if (!priceInfo) return escapeHtml(label);
+      var text = escapeHtml(label) + ' – ' + fmtEUR(priceInfo.normal) + ' €';
+      if (priceInfo.ermaessigt !== undefined) text += ' (' + fmtEUR(priceInfo.ermaessigt) + ' € ermäßigt)';
+      return text;
+    }
+    var headerText = groups.map(categoryHeaderText).join(' · ');
     /* Pfeile links/rechts vom Blocknamen statt eines Zurück-Pfeils: von hier aus lässt
        sich durch alle Blöcke blättern, ohne jedes Mal in die Übersicht und zurück. Der
        Weg zurück zur Übersicht ist der „Abbrechen"-Button unten links (plus Klick neben
@@ -863,10 +1019,7 @@
         : '<span style="width:32px"></span>') +
       '<span class="seatplan-mobile-detail-title">' +
         '<strong class="t-body-sm">' + zone.name + '</strong>' +
-        '<span class="t-caption" style="color:var(--text-muted)">' + mainCategory +
-          (hasVip ? ' (und <span style="color:rgba(179,57,44,.9)">VIP</span>)' : '') +
-          priceText +
-        '</span>' +
+        '<span class="t-caption" style="color:var(--text-muted)">' + headerText + '</span>' +
       '</span>' +
       (nextZone
         ? '<button type="button" class="seatplan-mobile-back" data-zone-step="1" aria-label="Nächster Block: ' + this._zoneById(nextZone).name + '"><i data-lucide="chevron-right" class="icon-16"></i></button>'
@@ -1785,11 +1938,22 @@
           btn.dataset.seatNumber = seat.seat_number;
           var seatLabel = zone.name + ', Reihe ' + rowLabel + ', Platz ' + seat.seat_number + (isWheelchair ? ' (Rollstuhlplatz)' : '');
           btn.setAttribute('aria-label', seatLabel + (reserved ? ' (reserviert für Ehrenamtliche)' : nv ? ' (nicht verfügbar)' : taken ? ' (vergeben)' : ' (frei)'));
-          if (taken || reserved || nv || blockMode) {
+          // Rollstuhlplätze haben sitzplanweit einen eigenen, festen Preis (8,00 € inkl.
+          // Begleitkarte, s. Preisliste) statt des Preises ihres Blocks — greift nur,
+          // wenn die Seite überhaupt einen Rollstuhlplatz-Preis mitgibt (opts.prices),
+          // sonst bleibt der Sitz beim normalen Block-Preis (Rückwärtskompatibilität).
+          var seatCategory = (isWheelchair && self.prices['Rollstuhlplatz']) ? 'Rollstuhlplatz' : category;
+          var seatPriceInfo = seatCategory === 'Rollstuhlplatz' ? self.prices['Rollstuhlplatz'] : priceInfo;
+          // Kategorien ohne Preis auf dieser Seite (z.B. Kategorie III/Fanblock, solange
+          // die Dauerkarte noch keine Saisonpreise dafür hat) waren vorher sichtbar
+          // "aktiv" (kein disabled), bekamen aber mangels self.prices[category] gar
+          // keinen Klick-Handler — ein Sitz, der anklickbar AUSSAH, aber stumm nichts
+          // tat. Jetzt explizit deaktiviert, bis ein Preis für die Kategorie da ist.
+          if (taken || reserved || nv || blockMode || !self.prices[seatCategory]) {
             btn.disabled = true;
-          } else if (self.prices[category]) {
+          } else {
             btn.addEventListener('click', function () {
-              self._toggleSeat(btn, seat.seat_guid, zone.name, rowLabel, seat.seat_number, category, priceInfo);
+              self._toggleSeat(btn, seat.seat_guid, zone.name, rowLabel, seat.seat_number, seatCategory, seatPriceInfo);
             });
           }
           // label_before_seat (z.B. Block A Reihe 1, wegen des neuen Rollstuhlplatzes am
@@ -1863,19 +2027,27 @@
   };
 
   SeatPicker.prototype._stepBlock = function (blockKey, zoneLabel, category, priceInfo, tarif, delta, freeCount) {
-    var counts = this.blockCounts[blockKey] || { normal: 0, ermaessigt: 0 };
-    this._setBlockCount(blockKey, zoneLabel, category, priceInfo, tarif, counts[tarif] + delta, freeCount);
+    var counts = this.blockCounts[blockKey] || {};
+    this._setBlockCount(blockKey, zoneLabel, category, priceInfo, tarif, (counts[tarif] || 0) + delta, freeCount);
   };
+
+  /* Alle Tarife, die im Modus "blocks" pro Block/Kategorie parallel gezählt werden —
+     normal/ermaessigt immer, "kind" nur wo eine Kategorie einen Kinder-Preis hat (s.
+     BLOCK_TARIF_LABELS). Bewusst als Liste statt hart auf zwei Tarife ("normal"/
+     "ermaessigt") ausgelegt: sonst würde die Obergrenze unten (maxForTarif) bei einem
+     dritten Tarif nur EINEN der beiden anderen Tarife abziehen statt beide. */
+  var BLOCK_TARIFS = Object.keys(BLOCK_TARIF_LABELS);
 
   /* Direkte Zahleneingabe im Stepper — ermöglicht Bulk-Buchungen (z. B. 50
      Tickets auf einmal), ohne 50× auf "+" klicken zu müssen. Wert wird auf
-     [0, verbleibende freie Plätze im Block minus bereits anderer Tarif] begrenzt.
+     [0, verbleibende freie Plätze im Block minus ALLER anderen Tarife] begrenzt.
      blockKey ist zoneId + "::" + category, damit ein Block mit mehreren
      Kategorien (z. B. Block B: VIP-Reihe + Kategorie-II-Reihen) getrennt zählt. */
   SeatPicker.prototype._setBlockCount = function (blockKey, zoneLabel, category, priceInfo, tarif, value, freeCount) {
-    var counts = this.blockCounts[blockKey] || { normal: 0, ermaessigt: 0 };
-    var otherTarif = tarif === 'normal' ? 'ermaessigt' : 'normal';
-    var maxForTarif = Math.max(0, freeCount - (counts[otherTarif] || 0));
+    var counts = this.blockCounts[blockKey] || {};
+    var otherTotal = BLOCK_TARIFS.filter(function (t) { return t !== tarif; })
+      .reduce(function (sum, t) { return sum + (counts[t] || 0); }, 0);
+    var maxForTarif = Math.max(0, freeCount - otherTotal);
     var next = Math.max(0, Math.min(value, maxForTarif));
     counts[tarif] = next;
     counts.zoneLabel = zoneLabel;
@@ -2184,13 +2356,27 @@
      der Warenkorb noch leer ist (reine Einstiegshilfe, kein Dauer-UI-Element). */
   SeatPicker.prototype._renderDirectAddRow = function () {
     var self = this;
-    var options = this.northZones.concat(this.southZones).slice().sort().map(function (id) {
-      var zone = self._zoneById(id);
-      if (!zone) return '';
-      var groups = self._categoryGroups(zone).filter(function (g) { return self.excludeCategories.indexOf(g.category) === -1; });
-      if (!groups.length) return '';
-      return '<option value="' + id + '">Block ' + id + '</option>';
-    }).join('');
+    var options = '';
+    this.northZones.concat(this.southZones).slice().sort().forEach(function (id) {
+      var purchasable = self._purchasableCategories(id);
+      // Ein Eintrag pro kaufbarer Kategorie — bei Blöcken mit nur EINER (die meisten,
+      // auch wenn sie optisch in 2 Gruppen mit gleichem Preis geteilt sind, z.B. Block
+      // C: "Kategorie II"/"C unten") bleibt das der bisherige einzelne "Block X"-Eintrag;
+      // bei mehreren ECHTEN Produkten (z.B. Block A: Kategorie III/Fanblock) je einer.
+      if (purchasable.length === 1) {
+        options += '<option value="' + id + '">Block ' + id + '</option>';
+      } else {
+        purchasable.forEach(function (p) {
+          options += '<option value="' + id + '::' + p.category + '">Block ' + id + ' – ' + escapeHtml(p.label) + '</option>';
+        });
+      }
+      // Rollstuhlplatz (sitzplanweit, s. Preisliste): zusätzliche Option je Block MIT
+      // Rollstuhlplätzen, unabhängig von dessen sonstigen Kategorien — eigenes Kontingent
+      // (s. _wheelchairSeatCount), kein eigenes Tipp-Ziel auf der Grafik.
+      if (self.prices['Rollstuhlplatz'] && self._wheelchairSeatCount(id) > 0) {
+        options += '<option value="' + id + '::Rollstuhlplatz">Block ' + id + ' – Rollstuhlplatz</option>';
+      }
+    });
     // Stehplatz reiht sich als weitere Option ein — nur wenn für dieses Spiel buchbar
     // (s. #222), sonst taucht sie hier gar nicht auf ("in der Dropdown-Box nicht
     // selektierbar", Marko).
@@ -2209,10 +2395,13 @@
       '</div>';
     this.cartEl.appendChild(wrap);
     wrap.querySelector('#seatplan-direct-add').addEventListener('click', function () {
-      var zoneId = wrap.querySelector('#seatplan-direct-block').value;
+      var raw = wrap.querySelector('#seatplan-direct-block').value;
       var qty = parseInt(wrap.querySelector('#seatplan-direct-qty').value, 10);
-      if (!zoneId || !qty || qty < 1) return;
-      self._quickAddBlock(zoneId, qty);
+      if (!raw || !qty || qty < 1) return;
+      var sep = raw.indexOf('::');
+      var zoneId = sep === -1 ? raw : raw.slice(0, sep);
+      var category = sep === -1 ? undefined : raw.slice(sep + 2);
+      self._quickAddBlock(zoneId, qty, category);
     });
   };
 
@@ -2221,8 +2410,11 @@
     var lines = [];
     Object.keys(this.blockCounts).forEach(function (blockKey) {
       var c = self.blockCounts[blockKey];
-      if (c.normal > 0) lines.push({ blockKey: blockKey, tarif: 'normal', label: 'Normalpreis', count: c.normal, price: c.priceInfo.normal, zoneLabel: c.zoneLabel });
-      if (c.ermaessigt > 0) lines.push({ blockKey: blockKey, tarif: 'ermaessigt', label: 'Ermäßigt', count: c.ermaessigt, price: c.priceInfo.ermaessigt, zoneLabel: c.zoneLabel });
+      BLOCK_TARIFS.forEach(function (tarif) {
+        if (c[tarif] > 0) {
+          lines.push({ blockKey: blockKey, tarif: tarif, label: BLOCK_TARIF_LABELS[tarif], count: c[tarif], price: c.priceInfo[tarif], zoneLabel: c.zoneLabel });
+        }
+      });
     });
     var ticketCount = lines.reduce(function (sum, l) { return sum + l.count; }, 0);
 
@@ -2239,14 +2431,17 @@
       lines.forEach(function (l) {
         var row = document.createElement('div');
         row.className = 'seatplan-cart-item';
-        var hasErmaessigt = self.blockCounts[l.blockKey].priceInfo.ermaessigt !== undefined;
+        var linePriceInfo = self.blockCounts[l.blockKey].priceInfo;
+        var hasErmaessigt = linePriceInfo.ermaessigt !== undefined;
+        var hasKind = linePriceInfo.kind !== undefined;
         var freeCount = self._blockFreeCount(l.blockKey.split('::')[0], self.blockCounts[l.blockKey].category);
         row.innerHTML =
           '<div>' + l.zoneLabel +
           '<br><span class="t-caption">' + fmtEUR(l.price) + ' € je Ticket</span>' +
-          (hasErmaessigt ? '<br><select class="seatplan-tarif-select" data-block-tarif-select data-zone="' + l.blockKey + '" data-tarif="' + l.tarif + '">' +
-            '<option value="normal"' + (l.tarif === 'normal' ? ' selected' : '') + '>Normalpreis</option>' +
-            '<option value="ermaessigt"' + (l.tarif === 'ermaessigt' ? ' selected' : '') + '>Ermäßigt</option>' +
+          ((hasErmaessigt || hasKind) ? '<br><select class="seatplan-tarif-select" data-block-tarif-select data-zone="' + l.blockKey + '" data-tarif="' + l.tarif + '">' +
+            '<option value="normal"' + (l.tarif === 'normal' ? ' selected' : '') + '>' + BLOCK_TARIF_LABELS.normal + '</option>' +
+            (hasErmaessigt ? '<option value="ermaessigt"' + (l.tarif === 'ermaessigt' ? ' selected' : '') + '>' + BLOCK_TARIF_LABELS.ermaessigt + '</option>' : '') +
+            (hasKind ? '<option value="kind"' + (l.tarif === 'kind' ? ' selected' : '') + '>' + BLOCK_TARIF_LABELS.kind + '</option>' : '') +
             '</select>' : '<br><span class="t-caption">' + l.label + '</span>') +
           '</div>' +
           '<div class="seatplan-cart-item-right">' +
@@ -2318,12 +2513,12 @@
     if (this.mode === 'blocks') {
       Object.keys(this.blockCounts).forEach(function (blockKey) {
         var c = self.blockCounts[blockKey];
-        ['normal', 'ermaessigt'].forEach(function (tarif) {
+        BLOCK_TARIFS.forEach(function (tarif) {
           var count = c[tarif];
           if (count > 0) {
-            var price = tarif === 'ermaessigt' ? c.priceInfo.ermaessigt : c.priceInfo.normal;
+            var price = c.priceInfo[tarif];
             lines.push({
-              label: c.zoneLabel + ' · ' + (tarif === 'ermaessigt' ? 'Ermäßigt' : 'Normalpreis'),
+              label: c.zoneLabel + ' · ' + BLOCK_TARIF_LABELS[tarif],
               qty: count, unitPrice: price, lineTotal: count * price,
               // Maschinenlesbar für die pretix-Order (n8n): im Blockmodus wählt der
               // Käufer keinen konkreten Sitz, sondern Block + Kategorie + Anzahl.

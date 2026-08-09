@@ -13,7 +13,7 @@
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
 <link rel="stylesheet" href="/css/site.css?v=1785495458" />
-<link rel="stylesheet" href="/css/seat-picker.css?v=1786400000" />
+<link rel="stylesheet" href="/css/seat-picker.css?v=1786500000" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 </head>
@@ -48,7 +48,13 @@
             <div class="price-row"><span>Kategorie 1 (ermäßigt)</span><strong>14,00 €</strong></div>
             <div class="price-row"><span>Kategorie 2</span><strong>12,00 €</strong></div>
             <div class="price-row"><span>Kategorie 2 (ermäßigt)</span><strong>8,50 €</strong></div>
-            <div class="price-row" id="preis-stehplatz"><span>Stehplatz</span><strong>8,50 €</strong></div>
+            <div class="price-row"><span>Kategorie 3</span><strong>10,00 €</strong></div>
+            <div class="price-row"><span>Kategorie 3 (ermäßigt)</span><strong>8,00 €</strong></div>
+            <div class="price-row"><span>Kategorie 3 (Kinder 7–14)</span><strong>5,50 €</strong></div>
+            <div class="price-row"><span>Fanblock</span><strong>10,50 €</strong></div>
+            <div class="price-row"><span>Fanblock (ermäßigt)</span><strong>8,00 €</strong></div>
+            <div class="price-row" id="preis-stehplatz"><span>Stehplatz</span><strong>8,00 €</strong></div>
+            <div class="price-row"><span>Rollstuhlfahrer (inkl. Begleitkarte)<br><span class="t-caption" style="color:var(--text-muted)">nur Block A, D, E, F</span></span><strong>8,00 €</strong></div>
           </div>
           <div class="buy-thumb-col">
             <div id="seatplan-root"></div>
@@ -130,7 +136,7 @@
 
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="/js/nav.js?v=1785398309"></script>
-<script src="/js/include.js?v=1785398309"></script><script src="/js/seat-picker.js?v=1786400000"></script>
+<script src="/js/include.js?v=1785398309"></script><script src="/js/seat-picker.js?v=1786530000"></script>
 <script>
   /* Die Seite gilt für JEDES Heimspiel, nicht nur für das erste. Welches gemeint
      ist, steht in ?spiel=<slug> (z. B. ?spiel=2026-10-11) und wird gegen
@@ -181,7 +187,7 @@
         mode: 'blocks',
         nachwuchsBeitrag: true,
         nachwuchsAmount: 2,
-        planUrl: '/assets/seating/riethsporthalle-seatingplan.json?v=1786370000',
+        planUrl: '/assets/seating/riethsporthalle-seatingplan.json?v=1786520000',
         /* Belegt sind hier zwei Dinge: die für DIESES Spiel schon verkauften
            Einzeltickets und — spielunabhängig — alle Dauerkarten-Plätze. Beide
            laufen seit 05.08.2026 im selben pretix-Event saison2627, die
@@ -210,13 +216,23 @@
         excludeCategories: ['VIP'],
         prices: {
           'Kategorie I': { normal: 16, ermaessigt: 14 },
-          'Kategorie II': { normal: 12, ermaessigt: 8.5 }
+          'Kategorie II': { normal: 12, ermaessigt: 8.5 },
+          // Block A oben (Marko, 09.08.2026): eigenes Produkt mit drittem Tarif
+          // "Kinder 7-14" — s. BLOCK_TARIF_LABELS/BLOCK_TARIFS in seat-picker.js.
+          'Kategorie III': { normal: 10, ermaessigt: 8, kind: 5.5 },
+          // Block A unten: eigenes Produkt, kein Kinder-Tarif.
+          'Fanblock': { normal: 10.5, ermaessigt: 8 },
+          // Sitzplanweit (Block A/D/E/F, s. Preisliste "nur Block A, D, E, F") — fester
+          // Preis inkl. Begleitkarte, überschreibt bei Dauerkarte den Blockpreis für
+          // seat.wheelchair-Sitze (s. seat-picker.js _renderZone), bei Einzelticket nur
+          // über die Direktwahl-Dropdown wählbar (s. _renderDirectAddRow).
+          'Rollstuhlplatz': { normal: 8 }
         },
         // Stehplatz (s. #222): eigenes pretix-Produkt (Item 23), kein Sitz, keine
         // Ermäßigung — reiner Mengen-Posten, Preis muss zum n8n-Bestellworkflow passen.
         // stehplatzBuchbar:false in heimspiele.json schaltet Stehplatz für EIN Spiel ab,
         // ohne pretix anzufassen (Marko: das Produkt bleibt dort einfach aktiv stehen).
-        standingPrice: 8.5,
+        standingPrice: 8,
         standingBookable: game.stehplatzBuchbar !== false,
         cartEl: document.getElementById('seatplan-cart'),
         totalEl: document.getElementById('seatplan-total'),

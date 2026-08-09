@@ -10,6 +10,10 @@
   --seatplan-cat-kat1-border: rgba(232, 119, 34, .9);
   --seatplan-cat-kat2: #D9DEE3;
   --seatplan-cat-kat2-border: #B9C1C8;
+  --seatplan-cat-kat3: rgba(42, 157, 143, .55);
+  --seatplan-cat-kat3-border: rgba(42, 157, 143, .9);
+  --seatplan-cat-fanblock: rgba(244, 163, 0, .55);
+  --seatplan-cat-fanblock-border: rgba(244, 163, 0, .9);
   --seatplan-cat-vip: rgba(179, 57, 44, .55);
   --seatplan-cat-vip-border: rgba(179, 57, 44, .9);
 }
@@ -52,6 +56,8 @@
    einen helleren Eindruck, Kategorie II in hellem Grau — auf Wunsch abgestimmt. */
 .seatplan-seat.cat-kat1 { background: var(--seatplan-cat-kat1); border-color: var(--seatplan-cat-kat1-border); }
 .seatplan-seat.cat-kat2 { background: var(--seatplan-cat-kat2); border-color: var(--seatplan-cat-kat2-border); }
+.seatplan-seat.cat-kat3 { background: var(--seatplan-cat-kat3); border-color: var(--seatplan-cat-kat3-border); }
+.seatplan-seat.cat-fanblock { background: var(--seatplan-cat-fanblock); border-color: var(--seatplan-cat-fanblock-border); }
 .seatplan-seat.cat-vip { background: var(--seatplan-cat-vip); border-color: var(--seatplan-cat-vip-border); }
 .seatplan-seat[disabled] { opacity: .35; cursor: not-allowed; }
 /* Vergeben (sobald echte Bestellungen vorliegen) — diagonale Schraffur in Grau.
@@ -314,12 +320,13 @@
    Gang-Trennlinie existiert, positioniert das padding-top der Kachel (s. seat-picker.js)
    das Label mittig im Abschnitt unter der Linie; ein zusätzlicher Versatz schob es
    sichtbar zu weit nach unten. */
-/* Zusätzliches VIP-Label oben in der Kachel, sitzt im roten Farbverlauf-Anteil
-   (nur bei Blöcken mit VIP-Reihen, aktuell nur Block B). */
-.seatplan-mobile-tile-vip {
+/* Zusätzliches Label oben in der Kachel für den ERSTEN Farbverlauf-Anteil eines
+   mehrteiligen Blocks (z.B. VIP bei Block B, Kategorie III bei Block A, Kategorie II
+   bei Block C) — Farbe kommt als Inline-Style aus JS (catBorderColor der jeweiligen
+   Gruppe, s. seat-picker.js blockTile()), hier nur Position/Typografie. */
+.seatplan-mobile-tile-extra-label {
   position: absolute; top: 9px; left: 0; right: 0; text-align: center;
   font-size: 9px; font-weight: 700; letter-spacing: .04em;
-  color: rgba(179, 57, 44, .9);
 }
 
 /* Eingangs-Markierung: eine durchgehende Linie, die vom Label unterbrochen wird,
@@ -531,6 +538,10 @@
 .seatplan-pending-empty { color: var(--text-muted); }
 .seatplan-pending-label { display: block; font-size: 11px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 3px; }
 .seatplan-pending-seats { color: var(--color-brand-navy); font-weight: 600; }
+/* Hinweis bei gewähltem Rollstuhlplatz: Begleitperson braucht einen echten Sitzplatz
+   im selben Block (s. #Preistabelle "inkl. Begleitkarte") — eigene Zeile, damit der
+   Hinweis auch bei mehreren gewählten Plätzen nicht in der Liste verschwindet. */
+.seatplan-pending-hint { display: block; margin-top: 6px; font-size: 12px; color: var(--color-brand-orange); }
 
 /* Abbrechen (verwirft die Vormerkung) links, Übernehmen (schreibt sie in den
    Warenkorb) rechts — unten, weil das am Handy die Daumenzone ist. */
