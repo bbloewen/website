@@ -658,30 +658,35 @@
      Grundlage für den Stepper-Grenzwert, sowohl beim Schnell-Hinzufügen aus der
      Übersicht/Direktwahl als auch beim +/- im Warenkorb selbst. Keine Live-Belegungs-
      prüfung (Einzelticket ist ohnehin First-Come-First-Serve vor Ort). */
-  /* Belegung eines Blocks über alle kaufbaren Kategorien zusammen: Gesamtzahl, freie
-     und belegte Plätze. _blockFreeCount liefert dasselbe "frei" pro einzelner
-     Kategorie (für die Mengen-Stepper), hier interessiert der ganze Block. */
-  SeatPicker.prototype._zoneOccupancy = function (zoneId) {
+  /* Belegung EINER Kategorie-Gruppe (nicht mehr des ganzen Blocks, seit 10.08.2026):
+     Fanblock/VIP/Courtside sind seit dem Produktkatalog-Umbau (09.08.2026) eigene
+     Produkte mit eigenem Kontingent, keine Untermenge "ihres" Blocks mehr — die
+     Auslastungskachel muss sie deshalb als eigene Zeile zeigen statt sie unsichtbar
+     in der Zahl von Block A/B/C mitzuzählen. _blockFreeCount liefert dasselbe "frei"
+     pro Kategorie für die Mengen-Stepper, hier interessiert nur gesamt/belegt/frei. */
+  SeatPicker.prototype._categoryOccupancy = function (group) {
     var self = this;
-    var zone = this._zoneById(zoneId);
-    if (!zone) return null;
     var gesamt = 0, belegt = 0;
-    this._categoryGroups(zone)
-      .filter(function (g) { return self.occupancyExcludeCategories.indexOf(g.category) === -1; })
-      .forEach(function (g) {
-        g.rows.forEach(function (r) {
-          r.seats.forEach(function (seat) {
-            gesamt++;
-            if (self._isBlocked(seat.seat_guid)) belegt++;
-          });
-        });
+    group.rows.forEach(function (r) {
+      r.seats.forEach(function (seat) {
+        gesamt++;
+        if (self._isBlocked(seat.seat_guid)) belegt++;
       });
+    });
     return { gesamt: gesamt, belegt: belegt, frei: gesamt - belegt };
   };
 
   /* Auslastung aller Blöcke als Kachelinhalt — nur wenn die Seite ein occupancyEl
      mitgegeben hat. Solange der Sitzstatus noch nicht da ist, stünde hier "alles frei",
-     was falscher wäre als keine Zahl — deshalb erst der Ladehinweis. */
+     was falscher wäre als keine Zahl — deshalb erst der Ladehinweis.
+     Seit 10.08.2026: eine Zeile pro kaufbarer Kategorie, nicht mehr pro physischem
+     Block — Fanblock/VIP/Courtside (C unten) sind seit dem Produktkatalog-Umbau
+     eigene Produkte mit eigenem Kontingent, keine Untermenge "ihres" Blocks mehr.
+     Vorher verschwanden sie unsichtbar in der Zahl von Block A/B/C, obwohl sie
+     unabhängig ausverkauft sein können (Marko: "die neuen Blöcke ... sichtbar
+     machen"). Die reale Verfügbarkeit selbst kam schon vorher korrekt aus den
+     Sitz-GUIDs (_isBlocked zieht taken/reserved(EA)/nv bereits pro Sitz ab, unabhängig
+     vom pretix-Kontingent) — nur die Aufschlüsselung nach Produkt fehlte. */
   SeatPicker.prototype._renderOccupancy = function () {
     if (!this.occupancyEl) return;
     var self = this;
@@ -690,25 +695,45 @@
       this.occupancyEl.innerHTML = '<p class="t-body-sm" style="color:var(--text-muted)">Wird geladen …</p>';
       return;
     }
-    // Alphabetisch statt Nord-vor-Süd (D,E,F,A,B,C) — in der Kachel zählt die
-    // Lesbarkeit als Liste, nicht die räumliche Anordnung wie in der Blockübersicht.
-    var zonen = this.northZones.concat(this.southZones).slice().sort();
     var zeilen = [], gesamtAlle = 0, freiAlle = 0;
-    zonen.forEach(function (id) {
-      var o = self._zoneOccupancy(id);
-      if (!o || !o.gesamt) return;
-      var zone = self._zoneById(id);
-      gesamtAlle += o.gesamt; freiAlle += o.frei;
-      var quote = Math.round((o.frei / o.gesamt) * 100);
+    function pushRow(label, gesamt, frei) {
+      if (!gesamt) return;
+      gesamtAlle += gesamt; freiAlle += frei;
+      var quote = Math.round((frei / gesamt) * 100);
       zeilen.push(
         '<li class="seatplan-occupancy-row">' +
-          '<span class="seatplan-occupancy-block">' + (zone ? zone.name : id) + '</span>' +
+          '<span class="seatplan-occupancy-block">' + label + '</span>' +
           '<span class="seatplan-occupancy-bar" aria-hidden="true">' +
             '<span style="width:' + (100 - quote) + '%"></span>' +
           '</span>' +
-          '<span class="seatplan-occupancy-num">' + o.frei + ' von ' + o.gesamt + ' frei</span>' +
+          '<span class="seatplan-occupancy-num">' + frei + ' von ' + gesamt + ' frei</span>' +
         '</li>'
       );
+    }
+    // Alphabetisch statt Nord-vor-Süd (D,E,F,A,B,C) — in der Kachel zählt die
+    // Lesbarkeit als Liste, nicht die räumliche Anordnung wie in der Blockübersicht.
+    var zonen = this.northZones.concat(this.southZones).slice().sort();
+    zonen.forEach(function (id) {
+      var zone = self._zoneById(id);
+      if (!zone) return;
+      var groups = self._categoryGroups(zone).filter(function (g) {
+        return self.occupancyExcludeCategories.indexOf(g.category) === -1;
+      });
+      var multi = groups.length > 1;
+      groups.forEach(function (g) {
+        var o = self._categoryOccupancy(g);
+        var label;
+        if (g.category === 'Fanblock' || g.category === 'VIP') {
+          label = g.category;
+        } else if (g.category === 'C unten') {
+          label = 'Courtside';
+        } else if (multi) {
+          label = zone.name + ' (' + (g.label || catShortLabel(g.category)) + ')';
+        } else {
+          label = zone.name;
+        }
+        pushRow(label, o.gesamt, o.frei);
+      });
     });
     // Stehplatz zählt zur Gesamtkapazität mit — eigene Zeile statt in die Block-Liste
     // gemischt, weil es kein Block mit Reihen/Sitzen ist, sondern ein reiner Mengen-Posten.
@@ -716,19 +741,8 @@
     // NICHT mit — sonst würde die Gesamtzahl Plätze verzeichnen, die für dieses Spiel gar
     // nicht angeboten werden (Bugfix, unterscheidet sich von den NV-Plätzen).
     if (this.standing && this.standing.capacity && this.standingBookable) {
-      gesamtAlle += this.standing.capacity;
       var stehplatzFrei = typeof this.standingAvailable === 'number' ? this.standingAvailable : this.standing.capacity;
-      freiAlle += stehplatzFrei;
-      var stehplatzQuote = Math.round((stehplatzFrei / this.standing.capacity) * 100);
-      zeilen.push(
-        '<li class="seatplan-occupancy-row">' +
-          '<span class="seatplan-occupancy-block">' + this.standing.name + '</span>' +
-          '<span class="seatplan-occupancy-bar" aria-hidden="true">' +
-            '<span style="width:' + (100 - stehplatzQuote) + '%"></span>' +
-          '</span>' +
-          '<span class="seatplan-occupancy-num">' + stehplatzFrei + ' von ' + this.standing.capacity + ' frei</span>' +
-        '</li>'
-      );
+      pushRow(this.standing.name, this.standing.capacity, stehplatzFrei);
     }
     if (!zeilen.length) { this.occupancyEl.innerHTML = ''; return; }
     function n(v) { return v.toLocaleString('de-DE'); }
