@@ -719,16 +719,17 @@
       var groups = self._categoryGroups(zone).filter(function (g) {
         return self.occupancyExcludeCategories.indexOf(g.category) === -1;
       });
-      var multi = groups.length > 1;
       groups.forEach(function (g) {
         var o = self._categoryOccupancy(g);
+        // Nur der Blockname/Produktname, keine Kategorie-Klammer (Marko, 10.08.2026:
+        // "sowas wie (Kat. II) soll da raus" — Fanblock/VIP/Courtside sind als eigene
+        // Zeile schon eindeutig von "Block A/B/C" unterscheidbar, die Kategorie in
+        // Klammern war redundant und sprengte die einzeilige Lesbarkeit).
         var label;
         if (g.category === 'Fanblock' || g.category === 'VIP') {
           label = g.category;
         } else if (g.category === 'C unten') {
           label = 'Courtside';
-        } else if (multi) {
-          label = zone.name + ' (' + (g.label || catShortLabel(g.category)) + ')';
         } else {
           label = zone.name;
         }
