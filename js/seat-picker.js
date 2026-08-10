@@ -695,25 +695,16 @@
       this.occupancyEl.innerHTML = '<p class="t-body-sm" style="color:var(--text-muted)">Wird geladen …</p>';
       return;
     }
-    var zeilen = [], gesamtAlle = 0, freiAlle = 0;
-    function pushRow(label, gesamt, frei) {
+    // Feste Reihenfolge (Marko, 10.08.2026): A, B, C, CS, D, E, F, Fanblock, VIP,
+    // Stehplatz — NICHT die physische Zeilen-Reihenfolge der Sitzplan-Daten (dort
+    // stehen Fanblock/VIP vor "ihrem" Hauptblock, weil sie näher am Spielfeld liegen).
+    var ORDER = ['A', 'B', 'C', 'CS', 'D', 'E', 'F', 'Fanblock', 'VIP', 'STEHPLATZ'];
+    var rows = {}; // key aus ORDER -> {label, gesamt, frei}
+    function addRow(key, label, gesamt, frei) {
       if (!gesamt) return;
-      gesamtAlle += gesamt; freiAlle += frei;
-      var quote = Math.round((frei / gesamt) * 100);
-      zeilen.push(
-        '<li class="seatplan-occupancy-row">' +
-          '<span class="seatplan-occupancy-block">' + label + '</span>' +
-          '<span class="seatplan-occupancy-bar" aria-hidden="true">' +
-            '<span style="width:' + (100 - quote) + '%"></span>' +
-          '</span>' +
-          '<span class="seatplan-occupancy-num">' + frei + ' von ' + gesamt + ' frei</span>' +
-        '</li>'
-      );
+      rows[key] = { label: label, gesamt: gesamt, frei: frei };
     }
-    // Alphabetisch statt Nord-vor-Süd (D,E,F,A,B,C) — in der Kachel zählt die
-    // Lesbarkeit als Liste, nicht die räumliche Anordnung wie in der Blockübersicht.
-    var zonen = this.northZones.concat(this.southZones).slice().sort();
-    zonen.forEach(function (id) {
+    this.northZones.concat(this.southZones).forEach(function (id) {
       var zone = self._zoneById(id);
       if (!zone) return;
       var groups = self._categoryGroups(zone).filter(function (g) {
@@ -725,15 +716,15 @@
         // "sowas wie (Kat. II) soll da raus" — Fanblock/VIP/Courtside sind als eigene
         // Zeile schon eindeutig von "Block A/B/C" unterscheidbar, die Kategorie in
         // Klammern war redundant und sprengte die einzeilige Lesbarkeit).
-        var label;
+        var key, label;
         if (g.category === 'Fanblock' || g.category === 'VIP') {
-          label = g.category;
+          key = g.category; label = g.category;
         } else if (g.category === 'C unten') {
-          label = 'Courtside';
+          key = 'CS'; label = 'Courtside';
         } else {
-          label = zone.name;
+          key = id; label = zone.name;
         }
-        pushRow(label, o.gesamt, o.frei);
+        addRow(key, label, o.gesamt, o.frei);
       });
     });
     // Stehplatz zählt zur Gesamtkapazität mit — eigene Zeile statt in die Block-Liste
@@ -743,8 +734,24 @@
     // nicht angeboten werden (Bugfix, unterscheidet sich von den NV-Plätzen).
     if (this.standing && this.standing.capacity && this.standingBookable) {
       var stehplatzFrei = typeof this.standingAvailable === 'number' ? this.standingAvailable : this.standing.capacity;
-      pushRow(this.standing.name, this.standing.capacity, stehplatzFrei);
+      addRow('STEHPLATZ', this.standing.name, this.standing.capacity, stehplatzFrei);
     }
+    var zeilen = [], gesamtAlle = 0, freiAlle = 0;
+    ORDER.forEach(function (key) {
+      var r = rows[key];
+      if (!r) return;
+      gesamtAlle += r.gesamt; freiAlle += r.frei;
+      var quote = Math.round((r.frei / r.gesamt) * 100);
+      zeilen.push(
+        '<li class="seatplan-occupancy-row">' +
+          '<span class="seatplan-occupancy-block">' + r.label + '</span>' +
+          '<span class="seatplan-occupancy-bar" aria-hidden="true">' +
+            '<span style="width:' + (100 - quote) + '%"></span>' +
+          '</span>' +
+          '<span class="seatplan-occupancy-num">' + r.frei + ' von ' + r.gesamt + ' frei</span>' +
+        '</li>'
+      );
+    });
     if (!zeilen.length) { this.occupancyEl.innerHTML = ''; return; }
     function n(v) { return v.toLocaleString('de-DE'); }
     var gesamtQuote = gesamtAlle > 0 ? Math.round((freiAlle / gesamtAlle) * 100) : 0;
