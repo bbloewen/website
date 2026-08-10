@@ -7,98 +7,112 @@
       "gegner": "Porsche BBA Ludwigsburg",
       "slug": "2026-10-11",
       "subeventId": 26,
-      "ticketUrl": "/tickets/einzelticket.html?spiel=2026-10-11"
+      "ticketUrl": "/tickets/einzelticket.html?spiel=2026-10-11",
+      "stehplatzBuchbar": false
     },
     {
       "datum": "18.10.2026",
       "zeit": "17:00",
       "gegner": "TSG Reutlingen Ravens",
       "slug": "2026-10-18",
-      "subeventId": 20
+      "subeventId": 20,
+      "stehplatzBuchbar": false
     },
     {
       "datum": "08.11.2026",
       "zeit": "17:00",
       "gegner": "Culture City Weimar",
       "slug": "2026-11-08",
-      "subeventId": 16
+      "subeventId": 16,
+      "stehplatzBuchbar": false
     },
     {
       "datum": "13.11.2026",
       "zeit": "18:30",
       "gegner": "Dresden Titans",
       "slug": "2026-11-13",
-      "subeventId": 28
+      "subeventId": 28,
+      "stehplatzBuchbar": false
     },
     {
       "datum": "20.11.2026",
       "zeit": "18:30",
       "gegner": "FC Bayern Basketball II",
       "slug": "2026-11-20",
-      "subeventId": 18
+      "subeventId": 18,
+      "stehplatzBuchbar": false
     },
     {
       "datum": "06.12.2026",
       "zeit": "17:00",
       "gegner": "BG Hessing Leitershofen",
       "slug": "2026-12-06",
-      "subeventId": 15
+      "subeventId": 15,
+      "stehplatzBuchbar": false
     },
     {
       "datum": "13.12.2026",
       "zeit": "17:00",
       "gegner": "TSV Oberhaching Tropics",
       "slug": "2026-12-13",
-      "subeventId": 21
+      "subeventId": 21,
+      "stehplatzBuchbar": false
     },
     {
       "datum": "03.01.2027",
       "zeit": "17:00",
       "gegner": "Dragons Rhöndorf",
       "slug": "2027-01-03",
-      "subeventId": 22
+      "subeventId": 22,
+      "stehplatzBuchbar": false
     },
     {
       "datum": "17.01.2027",
       "zeit": "17:00",
       "gegner": "SKYLINERS Juniors",
       "slug": "2027-01-17",
-      "subeventId": 24
+      "subeventId": 24,
+      "stehplatzBuchbar": false
     },
     {
       "datum": "31.01.2027",
       "zeit": "17:00",
       "gegner": "BBC Coburg",
       "slug": "2027-01-31",
-      "subeventId": 17
+      "subeventId": 17,
+      "stehplatzBuchbar": false
     },
     {
       "datum": "14.02.2027",
       "zeit": "17:00",
       "gegner": "SV Fellbach Flashers",
       "slug": "2027-02-14",
-      "subeventId": 23
+      "subeventId": 23,
+      "stehplatzBuchbar": false
     },
     {
       "datum": "07.03.2027",
       "zeit": "14:30",
       "gegner": "Bayer Giants Leverkusen",
       "slug": "2027-03-07",
-      "subeventId": 27
+      "subeventId": 27,
+      "stehplatzBuchbar": false
     },
     {
       "datum": "21.03.2027",
       "zeit": "17:00",
       "gegner": "TV Langen",
       "slug": "2027-03-21",
-      "subeventId": 19
+      "subeventId": 19,
+      "stehplatzBuchbar": false
     },
     {
       "datum": "28.03.2027",
       "zeit": "17:00",
       "gegner": "Ahorn Camp Baskets",
       "slug": "2027-03-28",
-      "subeventId": 25
+      "subeventId": 25,
+      "stehplatzBuchbar": false
     }
   ]
 }
