@@ -32,16 +32,13 @@
       action: 'TEMPLATE',
       text: text,
       dates: gcalStamp(start) + '/' + gcalStamp(end),
-      // Riethsporthalle ist NUR die Heimspielstätte der Profis (Pro B) — bei Damen/NBBL
-      // ist die tatsächliche Halle noch nicht hinterlegt (s. Notion-Feedback 03.08.2026:
-      // "Riethsporthalle" stand faelschlich bei jedem Damen-Heimspiel), deshalb hier ohne
-      // konkrete Hallenangabe, bis die echte Adresse vorliegt.
-      details: g.heim
-        ? (g.team === 'profis' ? 'Heimspiel der Basketball Löwen Erfurt in der Riethsporthalle.' : 'Heimspiel der Basketball Löwen Erfurt.')
-        : 'Auswärtsspiel der Basketball Löwen Erfurt.',
+      // Default-Heimspielstätte für alle Teams (Profis, Damen, NBBL) ist die
+      // Riethsporthalle, solange für ein konkretes Spiel nichts anderes bekannt ist
+      // (Marko, 10.08.2026 — Damen spielen ebenfalls dort).
+      details: g.heim ? 'Heimspiel der Basketball Löwen Erfurt in der Riethsporthalle.' : 'Auswärtsspiel der Basketball Löwen Erfurt.',
       ctz: 'Europe/Berlin'
     };
-    if (g.heim && g.team === 'profis') params.location = 'Essener Straße 20, 99089 Erfurt';
+    if (g.heim) params.location = 'Essener Straße 20, 99089 Erfurt';
     return 'https://calendar.google.com/calendar/render?' + new URLSearchParams(params).toString();
   }
 
@@ -51,14 +48,11 @@
     var matchup = g.heim ? (g.teamLabel + ' – ' + g.gegner) : (g.gegner + ' – ' + g.teamLabel);
     var dateTimeStr = WOCHENTAGE[g.date.getDay()] + ', ' + formatShort(g.date) + (g.zeit ? ', ' + g.zeit + ' Uhr' : '');
     var venueHTML, statusHTML;
-    if (g.heim && g.team === 'profis') {
+    if (g.heim) {
+      // Default-Heimspielstätte für alle Teams ist die Riethsporthalle, solange für
+      // ein konkretes Spiel nichts anderes bekannt ist (Marko, 10.08.2026 — Damen
+      // spielen ebenfalls dort).
       venueHTML = '<div class="fixture-venue-line"><a href="' + RIETHSPORTHALLE_MAPS_URL + '" target="_blank" rel="noopener"><i data-lucide="map-pin" style="width:14px;height:14px"></i> Riethsporthalle</a></div>';
-      statusHTML = '<span class="venue-heim">Heimspiel</span>';
-    } else if (g.heim) {
-      // Damen/NBBL: echte Heimspielstaette noch nicht hinterlegt (s. Notion-Feedback
-      // 03.08.2026) - bewusst ohne Hallenangabe statt der zuvor faelschlich gezeigten
-      // Riethsporthalle (die ist nur die Profis-Spielstaette).
-      venueHTML = '';
       statusHTML = '<span class="venue-heim">Heimspiel</span>';
     } else if (g.ort) {
       /* g.ort ist ein best-effort abgeleiteter Ort fürs Auswärtsspiel (kein
