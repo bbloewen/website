@@ -594,7 +594,7 @@
               var standingClass = 'seatplan-mobile-standing' + (standingPending ? ' selected' : '') + (clickable ? '' : ' seatplan-mobile-standing--unavailable');
               return '<button type="button" class="' + standingClass + '"' +
                 (clickable ? ' data-zone="STEHPLATZ"' : '') +
-                ' aria-label="Stehplatz' + (self.standing ? ' (' + self.standing.capacity + ' Plätze)' : '') + (clickable ? '' : ', nicht buchbar') + '">' +
+                ' aria-label="Stehplatz' + (self.standing ? ' (' + self.standing.capacity + ' Plätze)' : '') + (clickable ? '' : ', aktuell nicht buchbar') + '">' +
                 '<span>Steh-</span><span>platz</span>' +
               '</button>';
             })() +
