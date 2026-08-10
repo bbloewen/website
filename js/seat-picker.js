@@ -2671,10 +2671,16 @@
         label: s.zoneLabel + ' · Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber + ' · ' + (DK_TARIF_LABELS[s.tarif] || 'Normalpreis'),
         qty: 1, unitPrice: s.price, lineTotal: s.price,
         // Maschinenlesbare Felder für die echte Pretix-Order-Erstellung (n8n) —
-        // category/tarif bestimmen dort Item+Variation, seatGuid den Sitz.
-        // memberName geht in die serverseitige Mitgliedsrabatt-Nachprüfung ein
-        // (n8n verifiziert unabhängig, ob dieser Name wirklich freigeschaltet ist).
-        type: 'seat', seatGuid: guid, category: s.category, tarif: s.tarif,
+        // category/tarif bestimmen dort Item+Variation, seatGuid den Sitz. zoneLabel
+        // (Bugfix 10.08.2026, s. #245) zusätzlich nötig, weil mehrere physische Blöcke
+        // dieselbe Kategorie teilen können (z.B. Block B UND Block E sind beide
+        // "Kategorie I", aber pretix-seitig zwei eigene Items/Kontingente) — ohne
+        // zoneLabel kann der Bestell-Workflow nicht wissen, welches Item gemeint ist
+        // (fehlte hier bisher, obwohl der "blocks"-Modus/Einzelticket dasselbe Feld
+        // schon lange mitgibt, s. getSummary() oben). memberName geht in die
+        // serverseitige Mitgliedsrabatt-Nachprüfung ein (n8n verifiziert unabhängig,
+        // ob dieser Name wirklich freigeschaltet ist).
+        type: 'seat', seatGuid: guid, zoneLabel: s.zoneLabel, category: s.category, tarif: s.tarif,
         memberName: s.tarif.indexOf('_member') !== -1 ? (s.memberName || '') : undefined
       });
       total += s.price;
