@@ -720,7 +720,7 @@
         if (g.category === 'Fanblock' || g.category === 'VIP') {
           key = g.category; label = g.category;
         } else if (g.category === 'C unten') {
-          key = 'CS'; label = 'Courtside - Block CS';
+          key = 'CS'; label = 'Block CS';
         } else {
           key = id; label = zone.name;
         }
