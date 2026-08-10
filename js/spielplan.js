@@ -32,10 +32,16 @@
       action: 'TEMPLATE',
       text: text,
       dates: gcalStamp(start) + '/' + gcalStamp(end),
-      details: g.heim ? 'Heimspiel der Basketball Löwen Erfurt in der Riethsporthalle.' : 'Auswärtsspiel der Basketball Löwen Erfurt.',
+      // Riethsporthalle ist NUR die Heimspielstätte der Profis (Pro B) — bei Damen/NBBL
+      // ist die tatsächliche Halle noch nicht hinterlegt (s. Notion-Feedback 03.08.2026:
+      // "Riethsporthalle" stand faelschlich bei jedem Damen-Heimspiel), deshalb hier ohne
+      // konkrete Hallenangabe, bis die echte Adresse vorliegt.
+      details: g.heim
+        ? (g.team === 'profis' ? 'Heimspiel der Basketball Löwen Erfurt in der Riethsporthalle.' : 'Heimspiel der Basketball Löwen Erfurt.')
+        : 'Auswärtsspiel der Basketball Löwen Erfurt.',
       ctz: 'Europe/Berlin'
     };
-    if (g.heim) params.location = 'Essener Straße 20, 99089 Erfurt';
+    if (g.heim && g.team === 'profis') params.location = 'Essener Straße 20, 99089 Erfurt';
     return 'https://calendar.google.com/calendar/render?' + new URLSearchParams(params).toString();
   }
 
@@ -45,8 +51,14 @@
     var matchup = g.heim ? (g.teamLabel + ' – ' + g.gegner) : (g.gegner + ' – ' + g.teamLabel);
     var dateTimeStr = WOCHENTAGE[g.date.getDay()] + ', ' + formatShort(g.date) + (g.zeit ? ', ' + g.zeit + ' Uhr' : '');
     var venueHTML, statusHTML;
-    if (g.heim) {
+    if (g.heim && g.team === 'profis') {
       venueHTML = '<div class="fixture-venue-line"><a href="' + RIETHSPORTHALLE_MAPS_URL + '" target="_blank" rel="noopener"><i data-lucide="map-pin" style="width:14px;height:14px"></i> Riethsporthalle</a></div>';
+      statusHTML = '<span class="venue-heim">Heimspiel</span>';
+    } else if (g.heim) {
+      // Damen/NBBL: echte Heimspielstaette noch nicht hinterlegt (s. Notion-Feedback
+      // 03.08.2026) - bewusst ohne Hallenangabe statt der zuvor faelschlich gezeigten
+      // Riethsporthalle (die ist nur die Profis-Spielstaette).
+      venueHTML = '';
       statusHTML = '<span class="venue-heim">Heimspiel</span>';
     } else if (g.ort) {
       /* g.ort ist ein best-effort abgeleiteter Ort fürs Auswärtsspiel (kein
@@ -173,7 +185,7 @@
 
   Promise.all([
     fetch('/data/heimspiele.json?v=1786356737').then(function (r) { return r.json(); }),
-    fetch('/data/spielplan-saison.json?v=1786320000').then(function (r) { return r.json(); })
+    fetch('/data/spielplan-saison.json?v=1786381322').then(function (r) { return r.json(); })
   ]).then(function (results) {
     var heim = results[0], saison = results[1];
 
@@ -186,8 +198,8 @@
       return g;
     }
 
-    var profisGames = heim.spiele.map(function (s) { return toGame(s, true, 'Löwen Erfurt', 'profis'); })
-      .concat(saison.profisAuswaerts.map(function (s) { return toGame(s, false, 'Löwen Erfurt', 'profis'); }))
+    var profisGames = heim.spiele.map(function (s) { return toGame(s, true, 'Basketball Löwen', 'profis'); })
+      .concat(saison.profisAuswaerts.map(function (s) { return toGame(s, false, 'Basketball Löwen', 'profis'); }))
       .sort(function (a, b) { return a.date - b.date; });
 
     var damenGames = (saison.damen.spiele || []).map(function (s) { return toGame(s, s.heim, 'Löwinnen Erfurt', 'damen'); });
