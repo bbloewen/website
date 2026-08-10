@@ -517,7 +517,7 @@
 /* Modus "blocks" (Einzelticket): Übernehmen-Button erscheint nur nach Antippen eines
    Blocks, mittig über dem Spielfeld schwebend — kein Dauer-UI-Element. */
 .seatplan-mobile-court-confirm {
-  position: absolute; top: 6px; left: 50%; transform: translateX(-50%); z-index: 2;
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2;
   padding: 4px 14px; font-size: 12px;
 }
 .seatplan-mobile-tile.selected { outline: 2px solid var(--color-brand-blue); outline-offset: 1px; }

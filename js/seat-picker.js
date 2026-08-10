@@ -561,12 +561,32 @@
       var pendingKey = splitZoneKey(this.pendingBlockId);
       var pendingZoneId = pendingKey.zoneId;
       var pendingCategory = pendingKey.category;
+      // Zusatz IMMER anzeigen, nicht nur bei Blöcken mit mehreren kaufbaren Kategorien
+      // (Marko, 10.08.2026: "mal mit, mal ohne Zusatz" war uneinheitlich) — bei genau
+      // einer kaufbaren Kategorie im Block (z.B. Block D) gibt es zwar kein "::category"
+      // im Key, aber pendingPurchasable hat dann trotzdem genau einen Eintrag.
       var pendingPurchasable = pendingZoneId === 'STEHPLATZ' ? [] : this._purchasableCategories(pendingZoneId);
-      var pendingMatch = pendingCategory && pendingPurchasable.length > 1
+      var pendingMatch = pendingCategory
         ? pendingPurchasable.filter(function (p) { return p.category === pendingCategory; })[0]
-        : null;
+        : (pendingPurchasable.length === 1 ? pendingPurchasable[0] : null);
+      var confirmSuffix = '';
+      if (pendingZoneId === 'STEHPLATZ') {
+        confirmSuffix = 'Stehplatz';
+      } else if (pendingMatch) {
+        // Fanblock/VIP/Courtside: eigenständige Produktnamen ohne Block-Buchstabe/
+        // Klammer-Kategorie (deckungsgleich mit der Auslastungskachel, s.
+        // _renderOccupancy) — sonst "Block A (Fanblock)" statt einfach "Fanblock".
+        if (pendingMatch.category === 'Fanblock' || pendingMatch.category === 'VIP') {
+          confirmSuffix = pendingMatch.category;
+        } else if (pendingMatch.category === 'C unten') {
+          confirmSuffix = 'Block CS';
+        } else {
+          var pendingZone = this._zoneById(pendingZoneId);
+          confirmSuffix = (pendingZone ? pendingZone.name : pendingZoneId) + ' (' + catShortLabel(pendingMatch.category) + ')';
+        }
+      }
       courtConfirm = '<button type="button" class="btn btn-primary btn-sm seatplan-mobile-court-confirm" id="seatplan-mobile-add-btn">Übernehmen' +
-        (pendingMatch ? ': ' + escapeHtml(pendingMatch.label) : '') + '</button>';
+        (confirmSuffix ? ': ' + escapeHtml(confirmSuffix) : '') + '</button>';
     }
 
     this.root.innerHTML =
