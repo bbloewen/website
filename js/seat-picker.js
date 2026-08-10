@@ -700,8 +700,8 @@
     // stehen Fanblock/VIP vor "ihrem" Hauptblock, weil sie näher am Spielfeld liegen).
     var ORDER = ['A', 'B', 'C', 'CS', 'D', 'E', 'F', 'Fanblock', 'VIP', 'STEHPLATZ'];
     var rows = {}; // key aus ORDER -> {label, gesamt, frei}
-    function addRow(key, label, gesamt, frei) {
-      if (!gesamt) return;
+    function addRow(key, label, gesamt, frei, force) {
+      if (!gesamt && !force) return;
       rows[key] = { label: label, gesamt: gesamt, frei: frei };
     }
     this.northZones.concat(this.southZones).forEach(function (id) {
@@ -730,11 +730,15 @@
     // Stehplatz zählt zur Gesamtkapazität mit — eigene Zeile statt in die Block-Liste
     // gemischt, weil es kein Block mit Reihen/Sitzen ist, sondern ein reiner Mengen-Posten.
     // Zeile immer anzeigen (Marko, 10.08.2026), auch wenn Stehplatz für dieses Spiel nicht
-    // buchbar ist (s. #222) — dann aber mit 0 freien Plätzen statt ausgeblendet.
+    // buchbar ist (s. #222) — dann aber als "0 von 0 frei" statt mit der eigentlichen
+    // Kapazität, weil für dieses Spiel schlicht kein Stehplatz angeboten wird.
     if (this.standing && this.standing.capacity) {
-      var stehplatzFrei = !this.standingBookable ? 0
-        : (typeof this.standingAvailable === 'number' ? this.standingAvailable : this.standing.capacity);
-      addRow('STEHPLATZ', this.standing.name, this.standing.capacity, stehplatzFrei);
+      if (this.standingBookable) {
+        var stehplatzFrei = typeof this.standingAvailable === 'number' ? this.standingAvailable : this.standing.capacity;
+        addRow('STEHPLATZ', this.standing.name, this.standing.capacity, stehplatzFrei);
+      } else {
+        addRow('STEHPLATZ', this.standing.name, 0, 0, true);
+      }
     }
     var zeilen = [], gesamtAlle = 0, freiAlle = 0;
     ORDER.forEach(function (key) {
