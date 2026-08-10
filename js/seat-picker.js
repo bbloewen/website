@@ -720,7 +720,7 @@
         if (g.category === 'Fanblock' || g.category === 'VIP') {
           key = g.category; label = g.category;
         } else if (g.category === 'C unten') {
-          key = 'CS'; label = 'Courtside';
+          key = 'CS'; label = 'Courtside - Block CS';
         } else {
           key = id; label = zone.name;
         }
@@ -729,11 +729,11 @@
     });
     // Stehplatz zählt zur Gesamtkapazität mit — eigene Zeile statt in die Block-Liste
     // gemischt, weil es kein Block mit Reihen/Sitzen ist, sondern ein reiner Mengen-Posten.
-    // Ist Stehplatz für dieses Spiel nicht buchbar (s. #222), zählt die Kapazität hier
-    // NICHT mit — sonst würde die Gesamtzahl Plätze verzeichnen, die für dieses Spiel gar
-    // nicht angeboten werden (Bugfix, unterscheidet sich von den NV-Plätzen).
-    if (this.standing && this.standing.capacity && this.standingBookable) {
-      var stehplatzFrei = typeof this.standingAvailable === 'number' ? this.standingAvailable : this.standing.capacity;
+    // Zeile immer anzeigen (Marko, 10.08.2026), auch wenn Stehplatz für dieses Spiel nicht
+    // buchbar ist (s. #222) — dann aber mit 0 freien Plätzen statt ausgeblendet.
+    if (this.standing && this.standing.capacity) {
+      var stehplatzFrei = !this.standingBookable ? 0
+        : (typeof this.standingAvailable === 'number' ? this.standingAvailable : this.standing.capacity);
       addRow('STEHPLATZ', this.standing.name, this.standing.capacity, stehplatzFrei);
     }
     var zeilen = [], gesamtAlle = 0, freiAlle = 0;

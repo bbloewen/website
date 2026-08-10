@@ -32,7 +32,7 @@
   var card = document.getElementById('next-game-card');
   if (!card) return;
 
-  fetch('/data/heimspiele.json?v=1785951186').then(function (r) { return r.json(); }).then(function (d) {
+  fetch('/data/heimspiele.json?v=1786356737').then(function (r) { return r.json(); }).then(function (d) {
     var today = new Date();
     today.setHours(0, 0, 0, 0);
 

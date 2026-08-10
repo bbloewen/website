@@ -279,7 +279,7 @@
     }
 
     var slug = new URLSearchParams(window.location.search).get('spiel');
-    fetch('/data/heimspiele.json?v=1785951186')
+    fetch('/data/heimspiele.json?v=1786356737')
       .then(function (r) { return r.json(); })
       .then(function (d) { start(pickGame(d.spiele, slug)); })
       .catch(function (err) {
