@@ -745,7 +745,7 @@
       var r = rows[key];
       if (!r) return;
       gesamtAlle += r.gesamt; freiAlle += r.frei;
-      var quote = Math.round((r.frei / r.gesamt) * 100);
+      var quote = r.gesamt > 0 ? Math.round((r.frei / r.gesamt) * 100) : 100;
       zeilen.push(
         '<li class="seatplan-occupancy-row">' +
           '<span class="seatplan-occupancy-block">' + r.label + '</span>' +
