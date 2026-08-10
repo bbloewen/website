@@ -167,6 +167,30 @@
        (Frühbucher/Mitgliedsrabatt Löwen e.V.) werden erst im Warenkorb-Widget bei Auswahl
        des Tarifs berechnet und angezeigt, s. seat-picker.js dauerkarteDiscount. */
 
+    /* Die Auslastungskachel zeigte hier lange einen EIGENEN, spieltag-unabhängigen
+       Stand (Webhook "dauerkarte-sitzplatz-status") — das driftete von der
+       Einzelticket-Kachel weg, sobald sich der Buchungsstatus eines einzelnen
+       Spiels ändert (z. B. Stehplatz nicht buchbar für dieses Spiel, s. #222).
+       Marko, 10.08.2026: es gibt architektonisch keinen eigenen "Dauerkarten"-
+       Auslastungsstand — es ist immer nur EIN Spieltag freigeschaltet (aktuell
+       keiner), und die Dauerkarte-Kachel soll exakt denselben Stand zeigen wie
+       die Einzelticket-Seite für das jeweils nächste Heimspiel. Deshalb hier
+       dieselbe Spielauswahl (naechstes/erstes kommendes Spiel) und derselbe
+       pro-Subevent-Webhook wie in einzelticket.html — kein eigener Endpunkt mehr. */
+    function parseDMY(str) {
+      var p = str.split('.').map(Number);
+      return new Date(p[2], p[1] - 1, p[0]);
+    }
+    function pickCurrentGame(spiele) {
+      var today = new Date();
+      today.setHours(0, 0, 0, 0);
+      var upcoming = spiele
+        .filter(function (s) { return parseDMY(s.datum) >= today; })
+        .sort(function (a, b) { return parseDMY(a.datum) - parseDMY(b.datum); });
+      return upcoming[0] || spiele[spiele.length - 1];
+    }
+
+    function start(game) {
     var picker = new SeatPicker(document.getElementById('seatplan-root'), {
       nachwuchsBeitrag: true,
       nachwuchsAmount: 2,
@@ -174,8 +198,12 @@
       // Webhook-URL ohne Workflow-ID im Pfad! Das n8n-MCP-Tool liefert die
       // Produktions-URL fälschlich als .../webhook/<workflow-id>/<pfad> zurück, was
       // 404 ergibt (n8n-Bug, laut Support in 2.33.0 behoben, Ticket #35063).
-      // Gültig ist immer nur .../webhook/<pfad>.
-      seatStatusUrl: 'https://poetic-patience-production-9290.up.railway.app/webhook/dauerkarte-sitzplatz-status',
+      // Gültig ist immer nur .../webhook/<pfad> — analog einzelticket.html, mit
+      // demselben Subevent, damit beide Kacheln synchron sind (s. Kommentar oben).
+      seatStatusUrl: game.subeventId
+        ? 'https://poetic-patience-production-9290.up.railway.app/webhook/einzelticket-sitzplatz-status?subevent=' + game.subeventId
+        : null,
+      standingBookable: game.stehplatzBuchbar !== false,
       pretixEvent: 'saison2627',
       // pretix-Item-ID -> Kategorie-Bezeichnung (Event saison2627, Stand 09.08.2026) —
       // nötig, damit ein produktgebundener Gutschein (z.B. nur VIP) der richtigen
@@ -298,6 +326,18 @@
     new MutationObserver(alignEmptyCartButton).observe(document.getElementById('seatplan-root'), { childList: true, subtree: true });
     window.addEventListener('resize', alignEmptyCartButton);
     alignEmptyCartButton();
+    }
+
+    fetch('/data/heimspiele.json?v=1786357462')
+      .then(function (r) { return r.json(); })
+      .then(function (d) { start(pickCurrentGame(d.spiele)); })
+      .catch(function (err) {
+        /* JSON nicht erreichbar: mit einem Platzhalter-Spiel weiterarbeiten statt die
+           Seite (und den Kauf) komplett zu blockieren — Auslastungskachel zeigt dann
+           eben den Stand dieses einen Spiels statt des aktuellen. */
+        console.error('Heimspieldaten konnten nicht geladen werden', err);
+        start({ subeventId: 26, stehplatzBuchbar: false });
+      });
   });
 </script>
 </body>
