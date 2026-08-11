@@ -821,6 +821,16 @@
     if (zoneId === 'STEHPLATZ') {
       return typeof this.standingAvailable === 'number' ? this.standingAvailable : (this.standing ? this.standing.capacity : 0);
     }
+    // Rollstuhlplatz ist im Modus "blocks" (Einzelticket) EIN gemeinsames Kontingent
+    // über alle Blöcke mit Rollstuhlplätzen hinweg (Marko, 11.08.2026: "ist eigentlich
+    // egal, wo die Personen sitzen") — Pseudo-Zone "ROLLSTUHL" statt eines echten
+    // Blocks, s. _quickAddBlock/_renderDirectAddRow. Sitzplan-Modus (Dauerkarte) bleibt
+    // unberührt: dort ist der Rollstuhlplatz ein echter, konkret gewählter Sitz.
+    if (category === 'Rollstuhlplatz' && zoneId === 'ROLLSTUHL') {
+      return this.northZones.concat(this.southZones).reduce(function (sum, id) {
+        return sum + self._wheelchairSeatCount(id, true);
+      }, 0);
+    }
     // Rollstuhlplatz ist keine eigene Reihen-Kategorie, sondern einzelne, über den
     // Block verteilte Sitze (seat.wheelchair) — eigene Zählung statt _categoryGroups.
     if (category === 'Rollstuhlplatz') return this._wheelchairSeatCount(zoneId, true);
@@ -854,20 +864,23 @@
       this._setBlockCount('STEHPLATZ', this.standing.name, 'Stehplatz', { normal: this.standingPrice }, 'normal', (stehplatzCounts.normal || 0) + qty, stehplatzFree);
       return;
     }
-    var zone = this._zoneById(zoneId);
-    if (!zone) return;
-    // Rollstuhlplatz (sitzplanweit, s. Preisliste): eigenes Sonderprodukt, nur über die
-    // Direktwahl-Dropdown erreichbar (kein eigenes Tipp-Ziel auf der Grafik-Kachel — zu
-    // wenige/verstreute Plätze für eine dritte antippbare Kachel-Zone), quotiert über
-    // die tatsächlichen Rollstuhlplätze des Blocks statt über _categoryGroups.
+    // Rollstuhlplatz (Modus "blocks"/Einzelticket): EIN gemeinsames Kontingent über alle
+    // Blöcke hinweg statt eines pro Block (Marko, 11.08.2026) — Pseudo-Zone "ROLLSTUHL"
+    // statt eines echten Blocks, deshalb VOR dem _zoneById-Check (der für "ROLLSTUHL"
+    // ins Leere liefe). Kein eigenes Tipp-Ziel auf der Grafik-Kachel, nur über die
+    // Direktwahl-Dropdown erreichbar (zu wenige/verstreute Plätze für eine dritte
+    // antippbare Kachel-Zone), quotiert über die tatsächlichen Rollstuhlplätze aller
+    // Blöcke statt über _categoryGroups.
     if (category === 'Rollstuhlplatz') {
       if (!this.prices['Rollstuhlplatz']) return;
-      var wcFree = this._blockFreeCount(zoneId, 'Rollstuhlplatz');
-      var wcBlockKey = zoneId + '::Rollstuhlplatz';
+      var wcFree = this._blockFreeCount('ROLLSTUHL', 'Rollstuhlplatz');
+      var wcBlockKey = 'ROLLSTUHL::Rollstuhlplatz';
       var wcCounts = this.blockCounts[wcBlockKey] || {};
-      this._setBlockCount(wcBlockKey, zone.name + ' - Rollstuhlplatz', 'Rollstuhlplatz', this.prices['Rollstuhlplatz'], 'normal', (wcCounts.normal || 0) + qty, wcFree);
+      this._setBlockCount(wcBlockKey, 'Rollstuhlplatz', 'Rollstuhlplatz', this.prices['Rollstuhlplatz'], 'normal', (wcCounts.normal || 0) + qty, wcFree);
       return;
     }
+    var zone = this._zoneById(zoneId);
+    if (!zone) return;
     var purchasable = this._purchasableCategories(zoneId);
     if (!purchasable.length) return;
     var chosen = category
@@ -2521,25 +2534,33 @@
   SeatPicker.prototype._renderDirectAddRow = function () {
     var self = this;
     var options = '';
+    // Bezeichnung deckungsgleich mit der Sitzplan-Übersicht (s. blockTile weiter oben,
+    // Marko 11.08.2026: "sollten den Blockbez. in der Sitzplan-Übersicht entsprechen") —
+    // Fanblock/VIP ohne Block-Buchstabe, "C unten" heißt hier wie dort "Courtside".
+    function optionLabel(id, p, multi) {
+      if (p.category === 'Fanblock' || p.category === 'VIP') return p.category;
+      if (p.category === 'C unten') return 'Courtside';
+      return 'Block ' + id + (multi ? ' – ' + p.label : '');
+    }
     this.northZones.concat(this.southZones).slice().sort().forEach(function (id) {
       var purchasable = self._purchasableCategories(id);
       // Ein Eintrag pro kaufbarer Kategorie — bei Blöcken mit nur EINER bleibt das der
       // bisherige einzelne "Block X"-Eintrag; bei mehreren (z.B. Block A: Kategorie
       // III/Fanblock, Block C: Kategorie II/C unten) je einer.
-      if (purchasable.length === 1) {
-        options += '<option value="' + id + '">Block ' + id + '</option>';
-      } else {
-        purchasable.forEach(function (p) {
-          options += '<option value="' + id + '::' + p.category + '">Block ' + id + ' – ' + escapeHtml(p.label) + '</option>';
-        });
-      }
-      // Rollstuhlplatz (sitzplanweit, s. Preisliste): zusätzliche Option je Block MIT
-      // Rollstuhlplätzen, unabhängig von dessen sonstigen Kategorien — eigenes Kontingent
-      // (s. _wheelchairSeatCount), kein eigenes Tipp-Ziel auf der Grafik.
-      if (self.prices['Rollstuhlplatz'] && self._wheelchairSeatCount(id) > 0) {
-        options += '<option value="' + id + '::Rollstuhlplatz">Block ' + id + ' – Rollstuhlplatz</option>';
-      }
+      var multi = purchasable.length > 1;
+      purchasable.forEach(function (p) {
+        var key = multi ? id + '::' + p.category : id;
+        options += '<option value="' + key + '">' + escapeHtml(optionLabel(id, p, multi)) + '</option>';
+      });
     });
+    // Rollstuhlplatz (Modus "blocks"/Einzelticket): EIN gemeinsamer Eintrag über alle
+    // Blöcke hinweg statt einem pro Block — es ist ein einziges Kontingent, die Wahl
+    // des Blocks ist beim Einzelticket ohnehin nur eine Kategorie- keine feste
+    // Sitzwahl (Marko, 11.08.2026: "ist eigentlich egal, wo die Personen sitzen").
+    if (this.prices['Rollstuhlplatz']) {
+      var wcAny = this.northZones.concat(this.southZones).some(function (id) { return self._wheelchairSeatCount(id) > 0; });
+      if (wcAny) options += '<option value="ROLLSTUHL::Rollstuhlplatz">Rollstuhlplatz</option>';
+    }
     // Stehplatz reiht sich als weitere Option ein — nur wenn für dieses Spiel buchbar
     // (s. #222), sonst taucht sie hier gar nicht auf ("in der Dropdown-Box nicht
     // selektierbar", Marko).
