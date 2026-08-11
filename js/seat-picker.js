@@ -2537,16 +2537,18 @@
     // Bezeichnung deckungsgleich mit der Sitzplan-Übersicht (s. blockTile weiter oben,
     // Marko 11.08.2026: "sollten den Blockbez. in der Sitzplan-Übersicht entsprechen") —
     // Fanblock/VIP ohne Block-Buchstabe, "C unten" heißt hier wie dort "Courtside".
-    function optionLabel(id, p, multi) {
+    // Die Kategorie steht IMMER dabei (auch bei Blöcken mit nur einer kaufbaren
+    // Kategorie wie D/E/F, s. blockTile: die Übersicht zeigt dort ebenfalls Buchstabe
+    // UND Kat.-Kürzel nebeneinander, nicht nur bei mehreren Kategorien).
+    function optionLabel(id, p) {
       if (p.category === 'Fanblock' || p.category === 'VIP') return p.category;
       if (p.category === 'C unten') return 'Courtside';
-      return 'Block ' + id + (multi ? ' – ' + p.label : '');
+      return 'Block ' + id + ' – ' + p.label;
     }
     this.northZones.concat(this.southZones).forEach(function (id) {
       var purchasable = self._purchasableCategories(id);
-      // Ein Eintrag pro kaufbarer Kategorie — bei Blöcken mit nur EINER bleibt das der
-      // bisherige einzelne "Block X"-Eintrag; bei mehreren (z.B. Block A: Kategorie
-      // III/Fanblock, Block C: Kategorie II/C unten) je einer.
+      // Ein Eintrag pro kaufbarer Kategorie (z.B. Block A: Kategorie III/Fanblock,
+      // Block C: Kategorie II/C unten je einer; Block D/E/F genau einer).
       var multi = purchasable.length > 1;
       purchasable.forEach(function (p) {
         var key = multi ? id + '::' + p.category : id;
