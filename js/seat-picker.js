@@ -2533,7 +2533,7 @@
      der Warenkorb noch leer ist (reine Einstiegshilfe, kein Dauer-UI-Element). */
   SeatPicker.prototype._renderDirectAddRow = function () {
     var self = this;
-    var options = '';
+    var entries = [];
     // Bezeichnung deckungsgleich mit der Sitzplan-Übersicht (s. blockTile weiter oben,
     // Marko 11.08.2026: "sollten den Blockbez. in der Sitzplan-Übersicht entsprechen") —
     // Fanblock/VIP ohne Block-Buchstabe, "C unten" heißt hier wie dort "Courtside".
@@ -2542,7 +2542,7 @@
       if (p.category === 'C unten') return 'Courtside';
       return 'Block ' + id + (multi ? ' – ' + p.label : '');
     }
-    this.northZones.concat(this.southZones).slice().sort().forEach(function (id) {
+    this.northZones.concat(this.southZones).forEach(function (id) {
       var purchasable = self._purchasableCategories(id);
       // Ein Eintrag pro kaufbarer Kategorie — bei Blöcken mit nur EINER bleibt das der
       // bisherige einzelne "Block X"-Eintrag; bei mehreren (z.B. Block A: Kategorie
@@ -2550,7 +2550,7 @@
       var multi = purchasable.length > 1;
       purchasable.forEach(function (p) {
         var key = multi ? id + '::' + p.category : id;
-        options += '<option value="' + key + '">' + escapeHtml(optionLabel(id, p, multi)) + '</option>';
+        entries.push({ value: key, label: optionLabel(id, p, multi) });
       });
     });
     // Rollstuhlplatz (Modus "blocks"/Einzelticket): EIN gemeinsamer Eintrag über alle
@@ -2559,15 +2559,20 @@
     // Sitzwahl (Marko, 11.08.2026: "ist eigentlich egal, wo die Personen sitzen").
     if (this.prices['Rollstuhlplatz']) {
       var wcAny = this.northZones.concat(this.southZones).some(function (id) { return self._wheelchairSeatCount(id) > 0; });
-      if (wcAny) options += '<option value="ROLLSTUHL::Rollstuhlplatz">Rollstuhlplatz</option>';
+      if (wcAny) entries.push({ value: 'ROLLSTUHL::Rollstuhlplatz', label: 'Rollstuhlplatz' });
     }
     // Stehplatz reiht sich als weitere Option ein — nur wenn für dieses Spiel buchbar
     // (s. #222), sonst taucht sie hier gar nicht auf ("in der Dropdown-Box nicht
     // selektierbar", Marko).
     if (this.standing && this.standingPrice && this.standingBookable) {
-      options += '<option value="STEHPLATZ">Stehplatz</option>';
+      entries.push({ value: 'STEHPLATZ', label: 'Stehplatz' });
     }
-    if (!options) return;
+    if (!entries.length) return;
+    // Alphabetisch nach Anzeigetext, nicht nach Block-Buchstabe (Marko, 11.08.2026).
+    entries.sort(function (a, b) { return a.label.localeCompare(b.label, 'de'); });
+    var options = entries.map(function (e) {
+      return '<option value="' + e.value + '">' + escapeHtml(e.label) + '</option>';
+    }).join('');
     var wrap = document.createElement('div');
     wrap.className = 'seatplan-direct-add-row';
     wrap.innerHTML =
