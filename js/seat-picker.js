@@ -232,27 +232,32 @@
       (this.nvSeatGuids && this.nvSeatGuids.has(seatGuid)));
   };
 
-  /* Einheiten (Sitze bzw. Block-Tarifzeilen) der Kategorie, an die ein Gutschein
-     gebunden ist (this.voucherInfo.category) — Grundlage, um einen produktgebundenen
-     Gutschein (z.B. "nur VIP") NICHT auf den ganzen Warenkorb, sondern nur auf
-     passende Zeilen anzuwenden. Frisch aus this.selected/this.blockCounts gebaut,
-     damit sie immer den aktuellen Warenkorb-Stand widerspiegeln. */
+  /* Einheiten (Sitze bzw. Block-Tarifzeilen) der Kategorie(n)/des Tarifs, an die ein
+     Gutschein gebunden ist (this.voucherInfo.categories/.tarifRestriction) — Grundlage,
+     um einen produkt-/kategoriegebundenen Gutschein (z.B. "nur Kategorie 2+3,
+     Ermäßigt") NICHT auf den ganzen Warenkorb, sondern nur auf passende Zeilen
+     anzuwenden. Frisch aus this.selected/this.blockCounts gebaut, damit sie immer den
+     aktuellen Warenkorb-Stand widerspiegeln. */
   SeatPicker.prototype._voucherMatchingUnits = function () {
     var self = this;
-    var category = this.voucherInfo && this.voucherInfo.category;
+    var info = this.voucherInfo;
+    var categories = info && info.categories;
+    var tarifRestriction = info && info.tarifRestriction;
     var units = []; // { qty, unitPrice }
-    if (!category) return units;
+    if (!categories || !categories.length) return units;
+    function tarifOk(t) { return !tarifRestriction || baseTarif(t) === tarifRestriction; }
     if (this.mode === 'blocks') {
       Object.keys(this.blockCounts).forEach(function (key) {
         var c = self.blockCounts[key];
-        if (c.category !== category) return;
-        if (c.normal) units.push({ qty: c.normal, unitPrice: c.priceInfo.normal });
-        if (c.ermaessigt) units.push({ qty: c.ermaessigt, unitPrice: c.priceInfo.ermaessigt });
+        if (categories.indexOf(c.category) === -1) return;
+        if (c.normal && tarifOk('normal')) units.push({ qty: c.normal, unitPrice: c.priceInfo.normal });
+        if (c.ermaessigt && tarifOk('ermaessigt')) units.push({ qty: c.ermaessigt, unitPrice: c.priceInfo.ermaessigt });
       });
     } else {
       Object.keys(this.selected).forEach(function (guid) {
         var s = self.selected[guid];
-        if (s.category !== category) return;
+        if (categories.indexOf(s.category) === -1) return;
+        if (!tarifOk(s.tarif)) return;
         units.push({ qty: 1, unitPrice: s.price });
       });
     }
@@ -263,13 +268,13 @@
      gemeinsam für "seats"- und "blocks"-Modus sowie für getSummary(). Ein
      Wertgutschein zieht sein Guthaben pauschal vom Gesamtbetrag ab; ein Gutschein
      ohne Produktbindung wirkt ebenfalls pauschal (wie zuvor); ein produktgebundener
-     Gutschein (voucherInfo.category) wirkt nur auf die dazu passenden Zeilen, je
+     Gutschein (voucherInfo.categories) wirkt nur auf die dazu passenden Zeilen, je
      Einheit einmal, begrenzt auf die verbleibenden Einlösungen (remainingUses). */
   SeatPicker.prototype._voucherDiscount = function (base) {
     var info = this.voucherInfo;
     if (!info || base <= 0) return 0;
     if (info.source === 'giftcard') return Math.min(info.balance, base);
-    if (info.category) {
+    if (info.categories && info.categories.length) {
       var remaining = (info.remainingUses == null) ? Infinity : info.remainingUses;
       var discount = 0;
       this._voucherMatchingUnits().forEach(function (u) {
@@ -2223,8 +2228,15 @@
     var amount = info.priceMode === 'percent' ? (info.value + ' %')
       : info.priceMode === 'set' ? ('Preis ' + fmtEUR(info.value) + ' €')
       : (fmtEUR(info.value) + ' €');
-    return info.code + ' (' + amount + (info.category ? ', ' + info.category : '') + ')';
+    var scope = (info.categories && info.categories.length) ? info.categories.join('/') : null;
+    if (scope && info.tarifRestriction) scope += ' · ' + (DK_TARIF_LABELS[info.tarifRestriction] || info.tarifRestriction);
+    return info.code + ' (' + amount + (scope ? ', ' + scope : '') + ')';
   }
+
+  /* Normalisiert einen Tarif-Wert auf seine Basisform (z.B. "ermaessigt_member" ->
+     "ermaessigt") — Mitgliedsrabatt-Varianten zaehlen fuer die Gutschein-Tarifpruefung
+     als derselbe Tarif. */
+  function baseTarif(t) { return (t || '').replace('_member', ''); }
 
   /* Gutschein-/Wertgutschein-Code — gemeinsam für "seats"- und "blocks"-Modus,
      wird wie der Nachwuchsbeitrag nur angezeigt, wenn der Warenkorb nicht leer
@@ -2277,16 +2289,28 @@
             if (result && result.valid && result.source === 'giftcard') {
               self.voucherError = 'Wertgutscheine bitte an der Kasse einlösen (nächster Schritt).';
             } else if (result && result.valid) {
-              var category = (result.itemId != null && self.pretixItemCategoryMap[result.itemId]) || null;
-              var info = {
-                source: result.source, code: result.code, priceMode: result.priceMode, value: result.value,
-                category: category, remainingUses: result.remainingUses != null ? result.remainingUses : null,
-                balance: result.balance != null ? result.balance : null
-              };
-              info.label = labelForVoucherInfo(info);
-              self.voucherCode = result.code;
-              self.voucherInfo = info;
-              self.voucherError = null;
+              /* result.itemIds sind echte pretix-Item-IDs (item- oder quota-gebunden).
+                 self.pretixItemCategoryMap enthält nur die auf DIESER Seite (Einzelticket
+                 bzw. Dauerkarte) existierenden IDs — Items des jeweils anderen Produkttyps
+                 lösen hier absichtlich zu keiner Kategorie auf, s. Kommentar an der
+                 Kartendefinition. Ein item-/quota-gebundener Gutschein ohne passende
+                 Kategorie auf dieser Seite ist ein echter Fehlschlag, kein "gilt überall". */
+              var categories = (result.itemIds || []).map(function (id) { return self.pretixItemCategoryMap[id]; }).filter(Boolean);
+              categories = categories.filter(function (c, i) { return categories.indexOf(c) === i; });
+              if (result.itemIds && result.itemIds.length && !categories.length) {
+                self.voucherError = 'Dieser Gutschein gilt nicht für die Artikel in deinem Warenkorb.';
+              } else {
+                var info = {
+                  source: result.source, code: result.code, priceMode: result.priceMode, value: result.value,
+                  categories: categories, tarifRestriction: result.tarifRestriction || null,
+                  remainingUses: result.remainingUses != null ? result.remainingUses : null,
+                  balance: result.balance != null ? result.balance : null
+                };
+                info.label = labelForVoucherInfo(info);
+                self.voucherCode = result.code;
+                self.voucherInfo = info;
+                self.voucherError = null;
+              }
             } else {
               self.voucherError = 'Dieser Gutscheincode ist ungültig oder abgelaufen.';
             }
