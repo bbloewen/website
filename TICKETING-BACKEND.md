@@ -60,3 +60,37 @@ GET https://pretix-production-4263.up.railway.app/api/v1/organizers/xxl/webhooks
 `saison2627`). Das gilt zusätzlich zu den bereits bekannten Stolperfallen bei
 Event-Migrationen (hartcodierte Item-/Kontingent-/Quota-IDs in n8n-Workflows), die
 jeweils separat geprüft werden müssen, wenn Kontingente/Sitzpläne neu aufgesetzt werden.
+
+## Item-/Kontingent-Struktur (Stand 11.08.2026, event `saison2627`)
+
+Jede Preiskategorie existiert als **drei getrennte Items** (eigene IDs, teilen sich aber
+die physischen Kontingente je Subevent): `- Einzel` (Vorverkauf), `- Dauer`
+(Dauerkarte), `- Abend` (Tageskasse, Einzelticket-Preis + 2,00 € Zuschlag). Live per
+`GET /api/v1/organizers/xxl/events/saison2627/items/?page_size=100` verifiziert, nicht
+aus dem Gedächtnis übernommen — bei Zweifeln immer neu abfragen, IDs ändern sich bei
+jedem Kontingent-/Item-Neuaufbau (s. Merksatz oben).
+
+| Kategorie | Einzel-ID | Dauer-ID | Abend-ID | Preis Einzel (Normal/Erm./Kinder 7-14) |
+|---|---|---|---|---|
+| Block A (K3) | 28 | 37 | 49 | 10,50 € / 8,00 € / 5,00 € |
+| Block B (K1) | 35 | 44 | 55 | 16,00 € / 14,00 € |
+| Block C (K2) | 31 | 42 | 50 | 12,00 € / 8,50 € |
+| Block CS (K2) — zweites Kat.2-Kontingent, „C oben" | 32 | 46 | 53 | 12,00 € / 8,50 € |
+| Block D (K2) | 29 | 43 | 48 | 12,00 € / 8,50 € |
+| Block E (K1) | 33 | 41 | 52 | 16,00 € / 14,00 € |
+| Block F (K2) | 30 | 45 | 51 | 12,00 € / 8,50 € |
+| Fanblock | 27 | 38 | 54 | 10,50 € / 8,00 € |
+| VIP | 40 | 47 | 58 | 119,00 € (Dauer 1.290,00 €/495,00 € erm.) |
+| Rollstuhlplatz | 34 | 39 | 57 | 8,00 € (Dauer 104,00 €) |
+| Stehplatz | 23 | *(kein Dauer-Item)* | 56 | 8,00 € |
+| Nachwuchsunterstützung (Addon, `addon_category:3`, an jedem Kategorie-Item) | 19 | – | – | 2,00 € |
+
+Variationen durchgängig `{Normalpreis, Ermäßigt}`, nur **Block A (K3)** zusätzlich
+`Kinder 7-14`. Für Stehplatz existiert bewusst kein `- Dauer`-Item (Dauerkarten decken
+keinen separaten Stehplatz-Tarif ab).
+
+**Sponsoren-/Partner-Gutscheine** (kategorie-eingeschränkte Freikarten-Codes, z. B. SWE)
+nutzen ein eigenes Muster (unbegrenzte Zusatz-Quota je Subevent + Voucher mit
+`max_usages`) — vollständig dokumentiert im Abschnitt „Sponsoren-/Partner-Gutscheine
+anlegen" der Notion-Seite [Ticketing/ Sitzplan & Bestellungen](https://app.notion.com/p/3aba2418e2d781e2a0addde3c5ada33f),
+nicht hier duplizieren.
