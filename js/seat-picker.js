@@ -2221,16 +2221,32 @@
     });
   };
 
+  /* Kurzbezeichnungen für die Gutschein-Zeile im Warenkorb — "C unten" zählt fürs
+     Anzeigen als Kat. 2 (Preis ist ohnehin identisch, s. prices-Objekt weiter oben),
+     damit dort nicht faelschlich eine dritte, eigene "Kategorie" auftaucht. */
+  var VOUCHER_CATEGORY_SHORT = {
+    'Kategorie I': 'Kat. 1', 'Kategorie II': 'Kat. 2', 'C unten': 'Kat. 2', 'Kategorie III': 'Kat. 3',
+    'Fanblock': 'Fanblock', 'VIP': 'VIP', 'Rollstuhlplatz': 'Rollstuhlplatz'
+  };
+  var VOUCHER_CATEGORY_ORDER = ['Kat. 1', 'Kat. 2', 'Kat. 3', 'Fanblock', 'Rollstuhlplatz', 'VIP'];
+  var VOUCHER_TARIF_SHORT = { normal: 'normal', ermaessigt: 'ermäßigt', kind: 'Kinder' };
+
   /* Baut einen sprechenden Label-Text aus der normalisierten Antwort des
-     Gutschein-Webhooks (s. VOUCHER_CHECK_URL) — für die Warenkorb-Anzeige. */
+     Gutschein-Webhooks (s. VOUCHER_CHECK_URL) — für die Warenkorb-Anzeige. Zeigt
+     bewusst nicht mehr den eingegebenen Code selbst (steht schon im Eingabefeld),
+     nur noch Betrag + kurze Kategorie-/Tarif-Angabe. */
   function labelForVoucherInfo(info) {
-    if (info.source === 'giftcard') return info.code + ' (Guthaben ' + fmtEUR(info.balance) + ' €)';
-    var amount = info.priceMode === 'percent' ? (info.value + ' %')
-      : info.priceMode === 'set' ? ('Preis ' + fmtEUR(info.value) + ' €')
-      : (fmtEUR(info.value) + ' €');
-    var scope = (info.categories && info.categories.length) ? info.categories.join('/') : null;
-    if (scope && info.tarifRestriction) scope += ' · ' + (DK_TARIF_LABELS[info.tarifRestriction] || info.tarifRestriction);
-    return info.code + ' (' + amount + (scope ? ', ' + scope : '') + ')';
+    if (info.source === 'giftcard') return 'Guthaben ' + fmtEUR(info.balance) + ' €';
+    var amount = info.priceMode === 'percent' ? (info.value + ' %') : (fmtEUR(info.value) + ' €');
+    var scope = null;
+    if (info.categories && info.categories.length) {
+      var shortCats = info.categories.map(function (c) { return VOUCHER_CATEGORY_SHORT[c] || c; });
+      shortCats = shortCats.filter(function (c, i) { return shortCats.indexOf(c) === i; });
+      shortCats.sort(function (a, b) { return VOUCHER_CATEGORY_ORDER.indexOf(a) - VOUCHER_CATEGORY_ORDER.indexOf(b); });
+      scope = shortCats.join(' / ');
+      if (info.tarifRestriction) scope += ' ' + (VOUCHER_TARIF_SHORT[info.tarifRestriction] || info.tarifRestriction);
+    }
+    return amount + (scope ? ' (' + scope + ')' : '');
   }
 
   /* Normalisiert einen Tarif-Wert auf seine Basisform (z.B. "ermaessigt_member" ->
@@ -2248,11 +2264,18 @@
     wrap.className = 'seatplan-voucher-row';
 
     if (this.voucherInfo) {
+      /* Ein kategorie-/tarifgebundener Gutschein gilt nicht automatisch fuer alles
+         im Warenkorb — bei der aktuellen Auswahl (z.B. Normalpreis statt Ermaessigt,
+         oder ein anderer Block) kann der Rabatt 0 sein, obwohl der Code selbst gueltig
+         ist. Das muss sichtbar sein, statt stillschweigend "angewendet" zu zeigen. */
+      var categoryBound = this.voucherInfo.categories && this.voucherInfo.categories.length;
+      var hasMatch = !categoryBound || this._voucherMatchingUnits().length > 0;
       wrap.innerHTML =
         '<div class="seatplan-voucher-applied">' +
-          '<span><i data-lucide="tag" style="width:14px;height:14px"></i> Gutschein ' + this.voucherInfo.label + '</span>' +
+          '<span><i data-lucide="tag" style="width:14px;height:14px"></i> Gutschein: ' + this.voucherInfo.label + '</span>' +
           '<button type="button" data-voucher-remove>entfernen</button>' +
-        '</div>';
+        '</div>' +
+        (hasMatch ? '' : '<p class="seatplan-voucher-error">Dieser Gutschein gilt nicht für deine aktuelle Auswahl.</p>');
       this.cartEl.appendChild(wrap);
       if (window.lucide) window.lucide.createIcons();
       wrap.querySelector('[data-voucher-remove]').addEventListener('click', function () {
@@ -2723,7 +2746,7 @@
   SeatPicker.prototype._applyVoucherToSummary = function (lines, total, nachwuchsAmount) {
     var discount = this._voucherDiscount(total);
     if (discount > 0) {
-      lines.push({ label: 'Gutschein ' + this.voucherInfo.label, qty: 1, unitPrice: -discount, lineTotal: -discount });
+      lines.push({ label: 'Gutschein: ' + this.voucherInfo.label, qty: 1, unitPrice: -discount, lineTotal: -discount });
       total -= discount;
     }
     /* Auf Cent runden, bevor der Betrag den Warenkorb verlässt. Das Aufsummieren

@@ -241,6 +241,27 @@
       }
     };
 
+    // Kurzbezeichnungen für die Gutschein-Zeile — "C unten" zählt als Kat. 2 (Preis ist
+    // ohnehin identisch), analog js/seat-picker.js labelForVoucherInfo.
+    var VOUCHER_CATEGORY_SHORT = {
+      'Kategorie I': 'Kat. 1', 'Kategorie II': 'Kat. 2', 'C unten': 'Kat. 2', 'Kategorie III': 'Kat. 3',
+      'Fanblock': 'Fanblock', 'VIP': 'VIP', 'Rollstuhlplatz': 'Rollstuhlplatz'
+    };
+    var VOUCHER_CATEGORY_ORDER = ['Kat. 1', 'Kat. 2', 'Kat. 3', 'Fanblock', 'Rollstuhlplatz', 'VIP'];
+    var VOUCHER_TARIF_SHORT = { normal: 'normal', ermaessigt: 'ermäßigt', kind: 'Kinder' };
+
+    function voucherScopeLabel(itemIds, tarifRestriction) {
+      var map = PRETIX_ITEM_CATEGORY_MAPS[cart.productType] || {};
+      var categories = (itemIds || []).map(function (id) { return map[id]; }).filter(Boolean);
+      if (!categories.length) return null;
+      var shortCats = categories.map(function (c) { return VOUCHER_CATEGORY_SHORT[c] || c; });
+      shortCats = shortCats.filter(function (c, i) { return shortCats.indexOf(c) === i; });
+      shortCats.sort(function (a, b) { return VOUCHER_CATEGORY_ORDER.indexOf(a) - VOUCHER_CATEGORY_ORDER.indexOf(b); });
+      var scope = shortCats.join(' / ');
+      if (tarifRestriction) scope += ' ' + (VOUCHER_TARIF_SHORT[tarifRestriction] || tarifRestriction);
+      return scope;
+    }
+
     var VOUCHER_REASON_TEXT = {
       not_found: 'Dieser Gutschein-Code ist ungültig oder abgelaufen.',
       expired: 'Dieser Gutschein ist abgelaufen.',
@@ -345,7 +366,7 @@
           }
 
           if (result.source === 'voucher') {
-            cart.voucher = { code: result.code, discountAmount: result.discountAmount, category: result.category };
+            cart.voucher = { code: result.code, discountAmount: result.discountAmount, itemIds: result.itemIds, tarifRestriction: result.tarifRestriction };
           } else if (result.source === 'giftcard') {
             cart.giftcard = { code: result.code, discountAmount: result.discountAmount, giftcardId: result.giftcardId };
           }
@@ -364,10 +385,14 @@
             }
           }
 
+          var amount = formatMoney(result.discountAmount) + ' €';
           var label = result.source === 'giftcard'
-            ? (result.code + ' (Wertgutschein)')
-            : (result.code + (result.category ? ', ' + result.category : ''));
-          cart.lines.push({ label: 'Gutschein ' + label, qty: 1, unitPrice: -result.discountAmount, lineTotal: -result.discountAmount });
+            ? ('Guthaben ' + amount)
+            : (function () {
+              var scope = voucherScopeLabel(result.itemIds, result.tarifRestriction);
+              return amount + (scope ? ' (' + scope + ')' : '');
+            })();
+          cart.lines.push({ label: 'Gutschein: ' + label, qty: 1, unitPrice: -result.discountAmount, lineTotal: -result.discountAmount });
           cart.total = Math.max(0, Math.round((cart.total - result.discountAmount) * 100) / 100);
           renderSummary();
 
