@@ -48,6 +48,55 @@ Bestellcode ausgeführt). Ein Abgleich aller 16 zu dem Zeitpunkt existierenden O
 Event zeigte, dass alle anderen bereits (händisch, im Rahmen einer separaten
 Wiederherstellungsaktion) korrekt synchronisiert waren — kein weiterer Nachtrag nötig.
 
+## Vorfall 11.08.2026: Nur 1 von 28 Sitzplätzen synchronisiert (Race Condition)
+
+Kundin Sabine Dehne bestellte eine Dauerkarte mit 2 Sitzplätzen (Order `GQPTK`,
+Block B, Reihe 9, Platz 3+4). Sie meldete, dass nur einer ihrer beiden Plätze auf der
+Website als belegt/reserviert erschien — der zweite zeigte sich weiterhin als frei.
+
+**Ursache:** Der Bestell-Workflow ("Ticketing: Bestellprozess - Dauerkartenbestellung
+verarbeiten") legt eine pretix-Order zunächst nur mit der **ersten** von 28 Positionen
+an (`Create pretix Order`), dann folgt ein Positionen-Loop (`Restliche Positionen
+vorbereiten` → `Position hinzufuegen`), der die übrigen 27 Positionen (2 Sitze × 14
+Heimspiele, minus die bereits angelegte erste) einzeln nachträgt. pretix feuert den
+`order.placed`-Webhook aber **sofort** beim ersten Schritt — Sekunden bevor der
+Positionen-Loop überhaupt läuft. Der separate, webhookgetriebene Sync-Workflow
+("Ticketing: Bestellprozess - Reservierungen synchronisieren") lädt die Order in genau
+diesem Moment und sieht dadurch nur 1 von 28 Positionen. Ein zweiter Sync-Lauf (z. B.
+über `order.modified`, wenn die restlichen Positionen fertig sind) fand nicht statt —
+pretix feuert dieses Event für nachträglich per API hinzugefügte Positionen offenbar
+nicht zuverlässig.
+
+**Fix:** Der Bestell-Workflow selbst kennt die vollständige Liste aller
+(Sitzplatz-GUID, Subevent)-Kombinationen bereits aus `Build pretix Order Payload` (dort
+werden `initialPositions`/`restSpecs` gebaut) — er muss dafür nicht erst auf pretix
+warten. Neue Nodes `Reservierung: Orderdaten sammeln` → `Reservierung: alte Zeilen
+loeschen` → `Reservierung: Zeilen aufteilen` → `Reservierung: Zeilen einfuegen` laufen
+direkt im Anschluss an `Update Order: pretix angelegt`/`Update Order: nachgetragen` und
+schreiben alle Zeilen selbst, unabhängig vom pretix-Webhook-Timing. Der
+webhookbasierte Sync-Workflow bleibt für andere Order-Events (Stornierung etc.)
+weiterhin aktiv — beide Wege schreiben idempotent (erst löschen, dann einfügen), ein
+Überschneiden ist unschädlich.
+
+**Wichtige Detail-Falle beim Testen entdeckt:** Der `deleteRows`-Node gibt bei einer
+neuen Order (nichts zu löschen) 0 Items zurück — ohne `alwaysOutputData:true` liefe der
+nachfolgende Insert-Schritt dadurch bei **jeder neuen Bestellung** gar nicht erst an.
+Nur durch einen Testlauf vor der Veröffentlichung aufgefallen (s. Merksatz unten).
+
+**Backfill:** Die fehlenden 27 Zeilen für Order `GQPTK` wurden händisch nachgetragen
+(Datenbasis: `GET .../orders/GQPTK/` direkt aus pretix, alle 28 realen Positionen
+waren dort korrekt vorhanden — der Fehler lag ausschließlich im Sync, nicht in der
+Bestellung selbst). Ein Abgleich aller Orders mit Status "angelegt" zeigte, dass nur
+diese eine reale Order betroffen war.
+
+## Merksatz: Vor Veröffentlichung eines n8n-Workflow-Fixes immer live testen
+
+`test_workflow` mit `prepare_test_pin_data` erlaubt einen Testlauf, bei dem Trigger/
+HTTP-Request-/credential-Nodes simuliert werden (keine echten externen Calls), während
+Code-/Data-Table-Nodes **echt** laufen — genau das deckte den `alwaysOutputData`-Bug
+oben auf, der sonst erst beim nächsten echten Kunden aufgefallen wäre. Gilt für jede
+Änderung an einem produktiven Bestell-Workflow, nicht nur für diesen Fall.
+
 ## Merksatz für künftige pretix-Event-Migrationen
 
 **Nach jedem Anlegen/Löschen/Umbenennen eines pretix-Events den Webhook-Scope prüfen:**
