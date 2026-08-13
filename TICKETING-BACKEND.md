@@ -143,3 +143,48 @@ nutzen ein eigenes Muster (unbegrenzte Zusatz-Quota je Subevent + Voucher mit
 `max_usages`) — vollständig dokumentiert im Abschnitt „Sponsoren-/Partner-Gutscheine
 anlegen" der Notion-Seite [Ticketing/ Sitzplan & Bestellungen](https://app.notion.com/p/3aba2418e2d781e2a0addde3c5ada33f),
 nicht hier duplizieren.
+
+## Begleitperson eines Rollstuhlplatzes (Tarif "begleitung", seit 13.08.2026)
+
+Die Preisliste sagt "Rollstuhlfahrer (inkl. Begleitkarte)" — bis 13.08.2026 war das nur
+ein Hinweistext im Sitzplan-Popup, der zusätzliche Sitz wurde beim Checkout aber ganz
+regulär zum Blockpreis berechnet (kein 0-€-Mechanismus). Jetzt gibt es einen echten
+Tarif `begleitung` (0 €, max. 1 pro gebuchtem Rollstuhlplatz):
+
+- **Dauerkarte (`seats`-Modus)**: normaler Tarif-Dropdown-Eintrag am Sitz im Warenkorb
+  (`_companionSlotAvailable` in `js/seat-picker.js`), gebunden an dieselbe `zoneLabel`
+  wie der Rollstuhlplatz-Sitz.
+- **Einzelticket (`blocks`-Modus)**: Rollstuhlplatz ist hier block-unabhängig (pseudo-
+  Zone `ROLLSTUHL`, ein gemeinsames Kontingent über alle Blöcke) und hat deshalb selbst
+  keinen Block, an den man "eine Begleitperson dazu wählen" könnte. Stattdessen wandelt
+  der Käufer eine bereits im Warenkorb liegende NORMALE Ticket-Zeile über deren
+  Tarif-Dropdown in `begleitung` um (`_companionSlotsRemaining` in `js/seat-picker.js`,
+  cartweit statt pro Block gezählt).
+- **Serverseitig** (beide n8n-Workflows, Node "Preis serverseitig berechnen"):
+  `tarifPrice()`/`baseTarif()` geben für `begleitung` fest 0 zurück, unabhängig von
+  Rabatten. Zusätzlich eine harte Kappung: Anzahl `begleitung`-Zeilen darf die Anzahl
+  Rollstuhlplatz-Zeilen in derselben Bestellung nicht überschreiten (sonst `throw`) —
+  Backstop gegen einen manipulierten Request, der den Frontend-Cap umgeht. Bei
+  Einzelticket zusätzlich in "Sitze zuordnen": Positions-Preis kommt für diesen Tarif
+  NIE aus dem Client-Wert `l.unitPrice`, sondern ist hart auf `0.00` gesetzt.
+
+**Getestet:** Dauerkarte-Workflow live via `test_workflow` (positiv: 0-€-Position korrekt
+in `Build pretix Order Payload`; negativ: 2 Begleitpersonen bei 1 Rollstuhlplatz korrekt
+abgelehnt). Einzelticket-Workflow: nur die Order-Erstellung (Preisberechnung) getestet,
+NICHT der Capture-/Zahlungs-Workflow-Teil — dort hätte ein Testlauf ohne vollständige
+Pin-Daten für alle credentialed Nodes (PayPal, pretix) eine echte Produktions-Order
+anlegen können (s. Vorfall unten), das Risiko wurde bewusst vermieden.
+
+### Vorfall 13.08.2026: `test_workflow` ohne Pin-Daten für PayPal-Nodes = echter Live-Call
+
+Beim Testen der obigen Preisberechnung wurde `test_workflow` für die Einzelticket-
+Order-Erstellung ohne Pin-Daten für "PayPal OAuth Token"/"PayPal Order erstellen"
+aufgerufen (beide standen in `nodesWithoutSchema` von `prepare_test_pin_data`, ohne
+eigene generierbare Schema-Vorlage). Ergebnis: **echter** Call gegen die PayPal-
+PRODUKTIV-API (`api.paypal.com`, nicht Sandbox) — eine reale PayPal-Order (16,00 €)
+wurde angelegt. Kein finanzieller Schaden (Order wurde nie bestätigt/captured, verfällt
+folgenlos), aber ein wichtiger Merksatz: **`test_workflow` pinnt NICHT automatisch
+jeden credentialed Node, wenn `prepare_test_pin_data` dafür kein Schema liefern konnte
+— fehlt ein Node in der übergebenen `pinData`, kann er live laufen.** Vor jedem Test
+prüfen, ob alle Nodes in `nodesWithoutSchema` explizit (auch mit Dummy-Werten) in
+`pinData` enthalten sind, sonst lieber gar nicht über diesen Trigger-Knoten testen.
