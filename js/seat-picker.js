@@ -372,6 +372,28 @@
     return wheelchairCount > usedCount;
   };
 
+  /* Entfernt "Begleitperson (kostenlos)"-Sitze, die nach dem Entfernen eines
+     Rollstuhlplatz-Sitzes keine Grundlage mehr haben — komplett aus dem Warenkorb,
+     nicht nur zurueckgesetzt auf einen bezahlten Tarif (Marko, 13.08.2026). Prueft
+     live gegen den bereits aktualisierten this.selected-Stand (der geloeschte
+     Rollstuhlplatz-Sitz ist zu diesem Zeitpunkt schon entfernt).
+     _companionSlotAvailable liest bei jedem Aufruf den aktuellen Stand, deshalb
+     wirkt eine Loeschung innerhalb derselben Schleife sofort auf die naechste
+     Pruefung — bei mehreren jetzt ueberzaehligen Begleitperson-Sitzen faellt so
+     immer nur genau die Anzahl weg, die durch den Wegfall des Rollstuhlplatzes
+     jetzt fehlt. */
+  SeatPicker.prototype._removeOrphanedCompanions = function (zoneLabel) {
+    var self = this;
+    Object.keys(this.selected).forEach(function (guid) {
+      var s = self.selected[guid];
+      if (!s || s.zoneLabel !== zoneLabel || s.tarif !== 'begleitung') return;
+      if (self._companionSlotAvailable(guid, zoneLabel)) return;
+      var seatBtn = self.root.querySelector('.seatplan-seat[data-seat-guid="' + guid + '"]');
+      if (seatBtn) seatBtn.classList.remove('selected');
+      delete self.selected[guid];
+    });
+  };
+
   /* Rechnet die Rabattkette transparent vor, statt nur den fertigen Endpreis zu
      zeigen — jede Rabattzeile ("abzüglich 20 % Frühbucherrabatt", "abzüglich
      30 % Mitgliedsrabatt (Löwen e.V.)") bekommt eine eigene, fett gedruckte
@@ -2241,7 +2263,36 @@
 
     var input = this.root.querySelector('[data-count="' + blockKey + '-' + tarif + '"]');
     if (input) input.value = String(next);
+    // Sinkt die Rollstuhlplatz-Anzahl (z.B. per "-" im Warenkorb), verlieren
+    // ueberzaehlige "Begleitperson (kostenlos)"-Zeilen ihre Grundlage — sie werden
+    // komplett aus dem Warenkorb entfernt statt auf einen bezahlten Tarif
+    // zurueckgesetzt (Marko, 13.08.2026). Nach jeder Zaehlaenderung geprueft, nicht
+    // nur bei Rollstuhlplatz-Zeilen, da das billig und immer korrekt ist.
+    this._removeOrphanedCompanionBlocks();
     this._renderCart();
+  };
+
+  /* Kuerzt "begleitung"-Zeilen ueber den ganzen Warenkorb hinweg auf die aktuell
+     durch Rollstuhlplatz-Tickets gedeckte Menge — s. _setBlockCount. Gekuerzt wird
+     die Anzahl direkt (Tickets fallen weg), nicht auf einen bezahlten Tarif
+     umgebucht. */
+  SeatPicker.prototype._removeOrphanedCompanionBlocks = function () {
+    var self = this;
+    var wheelchairQty = 0;
+    Object.keys(this.blockCounts).forEach(function (bk) {
+      var c = self.blockCounts[bk];
+      if (c.category === 'Rollstuhlplatz') {
+        BLOCK_TARIFS.forEach(function (t) { if (t !== 'begleitung') wheelchairQty += (c[t] || 0); });
+      }
+    });
+    var remaining = wheelchairQty;
+    Object.keys(this.blockCounts).forEach(function (bk) {
+      var c = self.blockCounts[bk];
+      if (!c.begleitung) return;
+      if (c.begleitung <= remaining) { remaining -= c.begleitung; return; }
+      c.begleitung = remaining;
+      remaining = 0;
+    });
   };
 
   /* Wie viele Begleitperson-Plaetze insgesamt (ueber alle Bloecke hinweg) noch frei
@@ -2596,7 +2647,16 @@
           var guid = this.dataset.remove;
           var seatBtn = self.root.querySelector('.seatplan-seat[data-seat-guid="' + guid + '"]');
           if (seatBtn) seatBtn.classList.remove('selected');
+          var removed = self.selected[guid];
           delete self.selected[guid];
+          // Faellt der Rollstuhlplatz weg, verliert eine bereits als "Begleitperson
+          // (kostenlos)" markierte Zeile im selben Block ihre Grundlage — sie wird
+          // komplett aus dem Warenkorb entfernt, nicht nur auf einen bezahlten Tarif
+          // zurueckgesetzt (Marko, 13.08.2026: "muss dann auch aus dem Warenkorb
+          // geloescht werden").
+          if (removed && removed.category === 'Rollstuhlplatz') {
+            self._removeOrphanedCompanions(removed.zoneLabel);
+          }
           self._renderCart();
         });
       });
