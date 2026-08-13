@@ -2165,6 +2165,10 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
 @media (max-width: 1023px) {
   .hero-inner { grid-template-columns: 1fr; gap: 32px; padding: 40px 0 48px; }
   .grid-3, .werte-grid { grid-template-columns: 1fr; }
+  /* Die Desktop-Regel für ein einzeln übrig bleibendes 4. Element (siehe
+     .grid-3 > *:last-child:nth-child(3n+1) weiter oben) zentriert es auf
+     1/3 Breite — bei 1 Spalte hier zu schmal, Text passt nicht mehr rein. */
+  .grid-3 > *:last-child:nth-child(3n+1) { grid-column: auto; justify-self: stretch; width: auto; }
   .grid-2 { grid-template-columns: 1fr; }
   .grid-5 { grid-template-columns: repeat(2, 1fr); }
   .footer-grid { grid-template-columns: 1fr 1fr; }
