@@ -1587,6 +1587,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .hero-photo.hero-news-damen-regionalliga { --hero-photo-url: url('/assets/img/news/damen-regionalliga.webp'); background-position: center 25%; }
 .hero-photo.hero-news-achtelfinale { --hero-photo-url: url('/assets/img/news/achtelfinale.webp'); background-position: center 35%; }
 .hero-photo.hero-news-playoff-heimspiel { --hero-photo-url: url('/assets/img/news/playoff-heimspiel.webp'); background-position: center 35%; }
+.hero-photo.hero-news-neuer-cheftrainer-ibrahim { --hero-photo-url: url('/assets/img/news/neuer-cheftrainer-ibrahim.webp'); background-position: center 15%; }
 
 /* Hero-Variante für die Startseite — Platz für eine Seiten-Box (Top-News/Heimspiel).
    Höhe kommt vom vereinheitlichten .hero-photo-Basiswert, hier nur noch Layout/Typo. */

@@ -2,6 +2,18 @@
   "hinweis": "Zentrale Liste aller News-Beiträge. Inhalte stammen von der bisherigen Vereinswebsite (basketball-loewen.com) und wurden hierher übernommen. 'topNews': true steuert, ob ein Beitrag im Top-News-Bereich der Startseite erscheint — Beiträge ohne dieses Flag (oder mit false) werden nur auf der Aktuelles-Seite gelistet, nicht im Startseiten-Slider. 'bild' wird für die Foto-Kacheln im Startseiten-Newsfeed verwendet. 'team' (optional: 'profis' | 'damen' | 'nbbl') ordnet einen Artikel einem Team zu, für die 'Aktuelles zu ...'-Sektionen auf den Teamseiten (js/team-news.js) — Artikel ohne 'team' gelten als allgemein und füllen bei Bedarf auf.",
   "artikel": [
     {
+      "datum": "13.08.2026",
+      "kategorie": "Profis",
+      "tint": "tint-blue",
+      "icon": "users",
+      "titel": "Neuer Mann auf der Bank: Leif Ibrahim wird Cheftrainer der Löwen",
+      "kurztext": "Der 31-jährige Schwede unterschreibt für zwei Jahre — Florian Gut wechselt in die sportliche Leitung.",
+      "url": "/news/artikel/2026-08-13_verein_neuer-cheftrainer-ibrahim.html",
+      "bild": "/assets/img/news/neuer-cheftrainer-ibrahim.webp",
+      "topNews": true,
+      "team": "profis"
+    },
+    {
       "datum": "06.07.2026",
       "kategorie": "Verein",
       "tint": "tint-orange",
