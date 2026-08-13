@@ -751,6 +751,13 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .news-tile-insta img {
   object-position: top;
 }
+/* Cheftrainer-Pressefoto ist ebenfalls hochkant mit dem Kopf im oberen Bereich —
+   zentrierter Zuschnitt schnitt den Kopf ab (Marko, 13.08.2026). Gilt fuer
+   beide Kachel-Kontexte (Startseite .news-tile, Aktuelles-Seite .card-media-photo). */
+.news-tile img[src*="neuer-cheftrainer-ibrahim"],
+.card-media-photo img[src*="neuer-cheftrainer-ibrahim"] {
+  object-position: top;
+}
 
 /* Instagram-Post-Detailseite (news/insta-post.html): Hochkant-Vorschaubild
    neben dem Text, unabhängig vom Hero-Hintergrundbild. */
