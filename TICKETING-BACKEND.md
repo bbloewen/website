@@ -225,3 +225,23 @@ Kategorie III `{normal:136.5, ermaessigt:104, kind:65}`, "C unten" identisch zu
 Kategorie II (`{normal:156, ermaessigt:115}`), Fanblock identisch zu Kategorie III ohne
 Kindertarif, Rollstuhlplatz `{normal:104}`, VIP `{normal:1290, ermaessigt:495}`.
 `tarifPrice()` erkennt jetzt zusätzlich `'kind'`-Tarife (vorher nur normal/ermaessigt).
+
+## Testbestellungen haben mehr Nebeneffekte als nur pretix + Reservierungstabelle (13.08.2026)
+
+Nach dem oben beschriebenen Vorfall wurde beim weiteren Aufräumen entdeckt, dass eine
+erfolgreiche `testmode:true`-Order im Dauerkarte-Workflow (`HyUXW4kbhaQVbG0A`) noch zwei
+weitere Systeme berührt, die beim Löschen der pretix-Order **nicht** automatisch
+mitbereinigt werden:
+
+1. **Tracking-Tabellen "Dauerkarten-Bestellungen"/"Einzelticket-Bestellungen"** — werden
+   VOR der pretix-Order beschrieben, bleiben nach dem Löschen der Order als verwaiste
+   Zeile stehen. Muss separat per Order-Code gesucht und gelöscht werden.
+2. **Notion-Kontakt-Sync** — läuft parallel zur Order-Anlage, unabhängig von `testmode`.
+   Legt bei neuer Test-E-Mail einen echten Kontakt in der Kontaktpersonen-Datenbank an
+   (bzw. taggt einen bestehenden). Für Notion-Kontakte gibt es kein API-Löschen/Archivieren
+   über die verfügbaren Tools — muss händisch in der Notion-UI entfernt werden.
+
+**Lehre:** Vor dem ersten Live-Test eines neuen Bestell-Workflows einmal alle Nodes nach
+dem "Order angelegt"-Schritt durchsehen (auch parallele Branches!), um die vollständige
+Aufräum-Checkliste vorher zu kennen, statt sie nach und nach durch Zufallsfunde zu
+entdecken.
