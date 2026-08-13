@@ -1586,7 +1586,27 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 
 /* Hero-Variante für die Profi-Team-Seite — echtes Mannschaftsfoto */
 .hero-photo.hero-profis { --hero-photo-url: url('/assets/img/team-prob-hero-blur.webp'); background-position: center 20%; }
-.hero-photo.hero-nachwuchs { --hero-photo-url: url('/assets/img/hero-nachwuchs.webp'); background-position: center center; }
+/* Nachwuchs-Hero: Foto (Dunk unter dem Korb, blauer Himmel) rechtsbündig statt
+   volles Cover-Crop, Rest der Fläche mit einem zum Himmel im Foto passenden
+   Blau aufgefüllt (Markos Vorschlag, 13.08.2026 — Ersatz für das alte, nicht
+   mehr aktuelle Motiv). background-size/-position brauchen unten eigene
+   Media-Query-Fassungen mit 3 statt 2 Werten, weil die generischen
+   .hero-photo-Regeln unter 1024px auf einen 3-Layer-Hintergrund umschalten
+   (Mobile-Verlauf + Verlauf + Foto) — sonst würde die zyklische
+   Werte-Wiederholung von background-size das Foto wieder auf "cover" setzen. */
+.hero-photo.hero-nachwuchs {
+  --hero-photo-url: url('/assets/img/nachwuchs/hero-nachwuchs-dunk.webp');
+  background-position: center, right center;
+  background-size: cover, auto 100%;
+  background-repeat: no-repeat, no-repeat;
+  background-color: #2D96C8;
+}
+@media (max-width: 1023px) {
+  .hero-photo.hero-nachwuchs {
+    background-position: center, center, right center;
+    background-size: cover, cover, auto 100%;
+  }
+}
 /* Profis-Hero: ab Tablet-Breite bleibt die Zwei-Spalten-Aufteilung erhalten (statt wie
    sonst unter 1023px auf eine Spalte zu stapeln) und bekommt mehr Platz fuer Countdown +
    Button + Liga-Logo als der Standard-Split (1.3fr .8fr) — sonst blieb dort viel
