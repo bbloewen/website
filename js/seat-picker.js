@@ -2255,14 +2255,36 @@
       maxForTarif = Math.min(maxForTarif, this._companionSlotsRemaining(blockKey) + (counts.begleitung || 0));
     }
     var next = Math.max(0, Math.min(value, maxForTarif));
-    counts[tarif] = next;
+    var previous = counts[tarif] || 0;
+
+    // Rollstuhlplatz zuerst gebucht + freier Begleitperson-Slot -> die neu
+    // hinzugefuegte Menge automatisch als Begleitperson vorbelegen statt den Tarif
+    // manuell im Warenkorb umstellen zu muessen (Marko, 13.08.2026: "kann davon
+    // ausgegangen werden, dass es sich um eine Begleitperson handelt"). Nur bei
+    // einer echten Erhoehung, nie fuer Rollstuhlplatz-Zeilen selbst oder wenn
+    // schon "begleitung" gewaehlt ist. _companionSlotsRemaining(blockKey) liefert
+    // die Gesamtobergrenze fuer begleitung IN DIESEM Block (als haette er aktuell
+    // null) — abzueglich des bereits vorhandenen counts.begleitung ergibt das die
+    // tatsaechlich noch freien Slots.
+    var autoBegleitungQty = 0;
+    if (tarif !== 'begleitung' && category !== 'Rollstuhlplatz' && next > previous) {
+      var freeSlots = Math.max(0, this._companionSlotsRemaining(blockKey) - (counts.begleitung || 0));
+      autoBegleitungQty = Math.min(next - previous, freeSlots);
+    }
+
+    counts[tarif] = next - autoBegleitungQty;
+    if (autoBegleitungQty > 0) counts.begleitung = (counts.begleitung || 0) + autoBegleitungQty;
     counts.zoneLabel = zoneLabel;
     counts.category = category;
     counts.priceInfo = priceInfo;
     this.blockCounts[blockKey] = counts;
 
     var input = this.root.querySelector('[data-count="' + blockKey + '-' + tarif + '"]');
-    if (input) input.value = String(next);
+    if (input) input.value = String(counts[tarif]);
+    if (autoBegleitungQty > 0) {
+      var begleitungInput = this.root.querySelector('[data-count="' + blockKey + '-begleitung"]');
+      if (begleitungInput) begleitungInput.value = String(counts.begleitung);
+    }
     // Sinkt die Rollstuhlplatz-Anzahl (z.B. per "-" im Warenkorb), verlieren
     // ueberzaehlige "Begleitperson (kostenlos)"-Zeilen ihre Grundlage — sie werden
     // komplett aus dem Warenkorb entfernt statt auf einen bezahlten Tarif
@@ -2325,9 +2347,28 @@
       delete seats[guid];
       btn.classList.remove('selected');
     } else {
+      var tarif = 'normal';
+      // Ist im selben Block schon ein Rollstuhlplatz vorgemerkt und noch kein
+      // Begleitperson-Slot verbraucht, wird der naechste Sitz automatisch als
+      // Begleitperson vorbelegt statt den Tarif manuell im Warenkorb umstellen zu
+      // muessen (Marko, 13.08.2026: "kann davon ausgegangen werden, dass es sich um
+      // eine Begleitperson handelt"). Zaehlt gegen seats == _activeSeats(), also
+      // auch gegen die noch offene Vormerkung, nicht erst gegen den committeten
+      // Warenkorb — funktioniert dadurch auch, wenn beide Sitze in derselben
+      // Sitzplan-Ansicht direkt hintereinander angetippt werden.
+      if (category !== 'Rollstuhlplatz') {
+        var wheelchairCount = 0, usedCount = 0;
+        Object.keys(seats).forEach(function (g) {
+          var s = seats[g];
+          if (s.zoneLabel !== zoneLabel) return;
+          if (s.category === 'Rollstuhlplatz') wheelchairCount++;
+          else if (s.tarif === 'begleitung') usedCount++;
+        });
+        if (wheelchairCount > usedCount) tarif = 'begleitung';
+      }
       seats[guid] = {
         zoneLabel: zoneLabel, rowLabel: rowLabel, seatNumber: seatNumber,
-        category: category, tarif: 'normal', price: this._dkPrice(priceInfo.normal, false), priceInfo: priceInfo
+        category: category, tarif: tarif, price: this._dkTarifPrice(priceInfo, tarif), priceInfo: priceInfo
       };
       btn.classList.add('selected');
     }
