@@ -227,7 +227,19 @@ a.no-underline:hover { text-decoration: none; }
   color: var(--color-brand-orange-text); text-decoration: none;
 }
 .nav-link .chev { transition: transform var(--dur-fast) var(--ease-out); }
-.nav-item.open .nav-link .chev { transform: rotate(180deg); }
+.nav-item.open .chev { transform: rotate(180deg); }
+/* Partner-Nav-Item: Label ist ein echter Link (Klick führt direkt zu Sponsoren),
+   Chevron ist ein eigener Button daneben, der nur das Dropdown öffnet — sonst
+   müsste jeder Klick auf "Partner" zwischen Navigieren und Aufklappen wählen. */
+.nav-link-chevron {
+  display: inline-flex; align-items: center;
+  padding: 12px 14px 12px 0; margin-left: -10px;
+  background: none; border: none; cursor: pointer;
+  color: var(--text-secondary);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.nav-link-chevron:hover, .nav-link-chevron:focus-visible { color: var(--color-brand-orange-text); }
+.nav-link-chevron .chev { transition: transform var(--dur-fast) var(--ease-out); }
 
 .dropdown-panel {
   position: absolute; top: 100%; left: 0;
