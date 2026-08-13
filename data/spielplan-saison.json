@@ -19,23 +19,22 @@
   ],
   "damen": {
     "spiele": [
-      { "datum": "26.09.2026", "zeit": "15:00", "gegner": "Post SV Nürnberg", "heim": true, "spielberichtUrl": "/news/artikel/platzhalter-spielbericht.html" },
-      { "datum": "03.10.2026", "zeit": "19:00", "gegner": "TB 1888 Erlangen", "heim": false, "ort": "Erlangen" },
-      { "datum": "10.10.2026", "zeit": "15:00", "gegner": "BC Dresden", "heim": true },
-      { "datum": "17.10.2026", "zeit": "15:00", "gegner": "DJK Don Bosco Bamberg", "heim": false, "ort": "Bamberg" },
-      { "datum": "24.10.2026", "zeit": "15:00", "gegner": "Leipzig Lakers", "heim": true },
+      { "datum": "27.09.2026", "zeit": "15:00", "gegner": "Post SV Nürnberg", "heim": true, "spielberichtUrl": "/news/artikel/platzhalter-spielbericht.html" },
+      { "datum": "03.10.2026", "zeit": "16:00", "gegner": "TB 1888 Erlangen", "heim": false, "ort": "Erlangen" },
+      { "datum": "11.10.2026", "zeit": "13:00", "gegner": "BC Dresden", "heim": true },
+      { "datum": "17.10.2026", "gegner": "DJK Don Bosco Bamberg", "heim": false, "ort": "Bamberg" },
+      { "datum": "24.10.2026", "zeit": "17:00", "gegner": "Leipzig Lakers", "heim": true },
       { "datum": "31.10.2026", "zeit": "17:00", "gegner": "TG 48 Würzburg 2", "heim": true },
-      { "datum": "07.11.2026", "zeit": "20:00", "gegner": "BG Litzendorf", "heim": false, "ort": "Litzendorf" },
+      { "datum": "07.11.2026", "zeit": "17:15", "gegner": "BG Litzendorf", "heim": false, "ort": "Litzendorf" },
       { "datum": "14.11.2026", "zeit": "15:00", "gegner": "Post SV Nürnberg", "heim": false, "ort": "Nürnberg" },
-      { "datum": "21.11.2026", "zeit": "15:00", "gegner": "TB 1888 Erlangen", "heim": true },
-      { "datum": "28.11.2026", "zeit": "15:00", "gegner": "BC Dresden", "heim": false, "ort": "Dresden" },
-      { "datum": "04.12.2026", "zeit": "15:00", "gegner": "DJK Don Bosco Bamberg", "heim": true },
-      { "datum": "06.12.2026", "zeit": "15:00", "gegner": "Leipzig Lakers", "heim": true },
-      { "datum": "12.12.2026", "zeit": "15:00", "gegner": "TG 48 Würzburg 2", "heim": false, "ort": "Würzburg" },
-      { "datum": "09.01.2027", "zeit": "15:00", "gegner": "BG Litzendorf", "heim": true },
-      { "datum": "17.04.2027", "zeit": "15:00", "gegner": "Culture City Weimar", "heim": false, "ort": "Weimar" }
+      { "datum": "21.11.2026", "zeit": "17:00", "gegner": "TB 1888 Erlangen", "heim": true },
+      { "datum": "28.11.2026", "zeit": "18:15", "gegner": "BC Dresden", "heim": false, "ort": "Dresden" },
+      { "datum": "04.12.2026", "zeit": "20:00", "gegner": "DJK Don Bosco Bamberg", "heim": true },
+      { "datum": "06.12.2026", "zeit": "13:00", "gegner": "Leipzig Lakers", "heim": false, "ort": "Leipzig" },
+      { "datum": "12.12.2026", "zeit": "14:45", "gegner": "TG 48 Würzburg 2", "heim": false, "ort": "Würzburg" },
+      { "datum": "09.01.2027", "zeit": "18:00", "gegner": "BG Litzendorf", "heim": true }
     ],
-    "hinweis": "Die Termine für die Saison 2026/2027 stehen noch nicht fest."
+    "hinweis": "Kompletter Spielplan am 13.08.2026 gegen den offiziellen DBB-Spielplan (basketball-bund.net, Liga-ID 52497, Regionalliga Südost/RLSO) abgeglichen und korrigiert — u.a. Datum Spieltag 1 (27.09. statt 26.09.), mehrere Anwurfzeiten sowie Spieltag 12 (06.12., Auswärtsspiel bei Leipzig Lakers statt fälschlich als Heimspiel geführt). Das bisherige 15. 'Spiel' gegen Culture City Weimar am 17.04.2027 existierte nicht im echten Spielplan (Kopierfehler aus der Profis-Auswärtsliste) und wurde entfernt — die Damen-Saison hat 14 Spiele (7 Gegner, Hin- und Rückrunde). Spieltag 4 (17.10., bei DJK Don Bosco Bamberg) hat laut DBB noch keine Anwurfzeit."
   },
   "nbbl": {
     "spiele": [
