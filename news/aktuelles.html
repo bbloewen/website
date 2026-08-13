@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1785495458" />
+<link rel="stylesheet" href="/css/site.css?v=1786629069" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 </head>
@@ -99,15 +99,15 @@
     var grid = document.getElementById('news-grid');
     grid.innerHTML = items.map(function (a) {
       var label = a.datum ? (a.datum + ' · ' + a.kategorie) : a.kategorie;
-      return '<div class="card hoverable">' +
+      return '<a class="card hoverable" href="' + a.url + '" style="text-decoration:none;color:inherit">' +
         '<div class="card-media-photo"><img loading="lazy" src="' + a.bild + '" alt=""  /></div>' +
         '<div class="card-body">' +
           '<span class="card-label">' + label + '</span>' +
           '<h3 style="font-size:18px">' + a.titel + '</h3>' +
           '<p>' + a.kurztext + '</p>' +
-          '<a class="card-link" href="' + a.url + '">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></a>' +
+          '<span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span>' +
         '</div>' +
-      '</div>';
+      '</a>';
     }).join('');
     if (window.lucide) { lucide.createIcons(); }
   });
