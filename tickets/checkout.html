@@ -227,16 +227,21 @@
     // Dieselbe Zuordnung wie in tickets/einzelticket.html bzw. tickets/dauerkarte.html.
     var PRETIX_ITEM_CATEGORY_MAPS = {
       einzelticket: {
+        // ERGAENZT 2026-08-13: Item 23 (Stehplatz) fehlte komplett.
+        23: 'Stehplatz',
         24: 'Kategorie I', 25: 'Kategorie II',
         27: 'Fanblock', 28: 'Kategorie III',
         29: 'Kategorie II', 30: 'Kategorie II', 31: 'Kategorie II', 32: 'C unten',
         33: 'Kategorie I', 34: 'Rollstuhlplatz', 35: 'Kategorie I', 40: 'VIP'
       },
       dauerkarte: {
-        20: 'Kategorie I', 21: 'Kategorie II',
+        // KORRIGIERT 2026-08-13: Items 20/21/22/36 existieren nicht mehr (harte Loeschung
+        // im Block-Umbau) - VIP-Dauer ist seither Item 47 (mit Normal/Ermaessigt-Variation).
+        // KORRIGIERT 2026-08-13 (2): Item 46 (Block CS) faelschlich 'Kategorie II' statt
+        // 'C unten' - echte Sitzplan-Kategorie fuer Block CS ist 'C unten'.
         41: 'Kategorie I', 44: 'Kategorie I',
-        43: 'Kategorie II', 45: 'Kategorie II', 42: 'Kategorie II', 46: 'Kategorie II',
-        22: 'VIP', 36: 'VIP',
+        43: 'Kategorie II', 45: 'Kategorie II', 42: 'Kategorie II', 46: 'C unten',
+        47: 'VIP',
         37: 'Kategorie III', 38: 'Fanblock', 39: 'Rollstuhlplatz'
       }
     };
