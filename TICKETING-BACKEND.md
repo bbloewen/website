@@ -188,3 +188,40 @@ jeden credentialed Node, wenn `prepare_test_pin_data` dafür kein Schema liefern
 — fehlt ein Node in der übergebenen `pinData`, kann er live laufen.** Vor jedem Test
 prüfen, ob alle Nodes in `nodesWithoutSchema` explizit (auch mit Dummy-Werten) in
 `pinData` enthalten sind, sonst lieber gar nicht über diesen Trigger-Knoten testen.
+
+## Vorfall 13.08.2026: Gelöschte Test-Order räumt "Ticketing-ReserviertePlaetze" NICHT auf
+
+Beim Verifizieren eines Gutscheins wurden mehrere echte `testmode:true`-Testbestellungen
+für konkrete Sitze angelegt und die pretix-Orders anschließend per `DELETE` (bzw. über
+die pretix-Oberfläche) wieder entfernt. Kurz danach meldete Marko, drei Plätze
+(Block A, Reihe 1, Platz 1–3) seien auf der Website fälschlich als gebucht markiert.
+
+**Ursache:** Der webhookgetriebene Sync-Workflow ("Ticketing: Bestellprozess -
+Reservierungen synchronisieren", s. oben "Warum ein Sitz belegt erscheint") reagiert nur
+auf normale Order-Lifecycle-Events (`order.placed`, `order.paid`, `order.canceled`). Ein
+hartes Löschen einer Order (API `DELETE` oder pretix-UI) feuert **kein** solches Event —
+die zugehörigen Zeilen in der Data Table "Ticketing-ReserviertePlaetze" (`Te9OmItDRQ2KzxRC`)
+bleiben deshalb unverändert stehen, auch wenn die Order in pretix längst weg ist. Bei
+Dauerkarten-Testbestellungen sind das 14 Zeilen pro Sitz (eine je Subevent).
+
+**Fix (einmalig):** Alle betroffenen Zeilen per `seatGuid`-Filter (`anyCondition`)
+gefunden und gelöscht (43 Zeilen über 3 Sitze + eine noch ältere von einem früheren
+Test). Danach leer verifiziert.
+
+**Lehre für künftige Testbestellungen mit echten Sitzplätzen:** Nach dem Löschen einer
+Test-Order über `DELETE .../orders/{code}/` IMMER zusätzlich die zugehörigen
+`Ticketing-ReserviertePlaetze`-Zeilen (Filter auf die verwendete(n) `seatGuid`(s), nicht
+nur auf `orderCode` — die Zeilen tragen den Order-Code zwar auch, aber der sichere
+Suchschlüssel ist der Sitz) mitlöschen. Sonst bleiben Sitze dauerhaft fälschlich als
+belegt markiert, bis es zufällig auffällt.
+
+## Dauerkarte-Preistabelle vervollständigt (13.08.2026)
+
+Die `PRICES`-Konstante in "Preis serverseitig berechnen" (Dauerkarte) kannte lange nur
+Kategorie I/II und einen veralteten VIP-Preis (1.000 € pauschal, kein Ermäßigt-Tarif) —
+Kategorie III, Fanblock, Rollstuhlplatz und "C unten" fehlten komplett und hätten mit
+"Unbekannte Kategorie" abgelehnt. Jetzt vollständig (aktuelle Preise s. Tabelle oben):
+Kategorie III `{normal:136.5, ermaessigt:104, kind:65}`, "C unten" identisch zu
+Kategorie II (`{normal:156, ermaessigt:115}`), Fanblock identisch zu Kategorie III ohne
+Kindertarif, Rollstuhlplatz `{normal:104}`, VIP `{normal:1290, ermaessigt:495}`.
+`tarifPrice()` erkennt jetzt zusätzlich `'kind'`-Tarife (vorher nur normal/ermaessigt).
