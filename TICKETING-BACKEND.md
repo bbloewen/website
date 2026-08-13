@@ -245,3 +245,48 @@ mitbereinigt werden:
 dem "Order angelegt"-Schritt durchsehen (auch parallele Branches!), um die vollständige
 Aufräum-Checkliste vorher zu kennen, statt sie nach und nach durch Zufallsfunde zu
 entdecken.
+
+## Vorfall 13.08.2026: Rollstuhlplatz-Begleitperson bei Dauerkarte nicht kostenlos berechnet (echte Kundenbestellung betroffen)
+
+Die am selben Tag eingeführte "Begleitperson kostenlos"-Funktion (Tarif `begleitung`)
+funktionierte nur beim Einzelticket-Workflow korrekt. Bei der Dauerkarte
+(`HyUXW4kbhaQVbG0A`, Node "Preis serverseitig berechnen") kannte `tarifPrice()` den Tarif
+`begleitung` gar nicht und liess ihn auf den Normalpreis der Zeilen-**Kategorie**
+durchfallen — und diese Kategorie wird für den Begleitperson-Sitz anhand seiner
+physischen Blockposition aufgelöst (z. B. "Fanblock" für einen Sitz neben einem
+Rollstuhlplatz in Block A), NICHT anhand von "Rollstuhlplatz". Ergebnis: Ein loser
+Sitzplatz erschien im Warenkorb korrekt mit 0,00 €, wurde serverseitig aber zum vollen
+(ggf. rabattierten) Normalpreis seiner physischen Kategorie berechnet.
+
+**Konkret betroffen:** Order `JBCKH` (Michaela Klugmann, Referenz "whatsapp", einzige
+echte Dauerkarte-Bestellung mit Begleitperson seit Feature-Launch) — kommunizierter
+Preis 85,20 €, tatsächlicher pretix-Order-Total durch den Bug 194,40 € (Begleitperson-Sitz
+fälschlich mit 109,20 € statt 0,00 € berechnet). Das SEPA-Mandat (`DK-P3F7B8`) war noch
+nicht eingezogen, kein finanzieller Schaden.
+
+**Fix:**
+- Code: `tarifPrice()` prüft jetzt `if (t === 'begleitung') return 0;` als ALLERERSTE
+  Zeile, vor jeder Kategorie-Preistabellen-Aufloesung — analog zum bereits korrekten
+  Muster im Einzelticket-Workflow (`baseTarif()`/hartes `unitPrice=0` in "Sitze
+  zuordnen"), das zur Kontrolle ebenfalls nochmal geprüft und als bereits korrekt
+  bestätigt wurde.
+- Getestet via `test_workflow` (Webhook-Trigger, echtes JBCKH-Warenkorb-Payload
+  nachgebildet) — Begleitperson-Zeile berechnet jetzt korrekt 0,00 €, dann published.
+- **Reale Order nachträglich korrigiert:** Position 1 (Begleitperson-Sitz, `positionid:1`)
+  per `PATCH .../orderpositions/{id}/` auf `price:"0.00"` gesetzt — pretix hat
+  `tax_value` und den Order-`total` automatisch neu berechnet (194,40 € → 85,20 €,
+  stimmt jetzt mit dem kommunizierten Preis überein). Keine manuelle Anpassung des
+  Order-`total`-Felds nötig.
+
+**Nebenfund bei der Diagnose (kein Bug, aber verwirrend):** Die parallel gemeldete
+"1 von 27 Positionen fehlgeschlagen"-Alarm-Mail für dieselbe Order war ein Fehlalarm.
+Die als fehlgeschlagen protokollierte Position (Sitz 20, Subevent 16) existierte beim
+Nachprüfen über die pretix-API einwandfrei (`positionid:18`, korrekt `0,00 €`) — die
+Order hatte alle 29 Positionen vollständig, keine Duplikate, keine Lücke. Vermutete
+Ursache: ein verzögerter/wiederholter HTTP-Request, bei dem der erste Versuch serverseitig
+erfolgreich war, aber der (überflüssige) Retry auf den inzwischen belegten Sitz traf und
+dessen 400-Antwort fälschlich als Ergebnis protokolliert wurde. **Lehre:** Bei einer
+"Positionen nachtragen fehlgeschlagen"-Meldung IMMER zuerst die tatsächliche Order in
+pretix pruefen (`GET .../orders/{code}/`, Positionsanzahl vs. erwartete Anzahl), bevor man
+von einem echten Datenverlust ausgeht — die Meldung allein beweist noch keine fehlende
+Position.
