@@ -108,14 +108,37 @@
     kind: 'Kinder 7–14',
     normal_member: 'Normalpreis mit Mitgliedsrabatt (Löwen e.V.)',
     ermaessigt_member: 'Ermäßigt mit Mitgliedsrabatt (Löwen e.V.)',
-    kind_member: 'Kinder 7–14 mit Mitgliedsrabatt (Löwen e.V.)'
+    kind_member: 'Kinder 7–14 mit Mitgliedsrabatt (Löwen e.V.)',
+    // Begleitperson eines Rollstuhlplatzes (Marko, 13.08.2026: Buchung freiwillig, aber
+    // kostenlos) — pro gebuchtem Rollstuhlplatz genau ein Sitz im selben Block wählbar,
+    // s. _companionSlotAvailable. Serverseitig ebenfalls auf 0 € gesetzt (n8n-Workflow
+    // "Ticketing: Bestellprozess - Dauerkartenbestellung verarbeiten", Node "Preis
+    // serverseitig berechnen") — dort zusätzlich auf max. 1 pro Rollstuhlplatz begrenzt,
+    // sonst könnte ein manipulierter Request beliebig viele Gratis-Sitze erzeugen.
+    begleitung: 'Begleitperson (kostenlos)'
   };
 
   /* Tarife im Modus "blocks" (Einzelticket) — "kind" bisher nur für Kategorie III
      (Preis kommt aus priceInfo.kind, s. opts.prices), aber generisch benannt: jede
      Kategorie mit einem "kind"-Preis bekommt automatisch diese dritte Tarifzeile,
      ohne dass der Code nach Kategorie-Namen unterscheiden müsste. */
-  var BLOCK_TARIF_LABELS = { normal: 'Normalpreis', ermaessigt: 'Ermäßigt', kind: 'Kinder 7–14' };
+  var BLOCK_TARIF_LABELS = {
+    normal: 'Normalpreis', ermaessigt: 'Ermäßigt', kind: 'Kinder 7–14',
+    // Begleitperson eines Rollstuhlplatzes (Marko, 13.08.2026: "auch bei
+    // Einzelticketbuchungen so umsetzen") — s. DK_TARIF_LABELS.begleitung fuer die
+    // Begruendung. Rollstuhlplatz ist in diesem Modus block-unabhaengig (pseudo-Zone
+    // 'ROLLSTUHL'), deshalb ist die Begleitperson hier NICHT an denselben physischen
+    // Block gebunden wie in "seats"-Modus, sondern an die Gesamtzahl gebuchter
+    // Rollstuhlplaetze im ganzen Warenkorb, s. _companionSlotsRemaining.
+    begleitung: 'Begleitperson (kostenlos)'
+  };
+
+  /* "Begleitperson" hat pauschal 0 EUR, unabhaengig davon, was priceInfo fuer die
+     jeweilige Kategorie sonst hergibt (priceInfo kennt diesen Tarif gar nicht) —
+     zentrale Stelle statt an jeder priceInfo[tarif]-Lesestelle einzeln abzufangen. */
+  function blockTarifPrice(priceInfo, tarif) {
+    return tarif === 'begleitung' ? 0 : priceInfo[tarif];
+  }
 
   function SeatPicker(root, opts) {
     this.root = root;
@@ -326,10 +349,27 @@
   };
 
   SeatPicker.prototype._dkTarifPrice = function (priceInfo, tarif) {
+    if (tarif === 'begleitung') return 0;
     var base = tarif.indexOf('kind') === 0 ? priceInfo.kind
       : tarif.indexOf('ermaessigt') === 0 ? priceInfo.ermaessigt
       : priceInfo.normal;
     return this._dkPrice(base, tarif.indexOf('_member') !== -1);
+  };
+
+  /* Wie viele Begleitperson-Plätze in diesem Block noch frei sind — genau einer pro
+     dort gebuchtem Rollstuhlplatz (Marko, 13.08.2026). guid wird von der Zählung
+     ausgenommen, damit ein Sitz, der selbst schon "begleitung" trägt, seine eigene
+     Auswahl im tarifOptions-Dropdown nicht durch sich selbst blockiert. */
+  SeatPicker.prototype._companionSlotAvailable = function (guid, zoneLabel) {
+    var self = this;
+    var wheelchairCount = 0, usedCount = 0;
+    Object.keys(this.selected).forEach(function (g) {
+      var s = self.selected[g];
+      if (s.zoneLabel !== zoneLabel) return;
+      if (s.category === 'Rollstuhlplatz') wheelchairCount++;
+      else if (s.tarif === 'begleitung' && g !== guid) usedCount++;
+    });
+    return wheelchairCount > usedCount;
   };
 
   /* Rechnet die Rabattkette transparent vor, statt nur den fertigen Endpreis zu
@@ -338,6 +378,7 @@
      Zeile statt kommagetrennt in einem Satz zu verschwinden. Der Endpreis
      selbst steht separat rechts in der Zeile (s. _renderCart), nicht hier. */
   SeatPicker.prototype._dkBreakdownText = function (priceInfo, tarif) {
+    if (tarif === 'begleitung') return DK_TARIF_LABELS.begleitung;
     var isKind = tarif.indexOf('kind') === 0;
     var isErmaessigt = !isKind && tarif.indexOf('ermaessigt') === 0;
     var base = isKind ? priceInfo.kind : isErmaessigt ? priceInfo.ermaessigt : priceInfo.normal;
@@ -975,11 +1016,12 @@
     });
     // Rollstuhlplatz ist "inkl. Begleitkarte" (s. Preisliste) — die Begleitperson braucht
     // trotzdem einen echten Sitzplatz im selben Block, den es hier (anders als beim
-    // Einzelticket ohne feste Platzwahl) tatsächlich auszuwählen gibt. Reiner Hinweis,
-    // keine harte Validierung/Kopplung an einen bestimmten Nachbarsitz.
+    // Einzelticket ohne feste Platzwahl) tatsächlich auszuwählen gibt. Buchung freiwillig
+    // (Marko, 13.08.2026), deshalb "kannst" statt "bitte" — der Tarif "Begleitperson
+    // (kostenlos)" steht danach im Warenkorb je Sitz zur Auswahl, s. _companionSlotAvailable.
     var hasWheelchair = guids.some(function (guid) { return seats[guid].category === 'Rollstuhlplatz'; });
     var hint = hasWheelchair
-      ? '<span class="seatplan-pending-hint">Für die Begleitperson bitte zusätzlich einen Sitzplatz im selben Block wählen.</span>'
+      ? '<span class="seatplan-pending-hint">Für deine Begleitperson kannst du zusätzlich einen kostenlosen Sitzplatz im selben Block wählen (im Warenkorb als „Begleitperson" auswählbar).</span>'
       : '';
     return '<span class="seatplan-pending-label">Deine Auswahl</span>' +
       '<span class="seatplan-pending-seats">' + labels.join(' · ') + '</span>' + hint;
@@ -2123,14 +2165,15 @@
     var box = document.createElement('div');
     box.className = 'seatplan-block-controls';
 
-    function stepperRow(tarif, tarifLabel, price) {
+    function stepperRow(tarif, tarifLabel, price, maxOverride) {
       var row = document.createElement('div');
       row.className = 'seatplan-stepper-row';
+      var max = maxOverride !== undefined ? maxOverride : freeCount;
       row.innerHTML =
         '<span>' + tarifLabel + ' <strong>' + fmtEUR(price) + ' €</strong></span>' +
         '<span class="seatplan-stepper">' +
           '<button type="button" data-step="-1" data-zone="' + blockKey + '" data-tarif="' + tarif + '" aria-label="weniger ' + tarifLabel + '">−</button>' +
-          '<input type="number" inputmode="numeric" min="0" max="' + freeCount + '" value="0" ' +
+          '<input type="number" inputmode="numeric" min="0" max="' + max + '" value="0" ' +
             'data-count="' + blockKey + '-' + tarif + '" data-zone="' + blockKey + '" data-tarif="' + tarif + '" ' +
             'aria-label="Anzahl ' + tarifLabel + '">' +
           '<button type="button" data-step="1" data-zone="' + blockKey + '" data-tarif="' + tarif + '" aria-label="mehr ' + tarifLabel + '">+</button>' +
@@ -2182,6 +2225,13 @@
     var otherTotal = BLOCK_TARIFS.filter(function (t) { return t !== tarif; })
       .reduce(function (sum, t) { return sum + (counts[t] || 0); }, 0);
     var maxForTarif = Math.max(0, freeCount - otherTotal);
+    if (tarif === 'begleitung') {
+      // Zusaetzliche, blockuebergreifende Grenze: nie mehr Begleitpersonen im ganzen
+      // Warenkorb als gebuchte Rollstuhlplaetze (Marko, 13.08.2026) — die Pruefung oben
+      // kennt nur die physische Kapazitaet DIESES Blocks, nicht diese Regel. Der eigene
+      // bisherige Wert wird zurueckaddiert, sonst wuerde er sich selbst blockieren.
+      maxForTarif = Math.min(maxForTarif, this._companionSlotsRemaining(blockKey) + (counts.begleitung || 0));
+    }
     var next = Math.max(0, Math.min(value, maxForTarif));
     counts[tarif] = next;
     counts.zoneLabel = zoneLabel;
@@ -2192,6 +2242,24 @@
     var input = this.root.querySelector('[data-count="' + blockKey + '-' + tarif + '"]');
     if (input) input.value = String(next);
     this._renderCart();
+  };
+
+  /* Wie viele Begleitperson-Plaetze insgesamt (ueber alle Bloecke hinweg) noch frei
+     sind — genau einer pro im ganzen Warenkorb gebuchtem Rollstuhlplatz (Marko,
+     13.08.2026, "auch bei Einzelticketbuchungen so umsetzen"), analog zu
+     _companionSlotAvailable im "seats"-Modus. excludeBlockKey nimmt den gerade
+     bearbeiteten Block von der "bereits verbraucht"-Zaehlung aus. */
+  SeatPicker.prototype._companionSlotsRemaining = function (excludeBlockKey) {
+    var self = this;
+    var wheelchairQty = 0, begleitungElsewhere = 0;
+    Object.keys(this.blockCounts).forEach(function (bk) {
+      var c = self.blockCounts[bk];
+      if (c.category === 'Rollstuhlplatz') {
+        BLOCK_TARIFS.forEach(function (t) { if (t !== 'begleitung') wheelchairQty += (c[t] || 0); });
+      }
+      if (bk !== excludeBlockKey) begleitungElsewhere += (c.begleitung || 0);
+    });
+    return Math.max(0, wheelchairQty - begleitungElsewhere);
   };
 
   /* _toggleSeat läuft ausschließlich innerhalb der offenen Detailansicht (der Klick-
@@ -2400,6 +2468,13 @@
         if (self.dkDiscount) {
           tarifOptions = tarifOptions.concat(['normal_member'], hasErmaessigt ? ['ermaessigt_member'] : [], hasKind ? ['kind_member'] : []);
         }
+        // "Begleitperson (kostenlos)" nur fuer normale Sitze, nicht fuer den
+        // Rollstuhlplatz-Sitz selbst, und nur solange noch ein freier Begleit-Slot
+        // dieses Blocks uebrig ist (s. _companionSlotAvailable) — sonst wuerde der
+        // Tarif auch nach Verbrauch des einzigen Slots weiter angeboten.
+        if (s.category !== 'Rollstuhlplatz' && self._companionSlotAvailable(guid, s.zoneLabel)) {
+          tarifOptions = tarifOptions.concat(['begleitung']);
+        }
         /* Mitgliedsrabatt gilt pro Person, nicht pro Bestellung — ein Käufer könnte
            sonst seinen eigenen Mitgliedsstatus für beliebig viele fremde Plätze
            mitnehmen. Deshalb pro _member-Tarif-Platz Name abfragen + serverseitig
@@ -2418,6 +2493,11 @@
         }
         row.innerHTML =
           '<div>' + s.zoneLabel + ' · Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber +
+          // Kategorie sichtbar machen, wenn sie vom Preis her sonst nicht erkennbar
+          // waere — der Rollstuhlplatz-Preis (104,00 €) ist z.B. identisch mit dem
+          // ermaessigten Fanblock-Preis, ohne diesen Zusatz waere nicht ersichtlich,
+          // dass es sich um den Rollstuhlplatz-Tarif handelt (Marko, 13.08.2026).
+          (s.category === 'Rollstuhlplatz' ? ' (Rollstuhlplatz)' : '') +
           '<br><span class="t-caption">' + self._dkBreakdownText(s.priceInfo, s.tarif) + '</span>' +
           (tarifOptions.length > 1 ? '<br><select data-tarif="' + guid + '" class="seatplan-tarif-select">' +
             tarifOptions.map(function (t) {
@@ -2601,7 +2681,7 @@
       var c = self.blockCounts[blockKey];
       BLOCK_TARIFS.forEach(function (tarif) {
         if (c[tarif] > 0) {
-          lines.push({ blockKey: blockKey, tarif: tarif, label: BLOCK_TARIF_LABELS[tarif], count: c[tarif], price: c.priceInfo[tarif], zoneLabel: c.zoneLabel });
+          lines.push({ blockKey: blockKey, tarif: tarif, label: BLOCK_TARIF_LABELS[tarif], count: c[tarif], price: blockTarifPrice(c.priceInfo, tarif), zoneLabel: c.zoneLabel });
         }
       });
     });
@@ -2620,18 +2700,32 @@
       lines.forEach(function (l) {
         var row = document.createElement('div');
         row.className = 'seatplan-cart-item';
+        var lineCategory = self.blockCounts[l.blockKey].category;
         var linePriceInfo = self.blockCounts[l.blockKey].priceInfo;
         var hasErmaessigt = linePriceInfo.ermaessigt !== undefined;
         var hasKind = linePriceInfo.kind !== undefined;
-        var freeCount = self._blockFreeCount(l.blockKey.split('::')[0], self.blockCounts[l.blockKey].category);
+        var freeCount = self._blockFreeCount(l.blockKey.split('::')[0], lineCategory);
+        // Begleitperson (kostenlos): als Tarif-Umwandlung fuer eine bereits im Warenkorb
+        // liegende Zeile anbieten, nicht als eigener Direktwahl-Eintrag — Rollstuhlplatz
+        // selbst ist block-unabhaengig (pseudo-Zone 'ROLLSTUHL', s. _renderDirectAddRow),
+        // hat also gar keinen eigenen Block, an den man "eine Begleitperson dazu waehlen"
+        // koennte; stattdessen wandelt der Kaeufer eine seiner NORMALEN Ticket-Zeilen um
+        // (Marko, 13.08.2026: "auch bei Einzelticketbuchungen so umsetzen").
+        var hasBegleitung = lineCategory !== 'Rollstuhlplatz' && self.prices['Rollstuhlplatz'] &&
+          self._companionSlotsRemaining(l.blockKey) > 0;
         row.innerHTML =
           '<div>' + l.zoneLabel +
           '<br><span class="t-caption">' + fmtEUR(l.price) + ' € je Ticket</span>' +
-          ((hasErmaessigt || hasKind) ? '<br><select class="seatplan-tarif-select" data-block-tarif-select data-zone="' + l.blockKey + '" data-tarif="' + l.tarif + '">' +
+          ((hasErmaessigt || hasKind || hasBegleitung) ? '<br><select class="seatplan-tarif-select" data-block-tarif-select data-zone="' + l.blockKey + '" data-tarif="' + l.tarif + '">' +
             '<option value="normal"' + (l.tarif === 'normal' ? ' selected' : '') + '>' + BLOCK_TARIF_LABELS.normal + '</option>' +
             (hasErmaessigt ? '<option value="ermaessigt"' + (l.tarif === 'ermaessigt' ? ' selected' : '') + '>' + BLOCK_TARIF_LABELS.ermaessigt + '</option>' : '') +
             (hasKind ? '<option value="kind"' + (l.tarif === 'kind' ? ' selected' : '') + '>' + BLOCK_TARIF_LABELS.kind + '</option>' : '') +
+            (hasBegleitung ? '<option value="begleitung"' + (l.tarif === 'begleitung' ? ' selected' : '') + '>' + BLOCK_TARIF_LABELS.begleitung + '</option>' : '') +
             '</select>' : '<br><span class="t-caption">' + l.label + '</span>') +
+          // Hinweis direkt bei der Rollstuhlplatz-Zeile, da es hier (anders als im
+          // "seats"-Modus mit seinem Hinweis im Sitzplan-Popup) keine vergleichbare
+          // Stelle gibt, an der die Begleitperson-Option sonst auffallen wuerde.
+          (lineCategory === 'Rollstuhlplatz' ? '<br><span class="seatplan-pending-hint">Für deine Begleitperson kannst du bei einem anderen Ticket unten den Tarif auf „Begleitperson (kostenlos)“ umstellen.</span>' : '') +
           '</div>' +
           '<div class="seatplan-cart-item-right">' +
             '<span class="seatplan-stepper">' +
@@ -2666,8 +2760,14 @@
         var newTarif = this.value;
         if (newTarif === oldTarif) return;
         var counts = self.blockCounts[blockKey];
-        counts[newTarif] = (counts[newTarif] || 0) + counts[oldTarif];
-        counts[oldTarif] = 0;
+        // Bei Begleitperson nur so viele Tickets umwandeln, wie noch freie Slots da
+        // sind (max. 1 pro Rollstuhlplatz im Warenkorb, s. _companionSlotsRemaining) —
+        // der Rest bleibt im alten Tarif, statt die ganze Zeile pauschal umzubuchen.
+        var moveQty = newTarif === 'begleitung'
+          ? Math.min(counts[oldTarif], self._companionSlotsRemaining(blockKey))
+          : counts[oldTarif];
+        counts[newTarif] = (counts[newTarif] || 0) + moveQty;
+        counts[oldTarif] -= moveQty;
         self._renderCart();
       });
     });
@@ -2705,7 +2805,7 @@
         BLOCK_TARIFS.forEach(function (tarif) {
           var count = c[tarif];
           if (count > 0) {
-            var price = c.priceInfo[tarif];
+            var price = blockTarifPrice(c.priceInfo, tarif);
             lines.push({
               label: c.zoneLabel + ' · ' + BLOCK_TARIF_LABELS[tarif],
               qty: count, unitPrice: price, lineTotal: count * price,
