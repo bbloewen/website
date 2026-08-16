@@ -322,9 +322,7 @@
      soll kein Rest-Betrag stehen bleiben. Andere Gutscheine/Wertgutscheine lassen
      den Nachwuchsbeitrag unberührt (der bleibt ein freiwilliger Zusatzbetrag). */
   SeatPicker.prototype._voucherIsFullComp = function () {
-    var info = this.voucherInfo;
-    if (!info) return false;
-    return (info.priceMode === 'percent' && info.value === 100) || (info.priceMode === 'set' && info.value === 0);
+    return window.voucherIsFullComp(this.voucherInfo);
   };
 
   /* Nachwuchsbeitrag-Betrag für den aktuellen Warenkorb: 0, wenn die Pauschale nicht

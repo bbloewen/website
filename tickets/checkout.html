@@ -195,6 +195,7 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="/js/nav.js?v=1785398309"></script>
 <script src="/js/include.js?v=1785398309"></script>
+<script src="/js/voucher-utils.js?v=1786873000"></script>
 <script>
   var checkoutFormLoadedAt = Date.now();
   document.addEventListener('DOMContentLoaded', function () {
@@ -379,7 +380,7 @@
           /* Ein 100%-Gutschein (Sponsoren-Freikarte) übernimmt auch den Nachwuchsbeitrag —
              die Zeile kann schon auf der Auswahlseite in cart.lines gelandet sein, bevor
              der Code hier eingelöst wird. */
-          if (result.source === 'voucher' && ((result.priceMode === 'percent' && result.value === 100) || (result.priceMode === 'set' && result.value === 0))) {
+          if (result.source === 'voucher' && window.voucherIsFullComp(result)) {
             var nwIdx = cart.lines.findIndex(function (l) { return l.type === 'nachwuchs'; });
             if (nwIdx !== -1) {
               // Für "entfernen" gemerkt (s. voucher-remove-Handler) — sonst ist die
