@@ -144,6 +144,30 @@ nutzen ein eigenes Muster (unbegrenzte Zusatz-Quota je Subevent + Voucher mit
 anlegen" der Notion-Seite [Ticketing/ Sitzplan & Bestellungen](https://app.notion.com/p/3aba2418e2d781e2a0addde3c5ada33f),
 nicht hier duplizieren.
 
+### Gutschein-Rabatt-Berechnung: gemeinsamer Sub-Workflow (seit 16.08.2026)
+
+Bis 16.08.2026 gab es die Rabatt-Berechnung (Kategorien/Tarif matchen, Rabatt pro
+Zeile, Nachwuchsbeitrag-Vollbefreiung) **zweimal unabhängig** als n8n-Code-Node:
+einmal im Checkout-Einlösen-Flow (Workflow `5Bi15oYpyehxjhXK`, für die Live-Anzeige),
+einmal im Bestell-Workflow selbst (Workflow `HyUXW4kbhaQVbG0A`, serverseitig
+maßgeblich für den echten Bestellbetrag). Ein Bug (Nachwuchsbeitrag-Befreiung nur bei
+`priceMode=percent/value=100`, nicht bei `priceMode=set/value=0` wie bei echten
+Sponsoren-Gutscheinen) wurde zunächst nur in einer Kopie behoben — die andere schlug
+dadurch weiterhin fehl.
+
+Beide Workflows rufen die Berechnung jetzt per Execute-Workflow-Node aus dem
+gemeinsamen Sub-Workflow **„Ticketing: Gutschein-Rabatt berechnen (Shared)"**
+(`QxPE1ikMJWL0fyB7`) auf. Vertrag: Eingabe `{code, voucherRecord, lines: [{category,
+tarif, unitPrice, qty}], nachwuchsPresent, nachwuchsAmount, itemCategoryMap}`, Ausgabe
+`{valid, reason?, source, code, priceMode, value, itemIds, categories,
+tarifRestriction, discountAmount, newTotal, remainingUses, lineDiscounts,
+nachwuchsFree}`. Jeder Aufrufer hat einen kleinen Vorbereiten-Node (baut die Eingabe
+aus seinem eigenen Kontext) und — nur im Bestell-Workflow nötig — einen
+Ergebnis-übernehmen-Node, der die Shared-Antwort zurück in die dort erwartete
+`pre`-gemergte Objektform übersetzt (`voucherOk`/`voucherError`/`voucherLineDiscounts`/
+`voucherNachwuchsFree`/...). Künftige Änderungen an der Rabatt-Logik nur noch in
+`QxPE1ikMJWL0fyB7` vornehmen, nicht in den Aufrufer-Workflows.
+
 ## Begleitperson eines Rollstuhlplatzes (Tarif "begleitung", seit 13.08.2026)
 
 Die Preisliste sagt "Rollstuhlfahrer (inkl. Begleitkarte)" — bis 13.08.2026 war das nur
