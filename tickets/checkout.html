@@ -379,7 +379,7 @@
           /* Ein 100%-Gutschein (Sponsoren-Freikarte) übernimmt auch den Nachwuchsbeitrag —
              die Zeile kann schon auf der Auswahlseite in cart.lines gelandet sein, bevor
              der Code hier eingelöst wird. */
-          if (result.source === 'voucher' && result.priceMode === 'percent' && result.value === 100) {
+          if (result.source === 'voucher' && ((result.priceMode === 'percent' && result.value === 100) || (result.priceMode === 'set' && result.value === 0))) {
             var nwIdx = cart.lines.findIndex(function (l) { return l.type === 'nachwuchs'; });
             if (nwIdx !== -1) {
               // Für "entfernen" gemerkt (s. voucher-remove-Handler) — sonst ist die
