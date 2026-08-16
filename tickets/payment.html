@@ -101,7 +101,13 @@
         </div>
 
         <div class="card" style="padding:24px">
-          <h3 class="t-h4 mb-4">Zahlungsmethode wählen</h3>
+          <h3 class="t-h4 mb-4" id="payment-method-heading">Zahlungsmethode wählen</h3>
+
+          <div id="free-order-block" class="hidden">
+            <p class="t-body-sm" style="margin-bottom:14px">Dein Gutschein deckt diese Bestellung vollständig ab — es ist keine Zahlung nötig.</p>
+            <button class="btn btn-primary btn-sm" type="button" id="free-order-btn" style="width:100%;justify-content:center">Kostenlose Bestellung abschließen</button>
+          </div>
+
           <form id="payment-form">
             <label class="payment-method-card" id="pm-paypal">
               <input type="radio" name="paymethod" value="paypal" checked>
@@ -186,7 +192,18 @@
     paymentVatNoteEl.style.display = cart.vatNote ? '' : 'none';
     document.getElementById('pay-btn').textContent = 'Jetzt ' + cart.total.toFixed(2).replace('.', ',') + ' € bezahlen';
 
-    if (cart.productType === 'dauerkarte') {
+    /* Ein Gutschein kann den Betrag auf 0 senken - dann gibt es nichts einzuziehen
+       (kein SEPA-Mandat, kein PayPal). Zahlungsmethode-Auswahl komplett ausblenden,
+       stattdessen ein einziger Bestaetigen-Button, der direkt an den Bestell-Webhook
+       geht (Backend markiert die pretix-Order dabei sofort als bezahlt). */
+    var isFreeOrder = cart.total === 0 && (cart.productType === 'dauerkarte' || cart.productType === 'einzelticket');
+    if (isFreeOrder) {
+      document.getElementById('payment-method-heading').textContent = 'Bestellung abschließen';
+      document.getElementById('payment-form').style.display = 'none';
+      document.getElementById('free-order-block').classList.remove('hidden');
+    }
+
+    if (cart.productType === 'dauerkarte' && !isFreeOrder) {
       document.getElementById('pm-paypal').style.display = 'none';
       document.getElementById('pm-sepa').style.display = 'flex';
       document.getElementById('pm-sepa-caption').textContent = 'Einzige Zahlart für die Dauerkarte.';
@@ -196,7 +213,7 @@
 
     /* Löwen-Club der 100-Pakete: ausschließlich SEPA-Lastschrift, kein PayPal —
        passt zur B2B-Rechnungslogik statt Endkunden-Checkout. */
-    if (cart.productType === 'loewen-business-club') {
+    if (cart.productType === 'loewen-business-club' && !isFreeOrder) {
       document.getElementById('pm-paypal').style.display = 'none';
       document.getElementById('pm-sepa').style.display = 'flex';
       document.getElementById('pm-sepa-caption').textContent = 'Bequem und sicher per Bankeinzug.';
@@ -208,13 +225,15 @@
        Webhook berechnet den Preis serverseitig neu (inkl. Gutschein-Pruefung) und
        liefert eine echte PayPal-Order-ID; erst nach PayPal-Bestaetigung (Capture)
        wird die pretix-Order angelegt. */
-    if (cart.productType === 'einzelticket') {
+    var EINZELTICKET_ORDER_CREATE_URL = 'https://poetic-patience-production-9290.up.railway.app/webhook/einzelticket-paypal-order-erstellen';
+
+    if (cart.productType === 'einzelticket' && !isFreeOrder) {
       document.getElementById('pay-btn').classList.add('hidden');
       var paypalContainer = document.getElementById('paypal-button-container');
       paypalContainer.classList.remove('hidden');
 
       var PAYPAL_CLIENT_ID = 'BAAOl2K5Out1-IOUhPHJZYF4dKreSwFFEmJQxB8VP8L0fpOm95gxlfqppYMfyu7RLiIaWukS6Ei5doDvVI';
-      var ORDER_CREATE_URL = 'https://poetic-patience-production-9290.up.railway.app/webhook/einzelticket-paypal-order-erstellen';
+      var ORDER_CREATE_URL = EINZELTICKET_ORDER_CREATE_URL;
       var CAPTURE_URL = 'https://poetic-patience-production-9290.up.railway.app/webhook/einzelticket-paypal-capture-erfassen';
 
       var sdkScript = document.createElement('script');
@@ -313,6 +332,81 @@
       });
     });
 
+    /* Dauerkarte läuft asynchron über n8n: Bestellung landet zuerst in einer
+       Data Table, die eigentliche pretix-Buchung folgt als Folgeschritt.
+       Deshalb hier kein lokal erzeugter Fake-Bestellcode, sondern die vom
+       Workflow zurückgegebene Mandatsreferenz. Gemeinsame Funktion fuer den
+       normalen SEPA-Submit und den kostenlosen Bestellen-Button (leere
+       Kontodaten, method="kostenlos"). */
+    function submitDauerkarteOrder(kontoinhaber, iban, method, btn) {
+      var webhookUrl = 'https://poetic-patience-production-9290.up.railway.app/webhook/dauerkarte-bestellung';
+      var payload = { buyer: buyer, cart: cart, sepa: { kontoinhaber: kontoinhaber, iban: iban } };
+      /* Schutz gegen Doppel-Bestellungen: das blosse btn.disabled reicht nur
+         innerhalb desselben Seitenaufrufs. Bei einem Reload (z.B. nach langsamer
+         Antwort, Zurueck-Button) ist der Button wieder aktiv, das Formular aber
+         inhaltlich identisch — das hat schon zu einer echten Doppel-Bestellung
+         gefuehrt. Ueber sessionStorage bleibt der "bereits gesendet"-Zustand auch
+         ueber einen Reload im selben Tab erhalten. */
+      if (btn.disabled) return;
+      var payloadKey = JSON.stringify(payload);
+      if (sessionStorage.getItem('bl_dauerkarte_sent') === payloadKey) {
+        alert('Diese Bestellung wurde bereits gesendet. Bitte prüfe dein Postfach auf die Bestätigungs-E-Mail, bevor du es erneut versuchst. Bei Fragen schreib uns gerne an info@basketball-loewen.com.');
+        return;
+      }
+      var originalBtnText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Wird gesendet …';
+      sessionStorage.setItem('bl_dauerkarte_sent', payloadKey);
+      fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).then(function (res) {
+        if (!res.ok) throw new Error('Webhook antwortete mit Fehler');
+        return res.json();
+      }).then(function (data) {
+        var order = { orderNumber: data.reference || '', cart: cart, buyer: buyer, paymentMethod: method };
+        sessionStorage.setItem('bl_order', JSON.stringify(order));
+        window.location.href = '/tickets/confirmation.html';
+      }).catch(function () {
+        sessionStorage.removeItem('bl_dauerkarte_sent');
+        btn.disabled = false;
+        btn.textContent = originalBtnText;
+        alert('Deine Bestellung konnte nicht gesendet werden. Bitte versuche es gleich noch einmal oder schreib uns direkt an info@basketball-loewen.com.');
+      });
+    }
+
+    if (isFreeOrder) {
+      document.getElementById('free-order-btn').addEventListener('click', function () {
+        var btn = this;
+        if (cart.productType === 'dauerkarte') {
+          submitDauerkarteOrder('', '', 'kostenlos', btn);
+          return;
+        }
+        /* Einzelticket: derselbe Bestell-Webhook wie beim PayPal-Flow, aber ohne
+           PayPal-Order/Capture-Schritt — der Backend-Workflow erkennt total=0
+           selbst und markiert die pretix-Order direkt als bezahlt. */
+        if (btn.disabled) return;
+        var originalBtnText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Wird gesendet …';
+        fetch(EINZELTICKET_ORDER_CREATE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ buyer: buyer, cart: cart })
+        }).then(function (res) { return res.json(); }).then(function (result) {
+          if (!result.ok) throw new Error(result.error || 'Die Bestellung konnte nicht abgeschlossen werden.');
+          var order = { orderNumber: result.reference, cart: cart, buyer: buyer, paymentMethod: 'kostenlos' };
+          sessionStorage.setItem('bl_order', JSON.stringify(order));
+          window.location.href = '/tickets/confirmation.html';
+        }).catch(function (err) {
+          btn.disabled = false;
+          btn.textContent = originalBtnText;
+          alert((err && err.message) || 'Die Bestellung konnte nicht gesendet werden. Bitte versuche es gleich noch einmal oder schreib uns direkt an info@basketball-loewen.com.');
+        });
+      });
+    }
+
     document.getElementById('payment-form').addEventListener('submit', function (e) {
       e.preventDefault();
       /* Einzelticket und reine Gutschein-Bestellungen laufen ueber die PayPal-Buttons
@@ -331,47 +425,8 @@
         }
       }
 
-      /* Dauerkarte läuft asynchron über n8n: Bestellung landet zuerst in einer
-         Data Table, die eigentliche pretix-Buchung folgt als Folgeschritt.
-         Deshalb hier kein lokal erzeugter Fake-Bestellcode, sondern die vom
-         Workflow zurückgegebene Mandatsreferenz. */
       if (cart.productType === 'dauerkarte') {
-        var webhookUrl = 'https://poetic-patience-production-9290.up.railway.app/webhook/dauerkarte-bestellung';
-        var payload = { buyer: buyer, cart: cart, sepa: { kontoinhaber: kontoinhaber, iban: iban } };
-        var payBtn = document.getElementById('pay-btn');
-        /* Schutz gegen Doppel-Bestellungen: das blosse payBtn.disabled reicht nur
-           innerhalb desselben Seitenaufrufs. Bei einem Reload (z.B. nach langsamer
-           Antwort, Zurueck-Button) ist der Button wieder aktiv, das Formular aber
-           inhaltlich identisch — das hat schon zu einer echten Doppel-Bestellung
-           gefuehrt. Ueber sessionStorage bleibt der "bereits gesendet"-Zustand auch
-           ueber einen Reload im selben Tab erhalten. */
-        if (payBtn.disabled) return;
-        var payloadKey = JSON.stringify(payload);
-        if (sessionStorage.getItem('bl_dauerkarte_sent') === payloadKey) {
-          alert('Diese Bestellung wurde bereits gesendet. Bitte prüfe dein Postfach auf die Bestätigungs-E-Mail, bevor du es erneut versuchst. Bei Fragen schreib uns gerne an info@basketball-loewen.com.');
-          return;
-        }
-        var originalBtnText = payBtn.textContent;
-        payBtn.disabled = true;
-        payBtn.textContent = 'Wird gesendet …';
-        sessionStorage.setItem('bl_dauerkarte_sent', payloadKey);
-        fetch(webhookUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        }).then(function (res) {
-          if (!res.ok) throw new Error('Webhook antwortete mit Fehler');
-          return res.json();
-        }).then(function (data) {
-          var order = { orderNumber: data.reference || '', cart: cart, buyer: buyer, paymentMethod: method };
-          sessionStorage.setItem('bl_order', JSON.stringify(order));
-          window.location.href = '/tickets/confirmation.html';
-        }).catch(function () {
-          sessionStorage.removeItem('bl_dauerkarte_sent');
-          payBtn.disabled = false;
-          payBtn.textContent = originalBtnText;
-          alert('Deine Bestellung konnte nicht gesendet werden. Bitte versuche es gleich noch einmal oder schreib uns direkt an info@basketball-loewen.com.');
-        });
+        submitDauerkarteOrder(kontoinhaber, iban, method, document.getElementById('pay-btn'));
         return;
       }
 
