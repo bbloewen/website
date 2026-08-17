@@ -1,0 +1,9 @@
+{
+  "hinweis": "Pflegedatei für die Instagram-Archivseiten unter /news/insta-archiv/. Der n8n-Workflow 'Website: News - Social Instagram abrufen' (GpAS0ONrenHrcTwS) liest sie bei jedem Lauf und richtet sich danach. Schlüssel ist immer die Instagram-Post-ID, also der Teil hinter dem Bindestrich im Dateinamen: news/insta-archiv/loewen-18073261991385599.html hat die ID 18073261991385599. Mögliche Felder je Post: 'ausgeschlossen' (true = der Post bekommt keine Archivseite und erscheint auch nicht im News-Bento oder in den Seitenleisten; eine schon vorhandene Seite muss einmal von Hand gelöscht werden, der Workflow legt sie danach nicht wieder an), 'titel' (überschreibt die automatisch erzeugte Überschrift) und 'text' (überschreibt den Beitragstext, gedacht für Posts mit zu dünner Caption). 'notiz' ist nur für uns und wird nicht ausgegeben. Diese Datei ist die einzige Stelle, an der Handpflege einen Workflow-Lauf überlebt — Änderungen direkt in den HTML-Dateien werden am nächsten Morgen überschrieben.",
+  "posts": {
+    "18073261991385599": {
+      "ausgeschlossen": true,
+      "notiz": "Kin-Ball-EM 2026 in Erfurt. Fremde Veranstaltung, kein Löwen-Thema — auf Markos Ansage am 17.08.2026 gelöscht und dauerhaft ausgeschlossen."
+    }
+  }
+}
