@@ -4,6 +4,12 @@
   function include(selector, url) {
     var el = document.querySelector(selector);
     if (!el) return Promise.resolve();
+    // Seit 17.08.2026 baut tools/build-partials.py Header und Footer schon beim
+    // Build ins HTML ein, damit Crawler ohne JavaScript die Navigation sehen.
+    // Ist der Platzhalter also bereits gefüllt, hier nichts nachladen — sonst
+    // stünde alles doppelt. Der Abruf bleibt als Rückfall für Seiten, die noch
+    // nicht gebaut wurden.
+    if (el.children.length > 0) return Promise.resolve();
     return fetch(url, { cache: 'no-cache' })
       .then(function (res) { return res.text(); })
       .then(function (html) { el.innerHTML = html; });
