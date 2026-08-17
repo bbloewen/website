@@ -1,0 +1,64 @@
+# Build- und SEO-Skripte
+
+Alle Skripte sind **wiederholbar** (ein zweiter Lauf ändert nichts) und kennen
+`--check`: dann schreiben sie nichts, berichten nur und geben Exitcode 1 zurück,
+wenn etwas zu tun wäre. Sie arbeiten ausschließlich auf **von Git verfolgten**
+HTML-Dateien, damit lokale Arbeitsdateien nie versehentlich mitverarbeitet werden.
+
+Gemeinsame Grundlage: `seo_common.py` — dort steht die *eine* Definition davon,
+welche Seiten zählen und welche kanonische URL eine Datei hat. Sitemap und
+Canonical dürfen nie auseinanderlaufen.
+
+## Wann was laufen muss
+
+| Was du geändert hast | Skript |
+|---|---|
+| Seite hinzugefügt oder gelöscht | `build-sitemap.py` |
+| `partials/header.html` oder `footer.html` | `build-partials.py` |
+| `<title>` oder `<meta name="description">` einer Seite | `build-head-meta.py` |
+| `data/news.json` (Artikel ergänzt/geändert) | `build-news-list.py` |
+| Neues Artikel-Hero in `assets/img/news/` | `build-share-images.py`, dann `build-head-meta.py` |
+| `data/heimspiele.json` (Spieltermine) | `build-head-meta.py` |
+
+Alles auf einmal, in dieser Reihenfolge:
+
+```bash
+python3 tools/build-partials.py && \
+python3 tools/build-news-list.py && \
+python3 tools/build-share-images.py && \
+python3 tools/build-head-meta.py && \
+python3 tools/build-sitemap.py
+```
+
+`build-head-meta.py` zuletzt vor der Sitemap, weil es Titel und Description
+ausliest und `og:`-Angaben daraus ableitet.
+
+## Die Skripte im Einzelnen
+
+**`build-sitemap.py`** — erzeugt `sitemap.xml` aus dem Git-Stand, mit `lastmod`
+aus dem letzten Commit je Datei. Seiten mit `noindex` fallen automatisch raus.
+Ersetzt die frühere Handpflege, die um 8 Seiten hinterherhing.
+
+**`build-partials.py`** — baut Header und Footer aus `partials/` in jede Seite
+ein. Notwendig, weil sie vorher nur per `js/include.js` im Browser nachgeladen
+wurden: im ausgelieferten HTML stand dann kein einziger Navigationslink.
+`include.js` lädt weiterhin nach, aber nur wenn der Platzhalter leer ist.
+
+**`build-news-list.py`** — schreibt die Artikelliste statisch in
+`news/aktuelles.html`. Das JavaScript rendert sie beim Laden weiterhin selbst und
+überschreibt den statischen Stand mit identischer Ausgabe — die statische Fassung
+ist nur für Crawler ohne JavaScript da und kann daher nicht falsch werden, nur
+älter.
+
+**`build-head-meta.py`** — pflegt Canonical, Open Graph, Twitter Cards und JSON-LD
+in einem markierten Block vor `</head>`. `news/insta-archiv/` bleibt ausgespart,
+diese Seiten gehören dem n8n-Workflow `GpAS0ONrenHrcTwS`.
+
+**`build-share-images.py`** — erzeugt die Share-Bilder 1200×630 unter
+`assets/img/share/`. Bewusst als **JPG**, nicht WebP: WhatsApp und mehrere
+Vorschau-Renderer zeigen WebP-`og:image` unzuverlässig. Hochformat-Motive werden
+oben angesetzt, sonst schneidet der Zuschnitt Köpfe ab.
+
+**`fix-insta-archiv-legacy.py`** — zieht Insta-Archivseiten nach, die aus dem
+Behold-Feed gefallen sind. Der n8n-Workflow kennt nur die letzten 20 Posts je
+Account und fasst ältere Seiten nie wieder an. Läuft nur bei Bedarf.
