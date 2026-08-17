@@ -117,6 +117,50 @@ def truncate(s, max_len):
     return s[: max_len - 3].rstrip() + "..."
 
 
+MEDIA_RE = re.compile(
+    r'\s*<div class="insta-detail-media"><img [^>]*/></div>\n?', re.S
+)
+
+
+def fix_post_image(text, file_name):
+    """Beitragsbild auf die lokale Kopie umstellen, sonst Bildspalte entfernen.
+
+    Seit 17.08.2026 sichert der Workflow jedes Beitragsbild als
+    assets/img/insta/<name>.jpg. Fuer aeltere Posts gibt es keine Kopie und
+    Beholds URL ist tot -- dann faellt die Bildspalte weg statt ein kaputtes Bild
+    zu zeigen.
+
+    Legt jemand spaeter ein passend benanntes JPG in den Ordner (z. B. manuell
+    aus Instagram gesichert), stellt der naechste Lauf das Bild wieder her.
+    """
+    stem = file_name.replace(".html", "")
+    local_rel = f"assets/img/insta/{stem}.jpg"
+    exists = (REPO / local_rel).exists()
+    m = MEDIA_RE.search(text)
+
+    if exists:
+        img = (f'        <div class="insta-detail-media"><img src="/{local_rel}" '
+               f'alt="{attr(current_title(text))}" loading="lazy" /></div>\n')
+        if m:
+            text = text[: m.start()] + "\n" + img.rstrip("\n") + "\n" + text[m.end():]
+        text = text.replace(" insta-detail-grid-textonly", "")
+        return text
+
+    if m:
+        text = text[: m.start()] + "\n" + text[m.end():]
+    if "insta-detail-grid-textonly" not in text:
+        text = text.replace(
+            '<div class="insta-detail-grid">',
+            '<div class="insta-detail-grid insta-detail-grid-textonly">', 1
+        )
+    return text
+
+
+def current_title(text):
+    m = re.search(r"<h1>(.*?)</h1>", text, re.S)
+    return html.unescape(re.sub(r"<[^>]+>", "", m.group(1))).strip() if m else ""
+
+
 def fix_share_image(text, expired):
     """og:image/twitter:image auf das Standardbild setzen, wenn die Behold-URL tot ist.
 
@@ -214,6 +258,7 @@ def main():
         text = original if result is None else result
         expired = post_id(path.name) not in in_feed
         text = fix_share_image(text, expired)
+        text = fix_post_image(text, path.name)
         if result is not None:
             changed.append(path.name)
         elif text != original:
@@ -228,8 +273,7 @@ def main():
     for n in changed:
         print(f"  {'zu korrigieren' if args.check else 'korrigiert'}: {n}")
     for n in image_fixed:
-        print(f"  {'Share-Bild zu ersetzen' if args.check else 'Share-Bild ersetzt'} "
-              f"(Behold-URL abgelaufen): {n}")
+        print(f"  {'Bildverweise zu korrigieren' if args.check else 'Bildverweise korrigiert'}: {n}")
     print(f"\n  {len(changed)} nachgezogen, {len(image_fixed)} nur Share-Bild, "
           f"{len(skipped)} schon aktuell (vom n8n-Workflow erzeugt)")
     return 1 if (args.check and (changed or image_fixed)) else 0

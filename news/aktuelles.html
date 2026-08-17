@@ -129,19 +129,29 @@
     if (window.lucide) { lucide.createIcons(); }
   });
 
-  function renderInstaSidebar(containerId, feedKey, feedData) {
+  // Vorschaubild aus der im Repo gesicherten Kopie statt aus Beholds CDN:
+  // Beholds URLs sind signiert und verfallen, sobald der Post aus dem Feed fällt.
+  function instaImage(p) {
+    if (!p.persistedUrl) return p.image;
+    return p.persistedUrl.replace('/news/insta-archiv/', '/assets/img/insta/').replace('.html', '.jpg');
+  }
+
+  function renderInstaSidebar(containerId, feedData) {
     var posts = (feedData && feedData.posts || []).slice()
       .sort(function (a, b) { return new Date(b.timestamp) - new Date(a.timestamp); })
       .slice(0, 10);
     var container = document.getElementById(containerId);
     container.innerHTML = posts.map(function (p) {
-      var url = '/news/insta-post.html?feed=' + feedKey + '&id=' + encodeURIComponent(p.id);
-      return '<a class="insta-sidebar-item" href="' + url + '"><img loading="lazy" src="' + p.image + '" alt=""  /><span>' + firstLine(p.caption, 90) + '</span></a>';
+      // Auf die statische Archivseite verlinken, nicht auf die frühere
+      // dynamische Detailseite: nur die Archivseite ist indexierbar. Fehlt sie
+      // (Post ohne Archivseite), führt der Link direkt zu Instagram statt ins Leere.
+      var url = p.persistedUrl || p.permalink;
+      return '<a class="insta-sidebar-item" href="' + url + '"><img loading="lazy" src="' + instaImage(p) + '" alt=""  /><span>' + firstLine(p.caption, 90) + '</span></a>';
     }).join('');
   }
 
-  fetchJson('/data/instagram-loewen.json').then(function (data) { renderInstaSidebar('insta-sidebar-loewen', 'loewen', data); });
-  fetchJson('/data/instagram-loewenpark.json').then(function (data) { renderInstaSidebar('insta-sidebar-loewenpark', 'loewenpark', data); });
+  fetchJson('/data/instagram-loewen.json').then(function (data) { renderInstaSidebar('insta-sidebar-loewen', data); });
+  fetchJson('/data/instagram-loewenpark.json').then(function (data) { renderInstaSidebar('insta-sidebar-loewenpark', data); });
 
   fetchJson('/data/youtube-videos.json').then(function (data) {
     var videos = (data && data.videos || []).slice(0, 5);

@@ -774,6 +774,11 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 /* Instagram-Post-Detailseite (news/insta-post.html): Hochkant-Vorschaubild
    neben dem Text, unabhängig vom Hero-Hintergrundbild. */
 .insta-detail-grid { display: grid; grid-template-columns: 300px 1fr; gap: 32px; align-items: start; }
+/* Ältere Archivseiten ohne Beitragsbild: Beholds signierte Bild-URLs verfallen,
+   sobald ein Post aus dem Feed fällt, und für Posts von vor dem 17.08.2026 gibt
+   es keine gesicherte Kopie im Repo. Dann entfällt die Bildspalte ganz, sonst
+   klebte der Text in der 300px-Spalte. */
+.insta-detail-grid.insta-detail-grid-textonly { grid-template-columns: 1fr; }
 .insta-detail-media {
   border-radius: var(--radius-lg); overflow: hidden; background: var(--bg-subtle);
   aspect-ratio: 9 / 16;

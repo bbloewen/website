@@ -32,7 +32,14 @@ def tracked_html():
         ["git", "ls-files", "-z", "*.html"],
         cwd=REPO, capture_output=True, text=True, check=True,
     ).stdout
-    return sorted(f for f in out.split("\0") if f and not f.startswith("partials/"))
+    # Auf dem Datenträger vorhandene Dateien filtern: git ls-files liest den
+    # Index, der auch noch geloeschte Dateien enthaelt, solange die Loeschung
+    # nicht gestaged ist. Ohne diesen Filter brechen die Skripte mit
+    # FileNotFoundError ab.
+    return sorted(
+        f for f in out.split("\0")
+        if f and not f.startswith("partials/") and (REPO / f).is_file()
+    )
 
 
 def read(rel):

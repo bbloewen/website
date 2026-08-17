@@ -49,15 +49,21 @@ document.addEventListener('DOMContentLoaded', function () {
       };
     });
 
-    function instaItems(feed, badge, feedKey) {
+    function instaItems(feed, badge) {
       return (feed && feed.posts || []).map(function (p) {
         return {
           date: new Date(p.timestamp),
           dateLabel: null,
-          image: p.image,
+          // Bild aus der im Repo gesicherten Kopie: Beholds URLs sind signiert
+          // und verfallen, sobald der Post aus dem Feed fällt.
+          image: p.persistedUrl
+            ? p.persistedUrl.replace('/news/insta-archiv/', '/assets/img/insta/').replace('.html', '.jpg')
+            : p.image,
           headline: firstLine(p.caption, 70),
           teaser: firstLine(p.caption.split('\n').slice(1).join(' ').trim(), 110) || 'Jetzt ansehen.',
-          url: p.persistedUrl || ('/news/insta-post.html?feed=' + feedKey + '&id=' + encodeURIComponent(p.id)),
+          // Ohne Archivseite direkt zu Instagram, nicht auf die entfernte
+          // dynamische Detailseite.
+          url: p.persistedUrl || p.permalink,
           external: true,
           badge: badge
         };
@@ -70,8 +76,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Ausgewogene Quote: immer 3 News-Artikel, max. 6 Löwen, max. 6 LÖWENPARK.
     var items = []
       .concat(takeMax(newsItems, 3))
-      .concat(takeMax(instaItems(parkFeed, 'LÖWENPARK', 'loewenpark'), 6))
-      .concat(takeMax(instaItems(hauptFeed, 'Löwen', 'loewen'), 6));
+      .concat(takeMax(instaItems(parkFeed, 'LÖWENPARK'), 6))
+      .concat(takeMax(instaItems(hauptFeed, 'Löwen'), 6));
 
     items.sort(byDateDesc);
     if (!items.length) return;

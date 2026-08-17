@@ -241,8 +241,14 @@
       list.innerHTML = posts.map(function (p) {
         var line = (p.caption || '').split('\n')[0].trim();
         if (line.length > 90) line = line.slice(0, 89).trim() + '…';
-        var url = '/news/insta-post.html?feed=loewenpark&id=' + encodeURIComponent(p.id);
-        return '<a class="insta-sidebar-item" href="' + url + '"><img loading="lazy" src="' + p.image + '" alt=""  /><span>' + line + '</span></a>';
+        // Statische Archivseite statt der früheren dynamischen Detailseite --
+        // nur die Archivseite ist indexierbar. Vorschaubild aus der im Repo
+        // gesicherten Kopie, weil Beholds URLs mit dem Feed-Abgang verfallen.
+        var url = p.persistedUrl || p.permalink;
+        var img = p.persistedUrl
+          ? p.persistedUrl.replace('/news/insta-archiv/', '/assets/img/insta/').replace('.html', '.jpg')
+          : p.image;
+        return '<a class="insta-sidebar-item" href="' + url + '"><img loading="lazy" src="' + img + '" alt=""  /><span>' + line + '</span></a>';
       }).join('');
       if (window.lucide) { lucide.createIcons(); }
     })
