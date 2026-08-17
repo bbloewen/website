@@ -8,121 +8,121 @@
   },
   {
     "title": "Über uns",
-    "url": "/verein/ueber-uns.html",
+    "url": "/club/ueber-uns.html",
     "category": "Club",
     "description": "Gegründet 2018 in Erfurt: Vision, soziale Sportidee, Werte und Geschichte der Basketball Löwen."
   },
   {
     "title": "Organisation",
-    "url": "/verein/organisation.html",
+    "url": "/club/organisation.html",
     "category": "Club",
     "description": "Die drei Säulen der Basketball Löwen und alle Verantwortlichen — alphabetisch, filterbar nach Organisation."
   },
   {
     "title": "Aaron Rommeley",
-    "url": "/verein/organisation.html",
+    "url": "/club/organisation.html",
     "category": "Verantwortliche",
     "description": "Leiter Nachwuchssport & Inklusion — zu finden auf der Organisation-Seite."
   },
   {
     "title": "André Grenzdörffer",
-    "url": "/verein/organisation.html",
+    "url": "/club/organisation.html",
     "category": "Verantwortliche",
     "description": "Head of Partnerships — zu finden auf der Organisation-Seite."
   },
   {
     "title": "Anna Metzdorf",
-    "url": "/verein/organisation.html",
+    "url": "/club/organisation.html",
     "category": "Verantwortliche",
     "description": "Managerin Damenteam — zu finden auf der Organisation-Seite."
   },
   {
     "title": "Constanze Sakriß",
-    "url": "/verein/organisation.html",
+    "url": "/club/organisation.html",
     "category": "Verantwortliche",
     "description": "Vorstand — zu finden auf der Organisation-Seite."
   },
   {
     "title": "Florian Gut",
-    "url": "/verein/organisation.html",
+    "url": "/club/organisation.html",
     "category": "Verantwortliche",
     "description": "Geschäftsführer & Sportlicher Leiter — zu finden auf der Organisation-Seite."
   },
   {
     "title": "Johannes Stappel",
-    "url": "/verein/organisation.html",
+    "url": "/club/organisation.html",
     "category": "Verantwortliche",
     "description": "1. Vorsitzender — zu finden auf der Organisation-Seite."
   },
   {
     "title": "Kim Mauermann",
-    "url": "/verein/organisation.html",
+    "url": "/club/organisation.html",
     "category": "Verantwortliche",
     "description": "Managerin Profiteam & Büroleitung — zu finden auf der Organisation-Seite."
   },
   {
     "title": "Marc Reimschüssel",
-    "url": "/verein/organisation.html",
+    "url": "/club/organisation.html",
     "category": "Verantwortliche",
     "description": "Vorstand — zu finden auf der Organisation-Seite."
   },
   {
     "title": "Marko Fliege",
-    "url": "/verein/organisation.html",
+    "url": "/club/organisation.html",
     "category": "Verantwortliche",
     "description": "Geschäftsführer & Kaufmännischer Leiter — zu finden auf der Organisation-Seite."
   },
   {
     "title": "Nick Schmoock",
-    "url": "/verein/organisation.html",
+    "url": "/club/organisation.html",
     "category": "Verantwortliche",
     "description": "Dualer Student & Spieltagskoordinator — zu finden auf der Organisation-Seite."
   },
   {
     "title": "Silvio Fulsche",
-    "url": "/verein/organisation.html",
+    "url": "/club/organisation.html",
     "category": "Verantwortliche",
     "description": "Vorstand — zu finden auf der Organisation-Seite."
   },
   {
     "title": "Sophie Scherf",
-    "url": "/verein/organisation.html",
+    "url": "/club/organisation.html",
     "category": "Verantwortliche",
     "description": "Stellv. Vorsitzende — zu finden auf der Organisation-Seite."
   },
   {
     "title": "Steffi Warnatzsch-Abra",
-    "url": "/verein/organisation.html",
+    "url": "/club/organisation.html",
     "category": "Verantwortliche",
     "description": "Stellv. Vorsitzende — zu finden auf der Organisation-Seite."
   },
   {
     "title": "Valentin Kern",
-    "url": "/verein/organisation.html",
+    "url": "/club/organisation.html",
     "category": "Verantwortliche",
     "description": "Partnerschaftsmanagement & Wirkung — zu finden auf der Organisation-Seite."
   },
   {
     "title": "Wilhelm Sonnenberg",
-    "url": "/verein/organisation.html",
+    "url": "/club/organisation.html",
     "category": "Verantwortliche",
     "description": "Dualer Student & Nachwuchstrainer — zu finden auf der Organisation-Seite."
   },
   {
     "title": "Dr. Wolfgang Weisskopf",
-    "url": "/verein/organisation.html",
+    "url": "/club/organisation.html",
     "category": "Verantwortliche",
     "description": "Vorstand — zu finden auf der Organisation-Seite."
   },
   {
     "title": "Kinderschutz",
-    "url": "/verein/kinderschutz.html",
+    "url": "/club/kinderschutz.html",
     "category": "Club",
     "description": "Kinderschutz bei den Basketball Löwen — unsere Grundhaltung, das Kinderschutzkonzept und der Kontaktweg für Anliegen."
   },
   {
     "title": "Jobs",
-    "url": "/verein/jobs.html",
+    "url": "/club/jobs.html",
     "category": "Club",
     "description": "Offene Stellen und Mitarbeit bei den Basketball Löwen Erfurt.",
     "keywords": "Karriere Stellenangebote"
@@ -132,6 +132,12 @@
     "url": "/mitglied-werden.html",
     "category": "Club",
     "description": "Werde Mitglied bei den Basketball Löwen Erfurt — wähle deine Mitgliedschaftsart und melde dich direkt online an."
+  },
+  {
+    "title": "Soziales Engagement",
+    "url": "/club/soziales-engagement.html",
+    "category": "Club",
+    "description": "Soziale Projekte der Basketball Löwen Erfurt: SPORT VERNETZT, BasKIDball, Waid-Löwen und das Löwen Schulprogramm."
   },
   {
     "title": "Profis",

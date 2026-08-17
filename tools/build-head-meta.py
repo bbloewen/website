@@ -102,7 +102,7 @@ LOEWENPARK = {
 
 # Erstes Pfadsegment -> Breadcrumb-Bezeichnung (Formulierung aus partials/header.html)
 SECTIONS = {
-    "verein": ("Club", "verein/ueber-uns.html"),
+    "club": ("Club", "club/ueber-uns.html"),
     "teams-saison": ("Teams", "teams-saison/profis.html"),
     "trainieren": ("Trainieren", "trainieren/loewenpark.html"),
     "partner": ("Partner", "partner/sponsoring.html"),

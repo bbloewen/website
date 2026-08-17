@@ -1538,6 +1538,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 
 .hero-photo.hero-kinderschutz { --hero-photo-url: url('/assets/img/hero-kinderschutz.webp'); background-position: center 20%; }
 .hero-photo.hero-waidloewen { --hero-photo-url: url('/assets/img/hero-waidloewen.webp'); background-position: center 40%; }
+.hero-photo.hero-soziales { --hero-photo-url: url('/assets/img/hero-baskidball.webp'); background-position: 70% 60%; }
 
 .hero-photo.hero-baskidball { --hero-photo-url: url('/assets/img/hero-baskidball.webp'); background-position: 70% 60%; }
 
