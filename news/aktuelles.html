@@ -146,7 +146,10 @@
       // dynamische Detailseite: nur die Archivseite ist indexierbar. Fehlt sie
       // (Post ohne Archivseite), führt der Link direkt zu Instagram statt ins Leere.
       var url = p.persistedUrl || p.permalink;
-      return '<a class="insta-sidebar-item" href="' + url + '"><img loading="lazy" src="' + instaImage(p) + '" alt=""  /><span>' + firstLine(p.caption, 90) + '</span></a>';
+      // onerror-Rückfall, damit eine fehlende Bildkopie kein kaputtes Bildsymbol zeigt
+      // titel kommt fertig gekürzt aus dem Workflow; Rückfall nur für Feeds ohne titel-Feld
+      var text = p.titel || firstLine(p.caption, 90);
+      return '<a class="insta-sidebar-item" href="' + url + '"><img loading="lazy" src="' + instaImage(p) + '" alt="" onerror="this.onerror=null;this.src=\'/assets/img/share/og-default.jpg\'" /><span>' + text + '</span></a>';
     }).join('');
   }
 

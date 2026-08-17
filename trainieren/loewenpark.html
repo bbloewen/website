@@ -239,8 +239,14 @@
         .slice(0, 5);
       var list = document.getElementById('loewenpark-insta-list');
       list.innerHTML = posts.map(function (p) {
-        var line = (p.caption || '').split('\n')[0].trim();
-        if (line.length > 90) line = line.slice(0, 89).trim() + '…';
+        // titel kommt fertig gekürzt aus dem Workflow — bei der Interviewreihe
+        // also der Name statt fünfmal desselben Vorspanns. Rückfall auf die
+        // Caption nur, solange der Feed noch ohne titel-Feld ausgeliefert wird.
+        var line = p.titel;
+        if (!line) {
+          line = (p.caption || '').split('\n')[0].trim();
+          if (line.length > 90) line = line.slice(0, 89).trim() + '…';
+        }
         // Statische Archivseite statt der früheren dynamischen Detailseite --
         // nur die Archivseite ist indexierbar. Vorschaubild aus der im Repo
         // gesicherten Kopie, weil Beholds URLs mit dem Feed-Abgang verfallen.
@@ -248,7 +254,8 @@
         var img = p.persistedUrl
           ? p.persistedUrl.replace('/news/insta-archiv/', '/assets/img/insta/').replace('.html', '.jpg')
           : p.image;
-        return '<a class="insta-sidebar-item" href="' + url + '"><img loading="lazy" src="' + img + '" alt=""  /><span>' + line + '</span></a>';
+        // onerror-Rückfall, damit eine fehlende Bildkopie kein kaputtes Bildsymbol zeigt
+        return '<a class="insta-sidebar-item" href="' + url + '"><img loading="lazy" src="' + img + '" alt="" onerror="this.onerror=null;this.src=\'/assets/img/share/og-default.jpg\'" /><span>' + line + '</span></a>';
       }).join('');
       if (window.lucide) { lucide.createIcons(); }
     })

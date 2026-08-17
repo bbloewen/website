@@ -59,8 +59,12 @@ document.addEventListener('DOMContentLoaded', function () {
           image: p.persistedUrl
             ? p.persistedUrl.replace('/news/insta-archiv/', '/assets/img/insta/').replace('.html', '.jpg')
             : p.image,
-          headline: firstLine(p.caption, 70),
-          teaser: firstLine(p.caption.split('\n').slice(1).join(' ').trim(), 110) || 'Jetzt ansehen.',
+          // titel kommt fertig gekürzt aus dem Workflow (Vorspann abgeschnitten,
+          // Unicode-Fettschrift aufgelöst, Handpflege berücksichtigt). Der
+          // Rückfall auf die Caption greift nur, solange ein Feed noch ohne
+          // titel-Feld ausgeliefert wird.
+          headline: p.titel || firstLine(p.caption, 70),
+          teaser: firstLine(p.beschreibung || p.caption.split('\n').slice(1).join(' ').trim(), 110) || 'Jetzt ansehen.',
           // Ohne Archivseite direkt zu Instagram, nicht auf die entfernte
           // dynamische Detailseite.
           url: p.persistedUrl || p.permalink,
@@ -87,8 +91,11 @@ document.addEventListener('DOMContentLoaded', function () {
         ? INSTAGRAM_ICON + ' ' + item.badge + ' · Weiterlesen'
         : (item.dateLabel ? item.dateLabel + ' · ' : '') + 'Weiterlesen';
       var extraClass = (roleClass ? ' ' + roleClass : '') + (item.external ? ' news-tile-insta' : '');
+      // onerror-Rückfall: fehlt die gesicherte Bildkopie (z. B. weil ein Post
+      // gerade ausgeschlossen wurde und die Feed-Datei noch nicht neu
+      // ausgeliefert ist), zeigt der Browser sonst ein kaputtes Bildsymbol.
       return '<a class="news-tile' + extraClass + '" href="' + item.url + '">' +
-        '<img src="' + item.image + '" alt="" />' +
+        '<img src="' + item.image + '" alt="" onerror="this.onerror=null;this.src=\'/assets/img/share/og-default.jpg\'" />' +
         '<div class="news-tile-overlay">' +
           '<h3 class="news-tile-headline">' + item.headline + '</h3>' +
           '<p class="news-tile-teaser">' + item.teaser + '</p>' +
