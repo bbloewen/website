@@ -20,9 +20,20 @@ REPO = Path(__file__).resolve().parent.parent
 
 NOINDEX_RE = re.compile(r'<meta\s+name=["\']robots["\']\s+content=["\'][^"\']*noindex', re.I)
 
+# Weiterleitungs-Stubs tragen diese Markierung in der ersten Zeile. Sie sind
+# keine Seiten, sondern Wegweiser von einer alten auf eine neue URL, und muessen
+# deshalb aus *allen* Build-Schritten heraus: kein Header/Footer, kein
+# Canonical auf sich selbst, kein Sitemap-Eintrag.
+REDIRECT_MARKER = "<!-- REDIRECT-STUB -->"
+
+
+def is_redirect_stub(rel):
+    with (REPO / rel).open(encoding="utf-8") as fh:
+        return REDIRECT_MARKER in fh.read(200)
+
 
 def tracked_html():
-    """Von Git verfolgte HTML-Dateien, ohne partials/.
+    """Von Git verfolgte HTML-Dateien, ohne partials/ und ohne Redirect-Stubs.
 
     Bewusst git statt Verzeichnis-Scan: lokale Arbeitsartefakte (wie früher
     tools/familienrabatt-rechner.html) landen so nie versehentlich in Sitemap,
@@ -38,7 +49,10 @@ def tracked_html():
     # FileNotFoundError ab.
     return sorted(
         f for f in out.split("\0")
-        if f and not f.startswith("partials/") and (REPO / f).is_file()
+        if f
+        and not f.startswith("partials/")
+        and (REPO / f).is_file()
+        and not is_redirect_stub(f)
     )
 
 
