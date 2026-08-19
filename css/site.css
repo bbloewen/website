@@ -1014,12 +1014,18 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 }
 .partner-tile-front img { max-width: 100%; max-height: 100%; object-fit: contain; }
 .partner-tile-top .partner-tile-front, .partner-tile.is-enlarged .partner-tile-front { padding: 22px; font-size: 20px; font-weight: var(--weight-extrabold); border: 2px solid var(--color-brand-orange); }
-.partner-tile-performance .partner-tile-front { padding: 8px; font-size: 18px; font-weight: var(--weight-semibold); border: 2px solid var(--color-brand-orange); }
 /* Förderpartner (wirkungspartner): eigenes dreispaltiges Grid seit 01.08.2026,
    da genau drei Partner (Kinnings Foundation, KoWo, Salus BKK) — jede Kachel
    füllt exakt eine Spalte, alle drei blau umrandet statt orange. */
 .partner-wall-foerderpartner { grid-template-columns: repeat(3, 1fr); grid-auto-rows: 110px; gap: 16px; }
 .partner-tile-wirkungspartner .partner-tile-front { padding: 22px; font-size: 20px; font-weight: var(--weight-extrabold); border: 2px solid var(--color-brand-blue); }
+/* 'performance' (eigene Sektion seit 18.08.2026, direkt unter Förderpartner):
+   Flexbox statt Grid, da meist nur ein bis wenige Mitglieder — so bleiben die
+   Kacheln zentriert statt am linken Rand zu kleben, statt eine feste Spalten-
+   zahl vorzugeben. */
+.partner-wall-performance { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
+.partner-tile-performance { flex: 0 1 220px; height: 110px; }
+.partner-tile-performance .partner-tile-front { padding: 8px; font-size: 18px; font-weight: var(--weight-semibold); border: 2px solid var(--color-brand-orange); }
 /* 'partner' (vierspaltiges Grid, vier Mitglieder seit 18.08.2026 — vormals
    Teil von 'sponsoren'/'hauptsponsoren') braucht eine eigene, kleinere
    Kachel-Box, getrennt von Förderpartner/Top, die ihre größere Kachelgröße
