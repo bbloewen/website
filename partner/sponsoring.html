@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1787006489" />
+<link rel="stylesheet" href="/css/site.css?v=1787156147" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- SEO:auto START (tools/build-head-meta.py — nicht von Hand ändern) -->
@@ -239,10 +239,11 @@
       <div class="filter-row" role="group" aria-label="Nach Kategorie filtern">
         <button type="button" class="filter-chip is-active" data-filter="alle" aria-pressed="true">Alle</button>
         <button type="button" class="filter-chip" data-filter="top" aria-pressed="false">Premiumsponsoren</button>
-        <button type="button" class="filter-chip" data-filter="hauptsponsoren" aria-pressed="false">Hauptsponsoren</button>
         <button type="button" class="filter-chip" data-filter="wirkungspartner" aria-pressed="false">Förderpartner</button>
-        <button type="button" class="filter-chip" data-filter="sponsoren" aria-pressed="false">Sponsoren</button>
-        <button type="button" class="filter-chip" data-filter="weitere" aria-pressed="false">Weitere Unterstützer</button>
+        <button type="button" class="filter-chip" data-filter="performance" aria-pressed="false">Performance-Partner</button>
+        <button type="button" class="filter-chip" data-filter="partner" aria-pressed="false">Partner</button>
+        <button type="button" class="filter-chip" data-filter="basis" aria-pressed="false">Basis-Partner</button>
+        <button type="button" class="filter-chip" data-filter="weitere" aria-pressed="false">Unterstützer</button>
       </div>
 
       <div class="partner-wall" id="partner-wall"></div>
@@ -252,13 +253,18 @@
         <div class="partner-wall partner-wall-foerderpartner mt-3" id="partner-wall-foerderpartner"></div>
       </div>
 
-      <div id="sponsoren-partner-section">
-        <span class="eyebrow" style="display:block;margin-top:40px">Sponsoren</span>
-        <div class="partner-wall partner-wall-sponsoren mt-3" id="partner-wall-sponsoren"></div>
+      <div id="partner-tier-section">
+        <span class="eyebrow" style="display:block;margin-top:40px">Partner</span>
+        <div class="partner-wall partner-wall-partner mt-3" id="partner-wall-partner"></div>
+      </div>
+
+      <div id="basis-partner-section">
+        <span class="eyebrow" style="display:block;margin-top:40px">Basis-Partner</span>
+        <div class="partner-wall partner-wall-basis mt-3" id="partner-wall-basis"></div>
       </div>
 
       <div id="weitere-partner-section">
-        <span class="eyebrow" style="display:block;margin-top:40px">Weitere Unterstützer</span>
+        <span class="eyebrow" style="display:block;margin-top:40px">Unterstützer</span>
         <div class="partner-wall partner-wall-weitere mt-3" id="partner-wall-weitere"></div>
       </div>
     </div>
@@ -476,8 +482,8 @@
 <script src="/js/include.js?v=1785398309"></script>
 <script src="/js/partner-tile.js?v=1785398309"></script>
 <script>
-  fetch('/data/sponsoren.json?v=1785487795').then(function (r) { return r.json(); }).then(function (data) {
-    var tierRang = { top: 0, hauptsponsoren: 1 };
+  fetch('/data/sponsoren.json?v=1787156090').then(function (r) { return r.json(); }).then(function (data) {
+    var tierRang = { top: 0, performance: 1 };
     function byTierUndName(a, b) {
       var diff = tierRang[a.tier] - tierRang[b.tier];
       return diff !== 0 ? diff : a.name.localeCompare(b.name, 'de');
@@ -485,12 +491,16 @@
     function byName(a, b) { return a.name.localeCompare(b.name, 'de'); }
 
     var wall = document.getElementById('partner-wall');
-    var hauptPartner = data.partner.filter(function (p) { return p.tier === 'top' || p.tier === 'hauptsponsoren'; }).sort(byTierUndName);
+    var hauptPartner = data.partner.filter(function (p) { return p.tier === 'top' || p.tier === 'performance'; }).sort(byTierUndName);
     wall.innerHTML = hauptPartner.map(partnerTileHTML).join('');
 
-    var wallSponsoren = document.getElementById('partner-wall-sponsoren');
-    var sponsorenPartner = data.partner.filter(function (p) { return p.tier === 'sponsoren'; });
-    wallSponsoren.innerHTML = sponsorenPartner.map(partnerTileHTML).join('');
+    var wallPartner = document.getElementById('partner-wall-partner');
+    var partnerTier = data.partner.filter(function (p) { return p.tier === 'partner'; });
+    wallPartner.innerHTML = partnerTier.map(partnerTileHTML).join('');
+
+    var wallBasis = document.getElementById('partner-wall-basis');
+    var basisPartner = data.partner.filter(function (p) { return p.tier === 'basis'; });
+    wallBasis.innerHTML = basisPartner.map(partnerTileHTML).join('');
 
     var wallFoerderpartner = document.getElementById('partner-wall-foerderpartner');
     var foerderpartner = data.partner.filter(function (p) { return p.tier === 'wirkungspartner'; }).sort(byName);
@@ -502,7 +512,8 @@
 
     var chips = document.querySelectorAll('.filter-chip');
     var tiles = wall.querySelectorAll('.partner-tile');
-    var sponsorenSection = document.getElementById('sponsoren-partner-section');
+    var partnerSection = document.getElementById('partner-tier-section');
+    var basisSection = document.getElementById('basis-partner-section');
     var foerderpartnerSection = document.getElementById('foerderpartner-section');
     var weitereSection = document.getElementById('weitere-partner-section');
 
@@ -519,8 +530,9 @@
         chip.setAttribute('aria-pressed', 'true');
         var filter = chip.getAttribute('data-filter');
 
-        wall.hidden = filter === 'sponsoren' || filter === 'wirkungspartner' || filter === 'weitere';
-        sponsorenSection.hidden = filter !== 'alle' && filter !== 'sponsoren';
+        wall.hidden = filter === 'partner' || filter === 'basis' || filter === 'wirkungspartner' || filter === 'weitere';
+        partnerSection.hidden = filter !== 'alle' && filter !== 'partner';
+        basisSection.hidden = filter !== 'alle' && filter !== 'basis';
         foerderpartnerSection.hidden = filter !== 'alle' && filter !== 'wirkungspartner';
         weitereSection.hidden = filter !== 'alle' && filter !== 'weitere';
 
