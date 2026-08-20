@@ -491,27 +491,22 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
    z.B. auf der News-Übersichtsseite. */
 .card-media-photo { height: 180px; padding: 0; }
 .card-media-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
-/* Freiplätze-Seite (trainieren/freiplaetze.html, Stand 20.08.2026, noch nicht
-   öffentlich verlinkt): Kartenausschnitt, Kachel-Adresszeile mit Kopieren-
-   Button und QR-Code-Zeile. */
+/* Freiplätze-Seite (trainieren/freiplaetze.html): Kartenausschnitt,
+   Kachel-Adresszeile (gleiches Location-Icon-Muster wie .hero-location,
+   nur für hellen Kachel-Hintergrund statt Foto-Overlay) und QR-Code-Zeile. */
 .freiplaetze-map { height: 420px; border-radius: var(--radius-lg); margin-top: 24px; z-index: 0; }
 .freiplatz-photo-placeholder {
   height: 180px; display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 6px; color: var(--text-secondary); background: var(--bg-subtle); font-size: 13px;
 }
-.freiplatz-adresse-row {
-  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+.freiplatz-adresse-link {
+  display: flex; align-items: center; gap: 8px;
   padding: 10px 12px; background: var(--bg-subtle); border-radius: var(--radius-md);
-  margin-bottom: 12px;
+  margin-bottom: 12px; font-size: 13px; color: var(--text-primary); text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-out);
 }
-.freiplatz-adresse { font-size: 13px; color: var(--text-primary); }
-.freiplatz-copy-btn {
-  flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
-  width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border);
-  background: #fff; color: var(--text-secondary); cursor: pointer;
-  transition: border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
-}
-.freiplatz-copy-btn:hover { border-color: var(--color-brand-orange); color: var(--color-brand-orange-text); }
+.freiplatz-adresse-link:hover { color: var(--color-brand-orange-text); text-decoration: underline; }
+.freiplatz-adresse-link i { flex-shrink: 0; color: var(--color-brand-orange-text); }
 .freiplatz-qr-row { display: flex; align-items: center; gap: 12px; }
 .freiplatz-qr { width: 64px; height: 64px; flex-shrink: 0; border: 1px solid var(--border); border-radius: 8px; padding: 4px; background: #fff; }
 .freiplatz-qr-hint { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
@@ -1554,6 +1549,13 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 /* Hero-Variante für die Community-Events-Seite — gestaltete Festival-Szene
    mit Löwen-Maskottchen und "Community Stage". */
 .hero-photo.hero-community-events { --hero-photo-url: url('/assets/img/hero-community-events.webp'); background-position: center 55%; }
+
+/* Hero für die Freiplätze-Seite: Action-Foto vom 3x3-Turnier (Korbleger,
+   Ball am Ring), von Marko geliefert. Bild ist recht hochformatig im
+   Verhältnis zur schmalen hero-half-Box — Fokus bewusst weit oben, damit
+   Ball/Korb/Hände im sichtbaren Ausschnitt bleiben statt der Beine/Zuschauer
+   im unteren Bilddrittel. */
+.hero-photo.hero-freiplaetze { --hero-photo-url: url('/assets/img/hero-freiplaetze.webp'); background-position: 48% 15%; }
 
 /* Hero-Variante für die Netzwerk-Treffen-Seite — Bühnenmoment beim
    Alley-Oop 2025, Basketball-Löwen/CATL-Wandlogo links, Publikum unten. */

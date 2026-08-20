@@ -4,18 +4,35 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Freiplätze in Erfurt — Basketball Löwen Erfurt</title>
-<meta name="description" content="Alle öffentlichen Basketball-Freiplätze in Erfurt auf einen Blick — mit Adresse zum Kopieren, QR-Code zur Wegbeschreibung und Foto." />
-<meta name="robots" content="noindex, nofollow" />
+<meta name="description" content="Alle öffentlichen Basketball-Freiplätze in Erfurt auf einen Blick — mit Adresse, QR-Code zur Wegbeschreibung und Foto." />
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png" />
 <link rel="icon" type="image/png" sizes="16x16" href="/assets/logo/favicon-16.png" />
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1787221181" />
+<link rel="stylesheet" href="/css/site.css?v=1787222817" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
+<!-- SEO:auto START (tools/build-head-meta.py — nicht von Hand ändern) -->
+<link rel="canonical" href="https://basketball-loewen.com/trainieren/freiplaetze.html" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Basketball Löwen Erfurt" />
+<meta property="og:locale" content="de_DE" />
+<meta property="og:title" content="Freiplätze in Erfurt" />
+<meta property="og:description" content="Alle öffentlichen Basketball-Freiplätze in Erfurt auf einen Blick — mit Adresse, QR-Code zur Wegbeschreibung und Foto." />
+<meta property="og:url" content="https://basketball-loewen.com/trainieren/freiplaetze.html" />
+<meta property="og:image" content="https://basketball-loewen.com/assets/img/share/og-default.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Freiplätze in Erfurt" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Freiplätze in Erfurt" />
+<meta name="twitter:description" content="Alle öffentlichen Basketball-Freiplätze in Erfurt auf einen Blick — mit Adresse, QR-Code zur Wegbeschreibung und Foto." />
+<meta name="twitter:image" content="https://basketball-loewen.com/assets/img/share/og-default.jpg" />
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Start","item":"https://basketball-loewen.com/"},{"@type":"ListItem","position":2,"name":"Trainieren","item":"https://basketball-loewen.com/trainieren/loewenpark.html"},{"@type":"ListItem","position":3,"name":"Freiplätze in Erfurt","item":"https://basketball-loewen.com/trainieren/freiplaetze.html"}]}]}</script>
+<!-- SEO:auto END -->
 </head>
 <body data-nav-group="trainieren">
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
@@ -72,6 +89,7 @@
             <a href="/trainieren/camps.html">Feriencamps</a>
             <a href="/trainieren/probetraining.html">Probetraining</a>
             <a href="/trainieren/inklusion.html">Waid-Löwen</a>
+            <a href="/trainieren/freiplaetze.html">Freiplätze</a>
           </div>
         </div>
         <div class="nav-item drawer-only-4" data-nav-item>
@@ -170,6 +188,7 @@
         <a href="/trainieren/camps.html">Feriencamps</a>
         <a href="/trainieren/probetraining.html">Probetraining</a>
         <a href="/trainieren/inklusion.html">Waid-Löwen</a>
+        <a href="/trainieren/freiplaetze.html">Freiplätze</a>
       </div>
     </li>
     <li class="drawer-nav-item">
@@ -210,7 +229,7 @@
 </nav>
 <!--/PARTIAL:header--></div>
 <main id="main">
-  <section class="hero-photo hero-half">
+  <section class="hero-photo hero-freiplaetze hero-half">
     <div class="container">
     <span class="eyebrow">Trainieren · Freiplätze</span>
     <h1>Erfurt wird <span class="kw">Basketball-Stadt<span class="swoosh" aria-hidden="true"></span></span>.</h1>
@@ -405,14 +424,12 @@
       var gesperrtBanner = f.gesperrt
         ? '<div class="freiplatz-gesperrt-banner"><i data-lucide="lock" class="icon-16"></i> ' + (f.gesperrtHinweis || 'Gesperrt') + '</div>'
         : '';
+      var mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + f.lat + ',' + f.lng;
       return '<div class="card freiplatz-card">' + photo + gesperrtBanner +
         '<div class="card-body">' +
           '<h3>' + f.name + '</h3>' +
           '<p>' + f.beschreibung + '</p>' +
-          '<div class="freiplatz-adresse-row">' +
-            '<span class="freiplatz-adresse">' + f.adresse + '</span>' +
-            '<button type="button" class="freiplatz-copy-btn" data-adresse="' + f.adresse + '" aria-label="Adresse kopieren"><i data-lucide="copy" class="icon-14"></i></button>' +
-          '</div>' +
+          '<a class="freiplatz-adresse-link" href="' + mapsUrl + '" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> ' + f.adresse + '</a>' +
           '<div class="freiplatz-qr-row">' +
             '<img src="' + f.qr + '" alt="QR-Code zur Wegbeschreibung" class="freiplatz-qr" loading="lazy" />' +
             '<span class="freiplatz-qr-hint">QR-Code scannen für die Wegbeschreibung</span>' +
@@ -420,18 +437,6 @@
         '</div>' +
       '</div>';
     }).join('');
-
-    grid.querySelectorAll('.freiplatz-copy-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var adresse = btn.getAttribute('data-adresse');
-        navigator.clipboard.writeText(adresse).then(function () {
-          var original = btn.innerHTML;
-          btn.innerHTML = '<i data-lucide="check" class="icon-14"></i>';
-          if (window.lucide) window.lucide.createIcons();
-          setTimeout(function () { btn.innerHTML = original; if (window.lucide) window.lucide.createIcons(); }, 1500);
-        });
-      });
-    });
 
     if (window.L) {
       var map = L.map('freiplaetze-map', { scrollWheelZoom: false });
