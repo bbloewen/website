@@ -266,31 +266,15 @@
   <section class="section-sm bg-subtle" id="zeiten">
     <div class="container">
       <span class="eyebrow">Nachwuchs</span>
-      <h2 class="t-h2">Auszug: Trainingszeiten nach Alter</h2>
-      <p class="t-body" style="margin:10px 0 24px">Die vollständige, immer aktuelle Übersicht pflegen wir laufend in unseren internen Trainingsdaten. Ein Auszug:</p>
-      <div class="grid-3">
-        <div class="card">
-          <div class="card-body">
-            <span class="card-label">Bambini · 2019–2022</span>
-            <h3 style="font-size:17px">Erste Ballerfahrung</h3>
-            <p>Di 16:00–17:00 Uhr · Grundschule Siebleben</p>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-body">
-            <span class="card-label">U10 · 2016–2017</span>
-            <h3 style="font-size:17px">Gemischte Gruppen</h3>
-            <p>Di &amp; Do 16:30–18:00 Uhr · Südparkhalle</p>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-body">
-            <span class="card-label">U19 (weiblich) · 2007–2009</span>
-            <h3 style="font-size:17px">SG USV/Löwinnen</h3>
-            <p>Di &amp; Do 16:30–18:30 Uhr · Südparkhalle</p>
-          </div>
-        </div>
+      <h2 class="t-h2">Trainingszeiten nach Jahrgang</h2>
+      <p class="t-body" style="margin:10px 0 24px">Minibasketball, Jugend- und weibliche Jugendteams unserer Partnervereine BC Erfurt und USV Erfurt — sortiert vom jüngsten bis zum ältesten Jahrgang.</p>
+      <div class="filter-row" role="group" aria-label="Nach Verein filtern">
+        <button type="button" class="filter-chip is-active" data-filter="alle" aria-pressed="true">Alle</button>
+        <button type="button" class="filter-chip" data-filter="bc-erfurt" aria-pressed="false">BC Erfurt</button>
+        <button type="button" class="filter-chip" data-filter="usv-erfurt" aria-pressed="false">USV Erfurt</button>
+        <button type="button" class="filter-chip" data-filter="loewinnen" aria-pressed="false">Löwinnen (SG)</button>
       </div>
+      <div class="grid-3" id="trainingszeiten-grid" style="margin-top:24px"></div>
       <p class="t-body-sm mt-5">Genau dein Jahrgang ist nicht dabei? <a href="mailto:info@basketball-loewen.com">Schreib uns</a> — wir sagen dir, wo dein Platz ist.</p>
     </div>
   </section>
@@ -432,5 +416,6 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="/js/nav.js?v=1787221181"></script>
 <script src="/js/include.js?v=1785398309"></script>
+<script src="/js/trainingszeiten.js?v=1787240672"></script>
 </body>
 </html>
