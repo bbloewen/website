@@ -276,6 +276,9 @@ window.initNav = function initNav() {
   var feedbackClose = document.getElementById('feedback-widget-close');
   var feedbackForm = document.getElementById('feedback-widget-form');
   var feedbackContext = document.getElementById('feedback-widget-context');
+  var feedbackFoto = document.getElementById('feedback-widget-foto');
+  var feedbackFotoText = document.getElementById('feedback-widget-foto-text');
+  var FEEDBACK_FOTO_DEFAULT_TEXT = 'Foto anhängen (optional)';
   if (feedbackWidget && feedbackToggle && feedbackForm) {
     if (feedbackContext) {
       /* Seitenname aus dem Tab-Titel ableiten (Muster site-weit: "<Seite> — Basketball Löwen Erfurt"),
@@ -294,6 +297,12 @@ window.initNav = function initNav() {
         feedbackWidget.classList.remove('open');
       });
     }
+    if (feedbackFoto && feedbackFotoText) {
+      feedbackFoto.addEventListener('change', function () {
+        var file = feedbackFoto.files && feedbackFoto.files[0];
+        feedbackFotoText.textContent = file ? file.name : FEEDBACK_FOTO_DEFAULT_TEXT;
+      });
+    }
     feedbackForm.addEventListener('submit', function (e) {
       e.preventDefault();
       var message = feedbackForm.querySelector('[name="message"]').value.trim();
@@ -303,20 +312,48 @@ window.initNav = function initNav() {
       var submitBtn = feedbackForm.querySelector('.feedback-widget-submit');
       submitBtn.disabled = true;
       submitBtn.textContent = 'Wird gesendet …';
-      fetch('https://poetic-patience-production-9290.up.railway.app/webhook/website-feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: message, contact: contact, context: context, page: window.location.href })
-      }).then(function (res) {
-        if (!res.ok) throw new Error('Feedback-Webhook antwortete mit Fehler');
-        feedbackForm.hidden = true;
-        feedbackWidget.querySelector('.feedback-widget-success').hidden = false;
-        setTimeout(function () { feedbackWidget.classList.remove('open'); }, 2500);
-      }).catch(function () {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Absenden';
-        alert('Senden hat leider nicht geklappt — bitte später noch einmal versuchen.');
-      });
+
+      function send(fotoFields) {
+        var payload = { message: message, contact: contact, context: context, page: window.location.href };
+        if (fotoFields) {
+          payload.fotoBase64 = fotoFields.base64;
+          payload.fotoName = fotoFields.name;
+          payload.fotoType = fotoFields.type;
+        }
+        fetch('https://poetic-patience-production-9290.up.railway.app/webhook/website-feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }).then(function (res) {
+          if (!res.ok) throw new Error('Feedback-Webhook antwortete mit Fehler');
+          feedbackForm.hidden = true;
+          feedbackForm.reset();
+          if (feedbackFotoText) feedbackFotoText.textContent = FEEDBACK_FOTO_DEFAULT_TEXT;
+          feedbackWidget.querySelector('.feedback-widget-success').hidden = false;
+          setTimeout(function () { feedbackWidget.classList.remove('open'); }, 2500);
+        }).catch(function () {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Absenden';
+          alert('Senden hat leider nicht geklappt — bitte später noch einmal versuchen.');
+        });
+      }
+
+      var file = feedbackFoto && feedbackFoto.files && feedbackFoto.files[0];
+      if (file) {
+        var reader = new FileReader();
+        reader.onload = function () {
+          var base64 = String(reader.result).split(',')[1] || '';
+          send({ base64: base64, name: file.name, type: file.type || 'image/jpeg' });
+        };
+        reader.onerror = function () {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Absenden';
+          alert('Foto konnte nicht gelesen werden — bitte ohne Foto erneut senden.');
+        };
+        reader.readAsDataURL(file);
+      } else {
+        send(null);
+      }
     });
   }
 };

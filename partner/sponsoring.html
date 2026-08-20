@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1787220367" />
+<link rel="stylesheet" href="/css/site.css?v=1787221181" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- SEO:auto START (tools/build-head-meta.py — nicht von Hand ändern) -->
@@ -476,6 +476,11 @@
       <select name="context" id="feedback-widget-context"></select>
       <textarea name="message" required placeholder="Was ist dir aufgefallen?"></textarea>
       <input type="text" name="contact" placeholder="Kontakt (optional, falls wir nachfragen dürfen)" />
+      <label class="feedback-widget-file-label" for="feedback-widget-foto">
+        <i data-lucide="paperclip" class="icon-14"></i>
+        <span id="feedback-widget-foto-text">Foto anhängen (optional)</span>
+      </label>
+      <input type="file" id="feedback-widget-foto" name="foto" accept="image/*" style="display:none" />
       <button type="submit" class="feedback-widget-submit">Absenden</button>
     </form>
     <p class="feedback-widget-success" hidden>Danke fürs Feedback!</p>
@@ -483,7 +488,7 @@
 </div>
 <!--/PARTIAL:footer--></div>
 <script src="https://unpkg.com/lucide@latest"></script>
-<script src="/js/nav.js?v=1785398309"></script>
+<script src="/js/nav.js?v=1787221181"></script>
 <script src="/js/include.js?v=1785398309"></script>
 <script src="/js/partner-tile.js?v=1785398309"></script>
 <script>
