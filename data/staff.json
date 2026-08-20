@@ -1,17 +1,17 @@
 {
   "verantwortliche": [
-    { "name": "Florian Gut", "rolle": "Geschäftsführer & sportlicher Leiter" },
-    { "name": "Marko Fliege", "rolle": "Geschäftsführer" },
+    { "name": "Florian Gut", "rolle": "Sportlicher Leiter" },
+    { "name": "Marko Fliege", "rolle": "Kaufmännischer Leiter" },
     { "name": "Kim Mauermann", "rolle": "Managerin Profiteam" },
-    { "name": "Aaron Rommeley", "rolle": "Leiter Nachwuchssport & Inklusion" },
+    { "name": "Aaron Rommeley", "rolle": "Leiter Nachwuchssport" },
     { "name": "André Grenzdörffer", "rolle": "Vertriebsleitung" },
     { "name": "Anna-Sophie Metzdorf", "rolle": "Managerin Damenteam & Ticketing" },
-    { "name": "Valentin Kern", "rolle": "Partnerschaftsmanagement & Wirkung" },
-    { "name": "Nick Schmoock", "rolle": "Dualer Student & Spieltagskoordinator" },
+    { "name": "Valentin Kern", "rolle": "Leiter Soziale Projekte" },
+    { "name": "Nick Schmoock", "rolle": "Spieltagskoordinator" },
     { "name": "Nora Kirschstein", "rolle": "Duale Studentin & Nachwuchstrainerin" },
     { "name": "Wilhelm Sonnenberg", "rolle": "Dualer Student & Nachwuchstrainer" },
     { "name": "Thomas Pfistner", "rolle": "Team-Manager Profiteam" }
   ],
   "vorstand": ["Marc Reimschüssel", "Constanze Sakriß", "Dr. Wolfgang Weisskopf", "Florian Gut", "Aaron Rommeley"],
-  "foerderverein_vorstand": ["Johannes Stappel", "Steffi Warnatzsch-Abra", "Sophie Scherf", "Marko Fliege", "Arne Ott", "Silvio Fulsche", "Jonathan Schreier"]
+  "foerderverein_vorstand": ["Johannes Stappel", "Marko Fliege", "Arne Ott", "Jonathan Schreier"]
 }
