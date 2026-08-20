@@ -269,9 +269,6 @@
               <span class="card-label">Alley-Oop Season Opening</span>
               <h3 style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">wird noch festgelegt <a href="#" title="Termin folgt in Kürze — im Kalender vormerken" style="display:inline-flex;color:var(--color-brand-orange-text)"><i data-lucide="calendar-plus" class="icon-18"></i></a></h3>
               <p>Der Auftakt in die neue Saison der Netzwerk-Treffen — Firmenkunden empfangen und im VIP-Bereich netzwerken.</p>
-              <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px">
-                <button type="button" class="btn btn-primary btn-sm" id="alleyoop-ticket-btn">Ticket buchen</button>
-              </div>
             </div>
           </div>
           <div class="card hoverable camp-slider-card">
@@ -447,20 +444,6 @@
 <script src="/js/camp-galerie.js?v=1786323000"></script>
 <script>
   initCampGallery('netzwerktreffen-gallery', null, '/data/netzwerktreffen-galerie.json');
-
-  /* Alley-Oop Season Opening — 30.09.2026, 19 €, führt in den normalen
-     Warenkorb-Flow wie Einzeltickets. Die anderen Events bekommen erst
-     einen Ticket-Button, sobald auch sie einen Termin haben. */
-  document.getElementById('alleyoop-ticket-btn').addEventListener('click', function () {
-    sessionStorage.setItem('bl_cart', JSON.stringify({
-      productType: 'einzelticket',
-      eventLabel: 'Alley-Oop Season Opening – Basketball Löwen Erfurt, 30. September 2026',
-      lines: [{ label: 'Alley-Oop Ticket', qty: 1, unitPrice: 19, lineTotal: 19 }],
-      total: 19,
-      voucher: null
-    }));
-    window.location.href = '/tickets/checkout.html';
-  });
 
   (function () {
     var wrap = document.getElementById('netzwerktreffen-termine');
