@@ -6,187 +6,373 @@
       "jahrgang": "2019/2020",
       "verein": "usv-erfurt",
       "termine": [],
-      "hinweis": "Zeiten folgen in Kürze"
+      "hinweis": "Zeiten folgen in Kürze",
+      "jahre": [
+        2019,
+        2020
+      ]
     },
     {
       "team": "U9mix",
       "jahrgang": "2018/2019",
       "verein": "bc-erfurt",
       "termine": [
-        { "tag": "Di", "zeit": "16:30–18:00 Uhr", "ort": "Muldenweg (Feld 1)" },
-        { "tag": "Do", "zeit": "15:15–16:30 Uhr", "ort": "Bukarester Straße" }
+        {
+          "tag": "Di",
+          "zeit": "16:30–18:00 Uhr",
+          "ort": "Muldenweg (Feld 1)"
+        },
+        {
+          "tag": "Do",
+          "zeit": "15:15–16:30 Uhr",
+          "ort": "Bukarester Straße"
+        }
       ],
-      "trainer": "Kristina, Matthes, Willi"
+      "trainer": "Kristina, Matthes, Willi",
+      "jahre": [
+        2018,
+        2019
+      ]
     },
     {
       "team": "U10mix",
       "jahrgang": "2017",
       "verein": "bc-erfurt",
       "termine": [
-        { "tag": "Mo", "zeit": "16:30–18:00 Uhr", "ort": "Südparkhalle (Feld 1)" },
-        { "tag": "Mi", "zeit": "17:00–18:30 Uhr", "ort": "Muldenweg (Feld 1)" },
-        { "tag": "Fr", "zeit": "16:00–17:30 Uhr", "ort": "Christophorushalle", "vorbehaltlich": "ggf. 17:30–19:00 Uhr" }
+        {
+          "tag": "Mo",
+          "zeit": "16:30–18:00 Uhr",
+          "ort": "Südparkhalle (Feld 1)"
+        },
+        {
+          "tag": "Mi",
+          "zeit": "17:00–18:30 Uhr",
+          "ort": "Muldenweg (Feld 1)"
+        },
+        {
+          "tag": "Fr",
+          "zeit": "16:00–17:30 Uhr",
+          "ort": "Christophorushalle",
+          "vorbehaltlich": "ggf. 17:30–19:00 Uhr"
+        }
       ],
-      "trainer": "Tomasz"
+      "trainer": "Tomasz",
+      "jahre": [
+        2017
+      ]
     },
     {
       "team": "U10mix",
       "jahrgang": "2017/2018",
       "verein": "usv-erfurt",
       "termine": [],
-      "hinweis": "Zeiten folgen in Kürze"
+      "hinweis": "Zeiten folgen in Kürze",
+      "jahre": [
+        2017,
+        2018
+      ]
     },
     {
       "team": "U10w und jünger",
       "jahrgang": "2017–2020",
       "verein": "bc-erfurt",
       "termine": [
-        { "tag": "Di", "zeit": "17:00–18:30 Uhr", "ort": "Eugen-Richter-Halle (Feld 2)" },
-        { "tag": "Fr", "zeit": "16:30–18:00 Uhr", "ort": "Südparkhalle (Feld 2)" }
+        {
+          "tag": "Di",
+          "zeit": "17:00–18:30 Uhr",
+          "ort": "Eugen-Richter-Halle (Feld 2)"
+        },
+        {
+          "tag": "Fr",
+          "zeit": "16:30–18:00 Uhr",
+          "ort": "Südparkhalle (Feld 2)"
+        }
       ],
-      "trainer": "Steffi, Anna"
+      "trainer": "Steffi, Anna",
+      "jahre": [
+        2017,
+        2018,
+        2019,
+        2020
+      ]
     },
     {
       "team": "U11mix",
       "jahrgang": "2016",
       "verein": "bc-erfurt",
       "termine": [
-        { "tag": "Di", "zeit": "18:00–19:30 Uhr", "ort": "Christophorushalle" },
-        { "tag": "Do", "zeit": "17:00–18:30 Uhr", "ort": "Christophorushalle" }
+        {
+          "tag": "Di",
+          "zeit": "18:00–19:30 Uhr",
+          "ort": "Christophorushalle"
+        },
+        {
+          "tag": "Do",
+          "zeit": "17:00–18:30 Uhr",
+          "ort": "Christophorushalle"
+        }
       ],
-      "trainer": "Cassandra, Jamie"
+      "trainer": "Cassandra, Jamie",
+      "jahre": [
+        2016
+      ]
     },
     {
       "team": "U12mix",
       "jahrgang": "2015",
       "verein": "bc-erfurt",
       "termine": [
-        { "tag": "Mi", "zeit": "16:30–18:00 Uhr", "ort": "Christophorushalle" },
-        { "tag": "Fr", "zeit": "17:30–19:00 Uhr", "ort": "Christophorushalle", "vorbehaltlich": "ggf. 16:00–17:30 Uhr" }
+        {
+          "tag": "Mi",
+          "zeit": "16:30–18:00 Uhr",
+          "ort": "Christophorushalle"
+        },
+        {
+          "tag": "Fr",
+          "zeit": "17:30–19:00 Uhr",
+          "ort": "Christophorushalle",
+          "vorbehaltlich": "ggf. 16:00–17:30 Uhr"
+        }
       ],
-      "trainer": "Moriz, Luke"
+      "trainer": "Moriz, Luke",
+      "jahre": [
+        2015
+      ]
     },
     {
       "team": "U12m/1",
       "jahrgang": "2015/2016",
       "verein": "usv-erfurt",
       "termine": [],
-      "hinweis": "Zeiten folgen in Kürze"
+      "hinweis": "Zeiten folgen in Kürze",
+      "jahre": [
+        2015,
+        2016
+      ]
     },
     {
       "team": "U12w",
       "jahrgang": "2015/2016",
       "verein": "loewinnen",
       "termine": [
-        { "tag": "Mo", "zeit": "16:30–18:00 Uhr", "ort": "Südparkhalle (Feld 3)" }
+        {
+          "tag": "Mo",
+          "zeit": "16:30–18:00 Uhr",
+          "ort": "Südparkhalle (Feld 3)"
+        }
       ],
-      "trainer": "Laura"
+      "trainer": "Laura",
+      "jahre": [
+        2015,
+        2016
+      ]
     },
     {
       "team": "U13mix",
       "jahrgang": "2014",
       "verein": "bc-erfurt",
       "termine": [
-        { "tag": "Mo", "zeit": "16:30–18:00 Uhr", "ort": "Südparkhalle (Feld 2)" },
-        { "tag": "Do", "zeit": "16:30–18:00 Uhr", "ort": "Südparkhalle (Feld 3)" }
+        {
+          "tag": "Mo",
+          "zeit": "16:30–18:00 Uhr",
+          "ort": "Südparkhalle (Feld 2)"
+        },
+        {
+          "tag": "Do",
+          "zeit": "16:30–18:00 Uhr",
+          "ort": "Südparkhalle (Feld 3)"
+        }
       ],
-      "trainer": "Raúl, Léonar"
+      "trainer": "Raúl, Léonar",
+      "jahre": [
+        2014
+      ]
     },
     {
       "team": "U13m",
       "jahrgang": "2014",
       "verein": "usv-erfurt",
       "termine": [],
-      "hinweis": "Zeiten folgen in Kürze"
+      "hinweis": "Zeiten folgen in Kürze",
+      "jahre": [
+        2014
+      ]
     },
     {
       "team": "U14mix",
       "jahrgang": "2013",
       "verein": "bc-erfurt",
       "termine": [
-        { "tag": "Di", "zeit": "16:30–18:00 Uhr", "ort": "Südparkhalle (Feld 3)" },
-        { "tag": "Do", "zeit": "16:30–18:00 Uhr", "ort": "Südparkhalle (Feld 2)" }
+        {
+          "tag": "Di",
+          "zeit": "16:30–18:00 Uhr",
+          "ort": "Südparkhalle (Feld 3)"
+        },
+        {
+          "tag": "Do",
+          "zeit": "16:30–18:00 Uhr",
+          "ort": "Südparkhalle (Feld 2)"
+        }
       ],
-      "trainer": "Jannis"
+      "trainer": "Jannis",
+      "jahre": [
+        2013
+      ]
     },
     {
       "team": "U14m",
       "jahrgang": "2013",
       "verein": "usv-erfurt",
       "termine": [],
-      "hinweis": "Zeiten folgen in Kürze"
+      "hinweis": "Zeiten folgen in Kürze",
+      "jahre": [
+        2013
+      ]
     },
     {
       "team": "U14w",
       "jahrgang": "2013/2014",
       "verein": "loewinnen",
       "termine": [
-        { "tag": "Di", "zeit": "16:30–18:00 Uhr", "ort": "Südparkhalle (Feld 1)" },
-        { "tag": "Do", "zeit": "18:00–19:30 Uhr", "ort": "Muldenweg (Feld 1)" }
+        {
+          "tag": "Di",
+          "zeit": "16:30–18:00 Uhr",
+          "ort": "Südparkhalle (Feld 1)"
+        },
+        {
+          "tag": "Do",
+          "zeit": "18:00–19:30 Uhr",
+          "ort": "Muldenweg (Feld 1)"
+        }
       ],
-      "trainer": "Laura"
+      "trainer": "Laura",
+      "jahre": [
+        2013,
+        2014
+      ]
     },
     {
       "team": "U15m",
       "jahrgang": "2012",
       "verein": "bc-erfurt",
       "termine": [
-        { "tag": "Mo", "zeit": "18:00–20:00 Uhr", "ort": "Südparkhalle (Feld 2)" },
-        { "tag": "Mi", "zeit": "16:30–18:00 Uhr", "ort": "Südparkhalle (Feld 1)" }
+        {
+          "tag": "Mo",
+          "zeit": "18:00–20:00 Uhr",
+          "ort": "Südparkhalle (Feld 2)"
+        },
+        {
+          "tag": "Mi",
+          "zeit": "16:30–18:00 Uhr",
+          "ort": "Südparkhalle (Feld 1)"
+        }
       ],
-      "trainer": "Alex, Raúl"
+      "trainer": "Alex, Raúl",
+      "jahre": [
+        2012
+      ]
     },
     {
       "team": "U16m",
       "jahrgang": "2011",
       "verein": "bc-erfurt",
       "termine": [
-        { "tag": "Di", "zeit": "16:30–18:00 Uhr", "ort": "Südparkhalle (Feld 2)" },
-        { "tag": "Do", "zeit": "16:30–18:00 Uhr", "ort": "Südparkhalle (Feld 1)" }
+        {
+          "tag": "Di",
+          "zeit": "16:30–18:00 Uhr",
+          "ort": "Südparkhalle (Feld 2)"
+        },
+        {
+          "tag": "Do",
+          "zeit": "16:30–18:00 Uhr",
+          "ort": "Südparkhalle (Feld 1)"
+        }
       ],
-      "trainer": "Andreas, Sascha"
+      "trainer": "Andreas, Sascha",
+      "jahre": [
+        2011
+      ]
     },
     {
       "team": "U16m",
       "jahrgang": "2011/2012",
       "verein": "usv-erfurt",
       "termine": [],
-      "hinweis": "Zeiten folgen in Kürze"
+      "hinweis": "Zeiten folgen in Kürze",
+      "jahre": [
+        2011,
+        2012
+      ]
     },
     {
       "team": "U16w",
       "jahrgang": "2011/2012",
       "verein": "loewinnen",
       "termine": [
-        { "tag": "Di", "zeit": "19:30–21:30 Uhr", "ort": "Südparkhalle (Feld 2)" }
+        {
+          "tag": "Di",
+          "zeit": "19:30–21:30 Uhr",
+          "ort": "Südparkhalle (Feld 2)"
+        }
       ],
-      "trainer": "Toni, Anna"
+      "trainer": "Toni, Anna",
+      "jahre": [
+        2011,
+        2012
+      ]
     },
     {
       "team": "U19m",
       "jahrgang": "2008/2009/2010",
       "verein": "bc-erfurt",
       "termine": [
-        { "tag": "Mo", "zeit": "19:30–21:30 Uhr", "ort": "Südparkhalle (Feld 1)" },
-        { "tag": "Do", "zeit": "19:30–20:30 Uhr", "ort": "Südparkhalle (Feld 2+3)" }
+        {
+          "tag": "Mo",
+          "zeit": "19:30–21:30 Uhr",
+          "ort": "Südparkhalle (Feld 1)"
+        },
+        {
+          "tag": "Do",
+          "zeit": "19:30–20:30 Uhr",
+          "ort": "Südparkhalle (Feld 2+3)"
+        }
       ],
-      "trainer": "Andreas SE, Björn, Thomas"
+      "trainer": "Andreas SE, Björn, Thomas",
+      "jahre": [
+        2008,
+        2009,
+        2010
+      ]
     },
     {
       "team": "U19m",
       "jahrgang": "2008/2009/2010",
       "verein": "usv-erfurt",
       "termine": [],
-      "hinweis": "Zeiten folgen in Kürze"
+      "hinweis": "Zeiten folgen in Kürze",
+      "jahre": [
+        2008,
+        2009,
+        2010
+      ]
     },
     {
       "team": "U19w",
       "jahrgang": "2008/2009/2010",
       "verein": "loewinnen",
       "termine": [
-        { "tag": "Di", "zeit": "19:30–21:30 Uhr", "ort": "Südparkhalle (Feld 2)" }
+        {
+          "tag": "Di",
+          "zeit": "19:30–21:30 Uhr",
+          "ort": "Südparkhalle (Feld 2)"
+        }
       ],
-      "trainer": "Toni, Anna"
+      "trainer": "Toni, Anna",
+      "jahre": [
+        2008,
+        2009,
+        2010
+      ]
     }
   ]
 }

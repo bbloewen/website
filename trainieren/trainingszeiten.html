@@ -243,11 +243,19 @@
       <span class="eyebrow">Nachwuchs</span>
       <h2 class="t-h2">Trainingszeiten nach Jahrgang</h2>
       <p class="t-body" style="margin:10px 0 24px">Minibasketball, Jugend- und weibliche Jugendteams unserer Partnervereine BC Erfurt und USV Erfurt — sortiert vom jüngsten bis zum ältesten Jahrgang.</p>
-      <div class="filter-row" role="group" aria-label="Nach Verein filtern">
-        <button type="button" class="filter-chip is-active" data-filter="alle" aria-pressed="true">Alle</button>
-        <button type="button" class="filter-chip" data-filter="bc-erfurt" aria-pressed="false">BC Erfurt</button>
-        <button type="button" class="filter-chip" data-filter="usv-erfurt" aria-pressed="false">USV Erfurt</button>
-        <button type="button" class="filter-chip" data-filter="loewinnen" aria-pressed="false">Löwinnen (SG)</button>
+      <div style="display:flex; gap:20px; flex-wrap:wrap; align-items:flex-end">
+        <div class="filter-row" role="group" aria-label="Nach Verein filtern">
+          <button type="button" class="filter-chip is-active" data-filter="alle" aria-pressed="true">Alle</button>
+          <button type="button" class="filter-chip" data-filter="bc-erfurt" aria-pressed="false">BC Erfurt</button>
+          <button type="button" class="filter-chip" data-filter="usv-erfurt" aria-pressed="false">USV Erfurt</button>
+          <button type="button" class="filter-chip" data-filter="loewinnen" aria-pressed="false">Löwinnen (SG)</button>
+        </div>
+        <div class="field" style="margin:0; max-width:220px">
+          <label for="jahrgang-filter">Dein Geburtsjahr</label>
+          <select id="jahrgang-filter">
+            <option value="alle">Alle Jahrgänge</option>
+          </select>
+        </div>
       </div>
       <div class="grid-3" id="trainingszeiten-grid" style="margin-top:24px"></div>
       <p class="t-body-sm mt-5">Genau dein Jahrgang ist nicht dabei? <a href="mailto:info@basketball-loewen.com">Schreib uns</a> — wir sagen dir, wo dein Platz ist.</p>
@@ -391,6 +399,6 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="/js/nav.js?v=1787221181"></script>
 <script src="/js/include.js?v=1785398309"></script>
-<script src="/js/trainingszeiten.js?v=1787240672"></script>
+<script src="/js/trainingszeiten.js?v=1787250578"></script>
 </body>
 </html>
