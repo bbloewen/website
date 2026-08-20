@@ -507,6 +507,10 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 }
 .freiplatz-adresse-link:hover { color: var(--color-brand-orange-text); text-decoration: underline; }
 .freiplatz-adresse-link i { flex-shrink: 0; color: var(--color-brand-orange-text); }
+/* Riethsporthalle-Kachelfoto: zentrierter Zuschnitt schnitt Kopf und den
+   geworfenen Ball der Spielerin ab (Marko, 20.08.2026) — analog zum
+   Cheftrainer-Pressefoto oben auf den oberen Bildbereich gesetzt. */
+.card-media-photo img[src*="freiplaetze-riethsporthalle"] { object-position: top; }
 .freiplatz-qr-row { display: flex; align-items: center; gap: 12px; }
 .freiplatz-qr { width: 64px; height: 64px; flex-shrink: 0; border: 1px solid var(--border); border-radius: 8px; padding: 4px; background: #fff; }
 .freiplatz-qr-hint { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
@@ -1555,7 +1559,12 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
    Verhältnis zur schmalen hero-half-Box — Fokus bewusst weit oben, damit
    Ball/Korb/Hände im sichtbaren Ausschnitt bleiben statt der Beine/Zuschauer
    im unteren Bilddrittel. */
-.hero-photo.hero-freiplaetze { --hero-photo-url: url('/assets/img/hero-freiplaetze.webp'); background-position: 48% 15%; }
+/* Bildseitenverhältnis (~1,27:1) ist in jedem hero-half-Breakpoint schmaler
+   als die Box selbst — horizontal wird daher nie beschnitten (volle Breite
+   immer sichtbar), nur vertikal. Bildausschnitt ist deshalb im Quellbild
+   selbst nach rechts verschoben (rechter Rand abgeschnitten, 20.08.2026),
+   nicht per X-Position hier. */
+.hero-photo.hero-freiplaetze { --hero-photo-url: url('/assets/img/hero-freiplaetze.webp'); background-position: center 15%; }
 
 /* Hero-Variante für die Netzwerk-Treffen-Seite — Bühnenmoment beim
    Alley-Oop 2025, Basketball-Löwen/CATL-Wandlogo links, Publikum unten. */

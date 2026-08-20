@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1787222817" />
+<link rel="stylesheet" href="/css/site.css?v=1787223424" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
@@ -413,7 +413,7 @@
 <script src="/js/nav.js?v=1787221181"></script>
 <script src="/js/include.js?v=1785398309"></script>
 <script>
-  fetch('/data/freiplaetze.json?v=1787220367').then(function (r) { return r.json(); }).then(function (data) {
+  fetch('/data/freiplaetze.json?v=1787223424').then(function (r) { return r.json(); }).then(function (data) {
     var grid = document.getElementById('freiplaetze-grid');
     grid.innerHTML = data.freiplaetze.map(function (f) {
       var photo = f.fotoEmbed
@@ -445,7 +445,9 @@
         maxZoom: 19
       }).addTo(map);
       var markers = data.freiplaetze.map(function (f) {
-        return L.marker([f.lat, f.lng]).bindPopup('<strong>' + f.name + '</strong><br>' + f.adresse);
+        var popup = '<strong>' + f.name + '</strong><br>' + f.adresse;
+        if (f.gesperrt) popup += '<br><span style="color:#C62828;font-weight:600">' + (f.gesperrtHinweis || 'Gesperrt') + '</span>';
+        return L.marker([f.lat, f.lng]).bindPopup(popup);
       });
       if (markers.length === 1) {
         markers[0].addTo(map);
