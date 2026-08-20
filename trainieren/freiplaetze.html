@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1787157276" />
+<link rel="stylesheet" href="/css/site.css?v=1787220367" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
@@ -213,14 +213,14 @@
   <section class="hero-photo hero-half">
     <div class="container">
     <span class="eyebrow">Trainieren · Freiplätze</span>
-    <h1>Freiplätze in <span class="kw">Erfurt<span class="swoosh" aria-hidden="true"></span></span>.</h1>
+    <h1>Erfurt wird <span class="kw">Basketball-Stadt<span class="swoosh" aria-hidden="true"></span></span>.</h1>
     <p class="lead">Alle öffentlichen Basketball-Freiplätze auf einen Blick — mit Adresse, Wegbeschreibung per QR-Code und Foto.</p>
     </div>
   </section>
 
   <section class="section">
     <div class="container container-narrow text-center">
-      <span class="eyebrow">Streetball</span>
+      <span class="eyebrow">3x3</span>
       <h2 class="t-h2">Spontan einen Korb werfen</h2>
       <p class="t-body mt-4">Nicht jeder Basketball findet in der Halle statt. Diese Übersicht zeigt öffentlich zugängliche Freiplätze in Erfurt — für die spontane Runde nach der Schule, dem Feierabend oder einfach zwischendurch.</p>
     </div>
@@ -254,7 +254,7 @@
     <div class="container container-narrow text-center">
       <span class="eyebrow">Mithelfen</span>
       <h2 class="t-h2 mb-4">Freiplatz hier noch nicht verzeichnet?</h2>
-      <p class="t-body mb-5">Kennst du einen öffentlichen Freiplatz in Erfurt, der hier fehlt? Melde ihn uns kurz — am besten mit Adresse und wenn möglich einem Foto.</p>
+      <p class="t-body mb-5">Kennst du einen öffentlichen Freiplatz in Erfurt, der hier fehlt oder fehlerhaft verzeichnet ist? Melde ihn uns kurz, am besten mit Adresse und wenn möglich mit Standort und Foto.</p>
       <button type="button" class="btn btn-primary" id="freiplatz-melden-btn">Freiplatz melden</button>
     </div>
   </section>
@@ -389,13 +389,18 @@
 <script src="/js/nav.js?v=1785398309"></script>
 <script src="/js/include.js?v=1785398309"></script>
 <script>
-  fetch('/data/freiplaetze.json?v=1787157900').then(function (r) { return r.json(); }).then(function (data) {
+  fetch('/data/freiplaetze.json?v=1787220367').then(function (r) { return r.json(); }).then(function (data) {
     var grid = document.getElementById('freiplaetze-grid');
     grid.innerHTML = data.freiplaetze.map(function (f) {
-      var photo = f.foto
+      var photo = f.fotoEmbed
+        ? '<div class="card-media card-media-photo"><iframe src="' + f.fotoEmbed + '" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>'
+        : f.foto
         ? '<div class="card-media card-media-photo"><img src="' + f.foto + '" alt="' + f.name + '" loading="lazy" /></div>'
         : '<div class="card-media freiplatz-photo-placeholder"><i data-lucide="image" class="icon-22"></i><span>Foto folgt</span></div>';
-      return '<div class="card freiplatz-card">' + photo +
+      var gesperrtBanner = f.gesperrt
+        ? '<div class="freiplatz-gesperrt-banner"><i data-lucide="lock" class="icon-16"></i> ' + (f.gesperrtHinweis || 'Gesperrt') + '</div>'
+        : '';
+      return '<div class="card freiplatz-card">' + photo + gesperrtBanner +
         '<div class="card-body">' +
           '<h3>' + f.name + '</h3>' +
           '<p>' + f.beschreibung + '</p>' +
