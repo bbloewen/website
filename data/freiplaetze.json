@@ -1,0 +1,7 @@
+{
+  "hinweis": "Daten für trainieren/freiplaetze.html (Stand 20.08.2026, noch nicht öffentlich verlinkt/indexiert — siehe robots-Tag auf der Seite). Koordinaten für beide Einträge stammen von Marko (echte Freiplätze, am 20.08.2026 per Google-Maps-Link/Embed geliefert); Name/Adresse/Foto/Beschreibung sind noch Platzhalter, da Marko dazu noch keine Angaben gemacht hat — bei Antwort ersetzen. lat/lng bestimmen sowohl die Position auf der Karte als auch das Ziel des QR-Codes (Google-Maps-Link ohne API-Key: /maps/search/?api=1&query=lat,lng). qr = Pfad zur vorgenerierten QR-Code-SVG (tools: python3 -c mit qrcode-Paket, box_size=10, border=1 — bei neuen Einträgen oder geänderten Koordinaten neu generieren). foto optional (Pfad zu assets/img/freiplaetze/...) — ohne foto zeigt die Kachel 'Foto folgt', analog zum Muster auf club/organisation.html.",
+  "freiplaetze": [
+    { "name": "Freiplatz – Beispiel 1", "adresse": "Adresse folgt", "lat": 50.993453777003076, "lng": 11.072305640372784, "qr": "/assets/img/freiplaetze/qr-beispiel-1.svg", "foto": null, "beschreibung": "Von Marko als echtes Beispiel geliefert — Name/Adresse/Foto stehen noch aus." },
+    { "name": "Freiplatz – Beispiel 2", "adresse": "Adresse folgt", "lat": 50.9849486, "lng": 11.0657133, "qr": "/assets/img/freiplaetze/qr-beispiel-2.svg", "foto": null, "beschreibung": "Von Marko als echtes Beispiel geliefert — Name/Adresse/Foto stehen noch aus." }
+  ]
+}
