@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1787392130" />
+<link rel="stylesheet" href="/css/site.css?v=1787393199" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- SEO:auto START (tools/build-head-meta.py — nicht von Hand ändern) -->
@@ -283,6 +283,10 @@
               <input type="email" id="email" name="email" required autocomplete="email" />
             </div>
             <div class="field">
+              <label for="telefon">Telefonnummer</label>
+              <input type="tel" id="telefon" name="telefon" autocomplete="tel" />
+            </div>
+            <div class="field">
               <label for="nachricht">Nachricht</label>
               <textarea id="nachricht" name="nachricht" required></textarea>
             </div>
@@ -447,6 +451,7 @@
         betreff: document.getElementById('betreff').value.trim(),
         name: document.getElementById('name').value.trim(),
         email: document.getElementById('email').value.trim(),
+        telefon: document.getElementById('telefon').value.trim(),
         nachricht: document.getElementById('nachricht').value.trim(),
         firma: document.getElementById('kontakt-firma').value.trim(),
         elapsedMs: Date.now() - contactFormLoadedAt
@@ -473,13 +478,20 @@
   /* Vorbelegung von Betreff und Nachricht per URL-Param (z.B. von der
      Schulprogramm- oder Trainingszeiten-Seite aus verlinkt), damit
      Absender:innen nicht selbst den Text formulieren müssen, ihn aber vor
-     dem Absenden noch anpassen können. */
+     dem Absenden noch anpassen können. Bei Probetraining-Anfragen (erkennbar
+     am Betreff-Präfix) wird die Telefonnummer zusätzlich zur Pflicht, damit
+     der Trainer/die Nachwuchskoordination zurückrufen kann. */
   (function () {
     var params = new URLSearchParams(window.location.search);
     var betreff = params.get('betreff');
     var nachricht = params.get('nachricht');
     if (betreff) document.getElementById('betreff').value = betreff;
     if (nachricht) document.getElementById('nachricht').value = nachricht;
+    if (betreff && betreff.indexOf('Probetraining-Anfrage:') === 0) {
+      var telefonField = document.getElementById('telefon');
+      telefonField.required = true;
+      document.querySelector('label[for="telefon"]').textContent = 'Telefonnummer (für Rückfragen zum Probetraining)';
+    }
   })();
 </script>
 </body>

@@ -2463,15 +2463,14 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
    trotzdem sichtbar, obwohl das Attribut korrekt gesetzt ist. Genau das war die
    Ursache dafür, dass die Trainingszeiten-Filter augenscheinlich nicht wirkten. */
 .training-row[hidden] { display: none; }
-.training-row-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
-.training-row-team { font-size: 16px; font-weight: var(--weight-extrabold); color: var(--text-primary); line-height: 1.3; }
+.training-row-team { font-size: 16px; font-weight: var(--weight-extrabold); color: var(--text-primary); line-height: 1.3; margin-bottom: 10px; }
 .training-row-team .training-row-jahrgang { font-weight: var(--weight-medium); color: var(--text-secondary); }
 .team-badge-bc-erfurt { background: #CCFBF1; color: #0F766E; }
 .team-badge-bc-erfurt:hover { filter: brightness(0.95); }
 .team-badge-usv-erfurt { background: var(--color-blue-100); color: var(--color-blue-700); }
 .team-badge-usv-erfurt:hover { filter: brightness(0.95); }
 .team-badge-loewinnen { background: var(--color-orange-100); color: var(--color-orange-700); }
-.training-row-zeiten { display: flex; flex-direction: column; gap: 10px; font-size: 14px; }
+.training-row-zeiten { display: flex; flex-direction: column; gap: 14px; font-size: 14px; }
 .training-slot { display: flex; flex-direction: column; gap: 2px; }
 .training-slot-zeit, .training-slot-ort { display: flex; align-items: center; gap: 6px; }
 .training-slot-zeit i, .training-slot-ort i { flex-shrink: 0; color: var(--text-muted); }
@@ -2480,11 +2479,13 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
 .training-slot-zeit:hover i { color: var(--color-brand-orange); }
 .training-slot-ort a { color: inherit; text-decoration: underline; text-decoration-color: var(--border-strong); }
 .training-slot-ort a:hover { color: var(--color-brand-orange); }
-.training-row-trainer { font-size: 13px; color: var(--text-secondary); text-align: right; }
+.training-row-trainer { font-size: 13px; color: var(--text-secondary); text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
+.training-row-trainer .team-badge { margin-bottom: 10px; }
 .training-row-trainer-label { font-weight: var(--weight-semibold); color: var(--text-primary); margin-bottom: 2px; }
-.training-row-probetraining { display: inline-block; margin-top: 10px; font-size: 13px; font-weight: var(--weight-semibold); }
+.training-row-probetraining { display: inline-block; margin-top: 4px; font-size: 13px; font-weight: var(--weight-semibold); }
 @media (max-width: 700px) {
   .training-row { grid-template-columns: 1fr; text-align: left; gap: 12px; }
+  .training-row-trainer { align-items: flex-start; }
   .training-row-trainer { text-align: left; }
 }
 

@@ -23,6 +23,31 @@ document.addEventListener('DOMContentLoaded', function () {
     'U19w': 'U19 weiblich'
   };
 
+  /* Team-Kategorie-Kürzel für den Team-Filter (dieselbe Kategorie über alle
+     Vereine hinweg, z.B. "U19w" fasst BC-Erfurt- und Basketball-Löwen-Teams
+     zusammen) — bewusst kompakt ("mix" statt "mixed", "w"/"m" klein), im
+     Unterschied zur ausgeschriebenen Form in den Kacheln (TEAM_LABELS). */
+  var TEAM_KEY = {
+    'U8mix': 'U8mix',
+    'U9mix': 'U9mix',
+    'U10mix': 'U10mix',
+    'U10w und jünger': 'U10w',
+    'U11mix': 'U11mix',
+    'U12mix': 'U12mix',
+    'U12m/1': 'U12m',
+    'U12w': 'U12w',
+    'U13mix': 'U13mix',
+    'U13m': 'U13m',
+    'U14mix': 'U14mix',
+    'U14m': 'U14m',
+    'U14w': 'U14w',
+    'U15m': 'U15m',
+    'U16m': 'U16m',
+    'U16w': 'U16w',
+    'U19m': 'U19m',
+    'U19w': 'U19w'
+  };
+
   var vereinLabel = {
     'bc-erfurt': 'BC Erfurt',
     'usv-erfurt': 'USV Erfurt',
@@ -54,10 +79,16 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   var WOCHENTAG_INDEX = { 'So': 0, 'Mo': 1, 'Di': 2, 'Mi': 3, 'Do': 4, 'Fr': 5, 'Sa': 6 };
+  var WOCHENTAG_LANG = { 'So': 'Sonntag', 'Mo': 'Montag', 'Di': 'Dienstag', 'Mi': 'Mittwoch', 'Do': 'Donnerstag', 'Fr': 'Freitag', 'Sa': 'Samstag' };
+  var MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 
-  function jahrgangLabel(jahre) {
-    if (jahre.length === 1) return String(jahre[0]);
-    return Math.max.apply(null, jahre) + ' und jünger';
+  /* "X und jünger" gilt nur für Teams, die selbst offen nach unten benannt sind
+     (aktuell nur "U10w und jünger") — alle anderen Mehrjahrgangs-Teams zeigen
+     die exakten Jahrgänge aus dem Sheet (z.B. "2008/2009/2010" bei U19), nicht
+     zusammengefasst auf den jüngsten Jahrgang. */
+  function jahrgangLabel(g) {
+    if (g.team.indexOf('und jünger') !== -1) return Math.max.apply(null, g.jahre) + ' und jünger';
+    return g.jahrgang;
   }
 
   function ortDisplay(ort) {
@@ -96,17 +127,30 @@ document.addEventListener('DOMContentLoaded', function () {
     return 'https://calendar.google.com/calendar/render?' + new URLSearchParams(params).toString();
   }
 
-  function probetrainingLink(teamName, jahrgang, verein) {
+  /* Konkretes Datum des nächsten passenden Wochentags (z.B. "Dienstag, 25.
+     August 2026"), damit die vorausgefüllte Nachricht nicht nur den
+     Wochentag, sondern ein echtes Datum zum ausgewählten Probetraining-Termin
+     enthält. */
+  function naechstesDatumText(tag) {
+    var d = nextWeekday(tag);
+    return WOCHENTAG_LANG[tag] + ', ' + d.getDate() + '. ' + MONATE[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
+  function probetrainingLink(teamName, jahrgang, verein, termin) {
     var betreff = 'Probetraining-Anfrage: ' + teamName + ' (' + jahrgang + ')';
+    var terminZeile = '';
+    if (termin) {
+      terminZeile = '\n\nWir möchten am ' + naechstesDatumText(termin.tag) + ' (' + termin.zeit + ') bei ' + ortDisplay(termin.ort) + ' zum Probetraining kommen.';
+    }
     var nachricht = 'Hallo,\n\nwir interessieren uns für ein Probetraining bei ' + teamName +
-      ' (' + jahrgang + ', ' + vereinLabel[verein] + ').\n\nBitte meldet euch bei uns.\n\nViele Grüße';
+      ' (' + jahrgang + ', ' + vereinLabel[verein] + ').' + terminZeile + '\n\nBitte meldet euch bei uns.\n\nViele Grüße';
     var params = new URLSearchParams({ betreff: betreff, nachricht: nachricht });
     return '/kontakt.html?' + params.toString();
   }
 
   function cardHTML(g) {
     var teamName = TEAM_LABELS[g.team] || g.team;
-    var jahrgang = jahrgangLabel(g.jahre);
+    var jahrgang = jahrgangLabel(g);
     var titel = teamName + ' (' + jahrgang + ')';
     var zeitenHTML;
     if (g.termine && g.termine.length) {
@@ -118,26 +162,26 @@ document.addEventListener('DOMContentLoaded', function () {
           ? '<a class="training-slot-zeit" href="' + cal + '" target="_blank" rel="noopener" title="Zum Kalender hinzufügen"><i data-lucide="calendar-plus" class="icon-14"></i><span>' + zeitText + '</span></a>'
           : '<div class="training-slot-zeit"><span>' + zeitText + '</span></div>';
         var ortHTML = '<div class="training-slot-ort"><i data-lucide="map-pin" class="icon-14"></i><a href="' + mapsLink(t.ort) + '" target="_blank" rel="noopener">' + ortDisplay(t.ort) + '</a></div>';
-        return '<div class="training-slot">' + zeitHTML + ortHTML + '</div>';
+        var probLink = '<a class="training-row-probetraining" href="' + probetrainingLink(teamName, jahrgang, g.verein, t) + '">Probetraining vereinbaren</a>';
+        return '<div class="training-slot">' + zeitHTML + ortHTML + probLink + '</div>';
       }).join('');
     } else {
-      zeitenHTML = '<div class="training-slot"><em>' + (g.hinweis || 'Zeiten folgen in Kürze') + '</em></div>';
+      var probLinkOhneTermin = '<a class="training-row-probetraining" href="' + probetrainingLink(teamName, jahrgang, g.verein, null) + '">Probetraining vereinbaren</a>';
+      zeitenHTML = '<div class="training-slot"><em>' + (g.hinweis || 'Zeiten folgen in Kürze') + '</em>' + probLinkOhneTermin + '</div>';
     }
     var badgeHTML = vereinLink[g.verein]
       ? '<a class="team-badge ' + vereinBadgeClass[g.verein] + '" href="' + vereinLink[g.verein] + '" target="_blank" rel="noopener">' + vereinLabel[g.verein] + '</a>'
       : '<span class="team-badge ' + vereinBadgeClass[g.verein] + '">' + vereinLabel[g.verein] + '</span>';
+    var teamKey = TEAM_KEY[g.team] || g.team;
     return (
-      '<div class="card training-row" data-verein="' + g.verein + '" data-jahre="' + g.jahre.join(',') + '">' +
+      '<div class="card training-row" data-verein="' + g.verein + '" data-jahre="' + g.jahre.join(',') + '" data-team="' + teamKey + '">' +
         '<div>' +
-          '<div class="training-row-head">' +
-            '<div class="training-row-team">' + teamName + ' <span class="training-row-jahrgang">(' + jahrgang + ')</span></div>' +
-            badgeHTML +
-          '</div>' +
+          '<div class="training-row-team">' + teamName + ' <span class="training-row-jahrgang">(' + jahrgang + ')</span></div>' +
           '<div class="training-row-zeiten">' + zeitenHTML + '</div>' +
         '</div>' +
         '<div class="training-row-trainer">' +
+          badgeHTML +
           '<div class="training-row-trainer-label">Trainerinnen:</div><div>' + (g.trainer || '') + '</div>' +
-          '<a class="training-row-probetraining" href="' + probetrainingLink(teamName, jahrgang, g.verein) + '">Probetraining anfragen</a>' +
         '</div>' +
       '</div>'
     );
@@ -160,17 +204,33 @@ document.addEventListener('DOMContentLoaded', function () {
         jahrgangSelect.appendChild(opt);
       });
 
+      var alleTeams = Array.from(new Set(data.gruppen.map(function (g) { return TEAM_KEY[g.team] || g.team; })));
+      alleTeams.sort(function (a, b) {
+        var na = parseInt(a.match(/\d+/)[0], 10);
+        var nb = parseInt(b.match(/\d+/)[0], 10);
+        return nb - na || a.localeCompare(b);
+      });
+      var teamSelect = document.getElementById('team-filter');
+      alleTeams.forEach(function (team) {
+        var opt = document.createElement('option');
+        opt.value = team;
+        opt.textContent = team;
+        teamSelect.appendChild(opt);
+      });
+
       var chips = document.querySelectorAll('.filter-chip');
       var cards = grid.querySelectorAll('.training-row');
       var currentVerein = 'alle';
       var currentJahr = 'alle';
+      var currentTeam = 'alle';
 
       function applyFilters() {
         cards.forEach(function (card) {
           var vereinOk = currentVerein === 'alle' || card.getAttribute('data-verein') === currentVerein;
           var jahre = card.getAttribute('data-jahre').split(',');
           var jahrOk = currentJahr === 'alle' || jahre.indexOf(currentJahr) !== -1;
-          card.hidden = !(vereinOk && jahrOk);
+          var teamOk = currentTeam === 'alle' || card.getAttribute('data-team') === currentTeam;
+          card.hidden = !(vereinOk && jahrOk && teamOk);
         });
       }
 
@@ -186,6 +246,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
       jahrgangSelect.addEventListener('change', function () {
         currentJahr = jahrgangSelect.value;
+        applyFilters();
+      });
+
+      teamSelect.addEventListener('change', function () {
+        currentTeam = teamSelect.value;
         applyFilters();
       });
     });

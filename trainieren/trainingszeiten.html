@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1787392130" />
+<link rel="stylesheet" href="/css/site.css?v=1787393199" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- SEO:auto START (tools/build-head-meta.py — nicht von Hand ändern) -->
@@ -240,8 +240,11 @@
   <section class="section-sm bg-subtle" id="zeiten">
     <div class="container">
       <span class="eyebrow">Nachwuchs-Trainingszeiten</span>
-      <h2 class="t-h2">Alle Trainingszeiten nach Jahrgang</h2>
+      <h2 class="t-h2">Trainingszeiten nach Jahrgang, Team und Verein</h2>
       <div class="filter-row" role="group" aria-label="Nach Jahrgang und Verein filtern" style="margin-top:20px">
+        <select class="filter-select" id="team-filter" aria-label="Nach Team filtern">
+          <option value="alle">Team</option>
+        </select>
         <select class="filter-select" id="jahrgang-filter" aria-label="Nach Jahrgang filtern">
           <option value="alle">Jahrgang</option>
         </select>
@@ -406,6 +409,6 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="/js/nav.js?v=1787221181"></script>
 <script src="/js/include.js?v=1785398309"></script>
-<script src="/js/trainingszeiten.js?v=1787392130"></script>
+<script src="/js/trainingszeiten.js?v=1787393199"></script>
 </body>
 </html>
