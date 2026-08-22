@@ -2498,7 +2498,9 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
    wie .training-row, aber pro Termin statt pro Team. */
 .training-group { padding: 18px 22px; }
 .training-group[hidden] { display: none; }
-.training-group-header { font-size: 18px; font-weight: var(--weight-extrabold); color: var(--text-primary); margin-bottom: 4px; }
+.training-group-header { display: inline-block; font-size: 18px; font-weight: var(--weight-extrabold); color: var(--text-primary); margin-bottom: 4px; }
+a.training-group-header { text-decoration: underline; text-decoration-color: var(--border-strong); }
+a.training-group-header:hover { color: var(--color-brand-orange); }
 .training-group-rows { display: flex; flex-direction: column; }
 .training-session-row { display: grid; grid-template-columns: 1fr 180px; gap: 20px; align-items: start; padding: 14px 0; }
 .training-session-row[hidden] { display: none; }

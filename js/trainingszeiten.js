@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function () {
     'Südparkhalle (Feld 2)': 'Südparkhalle, Johann-Sebastian-Bach-Straße 7, 99096 Erfurt',
     'Südparkhalle (Feld 3)': 'Südparkhalle, Johann-Sebastian-Bach-Straße 7, 99096 Erfurt',
     'Südparkhalle (Feld 2+3)': 'Südparkhalle, Johann-Sebastian-Bach-Straße 7, 99096 Erfurt',
-    'Eugen-Richter-Halle (Feld 2)': 'Eugen-Richter-Halle',
+    'Eugen-Richter-Halle (Feld 2)': 'Eugen-Richter-Halle, Eugen-Richter-Straße 22, 99085 Erfurt',
     'Christophorushalle': 'Christophorushalle, Spittelgartenstraße 1, 99089 Erfurt',
     'Bukarester Straße': 'Regelschule An der Geraue, Bukarester Straße 3, 99091 Erfurt',
     'Südparkhalle': 'Südparkhalle, Johann-Sebastian-Bach-Straße 7, 99096 Erfurt',
@@ -260,9 +260,14 @@ document.addEventListener('DOMContentLoaded', function () {
     return keys.map(function (key) {
       var group = groups[key];
       var rowsHTML = group.sessions.map(function (s) { return sessionRowHTML(s, modus); }).join('');
+      // Im Halle-Modus ist die Box-Überschrift bereits die Adresse (key) —
+      // direkt darüber auf Google Maps verlinken.
+      var headerHTML = modus === 'halle'
+        ? '<a class="training-group-header" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(key) + '" target="_blank" rel="noopener">' + group.label + '</a>'
+        : '<div class="training-group-header">' + group.label + '</div>';
       return (
         '<div class="card training-group">' +
-          '<div class="training-group-header">' + group.label + '</div>' +
+          headerHTML +
           '<div class="training-group-rows">' + rowsHTML + '</div>' +
         '</div>'
       );
