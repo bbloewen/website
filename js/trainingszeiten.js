@@ -80,8 +80,8 @@ document.addEventListener('DOMContentLoaded', function () {
     'Bukarester Straße': 'Regelschule An der Geraue, Bukarester Straße 3, 99091 Erfurt',
     'Südparkhalle': 'Südparkhalle, Johann-Sebastian-Bach-Straße 7, 99096 Erfurt',
     'Riethsporthalle (Feld 1)': 'Riethsporthalle, Essener Straße 20, 99089 Erfurt',
-    'Ullrich-von-Hutten-Schule': 'Turnhalle Ullrich-von-Hutten-Schule',
-    'Domsporthalle': 'Domsporthalle'
+    'Ullrich-von-Hutten-Schule': 'Turnhalle Ullrich-von-Hutten-Schule, Grünstraße 9, 99084 Erfurt',
+    'Domsporthalle': 'Domsporthalle, Domstraße 2, 99084 Erfurt'
   };
 
   var WOCHENTAG_INDEX = { 'So': 0, 'Mo': 1, 'Di': 2, 'Mi': 3, 'Do': 4, 'Fr': 5, 'Sa': 6 };
