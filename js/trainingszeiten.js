@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', function () {
     );
   }
 
-  fetch('/data/trainingszeiten.json?v=1787393517')
+  fetch('/data/trainingszeiten.json?v=1787394380')
     .then(function (res) { return res.json(); })
     .then(function (data) {
       var gruppen = data.gruppen.slice().reverse();
