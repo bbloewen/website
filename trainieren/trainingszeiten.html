@@ -4,14 +4,14 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Trainingszeiten — Basketball Löwen Erfurt</title>
-<meta name="description" content="Unverbindlich beim Training vorbeischauen — wir finden die passende Gruppe für dein Kind." />
+<meta name="description" content="Alle Trainingszeiten unserer Leistungsteams und unserer Kooperationsvereine im Überblick." />
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png" />
 <link rel="icon" type="image/png" sizes="16x16" href="/assets/logo/favicon-16.png" />
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1787314467" />
+<link rel="stylesheet" href="/css/site.css?v=1787390309" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- SEO:auto START (tools/build-head-meta.py — nicht von Hand ändern) -->
@@ -20,7 +20,7 @@
 <meta property="og:site_name" content="Basketball Löwen Erfurt" />
 <meta property="og:locale" content="de_DE" />
 <meta property="og:title" content="Trainingszeiten" />
-<meta property="og:description" content="Unverbindlich beim Training vorbeischauen — wir finden die passende Gruppe für dein Kind." />
+<meta property="og:description" content="Alle Trainingszeiten unserer Leistungsteams und unserer Kooperationsvereine im Überblick." />
 <meta property="og:url" content="https://basketball-loewen.com/trainieren/trainingszeiten.html" />
 <meta property="og:image" content="https://basketball-loewen.com/assets/img/share/og-default.jpg" />
 <meta property="og:image:width" content="1200" />
@@ -28,7 +28,7 @@
 <meta property="og:image:alt" content="Trainingszeiten" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Trainingszeiten" />
-<meta name="twitter:description" content="Unverbindlich beim Training vorbeischauen — wir finden die passende Gruppe für dein Kind." />
+<meta name="twitter:description" content="Alle Trainingszeiten unserer Leistungsteams und unserer Kooperationsvereine im Überblick." />
 <meta name="twitter:image" content="https://basketball-loewen.com/assets/img/share/og-default.jpg" />
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Start","item":"https://basketball-loewen.com/"},{"@type":"ListItem","position":2,"name":"Trainieren","item":"https://basketball-loewen.com/trainieren/loewenpark.html"},{"@type":"ListItem","position":3,"name":"Trainingszeiten","item":"https://basketball-loewen.com/trainieren/trainingszeiten.html"}]}]}</script>
 <!-- SEO:auto END -->
@@ -229,36 +229,43 @@
 <!--/PARTIAL:header--></div>
 <main id="main">
 
-  <section class="hero-photo hero-half">
+  <section class="hero-photo hero-trainingszeiten hero-half">
     <div class="container">
-    <span class="eyebrow">Trainieren</span>
-    <h1>Einfach mal <span class="kw">reinschnuppern<span class="swoosh" aria-hidden="true"></span></span>.</h1>
-    <p class="lead">Ob Bambini oder U19 — bei uns ist für jeden Jahrgang eine Trainingsgruppe dabei. Meld dich unverbindlich, wir finden gemeinsam die passende Zeit.</p>
+    <span class="eyebrow">Trainieren · Trainingszeiten</span>
+    <h1>Basketball-<span class="kw">Trainingszeiten<span class="swoosh" aria-hidden="true"></span></span> in Erfurt.</h1>
+    <p class="lead">Alle Trainingszeiten unserer Leistungsteams und unserer Kooperationsvereine im Überblick.</p>
     </div>
-    <span class="photo-note">Platzhalterbild — echtes Trainingsfoto folgt</span>
   </section>
 
   <section class="section-sm bg-subtle" id="zeiten">
     <div class="container">
-      <span class="eyebrow">Nachwuchs</span>
-      <h2 class="t-h2">Trainingszeiten nach Jahrgang</h2>
-      <p class="t-body" style="margin:10px 0 24px">Minibasketball, Jugend- und weibliche Jugendteams unserer Partnervereine BC Erfurt und USV Erfurt — sortiert vom jüngsten bis zum ältesten Jahrgang.</p>
-      <div style="display:flex; gap:20px; flex-wrap:wrap; align-items:flex-end">
-        <div class="filter-row" role="group" aria-label="Nach Verein filtern">
-          <button type="button" class="filter-chip is-active" data-filter="alle" aria-pressed="true">Alle</button>
-          <button type="button" class="filter-chip" data-filter="bc-erfurt" aria-pressed="false">BC Erfurt</button>
-          <button type="button" class="filter-chip" data-filter="usv-erfurt" aria-pressed="false">USV Erfurt</button>
-          <button type="button" class="filter-chip" data-filter="loewinnen" aria-pressed="false">Löwinnen (SG)</button>
-        </div>
-        <div class="field" style="margin:0; max-width:220px">
-          <label for="jahrgang-filter">Dein Geburtsjahr</label>
-          <select id="jahrgang-filter">
-            <option value="alle">Alle Jahrgänge</option>
-          </select>
+      <span class="eyebrow">Nachwuchs-Trainingszeiten</span>
+      <h2 class="t-h2">Alle Trainingszeiten nach Jahrgang</h2>
+      <div class="filter-row" role="group" aria-label="Nach Jahrgang und Verein filtern" style="margin-top:20px">
+        <select class="filter-select" id="jahrgang-filter" aria-label="Nach Jahrgang filtern">
+          <option value="alle">Jahrgang</option>
+        </select>
+        <button type="button" class="filter-chip is-active" data-filter="alle" aria-pressed="true">Alle</button>
+        <button type="button" class="filter-chip" data-filter="loewinnen" aria-pressed="false">Basketball Löwen</button>
+        <button type="button" class="filter-chip" data-filter="bc-erfurt" aria-pressed="false">BC Erfurt</button>
+        <button type="button" class="filter-chip" data-filter="usv-erfurt" aria-pressed="false">USV Erfurt</button>
+      </div>
+      <div class="training-wall" id="trainingszeiten-grid" style="margin-top:24px"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container container-narrow">
+      <span class="eyebrow" style="display:block;text-align:center;margin-bottom:6px">Ansprechperson</span>
+      <h2 class="t-h2 text-center mb-5">Fragen zu den Trainingszeiten?</h2>
+      <div class="contact-person-card contact-person-card-centered">
+        <div class="contact-person-photo"><img loading="lazy" src="/assets/img/verantwortliche/am-1.webp" alt="Anna Metzdorf" style="object-position:center top"  /></div>
+        <div>
+          <h3 style="margin:4px 0 2px">Anna Metzdorf</h3>
+          <p class="t-body-sm" style="color:var(--text-muted);margin-bottom:6px">Ansprechpartnerin Trainingszeiten</p>
+          <a href="mailto:info@basketball-loewen.com">info@basketball-loewen.com</a>
         </div>
       </div>
-      <div class="grid-3" id="trainingszeiten-grid" style="margin-top:24px"></div>
-      <p class="t-body-sm mt-5">Genau dein Jahrgang ist nicht dabei? <a href="mailto:info@basketball-loewen.com">Schreib uns</a> — wir sagen dir, wo dein Platz ist.</p>
     </div>
   </section>
 
@@ -399,6 +406,6 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="/js/nav.js?v=1787221181"></script>
 <script src="/js/include.js?v=1785398309"></script>
-<script src="/js/trainingszeiten.js?v=1787250578"></script>
+<script src="/js/trainingszeiten.js?v=1787390309"></script>
 </body>
 </html>

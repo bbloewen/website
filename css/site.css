@@ -1567,6 +1567,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
    selbst nach rechts verschoben (rechter Rand abgeschnitten, 20.08.2026),
    nicht per X-Position hier. */
 .hero-photo.hero-freiplaetze { --hero-photo-url: url('/assets/img/hero-freiplaetze.webp'); background-position: center 15%; }
+.hero-photo.hero-trainingszeiten { --hero-photo-url: url('/assets/img/hero-trainingszeiten.webp'); background-position: center 30%; }
 
 /* Hero-Variante für die Netzwerk-Treffen-Seite — Bühnenmoment beim
    Alley-Oop 2025, Basketball-Löwen/CATL-Wandlogo links, Publikum unten. */
@@ -2435,6 +2436,37 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
 }
 .filter-chip:hover { border-color: var(--color-brand-orange); color: var(--color-brand-orange); }
 .filter-chip.is-active { background: var(--color-brand-orange-text); border-color: var(--color-brand-orange-text); color: #fff; }
+/* Jahrgang-Select in einer Filter-Row (Trainingszeiten): optisch wie ein
+   Filter-Chip, gleiche Höhe/Radius/Border wie .filter-chip, damit es sich
+   nahtlos in dieselbe Zeile einreiht statt wie ein separates Formularfeld
+   auszusehen. */
+.filter-select {
+  display: inline-flex; align-items: center; padding: 8px 14px; border-radius: var(--radius-full);
+  border: 1px solid var(--border-strong); background: #fff; color: var(--text-secondary);
+  font-size: 13px; font-weight: var(--weight-semibold); cursor: pointer; font-family: var(--font-base);
+}
+.filter-select:hover { border-color: var(--color-brand-orange); }
+.filter-select:focus-visible { outline: none; border-color: var(--focus-ring); box-shadow: 0 0 0 3px rgba(0,40,170,.15); }
+
+/* Trainingszeiten: längliche Zeilen-Kacheln analog zum Spielplan
+   (.fixture-day-game), statt der generischen 3er-Kachel-Grid-Karten — pro
+   Team eine eigene Zeile mit Jahrgang im Vordergrund, Verein/Team nachrangig
+   darunter, Zeiten/Ort in der Mitte, Trainer/-in rechts. */
+.training-wall { display: flex; flex-direction: column; gap: 12px; }
+.training-row {
+  display: grid; grid-template-columns: 200px 1fr 200px; gap: 20px; align-items: center;
+  padding: 18px 22px;
+}
+.training-row-jahrgang { font-size: 20px; font-weight: var(--weight-extrabold); color: var(--text-primary); line-height: 1.2; }
+.training-row-team { font-size: 13px; color: var(--text-secondary); margin-top: 3px; }
+.training-row-zeiten { font-size: 14px; line-height: 1.7; }
+.training-row-zeiten a { color: inherit; text-decoration: underline; text-decoration-color: var(--border-strong); }
+.training-row-zeiten a:hover { color: var(--color-brand-orange); }
+.training-row-trainer { font-size: 13px; color: var(--text-secondary); text-align: right; }
+@media (max-width: 700px) {
+  .training-row { grid-template-columns: 1fr; text-align: left; gap: 6px; }
+  .training-row-trainer { text-align: left; }
+}
 
 /* Spielplan: kompakte Team-Schnelllinks über der Tages-Liste */
 .spielplan-cal-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
