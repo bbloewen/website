@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', function () {
         '</div>' +
         '<div class="training-row-trainer">' +
           badgeHTML +
-          '<div class="training-row-trainer-label">Trainerinnen:</div><div>' + (g.trainer || '') + '</div>' +
+          '<div class="training-row-trainer-label">Trainer:innen:</div><div>' + (g.trainer || '') + '</div>' +
         '</div>' +
       '</div>'
     );
