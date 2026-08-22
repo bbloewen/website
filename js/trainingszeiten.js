@@ -88,6 +88,21 @@ document.addEventListener('DOMContentLoaded', function () {
   var WOCHENTAG_LANG = { 'So': 'Sonntag', 'Mo': 'Montag', 'Di': 'Dienstag', 'Mi': 'Mittwoch', 'Do': 'Donnerstag', 'Fr': 'Freitag', 'Sa': 'Samstag' };
   var MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 
+  /* Für die Wochentag-Sortierung zählt die Woche ab Montag (anders als
+     WOCHENTAG_INDEX oben, das für die Kalenderlink-Berechnung bei So=0
+     bleiben muss). */
+  var WOCHENTAG_SORT_ORDER = { 'Mo': 1, 'Di': 2, 'Mi': 3, 'Do': 4, 'Fr': 5, 'Sa': 6, 'So': 7 };
+
+  /* Sortierwert eines einzelnen Termins: Wochentag zuerst, dann Startzeit
+     desselben Tages — für Teams mit mehreren Terminen zählt beim
+     Wochentag-Sortieren der früheste. */
+  function terminSortWert(t) {
+    var tagWert = WOCHENTAG_SORT_ORDER[t.tag] || 8;
+    var m = t.zeit.match(/(\d{1,2}):(\d{2})/);
+    var minuten = m ? (+m[1] * 60 + +m[2]) : 0;
+    return tagWert * 10000 + minuten;
+  }
+
   /* "X und jünger" gilt nur für Teams, die selbst offen nach unten benannt sind
      (aktuell nur "U10w und jünger") — alle anderen Mehrjahrgangs-Teams zeigen
      die exakten Jahrgänge aus dem Sheet (z.B. "2008/2009/2010" bei U19), nicht
@@ -179,8 +194,10 @@ document.addEventListener('DOMContentLoaded', function () {
       ? '<a class="team-badge ' + vereinBadgeClass[g.verein] + '" href="' + vereinLink[g.verein] + '" target="_blank" rel="noopener">' + vereinLabel[g.verein] + '</a>'
       : '<span class="team-badge ' + vereinBadgeClass[g.verein] + '">' + vereinLabel[g.verein] + '</span>';
     var teamKey = TEAM_KEY[g.team] || g.team;
+    var sortWochentag = (g.termine && g.termine.length) ? Math.min.apply(null, g.termine.map(terminSortWert)) : 999999;
+    var sortHalle = (g.termine && g.termine.length) ? ortDisplay(g.termine[0].ort) : 'ZZZ – Zeiten folgen in Kürze';
     return (
-      '<div class="card training-row" data-verein="' + g.verein + '" data-jahre="' + g.jahre.join(',') + '" data-team="' + teamKey + '">' +
+      '<div class="card training-row" data-verein="' + g.verein + '" data-jahre="' + g.jahre.join(',') + '" data-team="' + teamKey + '" data-sort-wochentag="' + sortWochentag + '" data-sort-halle="' + sortHalle.replace(/"/g, '&quot;') + '">' +
         '<div>' +
           '<div class="training-row-team">' + teamName + ' <span class="training-row-jahrgang">(' + jahrgang + ')</span></div>' +
           '<div class="training-row-zeiten">' + zeitenHTML + '</div>' +
@@ -226,6 +243,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
       var chips = document.querySelectorAll('.filter-chip');
       var cards = grid.querySelectorAll('.training-row');
+
+      /* Sortieren ändert nur die DOM-Reihenfolge (appendChild verschiebt
+         bestehende Knoten, keine Neuerzeugung) — Filter-Status (hidden)
+         bleibt davon unberührt. "Team" ist die beim Rendern bereits
+         vorliegende Jahrgangsreihenfolge, daher hier einmalig gemerkt. */
+      var teamReihenfolge = Array.prototype.slice.call(cards);
+      var sortSelect = document.getElementById('sort-select');
+      function applySort() {
+        var modus = sortSelect.value;
+        var sortiert;
+        if (modus === 'wochentag') {
+          sortiert = teamReihenfolge.slice().sort(function (a, b) {
+            return (+a.getAttribute('data-sort-wochentag')) - (+b.getAttribute('data-sort-wochentag'));
+          });
+        } else if (modus === 'halle') {
+          sortiert = teamReihenfolge.slice().sort(function (a, b) {
+            return a.getAttribute('data-sort-halle').localeCompare(b.getAttribute('data-sort-halle'), 'de');
+          });
+        } else {
+          sortiert = teamReihenfolge;
+        }
+        sortiert.forEach(function (card) { grid.appendChild(card); });
+      }
+      sortSelect.addEventListener('change', applySort);
+
       var currentVerein = 'alle';
       var currentJahr = 'alle';
       var currentTeam = 'alle';
