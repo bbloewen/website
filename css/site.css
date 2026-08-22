@@ -2454,7 +2454,7 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
    Zeit/Ort je Termin, Trainer/-in + Probetraining-Link rechts. */
 .training-wall { display: flex; flex-direction: column; gap: 12px; }
 .training-row {
-  display: grid; grid-template-columns: 1fr 180px; gap: 20px; align-items: center;
+  display: grid; grid-template-columns: 1fr 180px; gap: 20px; align-items: start;
   padding: 18px 22px;
 }
 /* Eigene display:grid-Regel überschreibt sonst die UA-Regel [hidden]{display:none}
