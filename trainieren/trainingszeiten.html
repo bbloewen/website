@@ -242,13 +242,13 @@
       <span class="eyebrow">Nachwuchs-Trainingszeiten</span>
       <h2 class="t-h2">Trainingszeiten nach Jahrgang, Team und Verein</h2>
       <div class="filter-row" role="group" aria-label="Nach Jahrgang und Verein filtern" style="margin-top:20px">
-        <select class="filter-select" id="team-filter" aria-label="Nach Team filtern">
-          <option value="alle">Team</option>
-        </select>
+        <button type="button" class="filter-chip is-active" data-filter="alle" aria-pressed="true">Alle</button>
         <select class="filter-select" id="jahrgang-filter" aria-label="Nach Jahrgang filtern">
           <option value="alle">Jahrgang</option>
         </select>
-        <button type="button" class="filter-chip is-active" data-filter="alle" aria-pressed="true">Alle</button>
+        <select class="filter-select" id="team-filter" aria-label="Nach Team filtern">
+          <option value="alle">Team</option>
+        </select>
         <button type="button" class="filter-chip" data-filter="loewinnen" aria-pressed="false">Basketball Löwen</button>
         <button type="button" class="filter-chip" data-filter="bc-erfurt" aria-pressed="false">BC Erfurt</button>
         <button type="button" class="filter-chip" data-filter="usv-erfurt" aria-pressed="false">USV Erfurt</button>
@@ -409,6 +409,6 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="/js/nav.js?v=1787221181"></script>
 <script src="/js/include.js?v=1785398309"></script>
-<script src="/js/trainingszeiten.js?v=1787393199"></script>
+<script src="/js/trainingszeiten.js?v=1787393517"></script>
 </body>
 </html>

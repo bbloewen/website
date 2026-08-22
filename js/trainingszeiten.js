@@ -3,9 +3,10 @@ document.addEventListener('DOMContentLoaded', function () {
   if (!grid) return;
 
   var TEAM_LABELS = {
-    'U8mix': 'U8 mixed',
+    'U8mix und jünger': 'U8 mixed',
     'U9mix': 'U9 mixed',
     'U10mix': 'U10 mixed',
+    'U10mix und jünger': 'U10 mixed',
     'U10w und jünger': 'U10 weiblich',
     'U11mix': 'U11 mixed',
     'U12mix': 'U12 mixed',
@@ -28,9 +29,10 @@ document.addEventListener('DOMContentLoaded', function () {
      zusammen) — bewusst kompakt ("mix" statt "mixed", "w"/"m" klein), im
      Unterschied zur ausgeschriebenen Form in den Kacheln (TEAM_LABELS). */
   var TEAM_KEY = {
-    'U8mix': 'U8mix',
+    'U8mix und jünger': 'U8mix',
     'U9mix': 'U9mix',
     'U10mix': 'U10mix',
+    'U10mix und jünger': 'U10mix',
     'U10w und jünger': 'U10w',
     'U11mix': 'U11mix',
     'U12mix': 'U12mix',
@@ -75,7 +77,11 @@ document.addEventListener('DOMContentLoaded', function () {
     'Südparkhalle (Feld 2+3)': 'Südparkhalle, Johann-Sebastian-Bach-Straße 7, 99096 Erfurt',
     'Eugen-Richter-Halle (Feld 2)': 'Eugen-Richter-Halle',
     'Christophorushalle': 'Christophorushalle, Spittelgartenstraße 1, 99089 Erfurt',
-    'Bukarester Straße': 'Regelschule An der Geraue, Bukarester Straße 3, 99091 Erfurt'
+    'Bukarester Straße': 'Regelschule An der Geraue, Bukarester Straße 3, 99091 Erfurt',
+    'Südparkhalle': 'Südparkhalle, Johann-Sebastian-Bach-Straße 7, 99096 Erfurt',
+    'Riethsporthalle (Feld 1)': 'Riethsporthalle, Essener Straße 20, 99089 Erfurt',
+    'Ullrich-von-Hutten-Schule': 'Turnhalle Ullrich-von-Hutten-Schule',
+    'Domsporthalle': 'Domsporthalle'
   };
 
   var WOCHENTAG_INDEX = { 'So': 0, 'Mo': 1, 'Di': 2, 'Mi': 3, 'Do': 4, 'Fr': 5, 'Sa': 6 };
@@ -187,7 +193,7 @@ document.addEventListener('DOMContentLoaded', function () {
     );
   }
 
-  fetch('/data/trainingszeiten.json?v=1787250578')
+  fetch('/data/trainingszeiten.json?v=1787393517')
     .then(function (res) { return res.json(); })
     .then(function (data) {
       var gruppen = data.gruppen.slice().reverse();
@@ -240,6 +246,14 @@ document.addEventListener('DOMContentLoaded', function () {
           chip.classList.add('is-active');
           chip.setAttribute('aria-pressed', 'true');
           currentVerein = chip.getAttribute('data-filter');
+          // "Alle" setzt auch Jahrgang- und Team-Filter zurück, damit wirklich
+          // alle Zeilen wieder sichtbar werden statt nur den Verein zu lösen.
+          if (currentVerein === 'alle') {
+            currentJahr = 'alle';
+            currentTeam = 'alle';
+            jahrgangSelect.value = 'alle';
+            teamSelect.value = 'alle';
+          }
           applyFilters();
         });
       });
