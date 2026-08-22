@@ -2450,28 +2450,39 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
 
 /* Trainingszeiten: längliche Zeilen-Kacheln analog zum Spielplan
    (.fixture-day-game), statt der generischen 3er-Kachel-Grid-Karten — pro
-   Team eine eigene Zeile: Team+Jahrgang und Vereins-Badge links, Zeiten/Orte
-   (je mit Kalender-/Karten-Link) in der Mitte, Trainer/-in rechts. */
+   Team eine eigene Zeile: Team+Jahrgang+Vereins-Badge oben, darunter Tag/
+   Zeit/Ort je Termin, Trainer/-in + Probetraining-Link rechts. */
 .training-wall { display: flex; flex-direction: column; gap: 12px; }
 .training-row {
-  display: grid; grid-template-columns: 220px 1fr 160px; gap: 20px; align-items: center;
+  display: grid; grid-template-columns: 1fr 180px; gap: 20px; align-items: center;
   padding: 18px 22px;
 }
+/* Eigene display:grid-Regel überschreibt sonst die UA-Regel [hidden]{display:none}
+   (Autoren-Stylesheet schlägt User-Agent-Stylesheet unabhängig von Spezifität/
+   Reihenfolge) — ohne diese Zeile bleibt eine per JS auf hidden gesetzte Zeile
+   trotzdem sichtbar, obwohl das Attribut korrekt gesetzt ist. Genau das war die
+   Ursache dafür, dass die Trainingszeiten-Filter augenscheinlich nicht wirkten. */
+.training-row[hidden] { display: none; }
+.training-row-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
 .training-row-team { font-size: 16px; font-weight: var(--weight-extrabold); color: var(--text-primary); line-height: 1.3; }
 .training-row-team .training-row-jahrgang { font-weight: var(--weight-medium); color: var(--text-secondary); }
-.training-row-verein { margin-top: 8px; }
 .team-badge-bc-erfurt { background: #CCFBF1; color: #0F766E; }
+.team-badge-bc-erfurt:hover { filter: brightness(0.95); }
 .team-badge-usv-erfurt { background: var(--color-blue-100); color: var(--color-blue-700); }
+.team-badge-usv-erfurt:hover { filter: brightness(0.95); }
 .team-badge-loewinnen { background: var(--color-orange-100); color: var(--color-orange-700); }
 .training-row-zeiten { display: flex; flex-direction: column; gap: 10px; font-size: 14px; }
 .training-slot { display: flex; flex-direction: column; gap: 2px; }
 .training-slot-zeit, .training-slot-ort { display: flex; align-items: center; gap: 6px; }
 .training-slot-zeit i, .training-slot-ort i { flex-shrink: 0; color: var(--text-muted); }
+.training-slot-zeit { color: var(--text-primary); text-decoration: none; }
+.training-slot-zeit:hover { color: var(--color-brand-orange); }
+.training-slot-zeit:hover i { color: var(--color-brand-orange); }
 .training-slot-ort a { color: inherit; text-decoration: underline; text-decoration-color: var(--border-strong); }
-.training-slot-ort a:hover, .training-slot-zeit a:hover { color: var(--color-brand-orange); }
-.training-slot-zeit a { display: inline-flex; color: var(--text-muted); }
+.training-slot-ort a:hover { color: var(--color-brand-orange); }
 .training-row-trainer { font-size: 13px; color: var(--text-secondary); text-align: right; }
 .training-row-trainer-label { font-weight: var(--weight-semibold); color: var(--text-primary); margin-bottom: 2px; }
+.training-row-probetraining { display: inline-block; margin-top: 10px; font-size: 13px; font-weight: var(--weight-semibold); }
 @media (max-width: 700px) {
   .training-row { grid-template-columns: 1fr; text-align: left; gap: 12px; }
   .training-row-trainer { text-align: left; }

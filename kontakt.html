@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1787391149" />
+<link rel="stylesheet" href="/css/site.css?v=1787392130" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- SEO:auto START (tools/build-head-meta.py — nicht von Hand ändern) -->
@@ -470,12 +470,16 @@
         statusEl.classList.add('visible', 'error');
       });
   });
-  /* Vorbelegung des Betreffs per URL-Param (z.B. von der Schulprogramm-Seite
-     aus verlinkt), damit Absender:innen nicht selbst den Betreff formulieren
-     müssen. */
+  /* Vorbelegung von Betreff und Nachricht per URL-Param (z.B. von der
+     Schulprogramm- oder Trainingszeiten-Seite aus verlinkt), damit
+     Absender:innen nicht selbst den Text formulieren müssen, ihn aber vor
+     dem Absenden noch anpassen können. */
   (function () {
-    var betreff = new URLSearchParams(window.location.search).get('betreff');
+    var params = new URLSearchParams(window.location.search);
+    var betreff = params.get('betreff');
+    var nachricht = params.get('nachricht');
     if (betreff) document.getElementById('betreff').value = betreff;
+    if (nachricht) document.getElementById('nachricht').value = nachricht;
   })();
 </script>
 </body>

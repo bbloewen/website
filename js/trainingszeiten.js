@@ -33,16 +33,24 @@ document.addEventListener('DOMContentLoaded', function () {
     'usv-erfurt': 'team-badge-usv-erfurt',
     'loewinnen': 'team-badge-loewinnen'
   };
+  /* Verlinkung der Vereins-Badges auf die jeweilige Trainingszeiten-Seite des
+     Vereins — Basketball Löwen bleibt unverlinkt, das ist bereits diese Seite. */
+  var vereinLink = {
+    'bc-erfurt': 'https://bcerfurt.de/training',
+    'usv-erfurt': 'https://usv-erfurt-basketball.de/training'
+  };
 
+  // Adressen von der BC-Erfurt-Trainingsseite übernommen (bcerfurt.de/training),
+  // damit unsere Angaben mit denen des Partnervereins übereinstimmen.
   var ORT_DISPLAY = {
-    'Muldenweg (Feld 1)': 'Sporthalle am Muldenweg',
-    'Südparkhalle (Feld 1)': 'Südparkhalle',
-    'Südparkhalle (Feld 2)': 'Südparkhalle',
-    'Südparkhalle (Feld 3)': 'Südparkhalle',
-    'Südparkhalle (Feld 2+3)': 'Südparkhalle',
+    'Muldenweg (Feld 1)': 'Sporthalle Muldenweg, Kranichfelder Straße 56, 99097 Erfurt-Melchendorf',
+    'Südparkhalle (Feld 1)': 'Südparkhalle, Johann-Sebastian-Bach-Straße 7, 99096 Erfurt',
+    'Südparkhalle (Feld 2)': 'Südparkhalle, Johann-Sebastian-Bach-Straße 7, 99096 Erfurt',
+    'Südparkhalle (Feld 3)': 'Südparkhalle, Johann-Sebastian-Bach-Straße 7, 99096 Erfurt',
+    'Südparkhalle (Feld 2+3)': 'Südparkhalle, Johann-Sebastian-Bach-Straße 7, 99096 Erfurt',
     'Eugen-Richter-Halle (Feld 2)': 'Eugen-Richter-Halle',
-    'Christophorushalle': 'Christophorushalle',
-    'Bukarester Straße': 'Bukarester Straße'
+    'Christophorushalle': 'Christophorushalle, Spittelgartenstraße 1, 99089 Erfurt',
+    'Bukarester Straße': 'Regelschule An der Geraue, Bukarester Straße 3, 99091 Erfurt'
   };
 
   var WOCHENTAG_INDEX = { 'So': 0, 'Mo': 1, 'Di': 2, 'Mi': 3, 'Do': 4, 'Fr': 5, 'Sa': 6 };
@@ -57,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function mapsLink(ort) {
-    return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(ortDisplay(ort) + ' Erfurt');
+    return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(ortDisplay(ort));
   }
 
   function pad2(n) { return String(n).padStart(2, '0'); }
@@ -81,40 +89,56 @@ document.addEventListener('DOMContentLoaded', function () {
       text: titel,
       dates: gcalStamp(start) + '/' + gcalStamp(end),
       details: 'Training der Basketball Löwen Erfurt.',
-      location: ortDisplay(ort) + ', Erfurt',
+      location: ortDisplay(ort),
       recur: 'RRULE:FREQ=WEEKLY',
       ctz: 'Europe/Berlin'
     };
     return 'https://calendar.google.com/calendar/render?' + new URLSearchParams(params).toString();
   }
 
+  function probetrainingLink(teamName, jahrgang, verein) {
+    var betreff = 'Probetraining-Anfrage: ' + teamName + ' (' + jahrgang + ')';
+    var nachricht = 'Hallo,\n\nwir interessieren uns für ein Probetraining bei ' + teamName +
+      ' (' + jahrgang + ', ' + vereinLabel[verein] + ').\n\nBitte meldet euch bei uns.\n\nViele Grüße';
+    var params = new URLSearchParams({ betreff: betreff, nachricht: nachricht });
+    return '/kontakt.html?' + params.toString();
+  }
+
   function cardHTML(g) {
     var teamName = TEAM_LABELS[g.team] || g.team;
-    var titel = teamName + ' (' + jahrgangLabel(g.jahre) + ')';
+    var jahrgang = jahrgangLabel(g.jahre);
+    var titel = teamName + ' (' + jahrgang + ')';
     var zeitenHTML;
     if (g.termine && g.termine.length) {
       zeitenHTML = g.termine.map(function (t) {
         var cal = calendarLink(t.tag, t.zeit, titel, t.ort);
         var zeitText = t.tag + ' ' + t.zeit;
         if (t.vorbehaltlich) zeitText += ' (' + t.vorbehaltlich + ')';
-        var zeitHTML = '<div class="training-slot-zeit">' +
-          '<i data-lucide="clock" class="icon-14"></i><span>' + zeitText + '</span>' +
-          (cal ? ' <a href="' + cal + '" target="_blank" rel="noopener" title="Zum Kalender hinzufügen"><i data-lucide="calendar-plus" class="icon-14"></i></a>' : '') +
-        '</div>';
+        var zeitHTML = cal
+          ? '<a class="training-slot-zeit" href="' + cal + '" target="_blank" rel="noopener" title="Zum Kalender hinzufügen"><i data-lucide="calendar-plus" class="icon-14"></i><span>' + zeitText + '</span></a>'
+          : '<div class="training-slot-zeit"><span>' + zeitText + '</span></div>';
         var ortHTML = '<div class="training-slot-ort"><i data-lucide="map-pin" class="icon-14"></i><a href="' + mapsLink(t.ort) + '" target="_blank" rel="noopener">' + ortDisplay(t.ort) + '</a></div>';
         return '<div class="training-slot">' + zeitHTML + ortHTML + '</div>';
       }).join('');
     } else {
       zeitenHTML = '<div class="training-slot"><em>' + (g.hinweis || 'Zeiten folgen in Kürze') + '</em></div>';
     }
+    var badgeHTML = vereinLink[g.verein]
+      ? '<a class="team-badge ' + vereinBadgeClass[g.verein] + '" href="' + vereinLink[g.verein] + '" target="_blank" rel="noopener">' + vereinLabel[g.verein] + '</a>'
+      : '<span class="team-badge ' + vereinBadgeClass[g.verein] + '">' + vereinLabel[g.verein] + '</span>';
     return (
       '<div class="card training-row" data-verein="' + g.verein + '" data-jahre="' + g.jahre.join(',') + '">' +
         '<div>' +
-          '<div class="training-row-team">' + teamName + ' <span class="training-row-jahrgang">(' + jahrgangLabel(g.jahre) + ')</span></div>' +
-          '<div class="training-row-verein"><span class="team-badge ' + vereinBadgeClass[g.verein] + '">' + vereinLabel[g.verein] + '</span></div>' +
+          '<div class="training-row-head">' +
+            '<div class="training-row-team">' + teamName + ' <span class="training-row-jahrgang">(' + jahrgang + ')</span></div>' +
+            badgeHTML +
+          '</div>' +
+          '<div class="training-row-zeiten">' + zeitenHTML + '</div>' +
         '</div>' +
-        '<div class="training-row-zeiten">' + zeitenHTML + '</div>' +
-        '<div class="training-row-trainer"><div class="training-row-trainer-label">Trainerinnen:</div><div>' + (g.trainer || '') + '</div></div>' +
+        '<div class="training-row-trainer">' +
+          '<div class="training-row-trainer-label">Trainerinnen:</div><div>' + (g.trainer || '') + '</div>' +
+          '<a class="training-row-probetraining" href="' + probetrainingLink(teamName, jahrgang, g.verein) + '">Probetraining anfragen</a>' +
+        '</div>' +
       '</div>'
     );
   }
