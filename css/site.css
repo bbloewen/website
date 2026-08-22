@@ -2492,6 +2492,23 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
   .training-row-trainer { text-align: left; }
 }
 
+/* Wochentag-/Halle-Modus: eine Box je Wochentag bzw. Halle statt je Team,
+   darin eine Zeile je Trainingstermin (training-session-row) mit Zeit+Team
+   links und Verein/Trainer/Probetraining rechts — dieselbe Grid-Aufteilung
+   wie .training-row, aber pro Termin statt pro Team. */
+.training-group { padding: 18px 22px; }
+.training-group[hidden] { display: none; }
+.training-group-header { font-size: 18px; font-weight: var(--weight-extrabold); color: var(--text-primary); margin-bottom: 4px; }
+.training-group-rows { display: flex; flex-direction: column; }
+.training-session-row { display: grid; grid-template-columns: 1fr 180px; gap: 20px; align-items: start; padding: 14px 0; }
+.training-session-row[hidden] { display: none; }
+.training-session-row + .training-session-row { border-top: 1px solid var(--border-strong); }
+.training-session-team { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 15px; font-weight: var(--weight-semibold); color: var(--text-primary); margin-bottom: 8px; }
+.training-session-team .training-row-jahrgang { font-weight: var(--weight-medium); color: var(--text-secondary); }
+@media (max-width: 700px) {
+  .training-session-row { grid-template-columns: 1fr; text-align: left; gap: 12px; }
+}
+
 /* Spielplan: kompakte Team-Schnelllinks über der Tages-Liste */
 .spielplan-cal-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
 

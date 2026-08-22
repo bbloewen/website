@@ -169,6 +169,106 @@ document.addEventListener('DOMContentLoaded', function () {
     return '/kontakt.html?' + params.toString();
   }
 
+  /* Flache Liste aller einzelnen Trainingstermine (ein Eintrag pro Team+Tag),
+     Grundlage für die Wochentag-/Halle-Gruppierung. Teams ohne Termine
+     ("Zeiten folgen in Kürze") haben keinen Tag/keine Halle, zum Gruppieren
+     zu gehören, und bleiben daher nur im Team-Modus sichtbar. */
+  function buildSessions(gruppen) {
+    var sessions = [];
+    gruppen.forEach(function (g) {
+      if (!g.termine || !g.termine.length) return;
+      var teamName = TEAM_LABELS[g.team] || g.team;
+      var jahrgang = jahrgangLabel(g);
+      var teamKey = TEAM_KEY[g.team] || g.team;
+      g.termine.forEach(function (t) {
+        sessions.push({
+          teamName: teamName, jahrgang: jahrgang, teamKey: teamKey,
+          verein: g.verein, jahre: g.jahre, trainer: g.trainer,
+          tag: t.tag, zeit: t.zeit, ort: t.ort, vorbehaltlich: t.vorbehaltlich,
+          termin: t
+        });
+      });
+    });
+    return sessions;
+  }
+
+  function zeitLinkHTML(tag, zeit, vorbehaltlich, titel, ort, mitTag) {
+    var cal = calendarLink(tag, zeit, titel, ort);
+    var zeitText = (mitTag ? tag + ' ' : '') + zeit;
+    if (vorbehaltlich) zeitText += ' (' + vorbehaltlich + ')';
+    return cal
+      ? '<a class="training-slot-zeit" href="' + cal + '" target="_blank" rel="noopener" title="Zum Kalender hinzufügen"><i data-lucide="calendar-plus" class="icon-14"></i><span>' + zeitText + '</span></a>'
+      : '<div class="training-slot-zeit"><span>' + zeitText + '</span></div>';
+  }
+
+  function vereinBadgeHTML(verein) {
+    return vereinLink[verein]
+      ? '<a class="team-badge ' + vereinBadgeClass[verein] + '" href="' + vereinLink[verein] + '" target="_blank" rel="noopener">' + vereinLabel[verein] + '</a>'
+      : '<span class="team-badge ' + vereinBadgeClass[verein] + '">' + vereinLabel[verein] + '</span>';
+  }
+
+  /* Eine Zeile je Trainingstermin für den Wochentag-/Halle-Modus — anders als
+     cardHTML() (eine Box je Team) landen hier Zeit+Team in der Zeile selbst,
+     weil die Box-Überschrift der Wochentag bzw. die Halle ist, nicht mehr das
+     Team. Im Wochentag-Modus steht der Ort noch mit in der Zeile (eine
+     Wochentag-Box mischt mehrere Hallen); im Halle-Modus nicht mehr (die
+     Halle steht schon in der Box-Überschrift), dafür der Tag mit in der Zeit. */
+  function sessionRowHTML(s, modus) {
+    var titel = s.teamName + ' (' + s.jahrgang + ')';
+    var mitTag = modus === 'halle';
+    var zeitHTML = zeitLinkHTML(s.tag, s.zeit, s.vorbehaltlich, titel, s.ort, mitTag);
+    var ortLine = modus === 'wochentag'
+      ? '<div class="training-slot-ort"><i data-lucide="map-pin" class="icon-14"></i><a href="' + mapsLink(s.ort) + '" target="_blank" rel="noopener">' + ortDisplay(s.ort) + '</a></div>'
+      : '';
+    var probLink = '<a class="training-row-probetraining" href="' + probetrainingLink(s.teamName, s.jahrgang, s.verein, s.termin) + '">Probetraining vereinbaren</a>';
+    return (
+      '<div class="training-session-row" data-verein="' + s.verein + '" data-jahre="' + s.jahre.join(',') + '" data-team="' + s.teamKey + '">' +
+        '<div>' +
+          '<div class="training-session-team">' + zeitHTML + '<span>· ' + s.teamName + ' <span class="training-row-jahrgang">(' + s.jahrgang + ')</span></span></div>' +
+          ortLine +
+        '</div>' +
+        '<div class="training-row-trainer">' +
+          vereinBadgeHTML(s.verein) +
+          '<div class="training-row-trainer-label">Trainer:innen:</div><div>' + (s.trainer || '') + '</div>' +
+          probLink +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  /* Gruppiert die Termine nach Wochentag oder Halle (statt nach Team) und
+     baut je Gruppe eine eigene Box — auf Markos Wunsch für die Wochentag-/
+     Halle-Sortierung: "eine Box pro Wochentag" bzw. "eine Box pro Halle". */
+  function groupedHTML(sessions, modus) {
+    var groups = {};
+    var keys = [];
+    sessions.forEach(function (s) {
+      var key = modus === 'wochentag' ? s.tag : ortDisplay(s.ort);
+      if (!groups[key]) {
+        groups[key] = { label: modus === 'wochentag' ? WOCHENTAG_LANG[s.tag] : key, sessions: [] };
+        keys.push(key);
+      }
+      groups[key].sessions.push(s);
+    });
+    keys.forEach(function (key) {
+      groups[key].sessions.sort(function (a, b) { return terminSortWert(a.termin) - terminSortWert(b.termin); });
+    });
+    keys.sort(function (a, b) {
+      if (modus === 'wochentag') return (WOCHENTAG_SORT_ORDER[a] || 8) - (WOCHENTAG_SORT_ORDER[b] || 8);
+      return a.localeCompare(b, 'de');
+    });
+    return keys.map(function (key) {
+      var group = groups[key];
+      var rowsHTML = group.sessions.map(function (s) { return sessionRowHTML(s, modus); }).join('');
+      return (
+        '<div class="card training-group">' +
+          '<div class="training-group-header">' + group.label + '</div>' +
+          '<div class="training-group-rows">' + rowsHTML + '</div>' +
+        '</div>'
+      );
+    }).join('');
+  }
+
   function cardHTML(g) {
     var teamName = TEAM_LABELS[g.team] || g.team;
     var jahrgang = jahrgangLabel(g);
@@ -194,10 +294,8 @@ document.addEventListener('DOMContentLoaded', function () {
       ? '<a class="team-badge ' + vereinBadgeClass[g.verein] + '" href="' + vereinLink[g.verein] + '" target="_blank" rel="noopener">' + vereinLabel[g.verein] + '</a>'
       : '<span class="team-badge ' + vereinBadgeClass[g.verein] + '">' + vereinLabel[g.verein] + '</span>';
     var teamKey = TEAM_KEY[g.team] || g.team;
-    var sortWochentag = (g.termine && g.termine.length) ? Math.min.apply(null, g.termine.map(terminSortWert)) : 999999;
-    var sortHalle = (g.termine && g.termine.length) ? ortDisplay(g.termine[0].ort) : 'ZZZ – Zeiten folgen in Kürze';
     return (
-      '<div class="card training-row" data-verein="' + g.verein + '" data-jahre="' + g.jahre.join(',') + '" data-team="' + teamKey + '" data-sort-wochentag="' + sortWochentag + '" data-sort-halle="' + sortHalle.replace(/"/g, '&quot;') + '">' +
+      '<div class="card training-row" data-verein="' + g.verein + '" data-jahre="' + g.jahre.join(',') + '" data-team="' + teamKey + '">' +
         '<div>' +
           '<div class="training-row-team">' + teamName + ' <span class="training-row-jahrgang">(' + jahrgang + ')</span></div>' +
           '<div class="training-row-zeiten">' + zeitenHTML + '</div>' +
@@ -213,9 +311,8 @@ document.addEventListener('DOMContentLoaded', function () {
   fetch('/data/trainingszeiten.json?v=1787394380')
     .then(function (res) { return res.json(); })
     .then(function (data) {
-      var gruppen = data.gruppen.slice().reverse();
-      grid.innerHTML = gruppen.map(cardHTML).join('');
-      if (window.lucide) window.lucide.createIcons();
+      var gruppenTeamReihenfolge = data.gruppen.slice().reverse();
+      var sessions = buildSessions(gruppenTeamReihenfolge);
 
       var alleJahre = Array.from(new Set(data.gruppen.reduce(function (acc, g) { return acc.concat(g.jahre); }, [])));
       alleJahre.sort(function (a, b) { return a - b; });
@@ -242,45 +339,41 @@ document.addEventListener('DOMContentLoaded', function () {
       });
 
       var chips = document.querySelectorAll('.filter-chip');
-      var cards = grid.querySelectorAll('.training-row');
-
-      /* Sortieren ändert nur die DOM-Reihenfolge (appendChild verschiebt
-         bestehende Knoten, keine Neuerzeugung) — Filter-Status (hidden)
-         bleibt davon unberührt. "Team" ist die beim Rendern bereits
-         vorliegende Jahrgangsreihenfolge, daher hier einmalig gemerkt. */
-      var teamReihenfolge = Array.prototype.slice.call(cards);
-      var sortSelect = document.getElementById('sort-select');
-      function applySort() {
-        var modus = sortSelect.value;
-        var sortiert;
-        if (modus === 'wochentag') {
-          sortiert = teamReihenfolge.slice().sort(function (a, b) {
-            return (+a.getAttribute('data-sort-wochentag')) - (+b.getAttribute('data-sort-wochentag'));
-          });
-        } else if (modus === 'halle') {
-          sortiert = teamReihenfolge.slice().sort(function (a, b) {
-            return a.getAttribute('data-sort-halle').localeCompare(b.getAttribute('data-sort-halle'), 'de');
-          });
-        } else {
-          sortiert = teamReihenfolge;
-        }
-        sortiert.forEach(function (card) { grid.appendChild(card); });
-      }
-      sortSelect.addEventListener('change', applySort);
-
       var currentVerein = 'alle';
       var currentJahr = 'alle';
       var currentTeam = 'alle';
 
+      /* Team-Modus zeigt eine Box je Team (cardHTML), Wochentag/Halle
+         gruppieren stattdessen die einzelnen Termine neu (groupedHTML) —
+         ein Moduswechsel baut das Grid deshalb komplett neu, ein reines
+         Verschieben bestehender Boxen reicht hier nicht mehr aus. */
+      function render(modus) {
+        grid.innerHTML = (modus === 'wochentag' || modus === 'halle')
+          ? groupedHTML(sessions, modus)
+          : gruppenTeamReihenfolge.map(cardHTML).join('');
+        if (window.lucide) window.lucide.createIcons();
+        applyFilters();
+      }
+
       function applyFilters() {
-        cards.forEach(function (card) {
-          var vereinOk = currentVerein === 'alle' || card.getAttribute('data-verein') === currentVerein;
-          var jahre = card.getAttribute('data-jahre').split(',');
+        var rows = grid.querySelectorAll('[data-verein]');
+        rows.forEach(function (row) {
+          var vereinOk = currentVerein === 'alle' || row.getAttribute('data-verein') === currentVerein;
+          var jahre = row.getAttribute('data-jahre').split(',');
           var jahrOk = currentJahr === 'alle' || jahre.indexOf(currentJahr) !== -1;
-          var teamOk = currentTeam === 'alle' || card.getAttribute('data-team') === currentTeam;
-          card.hidden = !(vereinOk && jahrOk && teamOk);
+          var teamOk = currentTeam === 'alle' || row.getAttribute('data-team') === currentTeam;
+          row.hidden = !(vereinOk && jahrOk && teamOk);
+        });
+        // Wochentag-/Halle-Box ausblenden, wenn alle ihre Zeilen weggefiltert sind.
+        grid.querySelectorAll('.training-group').forEach(function (group) {
+          var zeilen = group.querySelectorAll('.training-session-row');
+          group.hidden = Array.prototype.every.call(zeilen, function (z) { return z.hidden; });
         });
       }
+
+      var sortSelect = document.getElementById('sort-select');
+      sortSelect.addEventListener('change', function () { render(sortSelect.value); });
+      render(sortSelect.value);
 
       chips.forEach(function (chip) {
         chip.addEventListener('click', function () {
