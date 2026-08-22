@@ -2249,6 +2249,9 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
      1/3 Breite — bei 1 Spalte hier zu schmal, Text passt nicht mehr rein. */
   .grid-3 > *:last-child:nth-child(3n+1) { grid-column: auto; justify-self: stretch; width: auto; }
   .grid-2 { grid-template-columns: 1fr; }
+  /* Kontaktseite: Formular soll gestapelt vor den Adress-Infos stehen, im
+     DOM aber nach ihnen bleiben (Desktop-Reihenfolge/Tab-Reihenfolge). */
+  .kontakt-contact-grid .card { order: -1; }
   .grid-5 { grid-template-columns: repeat(2, 1fr); }
   .footer-grid { grid-template-columns: 1fr 1fr; }
   .footer-leagues-top .container.footer-leagues-split { display: flex; flex-direction: column; justify-content: center; align-items: center; }
