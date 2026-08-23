@@ -1,49 +1,17 @@
 {
   "generatedAt": "2026-08-23T00:00:00.000Z",
+  "publishFrom": "2026-08-22",
   "events": [
     {
-      "name": "Barmer 3x3-Turnier",
-      "category": "Turnier",
+      "name": "Ehrenamtstreff",
+      "category": "Vereinsfest",
       "status": "Abgeschlossen",
-      "start": "2026-06-20T08:00:00.000Z",
-      "end": "2026-06-20T14:00:00.000Z",
+      "start": "2026-08-22T14:00:00.000Z",
+      "end": "2026-08-22T16:00:00.000Z",
       "isDatetime": true,
-      "description": "",
-      "location": "Willy-Brandt-Platz, 99084 Erfurt, Deutschland",
-      "heroImage": ""
-    },
-    {
-      "name": "Erfurt Bewegt sich",
-      "category": "Straßenfest",
-      "status": "Abgeschlossen",
-      "start": "2026-06-20T08:00:00.000Z",
-      "end": "2026-06-20T14:00:00.000Z",
-      "isDatetime": true,
-      "description": "",
-      "location": "Anger, 99084 Erfurt, Deutschland",
-      "heroImage": ""
-    },
-    {
-      "name": "UNITYED für krebskranke Kinder",
-      "category": "Straßenfest",
-      "status": "Abgeschlossen",
-      "start": "2026-06-20T11:00:00.000Z",
-      "end": "2026-06-20T14:00:00.000Z",
-      "isDatetime": true,
-      "description": "",
-      "location": "Kalkreiße 6, 99085 Erfurt, Deutschland",
-      "heroImage": ""
-    },
-    {
-      "name": "CJD Sommerfest",
-      "category": "Straßenfest",
-      "status": "Genehmigt",
-      "start": "2026-08-21T07:00:00.000Z",
-      "end": "2026-08-21T11:00:00.000Z",
-      "isDatetime": true,
-      "description": "",
-      "location": "Donaustraße 2A, 99089 Erfurt, Deutschland",
-      "heroImage": ""
+      "description": "Zwangloses Treffen für alle Ehrenamtlichen der Basketball Löwen — zum Kennenlernen, Austauschen und Danke sagen.",
+      "location": "Patrick's Pub, Johannesstraße 39, 99084 Erfurt",
+      "heroImage": "/assets/img/patricks-pub-erfurt.webp"
     },
     {
       "name": "Sommerfest Christophoruswerk",

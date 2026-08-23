@@ -78,7 +78,7 @@ function initCommunityEvents(containerId, jsonPath) {
       '<div class="card hoverable camp-slider-card" data-start="' + ev.start + '">' +
         mediaHTML +
         '<div class="card-body">' +
-          '<span class="card-label">' + (ev.category || 'Community-Event') + '</span>' +
+          '<span class="card-label">' + ev.name + '</span>' +
           '<h3 style="display:flex;align-items:center;gap:8px">' + dateLabel(ev) +
             ' <a href="' + calendarLink(ev) + '" target="_blank" rel="noopener" title="Ins Kalender eintragen" style="display:inline-flex;color:var(--color-brand-orange-text)"><i data-lucide="calendar-plus" class="icon-18"></i></a>' +
           '</h3>' +
