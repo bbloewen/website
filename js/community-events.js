@@ -73,8 +73,11 @@ function initCommunityEvents(containerId, jsonPath) {
     var mediaHTML = ev.heroImage
       ? '<div class="card-media card-media-photo" style="height:180px"><img src="' + ev.heroImage + '" alt="' + (ev.name || '').replace(/"/g, '&quot;') + '" loading="lazy" /></div>'
       : '<div class="card-media ' + cat.tint + '" style="height:180px"><i data-lucide="' + cat.icon + '" class="icon-32"></i></div>';
+    // Land am Ende der Adresse weglassen (immer Deutschland) -- nur fuer die
+    // Anzeige, der volle Adressstring (mit Land) bleibt fuer den Maps-Link erhalten.
+    var displayLocation = (ev.location || '').replace(/,\s*(Deutschland|Germany)$/, '');
     var locationHTML = ev.location
-      ? '<a class="t-caption" style="display:flex;align-items:center;gap:4px;margin:0 0 10px;color:var(--text-muted)" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(ev.location) + '" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-12"></i> ' + ev.location + '</a>'
+      ? '<a class="t-caption" style="display:flex;align-items:center;gap:4px;margin:0 0 10px;color:var(--text-muted)" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(ev.location) + '" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-12"></i> ' + displayLocation + '</a>'
       : '';
     var description = ev.description || FALLBACK_DESCRIPTION;
     return (
