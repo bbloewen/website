@@ -67,6 +67,10 @@ document.addEventListener('DOMContentLoaded', function () {
     'usv-erfurt': 'https://usv-erfurt-basketball.de/training'
   };
 
+  // Feste Reihenfolge der Erwachsenenteams (aelter als U19) am Ende der Team-Filter-
+  // Liste -- diese Teams haben keine U-Nummer, nach der sonst sortiert wird.
+  var ERWACHSENEN_TEAM_REIHENFOLGE = ['Oberliga Herren 1', 'Landesliga Herren 2', 'Landesliga Herren 3', 'Damen', 'Freizeit Mixed'];
+
   // Adressen von der BC-Erfurt-Trainingsseite übernommen (bcerfurt.de/training),
   // damit unsere Angaben mit denen des Partnervereins übereinstimmen.
   var ORT_DISPLAY = {
@@ -316,7 +320,9 @@ document.addEventListener('DOMContentLoaded', function () {
   fetch('/data/trainingszeiten.json?v=1787394380')
     .then(function (res) { return res.json(); })
     .then(function (data) {
-      var gruppenTeamReihenfolge = data.gruppen.slice().reverse();
+      // Reihenfolge = Reihenfolge im JSON: juengster Jahrgang oben, Erwachsenenteams
+      // (aelter als U19) stehen dort bewusst am Ende und rutschen damit ans Ende der Liste.
+      var gruppenTeamReihenfolge = data.gruppen.slice();
       var sessions = buildSessions(gruppenTeamReihenfolge);
 
       var alleJahre = Array.from(new Set(data.gruppen.reduce(function (acc, g) { return acc.concat(g.jahre); }, [])));
@@ -330,10 +336,19 @@ document.addEventListener('DOMContentLoaded', function () {
       });
 
       var alleTeams = Array.from(new Set(data.gruppen.map(function (g) { return TEAM_KEY[g.team] || g.team; })));
+      // Erwachsenenteams (aelter als U19) haben keine U-Nummer und stehen in einer
+      // festen Reihenfolge ganz am Ende, statt ueber die U-Jahrgaenge sortiert zu werden.
       alleTeams.sort(function (a, b) {
+        var ia = ERWACHSENEN_TEAM_REIHENFOLGE.indexOf(a);
+        var ib = ERWACHSENEN_TEAM_REIHENFOLGE.indexOf(b);
+        if (ia !== -1 || ib !== -1) {
+          if (ia === -1) return -1;
+          if (ib === -1) return 1;
+          return ia - ib;
+        }
         var na = parseInt(a.match(/\d+/)[0], 10);
         var nb = parseInt(b.match(/\d+/)[0], 10);
-        return nb - na || a.localeCompare(b);
+        return na - nb || a.localeCompare(b);
       });
       var teamSelect = document.getElementById('team-filter');
       alleTeams.forEach(function (team) {
