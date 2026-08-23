@@ -47,7 +47,12 @@ document.addEventListener('DOMContentLoaded', function () {
     'U16m': 'U16m',
     'U16w': 'U16w',
     'U19m': 'U19m',
-    'U19w': 'U19w'
+    'U19w': 'U19w',
+    // Landesliga Herren 2/3 bleiben als eigene Kachel sichtbar (Team-Label,
+    // TEAM_LABELS-Fallback = g.team), teilen sich im Team-Filter aber eine
+    // gemeinsame Option "Landesliga Herren" -- Auswahl zeigt dann beide Kacheln.
+    'Landesliga Herren 2': 'Landesliga Herren',
+    'Landesliga Herren 3': 'Landesliga Herren'
   };
 
   var vereinLabel = {

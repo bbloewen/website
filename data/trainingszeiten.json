@@ -1,5 +1,5 @@
 {
-  "hinweis": "Quelle: internes Trainingszeiten-Sheet, Stand 20.08.2026, für BC Erfurt gegen bcerfurt.de/training verifiziert (deckt sich exakt). USV-Erfurt-Einträge am 22.08.2026 durch echte Daten von usv-erfurt-basketball.de/training ersetzt — Achtung, diese Seite selbst gibt einen Gültigkeitszeitraum bis 03.07.2026 an (Vorsaison), USV hat also selbst noch nicht auf 2026/27 aktualisiert; als vorläufiger Platzhalter übernommen, bis USV neue Zeiten veröffentlicht. U13m (USV) hat dort keine Entsprechung (USV führt kein reines U13-Team) und blieb daher unverändert auf 'Zeiten folgen in Kürze'. U19m (USV) am 22.08.2026 auf Marko-Hinweis von 2007/2008/2009 auf 2008/2009/2010 korrigiert — USVs Seite listet weiterhin 2007-2009 (Vorsaison-Stand, per Live-Check am 22.08.2026 bestätigt), 2007 ist aber laut Marko für 2026/27 aus der U19 raus; an BC Erfurts bereits verifizierten aktuellen U19-Jahrgang angeglichen. Trainernamen durchgängig nur Vorname (auch bei USV, wo das Sheet bisher Nachnamen enthielt). Enthält Minibasketball, Jugendteams und weibliche Jugendteams (U12 und jünger bis U19) der Partnervereine BC Erfurt und USV Erfurt. Am 23.08.2026 die vier BC-Erfurt-Erwachsenenteams (Oberliga Herren, Landesliga Herren, Damen, Freizeit Mixed) auf Aaron-Hinweis ergänzt, Zeiten/Orte/Trainer live gegen bcerfurt.de/training verifiziert; Jahrgang einheitlich als '2007+' angegeben (älter als U19). BC Erfurts eigene interne Team-Nummerierung (z.B. 'Herren 1/2/3') bewusst nicht übernommen, da uns diese Zählung nicht gehört und sie sich bei anderen Partnervereinen (z.B. USV) anders darstellen könnte; Landesliga Herren fasst daher BC Erfurts 'Herren 2' und 'Herren 3' zu einem Team mit beiden Trainern und allen drei Terminen zusammen. SPORT VERNETZT, BasKIDball und Waid-Löwen haben eigene Seiten und sind hier weiterhin bewusst nicht enthalten, ebenso Erwachsenenteams von USV Erfurt und Basketball Löwen.",
+  "hinweis": "Quelle: internes Trainingszeiten-Sheet, Stand 20.08.2026, für BC Erfurt gegen bcerfurt.de/training verifiziert (deckt sich exakt). USV-Erfurt-Einträge am 22.08.2026 durch echte Daten von usv-erfurt-basketball.de/training ersetzt — Achtung, diese Seite selbst gibt einen Gültigkeitszeitraum bis 03.07.2026 an (Vorsaison), USV hat also selbst noch nicht auf 2026/27 aktualisiert; als vorläufiger Platzhalter übernommen, bis USV neue Zeiten veröffentlicht. U13m (USV) hat dort keine Entsprechung (USV führt kein reines U13-Team) und blieb daher unverändert auf 'Zeiten folgen in Kürze'. U19m (USV) am 22.08.2026 auf Marko-Hinweis von 2007/2008/2009 auf 2008/2009/2010 korrigiert — USVs Seite listet weiterhin 2007-2009 (Vorsaison-Stand, per Live-Check am 22.08.2026 bestätigt), 2007 ist aber laut Marko für 2026/27 aus der U19 raus; an BC Erfurts bereits verifizierten aktuellen U19-Jahrgang angeglichen. Trainernamen durchgängig nur Vorname (auch bei USV, wo das Sheet bisher Nachnamen enthielt). Enthält Minibasketball, Jugendteams und weibliche Jugendteams (U12 und jünger bis U19) der Partnervereine BC Erfurt und USV Erfurt. Am 23.08.2026 die fünf BC-Erfurt-Erwachsenenteams (Oberliga Herren, Landesliga Herren 2, Landesliga Herren 3, Damen, Freizeit Mixed) auf Aaron-Hinweis ergänzt, Zeiten/Orte/Trainer live gegen bcerfurt.de/training verifiziert; Jahrgang einheitlich als '2007+' angegeben (älter als U19). BC Erfurts eigene interne Team-Nummerierung ('Herren 1/2/3', gehört uns nicht und könnte sich bei anderen Partnervereinen wie USV anders darstellen) bewusst nicht als Liga-Bezeichnung übernommen: Oberliga Herren steht ohne Nummer (nur ein Team), Landesliga Herren 2 und 3 behalten die Nummer nur zur Unterscheidung der beiden Kacheln — im Team-Filter-Dropdown werden beide unter der gemeinsamen Option 'Landesliga Herren' zusammengefasst (siehe TEAM_KEY in js/trainingszeiten.js). SPORT VERNETZT, BasKIDball und Waid-Löwen haben eigene Seiten und sind hier weiterhin bewusst nicht enthalten, ebenso Erwachsenenteams von USV Erfurt und Basketball Löwen.",
   "gruppen": [
     {
       "team": "U8mix und jünger",
@@ -457,7 +457,7 @@
       ]
     },
     {
-      "team": "Landesliga Herren",
+      "team": "Landesliga Herren 2",
       "jahrgang": "2007+",
       "verein": "bc-erfurt",
       "termine": [
@@ -467,17 +467,28 @@
           "ort": "Südparkhalle"
         },
         {
-          "tag": "Mi",
-          "zeit": "20:30–22:00 Uhr",
-          "ort": "Südparkhalle"
-        },
-        {
           "tag": "Fr",
           "zeit": "19:30–21:00 Uhr",
           "ort": "Südparkhalle"
         }
       ],
-      "trainer": "Wilhelm, Tobias",
+      "trainer": "Wilhelm",
+      "jahre": [
+        2007
+      ]
+    },
+    {
+      "team": "Landesliga Herren 3",
+      "jahrgang": "2007+",
+      "verein": "bc-erfurt",
+      "termine": [
+        {
+          "tag": "Mi",
+          "zeit": "20:30–22:00 Uhr",
+          "ort": "Südparkhalle"
+        }
+      ],
+      "trainer": "Tobias",
       "jahre": [
         2007
       ]
