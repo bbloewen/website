@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-08-23T00:00:00.000Z",
+  "generatedAt": "2026-08-23T15:39:14.473+02:00",
   "publishFrom": "2026-08-22",
   "events": [
     {
       "name": "Ehrenamtstreff",
       "category": "Vereinsfest",
       "status": "Abgeschlossen",
-      "start": "2026-08-22T14:00:00.000Z",
-      "end": "2026-08-22T16:00:00.000Z",
+      "start": "2026-08-22T14:00:00.000+00:00",
+      "end": "2026-08-22T16:00:00.000+00:00",
       "isDatetime": true,
       "description": "Zwangloses Treffen für alle Ehrenamtlichen der Basketball Löwen — zum Kennenlernen, Austauschen und Danke sagen.",
-      "location": "Patrick's Pub, Johannesstraße 39, 99084 Erfurt",
-      "heroImage": "/assets/img/patricks-pub-erfurt.webp"
+      "location": "Johannesstraße 39, 99084 Erfurt, Deutschland",
+      "heroImage": "https://basketball-loewen.com/assets/img/patricks-pub-erfurt.webp"
     },
     {
       "name": "Sommerfest Christophoruswerk",
@@ -43,7 +43,7 @@
       "end": null,
       "isDatetime": false,
       "description": "",
-      "location": "Avenida-Therme Hohenfelden, Am Stausee 1, 99448 Hohenfelden, Germany",
+      "location": "Am Stausee 1, 99448 Hohenfelden, Germany",
       "heroImage": ""
     }
   ]
