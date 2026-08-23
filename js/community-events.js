@@ -102,7 +102,10 @@ function initCommunityEvents(containerId, jsonPath) {
     var now = new Date();
     var cards = Array.prototype.slice.call(track.querySelectorAll('.camp-slider-card'));
     var nextCard = cards.find(function (c) { return new Date(c.getAttribute('data-start')) >= now; }) || cards[cards.length - 1];
-    if (nextCard) track.scrollLeft = nextCard.offsetLeft;
+    // .news-slider-track hat scroll-behavior:smooth per CSS -- eine direkte
+    // scrollLeft-Zuweisung wuerde dadurch animiert statt sofort springen.
+    // behavior:'instant' erzwingt den sofortigen Sprung beim ersten Rendern.
+    if (nextCard) track.scrollTo({ left: nextCard.offsetLeft, behavior: 'instant' });
 
     if (prevBtn) prevBtn.addEventListener('click', function () { track.scrollBy({ left: -400, behavior: 'smooth' }); });
     if (nextBtn) nextBtn.addEventListener('click', function () { track.scrollBy({ left: 400, behavior: 'smooth' }); });
