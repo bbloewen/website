@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Feste Reihenfolge der Erwachsenenteams (aelter als U19) am Ende der Team-Filter-
   // Liste -- diese Teams haben keine U-Nummer, nach der sonst sortiert wird.
-  var ERWACHSENEN_TEAM_REIHENFOLGE = ['Oberliga Herren 1', 'Landesliga Herren 2', 'Landesliga Herren 3', 'Damen', 'Freizeit Mixed'];
+  var ERWACHSENEN_TEAM_REIHENFOLGE = ['Oberliga Herren', 'Landesliga Herren', 'Damen', 'Freizeit Mixed'];
 
   // Adressen von der BC-Erfurt-Trainingsseite übernommen (bcerfurt.de/training),
   // damit unsere Angaben mit denen des Partnervereins übereinstimmen.
