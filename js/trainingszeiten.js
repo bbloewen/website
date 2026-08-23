@@ -328,10 +328,12 @@ document.addEventListener('DOMContentLoaded', function () {
       var alleJahre = Array.from(new Set(data.gruppen.reduce(function (acc, g) { return acc.concat(g.jahre); }, [])));
       alleJahre.sort(function (a, b) { return a - b; });
       var jahrgangSelect = document.getElementById('jahrgang-filter');
+      // 2007 steht stellvertretend fuer "2007 und aelter" (die Erwachsenenteams,
+      // siehe ERWACHSENEN_TEAM_REIHENFOLGE) -- im Dropdown daher als "2007+" beschriftet.
       alleJahre.forEach(function (jahr) {
         var opt = document.createElement('option');
         opt.value = jahr;
-        opt.textContent = jahr;
+        opt.textContent = jahr === 2007 ? '2007+' : jahr;
         jahrgangSelect.appendChild(opt);
       });
 
