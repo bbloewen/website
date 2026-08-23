@@ -184,7 +184,7 @@ document.addEventListener('DOMContentLoaded', function () {
         sessions.push({
           teamName: teamName, jahrgang: jahrgang, teamKey: teamKey,
           verein: g.verein, jahre: g.jahre, trainer: g.trainer,
-          tag: t.tag, zeit: t.zeit, ort: t.ort, vorbehaltlich: t.vorbehaltlich,
+          tag: t.tag, zeit: t.zeit, ort: t.ort,
           termin: t
         });
       });

@@ -1,0 +1,82 @@
+{
+  "generatedAt": "2026-08-23T00:00:00.000Z",
+  "events": [
+    {
+      "name": "Barmer 3x3-Turnier",
+      "category": "Turnier",
+      "status": "Abgeschlossen",
+      "start": "2026-06-20T08:00:00.000Z",
+      "end": "2026-06-20T14:00:00.000Z",
+      "isDatetime": true,
+      "description": "",
+      "location": "Willy-Brandt-Platz, 99084 Erfurt, Deutschland",
+      "heroImage": ""
+    },
+    {
+      "name": "Erfurt Bewegt sich",
+      "category": "Straßenfest",
+      "status": "Abgeschlossen",
+      "start": "2026-06-20T08:00:00.000Z",
+      "end": "2026-06-20T14:00:00.000Z",
+      "isDatetime": true,
+      "description": "",
+      "location": "Anger, 99084 Erfurt, Deutschland",
+      "heroImage": ""
+    },
+    {
+      "name": "UNITYED für krebskranke Kinder",
+      "category": "Straßenfest",
+      "status": "Abgeschlossen",
+      "start": "2026-06-20T11:00:00.000Z",
+      "end": "2026-06-20T14:00:00.000Z",
+      "isDatetime": true,
+      "description": "",
+      "location": "Kalkreiße 6, 99085 Erfurt, Deutschland",
+      "heroImage": ""
+    },
+    {
+      "name": "CJD Sommerfest",
+      "category": "Straßenfest",
+      "status": "Genehmigt",
+      "start": "2026-08-21T07:00:00.000Z",
+      "end": "2026-08-21T11:00:00.000Z",
+      "isDatetime": true,
+      "description": "",
+      "location": "Donaustraße 2A, 99089 Erfurt, Deutschland",
+      "heroImage": ""
+    },
+    {
+      "name": "Sommerfest Christophoruswerk",
+      "category": "Straßenfest",
+      "status": "Genehmigt",
+      "start": "2026-09-05",
+      "end": null,
+      "isDatetime": false,
+      "description": "",
+      "location": "Spittelgartenstraße 1, 99089 Erfurt, Deutschland",
+      "heroImage": ""
+    },
+    {
+      "name": "Hopfenbergfest",
+      "category": "Straßenfest",
+      "status": "In Planung",
+      "start": "2026-09-12",
+      "end": null,
+      "isDatetime": false,
+      "description": "",
+      "location": "Am Hopfenberg, 99096 Erfurt, Deutschland",
+      "heroImage": ""
+    },
+    {
+      "name": "Avenida-Therme Stauseefest zum Kindertag – Mobiler Korb",
+      "category": "Straßenfest",
+      "status": "In Planung",
+      "start": "2026-09-20",
+      "end": null,
+      "isDatetime": false,
+      "description": "",
+      "location": "Avenida-Therme Hohenfelden, Am Stausee 1, 99448 Hohenfelden, Germany",
+      "heroImage": ""
+    }
+  ]
+}
