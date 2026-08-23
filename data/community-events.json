@@ -1,18 +1,7 @@
 {
-  "generatedAt": "2026-08-23T16:00:42.928+02:00",
+  "generatedAt": "2026-08-23T16:47:15.855+02:00",
   "publishFrom": "2026-08-22",
   "events": [
-    {
-      "name": "Ehrenamtstreff",
-      "category": "Vereinsfest",
-      "status": "Abgeschlossen",
-      "start": "2026-08-22T14:00:00.000+00:00",
-      "end": "2026-08-22T16:00:00.000+00:00",
-      "isDatetime": true,
-      "description": "Zwangloses Treffen für alle Ehrenamtlichen der Basketball Löwen — zum Kennenlernen, Austauschen und Danke sagen.",
-      "location": "Johannesstraße 39, 99084 Erfurt, Deutschland",
-      "heroImage": "https://basketball-loewen.com/assets/img/patricks-pub-erfurt.webp"
-    },
     {
       "name": "Sommerfest Christophoruswerk",
       "category": "Straßenfest",
