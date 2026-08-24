@@ -114,13 +114,14 @@ body { margin: 0; font-family: 'Lexend', system-ui, sans-serif; color: #00122D; 
 .karte p { font-size: %(text)s; margin: 0 0 .8em; line-height: 1.4; color: #3C4557; }
 .karte .qr { width: %(qr)s; height: %(qr)s; }
 .karte .platz { font-size: %(text)s; font-weight: 700; color: #B55709; margin-top: .6em; }
+.karte .foerderer { font-size: %(klein)s; color: #6B7488; margin-top: 1.2em; }
 """
 
 MASSE = {
     "a6": {"format": "A6", "breite": "105mm", "hoehe": "148mm", "polster": "10mm",
-           "logo": "16mm", "luft": "6mm", "titel": "20pt", "text": "11pt", "qr": "52mm"},
+           "logo": "16mm", "luft": "6mm", "titel": "20pt", "text": "11pt", "qr": "52mm", "klein": "8pt"},
     "a3": {"format": "A3", "breite": "297mm", "hoehe": "420mm", "polster": "28mm",
-           "logo": "45mm", "luft": "16mm", "titel": "56pt", "text": "26pt", "qr": "150mm"},
+           "logo": "45mm", "luft": "16mm", "titel": "56pt", "text": "26pt", "qr": "150mm", "klein": "16pt"},
 }
 
 
@@ -131,7 +132,9 @@ def druckseite(karten, format_name):
         f'<div class="seite"><div class="karte">'
         f'<img class="logo" src="{logo}" alt="Basketball Löwen Erfurt">'
         f'<h1>{k["titel"]}</h1><p>{k["text"]}</p>{k["qr"]}'
-        f'<div class="platz">{k["platz"]}</div></div></div>'
+        f'<div class="platz">{k["platz"]}</div>'
+        f'<div class="foerderer">Unterstützt von der E.E.S.T. Foundation · eest.foundation</div>'
+        f'</div></div>'
         for k in karten
     )
     return (f'<!doctype html><html lang="de"><head><meta charset="utf-8">'

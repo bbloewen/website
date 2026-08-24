@@ -575,6 +575,22 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
   margin-top: 24px; padding: 20px; background: var(--bg-subtle);
   border: 1px solid var(--border); border-radius: var(--radius-lg);
 }
+/* Foerderhinweis: bewusst leise — eine Zeile in Kleinschrift mit Trennlinie
+   darueber, kein Logo-Kasten. Er soll gefunden werden, wenn man hinschaut, und
+   nicht mit dem Spiel um Aufmerksamkeit konkurrieren. */
+.foerderhinweis {
+  margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border);
+  font-size: 13px; color: var(--text-muted);
+}
+.court-hunt-name { margin-top: 16px; font-size: 14px; color: var(--text-secondary); }
+.court-hunt-name-form { margin-top: 20px; }
+.court-hunt-name-form label { display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
+.court-hunt-name-zeile { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.court-hunt-name-zeile input {
+  width: 220px; padding: 11px 14px; border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-md); font: inherit; font-size: 14px; background: #fff; color: var(--text-primary);
+}
+.court-hunt-name-meldung { margin-top: 8px; font-size: 13px; color: var(--color-brand-orange-text); min-height: 18px; }
 .court-hunt-meldung { margin-top: 12px; font-size: 14px; color: var(--text-secondary); min-height: 21px; }
 .court-hunt-meldung.ist-erfolg { color: var(--color-success); font-weight: var(--weight-semibold); }
 .court-hunt-meldung.ist-hinweis { color: var(--color-brand-orange-text); font-weight: var(--weight-semibold); }

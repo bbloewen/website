@@ -20,8 +20,10 @@
 
   var DATA_URL = '/data/freiplaetze.json?v=1787609465';
 
-  /* Railway-URL des Court-Hunt-Service, sobald er steht (Phase 3). */
-  var API_BASE = '';
+  /* Der Court-Hunt-Dienst zaehlt die Punkte verbindlich (bbloewen/court-hunt-api,
+     Railway). Der Browser rechnet trotzdem sofort mit, damit man am Platz nicht
+     auf das Netz wartet — bei Abweichung gilt der Serverstand. */
+  var API_BASE = 'https://court-hunt-api-production.up.railway.app';
 
   var STORAGE_KEY = 'loewen-court-hunt';
   /* 100 m: Ein Freiplatz ist rund 30 m lang, 100 m heisst also "auf dem Platz
@@ -188,31 +190,54 @@
 
     stand.punkte += punkte;
     stand.offen.push({
-      slug: platz.slug, ts: jetzt,
-      /* Nur gerundet: Die genaue Position brauchen wir nach der Distanzpruefung
-         nicht mehr, der Server prueft die Plausibilitaet auf 3 Nachkommastellen
-         (rund 100 m) genauso gut. */
-      lat: coords ? Math.round(coords.latitude * 1000) / 1000 : null,
-      lng: coords ? Math.round(coords.longitude * 1000) / 1000 : null
+      slug: platz.slug,
+      /* Vier Nachkommastellen, rund 11 m: genau genug fuer die Pruefung auf dem
+         Server (100-m-Radius), aber keine metergenaue Ortsangabe in der
+         Warteschlange auf dem Geraet. */
+      lat: coords ? Math.round(coords.latitude * 10000) / 10000 : null,
+      lng: coords ? Math.round(coords.longitude * 10000) / 10000 : null,
+      genauigkeit: coords && coords.accuracy ? Math.round(coords.accuracy) : null
     });
     speichereStand(stand);
-    sendeOffene(stand);
     return { punkte: punkte, gutschrift: gutschrift, serie: serie };
   }
 
-  function sendeOffene(stand) {
+  /* Schickt die Warteschlange einzeln und der Reihe nach zum Server: Der prueft
+     unter anderem, ob der Ortswechsel zwischen zwei Check-ins plausibel ist —
+     das setzt die richtige Reihenfolge voraus.
+
+     Antwortet der Server fachlich ablehnend (409, etwa Sperre oder zu weit weg),
+     fliegt der Eintrag aus der Warteschlange: Ein zweiter Versuch aendert daran
+     nichts. Nur bei Netzfehlern bleibt er liegen und geht beim naechsten
+     Seitenaufruf erneut raus. */
+  function sendeOffene(stand, fertig) {
     if (!API_BASE || !stand.offen.length) return;
-    var pakete = stand.offen.slice();
-    Promise.all(pakete.map(function (c) {
-      return fetch(API_BASE + '/checkin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ geraeteId: stand.geraeteId, slug: c.slug, ts: c.ts, lat: c.lat, lng: c.lng })
-      }).then(function (res) { return res.ok ? c : null; });
-    })).then(function (erledigt) {
-      var weg = erledigt.filter(Boolean);
-      stand.offen = stand.offen.filter(function (c) { return weg.indexOf(c) < 0; });
+    var naechster = stand.offen[0];
+
+    fetch(API_BASE + '/checkin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        geraeteId: stand.geraeteId,
+        slug: naechster.slug,
+        lat: naechster.lat,
+        lng: naechster.lng,
+        genauigkeit: naechster.genauigkeit
+      })
+    }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (daten) {
+        return { ok: res.ok, status: res.status, daten: daten };
+      });
+    }).then(function (antwort) {
+      if (!antwort.ok && antwort.status !== 409 && antwort.status !== 404) return;
+      stand.offen.shift();
+      if (antwort.ok && antwort.daten.stand) {
+        /* Serverstand ist massgeblich — er kennt auch Check-ins von frueher. */
+        stand.punkte = antwort.daten.stand.gesamt;
+      }
       speichereStand(stand);
+      if (fertig) fertig(stand);
+      sendeOffene(stand, fertig);
     }).catch(function () { /* bleibt in der Warteschlange */ });
   }
 
@@ -383,6 +408,67 @@
 
   /* ------------------------------------------------ Spielstand-Anzeige */
 
+  /* Spielername: Pflicht fuer die Rangliste, aber ausdruecklich ein Fantasiename.
+     Ohne ihn steht dort nur "ohne Namen" — das ist kein Fehler, sondern die
+     Voreinstellung, damit niemand aus Versehen seinen echten Namen hinterlaesst. */
+  function namensBereich(stand) {
+    if (!API_BASE) return '';
+    if (stand.name) {
+      return '<p class="court-hunt-name">Du spielst als <strong>' + esc(stand.name) + '</strong> ' +
+        '<button type="button" class="btn-link" data-name-aendern>ändern</button></p>';
+    }
+    return '<form class="court-hunt-name-form" data-name-form>' +
+      '<label for="court-hunt-name">Spielername für die Rangliste — such dir einen aus, nicht deinen echten Namen</label>' +
+      '<div class="court-hunt-name-zeile">' +
+        '<input type="text" id="court-hunt-name" name="name" maxlength="24" minlength="2" placeholder="z. B. Korbjäger" required />' +
+        '<button type="submit" class="btn btn-ghost">Speichern</button>' +
+      '</div>' +
+      '<p class="court-hunt-name-meldung" role="status" aria-live="polite"></p>' +
+    '</form>';
+  }
+
+  function namenVerdrahten(el, stand) {
+    var aendern = el.querySelector('[data-name-aendern]');
+    if (aendern) {
+      aendern.addEventListener('click', function () {
+        stand.name = '';
+        speichereStand(stand);
+        standPanel(el);
+        icons();
+      });
+      return;
+    }
+
+    var form = el.querySelector('[data-name-form]');
+    if (!form) return;
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var feld = form.querySelector('input[name="name"]');
+      var meldung = form.querySelector('.court-hunt-name-meldung');
+      var name = feld.value.trim();
+      if (name.length < 2) return;
+
+      meldung.textContent = 'Wird gespeichert …';
+      fetch(API_BASE + '/name', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ geraeteId: stand.geraeteId, name: name })
+      }).then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (daten) {
+          if (!res.ok) throw new Error(typeof daten.detail === 'string' ? daten.detail : 'Das hat nicht geklappt.');
+          return daten;
+        });
+      }).then(function (daten) {
+        stand.name = daten.name;
+        speichereStand(stand);
+        standPanel(el);
+        icons();
+      }).catch(function (fehler) {
+        meldung.textContent = fehler.message;
+      });
+    });
+  }
+
   function standPanel(el, meldungText, meldungKlasse) {
     var stand = ladeStand();
 
@@ -421,10 +507,13 @@
             '<i data-lucide="map-pin-check" class="icon-18"></i> Hier einchecken</button>' +
         '</div>' +
         meldungHtml +
+        namensBereich(stand) +
         '<div class="court-hunt-aktionen">' +
           '<a class="btn btn-ghost" href="/trainieren/court-hunt.html">Rangliste ansehen</a>' +
           '<button type="button" class="btn btn-ghost" data-court-hunt-reset>Meinen Spielstand löschen</button>' +
         '</div>';
+
+      namenVerdrahten(el, stand);
 
       el.querySelector('[data-court-hunt-reset]').addEventListener('click', function () {
         if (!window.confirm('Punkte, besuchte Plätze und deine Spiel-ID werden gelöscht. Wirklich?')) return;
@@ -478,6 +567,11 @@
 
       var gebucht = bucheCheckin(stand, naechster.platz, Date.now(), coords);
       fertig(erfolgsText(gebucht, stand), 'ist-erfolg');
+      /* Der Server ist die zaehlende Instanz — sobald er geantwortet hat, steht
+         hier sein Stand statt der eigenen Rechnung. */
+      sendeOffene(stand, function (aktualisiert) {
+        fertig(erfolgsText(gebucht, aktualisiert), 'ist-erfolg');
+      });
     }).catch(function (fehler) {
       knopf.disabled = false;
       meldung.className = 'court-hunt-meldung ist-hinweis';
@@ -487,7 +581,13 @@
 
   /* ----------------------------------------------------- Seiteneinstiege */
 
+  function nachtragen() {
+    var stand = ladeStand();
+    if (stand && stand.offen && stand.offen.length) sendeOffene(stand);
+  }
+
   function initUebersicht() {
+    nachtragen();
     ladeDaten().then(function (data) {
       var plaetze = data.freiplaetze;
       var offen = plaetze.filter(spielbar);
@@ -516,6 +616,7 @@
   }
 
   function initPlatzseite() {
+    nachtragen();
     var slug = new URLSearchParams(window.location.search).get('platz');
     var wurzel = document.getElementById('freiplatz-detail');
     if (!wurzel) return;
@@ -602,6 +703,9 @@
         var gebucht = bucheCheckin(aktuell, platz, Date.now(), coords);
         meldung.className = 'court-hunt-meldung ist-erfolg';
         meldung.textContent = erfolgsText(gebucht, aktuell);
+        sendeOffene(aktuell, function (aktualisiert) {
+          meldung.textContent = erfolgsText(gebucht, aktualisiert);
+        });
       }).catch(function (fehler) {
         knopf.disabled = false;
         meldung.className = 'court-hunt-meldung ist-hinweis';
@@ -638,17 +742,19 @@
 
     el.innerHTML = '<p class="t-body">Rangliste wird geladen …</p>';
     var stand = ladeStand();
-    fetch(API_BASE + '/leaderboard').then(function (r) { return r.json(); }).then(function (daten) {
-      var zeilen = (daten.eintraege || []);
+    var abfrage = stand ? '?ich=' + encodeURIComponent(stand.geraeteId) : '';
+
+    fetch(API_BASE + '/rangliste' + abfrage).then(function (r) { return r.json(); }).then(function (daten) {
+      var zeilen = daten.eintraege || [];
       if (!zeilen.length) {
         el.innerHTML = '<p class="t-body">Diesen Monat hat noch niemand eingecheckt. Sei die Erste oder der Erste.</p>';
         return;
       }
-      el.innerHTML = '<div class="rangliste-wrap"><table class="rangliste"><thead><tr><th>Platz</th><th>Spielername</th><th>Punkte</th></tr></thead><tbody>' +
-        zeilen.map(function (z, i) {
-          var ich = stand && z.geraeteId === stand.geraeteId;
-          return '<tr' + (ich ? ' class="ist-ich"' : '') + '><td>' + (i + 1) + '</td><td>' +
-            esc(z.name || 'ohne Namen') + (ich ? ' <span class="rangliste-ich">du</span>' : '') +
+      el.innerHTML = '<div class="rangliste-wrap"><table class="rangliste">' +
+        '<thead><tr><th>Platz</th><th>Spielername</th><th>Punkte</th></tr></thead><tbody>' +
+        zeilen.map(function (z) {
+          return '<tr' + (z.ich ? ' class="ist-ich"' : '') + '><td>' + z.rang + '</td><td>' +
+            esc(z.name) + (z.ich ? ' <span class="rangliste-ich">du</span>' : '') +
             '</td><td>' + z.punkte + '</td></tr>';
         }).join('') + '</tbody></table></div>';
     }).catch(function () {
@@ -657,6 +763,7 @@
   }
 
   function initStandsseite() {
+    nachtragen();
     monatsInfo(document.getElementById('court-hunt-monat'));
     var panel = document.getElementById('court-hunt-panel');
     if (panel) standPanel(panel);
