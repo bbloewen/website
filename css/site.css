@@ -532,6 +532,7 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 }
 .freiplatz-zugang-banner i { flex-shrink: 0; color: var(--color-brand-orange-text); }
 .freiplatz-popup-hinweis { color: var(--color-error); font-weight: var(--weight-semibold); }
+.freiplatz-zugang-detail { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 10px; }
 
 /* Kartenpins: zwei Zustände, unterschieden über Farbe UND Form (gefüllter Punkt
    gegenüber Ring), damit die Karte nicht allein über Farbe spricht. Die Legende

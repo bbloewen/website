@@ -304,11 +304,23 @@
       esc(f.zugangHinweis || 'Zugang eingeschränkt') + '</div>';
   }
 
+  /* Erklärt, WER den Platz gesperrt hat. Ohne diesen Satz liest sich ein
+     eingeschränkter Platz so, als haette der Verein ihn dichtgemacht. */
+  function zugangDetail(f) {
+    if (spielbar(f) || !f.zugangDetail) return '';
+    var link = f.zugangLink
+      ? '<a class="card-link" href="' + f.zugangLink + '" target="_blank" rel="noopener">' +
+        esc(f.zugangLinkText || 'Mehr erfahren') + ' <i data-lucide="external-link" class="icon-14"></i></a>'
+      : '';
+    return '<p class="freiplatz-zugang-detail">' + esc(f.zugangDetail) + '</p>' + link;
+  }
+
   function kachel(f) {
     return '<div class="card freiplatz-card">' + medienBlock(f) + zugangBanner(f) +
       '<div class="card-body">' +
         '<h3>' + esc(f.name) + '</h3>' +
         '<p>' + esc(f.beschreibung) + '</p>' +
+        zugangDetail(f) +
         '<a class="freiplatz-adresse-link" href="' + mapsUrl(f) + '" target="_blank" rel="noopener">' +
           '<i data-lucide="map-pin" class="icon-16"></i> ' + esc(f.adresse) + '</a>' +
         '<a class="card-link" href="' + platzUrl(f.slug) + '">' +
@@ -343,6 +355,10 @@
       var popup = '<strong>' + esc(f.name) + '</strong><br>' + esc(f.adresse);
       if (eingeschraenkt) {
         popup += '<br><span class="freiplatz-popup-hinweis">' + esc(f.zugangHinweis || 'Zugang eingeschränkt') + '</span>';
+        if (f.zugangLink) {
+          popup += '<br><a href="' + f.zugangLink + '" target="_blank" rel="noopener">' +
+            esc(f.zugangLinkText || 'Mehr erfahren') + '</a>';
+        }
       }
       popup += '<br><a href="' + platzUrl(f.slug) + '">Zum Platz</a>';
       return window.L.marker([f.lat, f.lng], { icon: icon, alt: f.name, keyboard: true }).bindPopup(popup);
@@ -515,6 +531,7 @@
         '<p class="t-body mt-3">' + esc(platz.beschreibung) + '</p>' +
         medienBlock(platz) +
         zugangBanner(platz) +
+        zugangDetail(platz) +
         '<a class="freiplatz-adresse-link mt-4" href="' + mapsUrl(platz) + '" target="_blank" rel="noopener">' +
           '<i data-lucide="map-pin" class="icon-16"></i> ' + esc(platz.adresse) + '</a>' +
         '<div id="freiplatz-karte" class="freiplaetze-map freiplaetze-map-klein"></div>' +
