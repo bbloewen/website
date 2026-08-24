@@ -18,7 +18,7 @@
 (function () {
   'use strict';
 
-  var DATA_URL = '/data/freiplaetze.json?v=1787261100';
+  var DATA_URL = '/data/freiplaetze.json?v=1787609465';
 
   /* Railway-URL des Court-Hunt-Service, sobald er steht (Phase 3). */
   var API_BASE = '';
@@ -304,15 +304,23 @@
       esc(f.zugangHinweis || 'Zugang eingeschränkt') + '</div>';
   }
 
-  /* Erklärt, WER den Platz gesperrt hat. Ohne diesen Satz liest sich ein
-     eingeschränkter Platz so, als haette der Verein ihn dichtgemacht. */
+  /* Erklärt, wer den Platz verwaltet und wer ihn nutzen darf. Ohne diesen Satz
+     liest sich ein eingeschränkter Platz so, als hätte der Verein ihn
+     dichtgemacht. Links stehen als [Beschriftung] mitten im Text und werden aus
+     f.zugangLinks aufgelöst — mitten im Satz gelesen, nicht als Extra-Zeile
+     darunter. Nur https-Ziele, alles andere bleibt schlichter Text. */
+  function mitLinks(text, links) {
+    return esc(text).replace(/\[([^\]]+)\]/g, function (ganzes, beschriftung) {
+      var ziel = links && links[beschriftung];
+      return ziel && ziel.indexOf('https://') === 0
+        ? '<a href="' + ziel + '" target="_blank" rel="noopener">' + beschriftung + '</a>'
+        : beschriftung;
+    });
+  }
+
   function zugangDetail(f) {
     if (spielbar(f) || !f.zugangDetail) return '';
-    var link = f.zugangLink
-      ? '<a class="card-link" href="' + f.zugangLink + '" target="_blank" rel="noopener">' +
-        esc(f.zugangLinkText || 'Mehr erfahren') + ' <i data-lucide="external-link" class="icon-14"></i></a>'
-      : '';
-    return '<p class="freiplatz-zugang-detail">' + esc(f.zugangDetail) + '</p>' + link;
+    return '<p class="freiplatz-zugang-detail">' + mitLinks(f.zugangDetail, f.zugangLinks) + '</p>';
   }
 
   function kachel(f) {
@@ -355,10 +363,6 @@
       var popup = '<strong>' + esc(f.name) + '</strong><br>' + esc(f.adresse);
       if (eingeschraenkt) {
         popup += '<br><span class="freiplatz-popup-hinweis">' + esc(f.zugangHinweis || 'Zugang eingeschränkt') + '</span>';
-        if (f.zugangLink) {
-          popup += '<br><a href="' + f.zugangLink + '" target="_blank" rel="noopener">' +
-            esc(f.zugangLinkText || 'Mehr erfahren') + '</a>';
-        }
       }
       popup += '<br><a href="' + platzUrl(f.slug) + '">Zum Platz</a>';
       return window.L.marker([f.lat, f.lng], { icon: icon, alt: f.name, keyboard: true }).bindPopup(popup);
