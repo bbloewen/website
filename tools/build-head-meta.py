@@ -206,6 +206,49 @@ def home_games():
     return events
 
 
+def freiplaetze():
+    """Die oeffentlichen Basketball-Freiplaetze als ItemList.
+
+    Sechs benannte Plaetze mit Adresse und Koordinaten sind der staerkste lokale
+    Inhalt, den die Seite hat -- und das Schema, mit dem Google oeffentliche
+    Sportanlagen versteht. Ohne diesen Block bleibt die Seite fuer Google eine
+    Textseite ueber Basketball; mit ihm ist sie ein Verzeichnis von sechs Orten
+    in Erfurt, an denen man Basketball spielen kann.
+    """
+    daten = json.loads((REPO / "data" / "freiplaetze.json").read_text(encoding="utf-8"))
+    orte = []
+    for i, f in enumerate(daten.get("freiplaetze", []), start=1):
+        strasse = f["adresse"].split(",")[0].strip()
+        plz = re.search(r"\b(\d{5})\b", f["adresse"])
+        ort = {
+            "@type": "SportsActivityLocation",
+            "name": f["name"],
+            "description": f.get("beschreibung", ""),
+            "sport": "Basketball",
+            "isAccessibleForFree": f.get("zugang") != "eingeschraenkt",
+            "address": {
+                "@type": "PostalAddress",
+                "streetAddress": strasse,
+                "addressLocality": "Erfurt",
+                "addressRegion": "Thüringen",
+                "addressCountry": "DE",
+            },
+            "geo": {"@type": "GeoCoordinates",
+                    "latitude": f["lat"], "longitude": f["lng"]},
+        }
+        if plz:
+            ort["address"]["postalCode"] = plz.group(1)
+        orte.append({"@type": "ListItem", "position": i, "item": ort})
+    if not orte:
+        return []
+    return [{
+        "@type": "ItemList",
+        "name": "Öffentliche Basketball-Freiplätze in Erfurt",
+        "numberOfItems": len(orte),
+        "itemListElement": orte,
+    }]
+
+
 def nodes_for(rel, text, page_title, social_title, description, image):
     """JSON-LD-Knoten dieser Seite."""
     nodes = []
@@ -249,6 +292,9 @@ def nodes_for(rel, text, page_title, social_title, description, image):
 
     if rel.startswith("trainieren/loewenpark"):
         nodes.append(LOEWENPARK)
+
+    if rel == "trainieren/freiplaetze.html":
+        nodes.extend(freiplaetze())
 
     crumb = breadcrumb(rel, social_title)
     if crumb:

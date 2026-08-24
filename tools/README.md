@@ -17,6 +17,7 @@ Canonical dürfen nie auseinanderlaufen.
 | `partials/header.html` oder `footer.html` | `build-partials.py` |
 | `<title>` oder `<meta name="description">` einer Seite | `build-head-meta.py` |
 | `data/news.json` (Artikel ergänzt/geändert) | `build-news-list.py` |
+| `data/freiplaetze.json` (Platz ergänzt/geändert) | `build-freiplaetze.py` |
 | Neues Artikel-Hero in `assets/img/news/` | `build-share-images.py`, dann `build-head-meta.py` |
 | `data/heimspiele.json` (Spieltermine) | `build-head-meta.py` |
 | `data/freiplaetze.json` (Platz ergänzt, Koordinaten geändert) | `build-freiplatz-qr.py` |
@@ -26,6 +27,7 @@ Alles auf einmal, in dieser Reihenfolge:
 ```bash
 python3 tools/build-partials.py && \
 python3 tools/build-news-list.py && \
+python3 tools/build-freiplaetze.py && \
 python3 tools/build-share-images.py && \
 python3 tools/build-head-meta.py && \
 python3 tools/build-sitemap.py
@@ -71,3 +73,12 @@ Plätze mit eingeschränktem Zugang bekommen bewusst keinen Spiel-Code.
 **`fix-insta-archiv-legacy.py`** — zieht Insta-Archivseiten nach, die aus dem
 Behold-Feed gefallen sind. Der n8n-Workflow kennt nur die letzten 20 Posts je
 Account und fasst ältere Seiten nie wieder an. Läuft nur bei Bedarf.
+
+**`build-freiplaetze.py`** — schreibt die Freiplatz-Liste statisch in
+`trainieren/freiplaetze.html`. Die sechs Plätze wurden vorher ausschließlich im
+Browser aus `data/freiplaetze.json` gerendert; im ausgelieferten HTML stand kein
+einziger Platzname und keine Adresse. Gleiche Bauart wie `build-news-list.py`:
+Das JavaScript überschreibt den statischen Stand mit identischem Inhalt, die
+statische Fassung ist nur für Crawler ohne JavaScript da. Bewusst ohne
+Medienblock — Karten-iframes würden beim ersten Aufbau laden und Sekunden später
+ersetzt, ohne für die Auffindbarkeit etwas beizutragen.

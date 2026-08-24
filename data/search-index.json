@@ -206,13 +206,15 @@
     "title": "Freiplätze",
     "url": "/trainieren/freiplaetze.html",
     "category": "Trainieren",
-    "description": "Alle öffentlichen Basketball-Freiplätze in Erfurt auf einen Blick — mit Adresse, QR-Code zur Wegbeschreibung und Foto."
+    "description": "Sechs öffentliche Basketball-Freiplätze in Erfurt mit Adresse, Lage und Zugang — frei nutzbar, ohne Anmeldung.",
+    "keywords": "Freiplatz Streetball 3x3 Basketballplatz Korb draußen Erfurt"
   },
   {
     "title": "Court-Hunt",
     "url": "/trainieren/court-hunt.html",
     "category": "Trainieren",
-    "description": "An Erfurter Freiplätzen einchecken, Punkte sammeln und einen Ticket-Gutschein fürs Heimspiel gewinnen — Punktestand, Regeln und Rangliste."
+    "description": "An Erfurter Basketball-Freiplätzen einchecken, Punkte sammeln und Freikarten fürs Heimspiel gewinnen.",
+    "keywords": "Court-Hunt Gewinnspiel Freiplatz Check-in Punkte Freikarten"
   },
   {
     "title": "Unsere Sponsoren",

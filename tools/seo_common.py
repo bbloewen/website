@@ -21,8 +21,15 @@ REPO = Path(__file__).resolve().parent.parent
 NOINDEX_RE = re.compile(r'<meta\s+name=["\']robots["\']\s+content=["\'][^"\']*noindex', re.I)
 
 
+# Druckvorlagen sind keine Webseiten: kein Header, kein Footer, keine
+# Navigation, und in Google haben sie nichts verloren. Sie werden deshalb aus
+# allen Build-Schritten herausgehalten -- sonst meldet build-partials.py bei
+# jedem Lauf einen fehlenden Platzhalter, den es dort nie geben wird.
+AUSGENOMMEN = ("partials/", "tools/druck/")
+
+
 def tracked_html():
-    """Von Git verfolgte HTML-Dateien, ohne partials/.
+    """Von Git verfolgte HTML-Dateien, ohne partials/ und Druckvorlagen.
 
     Bewusst git statt Verzeichnis-Scan: lokale Arbeitsartefakte (wie früher
     tools/familienrabatt-rechner.html) landen so nie versehentlich in Sitemap,
@@ -38,7 +45,7 @@ def tracked_html():
     # FileNotFoundError ab.
     return sorted(
         f for f in out.split("\0")
-        if f and not f.startswith("partials/") and (REPO / f).is_file()
+        if f and not f.startswith(AUSGENOMMEN) and (REPO / f).is_file()
     )
 
 
