@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Schreibt die Freiplatz-Liste statisch in trainieren/freiplaetze.html.
 
-Warum: Die sechs Freiplätze wurden ausschliesslich im Browser aus
+Warum: Die Freiplätze wurden ausschliesslich im Browser aus
 data/freiplaetze.json in leere Container gerendert. Im ausgelieferten HTML stand
 damit **kein einziger Platzname und keine einzige Adresse** -- fuer einen
 Crawler ohne JavaScript war die Seite 210 Woerter Einleitung und sonst nichts.
