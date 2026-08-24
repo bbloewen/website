@@ -509,17 +509,84 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
    geworfenen Ball der Spielerin ab (Marko, 20.08.2026) — analog zum
    Cheftrainer-Pressefoto oben auf den oberen Bildbereich gesetzt. */
 .card-media-photo img[src*="freiplaetze-riethsporthalle"] { object-position: top; }
-.freiplatz-qr-row { display: flex; align-items: center; gap: 12px; }
-.freiplatz-qr { width: 64px; height: 64px; flex-shrink: 0; border: 1px solid var(--border); border-radius: 8px; padding: 4px; background: #fff; }
-.freiplatz-qr-hint { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
+/* QR-Code liegt seit 24.08.2026 als kleines Overlay unten rechts im Kachelbild
+   statt als eigene Zeile in der Textspalte: als Block darunter wirkte er wie ein
+   Fremdkörper und drängte sich vor die eigentliche Platzbeschreibung. */
+.freiplatz-media { position: relative; }
+/* Selektor bewusst mit Elternklasse: .card-media-photo img zieht das Bild sonst
+   auf volle Kachelgröße (höhere Spezifität als eine einzelne Klasse). */
+.freiplatz-media .freiplatz-qr {
+  position: absolute; right: 10px; bottom: 10px; width: 56px; height: 56px;
+  border-radius: 8px; padding: 4px; background: #fff; box-shadow: var(--shadow-card);
+  object-fit: contain;
+}
 .card-media-photo iframe { width: 100%; height: 100%; border: 0; display: block; }
-/* Großer, unübersehbarer Hinweis für gesperrte Freiplätze (aktuell nur
-   Riethsporthalle) — direkte volle Breite unter dem Foto, nicht nur ein
-   kleines Badge, damit es beim Überfliegen der Kachel nicht übersehen wird. */
-.freiplatz-gesperrt-banner {
+/* Zugangshinweis für Plätze, die nicht allen offenstehen (aktuell nur die
+   Riethsporthalle). Früher ein roter Sperr-Banner — das las sich wie eine
+   Warnung, obwohl der Platz existiert und für Mitglieder nutzbar ist. Jetzt ein
+   ruhiger Balken; die Plätze stehen ohnehin in einem eigenen Abschnitt. */
+.freiplatz-zugang-banner {
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  background: var(--color-error); color: #fff; font-weight: var(--weight-extrabold);
-  font-size: 14px; letter-spacing: .01em; padding: 10px 12px; text-align: center;
+  background: var(--color-warning-bg); color: var(--text-primary);
+  font-weight: var(--weight-semibold); font-size: 13px; padding: 9px 12px; text-align: center;
+}
+.freiplatz-zugang-banner i { flex-shrink: 0; color: var(--color-brand-orange-text); }
+.freiplatz-popup-hinweis { color: var(--color-error); font-weight: var(--weight-semibold); }
+
+/* Kartenpins: zwei Zustände, unterschieden über Farbe UND Form (gefüllter Punkt
+   gegenüber Ring), damit die Karte nicht allein über Farbe spricht. Die Legende
+   darunter benennt beide zusätzlich in Worten. */
+.freiplatz-pin span {
+  display: block; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--color-brand-orange); border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,18,45,.45);
+}
+.freiplatz-pin-eingeschraenkt span { background: #fff; border-color: #F08A8A; box-shadow: 0 1px 4px rgba(0,18,45,.35); }
+.freiplaetze-legende {
+  display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;
+  margin-top: 16px; font-size: 13px; color: var(--text-muted);
+}
+.freiplaetze-legende span { display: flex; align-items: center; justify-content: center; gap: 8px; flex: 0 0 300px; }
+/* Legendensymbole sind bewusst dieselben Kreise wie auf der Karte, nicht
+   irgendein Icon — sonst muss man sich die Zuordnung selbst zusammenreimen. */
+.freiplatz-pin-probe {
+  width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
+  background: var(--color-brand-orange); border: 3px solid #fff; box-shadow: 0 1px 3px rgba(0,18,45,.4);
+}
+.freiplatz-pin-probe.ist-eingeschraenkt { background: #fff; border-color: #F08A8A; }
+.freiplaetze-map-klein { height: 260px; }
+
+/* ---- Court-Hunt (Freiplatz-Spiel, seit 24.08.2026) ---- */
+.court-hunt-stand { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.court-hunt-zahl {
+  flex: 0 0 140px; background: #fff; border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 16px 12px;
+}
+.court-hunt-zahl strong {
+  display: block; font-size: 30px; font-weight: var(--weight-extrabold);
+  line-height: 1.1; color: var(--color-brand-orange-text);
+}
+.court-hunt-zahl span { font-size: 13px; color: var(--text-secondary); }
+.court-hunt-aktionen { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+.freiplatz-checkin {
+  margin-top: 24px; padding: 20px; background: var(--bg-subtle);
+  border: 1px solid var(--border); border-radius: var(--radius-lg);
+}
+.court-hunt-meldung { margin-top: 12px; font-size: 14px; color: var(--text-secondary); min-height: 21px; }
+.court-hunt-meldung.ist-erfolg { color: var(--color-success); font-weight: var(--weight-semibold); }
+.court-hunt-meldung.ist-hinweis { color: var(--color-brand-orange-text); font-weight: var(--weight-semibold); }
+.rangliste-wrap { overflow-x: auto; }
+.rangliste { width: 100%; border-collapse: collapse; background: #fff; font-size: 14px; }
+.rangliste th { text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--border-strong); font-weight: var(--weight-semibold); }
+.rangliste td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+.rangliste tbody tr:last-child td { border-bottom: 0; }
+.rangliste tr.ist-ich td { background: var(--color-orange-50); font-weight: var(--weight-semibold); }
+.rangliste-ich {
+  display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px;
+  background: var(--color-brand-orange-text); color: #fff; font-size: 11px; letter-spacing: .04em;
+}
+@media (max-width: 640px) {
+  .freiplatz-media .freiplatz-qr { width: 46px; height: 46px; right: 8px; bottom: 8px; }
+  .court-hunt-zahl { flex: 1 1 100px; }
 }
 /* Icon-Liste für Vorteile-/Feature-Aufzählungen — kleine runde Icon-Badge statt
    Standard-Bullet, macht die Liste auf den ersten Blick als Liste erkennbar. */

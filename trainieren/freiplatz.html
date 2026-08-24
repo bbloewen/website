@@ -4,8 +4,12 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="format-detection" content="telephone=no" />
-<title>Datenschutz — Basketball Löwen Erfurt</title>
-<meta name="description" content="Datenschutzerklärung der Basketball Löwen Erfurt gemäß DSGVO." />
+<title>Freiplatz — Basketball Löwen Erfurt</title>
+<meta name="description" content="Ein einzelner Basketball-Freiplatz in Erfurt: Lage, Wegbeschreibung und Check-in für den Court-Hunt." />
+<!-- noindex: Der Inhalt dieser Seite hängt am Query-Parameter ?platz=, es gibt
+     also keine sinnvolle einzelne Fassung für den Index. Gefunden wird sie über
+     den QR-Code am Platz und über die Übersicht /trainieren/freiplaetze.html. -->
+<meta name="robots" content="noindex" />
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png" />
 <link rel="icon" type="image/png" sizes="16x16" href="/assets/logo/favicon-16.png" />
@@ -13,28 +17,11 @@
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
 <link rel="stylesheet" href="/css/site.css?v=1787394380" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
-<!-- SEO:auto START (tools/build-head-meta.py — nicht von Hand ändern) -->
-<link rel="canonical" href="https://basketball-loewen.com/datenschutz.html" />
-<meta property="og:type" content="website" />
-<meta property="og:site_name" content="Basketball Löwen Erfurt" />
-<meta property="og:locale" content="de_DE" />
-<meta property="og:title" content="Datenschutz" />
-<meta property="og:description" content="Datenschutzerklärung der Basketball Löwen Erfurt gemäß DSGVO." />
-<meta property="og:url" content="https://basketball-loewen.com/datenschutz.html" />
-<meta property="og:image" content="https://basketball-loewen.com/assets/img/share/og-default.jpg" />
-<meta property="og:image:width" content="1200" />
-<meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Datenschutz" />
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Datenschutz" />
-<meta name="twitter:description" content="Datenschutzerklärung der Basketball Löwen Erfurt gemäß DSGVO." />
-<meta name="twitter:image" content="https://basketball-loewen.com/assets/img/share/og-default.jpg" />
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Start","item":"https://basketball-loewen.com/"},{"@type":"ListItem","position":2,"name":"Datenschutz","item":"https://basketball-loewen.com/datenschutz.html"}]}]}</script>
-<!-- SEO:auto END -->
 </head>
-<body data-nav-group="">
+<body data-nav-group="trainieren">
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
 <div id="site-header-placeholder"><!--PARTIAL:header-->
 <header class="site-header">
@@ -228,83 +215,18 @@
   </div>
 </nav>
 <!--/PARTIAL:header--></div>
+
 <main id="main">
-  <section class="hero-photo hero-half hero-datenschutz">
-    <div class="container">
-    <span class="eyebrow">Rechtliches</span>
-    <h1>Datenschutz.</h1>
-    </div>
-  </section>
   <section class="section">
     <div class="container container-narrow">
-
-      <h2 class="t-h3">1. Datenschutz auf einen Blick</h2>
-      <h3 class="t-h4 mt-6">Allgemeine Hinweise</h3>
-      <p class="t-body mt-2">Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit deinen personenbezogenen Daten passiert, wenn du unsere Website besuchst. Personenbezogene Daten sind alle Daten, mit denen du persönlich identifiziert werden kannst. Ausführliche Informationen entnimmst du der Datenschutzerklärung unter diesem Text.</p>
-
-      <h3 class="t-h4 mt-6">Datenerfassung auf unserer Website</h3>
-      <p class="t-body mt-2"><strong>Wer ist verantwortlich für die Datenerfassung auf dieser Website?</strong><br>Die Datenverarbeitung auf dieser Website erfolgt durch den Websitebetreiber. Dessen Kontaktdaten findest du im Impressum dieser Website.</p>
-      <p class="t-body mt-3"><strong>Wie erfassen wir deine Daten?</strong><br>Deine Daten werden zum einen dadurch erhoben, dass du sie uns mitteilst — etwa Daten, die du in ein Kontaktformular oder das Newsletter-Anmeldeformular einträgst.</p>
-      <p class="t-body mt-3">Andere Daten werden automatisch beim Besuch der Website durch unsere IT-Systeme erfasst. Das sind vor allem technische Daten (z. B. Internetbrowser, Betriebssystem oder Uhrzeit des Seitenaufrufs). Die Erfassung dieser Daten erfolgt automatisch, sobald du unsere Website betrittst.</p>
-      <p class="t-body mt-3"><strong>Wofür nutzen wir deine Daten?</strong><br>Ein Teil der Daten wird erhoben, um eine fehlerfreie Bereitstellung der Website zu gewährleisten. Andere Daten können zur anonymen Analyse des Nutzungsverhaltens verwendet werden.</p>
-      <p class="t-body mt-3"><strong>Welche Rechte hast du bezüglich deiner Daten?</strong><br>Du hast jederzeit das Recht, unentgeltlich Auskunft über Herkunft, Empfänger und Zweck deiner gespeicherten personenbezogenen Daten zu erhalten. Du hast außerdem ein Recht, die Berichtigung, Sperrung oder Löschung dieser Daten zu verlangen. Hierzu sowie zu weiteren Fragen zum Thema Datenschutz kannst du dich jederzeit unter der im Impressum angegebenen Adresse an uns wenden. Dir steht außerdem ein Beschwerderecht bei der zuständigen Aufsichtsbehörde zu.</p>
-
-      <h2 class="t-h3 mt-8">2. Allgemeine Hinweise und Pflichtinformationen</h2>
-      <h3 class="t-h4 mt-6">Datenschutz</h3>
-      <p class="t-body mt-2">Wir nehmen den Schutz deiner persönlichen Daten sehr ernst. Wir behandeln deine personenbezogenen Daten vertraulich und entsprechend der gesetzlichen Datenschutzvorschriften sowie dieser Datenschutzerklärung.</p>
-      <p class="t-body mt-3">Wir weisen darauf hin, dass die Datenübertragung im Internet (z. B. bei der Kommunikation per E-Mail) Sicherheitslücken aufweisen kann. Ein lückenloser Schutz der Daten vor dem Zugriff durch Dritte ist nicht möglich.</p>
-
-      <h3 class="t-h4 mt-6">Hinweis zur verantwortlichen Stelle</h3>
-      <p class="t-body mt-2">Die verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:</p>
-      <p class="t-body mt-2">XXL Baskets GmbH<br>Leipziger Straße 71<br>99085 Erfurt<br>Telefon: <a href="tel:+491756100411">+49 175 6100411</a><br>E-Mail: <a href="mailto:info@basketball-loewen.com">info@basketball-loewen.com</a></p>
-      <p class="t-body mt-3">Verantwortliche Stelle ist die natürliche oder juristische Person, die allein oder gemeinsam mit anderen über die Zwecke und Mittel der Verarbeitung von personenbezogenen Daten entscheidet.</p>
-
-      <h3 class="t-h4 mt-6">Widerruf deiner Einwilligung zur Datenverarbeitung</h3>
-      <p class="t-body mt-2">Viele Datenverarbeitungsvorgänge sind nur mit deiner ausdrücklichen Einwilligung möglich. Du kannst eine bereits erteilte Einwilligung jederzeit widerrufen. Dazu reicht eine formlose Mitteilung per E-Mail an uns. Die Rechtmäßigkeit der bis zum Widerruf erfolgten Datenverarbeitung bleibt vom Widerruf unberührt.</p>
-
-      <h3 class="t-h4 mt-6">Widerspruchsrecht gegen die Datenerhebung (Art. 21 DSGVO)</h3>
-      <p class="t-body mt-2">Wenn die Datenverarbeitung auf Grundlage von Art. 6 Abs. 1 lit. e oder f DSGVO erfolgt, hast du jederzeit das Recht, aus Gründen, die sich aus deiner besonderen Situation ergeben, gegen die Verarbeitung deiner personenbezogenen Daten Widerspruch einzulegen. Wenn du Widerspruch einlegst, werden wir deine betroffenen personenbezogenen Daten nicht mehr verarbeiten, es sei denn, wir können zwingende schutzwürdige Gründe für die Verarbeitung nachweisen, die deine Interessen, Rechte und Freiheiten überwiegen, oder die Verarbeitung dient der Geltendmachung, Ausübung oder Verteidigung von Rechtsansprüchen.</p>
-
-      <h3 class="t-h4 mt-6">Beschwerderecht bei der zuständigen Aufsichtsbehörde</h3>
-      <p class="t-body mt-2">Im Falle von Verstößen gegen die DSGVO steht dir ein Beschwerderecht bei einer Aufsichtsbehörde zu, insbesondere in dem Mitgliedstaat deines gewöhnlichen Aufenthalts, deines Arbeitsplatzes oder des Orts des mutmaßlichen Verstoßes.</p>
-
-      <h3 class="t-h4 mt-6">Recht auf Datenübertragbarkeit</h3>
-      <p class="t-body mt-2">Du hast das Recht, Daten, die wir auf Grundlage deiner Einwilligung oder in Erfüllung eines Vertrags automatisiert verarbeiten, an dich oder an einen Dritten in einem gängigen, maschinenlesbaren Format aushändigen zu lassen. Sofern du die direkte Übertragung der Daten an einen anderen Verantwortlichen verlangst, erfolgt dies nur, soweit es technisch machbar ist.</p>
-
-      <h3 class="t-h4 mt-6">SSL- bzw. TLS-Verschlüsselung</h3>
-      <p class="t-body mt-2">Diese Seite nutzt aus Sicherheitsgründen und zum Schutz der Übertragung vertraulicher Inhalte eine SSL- bzw. TLS-Verschlüsselung. Eine verschlüsselte Verbindung erkennst du daran, dass die Adresszeile des Browsers von „http://" auf „https://" wechselt und an dem Schloss-Symbol in deiner Browserzeile.</p>
-
-      <h3 class="t-h4 mt-6">Auskunft, Löschung und Berichtigung</h3>
-      <p class="t-body mt-2">Du hast im Rahmen der geltenden gesetzlichen Bestimmungen jederzeit das Recht auf unentgeltliche Auskunft über deine gespeicherten personenbezogenen Daten, deren Herkunft und Empfänger und den Zweck der Datenverarbeitung und ggf. ein Recht auf Berichtigung oder Löschung dieser Daten. Hierzu sowie zu weiteren Fragen kannst du dich jederzeit unter der im Impressum angegebenen Adresse an uns wenden.</p>
-
-      <h2 class="t-h3 mt-8">3. Datenerfassung auf unserer Website</h2>
-      <h3 class="t-h4 mt-6">Server-Log-Dateien</h3>
-      <p class="t-body mt-2">Der Hosting-Anbieter dieser Seite erhebt und speichert automatisch Informationen in sogenannten Server-Log-Dateien, die dein Browser automatisch übermittelt. Dies sind: Browsertyp und -version, verwendetes Betriebssystem, Referrer-URL, Uhrzeit der Serveranfrage und IP-Adresse. Eine Zusammenführung dieser Daten mit anderen Datenquellen wird nicht vorgenommen.</p>
-      <p class="t-body mt-3">Die Erfassung dieser Daten erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO. Wir haben ein berechtigtes Interesse an der technisch fehlerfreien Darstellung und der Optimierung unserer Website — hierzu müssen die Server-Log-Files erfasst werden.</p>
-
-      <h3 class="t-h4 mt-6">Kontaktformular</h3>
-      <p class="t-body mt-2">Wenn du uns per Kontaktformular Anfragen zukommen lässt, werden deine Angaben aus dem Anfrageformular inklusive der von dir dort angegebenen Kontaktdaten zwecks Bearbeitung der Anfrage und für den Fall von Anschlussfragen bei uns gespeichert. Diese Daten geben wir nicht ohne deine Einwilligung weiter.</p>
-      <p class="t-body mt-3">Die Verarbeitung dieser Daten erfolgt auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO, sofern deine Anfrage mit der Erfüllung eines Vertrags zusammenhängt oder zur Durchführung vorvertraglicher Maßnahmen erforderlich ist. In allen übrigen Fällen beruht die Verarbeitung auf unserem berechtigten Interesse an der effektiven Bearbeitung der an uns gerichteten Anfragen (Art. 6 Abs. 1 lit. f DSGVO) oder auf deiner Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), sofern diese abgefragt wurde.</p>
-      <p class="t-body mt-3">Die von dir im Kontaktformular eingegebenen Daten verbleiben bei uns, bis du uns zur Löschung aufforderst, deine Einwilligung zur Speicherung widerrufst oder der Zweck für die Datenspeicherung entfällt.</p>
-
-      <h3 class="t-h4 mt-6">Newsletter</h3>
-      <p class="t-body mt-2">Wenn du dich für unseren Newsletter anmeldest, benötigen wir dafür deine E-Mail-Adresse sowie Informationen, die uns die Überprüfung gestatten, dass du der Inhaber der angegebenen E-Mail-Adresse bist und mit dem Empfang des Newsletters einverstanden bist. Die Verarbeitung erfolgt auf Grundlage deiner Einwilligung (Art. 6 Abs. 1 lit. a DSGVO). Du kannst diese Einwilligung jederzeit widerrufen, etwa über einen Abmeldelink im Newsletter oder durch eine formlose Nachricht an die im Impressum genannte Adresse.</p>
-
-      <h2 class="t-h3 mt-8">4. Analyse-Tools</h2>
-      <h3 class="t-h4 mt-6">GoatCounter</h3>
-      <p class="t-body mt-2">Diese Website nutzt GoatCounter, einen datenschutzfreundlichen, selbst gehosteten Webanalysedienst. GoatCounter verwendet keine Cookies und erstellt keine personenbezogenen Nutzerprofile. Es werden keine IP-Adressen gespeichert und keine Daten an Dritte oder in Länder außerhalb der EU übertragen — die Auswertung läuft auf unserer eigenen, in der EU gehosteten Instanz.</p>
-      <p class="t-body mt-3">Erfasst werden lediglich anonyme, aggregierte Informationen wie aufgerufene Seiten, grober Zeitpunkt des Aufrufs und die verweisende Seite (Referrer), um die Nutzung unserer Website statistisch auszuwerten und das Angebot zu verbessern. Da keine personenbezogenen Daten und keine Cookies verwendet werden, ist für den Einsatz von GoatCounter keine Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO erforderlich; die Verarbeitung erfolgt auf Grundlage unseres berechtigten Interesses an einer anonymen Reichweitenmessung (Art. 6 Abs. 1 lit. f DSGVO).</p>
-
-      <h2 class="t-h3 mt-8">5. Court-Hunt (Freiplatz-Spiel)</h2>
-      <p class="t-body mt-2">Auf unseren Freiplatz-Seiten kannst du am Court-Hunt teilnehmen: An einem öffentlichen Basketball-Freiplatz einchecken, Punkte sammeln und am Monatsende einen Ticket-Gutschein gewinnen. Die Teilnahme ist freiwillig und beginnt erst, wenn du auf „Mitspielen" klickst.</p>
-      <p class="t-body mt-3"><strong>Spielstand auf deinem Gerät.</strong> Mit dem Start legt dein Browser im lokalen Speicher (localStorage) einen Eintrag „loewen-court-hunt" an: eine zufällig erzeugte Spiel-ID, dein selbst gewählter Spielername, deine Check-ins und dein Punktestand. Das ist kein Cookie und wird nicht an Dritte übertragen. Du kannst den Eintrag jederzeit über die Schaltfläche „Meinen Spielstand löschen" oder über die Einstellungen deines Browsers entfernen.</p>
-      <p class="t-body mt-3"><strong>Standort.</strong> Beim Check-in fragen wir — und nur nach einem Klick auf die Schaltfläche — über deinen Browser deine aktuelle Position ab, um zu prüfen, ob du wirklich am Platz stehst. Deine Koordinaten speichern wir nicht dauerhaft; gespeichert werden der Platz, der Zeitpunkt und ein gerundeter Abstandswert. Ohne Standortfreigabe kannst du die übrigen Inhalte der Seite unverändert nutzen, nur der Check-in entfällt.</p>
-      <p class="t-body mt-3"><strong>Punktestand und Rangliste.</strong> Zur Auswertung übermitteln wir Spiel-ID, Spielername, Platz, Zeitpunkt und Punkte an unseren eigenen, in der EU gehosteten Spielserver. Diese Daten sind pseudonym: Wir können daraus keine Person bestimmen, solange du uns keinen echten Namen als Spielernamen gibst. In der öffentlichen Rangliste erscheinen ausschließlich Spielername und Punkte. Rechtsgrundlage ist deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die du durch Löschen deines Spielstands jederzeit widerrufen kannst; wir löschen den zugehörigen Eintrag dann auch auf dem Server. Spätestens drei Monate nach Ende der jeweiligen Wertung löschen wir die Spieldaten.</p>
-      <p class="t-body mt-3"><strong>Gewinn.</strong> Erst wenn du gewinnst und den Gutschein anforderst, erheben wir Vorname und E-Mail-Adresse, um dir den Gutschein zuzustellen (Art. 6 Abs. 1 lit. b und lit. a DSGVO). Teilnehmende unter 16 Jahren geben dafür die E-Mail-Adresse eines Erziehungsberechtigten an. Diese Angaben speichern wir getrennt vom Spielstand und löschen sie, sobald der Gutschein eingelöst oder abgelaufen ist, soweit keine steuerlichen Aufbewahrungsfristen entgegenstehen.</p>
-
+      <span class="eyebrow">Trainieren · Freiplätze</span>
+      <div id="freiplatz-detail">
+        <p class="t-body">Platz wird geladen …</p>
+      </div>
     </div>
   </section>
 </main>
+
 <div id="site-footer-placeholder"><!--PARTIAL:footer-->
 <footer class="site-footer">
   <div class="container">
@@ -436,7 +358,12 @@
 </div>
 <!--/PARTIAL:footer--></div>
 <script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="/js/nav.js?v=1787221181"></script>
 <script src="/js/include.js?v=1785398309"></script>
+<script src="/js/freiplaetze.js?v=1787261100"></script>
+<script>
+  Freiplaetze.initPlatzseite();
+</script>
 </body>
 </html>

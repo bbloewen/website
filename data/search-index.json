@@ -209,6 +209,12 @@
     "description": "Alle öffentlichen Basketball-Freiplätze in Erfurt auf einen Blick — mit Adresse, QR-Code zur Wegbeschreibung und Foto."
   },
   {
+    "title": "Court-Hunt",
+    "url": "/trainieren/court-hunt.html",
+    "category": "Trainieren",
+    "description": "An Erfurter Freiplätzen einchecken, Punkte sammeln und einen Ticket-Gutschein fürs Heimspiel gewinnen — Punktestand, Regeln und Rangliste."
+  },
+  {
     "title": "Unsere Sponsoren",
     "url": "/partner/sponsoring.html",
     "category": "Partner",

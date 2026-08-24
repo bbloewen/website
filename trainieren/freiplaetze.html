@@ -255,6 +255,10 @@
         </div>
       </div>
       <div id="freiplaetze-map" class="freiplaetze-map"></div>
+      <div class="freiplaetze-legende">
+        <span><span class="freiplatz-pin-probe" aria-hidden="true"></span> Frei zugänglich — zählt im Court-Hunt</span>
+        <span><span class="freiplatz-pin-probe ist-eingeschraenkt" aria-hidden="true"></span> Zugang eingeschränkt — kein Check-in</span>
+      </div>
     </div>
   </section>
 
@@ -264,9 +268,32 @@
         <div class="head-text" style="max-width:none">
           <span class="eyebrow">Details</span>
           <h2 class="t-h2">Freiplätze im Einzelnen</h2>
+          <p class="t-body mt-3">Der QR-Code auf jedem Bild führt direkt zur Wegbeschreibung.</p>
         </div>
       </div>
       <div class="grid-2" id="freiplaetze-grid"></div>
+    </div>
+  </section>
+
+  <section class="section bg-subtle" id="freiplaetze-weitere">
+    <div class="container">
+      <div class="section-head">
+        <div class="head-text" style="max-width:none">
+          <span class="eyebrow">Nicht frei zugänglich</span>
+          <h2 class="t-h2">Weitere verfügbare Plätze</h2>
+          <p class="t-body mt-3">Diese Plätze gibt es, sie stehen aber nicht allen offen — und sie zählen deshalb nicht im Court-Hunt.</p>
+        </div>
+      </div>
+      <div class="grid-2" id="freiplaetze-grid-weitere"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container container-narrow text-center">
+      <span class="eyebrow">Court-Hunt</span>
+      <h2 class="t-h2 mb-4">Punkte sammeln, Freikarten gewinnen</h2>
+      <p class="t-body mb-5">Steh an einem Freiplatz, checke ein, sammle Punkte. Wer im Monat vorn liegt, bekommt einen Gutschein für ein Heimspiel im Familienbereich.</p>
+      <div id="court-hunt-panel"></div>
     </div>
   </section>
 
@@ -413,55 +440,13 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="/js/nav.js?v=1787221181"></script>
 <script src="/js/include.js?v=1785398309"></script>
+<script src="/js/freiplaetze.js?v=1787261100"></script>
 <script>
-  fetch('/data/freiplaetze.json?v=1787250937').then(function (r) { return r.json(); }).then(function (data) {
-    var grid = document.getElementById('freiplaetze-grid');
-    grid.innerHTML = data.freiplaetze.map(function (f) {
-      var photo = f.fotoEmbed
-        ? '<div class="card-media card-media-photo"><iframe src="' + f.fotoEmbed + '" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>'
-        : f.foto
-        ? '<div class="card-media card-media-photo"><img src="' + f.foto + '" alt="' + f.name + '" loading="lazy" /></div>'
-        : '<div class="card-media freiplatz-photo-placeholder"><i data-lucide="image" class="icon-22"></i><span>Foto folgt</span></div>';
-      var gesperrtBanner = f.gesperrt
-        ? '<div class="freiplatz-gesperrt-banner"><i data-lucide="lock" class="icon-16"></i> ' + (f.gesperrtHinweis || 'Gesperrt') + '</div>'
-        : '';
-      var mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + f.lat + ',' + f.lng;
-      return '<div class="card freiplatz-card">' + photo + gesperrtBanner +
-        '<div class="card-body">' +
-          '<h3>' + f.name + '</h3>' +
-          '<p>' + f.beschreibung + '</p>' +
-          '<a class="freiplatz-adresse-link" href="' + mapsUrl + '" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> ' + f.adresse + '</a>' +
-          '<div class="freiplatz-qr-row">' +
-            '<img src="' + f.qr + '" alt="QR-Code zur Wegbeschreibung" class="freiplatz-qr" loading="lazy" />' +
-            '<span class="freiplatz-qr-hint">QR-Code scannen für die Wegbeschreibung</span>' +
-          '</div>' +
-        '</div>' +
-      '</div>';
-    }).join('');
+  Freiplaetze.initUebersicht();
 
-    if (window.L) {
-      var map = L.map('freiplaetze-map', { scrollWheelZoom: false });
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>',
-        maxZoom: 19
-      }).addTo(map);
-      var markers = data.freiplaetze.map(function (f) {
-        var popup = '<strong>' + f.name + '</strong><br>' + f.adresse;
-        if (f.gesperrt) popup += '<br><span style="color:#C62828;font-weight:600">' + (f.gesperrtHinweis || 'Gesperrt') + '</span>';
-        return L.marker([f.lat, f.lng]).bindPopup(popup);
-      });
-      if (markers.length === 1) {
-        markers[0].addTo(map);
-        map.setView([data.freiplaetze[0].lat, data.freiplaetze[0].lng], 14);
-      } else {
-        var group = L.featureGroup(markers).addTo(map);
-        map.fitBounds(group.getBounds().pad(0.2));
-      }
-    }
-
-    if (window.lucide) window.lucide.createIcons();
-  });
-
+  /* „Freiplatz melden" nutzt vorerst das allgemeine Feedback-Widget aus dem
+     Footer; ein eigenes Formular mit Standort und Foto kommt mit der
+     Court-Hunt-Meldeprämie. */
   var freiplatzMeldenBtn = document.getElementById('freiplatz-melden-btn');
   if (freiplatzMeldenBtn) {
     freiplatzMeldenBtn.addEventListener('click', function () {
