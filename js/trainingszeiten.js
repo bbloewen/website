@@ -194,6 +194,7 @@ document.addEventListener('DOMContentLoaded', function () {
           teamName: teamName, jahrgang: jahrgang, teamKey: teamKey,
           verein: g.verein, jahre: g.jahre, trainer: g.trainer,
           tag: t.tag, zeit: t.zeit, ort: t.ort,
+          bestaetigt: g.bestaetigt !== false,
           termin: t
         });
       });
@@ -201,13 +202,16 @@ document.addEventListener('DOMContentLoaded', function () {
     return sessions;
   }
 
-  function zeitLinkHTML(tag, zeit, vorbehaltlich, titel, ort, mitTag) {
+  var UNBESTAETIGT_BADGE = '<span class="training-unconfirmed-badge">noch nicht bestätigt</span>';
+
+  function zeitLinkHTML(tag, zeit, vorbehaltlich, titel, ort, mitTag, unbestaetigt) {
     var cal = calendarLink(tag, zeit, titel, ort);
     var zeitText = (mitTag ? tag + ' ' : '') + zeit;
     if (vorbehaltlich) zeitText += ' (' + vorbehaltlich + ')';
+    var cls = 'training-slot-zeit' + (unbestaetigt ? ' training-slot-zeit-unbestaetigt' : '');
     return cal
-      ? '<a class="training-slot-zeit" href="' + cal + '" target="_blank" rel="noopener" title="Zum Kalender hinzufügen"><i data-lucide="calendar-plus" class="icon-14"></i><span>' + zeitText + '</span></a>'
-      : '<div class="training-slot-zeit"><span>' + zeitText + '</span></div>';
+      ? '<a class="' + cls + '" href="' + cal + '" target="_blank" rel="noopener" title="Zum Kalender hinzufügen"><i data-lucide="calendar-plus" class="icon-14"></i><span>' + zeitText + '</span></a>'
+      : '<div class="' + cls + '"><span>' + zeitText + '</span></div>';
   }
 
   function vereinBadgeHTML(verein) {
@@ -225,7 +229,8 @@ document.addEventListener('DOMContentLoaded', function () {
   function sessionRowHTML(s, modus) {
     var titel = s.teamName + ' (' + s.jahrgang + ')';
     var mitTag = modus === 'halle';
-    var zeitHTML = zeitLinkHTML(s.tag, s.zeit, s.vorbehaltlich, titel, s.ort, mitTag);
+    var unbestaetigt = s.bestaetigt === false;
+    var zeitHTML = zeitLinkHTML(s.tag, s.zeit, s.vorbehaltlich, titel, s.ort, mitTag, unbestaetigt);
     var ortLine = modus === 'wochentag'
       ? '<div class="training-slot-ort"><i data-lucide="map-pin" class="icon-14"></i><a href="' + mapsLink(s.ort) + '" target="_blank" rel="noopener">' + ortDisplay(s.ort) + '</a></div>'
       : '';
@@ -233,7 +238,7 @@ document.addEventListener('DOMContentLoaded', function () {
     return (
       '<div class="training-session-row" data-verein="' + s.verein + '" data-jahre="' + s.jahre.join(',') + '" data-team="' + s.teamKey + '">' +
         '<div>' +
-          '<div class="training-session-team">' + zeitHTML + '<span>· ' + s.teamName + ' <span class="training-row-jahrgang">(' + s.jahrgang + ')</span></span></div>' +
+          '<div class="training-session-team">' + zeitHTML + '<span>· ' + s.teamName + ' <span class="training-row-jahrgang">(' + s.jahrgang + ')</span></span>' + (unbestaetigt ? UNBESTAETIGT_BADGE : '') + '</div>' +
           ortLine +
         '</div>' +
         '<div class="training-row-trainer">' +
@@ -287,15 +292,11 @@ document.addEventListener('DOMContentLoaded', function () {
     var teamName = TEAM_LABELS[g.team] || g.team;
     var jahrgang = jahrgangLabel(g);
     var titel = teamName + ' (' + jahrgang + ')';
+    var unbestaetigt = g.bestaetigt === false;
     var zeitenHTML;
     if (g.termine && g.termine.length) {
       zeitenHTML = g.termine.map(function (t) {
-        var cal = calendarLink(t.tag, t.zeit, titel, t.ort);
-        var zeitText = t.tag + ' ' + t.zeit;
-        if (t.vorbehaltlich) zeitText += ' (' + t.vorbehaltlich + ')';
-        var zeitHTML = cal
-          ? '<a class="training-slot-zeit" href="' + cal + '" target="_blank" rel="noopener" title="Zum Kalender hinzufügen"><i data-lucide="calendar-plus" class="icon-14"></i><span>' + zeitText + '</span></a>'
-          : '<div class="training-slot-zeit"><span>' + zeitText + '</span></div>';
+        var zeitHTML = zeitLinkHTML(t.tag, t.zeit, t.vorbehaltlich, titel, t.ort, true, unbestaetigt);
         var ortHTML = '<div class="training-slot-ort"><i data-lucide="map-pin" class="icon-14"></i><a href="' + mapsLink(t.ort) + '" target="_blank" rel="noopener">' + ortDisplay(t.ort) + '</a></div>';
         var probLink = '<a class="training-row-probetraining" href="' + probetrainingLink(teamName, jahrgang, g.verein, t) + '">Probetraining vereinbaren</a>';
         return '<div class="training-slot">' + zeitHTML + ortHTML + probLink + '</div>';
@@ -311,7 +312,7 @@ document.addEventListener('DOMContentLoaded', function () {
     return (
       '<div class="card training-row" data-verein="' + g.verein + '" data-jahre="' + g.jahre.join(',') + '" data-team="' + teamKey + '">' +
         '<div>' +
-          '<div class="training-row-team">' + teamName + ' <span class="training-row-jahrgang">(' + jahrgang + ')</span></div>' +
+          '<div class="training-row-team">' + teamName + ' <span class="training-row-jahrgang">(' + jahrgang + ')</span>' + (unbestaetigt ? UNBESTAETIGT_BADGE : '') + '</div>' +
           '<div class="training-row-zeiten">' + zeitenHTML + '</div>' +
         '</div>' +
         '<div class="training-row-trainer">' +

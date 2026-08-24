@@ -2485,6 +2485,15 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
 .training-slot-zeit:hover i { color: var(--color-brand-orange); }
 .training-slot-ort a { color: inherit; text-decoration: underline; text-decoration-color: var(--border-strong); }
 .training-slot-ort a:hover { color: var(--color-brand-orange); }
+/* Noch nicht vom Partnerverein bestaetigte Zeiten (z.B. USV vor Saisonstart-Update) --
+   Uhrzeit durchgestrichen, Badge daneben macht den Grund sichtbar. */
+.training-slot-zeit-unbestaetigt { color: var(--text-muted); }
+.training-slot-zeit-unbestaetigt span { text-decoration: line-through; }
+.training-unconfirmed-badge {
+  display: inline-block; margin-left: 8px; padding: 2px 9px; border-radius: 999px;
+  background: var(--color-orange-50); color: var(--color-brand-orange-text);
+  font-size: 11px; font-weight: var(--weight-semibold); vertical-align: middle; white-space: nowrap;
+}
 .training-row-trainer { font-size: 13px; color: var(--text-secondary); text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
 .training-row-trainer .team-badge { margin-bottom: 10px; }
 .training-row-trainer-label { font-weight: var(--weight-semibold); color: var(--text-primary); margin-bottom: 2px; }
