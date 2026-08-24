@@ -24,7 +24,14 @@
   var API_BASE = '';
 
   var STORAGE_KEY = 'loewen-court-hunt';
-  var RADIUS_M = 200;
+  /* 100 m: Ein Freiplatz ist rund 30 m lang, 100 m heisst also "auf dem Platz
+     oder direkt daneben" — und nicht "vom Balkon gegenueber". Dazu ein
+     Zugestaendnis an die GPS-Genauigkeit, die das Handy selbst mitliefert:
+     unter Baeumen oder zwischen Haeusern meldet es schnell 40–60 m Unschaerfe,
+     und daran soll der Check-in nicht scheitern. Mehr als 75 m Nachlass gibt es
+     aber nicht, sonst wird aus der Toleranz ein Scheunentor. */
+  var RADIUS_M = 100;
+  var GENAUIGKEIT_MAX_M = 75;
   var COOLDOWN_MS = 24 * 60 * 60 * 1000;
   var PUNKTE = { checkin: 10, erstbesuch: 20, serie3: 30, serie7: 100 };
 
@@ -156,7 +163,7 @@
   /* Bucht den Check-in lokal und liefert die Gutschrift zurück. Der Server ist
      die Instanz, die am Monatsende zählt; diese Rechnung hier ist nur die
      sofortige Rückmeldung, damit man am Platz nicht auf das Netz wartet. */
-  function bucheCheckin(stand, platz, jetzt) {
+  function bucheCheckin(stand, platz, jetzt, coords) {
     var gutschrift = [];
     var punkte = PUNKTE.checkin;
     gutschrift.push({ text: 'Check-in ' + platz.name, punkte: PUNKTE.checkin });
@@ -180,7 +187,14 @@
     });
 
     stand.punkte += punkte;
-    stand.offen.push({ slug: platz.slug, ts: jetzt });
+    stand.offen.push({
+      slug: platz.slug, ts: jetzt,
+      /* Nur gerundet: Die genaue Position brauchen wir nach der Distanzpruefung
+         nicht mehr, der Server prueft die Plausibilitaet auf 3 Nachkommastellen
+         (rund 100 m) genauso gut. */
+      lat: coords ? Math.round(coords.latitude * 1000) / 1000 : null,
+      lng: coords ? Math.round(coords.longitude * 1000) / 1000 : null
+    });
     speichereStand(stand);
     sendeOffene(stand);
     return { punkte: punkte, gutschrift: gutschrift, serie: serie };
@@ -214,6 +228,14 @@
     return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
   }
 
+  /* Ist der Platz nah genug? Beruecksichtigt die vom Geraet gemeldete
+     Ungenauigkeit, damit ein schlechtes GPS-Signal keinen ehrlichen Check-in
+     verhindert. */
+  function inReichweite(abstand, genauigkeit) {
+    var nachlass = Math.min(genauigkeit || 0, GENAUIGKEIT_MAX_M);
+    return abstand - nachlass <= RADIUS_M;
+  }
+
   function standort() {
     return new Promise(function (erfuellen, ablehnen) {
       if (!navigator.geolocation) {
@@ -230,6 +252,26 @@
         { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 }
       );
     });
+  }
+
+  function abstandText(meter) {
+    return meter < 1000 ? meter + ' m' : String(Math.round(meter / 100) / 10).replace('.', ',') + ' km';
+  }
+
+  /* Alle bespielbaren Plaetze nach Entfernung sortiert. Grundlage des
+     Sofort-Check-ins: Die Seite kennt die Plaetze, das Handy kennt die Position
+     — den passenden Platz kann sie daraus selbst bestimmen, dafuer braucht es
+     keinen QR-Code am Korb. */
+  function naechstePlaetze(coords, plaetze) {
+    return plaetze.filter(spielbar).map(function (f) {
+      return { platz: f, abstand: entfernungM(coords.latitude, coords.longitude, f.lat, f.lng) };
+    }).sort(function (a, b) { return a.abstand - b.abstand; });
+  }
+
+  function erfolgsText(ergebnis, stand) {
+    return '+' + ergebnis.punkte + ' Punkte: ' +
+      ergebnis.gutschrift.map(function (g) { return g.text; }).join(', ') +
+      '. Neuer Stand: ' + stand.punkte + ' Punkte.';
   }
 
   /* ----------------------------------------------------------- Rendering */
@@ -321,7 +363,7 @@
 
   /* ------------------------------------------------ Spielstand-Anzeige */
 
-  function standPanel(el) {
+  function standPanel(el, meldungText, meldungKlasse) {
     var stand = ladeStand();
 
     if (!speicherVerfuegbar()) {
@@ -330,42 +372,96 @@
       return;
     }
 
+    var meldungHtml = '<p class="court-hunt-meldung' + (meldungKlasse ? ' ' + meldungKlasse : '') +
+      '" role="status" aria-live="polite">' + (meldungText || '') + '</p>';
+
     if (!stand) {
       el.innerHTML =
         '<p class="t-body mb-4">Beim Mitspielen legt dein Gerät eine zufällige Spiel-ID an und merkt sich deinen ' +
         'Punktestand — ohne Konto, ohne Name, ohne E-Mail. Erst wenn du gewinnst, fragen wir nach einer Adresse, ' +
         'um dir den Ticket-Gutschein zu schicken.</p>' +
-        '<button type="button" class="btn btn-primary" data-court-hunt-start>Mitspielen</button>';
-      el.querySelector('[data-court-hunt-start]').addEventListener('click', function () {
-        starteSpiel();
+        '<button type="button" class="btn btn-primary btn-lg" data-court-hunt-checkin>' +
+          '<i data-lucide="map-pin-check" class="icon-18"></i> Mitspielen und einchecken</button>' +
+        meldungHtml;
+    } else {
+      var heute = tagKey(new Date());
+      var serie = serienLaenge(stand, heute);
+      var plaetzeBesucht = {};
+      stand.checkins.forEach(function (c) { plaetzeBesucht[c.slug] = true; });
+      var anzahlPlaetze = Object.keys(plaetzeBesucht).length;
+
+      el.innerHTML =
+        '<div class="court-hunt-stand">' +
+          '<div class="court-hunt-zahl"><strong>' + stand.punkte + '</strong><span>' + (stand.punkte === 1 ? 'Punkt' : 'Punkte') + '</span></div>' +
+          '<div class="court-hunt-zahl"><strong>' + anzahlPlaetze + '</strong><span>' + (anzahlPlaetze === 1 ? 'Platz besucht' : 'Plätze besucht') + '</span></div>' +
+          '<div class="court-hunt-zahl"><strong>' + serie + '</strong><span>' + (serie === 1 ? 'Tag in Folge' : 'Tage in Folge') + '</span></div>' +
+        '</div>' +
+        '<div class="court-hunt-aktionen">' +
+          '<button type="button" class="btn btn-primary btn-lg" data-court-hunt-checkin>' +
+            '<i data-lucide="map-pin-check" class="icon-18"></i> Hier einchecken</button>' +
+        '</div>' +
+        meldungHtml +
+        '<div class="court-hunt-aktionen">' +
+          '<a class="btn btn-ghost" href="/trainieren/court-hunt.html">Rangliste ansehen</a>' +
+          '<button type="button" class="btn btn-ghost" data-court-hunt-reset>Meinen Spielstand löschen</button>' +
+        '</div>';
+
+      el.querySelector('[data-court-hunt-reset]').addEventListener('click', function () {
+        if (!window.confirm('Punkte, besuchte Plätze und deine Spiel-ID werden gelöscht. Wirklich?')) return;
+        loescheStand();
         standPanel(el);
         icons();
       });
-      return;
     }
 
-    var heute = tagKey(new Date());
-    var serie = serienLaenge(stand, heute);
-    var plaetzeBesucht = {};
-    stand.checkins.forEach(function (c) { plaetzeBesucht[c.slug] = true; });
+    var knopf = el.querySelector('[data-court-hunt-checkin]');
+    knopf.addEventListener('click', function () {
+      checkeNaechstenEin(knopf, el.querySelector('.court-hunt-meldung'), function (text, klasse) {
+        standPanel(el, text, klasse);
+        icons();
+      });
+    });
+    icons();
+  }
 
-    var anzahlPlaetze = Object.keys(plaetzeBesucht).length;
-    el.innerHTML =
-      '<div class="court-hunt-stand">' +
-        '<div class="court-hunt-zahl"><strong>' + stand.punkte + '</strong><span>' + (stand.punkte === 1 ? 'Punkt' : 'Punkte') + '</span></div>' +
-        '<div class="court-hunt-zahl"><strong>' + anzahlPlaetze + '</strong><span>' + (anzahlPlaetze === 1 ? 'Platz besucht' : 'Plätze besucht') + '</span></div>' +
-        '<div class="court-hunt-zahl"><strong>' + serie + '</strong><span>' + (serie === 1 ? 'Tag in Folge' : 'Tage in Folge') + '</span></div>' +
-      '</div>' +
-      '<div class="court-hunt-aktionen">' +
-        '<a class="btn btn-primary" href="/trainieren/court-hunt.html">Rangliste ansehen</a>' +
-        '<button type="button" class="btn btn-ghost" data-court-hunt-reset>Meinen Spielstand löschen</button>' +
-      '</div>';
+  /* Der Sofort-Check-in: Die Seite kennt alle Plätze, das Handy die Position —
+     welcher Platz gemeint ist, ergibt sich daraus von selbst. Deshalb braucht
+     es keinen QR-Code am Korb, um mitzuspielen; der Aufkleber ist später nur
+     eine zweite Tür ins selbe Spiel. */
+  function checkeNaechstenEin(knopf, meldung, fertig) {
+    knopf.disabled = true;
+    meldung.className = 'court-hunt-meldung';
+    meldung.textContent = 'Standort wird geprüft …';
 
-    el.querySelector('[data-court-hunt-reset]').addEventListener('click', function () {
-      if (!window.confirm('Punkte, besuchte Plätze und deine Spiel-ID werden gelöscht. Wirklich?')) return;
-      loescheStand();
-      standPanel(el);
-      icons();
+    Promise.all([standort(), ladeDaten()]).then(function (ergebnisse) {
+      var coords = ergebnisse[0];
+      var liste = naechstePlaetze(coords, ergebnisse[1].freiplaetze);
+      var naechster = liste[0];
+
+      if (!naechster || !inReichweite(naechster.abstand, coords.accuracy)) {
+        knopf.disabled = false;
+        meldung.className = 'court-hunt-meldung ist-hinweis';
+        meldung.innerHTML = naechster
+          ? 'Kein Freiplatz in Reichweite. Am nächsten liegt <a href="' + platzUrl(naechster.platz.slug) + '">' +
+            esc(naechster.platz.name) + '</a>, ' + abstandText(naechster.abstand) + ' entfernt.'
+          : 'Wir konnten keinen Freiplatz in deiner Nähe finden.';
+        return;
+      }
+
+      var stand = ladeStand() || starteSpiel();
+      if (Date.now() - letzterCheckin(stand, naechster.platz.slug) < COOLDOWN_MS) {
+        knopf.disabled = false;
+        meldung.className = 'court-hunt-meldung ist-hinweis';
+        meldung.textContent = naechster.platz.name + ' hast du heute schon gezählt — morgen wieder.';
+        return;
+      }
+
+      var gebucht = bucheCheckin(stand, naechster.platz, Date.now(), coords);
+      fertig(erfolgsText(gebucht, stand), 'ist-erfolg');
+    }).catch(function (fehler) {
+      knopf.disabled = false;
+      meldung.className = 'court-hunt-meldung ist-hinweis';
+      meldung.textContent = fehler.message;
     });
   }
 
@@ -442,35 +538,22 @@
     }
 
     var stand = ladeStand();
-    if (!stand) {
-      el.innerHTML =
-        '<h2 class="t-h3">Court-Hunt</h2>' +
-        '<p class="t-body mt-2 mb-4">Checke an diesem Platz ein und sammle Punkte. Dein Gerät legt dafür eine ' +
-        'zufällige Spiel-ID an — kein Konto, kein Name, keine E-Mail.</p>' +
-        '<button type="button" class="btn btn-primary" data-start>Mitspielen und einchecken</button>' +
-        '<p class="court-hunt-meldung" role="status" aria-live="polite"></p>';
-      el.querySelector('[data-start]').addEventListener('click', function () {
-        starteSpiel();
-        checkinBereich(el, platz);
-        icons();
-        var knopf = el.querySelector('[data-checkin]');
-        if (knopf) knopf.click();
-      });
-      return;
-    }
-
-    var offenSeit = Date.now() - letzterCheckin(stand, platz.slug);
-    var gesperrt = offenSeit < COOLDOWN_MS;
+    var gesperrt = stand && (Date.now() - letzterCheckin(stand, platz.slug) < COOLDOWN_MS);
 
     el.innerHTML =
       '<h2 class="t-h3">Court-Hunt</h2>' +
-      '<p class="t-body mt-2 mb-4">Dein Stand: <strong>' + stand.punkte + ' Punkte</strong>.' +
-        (besucht(stand, platz.slug) ? ' Diesen Platz hast du schon besucht.' : ' Erstbesuch bringt 20 Punkte extra.') +
+      '<p class="t-body mt-2 mb-4">' +
+        (stand
+          ? 'Dein Stand: <strong>' + stand.punkte + ' Punkte</strong>.' +
+            (besucht(stand, platz.slug) ? ' Diesen Platz hast du schon besucht.' : ' Erstbesuch bringt 20 Punkte extra.')
+          : 'Checke hier ein und sammle Punkte. Dein Gerät legt dafür eine zufällige Spiel-ID an — ' +
+            'kein Konto, kein Name, keine E-Mail.') +
       '</p>' +
-      '<button type="button" class="btn btn-primary" data-checkin' + (gesperrt ? ' disabled' : '') + '>' +
-        '<i data-lucide="map-pin-check" class="icon-16"></i> Ich bin hier</button>' +
+      '<button type="button" class="btn btn-primary btn-lg" data-checkin' + (gesperrt ? ' disabled' : '') + '>' +
+        '<i data-lucide="map-pin-check" class="icon-18"></i> ' + (stand ? 'Ich bin hier' : 'Mitspielen und einchecken') + '</button>' +
       '<p class="court-hunt-meldung" role="status" aria-live="polite">' +
-        (gesperrt ? 'Heute schon eingecheckt — dieser Platz zählt wieder in ' + stunden(COOLDOWN_MS - offenSeit) + '.' : '') +
+        (gesperrt ? 'Heute schon eingecheckt — dieser Platz zählt wieder in ' +
+          stunden(COOLDOWN_MS - (Date.now() - letzterCheckin(stand, platz.slug))) + '.' : '') +
       '</p>';
 
     var knopf = el.querySelector('[data-checkin]');
@@ -483,23 +566,21 @@
 
       standort().then(function (coords) {
         var abstand = entfernungM(coords.latitude, coords.longitude, platz.lat, platz.lng);
-        if (abstand > RADIUS_M) {
+        if (!inReichweite(abstand, coords.accuracy)) {
           knopf.disabled = false;
           meldung.className = 'court-hunt-meldung ist-hinweis';
-          meldung.textContent = 'Du bist noch rund ' + abstand + ' m entfernt. Der Check-in klappt direkt am Platz.';
+          meldung.textContent = 'Du bist noch rund ' + abstandText(abstand) + ' entfernt. Der Check-in klappt direkt am Platz.';
           return;
         }
-        var aktuell = ladeStand();
+        var aktuell = ladeStand() || starteSpiel();
         if (Date.now() - letzterCheckin(aktuell, platz.slug) < COOLDOWN_MS) {
           meldung.className = 'court-hunt-meldung ist-hinweis';
           meldung.textContent = 'Diesen Platz hast du heute schon gezählt — morgen wieder.';
           return;
         }
-        var ergebnis = bucheCheckin(aktuell, platz, Date.now());
+        var gebucht = bucheCheckin(aktuell, platz, Date.now(), coords);
         meldung.className = 'court-hunt-meldung ist-erfolg';
-        meldung.textContent = '+' + ergebnis.punkte + ' Punkte: ' +
-          ergebnis.gutschrift.map(function (g) { return g.text; }).join(', ') +
-          '. Neuer Stand: ' + aktuell.punkte + ' Punkte.';
+        meldung.textContent = erfolgsText(gebucht, aktuell);
       }).catch(function (fehler) {
         knopf.disabled = false;
         meldung.className = 'court-hunt-meldung ist-hinweis';
