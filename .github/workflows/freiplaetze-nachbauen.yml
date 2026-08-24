@@ -1,0 +1,59 @@
+# Zieht die abgeleiteten Dateien nach, wenn data/freiplaetze.json sich aendert.
+#
+# Anlass: Seit dem 25.08.2026 schaltet der n8n-Workflow "Court-Hunt: Platz
+# freischalten" neue Plaetze selbst frei und committet sie in die JSON. Karte und
+# Kacheln zeigen den Platz dann sofort, weil sie im Browser aus der JSON gerendert
+# werden -- die statische Fassung im HTML (fuer Crawler ohne JavaScript) und die
+# Sitemap blieben aber auf dem alten Stand, bis jemand die Build-Skripte von Hand
+# laufen laesst. Genau das erledigt dieser Lauf.
+#
+# Die QR-Codes bleiben bewusst aussen vor: sie entstehen separat.
+
+name: Freiplaetze nachbauen
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - data/freiplaetze.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: freiplaetze-nachbauen
+  cancel-in-progress: false
+
+jobs:
+  nachbauen:
+    # Ohne diese Grenze wuerde der eigene Commit den Lauf erneut ausloesen.
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # build-sitemap.py liest lastmod aus der Commit-Historie.
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Statische Platzliste, Head-Meta und Sitemap neu bauen
+        run: |
+          python3 tools/build-freiplaetze.py
+          python3 tools/build-head-meta.py
+          python3 tools/build-sitemap.py
+
+      - name: Aenderungen committen
+        run: |
+          if git diff --quiet; then
+            echo "Nichts nachzuziehen."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add trainieren/freiplaetze.html sitemap.xml
+          git commit -m "Freiplaetze: statische Liste und Sitemap nachgezogen"
+          git push
