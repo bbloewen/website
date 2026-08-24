@@ -19,6 +19,7 @@ Canonical dürfen nie auseinanderlaufen.
 | `data/news.json` (Artikel ergänzt/geändert) | `build-news-list.py` |
 | Neues Artikel-Hero in `assets/img/news/` | `build-share-images.py`, dann `build-head-meta.py` |
 | `data/heimspiele.json` (Spieltermine) | `build-head-meta.py` |
+| `data/freiplaetze.json` (Platz ergänzt, Koordinaten geändert) | `build-freiplatz-qr.py` |
 
 Alles auf einmal, in dieser Reihenfolge:
 
@@ -58,6 +59,14 @@ diese Seiten gehören dem n8n-Workflow `GpAS0ONrenHrcTwS`.
 `assets/img/share/`. Bewusst als **JPG**, nicht WebP: WhatsApp und mehrere
 Vorschau-Renderer zeigen WebP-`og:image` unzuverlässig. Hochformat-Motive werden
 oben angesetzt, sonst schneidet der Zuschnitt Köpfe ab.
+
+**`build-freiplatz-qr.py`** — erzeugt beide QR-Sätze zu den Freiplätzen: den
+Wegbeschreibungs-Code fürs Kachelbild (`assets/img/freiplaetze/qr-<slug>.svg`)
+und den Court-Hunt-Code für den Aufkleber am Platz
+(`assets/img/freiplaetze/hunt/qr-<slug>.svg`, Ziel `freiplatz.html?platz=<slug>`).
+Mit `--aufkleber` kommt die A6-Druckvorlage dazu, mit `--event <slug>
+--event-name "..."` ein A3-Schild für den mobilen Korb bei Straßenfesten.
+Plätze mit eingeschränktem Zugang bekommen bewusst keinen Spiel-Code.
 
 **`fix-insta-archiv-legacy.py`** — zieht Insta-Archivseiten nach, die aus dem
 Behold-Feed gefallen sind. Der n8n-Workflow kennt nur die letzten 20 Posts je
