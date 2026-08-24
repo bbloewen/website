@@ -133,7 +133,7 @@ def druckseite(karten, format_name):
         f'<img class="logo" src="{logo}" alt="Basketball Löwen Erfurt">'
         f'<h1>{k["titel"]}</h1><p>{k["text"]}</p>{k["qr"]}'
         f'<div class="platz">{k["platz"]}</div>'
-        f'<div class="foerderer">Unterstützt von der E.E.S.T. Foundation · eest.foundation</div>'
+        f'<div class="foerderer">Ein Projekt der E.E.S.T. Foundation · eest.foundation</div>'
         f'</div></div>'
         for k in karten
     )
