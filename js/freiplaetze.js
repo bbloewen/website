@@ -611,6 +611,7 @@
       var panel = document.getElementById('court-hunt-panel');
       if (panel) standPanel(panel);
 
+      initMeldeformular();
       icons();
     });
   }
@@ -769,6 +770,122 @@
     if (panel) standPanel(panel);
     rangliste(document.getElementById('court-hunt-rangliste'));
     icons();
+  }
+
+  /* ------------------------------------------------- Freiplatz melden */
+
+  var MELDE_WEBHOOK = 'https://poetic-patience-production-9290.up.railway.app/webhook/freiplatz-melden';
+
+  /* Das Meldeformular lag bis 25.08.2026 auf dem allgemeinen Feedback-Widget.
+     Fuer die Meldepraemie braucht es aber eigene Felder: Standort, Foto und die
+     Spiel-ID des Melders — ohne die koennen wir die 100 Punkte niemandem
+     gutschreiben. */
+  function initMeldeformular() {
+    var knopf = document.getElementById('freiplatz-melden-btn');
+    var form = document.getElementById('freiplatz-melden-form');
+    if (!knopf || !form) return;
+
+    var standort_ = null;
+    var foto = null;
+    var status = form.querySelector('.melde-standort-status');
+    var meldung = form.querySelector('.melde-meldung');
+    var punkteHinweis = form.querySelector('[data-melde-punkte]');
+
+    knopf.addEventListener('click', function () {
+      form.hidden = false;
+      knopf.hidden = true;
+      var stand = ladeStand();
+      punkteHinweis.hidden = false;
+      punkteHinweis.textContent = stand
+        ? 'Deine Spiel-ID hängt an der Meldung — schalten wir den Platz frei, landen die 100 Punkte auf deinem Stand.'
+        : 'Du spielst noch nicht mit. Melden kannst du den Platz trotzdem; die 100 Punkte gibt es nur mit Spielstand.';
+      form.querySelector('#melde-platz').focus();
+      icons();
+    });
+
+    form.querySelector('[data-melde-standort]').addEventListener('click', function () {
+      status.textContent = 'Standort wird geholt …';
+      standort().then(function (coords) {
+        standort_ = coords;
+        status.textContent = 'Standort übernommen (auf etwa ' +
+          Math.round(coords.accuracy || 0) + ' m genau).';
+      }).catch(function (fehler) {
+        status.textContent = fehler.message + ' Schreib die Lage einfach ins Adressfeld.';
+      });
+    });
+
+    var fotoFeld = form.querySelector('#melde-foto');
+    fotoFeld.addEventListener('change', function () {
+      var datei = fotoFeld.files && fotoFeld.files[0];
+      form.querySelector('[data-melde-fotoname]').textContent = datei ? datei.name : 'Foto anhängen (optional)';
+      foto = datei || null;
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var beschreibung = form.querySelector('#melde-beschreibung').value.trim();
+      var adresse = form.querySelector('#melde-adresse').value.trim();
+      if (!beschreibung && !adresse && !standort_) {
+        meldung.className = 'melde-meldung ist-hinweis';
+        meldung.textContent = 'Wir brauchen wenigstens die Lage: Adresse eintragen oder Standort übernehmen.';
+        return;
+      }
+
+      var senden = form.querySelector('button[type="submit"]');
+      senden.disabled = true;
+      senden.textContent = 'Wird gesendet …';
+      meldung.className = 'melde-meldung';
+      meldung.textContent = '';
+
+      var stand = ladeStand();
+      var daten = {
+        platz: form.querySelector('#melde-platz').value.trim(),
+        adresse: adresse,
+        beschreibung: beschreibung,
+        lat: standort_ ? Math.round(standort_.latitude * 100000) / 100000 : '',
+        lng: standort_ ? Math.round(standort_.longitude * 100000) / 100000 : '',
+        geraeteId: stand ? stand.geraeteId : ''
+      };
+
+      function abschicken() {
+        fetch(MELDE_WEBHOOK, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(daten)
+        }).then(function (res) {
+          /* Bewusst nicht nur auf den Statuscode schauen: Bricht der Workflow
+             hinter dem Webhook ab, antwortet n8n trotzdem mit 200 und leerem
+             Body. Nur die ausdrueckliche Bestaetigung zaehlt als Erfolg. */
+          return res.json().catch(function () { return {}; });
+        }).then(function (antwort) {
+          if (!antwort.ok) throw new Error('Der Server hat die Meldung nicht bestätigt.');
+          form.reset();
+          form.hidden = true;
+          knopf.hidden = false;
+          knopf.textContent = 'Noch einen Freiplatz melden';
+          meldung.className = 'melde-meldung ist-erfolg';
+          meldung.textContent = 'Danke! Wir schauen uns den Platz an. Sobald er freigeschaltet ist, ' +
+            (stand ? 'bekommst du 100 Punkte.' : 'steht er hier in der Übersicht.');
+          form.parentNode.appendChild(meldung);
+        }).catch(function () {
+          senden.disabled = false;
+          senden.textContent = 'Meldung abschicken';
+          meldung.className = 'melde-meldung ist-hinweis';
+          meldung.textContent = 'Senden hat nicht geklappt — bitte später noch einmal versuchen.';
+        });
+      }
+
+      if (!foto) { abschicken(); return; }
+      var leser = new FileReader();
+      leser.onload = function () {
+        daten.fotoBase64 = String(leser.result).split(',')[1];
+        daten.fotoName = foto.name;
+        daten.fotoType = foto.type || 'image/jpeg';
+        abschicken();
+      };
+      leser.onerror = function () { abschicken(); };
+      leser.readAsDataURL(foto);
+    });
   }
 
   window.Freiplaetze = {

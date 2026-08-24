@@ -578,6 +578,27 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 /* Foerderhinweis: bewusst leise — eine Zeile in Kleinschrift mit Trennlinie
    darueber, kein Logo-Kasten. Er soll gefunden werden, wenn man hinschaut, und
    nicht mit dem Spiel um Aufmerksamkeit konkurrieren. */
+/* Meldeformular fuer neue Freiplaetze: klappt erst auf Klick auf, damit der
+   Abschnitt vorher eine ruhige Aufforderung bleibt und kein Formularblock. */
+.melde-form { margin-top: 24px; text-align: left; max-width: 520px; margin-left: auto; margin-right: auto; }
+.melde-feld { margin-bottom: 16px; }
+.melde-feld label { display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
+.melde-form input[type="text"], .melde-form textarea {
+  width: 100%; padding: 11px 14px; border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-md); font: inherit; font-size: 14px; background: #fff; color: var(--text-primary);
+}
+.melde-form textarea { resize: vertical; }
+.melde-standort { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.melde-standort-status { font-size: 13px; color: var(--text-secondary); flex: 1 1 220px; }
+.melde-datei {
+  display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+  padding: 10px 14px; border: 1.5px dashed var(--border-strong); border-radius: var(--radius-md);
+  font-size: 14px; color: var(--text-secondary);
+}
+.melde-hinweis { font-size: 13px; color: var(--color-brand-orange-text); margin-bottom: 16px; }
+.melde-meldung { margin-top: 12px; font-size: 14px; color: var(--text-secondary); }
+.melde-meldung.ist-erfolg { color: var(--color-success); font-weight: var(--weight-semibold); }
+.melde-meldung.ist-hinweis { color: var(--color-brand-orange-text); font-weight: var(--weight-semibold); }
 .foerderhinweis {
   margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border);
   font-size: 13px; color: var(--text-muted);

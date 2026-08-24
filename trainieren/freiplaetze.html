@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1787612243" />
+<link rel="stylesheet" href="/css/site.css?v=1787612545" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
@@ -311,6 +311,32 @@
       <h2 class="t-h2 mb-4">Freiplatz hier noch nicht verzeichnet?</h2>
       <p class="t-body mb-5">Kennst du einen öffentlichen Freiplatz in Erfurt, der hier fehlt oder fehlerhaft verzeichnet ist? Melde ihn uns kurz, am besten mit Adresse und wenn möglich mit Standort und Foto. Schalten wir ihn frei, bekommst du 100 Punkte für den Court-Hunt — und alle, die dort in den ersten 30 Tagen einchecken, bekommen doppelte Punkte.</p>
       <button type="button" class="btn btn-primary" id="freiplatz-melden-btn">Freiplatz melden und Zusatzpunkte sammeln</button>
+
+      <form class="melde-form" id="freiplatz-melden-form" hidden>
+        <div class="melde-feld">
+          <label for="melde-platz">Wie heißt der Platz?</label>
+          <input type="text" id="melde-platz" name="platz" maxlength="80" placeholder="z. B. Freiplatz am Johannesplatz" />
+        </div>
+        <div class="melde-feld">
+          <label for="melde-adresse">Wo steht er?</label>
+          <input type="text" id="melde-adresse" name="adresse" maxlength="120" placeholder="Straße, Ortsteil oder Beschreibung der Lage" />
+        </div>
+        <div class="melde-feld">
+          <label for="melde-beschreibung">Was sollten wir wissen?</label>
+          <textarea id="melde-beschreibung" name="beschreibung" rows="3" maxlength="600" placeholder="Belag, Anzahl der Körbe, frei zugänglich?"></textarea>
+        </div>
+        <div class="melde-feld melde-standort">
+          <button type="button" class="btn btn-ghost" data-melde-standort><i data-lucide="map-pin" class="icon-16"></i> Standort übernehmen</button>
+          <span class="melde-standort-status" role="status" aria-live="polite">Am besten direkt am Platz — dann haben wir die Koordinaten genau.</span>
+        </div>
+        <div class="melde-feld">
+          <label class="melde-datei" for="melde-foto"><i data-lucide="image" class="icon-16"></i> <span data-melde-fotoname>Foto anhängen (optional)</span></label>
+          <input type="file" id="melde-foto" name="foto" accept="image/*" hidden />
+        </div>
+        <p class="melde-hinweis" data-melde-punkte hidden></p>
+        <button type="submit" class="btn btn-primary">Meldung abschicken</button>
+        <p class="melde-meldung" role="status" aria-live="polite"></p>
+      </form>
     </div>
   </section>
 
@@ -457,7 +483,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="/js/nav.js?v=1787221181"></script>
 <script src="/js/include.js?v=1785398309"></script>
-<script src="/js/freiplaetze.js?v=1787612243"></script>
+<script src="/js/freiplaetze.js?v=1787612545"></script>
 <script>
   Freiplaetze.initUebersicht();
 
