@@ -545,11 +545,14 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
   display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;
   margin-top: 16px; font-size: 13px; color: var(--text-muted);
 }
-.freiplaetze-legende span { display: flex; align-items: center; justify-content: center; gap: 8px; flex: 0 0 300px; }
+/* Nur die direkten Kinder sind die Legendenspalten — der Farbtupfer darin ist
+   ebenfalls ein span und wuerde die Flex-Basis sonst erben (300 px breite
+   Wurst statt Punkt). */
+.freiplaetze-legende > span { display: flex; align-items: center; justify-content: center; gap: 8px; flex: 0 0 300px; }
 /* Legendensymbole sind bewusst dieselben Kreise wie auf der Karte, nicht
    irgendein Icon — sonst muss man sich die Zuordnung selbst zusammenreimen. */
 .freiplatz-pin-probe {
-  width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
+  width: 16px; height: 16px; border-radius: 50%; flex: 0 0 16px;
   background: var(--color-brand-orange); border: 3px solid #fff; box-shadow: 0 1px 3px rgba(0,18,45,.4);
 }
 .freiplatz-pin-probe.ist-eingeschraenkt { background: #fff; border-color: #F08A8A; }
