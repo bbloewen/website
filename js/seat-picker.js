@@ -2759,11 +2759,17 @@
     wrap.className = 'seatplan-direct-add-row';
     wrap.innerHTML =
       '<label class="t-caption" for="seatplan-direct-block" style="display:block;margin-bottom:6px;color:var(--text-muted)">Block direkt wählen, ohne den Sitzplan zu öffnen</label>' +
+      // Select bekommt die gesamte Zeilenbreite (flex:1), damit die gewaehlte
+      // Option nicht abgeschnitten wird -- vorher teilte sich das Select die Zeile
+      // mit Anzahl-Feld UND Button ohne feste Breiten, wodurch der ausgewaehlte
+      // Block/die Kategorie nicht mehr lesbar war (Website-Feedback von AG,
+      // 24.08.2026). Der Uebernehmen-Button steht deshalb jetzt in einer eigenen
+      // zweiten Zeile, wie von Marko vorgeschlagen.
       '<div style="display:flex;gap:8px">' +
-        '<select id="seatplan-direct-block">' + options + '</select>' +
-        '<input type="number" id="seatplan-direct-qty" min="1" value="1" aria-label="Anzahl">' +
-        '<button type="button" class="btn btn-primary btn-sm" id="seatplan-direct-add">Auswahl übernehmen</button>' +
-      '</div>';
+        '<select id="seatplan-direct-block" style="flex:1;min-width:0">' + options + '</select>' +
+        '<input type="number" id="seatplan-direct-qty" min="1" value="1" aria-label="Anzahl" style="width:60px;flex-shrink:0">' +
+      '</div>' +
+      '<button type="button" class="btn btn-primary btn-sm" id="seatplan-direct-add" style="width:100%;margin-top:8px">Auswahl übernehmen</button>';
     this.cartEl.appendChild(wrap);
     wrap.querySelector('#seatplan-direct-add').addEventListener('click', function () {
       var raw = wrap.querySelector('#seatplan-direct-block').value;
