@@ -449,8 +449,11 @@
 </div>
 <!--/PARTIAL:footer--></div>
 <script>
-  // Restliche Heimspiele aus data/heimspiele.json rendern (noch nicht in pretix, daher ohne Kaufbutton).
-  // Vorverkaufsstart = Spieltag minus 10 Tage.
+  // Heimspiele aus data/heimspiele.json rendern. Der Tickets-Button verlinkt auf die
+  // eigene Spieltagsseite (teams-saison/spiel/<seiteSlug>.html, s. tools/build-spieltagsseiten.py)
+  // -- dort ist der Saalplan direkt eingebettet -- und erscheint nur, wenn fuer dieses
+  // Spiel schon eine ticketUrl gesetzt ist (Vorverkauf ist offen). Ohne ticketUrl bleibt
+  // der Button ausgegraut, mit geschaetztem Vorverkaufsstart = Spieltag minus 10 Tage.
   var MONATE = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
   var WOCHENTAGE = ['So','Mo','Di','Mi','Do','Fr','Sa'];
   function parseDMY(str) {
@@ -479,7 +482,7 @@
   }
   fetch('/data/heimspiele.json?v=1785398309').then(function (r) { return r.json(); }).then(function (d) {
     var el = document.getElementById('heimspiele-liste');
-    el.innerHTML = d.spiele.map(function (s, i) {
+    el.innerHTML = d.spiele.map(function (s) {
       var gameDate = parseDMY(s.datum);
       var vvkDate = new Date(gameDate);
       vvkDate.setDate(vvkDate.getDate() - 10);
@@ -491,9 +494,11 @@
             '<span><i data-lucide="clock" class="icon-14"></i> ' + s.zeit + ' Uhr</span>' +
             '<a href="https://www.google.com/maps/search/?api=1&query=Riethsporthalle+Erfurt+Essener+Stra%C3%9Fe+20+99089+Erfurt" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-14"></i> Riethsporthalle</a>' +
           '</div>' +
-          (i === 0 ? '<div class="ticket-row-vvk"><span class="badge badge-info">Vorverkauf startet am ' + formatLong(vvkDate) + '</span></div>' : '') +
+          (!s.ticketUrl ? '<div class="ticket-row-vvk"><span class="badge badge-info">Vorverkauf startet am ' + formatLong(vvkDate) + '</span></div>' : '') +
         '</div>' +
-        '<div class="tactions"><button type="button" class="btn btn-primary btn-sm" disabled>Tickets <i data-lucide="arrow-right" class="icon-14"></i></button></div>' +
+        '<div class="tactions">' + (s.ticketUrl
+          ? '<a class="btn btn-primary btn-sm" href="' + s.ticketUrl + '">Tickets <i data-lucide="arrow-right" class="icon-14"></i></a>'
+          : '<button type="button" class="btn btn-primary btn-sm" disabled>Tickets <i data-lucide="arrow-right" class="icon-14"></i></button>') + '</div>' +
       '</div>';
     }).join('');
     if (window.lucide) window.lucide.createIcons();

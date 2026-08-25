@@ -288,6 +288,42 @@ def freiplaetze():
     }]
 
 
+FAQ_ABSCHNITT_RE = re.compile(
+    r'<span class="eyebrow">Häufige Fragen</span>(.*?)</section>', re.S)
+FAQ_PAAR_RE = re.compile(
+    r'<h3[^>]*>(.*?)</h3>\s*<p[^>]*>(.*?)</p>', re.S)
+
+
+def faq(text):
+    """FAQPage aus dem Abschnitt "Häufige Fragen" der Seite selbst.
+
+    Bewusst aus dem sichtbaren HTML gelesen und nicht hier nochmal
+    hingeschrieben: Sonst driften die strukturierten Daten von der Seite weg,
+    sobald jemand eine Antwort umformuliert -- derselbe Fehler, den die
+    handgepflegte sitemap.xml jahrelang gemacht hat.
+
+    Zur Erwartung: Google zeigt FAQ-Rich-Results seit August 2023 nur noch fuer
+    behoerdliche und medizinische Quellen an. Der Block bringt hier also keine
+    aufklappbaren Treffer in der Suche, sondern macht die Frage-Antwort-Paare
+    maschinenlesbar -- was fuer Antwortsysteme zaehlt, die aus der Seite zitieren.
+    """
+    m = FAQ_ABSCHNITT_RE.search(text)
+    if not m:
+        return []
+    paare = [(text_of(f), text_of(a)) for f, a in FAQ_PAAR_RE.findall(m.group(1))]
+    paare = [(f, a) for f, a in paare if f and a]
+    if not paare:
+        return []
+    return [{
+        "@type": "FAQPage",
+        "mainEntity": [
+            {"@type": "Question", "name": f,
+             "acceptedAnswer": {"@type": "Answer", "text": a}}
+            for f, a in paare
+        ],
+    }]
+
+
 def nodes_for(rel, text, page_title, social_title, description, image):
     """JSON-LD-Knoten dieser Seite."""
     nodes = []
@@ -339,6 +375,9 @@ def nodes_for(rel, text, page_title, social_title, description, image):
 
     if rel == "trainieren/freiplaetze.html":
         nodes.extend(freiplaetze())
+
+    if rel == "trainieren/court-hunt.html":
+        nodes.extend(faq(text))
 
     crumb = breadcrumb(rel, social_title)
     if crumb:
