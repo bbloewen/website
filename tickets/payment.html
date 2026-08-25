@@ -327,6 +327,11 @@
                 <label for="pf-iban">IBAN *</label>
                 <input type="text" id="pf-iban" placeholder="DE68 8205 1000 0163 1313 76">
               </div>
+              <div class="field hidden" id="pf-bic-field">
+                <label for="pf-bic">BIC *</label>
+                <input type="text" id="pf-bic" placeholder="HELADEF1WEM">
+                <span class="t-caption" style="color:var(--text-muted)">Bei ausländischen IBANs (nicht DE) benötigen wir zusätzlich die BIC.</span>
+              </div>
               <label class="field-checkbox">
                 <input type="checkbox" id="pf-sepa-mandat">
                 <span>Ich erteile der XXL Baskets GmbH das Mandat, den Rechnungsbetrag per SEPA-Lastschrift von oben genanntem Konto einzuziehen.</span>
@@ -652,15 +657,25 @@
       });
     });
 
+    /* BIC nur fuer nicht-deutsche IBANs abfragen -- fuer die SEPA-Datei reicht bei
+       DE-IBANs die IBAN allein, bei allen anderen braucht die Bank zusaetzlich die
+       BIC (Marko-Vorgabe 25.08.2026, Kundenfall vm-elektrotechnik.at). */
+    var ibanField = document.getElementById('pf-iban');
+    var bicFieldWrap = document.getElementById('pf-bic-field');
+    ibanField.addEventListener('input', function () {
+      var v = ibanField.value.replace(/\s+/g, '').toUpperCase();
+      bicFieldWrap.classList.toggle('hidden', v.length < 2 || v.slice(0, 2) === 'DE');
+    });
+
     /* Dauerkarte läuft asynchron über n8n: Bestellung landet zuerst in einer
        Data Table, die eigentliche pretix-Buchung folgt als Folgeschritt.
        Deshalb hier kein lokal erzeugter Fake-Bestellcode, sondern die vom
        Workflow zurückgegebene Mandatsreferenz. Gemeinsame Funktion fuer den
        normalen SEPA-Submit und den kostenlosen Bestellen-Button (leere
        Kontodaten, method="kostenlos"). */
-    function submitDauerkarteOrder(kontoinhaber, iban, method, btn) {
+    function submitDauerkarteOrder(kontoinhaber, iban, bic, method, btn) {
       var webhookUrl = 'https://poetic-patience-production-9290.up.railway.app/webhook/dauerkarte-bestellung';
-      var payload = { buyer: buyer, cart: cart, sepa: { kontoinhaber: kontoinhaber, iban: iban } };
+      var payload = { buyer: buyer, cart: cart, sepa: { kontoinhaber: kontoinhaber, iban: iban, bic: bic } };
       /* Schutz gegen Doppel-Bestellungen: das blosse btn.disabled reicht nur
          innerhalb desselben Seitenaufrufs. Bei einem Reload (z.B. nach langsamer
          Antwort, Zurueck-Button) ist der Button wieder aktiv, das Formular aber
@@ -700,7 +715,7 @@
       document.getElementById('free-order-btn').addEventListener('click', function () {
         var btn = this;
         if (cart.productType === 'dauerkarte') {
-          submitDauerkarteOrder('', '', 'kostenlos', btn);
+          submitDauerkarteOrder('', '', '', 'kostenlos', btn);
           return;
         }
         /* Einzelticket: derselbe Bestell-Webhook wie beim PayPal-Flow, aber ohne
@@ -734,19 +749,25 @@
       if (cart.productType === 'einzelticket' || istReinerGutscheinKauf) return;
 
       var method = document.querySelector('input[name="paymethod"]:checked').value;
-      var kontoinhaber = '', iban = '';
+      var kontoinhaber = '', iban = '', bic = '';
       if (method === 'sepa') {
         kontoinhaber = document.getElementById('pf-kontoinhaber').value.trim();
         iban = document.getElementById('pf-iban').value.trim();
+        bic = document.getElementById('pf-bic').value.trim();
         var mandat = document.getElementById('pf-sepa-mandat').checked;
         if (!kontoinhaber || !iban || !mandat) {
           alert('Bitte Kontoinhaber, IBAN und das SEPA-Mandat ausfüllen.');
           return;
         }
+        var ibanNormalized = iban.replace(/\s+/g, '').toUpperCase();
+        if (ibanNormalized.slice(0, 2) !== 'DE' && !bic) {
+          alert('Bitte zusätzlich die BIC angeben — bei ausländischen IBANs benötigen wir diese für den Bankeinzug.');
+          return;
+        }
       }
 
       if (cart.productType === 'dauerkarte') {
-        submitDauerkarteOrder(kontoinhaber, iban, method, document.getElementById('pay-btn'));
+        submitDauerkarteOrder(kontoinhaber, iban, bic, method, document.getElementById('pay-btn'));
         return;
       }
 
