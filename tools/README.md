@@ -20,7 +20,7 @@ Canonical dürfen nie auseinanderlaufen.
 | `data/freiplaetze.json` (Platz ergänzt/geändert) | `build-freiplaetze.py` |
 | Neue Insta-Archivseite unter `news/insta-archiv/` | `build-instagram-archiv.py` |
 | Neues Artikel-Hero in `assets/img/news/` | `build-share-images.py`, dann `build-head-meta.py` |
-| `data/heimspiele.json` (Spieltermine, neues Spiel, Vorverkauf gestartet) | `build-spieltagsseiten.py`, dann `build-head-meta.py` |
+| `data/heimspiele.json` (Spieltermine, neues Spiel, Vorverkauf gestartet) | `build-spieltagsseiten.py`, `build-spielplan-liste.py`, dann `build-head-meta.py` |
 | `data/freiplaetze.json` (Platz ergänzt, Koordinaten geändert) | `build-freiplatz-qr.py` |
 
 Alles auf einmal, in dieser Reihenfolge:
@@ -30,6 +30,7 @@ python3 tools/build-spieltagsseiten.py && \
 python3 tools/build-partials.py && \
 python3 tools/build-instagram-archiv.py && \
 python3 tools/build-news-list.py && \
+python3 tools/build-spielplan-liste.py && \
 python3 tools/build-freiplaetze.py && \
 python3 tools/build-share-images.py && \
 python3 tools/build-head-meta.py && \
@@ -117,3 +118,18 @@ Das JavaScript überschreibt den statischen Stand mit identischem Inhalt, die
 statische Fassung ist nur für Crawler ohne JavaScript da. Bewusst ohne
 Medienblock — Karten-iframes würden beim ersten Aufbau laden und Sekunden später
 ersetzt, ohne für die Auffindbarkeit etwas beizutragen.
+
+**`build-spielplan-liste.py`** — schreibt die 14 Heimspiele statisch in
+`teams-saison/spielplan.html`. Anlass war der Ahrefs-Crawl vom 25.08.2026: Alle
+14 Spieltagsseiten galten als „Orphan page", weil ihre Adressen im Körper der
+Seite nicht ein einziges Mal als `href` standen — nur im JSON-LD im `<head>`.
+Die Liste entsteht sonst erst im Browser in `js/spielplan.js` (`renderDayList`
+schreibt in `#spielplan-tage`), und dort hängt der Verweis auf die
+Spieltagsseite an einem Icon. Bewusst nur die Heimspiele: Auswärtsspiele und die
+Termine von Damen und U19 zeigen auf keine eigene Seite. Der Gegnername ist der
+Ankertext, weil genau danach gesucht wird. Gleiche Bauart wie
+`build-freiplaetze.py` — das JavaScript ersetzt den statischen Stand beim Laden
+durch den vollen, filterbaren Plan.
+
+Die Markup-Struktur spiegelt `gameRowHTML()` aus `js/spielplan.js`. Ändert sich
+die dort, muss sie hier mitgezogen werden.
