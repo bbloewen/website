@@ -475,10 +475,16 @@
     if (window.lucide) { lucide.createIcons(); }
   });
 
-  // Vorschaubild aus der im Repo gesicherten Kopie statt aus Beholds CDN:
-  // Beholds URLs sind signiert und verfallen, sobald der Post aus dem Feed fällt.
+  // Diese Posts stehen alle noch im laufenden Feed -- Beholds Live-URL (p.image)
+  // ist also gueltig und immer aktuell. Die gesicherte Kopie unter
+  // assets/img/insta/ existiert erst, sobald ein Post aus dem Feed faellt und
+  // archiviert wird; bis dahin haette der Pfad hierher gezeigt und waere ins
+  // Leere gelaufen (onerror-Rueckfall auf dasselbe Platzhalterbild fuer fast
+  // jeden Post, Feedback Marko 25.08.2026). Rueckfall auf die Kopie bleibt fuer
+  // den (aktuell nie eintretenden) Fall, dass p.image mal fehlt.
   function instaImage(p) {
-    if (!p.persistedUrl) return p.image;
+    if (p.image) return p.image;
+    if (!p.persistedUrl) return '/assets/img/share/og-default.jpg';
     return p.persistedUrl.replace('/news/insta-archiv/', '/assets/img/insta/').replace('.html', '.jpg');
   }
 

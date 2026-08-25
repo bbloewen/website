@@ -54,11 +54,15 @@ document.addEventListener('DOMContentLoaded', function () {
         return {
           date: new Date(p.timestamp),
           dateLabel: null,
-          // Bild aus der im Repo gesicherten Kopie: Beholds URLs sind signiert
-          // und verfallen, sobald der Post aus dem Feed fällt.
-          image: p.persistedUrl
-            ? p.persistedUrl.replace('/news/insta-archiv/', '/assets/img/insta/').replace('.html', '.jpg')
-            : p.image,
+          // Diese Posts stehen alle noch im laufenden Feed -- Beholds Live-URL
+          // (p.image) ist also gueltig. Die gesicherte Kopie unter
+          // assets/img/insta/ existiert erst nach dem Archivieren (sobald der
+          // Post aus dem Feed faellt); vorher lief der Pfad hierher ins Leere
+          // und zeigte fuer fast jeden Post denselben Platzhalter (Feedback
+          // Marko 25.08.2026). Rueckfall auf die Kopie nur, falls p.image
+          // ausnahmsweise fehlt.
+          image: p.image
+            || (p.persistedUrl ? p.persistedUrl.replace('/news/insta-archiv/', '/assets/img/insta/').replace('.html', '.jpg') : ''),
           // titel kommt fertig gekürzt aus dem Workflow (Vorspann abgeschnitten,
           // Unicode-Fettschrift aufgelöst, Handpflege berücksichtigt). Der
           // Rückfall auf die Caption greift nur, solange ein Feed noch ohne
