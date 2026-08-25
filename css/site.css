@@ -542,6 +542,18 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
   background: var(--color-brand-orange); border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,18,45,.45);
 }
 .freiplatz-pin-eingeschraenkt span { background: #fff; border-color: #F08A8A; box-shadow: 0 1px 4px rgba(0,18,45,.35); }
+.freiplatz-pin-event span { background: #7C5CD6; border-color: #fff; }
+.freiplatz-pin-probe.ist-event { background: #7C5CD6; }
+.freiplatz-popup-event { color: #5B3FB0; font-weight: var(--weight-semibold); }
+.freiplatz-spot-zeit {
+  display: flex; align-items: center; gap: 8px; margin-top: 14px; padding: 10px 12px;
+  background: #F1EDFB; border-radius: var(--radius-md); font-size: 14px; color: #4A3F8C;
+}
+.court-hunt-spot-banner {
+  margin: 0 auto 16px; max-width: 520px; padding: 12px 16px; border-radius: var(--radius-md);
+  background: #F1EDFB; color: #4A3F8C; font-size: 14px; font-weight: var(--weight-semibold);
+}
+.court-hunt-spot-banner.ist-bald { background: var(--bg-subtle); color: var(--text-secondary); font-weight: var(--weight-regular); }
 .freiplaetze-legende {
   display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;
   margin-top: 16px; font-size: 13px; color: var(--text-muted);

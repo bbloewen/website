@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1787654030" />
+<link rel="stylesheet" href="/css/site.css?v=1787654974" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
@@ -258,6 +258,7 @@
       <div class="freiplaetze-legende">
         <span><span class="freiplatz-pin-probe" aria-hidden="true"></span> Frei zugänglich — zählt im Court-Hunt</span>
         <span><span class="freiplatz-pin-probe ist-eingeschraenkt" aria-hidden="true"></span> Zugang eingeschränkt — kein Check-in</span>
+        <span id="freiplaetze-legende-event" hidden><span class="freiplatz-pin-probe ist-event" aria-hidden="true"></span> Spot am mobilen Korb — nur am Veranstaltungstag</span>
       </div>
     </div>
   </section>
@@ -483,7 +484,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="/js/nav.js?v=1787221181"></script>
 <script src="/js/include.js?v=1785398309"></script>
-<script src="/js/freiplaetze.js?v=1787654030"></script>
+<script src="/js/freiplaetze.js?v=1787654974"></script>
 <script>
   Freiplaetze.initUebersicht();
 

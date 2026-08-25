@@ -54,6 +54,53 @@
     return datenPromise;
   }
 
+  /* Event-Spots kommen aus den Community-Events, nicht aus der Platzliste: Sie
+     gelten nur an einem Tag und haben in der dauerhaften Übersicht nichts
+     verloren. Für die Seite verhalten sie sich danach wie ein Platz. */
+  var EVENT_URL = '/data/community-events.json';
+  var eventPromise = null;
+
+  function ladeSpots() {
+    if (!eventPromise) {
+      eventPromise = fetch(EVENT_URL).then(function (r) { return r.json(); }).then(function (daten) {
+        return (daten.events || []).filter(function (e) {
+          return e.courtHunt && e.spotSlug && typeof e.lat === 'number' && typeof e.lng === 'number';
+        }).map(function (e) {
+          return {
+            slug: e.spotSlug,
+            name: e.name,
+            adresse: e.location || '',
+            lat: e.lat,
+            lng: e.lng,
+            beschreibung: e.description || 'Mobiler Korb der Löwen — nur an diesem Tag, dafür 50 Punkte.',
+            typ: 'event',
+            von: e.spotVon,
+            bis: e.spotBis,
+            zugang: 'oeffentlich'
+          };
+        });
+      }).catch(function () { return []; });
+    }
+    return eventPromise;
+  }
+
+  function spotOffen(spot, jetzt) {
+    var zeit = (jetzt || new Date()).getTime();
+    return zeit >= new Date(spot.von).getTime() && zeit <= new Date(spot.bis).getTime();
+  }
+
+  function spotVorbei(spot) {
+    return new Date(spot.bis).getTime() < Date.now();
+  }
+
+  function spotZeitText(spot) {
+    var von = new Date(spot.von);
+    var tag = new Intl.DateTimeFormat('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit' }).format(von);
+    var uhr = new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '2-digit' }).format(von);
+    var bis = new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '2-digit' }).format(new Date(spot.bis));
+    return tag + ', ' + uhr + ' bis ' + bis + ' Uhr';
+  }
+
   function platzUrl(slug) {
     return '/trainieren/freiplatz.html?platz=' + encodeURIComponent(slug);
   }
@@ -383,13 +430,17 @@
          Zustände farblich trennen. Die Form unterscheidet sich zusätzlich
          (Ring statt Punkt), damit die Karte nicht allein über Farbe spricht. */
       var icon = window.L.divIcon({
-        className: 'freiplatz-pin' + (eingeschraenkt ? ' freiplatz-pin-eingeschraenkt' : ''),
+        className: 'freiplatz-pin' + (eingeschraenkt ? ' freiplatz-pin-eingeschraenkt' : '') +
+          (f.typ === 'event' ? ' freiplatz-pin-event' : ''),
         html: '<span></span>',
         iconSize: [22, 22],
         iconAnchor: [11, 11],
         popupAnchor: [0, -12]
       });
       var popup = '<strong>' + esc(f.name) + '</strong><br>' + esc(f.adresse);
+      if (f.typ === 'event') {
+        popup += '<br><span class="freiplatz-popup-event">Court-Hunt-Spot: ' + esc(spotZeitText(f)) + '</span>';
+      }
       if (eingeschraenkt) {
         popup += '<br><span class="freiplatz-popup-hinweis">' + esc(f.zugangHinweis || 'Zugang eingeschränkt') + '</span>';
       }
@@ -624,7 +675,15 @@
         }
       }
 
-      zeichneKarte('freiplaetze-map', plaetze);
+      /* Kommende Spots gehören auf die Karte, vergangene nicht — die Karte soll
+         zeigen, wo man hin kann, nicht wo man hätte hingehen können. */
+      ladeSpots().then(function (spots) {
+        var kommend = spots.filter(function (sp) { return !spotVorbei(sp); });
+        zeichneKarte('freiplaetze-map', plaetze.concat(kommend));
+        var legende = document.getElementById('freiplaetze-legende-event');
+        if (legende) legende.hidden = kommend.length === 0;
+        icons();
+      });
 
       var panel = document.getElementById('court-hunt-panel');
       if (panel) standPanel(panel);
@@ -640,8 +699,10 @@
     var wurzel = document.getElementById('freiplatz-detail');
     if (!wurzel) return;
 
-    ladeDaten().then(function (data) {
-      var platz = data.freiplaetze.filter(function (f) { return f.slug === slug; })[0];
+    Promise.all([ladeDaten(), ladeSpots()]).then(function (beides) {
+      var data = beides[0];
+      var platz = data.freiplaetze.filter(function (f) { return f.slug === slug; })[0]
+        || beides[1].filter(function (sp) { return sp.slug === slug; })[0];
       /* Kein oder unbekannter Parameter: die Detailseite hat ohne Platz keinen
          Inhalt — zurück zur Übersicht statt einer leeren Seite. */
       if (!platz) {
@@ -650,9 +711,16 @@
       }
 
       document.title = platz.name + ' — Basketball Löwen Erfurt';
+      var spotZeile = platz.typ === 'event'
+        ? '<p class="freiplatz-spot-zeit"><i data-lucide="calendar-clock" class="icon-16"></i> ' +
+          (spotVorbei(platz) ? 'Dieser Spot ist vorbei — er galt am ' + esc(spotZeitText(platz)) + '.'
+            : (spotOffen(platz) ? 'Jetzt aktiv: ' + esc(spotZeitText(platz)) + ' — 50 Punkte am mobilen Korb.'
+              : 'Aktiv am ' + esc(spotZeitText(platz)) + ' — dann gibt es hier 50 Punkte.')) + '</p>'
+        : '';
       wurzel.innerHTML =
         '<h1 class="t-h2">' + esc(platz.name) + '</h1>' +
         '<p class="t-body mt-3">' + esc(platz.beschreibung) + '</p>' +
+        spotZeile +
         /* Adresse direkt unter die Überschrift: Wer die Seite am Handy öffnet,
            will als Erstes wissen, wo das ist — nicht erst nach dem Foto. */
         '<a class="freiplatz-adresse-link mt-4" href="' + mapsUrl(platz) + '" target="_blank" rel="noopener">' +
@@ -689,7 +757,7 @@
   function teilenBlock() {
     return '<div class="freiplatz-teilen">' +
       '<button type="button" class="btn btn-ghost" data-teilen>' +
-        '<i data-lucide="share-2" class="icon-16"></i> Kumpels Bescheid sagen</button>' +
+        '<i data-lucide="share-2" class="icon-16"></i> Freunden Bescheid sagen</button>' +
       '<p class="freiplatz-teilen-status" role="status" aria-live="polite"></p>' +
     '</div>';
   }
@@ -727,6 +795,20 @@
     if (!spielbar(platz)) {
       el.innerHTML = '<p class="t-body-sm">Dieser Platz gehört nicht zum Court-Hunt — er ist nicht frei zugänglich, ' +
         'deshalb gibt es hier keine Punkte. Auf allen öffentlichen Plätzen kannst du mitspielen.</p>' + teilenBlock();
+      teilenVerdrahten(el, platz);
+      icons();
+      return;
+    }
+
+    if (platz.typ === 'event' && !spotOffen(platz)) {
+      el.innerHTML = '<h2 class="t-h3">Court-Hunt</h2>' +
+        '<p class="t-body mt-2">' +
+          (spotVorbei(platz)
+            ? 'Dieser Spot ist vorbei. Auf den festen Freiplätzen geht es weiter.'
+            : 'Der Spot zählt erst am Veranstaltungstag — komm dann mit dem Handy vorbei.') +
+        '</p>' +
+        '<p class="mt-4"><a class="card-link" href="/trainieren/freiplaetze.html">' +
+          'Alle Freiplätze <i data-lucide="arrow-right" class="icon-14"></i></a></p>' + teilenBlock();
       teilenVerdrahten(el, platz);
       icons();
       return;
@@ -867,8 +949,30 @@
     });
   }
 
+  /* Am Veranstaltungstag gehört der Spot ganz nach oben: Wer die Seite öffnet,
+     soll sehen, dass es heute 50 Punkte gibt statt der üblichen 10. */
+  function spotBanner(el) {
+    if (!el) return;
+    ladeSpots().then(function (spots) {
+      var heute = spots.filter(function (sp) { return spotOffen(sp); });
+      if (!heute.length) {
+        var bald = spots.filter(function (sp) { return !spotVorbei(sp); })
+          .sort(function (a, b) { return new Date(a.von) - new Date(b.von); })[0];
+        if (!bald) return;
+        el.innerHTML = '<p class="court-hunt-spot-banner ist-bald">Nächster Spot am mobilen Korb: ' +
+          '<a href="' + platzUrl(bald.slug) + '">' + esc(bald.name) + '</a>, ' + esc(spotZeitText(bald)) + '.</p>';
+        return;
+      }
+      el.innerHTML = heute.map(function (sp) {
+        return '<p class="court-hunt-spot-banner">Heute vor Ort: <a href="' + platzUrl(sp.slug) + '">' +
+          esc(sp.name) + '</a> — 50 Punkte am mobilen Korb, ' + esc(spotZeitText(sp)) + '.</p>';
+      }).join('');
+    });
+  }
+
   function initStandsseite() {
     nachtragen();
+    spotBanner(document.getElementById('court-hunt-spot'));
     monatsInfo(document.getElementById('court-hunt-monat'));
     var panel = document.getElementById('court-hunt-panel');
     if (panel) standPanel(panel);
