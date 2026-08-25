@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1787651234" />
+<link rel="stylesheet" href="/css/site.css?v=1787651434" />
 <link rel="stylesheet" href="/css/seat-picker.css?v=1786362756" />
 <style>
   .process-chain { display: flex; align-items: flex-start; justify-content: center; gap: 0; margin: 24px 0 4px; flex-wrap: wrap; }
@@ -457,6 +457,7 @@
 
     var isFanshop = cart.productType === 'fanshop';
     var isDauerkarte = cart.productType === 'dauerkarte';
+    var isClub100 = cart.productType === 'loewen-business-club';
     var isGutschein = isFanshop && !!order.giftcardSecret;
 
     if (isGutschein) {
@@ -467,7 +468,7 @@
     function formatMoney(n) { return n.toFixed(2).replace('.', ',') + ' €'; }
 
     document.getElementById('confirmation-order-number').textContent = order.orderNumber;
-    document.querySelector('#confirmation-order-number').previousElementSibling.textContent = isDauerkarte ? 'Referenz' : 'Bestellnummer';
+    document.querySelector('#confirmation-order-number').previousElementSibling.textContent = (isDauerkarte || isClub100) ? 'Referenz' : 'Bestellnummer';
     document.getElementById('confirmation-total').textContent = formatMoney(cart.total);
     document.getElementById('confirmation-method').textContent = order.paymentMethod === 'sepa' ? 'SEPA-Lastschrift' : 'PayPal';
     document.getElementById('confirmation-event-label').textContent = cart.eventLabel;
@@ -478,7 +479,9 @@
         ? 'Wir bereiten deine Bestellung vor und schicken sie dir in den nächsten Tagen an deine Adresse.'
         : isDauerkarte
           ? 'Wir haben deine Dauerkarten-Bestellung erhalten und legen sie jetzt für dich an.'
-          : 'Wir haben deine Bestellung erhalten und schicken dir deine Tickets in Kürze per E-Mail.';
+          : isClub100
+            ? 'Wir haben Ihre Anmeldung zum Löwen-Club der 100 erhalten und richten Ihre Mitgliedschaft jetzt ein.'
+            : 'Wir haben deine Bestellung erhalten und schicken dir deine Tickets in Kürze per E-Mail.';
     document.getElementById('confirmation-lead').textContent = buyer.vorname ? ('Danke, ' + buyer.vorname + '! ' + fulfillmentNote) : ('Vielen Dank! ' + fulfillmentNote);
 
     document.getElementById('confirmation-fulfillment-text').innerHTML = isGutschein
@@ -487,7 +490,9 @@
         ? 'Wir bearbeiten deine Bestellung, sobald die Zahlung bestätigt ist, und schicken dir eine Versandbestätigung an <strong id="confirmation-email-2"></strong>.'
         : isDauerkarte
           ? 'Du bekommst von uns eine E-Mail mit den Lastschrift-Details und deiner Dauerkarte an <strong id="confirmation-email-2"></strong>, sobald alles bereit ist.'
-          : 'Deine Tickets als QR-Code gehen an <strong id="confirmation-email-2"></strong>, sobald die Zahlung bestätigt ist.';
+          : isClub100
+            ? 'Sie erhalten von uns eine E-Mail mit den Lastschrift-Details an <strong id="confirmation-email-2"></strong>.'
+            : 'Deine Tickets als QR-Code gehen an <strong id="confirmation-email-2"></strong>, sobald die Zahlung bestätigt ist.';
     document.getElementById('confirmation-email-2').textContent = buyer.email || 'deiner E-Mail-Adresse';
     document.querySelector('#confirmation-fulfillment-icon i').setAttribute('data-lucide', isGutschein ? 'gift' : isFanshop ? 'package' : 'mail');
     if (window.lucide) window.lucide.createIcons();

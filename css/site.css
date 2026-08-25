@@ -573,7 +573,7 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .court-hunt-aktionen { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
 .freiplatz-checkin {
   margin-top: 24px; padding: 20px; background: var(--bg-subtle);
-  border: 1px solid var(--border); border-radius: var(--radius-lg);
+  border: 1px solid var(--border); border-radius: var(--radius-lg); text-align: center;
 }
 /* Foerderhinweis: bewusst leise — eine Zeile in Kleinschrift mit Trennlinie
    darueber, kein Logo-Kasten. Er soll gefunden werden, wenn man hinschaut, und
@@ -601,10 +601,14 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .melde-meldung.ist-hinweis { color: var(--color-brand-orange-text); font-weight: var(--weight-semibold); }
 .freiplatz-teilen { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); }
 .freiplatz-teilen-status { margin-top: 8px; font-size: 13px; color: var(--text-secondary); word-break: break-word; }
+/* Zweiter Handlungsweg unter dem Court-Hunt-Kasten, gleiche Breite und Mitte:
+   erst spielen, dann melden. */
 .freiplatz-maengel {
-  margin-top: 24px; padding: 14px 16px; background: var(--bg-subtle);
-  border-radius: var(--radius-md); font-size: 13px; color: var(--text-secondary); line-height: 1.5;
+  margin-top: 16px; padding: 20px; background: var(--bg-subtle);
+  border: 1px solid var(--border); border-radius: var(--radius-lg); text-align: center;
 }
+.freiplatz-maengel p { font-size: 14px; color: var(--text-secondary); margin-bottom: 12px; }
+.freiplatz-maengel-fuss { font-size: 13px; color: var(--text-muted); margin: 12px 0 0; }
 .foerderhinweis {
   margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border);
   font-size: 13px; color: var(--text-muted);

@@ -639,16 +639,16 @@
       wurzel.innerHTML =
         '<h1 class="t-h2">' + esc(platz.name) + '</h1>' +
         '<p class="t-body mt-3">' + esc(platz.beschreibung) + '</p>' +
+        /* Adresse direkt unter die Überschrift: Wer die Seite am Handy öffnet,
+           will als Erstes wissen, wo das ist — nicht erst nach dem Foto. */
+        '<a class="freiplatz-adresse-link mt-4" href="' + mapsUrl(platz) + '" target="_blank" rel="noopener">' +
+          '<i data-lucide="map-pin" class="icon-16"></i> ' + esc(platz.adresse) + '</a>' +
         medienBlock(platz) +
         zugangBanner(platz) +
         zugangDetail(platz) +
-        '<a class="freiplatz-adresse-link mt-4" href="' + mapsUrl(platz) + '" target="_blank" rel="noopener">' +
-          '<i data-lucide="map-pin" class="icon-16"></i> ' + esc(platz.adresse) + '</a>' +
         '<div id="freiplatz-karte" class="freiplaetze-map freiplaetze-map-klein"></div>' +
         '<div class="freiplatz-checkin" id="freiplatz-checkin"></div>' +
-        maengelHinweis() +
-        '<p class="mt-5"><a class="card-link" href="/trainieren/freiplaetze.html">' +
-          '<i data-lucide="arrow-left" class="icon-14"></i> Alle Freiplätze</a></p>';
+        maengelHinweis();
 
       zeichneKarte('freiplatz-karte', [platz]);
       checkinBereich(document.getElementById('freiplatz-checkin'), platz);
@@ -656,15 +656,16 @@
     });
   }
 
-  /* Kaputter Korb, gerissenes Netz: Die Freiplätze gehören der Stadt Erfurt,
-     Reparaturen laufen über deren Mängelmelder. Der Hinweis steht bewusst auf
-     jeder Platzseite — wer vor einem defekten Korb steht, sucht dort und nicht
-     im Impressum. */
+  /* Zweiter Handlungsweg neben dem Check-in: Wer vor einem kaputten Korb steht,
+     soll ihn hier melden können. Die Plätze gehören der Stadt, deshalb führt der
+     Weg zu ihrem Mängelmelder — freundlich formuliert, nicht als Zurechtweisung. */
   function maengelHinweis() {
-    return '<p class="freiplatz-maengel">Korb verbogen, Netz gerissen, Belag kaputt? Die Freiplätze gehören ' +
-      'der Stadt Erfurt — Reparaturen laufen über den ' +
-      '<a href="https://maengelmelder.erfurt.de/" target="_blank" rel="noopener">Mängelmelder der Stadt</a>, ' +
-      'nicht über den Verein. Ein Hinweis dort hilft mehr als eine Nachricht an uns.</p>';
+    return '<div class="freiplatz-maengel">' +
+      '<p>Ist am Platz etwas kaputt — Korb, Netz oder Belag?</p>' +
+      '<a class="btn btn-ghost" href="https://maengelmelder.erfurt.de/" target="_blank" rel="noopener">' +
+        '<i data-lucide="wrench" class="icon-16"></i> Beschädigung melden</a>' +
+      '<p class="freiplatz-maengel-fuss">Die Plätze gehören der Stadt Erfurt, sie kümmert sich um Reparaturen.</p>' +
+    '</div>';
   }
 
   /* Teilen ist hier keine Werbung für eine Website, sondern eine Einladung:
