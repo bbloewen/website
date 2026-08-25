@@ -667,12 +667,53 @@
       'nicht über den Verein. Ein Hinweis dort hilft mehr als eine Nachricht an uns.</p>';
   }
 
+  /* Teilen ist hier keine Werbung für eine Website, sondern eine Einladung:
+     "Ich bin jetzt hier und zocke, kommt vorbei." Deshalb steht der Button beim
+     Check-in und nicht am Seitenende, und der Text ist in der ersten Person
+     geschrieben. Geteilt wird nur der Link — keine Punkte, kein Standort. */
+  function teilenBlock() {
+    return '<div class="freiplatz-teilen">' +
+      '<button type="button" class="btn btn-ghost" data-teilen>' +
+        '<i data-lucide="share-2" class="icon-16"></i> Kumpels Bescheid sagen</button>' +
+      '<p class="freiplatz-teilen-status" role="status" aria-live="polite"></p>' +
+    '</div>';
+  }
+
+  function teilenVerdrahten(el, platz) {
+    var knopf = el.querySelector('[data-teilen]');
+    if (!knopf) return;
+    var rueckmeldung = el.querySelector('.freiplatz-teilen-status');
+    var ziel = window.location.origin + platzUrl(platz.slug);
+    var text = 'Ich bin gerade am ' + platz.name + ' und spiele. Kommt vorbei!';
+
+    knopf.addEventListener('click', function () {
+      if (navigator.share) {
+        /* Abbruch durch den Nutzer ist kein Fehler — dann passiert einfach nichts. */
+        navigator.share({ title: platz.name, text: text, url: ziel }).catch(function () {});
+        return;
+      }
+      /* Ohne Teilen-Dialog (meist Desktop): Einladung in die Zwischenablage. */
+      var kopie = text + ' ' + ziel;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(kopie).then(function () {
+          rueckmeldung.textContent = 'Einladung kopiert — jetzt einfügen und abschicken.';
+        }).catch(function () {
+          rueckmeldung.textContent = kopie;
+        });
+      } else {
+        rueckmeldung.textContent = kopie;
+      }
+    });
+  }
+
   function checkinBereich(el, platz) {
     if (!el) return;
 
     if (!spielbar(platz)) {
       el.innerHTML = '<p class="t-body-sm">Dieser Platz gehört nicht zum Court-Hunt — er ist nicht frei zugänglich, ' +
-        'deshalb gibt es hier keine Punkte. Auf allen öffentlichen Plätzen kannst du mitspielen.</p>';
+        'deshalb gibt es hier keine Punkte. Auf allen öffentlichen Plätzen kannst du mitspielen.</p>' + teilenBlock();
+      teilenVerdrahten(el, platz);
+      icons();
       return;
     }
 
@@ -693,8 +734,9 @@
       '<p class="court-hunt-meldung" role="status" aria-live="polite">' +
         (gesperrt ? 'Gerade erst eingecheckt — dieser Platz zählt wieder in ' +
           stunden(COOLDOWN_MS - (Date.now() - letzterCheckin(stand, platz.slug))) + '.' : '') +
-      '</p>';
+      '</p>' + teilenBlock();
 
+    teilenVerdrahten(el, platz);
     var knopf = el.querySelector('[data-checkin]');
     var meldung = el.querySelector('.court-hunt-meldung');
 
