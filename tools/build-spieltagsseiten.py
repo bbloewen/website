@@ -112,6 +112,49 @@ def extract_bericht(pfad):
     return m.group(1) if m else BERICHT_PLATZHALTER
 
 
+LEER_HEADER = '<div id="site-header-placeholder"></div>'
+LEER_FOOTER = '<div id="site-footer-placeholder"></div>'
+LEER_SEO = ""
+
+
+def extract_seo_block(pfad):
+    """SEO:auto-Block (Canonical/OG/JSON-LD) unveraendert uebernehmen, aus
+    demselben Grund wie extract_platzhalter: dieses Skript baut die Seite komplett
+    neu, wuerde also sonst bei jedem Lauf zunichtemachen, was build-head-meta.py
+    zuletzt eingetragen hat. Fehlt der Block (Seite noch nie durch build-head-meta.py
+    gelaufen), bleibt er leer -- build-head-meta.py ergaenzt ihn beim naechsten Lauf."""
+    if not pfad.exists():
+        return LEER_SEO
+    text = pfad.read_text(encoding="utf-8")
+    m = re.search(
+        r"<!-- SEO:auto START \(tools/build-head-meta\.py — nicht von Hand ändern\) -->.*?<!-- SEO:auto END -->\n?",
+        text, re.S,
+    )
+    return m.group(0) if m else LEER_SEO
+
+
+def extract_platzhalter(pfad, name, leer):
+    """Header/Footer-Platzhalter unveraendert aus der bestehenden Datei uebernehmen.
+
+    Wichtig: dieses Skript baut die Seite bei jedem Lauf komplett neu zusammen
+    (die Phase kann sich geaendert haben) -- ohne diese Funktion wuerde jeder Lauf
+    die von build-partials.py eingefuegten Header/Footer wieder auf die leeren
+    Platzhalter zuruecksetzen, und build-partials.py muesste jedes Mal erneut
+    laufen, nur um das rueckgaengig zu machen (genau das ist beim allerersten
+    Zusammenspiel der beiden Skripte am 25.08.2026 passiert -- s. Reihenfolge
+    unten in main()/README). Ist die Datei noch neu oder der Block unvollstaendig,
+    bleibt der leere Platzhalter stehen, den build-partials.py beim naechsten Lauf
+    dann fuellt."""
+    if not pfad.exists():
+        return leer
+    text = pfad.read_text(encoding="utf-8")
+    m = re.search(
+        r'<div id="site-' + name + r'-placeholder">(?:<!--PARTIAL:' + name + r'-->.*?<!--/PARTIAL:' + name + r'-->)?</div>',
+        text, re.S,
+    )
+    return m.group(0) if m else leer
+
+
 PRETIX_ITEM_CATEGORY_MAP = {
     23: "Stehplatz", 24: "Kategorie I", 25: "Kategorie II",
     27: "Fanblock", 28: "Kategorie III",
@@ -362,7 +405,7 @@ def bericht_section(bericht_inhalt):
 """
 
 
-def build_page(game, phase, bericht_inhalt):
+def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html=LEER_FOOTER, seo_block=LEER_SEO):
     d = parse_dmy(game["datum"])
     gegner = html.escape(game["gegner"])
     url = f"https://basketball-loewen.com/teams-saison/spiel/{game['seiteSlug']}.html"
@@ -417,10 +460,10 @@ def build_page(game, phase, bericht_inhalt):
 <link rel="stylesheet" href="/css/seat-picker.css?v=1786362756" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
-</head>
+{seo_block}</head>
 <body data-nav-group="teams-saison" class="hide-mobile-cta">
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
-<div id="site-header-placeholder"></div>
+{header_html}
 <main id="main">
   <section class="hero-photo hero-tickets hero-half">
     <div class="container">
@@ -440,7 +483,7 @@ def build_page(game, phase, bericht_inhalt):
 
 {main_content}
 </main>
-<div id="site-footer-placeholder"></div>
+{footer_html}
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="/js/nav.js?v=1787221181"></script>
 <script src="/js/include.js?v=1785398309"></script>
@@ -464,7 +507,10 @@ def main():
         phase = phase_of(game, today)
         pfad = ZIEL_DIR / f"{game['seiteSlug']}.html"
         bericht = extract_bericht(pfad)
-        neu = build_page(game, phase, bericht)
+        header_html = extract_platzhalter(pfad, "header", LEER_HEADER)
+        footer_html = extract_platzhalter(pfad, "footer", LEER_FOOTER)
+        seo_block = extract_seo_block(pfad)
+        neu = build_page(game, phase, bericht, header_html, footer_html, seo_block)
         alt = pfad.read_text(encoding="utf-8") if pfad.exists() else None
         if neu == alt:
             unveraendert.append((game["seiteSlug"], phase))

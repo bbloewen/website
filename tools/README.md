@@ -20,12 +20,13 @@ Canonical dürfen nie auseinanderlaufen.
 | `data/freiplaetze.json` (Platz ergänzt/geändert) | `build-freiplaetze.py` |
 | Neue Insta-Archivseite unter `news/insta-archiv/` | `build-instagram-archiv.py` |
 | Neues Artikel-Hero in `assets/img/news/` | `build-share-images.py`, dann `build-head-meta.py` |
-| `data/heimspiele.json` (Spieltermine) | `build-head-meta.py` |
+| `data/heimspiele.json` (Spieltermine, neues Spiel, Vorverkauf gestartet) | `build-spieltagsseiten.py`, dann `build-head-meta.py` |
 | `data/freiplaetze.json` (Platz ergänzt, Koordinaten geändert) | `build-freiplatz-qr.py` |
 
 Alles auf einmal, in dieser Reihenfolge:
 
 ```bash
+python3 tools/build-spieltagsseiten.py && \
 python3 tools/build-partials.py && \
 python3 tools/build-instagram-archiv.py && \
 python3 tools/build-news-list.py && \
@@ -34,6 +35,15 @@ python3 tools/build-share-images.py && \
 python3 tools/build-head-meta.py && \
 python3 tools/build-sitemap.py
 ```
+
+`build-spieltagsseiten.py` zuerst, vor `build-partials.py`: es baut jede
+Spieltagsseite komplett neu zusammen (die Phase kann sich geändert haben) und
+übernimmt Header/Footer/SEO-Block dabei nur unverändert aus der bestehenden
+Datei — bei einer neuen Seite sind diese Platzhalter also noch leer, und erst
+der nachfolgende `build-partials.py`-/`build-head-meta.py`-Lauf füllt sie.
+Andersherum (wie ursprünglich in einem Zwischenstand versucht) setzt jeder
+Lauf von `build-spieltagsseiten.py` die von `build-partials.py` gerade erst
+eingefügten Header/Footer wieder auf leer zurück.
 
 `build-head-meta.py` zuletzt vor der Sitemap, weil es Titel und Description
 ausliest und `og:`-Angaben daraus ableitet.
@@ -81,6 +91,19 @@ Skript aus dem `<h1>` bzw. der Datumszeile jeder Archivseite; das Vorschaubild
 ist `assets/img/insta/<Dateiname>.jpg`, wenn vorhanden, sonst das `og:image` der
 Seite. Liest die Archivseiten nur — sie gehören weiterhin dem n8n-Workflow
 `GpAS0ONrenHrcTwS`.
+
+**`build-spieltagsseiten.py`** — erzeugt/pflegt eine Seite je Heimspiel unter
+`teams-saison/spiel/<seiteSlug>.html` (Marko, 25.08.2026: "eine Adresse für den
+ganzen Lebenszyklus" — vorher Ankündigung, danach Ergebnis+Bericht, dieselbe
+URL). Vier Phasen (angekündigt/vorverkauf/spieltag/danach) werden aus `datum`
+und `ticketUrl` hergeleitet, nicht von Hand gepflegt. `seiteSlug` wird pro Spiel
+nur einmalig erzeugt (Gegnername ohne Sponsorenpräfix + Datum) und danach nie
+mehr angetastet, auch wenn sich die Schreibweise des Gegners ändert. Der
+redaktionelle Bericht (`<!--BERICHT:auto-->`-Block) wird bei jedem Lauf aus der
+bestehenden Datei ausgelesen und unverändert wieder eingesetzt — das Skript
+überschreibt ihn nie. Der Ticketkauf (Saalplan/Kategorien/Kasse) ist direkt
+eingebettet, dieselbe Komponente, die vorher in der nie verlinkten
+`tickets/einzelticket.html` lief (gelöscht).
 
 **`fix-insta-archiv-legacy.py`** — zieht Insta-Archivseiten nach, die aus dem
 Behold-Feed gefallen sind. Der n8n-Workflow kennt nur die letzten 20 Posts je

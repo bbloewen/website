@@ -1,0 +1,67 @@
+# Baut die Spieltagsseiten nach, wenn sich data/heimspiele.json aendert -- und
+# taeglich, weil die Phase (angekuendigt/vorverkauf/spieltag/danach) einer Seite
+# allein vom aktuellen Datum abhaengt, nicht nur von der JSON. Ohne den
+# taeglichen Lauf wuerde eine Seite z. B. am Spieltag selbst weiter die
+# Vorverkaufs-Ansicht zeigen, bis irgendwann jemand von Hand baut.
+#
+# Anlass (25.08.2026, Marko): "Jedes Heimspiel bekommt eine Adresse -- und
+# behaelt sie sein ganzes Leben." s. tools/build-spieltagsseiten.py fuer Details.
+
+name: Spieltagsseiten nachbauen
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - data/heimspiele.json
+  schedule:
+    - cron: '20 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: spieltagsseiten-nachbauen
+  cancel-in-progress: false
+
+jobs:
+  nachbauen:
+    # Ohne diese Grenze wuerde der eigene Commit den Lauf erneut ausloesen.
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # build-sitemap.py liest lastmod aus der Commit-Historie.
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Reihenfolge ist hier bindend, s. tools/README.md: build-spieltagsseiten.py
+      # baut jede Seite komplett neu und uebernimmt Header/Footer/SEO-Block nur
+      # unveraendert aus der bestehenden Datei -- andersherum wuerde jeder Lauf
+      # die von build-partials.py gerade eingefuegten Header/Footer wieder leeren.
+      - name: Spieltagsseiten, Partials, Head-Meta und Sitemap neu bauen
+        run: |
+          python3 tools/build-spieltagsseiten.py
+          python3 tools/build-partials.py
+          python3 tools/build-head-meta.py
+          python3 tools/build-sitemap.py
+
+      - name: Aenderungen committen
+        run: |
+          if git diff --quiet && git status --porcelain teams-saison/spiel/ | grep -q .; then
+            :
+          elif git diff --quiet; then
+            echo "Nichts nachzuziehen."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add teams-saison/spiel/ data/heimspiele.json teams-saison/spielplan.html tickets.html sitemap.xml
+          git diff --cached --quiet && { echo "Nichts nachzuziehen."; exit 0; }
+          git commit -m "Spieltagsseiten: Phase/Sitemap nachgezogen"
+          git push
