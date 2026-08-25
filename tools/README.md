@@ -165,3 +165,25 @@ geändert werden.
 
 Neue Platzseiten müssen zusätzlich von Hand in `data/search-index.json`
 eingetragen werden — die Datei wird nicht generiert.
+
+**Achtung Cache:** Die Verweise auf `js/` und `css/` tragen einen
+Versionsparameter (`?v=1787678640`). Der wird von **keinem** Skript gestempelt.
+Wer eine JavaScript- oder CSS-Datei ändert, muss ihn in allen Seiten, die sie
+einbinden, mit hochziehen — sonst liefern Browser- und CDN-Cache weiter die alte
+Datei, und die Änderung wirkt lokal, aber nicht live. Genau das ist am
+25.08.2026 passiert: Die neuen Platzseiten zeigten live weder Karte noch
+Check-in, weil `?v=` unverändert blieb, während lokal alles stimmte.
+
+Hochziehen lässt sich der Parameter mit einem Einzeiler pro geänderter Datei —
+Muster und Dateiname anpassen:
+
+    python3 -c "
+    import re, subprocess
+    from pathlib import Path
+    datei, muster = 'js/freiplaetze.js', r'(freiplaetze\.js\?v=)\d+'
+    neu = str(int(Path(datei).stat().st_mtime))
+    for f in subprocess.run(['git','ls-files','*.html'],capture_output=True,text=True).stdout.split():
+        p = Path(f); t = p.read_text(encoding='utf-8')
+        t2 = re.sub(muster, lambda m: m.group(1) + neu, t)
+        if t2 != t: p.write_text(t2, encoding='utf-8')
+    "
