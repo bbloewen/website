@@ -18,6 +18,7 @@ Canonical dürfen nie auseinanderlaufen.
 | `<title>` oder `<meta name="description">` einer Seite | `build-head-meta.py` |
 | `data/news.json` (Artikel ergänzt/geändert) | `build-news-list.py` |
 | `data/freiplaetze.json` (Platz ergänzt/geändert) | `build-freiplaetze.py` |
+| Neue Insta-Archivseite unter `news/insta-archiv/` | `build-instagram-archiv.py` |
 | Neues Artikel-Hero in `assets/img/news/` | `build-share-images.py`, dann `build-head-meta.py` |
 | `data/heimspiele.json` (Spieltermine) | `build-head-meta.py` |
 | `data/freiplaetze.json` (Platz ergänzt, Koordinaten geändert) | `build-freiplatz-qr.py` |
@@ -26,6 +27,7 @@ Alles auf einmal, in dieser Reihenfolge:
 
 ```bash
 python3 tools/build-partials.py && \
+python3 tools/build-instagram-archiv.py && \
 python3 tools/build-news-list.py && \
 python3 tools/build-freiplaetze.py && \
 python3 tools/build-share-images.py && \
@@ -69,6 +71,16 @@ und den Court-Hunt-Code für den Aufkleber am Platz
 Mit `--aufkleber` kommt die A6-Druckvorlage dazu, mit `--event <slug>
 --event-name "..."` ein A3-Schild für den mobilen Korb bei Straßenfesten.
 Plätze mit eingeschränktem Zugang bekommen bewusst keinen Spiel-Code.
+
+**`build-instagram-archiv.py`** — schreibt die Übersichtsliste statisch in
+`news/instagram-archiv.html`. Quelle ist der Ordner `news/insta-archiv/` selbst,
+nicht `data/instagram-loewen.json`/`data/instagram-loewenpark.json` — die
+Feed-Dateien kennen nur die aktuellen Behold-Posts, während auf der Platte auch
+längst aus dem Feed gefallene Archivseiten liegen. Titel und Datum liest das
+Skript aus dem `<h1>` bzw. der Datumszeile jeder Archivseite; das Vorschaubild
+ist `assets/img/insta/<Dateiname>.jpg`, wenn vorhanden, sonst das `og:image` der
+Seite. Liest die Archivseiten nur — sie gehören weiterhin dem n8n-Workflow
+`GpAS0ONrenHrcTwS`.
 
 **`fix-insta-archiv-legacy.py`** — zieht Insta-Archivseiten nach, die aus dem
 Behold-Feed gefallen sind. Der n8n-Workflow kennt nur die letzten 20 Posts je
