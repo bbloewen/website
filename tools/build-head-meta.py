@@ -86,6 +86,12 @@ RIETHSPORTHALLE = {
     },
 }
 
+# Kein "sport"-Feld: schema.org definiert sport nur auf SportsOrganization,
+# SportsEvent und SportsTeam, nicht auf Place-Typen wie SportsActivityLocation.
+# Der Ahrefs-Crawl vom 25.08.2026 hat es als "Unexpected property" gemeldet --
+# sechsmal auf der Freiplatz-Seite, je einmal auf den beiden LOEWENPARK-Seiten.
+# Die Sportart steht ohnehin im Namen, in der Beschreibung und im Namen der
+# ItemList.
 LOEWENPARK = {
     "@type": "SportsActivityLocation",
     "name": "LÖWENPARK",
@@ -97,7 +103,6 @@ LOEWENPARK = {
         "addressRegion": "Thüringen",
         "addressCountry": "DE",
     },
-    "sport": "Basketball",
 }
 
 # Erstes Pfadsegment -> Breadcrumb-Bezeichnung (Formulierung aus partials/header.html)
@@ -263,7 +268,6 @@ def freiplaetze():
             "@type": "SportsActivityLocation",
             "name": f["name"],
             "description": f.get("beschreibung", ""),
-            "sport": "Basketball",
             "isAccessibleForFree": f.get("zugang") != "eingeschraenkt",
             "address": {
                 "@type": "PostalAddress",
