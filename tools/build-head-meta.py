@@ -250,6 +250,54 @@ def spielplan_itemlist():
     }]
 
 
+def platz_daten():
+    return json.loads((REPO / "data" / "freiplaetze.json").read_text(encoding="utf-8")).get("freiplaetze", [])
+
+
+def platz_knoten(f, mit_seite=False):
+    """Ein Freiplatz als SportsActivityLocation.
+
+    Kein "sport"-Feld -- siehe Kommentar an LOEWENPARK. mit_seite=True setzt
+    zusaetzlich url und mainEntityOfPage: Auf der eigenen Platzseite ist der Ort
+    das Thema der Seite, in der ItemList der Uebersicht nur ein Listeneintrag.
+    """
+    strasse = f["adresse"].split(",")[0].strip()
+    plz = re.search(r"\b(\d{5})\b", f["adresse"])
+    ort = {
+        "@type": "SportsActivityLocation",
+        "name": f["name"],
+        "description": f.get("beschreibung", ""),
+        "isAccessibleForFree": f.get("zugang") != "eingeschraenkt",
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": strasse,
+            "addressLocality": "Erfurt",
+            "addressRegion": "Thüringen",
+            "addressCountry": "DE",
+        },
+        "geo": {"@type": "GeoCoordinates",
+                "latitude": f["lat"], "longitude": f["lng"]},
+    }
+    if plz:
+        ort["address"]["postalCode"] = plz.group(1)
+    if mit_seite:
+        seite = f"{BASE}trainieren/freiplatz/{f['slug']}.html"
+        ort["url"] = seite
+        ort["mainEntityOfPage"] = {"@type": "WebPage", "@id": seite}
+        if f.get("foto"):
+            ort["image"] = BASE.rstrip("/") + f["foto"]
+    return ort
+
+
+def freiplatz_seite(rel):
+    """SportsActivityLocation der einen Platzseite, anhand des Dateinamens."""
+    slug = rel.rsplit("/", 1)[-1][: -len(".html")]
+    for f in platz_daten():
+        if f.get("slug") == slug:
+            return [platz_knoten(f, mit_seite=True)]
+    return []
+
+
 def freiplaetze():
     """Die oeffentlichen Basketball-Freiplaetze als ItemList.
 
@@ -258,29 +306,15 @@ def freiplaetze():
     Sportanlagen versteht. Ohne diesen Block bleibt die Seite fuer Google eine
     Textseite ueber Basketball; mit ihm ist sie ein Verzeichnis von sechs Orten
     in Erfurt, an denen man Basketball spielen kann.
+
+    Die Listeneintraege verweisen ueber url auf die eigene Seite des Platzes --
+    so haengt die Uebersicht auch in den strukturierten Daten an den sechs
+    Einzelseiten, nicht nur ueber die Links im Text.
     """
-    daten = json.loads((REPO / "data" / "freiplaetze.json").read_text(encoding="utf-8"))
     orte = []
-    for i, f in enumerate(daten.get("freiplaetze", []), start=1):
-        strasse = f["adresse"].split(",")[0].strip()
-        plz = re.search(r"\b(\d{5})\b", f["adresse"])
-        ort = {
-            "@type": "SportsActivityLocation",
-            "name": f["name"],
-            "description": f.get("beschreibung", ""),
-            "isAccessibleForFree": f.get("zugang") != "eingeschraenkt",
-            "address": {
-                "@type": "PostalAddress",
-                "streetAddress": strasse,
-                "addressLocality": "Erfurt",
-                "addressRegion": "Thüringen",
-                "addressCountry": "DE",
-            },
-            "geo": {"@type": "GeoCoordinates",
-                    "latitude": f["lat"], "longitude": f["lng"]},
-        }
-        if plz:
-            ort["address"]["postalCode"] = plz.group(1)
+    for i, f in enumerate(platz_daten(), start=1):
+        ort = platz_knoten(f)
+        ort["url"] = f"{BASE}trainieren/freiplatz/{f['slug']}.html"
         orte.append({"@type": "ListItem", "position": i, "item": ort})
     if not orte:
         return []
@@ -379,6 +413,9 @@ def nodes_for(rel, text, page_title, social_title, description, image):
 
     if rel == "trainieren/freiplaetze.html":
         nodes.extend(freiplaetze())
+
+    if rel.startswith("trainieren/freiplatz/"):
+        nodes.extend(freiplatz_seite(rel))
 
     if rel == "trainieren/court-hunt.html":
         nodes.extend(faq(text))

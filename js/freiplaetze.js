@@ -840,9 +840,17 @@
 
   function initPlatzseite() {
     nachtragen();
-    var slug = new URLSearchParams(window.location.search).get('platz');
+    /* Zwei Betriebsarten. Auf einer statisch gebauten Platzseite steht der
+       Inhalt schon im HTML (tools/build-freiplatz-seiten.py) und der Slug im
+       data-Attribut; dort werden nur Karte und Check-in nachgerüstet, denn beide
+       brauchen ohnehin JavaScript. Die Hülle freiplatz.html liest weiter
+       ?platz= und schreibt alles selbst — sie bedient die Event-Spots. */
+    var statisch = document.querySelector('[data-platz-slug]');
     var wurzel = document.getElementById('freiplatz-detail');
-    if (!wurzel) return;
+    if (!statisch && !wurzel) return;
+    var slug = statisch
+      ? statisch.getAttribute('data-platz-slug')
+      : new URLSearchParams(window.location.search).get('platz');
 
     Promise.all([ladeDaten(), ladeSpots()]).then(function (beides) {
       var data = beides[0];
@@ -852,6 +860,22 @@
          Inhalt — zurück zur Übersicht statt einer leeren Seite. */
       if (!platz) {
         window.location.replace('/trainieren/freiplaetze.html');
+        return;
+      }
+
+      if (statisch) {
+        zeichneKarte('freiplatz-karte', [platz]);
+        checkinBereich(document.getElementById('freiplatz-checkin'), platz);
+        icons();
+        return;
+      }
+
+      /* Hülle mit ?platz= auf einen festen Platz: Der gehört seit dem 25.08.2026
+         auf seine eigene Adresse. Weiterleiten statt denselben Inhalt an zwei
+         Stellen zu zeigen — und damit bleiben schon gedruckte QR-Codes mit dem
+         alten Ziel gültig. */
+      if (platz.typ !== 'event') {
+        window.location.replace(platzUrl(platz.slug));
         return;
       }
 

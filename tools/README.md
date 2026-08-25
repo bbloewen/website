@@ -17,7 +17,7 @@ Canonical dürfen nie auseinanderlaufen.
 | `partials/header.html` oder `footer.html` | `build-partials.py` |
 | `<title>` oder `<meta name="description">` einer Seite | `build-head-meta.py` |
 | `data/news.json` (Artikel ergänzt/geändert) | `build-news-list.py` |
-| `data/freiplaetze.json` (Platz ergänzt/geändert) | `build-freiplaetze.py` |
+| `data/freiplaetze.json` (Platz ergänzt/geändert) | `build-freiplatz-seiten.py`, `build-freiplaetze.py` |
 | Neue Insta-Archivseite unter `news/insta-archiv/` | `build-instagram-archiv.py` |
 | Neues Artikel-Hero in `assets/img/news/` | `build-share-images.py`, dann `build-head-meta.py` |
 | `data/heimspiele.json` (Spieltermine, neues Spiel, Vorverkauf gestartet) | `build-spieltagsseiten.py`, `build-spielplan-liste.py`, dann `build-head-meta.py` |
@@ -31,6 +31,7 @@ python3 tools/build-partials.py && \
 python3 tools/build-instagram-archiv.py && \
 python3 tools/build-news-list.py && \
 python3 tools/build-spielplan-liste.py && \
+python3 tools/build-freiplatz-seiten.py && \
 python3 tools/build-freiplaetze.py && \
 python3 tools/build-share-images.py && \
 python3 tools/build-head-meta.py && \
@@ -141,3 +142,26 @@ wert.
 Die Markup-Struktur spiegelt `gameRowHTML()` aus `js/spielplan.js` und die
 `.ticket-row` aus dem Inline-Skript in `tickets.html`. Ändert sich eine der
 beiden, muss sie hier mitgezogen werden.
+
+**`build-freiplatz-seiten.py`** — erzeugt je Freiplatz eine eigene, indexierbare
+Seite unter `trainieren/freiplatz/<slug>.html`. Vorher teilten sich alle sechs
+Plätze die Adresse `trainieren/freiplatz.html?platz=<slug>`; die steht auf
+`noindex`, weil eine Seite, deren ganzer Inhalt am Query-Parameter hängt, keine
+sinnvolle einzelne Fassung für den Index hat. Folge war, dass kein einzelner
+Platz auffindbar war.
+
+Statisch stehen Überschrift, Beschreibung, Adresse, Foto und Zugangshinweis.
+Karte und Check-in kommen weiter per JavaScript — `initPlatzseite()` in
+`js/freiplaetze.js` erkennt eine statische Seite am Attribut `data-platz-slug`
+und hängt beides in die vorhandenen Container, ohne den Inhalt zu überschreiben.
+
+Die Hülle bleibt für die **Event-Spots** am mobilen Korb, die nur einen Tag
+gelten. Ruft jemand sie mit dem Slug eines festen Platzes auf, leitet sie auf
+dessen Seite weiter — damit bleiben schon gedruckte QR-Codes mit dem alten Ziel
+gültig. `platzUrl()` in `js/freiplaetze.js`, `platz_url()` in
+`build-freiplaetze.py` und `qr_saetze()` in `build-freiplatz-qr.py`
+unterscheiden die beiden Fälle am Präfix `event-`; alle drei müssen zusammen
+geändert werden.
+
+Neue Platzseiten müssen zusätzlich von Hand in `data/search-index.json`
+eingetragen werden — die Datei wird nicht generiert.

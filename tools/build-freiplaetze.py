@@ -73,7 +73,15 @@ def maps_url(f):
 
 
 def platz_url(slug):
-    return "/trainieren/freiplatz.html?platz=" + slug
+    """Spiegelt platzUrl() in js/freiplaetze.js.
+
+    Feste Plaetze haben seit dem 25.08.2026 eine eigene, indexierbare Seite;
+    Event-Spots am mobilen Korb gelten nur einen Tag und bleiben auf der
+    parametergesteuerten Huelle. Merkmal ist der Praefix 'event-'.
+    """
+    if slug.startswith("event-"):
+        return "/trainieren/freiplatz.html?platz=" + slug
+    return f"/trainieren/freiplatz/{slug}.html"
 
 
 def mit_links(text, links):

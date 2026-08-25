@@ -9,7 +9,8 @@ Es gibt zwei QR-Sätze, und sie dürfen nicht verwechselt werden:
                    den Weg aufs Handy holen wollen.
 
   hunt             assets/img/freiplaetze/hunt/qr-<slug>.svg
-                   zeigt auf die Platzseite (?platz=<slug>) und klebt am Platz
+                   zeigt auf die eigene Seite des Platzes
+                   (/trainieren/freiplatz/<slug>.html) und klebt am Platz
                    selbst. Das ist der Einstieg ins Spiel: scannen, einchecken,
                    Punkte sammeln.
 
@@ -87,7 +88,12 @@ def qr_saetze(check):
     for f in plaetze():
         slug = f["slug"]
         weg = f"https://www.google.com/maps/search/?api=1&query={f['lat']},{f['lng']}"
-        hunt = f"{BASIS}/trainieren/freiplatz.html?platz={slug}"
+        # Seit dem 25.08.2026 hat jeder feste Platz eine eigene Adresse. Der
+        # QR-Code zeigt direkt dorthin statt auf die parametergesteuerte
+        # Huelle -- ein Sprung weniger und die kanonische Adresse. Bereits
+        # gedruckte Aufkleber mit dem alten Ziel bleiben gueltig: die Huelle
+        # leitet feste Plaetze auf ihre Seite weiter (js/freiplaetze.js).
+        hunt = f"{BASIS}/trainieren/freiplatz/{slug}.html"
         zaehler[schreibe(QR_WEG / f"qr-{slug}.svg", qr_svg(weg), check)] += 1
         # Plätze mit eingeschränktem Zugang gehören nicht zum Spiel — für sie
         # gibt es folgerichtig auch keinen Aufkleber.

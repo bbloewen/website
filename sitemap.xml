@@ -371,6 +371,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://basketball-loewen.com/tickets/familienpass.html</loc>
+    <lastmod>2026-08-25</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://basketball-loewen.com/trainieren/baskidball.html</loc>
     <lastmod>2026-08-25</lastmod>
     <priority>0.7</priority>
@@ -387,6 +392,36 @@
   </url>
   <url>
     <loc>https://basketball-loewen.com/trainieren/freiplaetze.html</loc>
+    <lastmod>2026-08-25</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://basketball-loewen.com/trainieren/freiplatz/loewenpark.html</loc>
+    <lastmod>2026-08-25</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://basketball-loewen.com/trainieren/freiplatz/neuer-ringelberg.html</loc>
+    <lastmod>2026-08-25</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://basketball-loewen.com/trainieren/freiplatz/nordpark.html</loc>
+    <lastmod>2026-08-25</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://basketball-loewen.com/trainieren/freiplatz/riethsporthalle.html</loc>
+    <lastmod>2026-08-25</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://basketball-loewen.com/trainieren/freiplatz/ringelberg-radweg.html</loc>
+    <lastmod>2026-08-25</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://basketball-loewen.com/trainieren/freiplatz/thomaspark.html</loc>
     <lastmod>2026-08-25</lastmod>
     <priority>0.7</priority>
   </url>
