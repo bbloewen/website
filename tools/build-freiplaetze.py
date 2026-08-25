@@ -16,6 +16,13 @@ Laden weiterhin selbst und ueberschreibt den statischen Stand. Die statische
 Fassung ist nur fuer Crawler ohne JavaScript da und kann deshalb nicht falsch
 werden, nur aelter.
 
+Seit 25.08.2026 schreibt das Skript zusaetzlich die Court-Hunt-Spots (mobiler
+Korb bei Strassenfesten) in denselben Seiten-Abschnitt. Quelle dafuer ist
+data/community-events.json, die der n8n-Workflow "Website: Community-Events
+abrufen" taeglich schreibt -- vergangene Spots bleiben dort erhalten, in die
+Seite kommen aber nur laufende und kommende. Weil die Datei taeglich neu
+committet wird, baut die GitHub-Action den statischen Stand taeglich mit.
+
 Bewusster Unterschied zur JS-Fassung: **ohne Medienblock**. Die Kacheln binden
 Karten-iframes ein; statisch vorgerendert wuerden drei Google-Maps-iframes beim
 ersten Aufbau laden, nur um Sekundenbruchteile spaeter vom JavaScript ersetzt zu
@@ -31,11 +38,17 @@ import html
 import json
 import re
 import sys
+from datetime import datetime
 
 from seo_common import REPO
 
 ZIEL = REPO / "trainieren" / "freiplaetze.html"
 QUELLE = REPO / "data" / "freiplaetze.json"
+EVENTS = REPO / "data" / "community-events.json"
+
+# Wochentage von Hand statt ueber locale: Auf dem GitHub-Runner ist de_DE nicht
+# installiert, strftime("%A") lieferte dort englische Namen.
+WOCHENTAGE = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
 
 # Zwei Container, zwei Bloecke: offene Plaetze und solche mit eingeschraenktem
 # Zugang. Die Trennung stammt aus dem JavaScript (spielbar()) und wird hier
@@ -102,6 +115,89 @@ def kachel(f):
     return "".join(teile)
 
 
+def spots_lesen(jetzt):
+    """Laufende und kommende Court-Hunt-Spots aus den Community-Events.
+
+    Vergangene bleiben in der Datei stehen (Archiv, s. n8n-Workflow) und ueber
+    ihre eigene Seite erreichbar -- in der Uebersicht haben sie nichts verloren.
+    """
+    if not EVENTS.exists():
+        return []
+    events = json.loads(EVENTS.read_text(encoding="utf-8")).get("events", [])
+    spots = []
+    for e in events:
+        if not (e.get("courtHunt") and e.get("spotSlug") and e.get("spotVon") and e.get("spotBis")):
+            continue
+        if not isinstance(e.get("lat"), (int, float)) or not isinstance(e.get("lng"), (int, float)):
+            continue
+        try:
+            von, bis = datetime.fromisoformat(e["spotVon"]), datetime.fromisoformat(e["spotBis"])
+        except ValueError:
+            continue
+        if bis < jetzt:
+            continue
+        spots.append({
+            "slug": e["spotSlug"], "name": e.get("name", "Court-Hunt-Spot"),
+            "adresse": re.sub(r",\s*(Deutschland|Germany)$", "", e.get("location", "")),
+            "lat": e["lat"], "lng": e["lng"],
+            "von": von, "bis": bis, "laeuft": von <= jetzt <= bis,
+        })
+    spots.sort(key=lambda sp: sp["von"])
+    return spots
+
+
+def spot_zeit_text(sp):
+    """Wie spotZeitText() im JavaScript: "Samstag, 12.09., 06:00 bis 22:00 Uhr"."""
+    von, bis = sp["von"], sp["bis"]
+    return (f"{WOCHENTAGE[von.weekday()]}, {von:%d.%m.}, {von:%H:%M} bis {bis:%H:%M} Uhr")
+
+
+def spot_kachel(sp):
+    e = html.escape
+    teile = [
+        '<div class="card hoverable camp-slider-card">',
+        '<div class="card-media tint-violet" style="height:140px">'
+        '<i data-lucide="calendar-clock" class="icon-32"></i></div>',
+        '<div class="card-body">',
+        f'<span class="card-label">{"Heute aktiv" if sp["laeuft"] else "Court-Hunt-Spot"}</span>',
+        f'<h3>{e(sp["name"])}</h3>',
+        '<p class="freiplatz-spot-zeit"><i data-lucide="calendar-clock" class="icon-16"></i> '
+        + e(spot_zeit_text(sp)) + "</p>",
+    ]
+    if sp["adresse"]:
+        teile.append(
+            f'<a class="freiplatz-adresse-link" href="{maps_url(sp)}" target="_blank" rel="noopener">'
+            f'<i data-lucide="map-pin" class="icon-16"></i> {e(sp["adresse"])}</a>'
+        )
+    teile.append(
+        f'<a class="card-link" href="{platz_url(sp["slug"])}">'
+        + ("Spot öffnen und einchecken" if sp["laeuft"] else "Spot ansehen")
+        + ' <i data-lucide="arrow-right" class="icon-14"></i></a>'
+    )
+    teile.append("</div></div>")
+    return "".join(teile)
+
+
+def spots_schreiben(seite, spots):
+    """Spot-Kacheln in den Slider schreiben und den Abschnitt auf-/zuklappen.
+
+    Ohne Spots bleibt der Abschnitt versteckt -- eine leere Ueberschrift
+    "Spots an Veranstaltungstagen" waere schlechter als gar keine.
+    """
+    karten = "\n".join("          " + spot_kachel(sp) for sp in spots)
+    inhalt = (f"<!--COURTHUNT:spots-->\n{karten}\n        <!--/COURTHUNT:spots-->"
+              if spots else "<!--COURTHUNT:spots--><!--/COURTHUNT:spots-->")
+    seite = re.sub(
+        r"<!--COURTHUNT:spots-->.*?<!--/COURTHUNT:spots-->", lambda _: inhalt, seite,
+        count=1, flags=re.S,
+    )
+    return re.sub(
+        r'<section class="section" id="court-hunt-spots"( hidden)?>',
+        '<section class="section" id="court-hunt-spots"' + ("" if spots else " hidden") + ">",
+        seite, count=1,
+    )
+
+
 def block(name, plaetze):
     start, ende = f"<!--FREIPLAETZE:{name}-->", f"<!--/FREIPLAETZE:{name}-->"
     karten = "\n".join("        " + kachel(f) for f in plaetze)
@@ -136,20 +232,24 @@ def main():
             print(f"  ACHTUNG Container {CONTAINER[name]} nicht gefunden", file=sys.stderr)
             return 1
 
+    spots = spots_lesen(datetime.now())
+    neu = spots_schreiben(neu, spots)
+
     fehlend = [f["name"] for f in plaetze if html.escape(f["name"]) not in neu]
     if fehlend:
         print(f"  ACHTUNG {len(fehlend)} Plätze fehlen im Ergebnis: {fehlend}", file=sys.stderr)
         return 1
 
     if neu == alt:
-        print(f"  unverändert, {len(plaetze)} Plätze verlinkt")
+        print(f"  unverändert, {len(plaetze)} Plätze + {len(spots)} Spots verlinkt")
         return 0
     if args.check:
-        print(f"  zu bauen: {len(plaetze)} Plätze")
+        print(f"  zu bauen: {len(plaetze)} Plätze + {len(spots)} Spots")
         return 1
 
     ZIEL.write_text(neu, encoding="utf-8")
-    print(f"  geschrieben: {len(gruppen['offen'])} offene + {len(gruppen['weitere'])} eingeschränkte Plätze")
+    print(f"  geschrieben: {len(gruppen['offen'])} offene + {len(gruppen['weitere'])} eingeschränkte Plätze"
+          f", {len(spots)} Court-Hunt-Spots")
     return 0
 
 

@@ -7,6 +7,13 @@
 # Sitemap blieben aber auf dem alten Stand, bis jemand die Build-Skripte von Hand
 # laufen laesst. Genau das erledigt dieser Lauf.
 #
+# Seit 25.08.2026 haengen auch die Court-Hunt-Spots (mobiler Korb bei
+# Strassenfesten) mit drin: Sie stehen in data/community-events.json, die der
+# n8n-Workflow "Website: Community-Events abrufen" taeglich committet. Dazu ein
+# taeglicher Lauf am fruehen Morgen -- ohne ihn bliebe ein Spot, der gestern
+# abend abgelaufen ist, bis zum naechsten Notion-Sync um 16 Uhr statisch stehen
+# (im Browser blendet ihn das JavaScript sofort aus, ein Crawler saehe ihn noch).
+#
 # Die QR-Codes bleiben bewusst aussen vor: sie entstehen separat.
 
 name: Freiplaetze nachbauen
@@ -16,6 +23,9 @@ on:
     branches: [main]
     paths:
       - data/freiplaetze.json
+      - data/community-events.json
+  schedule:
+    - cron: '15 4 * * *'
   workflow_dispatch:
 
 permissions:

@@ -69,7 +69,8 @@
           return {
             slug: e.spotSlug,
             name: e.name,
-            adresse: e.location || '',
+            /* Das Land steht in jeder Notion-Adresse und traegt nichts bei. */
+            adresse: (e.location || '').replace(/,\s*(Deutschland|Germany)$/, ''),
             lat: e.lat,
             lng: e.lng,
             beschreibung: e.description || 'Mobiler Korb der Löwen — nur an diesem Tag, dafür 50 Punkte.',
@@ -412,6 +413,55 @@
           ' <i data-lucide="arrow-right" class="icon-14"></i></a>' +
       '</div>' +
     '</div>';
+  }
+
+  /* Kachel eines Event-Spots. Bewusst nicht kachel(): Ein Spot hat kein Foto und
+     keinen Zugangshinweis, dafuer ein Zeitfenster — und genau das ist die
+     Information, wegen der jemand die Kachel ueberhaupt liest. */
+  function spotKachel(sp) {
+    var laeuft = spotOffen(sp);
+    return '<div class="card hoverable camp-slider-card">' +
+      '<div class="card-media tint-violet" style="height:140px"><i data-lucide="calendar-clock" class="icon-32"></i></div>' +
+      '<div class="card-body">' +
+        '<span class="card-label">' + (laeuft ? 'Heute aktiv' : 'Court-Hunt-Spot') + '</span>' +
+        '<h3>' + esc(sp.name) + '</h3>' +
+        '<p class="freiplatz-spot-zeit"><i data-lucide="calendar-clock" class="icon-16"></i> ' +
+          esc(spotZeitText(sp)) + '</p>' +
+        (sp.adresse
+          ? '<a class="freiplatz-adresse-link" href="' + mapsUrl(sp) + '" target="_blank" rel="noopener">' +
+            '<i data-lucide="map-pin" class="icon-16"></i> ' + esc(sp.adresse) + '</a>'
+          : '') +
+        '<a class="card-link" href="' + platzUrl(sp.slug) + '">' +
+          (laeuft ? 'Spot öffnen und einchecken' : 'Spot ansehen') +
+          ' <i data-lucide="arrow-right" class="icon-14"></i></a>' +
+      '</div>' +
+    '</div>';
+  }
+
+  /* Die Liste zeigt nur, was noch kommt oder gerade laeuft. Vergangene Spots
+     bleiben in den Daten und ueber ihre eigene Seite erreichbar (gedruckte
+     A3-Schilder und geteilte Links sollen nicht ins Leere zeigen) — in der
+     Uebersicht haetten sie aber nur die Wirkung, verpasste Gelegenheiten
+     aufzuzaehlen. */
+  function spotListe(sektion, spots) {
+    if (!sektion) return;
+    var kommend = spots.filter(function (sp) { return !spotVorbei(sp); })
+      .sort(function (a, b) { return new Date(a.von) - new Date(b.von); });
+    if (!kommend.length) {
+      sektion.hidden = true;
+      return;
+    }
+
+    var wrap = sektion.querySelector('.camp-gallery-wrap');
+    var track = wrap && wrap.querySelector('.news-slider-track');
+    if (!track) return;
+    track.innerHTML = kommend.map(spotKachel).join('');
+    sektion.hidden = false;
+
+    var vor = wrap.querySelector('[data-gallery-prev]');
+    var zurueck = wrap.querySelector('[data-gallery-next]');
+    if (vor) vor.addEventListener('click', function () { track.scrollBy({ left: -400, behavior: 'smooth' }); });
+    if (zurueck) zurueck.addEventListener('click', function () { track.scrollBy({ left: 400, behavior: 'smooth' }); });
   }
 
   function zeichneKarte(elementId, plaetze) {
@@ -758,6 +808,7 @@
         zeichneKarte('freiplaetze-map', plaetze.concat(kommend));
         var legende = document.getElementById('freiplaetze-legende-event');
         if (legende) legende.hidden = kommend.length === 0;
+        spotListe(document.getElementById('court-hunt-spots'), spots);
         icons();
       });
 
