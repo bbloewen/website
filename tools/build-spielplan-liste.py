@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Schreibt die 14 Heimspiele statisch in teams-saison/spielplan.html.
+"""Schreibt die 14 Heimspiele statisch in Spielplan und Ticket-Uebersicht.
 
 Anlass: Der Ahrefs-Crawl vom 25.08.2026 hat alle 14 Spieltagsseiten als
 "Orphan page" gemeldet -- ohne einen einzigen eingehenden internen Link. Die
@@ -26,6 +26,13 @@ statische Stand nicht fuer den Moment vor dem Laden kaputt aussieht. Aendert
 sich dort die Struktur, muss sie hier mitgezogen werden -- deshalb bleibt der
 Block hier absichtlich schlank.
 
+Dasselbe Muster steckt in tickets.html: Auch dort entsteht die Terminliste erst
+im Browser, in einem Inline-Skript, das #heimspiele-liste fuellt. Und dort ist es
+noch enger -- der Tickets-Knopf ist bei 13 von 14 Spielen `disabled`, weil der
+Einzelticketverkauf noch nicht live ist. Selbst im Browser fuehrte also nur ein
+einziges Spiel auf seine Seite. Beide Seiten werden deshalb aus derselben
+Datenquelle bedient.
+
 Aufruf:
   python3 tools/build-spielplan-liste.py
   python3 tools/build-spielplan-liste.py --check    # schreibt nichts
@@ -33,27 +40,22 @@ Aufruf:
 
 import argparse
 import json
-import re
 import sys
 from datetime import date
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-SEITE = REPO / "teams-saison" / "spielplan.html"
 DATEN = REPO / "data" / "heimspiele.json"
-
-START = "<!--SPIELPLAN:heimspiele-->"
-ENDE = "<!--/SPIELPLAN:heimspiele-->"
-BLOCK_RE = re.compile(re.escape(START) + r".*?" + re.escape(ENDE), re.S)
-
-# Container, in den js/spielplan.js seine Liste schreibt.
-CONTAINER = '<div id="spielplan-tage"></div>'
 
 WOCHENTAGE = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"]
 
 # Gleiche Adresse wie RIETHSPORTHALLE_MAPS_URL in js/spielplan.js.
-MAPS = ("https://www.google.com/maps/search/?api=1&amp;query="
-        "Essener+Stra%C3%9Fe+20%2C+99089+Erfurt")
+MAPS_SPIELPLAN = ("https://www.google.com/maps/search/?api=1&amp;query="
+                  "Essener+Stra%C3%9Fe+20%2C+99089+Erfurt")
+# tickets.html nutzt eine eigene, ausfuehrlichere Suchadresse -- uebernommen,
+# damit der statische Stand nicht von der JS-Fassung abweicht.
+MAPS_TICKETS = ("https://www.google.com/maps/search/?api=1&amp;query="
+                "Riethsporthalle+Erfurt+Essener+Stra%C3%9Fe+20+99089+Erfurt")
 
 
 def esc(text):
@@ -61,31 +63,49 @@ def esc(text):
             .replace(">", "&gt;").replace('"', "&quot;"))
 
 
-def spiel_zeile(s):
-    """Eine Heimspiel-Karte. Der Gegnername ist der Link -- als Ankertext ist er
-    genau das, wonach gesucht wird, und deutlich mehr wert als ein Icon."""
-    tag, monat, jahr = (int(t) for t in s["datum"].split("."))
+def spiele():
+    daten = json.loads(DATEN.read_text(encoding="utf-8"))
+    liste = [s for s in daten.get("spiele", []) if s.get("seiteSlug")]
+    if not liste:
+        raise SystemExit("data/heimspiele.json: kein Spiel mit seiteSlug gefunden")
+    liste.sort(key=lambda s: tuple(reversed([int(x) for x in s["datum"].split(".")])))
+    return liste
+
+
+def datum_text(s, mit_zeit):
+    tag, monat, jahr = (int(x) for x in s["datum"].split("."))
     d = date(jahr, monat, tag)
-    zeit = s.get("zeit") or ""
-    datum_text = f"{WOCHENTAGE[(d.weekday() + 1) % 7]}, {s['datum']}"
-    if zeit:
-        datum_text += f", {zeit} Uhr"
+    text = f"{WOCHENTAGE[(d.weekday() + 1) % 7]}, {s['datum']}"
+    if mit_zeit and s.get("zeit"):
+        text += f", {s['zeit']} Uhr"
+    return text
 
-    ziel = f"/teams-saison/spiel/{s['seiteSlug']}.html"
-    paarung = f"Basketball Löwen – {s['gegner']}"
 
+def ziel_url(s):
+    return f"/teams-saison/spiel/{s['seiteSlug']}.html"
+
+
+def paarung(s):
+    return f"Basketball Löwen – {s['gegner']}"
+
+
+def zeile_spielplan(s):
+    """Spiegelt gameRowHTML() aus js/spielplan.js. Der Gegnername ist der Link --
+    als Ankertext ist er genau das, wonach gesucht wird, und deutlich mehr wert
+    als ein Icon."""
+    ziel = ziel_url(s)
     return (
         '<div class="card fixture-day" data-teams="profis">'
         '<div class="fixture-day-game" data-team="profis" data-heim="1">'
         '<div class="fixture-day-meta">'
-        f'<div class="fixture-time">{esc(datum_text)}</div>'
-        f'<div class="fixture-venue-line"><a href="{MAPS}" target="_blank" rel="noopener">'
+        f'<div class="fixture-time">{esc(datum_text(s, True))}</div>'
+        f'<div class="fixture-venue-line"><a href="{MAPS_SPIELPLAN}" target="_blank" rel="noopener">'
         '<i data-lucide="map-pin" style="width:14px;height:14px"></i> Riethsporthalle</a></div>'
         '<span class="venue-heim">Heimspiel</span>'
         '</div>'
         '<div class="fixture-mid">'
         '<a class="team-badge team-badge-profis" href="/teams-saison/profis.html">Pro B</a>'
-        f'<div class="matchup"><a href="{esc(ziel)}">{esc(paarung)}</a></div>'
+        f'<div class="matchup"><a href="{esc(ziel)}">{esc(paarung(s))}</a></div>'
         '</div>'
         '<div class="fixture-day-actions">'
         '<div class="fixture-result-row">'
@@ -99,14 +119,69 @@ def spiel_zeile(s):
     )
 
 
-def block():
-    daten = json.loads(DATEN.read_text(encoding="utf-8"))
-    spiele = [s for s in daten.get("spiele", []) if s.get("seiteSlug")]
-    if not spiele:
-        raise SystemExit("data/heimspiele.json: kein Spiel mit seiteSlug gefunden")
-    spiele.sort(key=lambda s: tuple(reversed([int(t) for t in s["datum"].split(".")])))
-    zeilen = "\n        ".join(spiel_zeile(s) for s in spiele)
-    return START + "\n        " + zeilen + "\n      " + ENDE, len(spiele)
+def zeile_tickets(s):
+    """Spiegelt die .ticket-row aus dem Inline-Skript in tickets.html.
+
+    Ein Unterschied ist gewollt: Dort ist der Knopf `disabled`, solange kein
+    ticketUrl gesetzt ist. Hier fuehrt er immer auf die Spieltagsseite -- ein
+    toter Knopf waere als Link nichts wert, und die Seite gibt es ja. Das
+    JavaScript ersetzt den Block beim Laden ohnehin.
+    """
+    ziel = ziel_url(s)
+    return (
+        '<div class="ticket-row">'
+        '<div>'
+        f'<div class="ticket-row-title"><strong>{esc(datum_text(s, False))}</strong> · '
+        f'<a href="{esc(ziel)}">{esc(paarung(s))}</a></div>'
+        '<div class="ticket-row-meta">'
+        f'<span><i data-lucide="clock" class="icon-14"></i> {esc(s.get("zeit") or "")} Uhr</span>'
+        f'<a href="{MAPS_TICKETS}" target="_blank" rel="noopener">'
+        '<i data-lucide="map-pin" class="icon-14"></i> Riethsporthalle</a>'
+        '</div>'
+        '</div>'
+        f'<div class="tactions"><a class="btn btn-primary btn-sm" href="{esc(ziel)}">Zum Spiel '
+        '<i data-lucide="arrow-right" class="icon-14"></i></a></div>'
+        '</div>'
+    )
+
+
+# (Datei, Marker-Name, Container-Id, Zeilenbauer, Einrueckung)
+ZIELE = [
+    (REPO / "teams-saison" / "spielplan.html", "SPIELPLAN", "spielplan-tage",
+     zeile_spielplan, "        ", "      "),
+    (REPO / "tickets.html", "TICKETS", "heimspiele-liste",
+     zeile_tickets, "              ", "            "),
+]
+
+
+def anwenden(pfad, marker, container_id, bauer, ein, aus, spiel_liste, check):
+    start = f"<!--{marker}:heimspiele-->"
+    ende = f"<!--/{marker}:heimspiele-->"
+    text = pfad.read_text(encoding="utf-8")
+    block = start + "\n" + ein + (("\n" + ein).join(bauer(s) for s in spiel_liste)) + "\n" + aus + ende
+
+    container = f'<div id="{container_id}"></div>'
+    if start in text and ende in text:
+        i, j = text.index(start), text.index(ende) + len(ende)
+        ziel = text[:i] + block + text[j:]
+    elif container in text:
+        ziel = text.replace(container, f'<div id="{container_id}">{block}</div>')
+    else:
+        raise SystemExit(
+            f"In {pfad.name} fehlt weder der Block {marker} noch {container} "
+            "-- wurde die Seite umgebaut?"
+        )
+
+    name = pfad.relative_to(REPO)
+    if ziel == text:
+        print(f"  {name}: unverändert, {len(spiel_liste)} Heimspiele verlinkt")
+        return 0
+    if check:
+        print(f"  {name}: zu ändern, {len(spiel_liste)} Heimspiele")
+        return 1
+    pfad.write_text(ziel, encoding="utf-8")
+    print(f"  {name}: geschrieben, {len(spiel_liste)} Heimspiele verlinkt")
+    return 0
 
 
 def main():
@@ -114,28 +189,11 @@ def main():
     p.add_argument("--check", action="store_true", help="nur berichten, nichts schreiben")
     args = p.parse_args()
 
-    text = SEITE.read_text(encoding="utf-8")
-    neu, anzahl = block()
-
-    if BLOCK_RE.search(text):
-        ziel = BLOCK_RE.sub(lambda _: neu, text)
-    elif CONTAINER in text:
-        ziel = text.replace(CONTAINER, f'<div id="spielplan-tage">{neu}</div>')
-    else:
-        raise SystemExit(
-            "In teams-saison/spielplan.html fehlt weder Block noch "
-            f'{CONTAINER} -- wurde die Seite umgebaut?'
-        )
-
-    if ziel == text:
-        print(f"  unverändert, {anzahl} Heimspiele verlinkt")
-        return 0
-    if args.check:
-        print(f"  zu ändern: {anzahl} Heimspiele")
-        return 1
-    SEITE.write_text(ziel, encoding="utf-8")
-    print(f"  geschrieben, {anzahl} Heimspiele verlinkt")
-    return 0
+    liste = spiele()
+    offen = 0
+    for pfad, marker, container_id, bauer, ein, aus in ZIELE:
+        offen += anwenden(pfad, marker, container_id, bauer, ein, aus, liste, args.check)
+    return 1 if offen else 0
 
 
 if __name__ == "__main__":

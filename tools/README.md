@@ -120,7 +120,7 @@ Medienblock — Karten-iframes würden beim ersten Aufbau laden und Sekunden sp�
 ersetzt, ohne für die Auffindbarkeit etwas beizutragen.
 
 **`build-spielplan-liste.py`** — schreibt die 14 Heimspiele statisch in
-`teams-saison/spielplan.html`. Anlass war der Ahrefs-Crawl vom 25.08.2026: Alle
+`teams-saison/spielplan.html` **und** in `tickets.html`. Anlass war der Ahrefs-Crawl vom 25.08.2026: Alle
 14 Spieltagsseiten galten als „Orphan page", weil ihre Adressen im Körper der
 Seite nicht ein einziges Mal als `href` standen — nur im JSON-LD im `<head>`.
 Die Liste entsteht sonst erst im Browser in `js/spielplan.js` (`renderDayList`
@@ -131,5 +131,13 @@ Ankertext, weil genau danach gesucht wird. Gleiche Bauart wie
 `build-freiplaetze.py` — das JavaScript ersetzt den statischen Stand beim Laden
 durch den vollen, filterbaren Plan.
 
-Die Markup-Struktur spiegelt `gameRowHTML()` aus `js/spielplan.js`. Ändert sich
-die dort, muss sie hier mitgezogen werden.
+In `tickets.html` steckt dasselbe Muster: Die Terminliste entsteht dort in einem
+Inline-Skript, das `#heimspiele-liste` füllt, und der Tickets-Knopf ist bei 13
+von 14 Spielen `disabled`, weil der Einzelticketverkauf noch nicht live ist —
+selbst im Browser führte also nur ein Spiel auf seine Seite. Der statische Block
+verlinkt dort immer die Spieltagsseite; ein toter Knopf wäre als Link nichts
+wert.
+
+Die Markup-Struktur spiegelt `gameRowHTML()` aus `js/spielplan.js` und die
+`.ticket-row` aus dem Inline-Skript in `tickets.html`. Ändert sich eine der
+beiden, muss sie hier mitgezogen werden.
