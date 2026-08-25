@@ -634,6 +634,14 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .rangliste td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
 .rangliste tbody tr:last-child td { border-bottom: 0; }
 .rangliste tr.ist-ich td { background: var(--color-orange-50); font-weight: var(--weight-semibold); }
+.rangliste-melden {
+  background: none; border: 0; padding: 2px 4px; margin-left: 4px; cursor: pointer;
+  color: var(--text-muted); vertical-align: middle;
+}
+.rangliste-melden:hover:not(:disabled) { color: var(--color-error); }
+.rangliste-melden:disabled { opacity: .4; cursor: default; }
+.rangliste-meldung { margin-top: 10px; font-size: 13px; color: var(--text-secondary); }
+.court-hunt-name-regel { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.5; }
 .rangliste-ich {
   display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px;
   background: var(--color-brand-orange-text); color: #fff; font-size: 11px; letter-spacing: .04em;

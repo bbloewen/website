@@ -423,6 +423,8 @@
     }
     return '<form class="court-hunt-name-form" data-name-form>' +
       '<label for="court-hunt-name">Spielername für die Rangliste — such dir einen aus, nicht deinen echten Namen</label>' +
+      '<p class="court-hunt-name-regel">Was die Grenzen des guten Geschmacks überschreitet, wird gesperrt — und ' +
+      'wer es darauf anlegt, fliegt aus dem Spiel.</p>' +
       '<div class="court-hunt-name-zeile">' +
         '<input type="text" id="court-hunt-name" name="name" maxlength="24" minlength="2" placeholder="z. B. Korbjäger" required />' +
         '<button type="submit" class="btn btn-ghost">Speichern</button>' +
@@ -826,12 +828,42 @@
       el.innerHTML = '<div class="rangliste-wrap"><table class="rangliste">' +
         '<thead><tr><th>Platz</th><th>Spielername</th><th>Punkte</th></tr></thead><tbody>' +
         zeilen.map(function (z) {
+          /* Melden nur bei fremden Zeilen mit Namen — sich selbst zu melden
+             ergibt keinen Sinn, und "ohne Namen" gibt es nichts zu melden. */
+          var melden = (!z.ich && z.meldeId)
+            ? ' <button type="button" class="rangliste-melden" data-melden="' + z.meldeId +
+              '" title="Namen melden" aria-label="Spielername ' + esc(z.name) + ' melden">' +
+              '<i data-lucide="flag" class="icon-14"></i></button>'
+            : '';
           return '<tr' + (z.ich ? ' class="ist-ich"' : '') + '><td>' + z.rang + '</td><td>' +
-            esc(z.name) + (z.ich ? ' <span class="rangliste-ich">du</span>' : '') +
+            esc(z.name) + (z.ich ? ' <span class="rangliste-ich">du</span>' : '') + melden +
             '</td><td>' + z.punkte + '</td></tr>';
-        }).join('') + '</tbody></table></div>';
+        }).join('') + '</tbody></table></div>' +
+        '<p class="rangliste-meldung" role="status" aria-live="polite"></p>';
+
+      meldenVerdrahten(el);
     }).catch(function () {
       el.innerHTML = '<p class="t-body">Die Rangliste ist gerade nicht erreichbar. Deine Punkte auf dem Gerät sind davon nicht betroffen.</p>';
+    });
+  }
+
+  function meldenVerdrahten(el) {
+    var rueckmeldung = el.querySelector('.rangliste-meldung');
+    [].forEach.call(el.querySelectorAll('[data-melden]'), function (knopf) {
+      knopf.addEventListener('click', function () {
+        knopf.disabled = true;
+        fetch(API_BASE + '/melden', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ meldeId: knopf.getAttribute('data-melden') })
+        }).then(function (res) {
+          rueckmeldung.textContent = res.ok
+            ? 'Danke — wir schauen uns den Namen an.'
+            : 'Das hat gerade nicht geklappt.';
+        }).catch(function () {
+          rueckmeldung.textContent = 'Das hat gerade nicht geklappt.';
+        });
+      });
     });
   }
 
