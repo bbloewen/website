@@ -18,7 +18,7 @@
 (function () {
   'use strict';
 
-  var DATA_URL = '/data/freiplaetze.json?v=1787609465';
+  var DATA_URL = '/data/freiplaetze.json?v=1787654030';
 
   /* Der Court-Hunt-Dienst zaehlt die Punkte verbindlich (bbloewen/court-hunt-api,
      Railway). Der Browser rechnet trotzdem sofort mit, damit man am Platz nicht
