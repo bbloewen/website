@@ -38,7 +38,10 @@
      nachmittags wieder zählen — sonst bestraft die Sperre den, der einfach mal
      früher spielt. */
   var COOLDOWN_MS = 12 * 60 * 60 * 1000;
-  var PUNKTE = { checkin: 10, erstbesuch: 20, serie3: 30, serie7: 100 };
+  /* Serien-Bonus alle drei Tage (Tag 3, 6, 9 …) statt einmaliger Stufen bei 3
+     und 7 — sonst wäre Dranbleiben ab Tag vier wirkungslos. */
+  var PUNKTE = { checkin: 10, erstbesuch: 20, serie: 30 };
+  var SERIE_INTERVALL = 3;
 
   /* ---------------------------------------------------------------- Daten */
 
@@ -182,14 +185,12 @@
 
     var heute = tagKey(new Date(jetzt));
     var serie = serienLaenge(stand, heute);
-    [[3, PUNKTE.serie3], [7, PUNKTE.serie7]].forEach(function (paar) {
-      var schluessel = 'serie' + paar[0] + ':' + heute;
-      if (serie === paar[0] && stand.boni.indexOf(schluessel) < 0) {
-        stand.boni.push(schluessel);
-        punkte += paar[1];
-        gutschrift.push({ text: paar[0] + ' Tage in Folge', punkte: paar[1] });
-      }
-    });
+    var schluessel = 'serie3:' + heute;
+    if (serie && serie % SERIE_INTERVALL === 0 && stand.boni.indexOf(schluessel) < 0) {
+      stand.boni.push(schluessel);
+      punkte += PUNKTE.serie;
+      gutschrift.push({ text: serie + ' Tage in Folge', punkte: PUNKTE.serie });
+    }
 
     stand.punkte += punkte;
     stand.offen.push({
