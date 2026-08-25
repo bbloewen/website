@@ -509,6 +509,19 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
    geworfenen Ball der Spielerin ab (Marko, 20.08.2026) — analog zum
    Cheftrainer-Pressefoto oben auf den oberen Bildbereich gesetzt. */
 .card-media-photo img[src*="freiplaetze-riethsporthalle"] { object-position: top; }
+/* Instagram-Archiv (news/instagram-archiv.html): Hochkant-Fotos (394x700 bzw.
+   560x700) sitzen in der 180px-Kachel mit zentriertem Zuschnitt fast immer zu
+   tief -- die Köpfe stehen im oberen Fünftel des Originalfotos, der zentrierte
+   Ausschnitt zeigt aber nur den mittleren Streifen. Marko, 25.08.2026: "Köpfe
+   abgeschnitten, Bilder nach unten rücken". */
+.card-media-photo img[src*="loewen-17920245561201740"],
+.card-media-photo img[src*="loewen-18059405546758069"],
+.card-media-photo img[src*="loewenpark-18018155786700568"],
+.card-media-photo img[src*="loewenpark-18082776263481467"],
+.card-media-photo img[src*="loewenpark-18120295273678542"],
+.card-media-photo img[src*="loewenpark-18135245524583630"],
+.card-media-photo img[src*="loewenpark-18171405229416217"],
+.card-media-photo img[src*="loewenpark-18359930035244735"] { object-position: top; }
 /* Körbe im oberen Bilddrittel: Bei fester Kachelhöhe (180px) und variabler
    Breite zeigt ein zentrierter Zuschnitt bei breiten Karten (einspaltige
    Tablet-Ansicht der Übersicht, ~940px; Detailseite in .container-narrow,
