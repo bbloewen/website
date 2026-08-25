@@ -39,6 +39,7 @@ import json
 import re
 import sys
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from seo_common import REPO
 
@@ -49,6 +50,10 @@ EVENTS = REPO / "data" / "community-events.json"
 # Wochentage von Hand statt ueber locale: Auf dem GitHub-Runner ist de_DE nicht
 # installiert, strftime("%A") lieferte dort englische Namen.
 WOCHENTAGE = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
+
+# Spot-Zeiten kommen seit 25.08.2026 als UTC mit Z aus dem Notion-Sync und
+# werden hier in Berliner Zeit angezeigt -- das Fest findet in Erfurt statt.
+BERLIN = ZoneInfo("Europe/Berlin")
 
 # Zwei Container, zwei Bloecke: offene Plaetze und solche mit eingeschraenktem
 # Zugang. Die Trennung stammt aus dem JavaScript (spielbar()) und wird hier
@@ -115,6 +120,16 @@ def kachel(f):
     return "".join(teile)
 
 
+def berliner_zeit(wert):
+    """ISO-Zeitstempel in Berliner Zeit.
+
+    Ohne Zeitzonen-Angabe (Altbestand vor dem 25.08.2026) gilt die Angabe als
+    Ortszeit -- genauso liest sie der Browser mit new Date().
+    """
+    zeit = datetime.fromisoformat(str(wert).replace("Z", "+00:00"))
+    return zeit.replace(tzinfo=BERLIN) if zeit.tzinfo is None else zeit.astimezone(BERLIN)
+
+
 def spots_lesen(jetzt):
     """Laufende und kommende Court-Hunt-Spots aus den Community-Events.
 
@@ -131,7 +146,7 @@ def spots_lesen(jetzt):
         if not isinstance(e.get("lat"), (int, float)) or not isinstance(e.get("lng"), (int, float)):
             continue
         try:
-            von, bis = datetime.fromisoformat(e["spotVon"]), datetime.fromisoformat(e["spotBis"])
+            von, bis = berliner_zeit(e["spotVon"]), berliner_zeit(e["spotBis"])
         except ValueError:
             continue
         if bis < jetzt:
@@ -232,7 +247,7 @@ def main():
             print(f"  ACHTUNG Container {CONTAINER[name]} nicht gefunden", file=sys.stderr)
             return 1
 
-    spots = spots_lesen(datetime.now())
+    spots = spots_lesen(datetime.now(BERLIN))
     neu = spots_schreiben(neu, spots)
 
     fehlend = [f["name"] for f in plaetze if html.escape(f["name"]) not in neu]

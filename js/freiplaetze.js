@@ -40,7 +40,9 @@
   var COOLDOWN_MS = 12 * 60 * 60 * 1000;
   /* Serien-Bonus alle drei Tage (Tag 3, 6, 9 …) statt einmaliger Stufen bei 3
      und 7 — sonst wäre Dranbleiben ab Tag vier wirkungslos. */
-  var PUNKTE = { checkin: 10, erstbesuch: 20, serie: 30 };
+  /* spot: 50 — derselbe Wert, den der n8n-Sync der API meldet. Steht hier nur
+     fuer die Sofort-Rueckmeldung im Browser; gezaehlt wird server-seitig. */
+  var PUNKTE = { checkin: 10, erstbesuch: 20, serie: 30, spot: 50 };
   var SERIE_INTERVALL = 3;
 
   /* ---------------------------------------------------------------- Daten */
@@ -75,6 +77,7 @@
             lng: e.lng,
             beschreibung: e.description || 'Mobiler Korb der Löwen — nur an diesem Tag, dafür 50 Punkte.',
             typ: 'event',
+            punkte: PUNKTE.spot,
             von: e.spotVon,
             bis: e.spotBis,
             zugang: 'oeffentlich'
@@ -94,11 +97,15 @@
     return new Date(spot.bis).getTime() < Date.now();
   }
 
+  /* Immer in Berliner Zeit, nicht in der Zeitzone des Geraets: Das Fest findet
+     in Erfurt statt, auch wenn jemand aus dem Urlaub auf die Seite schaut. Die
+     Zeitstempel kommen seit 25.08.2026 als UTC mit Z aus dem Notion-Sync;
+     aeltere Eintraege ohne Zeitzonen-Angabe liest der Browser als Ortszeit. */
   function spotZeitText(spot) {
     var von = new Date(spot.von);
-    var tag = new Intl.DateTimeFormat('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit' }).format(von);
-    var uhr = new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '2-digit' }).format(von);
-    var bis = new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '2-digit' }).format(new Date(spot.bis));
+    var tag = new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit' }).format(von);
+    var uhr = new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }).format(von);
+    var bis = new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }).format(new Date(spot.bis));
     return tag + ', ' + uhr + ' bis ' + bis + ' Uhr';
   }
 
@@ -221,10 +228,13 @@
      sofortige Rückmeldung, damit man am Platz nicht auf das Netz wartet. */
   function bucheCheckin(stand, platz, jetzt, coords) {
     var gutschrift = [];
-    var punkte = PUNKTE.checkin;
-    gutschrift.push({ text: 'Check-in ' + platz.name, punkte: PUNKTE.checkin });
+    /* Ein Event-Spot bringt 50 statt 10 Punkte und keinen Erstbesuch-Bonus —
+       genauso rechnet der Server (spiel.py). Weicht der Browser hier ab, springt
+       die Anzeige, sobald die Server-Antwort da ist. */
+    var punkte = platz.punkte || PUNKTE.checkin;
+    gutschrift.push({ text: 'Check-in ' + platz.name, punkte: punkte });
 
-    if (!besucht(stand, platz.slug)) {
+    if (platz.typ !== 'event' && !besucht(stand, platz.slug)) {
       punkte += PUNKTE.erstbesuch;
       gutschrift.push({ text: 'Erstbesuch', punkte: PUNKTE.erstbesuch });
     }
@@ -737,9 +747,17 @@
     meldung.className = 'court-hunt-meldung';
     meldung.textContent = 'Standort wird geprüft …';
 
-    Promise.all([standort(), ladeDaten()]).then(function (ergebnisse) {
+    /* Die laufenden Event-Spots gehoeren mit in die Suche: Wer am Strassenfest
+       neben dem mobilen Korb steht, drueckt denselben Knopf wie sonst — er soll
+       nicht erst das Schild scannen muessen, um seine 50 Punkte zu bekommen.
+       Spots ausserhalb ihres Zeitfensters bleiben draussen, sonst schlaegt die
+       Suche einen Platz vor, an dem es heute nichts zu holen gibt. */
+    Promise.all([standort(), ladeDaten(), ladeSpots()]).then(function (ergebnisse) {
       var coords = ergebnisse[0];
-      var liste = naechstePlaetze(coords, ergebnisse[1].freiplaetze);
+      var kandidaten = ergebnisse[1].freiplaetze.concat(
+        ergebnisse[2].filter(function (sp) { return spotOffen(sp); })
+      );
+      var liste = naechstePlaetze(coords, kandidaten);
       var naechster = liste[0];
 
       if (!naechster || !inReichweite(naechster.abstand, coords.accuracy)) {
@@ -949,7 +967,9 @@
       '<p class="t-body mt-2 mb-4">' +
         (stand
           ? 'Dein Stand: <strong>' + stand.punkte + ' Punkte</strong>.' +
-            (besucht(stand, platz.slug) ? ' Diesen Platz hast du schon besucht.' : ' Erstbesuch bringt 20 Punkte extra.')
+            (platz.typ === 'event'
+              ? ' Der Check-in am mobilen Korb bringt heute ' + PUNKTE.spot + ' Punkte.'
+              : (besucht(stand, platz.slug) ? ' Diesen Platz hast du schon besucht.' : ' Erstbesuch bringt 20 Punkte extra.'))
           : 'Checke hier ein und sammle Punkte. Dein Gerät legt dafür eine zufällige Spiel-ID an — ' +
             'kein Konto, kein Name, keine E-Mail.') +
       '</p>' +
