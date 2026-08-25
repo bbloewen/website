@@ -537,6 +537,80 @@
       '<a href="/datenschutz.html#court-hunt">Datenschutzerklärung</a>.</p>';
   }
 
+  /* Der Gewinn haengt an der Geraete-ID: Wer gewonnen hat, erfaehrt es beim
+     naechsten Besuch — wir haben ja keine Adresse, an die wir schreiben
+     koennten. Genau hier entstehen dann die einzigen personenbezogenen Daten
+     des Spiels, und nur weil jemand sie freiwillig einträgt. */
+  function gewinnKasten(el, stand) {
+    if (!API_BASE || !stand) return;
+    fetch(API_BASE + '/me/' + encodeURIComponent(stand.geraeteId))
+      .then(function (r) { return r.json(); })
+      .then(function (daten) {
+        if (!daten.gewinn) return;
+        var kasten = document.createElement('div');
+        kasten.className = 'court-hunt-gewinn';
+        kasten.innerHTML =
+          '<h3 class="t-h3">Du hast gewonnen!</h3>' +
+          '<p class="t-body mt-2 mb-4">Platz ' + daten.gewinn.rang + ' in der Wertung ' + esc(daten.gewinn.monat) +
+          ' mit ' + daten.gewinn.punkte + ' Punkten. Dafür gibt es einen Gutschein für ein Einzelticket ' +
+          'bei einem Heimspiel. Sag uns, wohin wir ihn schicken sollen.</p>' +
+          '<form data-gewinn-form>' +
+            '<div class="melde-feld">' +
+              '<label for="gewinn-vorname">Wie sollen wir dich ansprechen?</label>' +
+              '<input type="text" id="gewinn-vorname" name="vorname" maxlength="80" required placeholder="Vorname" />' +
+            '</div>' +
+            '<div class="melde-feld">' +
+              '<label for="gewinn-email">An welche Adresse dürfen wir den Gutschein schicken?</label>' +
+              '<input type="email" id="gewinn-email" name="email" maxlength="160" required placeholder="name@beispiel.de" />' +
+              '<p class="court-hunt-name-regel">Unter 16? Dann trag bitte die Adresse eines Elternteils ein.</p>' +
+            '</div>' +
+            '<label class="court-hunt-haken"><input type="checkbox" name="newsletter" /> ' +
+              'Schickt mir ab und zu Neuigkeiten der Löwen. (freiwillig)</label>' +
+            '<p class="court-hunt-name-regel">Vorname und Adresse speichern wir getrennt vom Spielstand, um den ' +
+              'Gutschein zuzustellen und die Regel „höchstens zwei Gutscheine je Person und Jahr" einzuhalten. ' +
+              'Einzelheiten in der <a href="/datenschutz.html#court-hunt">Datenschutzerklärung</a>.</p>' +
+            '<button type="submit" class="btn btn-primary">Gutschein anfordern</button>' +
+            '<p class="court-hunt-meldung" role="status" aria-live="polite"></p>' +
+          '</form>';
+        el.insertBefore(kasten, el.firstChild);
+        icons();
+
+        var form = kasten.querySelector('[data-gewinn-form]');
+        var meldung = kasten.querySelector('.court-hunt-meldung');
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var knopf = form.querySelector('button[type="submit"]');
+          knopf.disabled = true;
+          meldung.className = 'court-hunt-meldung';
+          meldung.textContent = 'Wird gesendet …';
+
+          fetch(API_BASE + '/gewinn/einloesen', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              geraeteId: stand.geraeteId,
+              vorname: form.vorname.value.trim(),
+              email: form.email.value.trim(),
+              newsletter: form.newsletter.checked
+            })
+          }).then(function (res) {
+            return res.json().catch(function () { return {}; }).then(function (d) {
+              if (!res.ok) throw new Error(typeof d.detail === 'string' ? d.detail : 'Das hat nicht geklappt.');
+              return d;
+            });
+          }).then(function () {
+            kasten.innerHTML = '<h3 class="t-h3">Ist notiert</h3>' +
+              '<p class="t-body mt-2">Dein Gutschein kommt in den nächsten Minuten per E-Mail. ' +
+              'Falls nichts ankommt, schau auch im Spam-Ordner nach.</p>';
+          }).catch(function (fehler) {
+            knopf.disabled = false;
+            meldung.className = 'court-hunt-meldung ist-hinweis';
+            meldung.textContent = fehler.message;
+          });
+        });
+      }).catch(function () { /* Kein Netz: Der Gewinn wartet beim nächsten Mal. */ });
+  }
+
   function standPanel(el, meldungText, meldungKlasse) {
     var stand = ladeStand();
 
@@ -583,6 +657,8 @@
         '</div>';
 
       namenVerdrahten(el, stand);
+
+      gewinnKasten(el, stand);
 
       el.querySelector('[data-court-hunt-reset]').addEventListener('click', function () {
         if (!window.confirm('Punkte, besuchte Plätze und deine Spiel-ID werden gelöscht. Wirklich?')) return;

@@ -572,6 +572,15 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .freiplaetze-map-klein { height: 260px; }
 
 /* ---- Court-Hunt (Freiplatz-Spiel, seit 24.08.2026) ---- */
+.court-hunt-gewinn {
+  margin-bottom: 24px; padding: 24px; text-align: left;
+  background: linear-gradient(135deg, var(--color-orange-50), #fff);
+  border: 1.5px solid var(--color-orange-200); border-radius: var(--radius-lg);
+}
+.court-hunt-gewinn .melde-feld input { width: 100%; padding: 11px 14px; border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-md); font: inherit; font-size: 14px; background: #fff; }
+.court-hunt-haken { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; margin-bottom: 12px; }
+.court-hunt-haken input { margin-top: 3px; }
 .court-hunt-stand { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
 .court-hunt-zahl {
   flex: 0 0 140px; background: #fff; border: 1px solid var(--border);
