@@ -1,13 +1,15 @@
 {
-  "hinweis": "Heimspiele Profis (Basketball Löwen Erfurt), Saison 2026/ 27 ProB. Quelle: basketball-loewen.com/saison/profis/spielplan. Alle Spiele in der Riethsporthalle, Essener Straße 20, 99089 Erfurt. slug = Schlüssel für /tickets/einzelticket.html?spiel=<slug>, subeventId = ID des zugehörigen pretix-Subevents in der Serie saison2627 (Dauerkarte+Einzelticket vereinheitlicht, 05.08.2026 — vorher einzeltickets2627 mit anderen IDs); wird ein Spiel verlegt, müssen Datum, slug und Subevent gemeinsam nachgezogen werden. ticketUrl steht ABSICHTLICH nur beim ersten Spiel: js/spielplan.js rendert je Spiel mit ticketUrl einen Kaufbutton, und der Einzelticket-Verkauf ist noch nicht scharf (pretix-Event live=false, keine Zahlart angebunden). Zum Verkaufsstart ticketUrl bei allen Spielen ergänzen — der Wert ist immer /tickets/einzelticket.html?spiel=<slug>. Optionales Feld `stehplatzBuchbar: false` je Spiel schaltet den Stehplatz-Verkauf für genau dieses Spiel aus (Preisliste durchgestrichen, Grafik nicht anklickbar, Direktwahl-Dropdown ohne die Option) — pretix bleibt dabei unverändert aktiv, das ist eine reine Website-Einstellung (s. #222). Fehlt das Feld, ist Stehplatz buchbar.",
+  "hinweis": "Heimspiele Profis (Basketball Löwen Erfurt), Saison 2026/ 27 ProB. Quelle: basketball-loewen.com/saison/profis/spielplan. Alle Spiele in der Riethsporthalle, Essener Straße 20, 99089 Erfurt. slug = interner Schlüssel (steckt in der pretix-Zuordnung, frueher auch im ?spiel=-Parameter der inzwischen entfernten tickets/einzelticket.html) — NICHT umdefinieren. seiteSlug = fester Adressbestandteil der eigenen Spieltagsseite teams-saison/spiel/<seiteSlug>.html (Schema <slug>-<gegner-kurzform>, Sponsorennamen wie 'Porsche'/'Hessing'/'Bayer' bewusst weggelassen); wird von tools/build-spieltagsseiten.py nur einmalig erzeugt, wenn das Feld fehlt, und danach nie mehr angetastet — Marko-Vorgabe 25.08.2026, da eine sich aendernde Adresse Rankings/Links zerstoert. subeventId ist die pretix-Zuordnung des zugehörigen Subevents in der Serie saison2627 (Dauerkarte+Einzelticket vereinheitlicht, 05.08.2026); wird ein Spiel verlegt, müssen Datum, slug und Subevent gemeinsam nachgezogen werden. ticketUrl zeigt seit 25.08.2026 auf die eigene Spieltagsseite (teams-saison/spiel/<seiteSlug>.html, dort ist der Saalplan/Kauf jetzt direkt eingebettet, tickets/einzelticket.html wurde geloescht) und steht ABSICHTLICH nur bei Spielen, fuer die der Vorverkauf schon freigegeben ist (js/spielplan.js und tickets.html rendern je Spiel mit ticketUrl einen echten Kaufbutton statt eines ausgegrauten Platzhalters) — ihr Vorhandensein ist zugleich das Signal fuer die Phase 'Vorverkauf' auf der Spieltagsseite selbst. spielberichtUrl zeigt bei ALLEN Spielen auf dieselbe Spieltagsseite (sie ist der einzige Heimatort des Spiels, Bericht inklusive, unabhaengig von der aktuellen Phase). Optionales Feld `stehplatzBuchbar: false` je Spiel schaltet den Stehplatz-Verkauf für genau dieses Spiel aus (Preisliste durchgestrichen, Grafik nicht anklickbar, Direktwahl-Dropdown ohne die Option) — pretix bleibt dabei unverändert aktiv, das ist eine reine Website-Einstellung (s. #222). Fehlt das Feld, ist Stehplatz buchbar.",
   "spiele": [
     {
       "datum": "11.10.2026",
       "zeit": "17:00",
       "gegner": "Porsche BBA Ludwigsburg",
       "slug": "2026-10-11",
+      "seiteSlug": "2026-10-11-bba-ludwigsburg",
       "subeventId": 26,
-      "ticketUrl": "/tickets/einzelticket.html?spiel=2026-10-11",
+      "ticketUrl": "/teams-saison/spiel/2026-10-11-bba-ludwigsburg.html",
+      "spielberichtUrl": "/teams-saison/spiel/2026-10-11-bba-ludwigsburg.html",
       "stehplatzBuchbar": false
     },
     {
@@ -15,7 +17,9 @@
       "zeit": "17:00",
       "gegner": "TSG Reutlingen Ravens",
       "slug": "2026-10-18",
+      "seiteSlug": "2026-10-18-tsg-reutlingen-ravens",
       "subeventId": 20,
+      "spielberichtUrl": "/teams-saison/spiel/2026-10-18-tsg-reutlingen-ravens.html",
       "stehplatzBuchbar": false
     },
     {
@@ -23,7 +27,9 @@
       "zeit": "17:00",
       "gegner": "Culture City Weimar",
       "slug": "2026-11-08",
+      "seiteSlug": "2026-11-08-culture-city-weimar",
       "subeventId": 16,
+      "spielberichtUrl": "/teams-saison/spiel/2026-11-08-culture-city-weimar.html",
       "stehplatzBuchbar": false
     },
     {
@@ -31,7 +37,9 @@
       "zeit": "18:30",
       "gegner": "Dresden Titans",
       "slug": "2026-11-13",
+      "seiteSlug": "2026-11-13-dresden-titans",
       "subeventId": 28,
+      "spielberichtUrl": "/teams-saison/spiel/2026-11-13-dresden-titans.html",
       "stehplatzBuchbar": false
     },
     {
@@ -39,7 +47,9 @@
       "zeit": "18:30",
       "gegner": "FC Bayern Basketball II",
       "slug": "2026-11-20",
+      "seiteSlug": "2026-11-20-fc-bayern-basketball",
       "subeventId": 18,
+      "spielberichtUrl": "/teams-saison/spiel/2026-11-20-fc-bayern-basketball.html",
       "stehplatzBuchbar": false
     },
     {
@@ -47,7 +57,9 @@
       "zeit": "17:00",
       "gegner": "BG Hessing Leitershofen",
       "slug": "2026-12-06",
+      "seiteSlug": "2026-12-06-bg-leitershofen",
       "subeventId": 15,
+      "spielberichtUrl": "/teams-saison/spiel/2026-12-06-bg-leitershofen.html",
       "stehplatzBuchbar": false
     },
     {
@@ -55,7 +67,9 @@
       "zeit": "17:00",
       "gegner": "TSV Oberhaching Tropics",
       "slug": "2026-12-13",
+      "seiteSlug": "2026-12-13-tsv-oberhaching-tropics",
       "subeventId": 21,
+      "spielberichtUrl": "/teams-saison/spiel/2026-12-13-tsv-oberhaching-tropics.html",
       "stehplatzBuchbar": false
     },
     {
@@ -63,7 +77,9 @@
       "zeit": "17:00",
       "gegner": "Dragons Rhöndorf",
       "slug": "2027-01-03",
+      "seiteSlug": "2027-01-03-dragons-rhoendorf",
       "subeventId": 22,
+      "spielberichtUrl": "/teams-saison/spiel/2027-01-03-dragons-rhoendorf.html",
       "stehplatzBuchbar": false
     },
     {
@@ -71,7 +87,9 @@
       "zeit": "17:00",
       "gegner": "SKYLINERS Juniors",
       "slug": "2027-01-17",
+      "seiteSlug": "2027-01-17-skyliners-juniors",
       "subeventId": 24,
+      "spielberichtUrl": "/teams-saison/spiel/2027-01-17-skyliners-juniors.html",
       "stehplatzBuchbar": false
     },
     {
@@ -79,7 +97,9 @@
       "zeit": "17:00",
       "gegner": "BBC Coburg",
       "slug": "2027-01-31",
+      "seiteSlug": "2027-01-31-bbc-coburg",
       "subeventId": 17,
+      "spielberichtUrl": "/teams-saison/spiel/2027-01-31-bbc-coburg.html",
       "stehplatzBuchbar": false
     },
     {
@@ -87,7 +107,9 @@
       "zeit": "17:00",
       "gegner": "SV Fellbach Flashers",
       "slug": "2027-02-14",
+      "seiteSlug": "2027-02-14-sv-fellbach-flashers",
       "subeventId": 23,
+      "spielberichtUrl": "/teams-saison/spiel/2027-02-14-sv-fellbach-flashers.html",
       "stehplatzBuchbar": false
     },
     {
@@ -95,7 +117,9 @@
       "zeit": "14:30",
       "gegner": "Bayer Giants Leverkusen",
       "slug": "2027-03-07",
+      "seiteSlug": "2027-03-07-giants-leverkusen",
       "subeventId": 27,
+      "spielberichtUrl": "/teams-saison/spiel/2027-03-07-giants-leverkusen.html",
       "stehplatzBuchbar": false
     },
     {
@@ -103,7 +127,9 @@
       "zeit": "17:00",
       "gegner": "TV Langen",
       "slug": "2027-03-21",
+      "seiteSlug": "2027-03-21-tv-langen",
       "subeventId": 19,
+      "spielberichtUrl": "/teams-saison/spiel/2027-03-21-tv-langen.html",
       "stehplatzBuchbar": false
     },
     {
@@ -111,7 +137,9 @@
       "zeit": "17:00",
       "gegner": "Ahorn Camp Baskets",
       "slug": "2027-03-28",
+      "seiteSlug": "2027-03-28-ahorn-camp-baskets",
       "subeventId": 25,
+      "spielberichtUrl": "/teams-saison/spiel/2027-03-28-ahorn-camp-baskets.html",
       "stehplatzBuchbar": false
     }
   ]

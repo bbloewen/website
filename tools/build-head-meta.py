@@ -164,46 +164,85 @@ def breadcrumb(rel, page_title):
     return {"@type": "BreadcrumbList", "itemListElement": items}
 
 
-def home_games():
-    """SportsEvent-Knoten aus data/heimspiele.json.
+def heimspiele():
+    """Rohdaten aus data/heimspiele.json, unveraendert (Liste von dicts)."""
+    return json.loads((REPO / "data" / "heimspiele.json").read_text(encoding="utf-8")).get("spiele", [])
+
+
+def _spiel_event_node(g, mainEntityOfPage_url):
+    """Ein SportsEvent-Knoten fuer genau ein Heimspiel.
 
     startDate mit echtem Berliner Offset (Sommer +02:00, Winter +01:00) — eine
     feste Zeitzone würde die Spiele von November bis März um eine Stunde
     verschieben.
 
-    offers nur, wenn das Spiel eine ticketUrl hat. Aktuell (17.08.2026) ist das
-    nur das Auftaktspiel. Ein Offer mit InStock für nicht verkaufbare Spiele
-    wäre eine Falschangabe in den strukturierten Daten.
+    offers nur, wenn das Spiel eine ticketUrl hat (Vorverkauf ist offen). Ein
+    Offer mit InStock fuer nicht verkaufbare Spiele waere eine Falschangabe in
+    den strukturierten Daten.
+
+    mainEntityOfPage bindet das Event an genau seine eigene Spieltagsseite --
+    seit 25.08.2026 (Marko: "eine Adresse fuer den ganzen Lebenszyklus") gibt es
+    dieses Event nur noch dort, nicht mehr zusaetzlich auf spielplan.html/tickets.html.
     """
-    data = json.loads((REPO / "data" / "heimspiele.json").read_text(encoding="utf-8"))
     berlin = ZoneInfo("Europe/Berlin")
-    events = []
-    for g in data.get("spiele", []):
-        d, m, y = g["datum"].split(".")
-        hh, mm = g["zeit"].split(":")
-        start = datetime(int(y), int(m), int(d), int(hh), int(mm), tzinfo=berlin)
-        node = {
-            "@type": "SportsEvent",
-            "name": f"Basketball Löwen Erfurt – {g['gegner']}",
-            "description": f"Heimspiel der Basketball Löwen Erfurt gegen {g['gegner']} "
-                           f"in der Riethsporthalle.",
-            "startDate": start.isoformat(),
-            "eventStatus": "https://schema.org/EventScheduled",
-            "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
-            "location": RIETHSPORTHALLE,
-            "homeTeam": {"@type": "SportsTeam", "name": "Basketball Löwen Erfurt"},
-            "awayTeam": {"@type": "SportsTeam", "name": g["gegner"]},
-            "organizer": {"@id": ORG["@id"]},
+    d, m, y = g["datum"].split(".")
+    hh, mm = g["zeit"].split(":")
+    start = datetime(int(y), int(m), int(d), int(hh), int(mm), tzinfo=berlin)
+    node = {
+        "@type": "SportsEvent",
+        "name": f"Basketball Löwen Erfurt – {g['gegner']}",
+        "description": f"Heimspiel der Basketball Löwen Erfurt gegen {g['gegner']} "
+                       f"in der Riethsporthalle.",
+        "startDate": start.isoformat(),
+        "eventStatus": "https://schema.org/EventScheduled",
+        "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+        "location": RIETHSPORTHALLE,
+        "homeTeam": {"@type": "SportsTeam", "name": "Basketball Löwen Erfurt"},
+        "awayTeam": {"@type": "SportsTeam", "name": g["gegner"]},
+        "organizer": {"@id": ORG["@id"]},
+        "mainEntityOfPage": {"@type": "WebPage", "@id": mainEntityOfPage_url},
+    }
+    if g.get("ticketUrl"):
+        node["offers"] = {
+            "@type": "Offer",
+            "url": BASE + g["ticketUrl"].lstrip("/"),
+            "availability": "https://schema.org/InStock",
+            "priceCurrency": "EUR",
         }
-        if g.get("ticketUrl"):
-            node["offers"] = {
-                "@type": "Offer",
-                "url": BASE + g["ticketUrl"].lstrip("/"),
-                "availability": "https://schema.org/InStock",
-                "priceCurrency": "EUR",
-            }
-        events.append(node)
-    return events
+    return node
+
+
+def spiel_event_for(rel):
+    """SportsEvent fuer die Spieltagsseite teams-saison/spiel/<seiteSlug>.html."""
+    seite_slug = rel.split("/")[-1].removesuffix(".html")
+    for g in heimspiele():
+        if g.get("seiteSlug") == seite_slug:
+            return _spiel_event_node(g, canonical_url(rel))
+    return None
+
+
+def spielplan_itemlist():
+    """ItemList mit Verweisen auf alle Spieltagsseiten -- spielplan.html ist nur
+    noch Verzeichnis, das SportsEvent selbst lebt allein auf der jeweiligen Seite."""
+    spiele = heimspiele()
+    items = [
+        {
+            "@type": "ListItem",
+            "position": i,
+            "url": BASE + f"teams-saison/spiel/{g['seiteSlug']}.html",
+            "name": f"Basketball Löwen Erfurt – {g['gegner']}",
+        }
+        for i, g in enumerate(spiele, start=1)
+        if g.get("seiteSlug")
+    ]
+    if not items:
+        return []
+    return [{
+        "@type": "ItemList",
+        "name": "Heimspiele der Basketball Löwen Erfurt (Profis)",
+        "numberOfItems": len(items),
+        "itemListElement": items,
+    }]
 
 
 def freiplaetze():
@@ -287,8 +326,13 @@ def nodes_for(rel, text, page_title, social_title, description, image):
             node["datePublished"] = m.group(1)
         nodes.append(node)
 
-    if rel in ("teams-saison/spielplan.html", "tickets.html"):
-        nodes.extend(home_games())
+    if rel.startswith("teams-saison/spiel/"):
+        event = spiel_event_for(rel)
+        if event:
+            nodes.append(event)
+
+    if rel == "teams-saison/spielplan.html":
+        nodes.extend(spielplan_itemlist())
 
     if rel.startswith("trainieren/loewenpark"):
         nodes.append(LOEWENPARK)
