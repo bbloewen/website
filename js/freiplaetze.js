@@ -109,8 +109,23 @@
     return tag + ', ' + uhr + ' bis ' + bis + ' Uhr';
   }
 
-  function platzUrl(slug) {
-    return '/trainieren/freiplatz.html?platz=' + encodeURIComponent(slug);
+  function platzUrl(f) {
+    /* Dauerhafte Plaetze leben seit dem 25.08.2026 auf ihrer eigenen Adresse
+       (tools/build-freiplatz-seiten.py); nur Event-Spots (Slug-Praefix
+       "event-", kommen aus den Community-Events statt aus der Platzliste)
+       nutzen weiterhin die Huelle freiplatz.html mit ?platz=, die es fuer
+       feste Plaetze gar nicht mehr gibt. Unterscheidung bewusst am
+       Slug-Praefix, nicht an f.typ, damit sie mit platz_url() in
+       build-freiplaetze.py und qr_saetze() in build-freiplatz-qr.py
+       uebereinstimmt (s. tools/README.md) -- alle drei muessen bei einer
+       Aenderung zusammen angepasst werden.
+       Vorher zeigte diese Funktion fuer alle Plaetze auf die Huelle -- der
+       Redirect darin (initPlatzseite) leitete dann auf genau dieselbe URL
+       um, window.location.replace() aendert nichts und die Seite blieb fuer
+       immer bei "Platz wird geladen ..." haengen (Feedback AG, 25.08.2026). */
+    return f.slug.indexOf('event-') === 0
+      ? '/trainieren/freiplatz.html?platz=' + encodeURIComponent(f.slug)
+      : '/trainieren/freiplatz/' + encodeURIComponent(f.slug) + '.html';
   }
 
   function mapsUrl(f) {
@@ -418,7 +433,7 @@
         zugangDetail(f) +
         '<a class="freiplatz-adresse-link" href="' + mapsUrl(f) + '" target="_blank" rel="noopener">' +
           '<i data-lucide="map-pin" class="icon-16"></i> ' + esc(f.adresse) + '</a>' +
-        '<a class="card-link" href="' + platzUrl(f.slug) + '">' +
+        '<a class="card-link" href="' + platzUrl(f) + '">' +
           (spielbar(f) ? 'Platz öffnen und einchecken' : 'Platz ansehen') +
           ' <i data-lucide="arrow-right" class="icon-14"></i></a>' +
       '</div>' +
@@ -441,7 +456,7 @@
           ? '<a class="freiplatz-adresse-link" href="' + mapsUrl(sp) + '" target="_blank" rel="noopener">' +
             '<i data-lucide="map-pin" class="icon-16"></i> ' + esc(sp.adresse) + '</a>'
           : '') +
-        '<a class="card-link" href="' + platzUrl(sp.slug) + '">' +
+        '<a class="card-link" href="' + platzUrl(sp) + '">' +
           (laeuft ? 'Spot öffnen und einchecken' : 'Spot ansehen') +
           ' <i data-lucide="arrow-right" class="icon-14"></i></a>' +
       '</div>' +
@@ -504,7 +519,7 @@
       if (eingeschraenkt) {
         popup += '<br><span class="freiplatz-popup-hinweis">' + esc(f.zugangHinweis || 'Zugang eingeschränkt') + '</span>';
       }
-      popup += '<br><a href="' + platzUrl(f.slug) + '">Zum Platz</a>';
+      popup += '<br><a href="' + platzUrl(f) + '">Zum Platz</a>';
       return window.L.marker([f.lat, f.lng], { icon: icon, alt: f.name, keyboard: true }).bindPopup(popup);
     });
 
@@ -764,7 +779,7 @@
         knopf.disabled = false;
         meldung.className = 'court-hunt-meldung ist-hinweis';
         meldung.innerHTML = naechster
-          ? 'Kein Freiplatz in Reichweite. Am nächsten liegt <a href="' + platzUrl(naechster.platz.slug) + '">' +
+          ? 'Kein Freiplatz in Reichweite. Am nächsten liegt <a href="' + platzUrl(naechster.platz) + '">' +
             esc(naechster.platz.name) + '</a>, ' + abstandText(naechster.abstand) + ' entfernt.'
           : 'Wir konnten keinen Freiplatz in deiner Nähe finden.';
         return;
@@ -875,7 +890,7 @@
          Stellen zu zeigen — und damit bleiben schon gedruckte QR-Codes mit dem
          alten Ziel gültig. */
       if (platz.typ !== 'event') {
-        window.location.replace(platzUrl(platz.slug));
+        window.location.replace(platzUrl(platz));
         return;
       }
 
@@ -935,7 +950,7 @@
     var knopf = el.querySelector('[data-teilen]');
     if (!knopf) return;
     var rueckmeldung = el.querySelector('.freiplatz-teilen-status');
-    var ziel = window.location.origin + platzUrl(platz.slug);
+    var ziel = window.location.origin + platzUrl(platz);
     var text = 'Ich bin gerade am ' + platz.name + ' und spiele. Kommt vorbei!';
 
     knopf.addEventListener('click', function () {
@@ -1131,11 +1146,11 @@
           .sort(function (a, b) { return new Date(a.von) - new Date(b.von); })[0];
         if (!bald) return;
         el.innerHTML = '<p class="court-hunt-spot-banner ist-bald">Nächster Spot am mobilen Korb: ' +
-          '<a href="' + platzUrl(bald.slug) + '">' + esc(bald.name) + '</a>, ' + esc(spotZeitText(bald)) + '.</p>';
+          '<a href="' + platzUrl(bald) + '">' + esc(bald.name) + '</a>, ' + esc(spotZeitText(bald)) + '.</p>';
         return;
       }
       el.innerHTML = heute.map(function (sp) {
-        return '<p class="court-hunt-spot-banner">Heute vor Ort: <a href="' + platzUrl(sp.slug) + '">' +
+        return '<p class="court-hunt-spot-banner">Heute vor Ort: <a href="' + platzUrl(sp) + '">' +
           esc(sp.name) + '</a> — 50 Punkte am mobilen Korb, ' + esc(spotZeitText(sp)) + '.</p>';
       }).join('');
     });

@@ -156,7 +156,7 @@ def aufkleber(check):
         karten.append({
             "titel": "Court-Hunt",
             "text": "Scan mich: einchecken, Punkte sammeln, Freikarte fürs Heimspiel gewinnen.",
-            "qr": qr_svg(f"{BASIS}/trainieren/freiplatz.html?platz={f['slug']}").replace(
+            "qr": qr_svg(f"{BASIS}/trainieren/freiplatz/{f['slug']}.html").replace(
                 "<svg", '<svg class="qr"', 1),
             "platz": f["name"],
         })
