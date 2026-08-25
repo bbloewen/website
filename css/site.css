@@ -613,6 +613,9 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
   margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border);
   font-size: 13px; color: var(--text-muted);
 }
+.court-hunt-einwilligung {
+  margin: 14px auto 0; max-width: 460px; font-size: 12px; line-height: 1.5; color: var(--text-muted);
+}
 .court-hunt-name { margin-top: 16px; font-size: 14px; color: var(--text-secondary); }
 .court-hunt-name-form { margin-top: 20px; }
 .court-hunt-name-form label { display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }

@@ -473,6 +473,17 @@
     });
   }
 
+  /* Einwilligung gehört an den Knopf, nicht zwei Seiten weiter: Wer hier klickt,
+     erlaubt zweierlei — den Zugriff auf den Endgerätespeicher (§ 25 TDDDG) und
+     die Verarbeitung der Spieldaten (DSGVO). Ohne diesen Satz am Knopf ist die
+     Einwilligung nicht informiert. */
+  function einwilligungsHinweis() {
+    return '<p class="court-hunt-einwilligung">Mit „Mitspielen" erlaubst du, dass dein Spielstand auf deinem ' +
+      'Gerät gespeichert (§ 25 TDDDG) und für die Wertung verarbeitet wird (Art. 6 Abs. 1 lit. a DSGVO). ' +
+      'Beides gilt nur, bis du deinen Spielstand löschst. Einzelheiten in der ' +
+      '<a href="/datenschutz.html#court-hunt">Datenschutzerklärung</a>.</p>';
+  }
+
   function standPanel(el, meldungText, meldungKlasse) {
     var stand = ladeStand();
 
@@ -492,6 +503,7 @@
         'um dir den Ticket-Gutschein zu schicken.</p>' +
         '<button type="button" class="btn btn-primary btn-lg" data-court-hunt-checkin>' +
           '<i data-lucide="map-pin-check" class="icon-18"></i> Mitspielen und einchecken</button>' +
+        einwilligungsHinweis() +
         meldungHtml;
     } else {
       var heute = tagKey(new Date());
@@ -732,6 +744,7 @@
       '</p>' +
       '<button type="button" class="btn btn-primary btn-lg" data-checkin' + (gesperrt ? ' disabled' : '') + '>' +
         '<i data-lucide="map-pin-check" class="icon-18"></i> ' + (stand ? 'Ich bin hier' : 'Mitspielen und einchecken') + '</button>' +
+      (stand ? '' : einwilligungsHinweis()) +
       '<p class="court-hunt-meldung" role="status" aria-live="polite">' +
         (gesperrt ? 'Gerade erst eingecheckt — dieser Platz zählt wieder in ' +
           stunden(COOLDOWN_MS - (Date.now() - letzterCheckin(stand, platz.slug))) + '.' : '') +
