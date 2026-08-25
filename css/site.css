@@ -599,6 +599,10 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .melde-meldung { margin-top: 12px; font-size: 14px; color: var(--text-secondary); }
 .melde-meldung.ist-erfolg { color: var(--color-success); font-weight: var(--weight-semibold); }
 .melde-meldung.ist-hinweis { color: var(--color-brand-orange-text); font-weight: var(--weight-semibold); }
+.freiplatz-maengel {
+  margin-top: 24px; padding: 14px 16px; background: var(--bg-subtle);
+  border-radius: var(--radius-md); font-size: 13px; color: var(--text-secondary); line-height: 1.5;
+}
 .foerderhinweis {
   margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border);
   font-size: 13px; color: var(--text-muted);

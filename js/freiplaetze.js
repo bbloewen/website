@@ -646,6 +646,7 @@
           '<i data-lucide="map-pin" class="icon-16"></i> ' + esc(platz.adresse) + '</a>' +
         '<div id="freiplatz-karte" class="freiplaetze-map freiplaetze-map-klein"></div>' +
         '<div class="freiplatz-checkin" id="freiplatz-checkin"></div>' +
+        maengelHinweis() +
         '<p class="mt-5"><a class="card-link" href="/trainieren/freiplaetze.html">' +
           '<i data-lucide="arrow-left" class="icon-14"></i> Alle Freiplätze</a></p>';
 
@@ -653,6 +654,17 @@
       checkinBereich(document.getElementById('freiplatz-checkin'), platz);
       icons();
     });
+  }
+
+  /* Kaputter Korb, gerissenes Netz: Die Freiplätze gehören der Stadt Erfurt,
+     Reparaturen laufen über deren Mängelmelder. Der Hinweis steht bewusst auf
+     jeder Platzseite — wer vor einem defekten Korb steht, sucht dort und nicht
+     im Impressum. */
+  function maengelHinweis() {
+    return '<p class="freiplatz-maengel">Korb verbogen, Netz gerissen, Belag kaputt? Die Freiplätze gehören ' +
+      'der Stadt Erfurt — Reparaturen laufen über den ' +
+      '<a href="https://maengelmelder.erfurt.de/" target="_blank" rel="noopener">Mängelmelder der Stadt</a>, ' +
+      'nicht über den Verein. Ein Hinweis dort hilft mehr als eine Nachricht an uns.</p>';
   }
 
   function checkinBereich(el, platz) {
