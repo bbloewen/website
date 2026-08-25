@@ -34,7 +34,10 @@
      aber nicht, sonst wird aus der Toleranz ein Scheunentor. */
   var RADIUS_M = 100;
   var GENAUIGKEIT_MAX_M = 75;
-  var COOLDOWN_MS = 24 * 60 * 60 * 1000;
+  /* 12 Stunden statt 24: Wer Dienstag abends am Platz war, soll Mittwoch
+     nachmittags wieder zählen — sonst bestraft die Sperre den, der einfach mal
+     früher spielt. */
+  var COOLDOWN_MS = 12 * 60 * 60 * 1000;
   var PUNKTE = { checkin: 10, erstbesuch: 20, serie3: 30, serie7: 100 };
 
   /* ---------------------------------------------------------------- Daten */
@@ -561,7 +564,7 @@
       if (Date.now() - letzterCheckin(stand, naechster.platz.slug) < COOLDOWN_MS) {
         knopf.disabled = false;
         meldung.className = 'court-hunt-meldung ist-hinweis';
-        meldung.textContent = naechster.platz.name + ' hast du heute schon gezählt — morgen wieder.';
+        meldung.textContent = naechster.platz.name + ' hast du gerade erst gezählt — in ein paar Stunden wieder.';
         return;
       }
 
@@ -675,7 +678,7 @@
       '<button type="button" class="btn btn-primary btn-lg" data-checkin' + (gesperrt ? ' disabled' : '') + '>' +
         '<i data-lucide="map-pin-check" class="icon-18"></i> ' + (stand ? 'Ich bin hier' : 'Mitspielen und einchecken') + '</button>' +
       '<p class="court-hunt-meldung" role="status" aria-live="polite">' +
-        (gesperrt ? 'Heute schon eingecheckt — dieser Platz zählt wieder in ' +
+        (gesperrt ? 'Gerade erst eingecheckt — dieser Platz zählt wieder in ' +
           stunden(COOLDOWN_MS - (Date.now() - letzterCheckin(stand, platz.slug))) + '.' : '') +
       '</p>';
 
@@ -698,7 +701,7 @@
         var aktuell = ladeStand() || starteSpiel();
         if (Date.now() - letzterCheckin(aktuell, platz.slug) < COOLDOWN_MS) {
           meldung.className = 'court-hunt-meldung ist-hinweis';
-          meldung.textContent = 'Diesen Platz hast du heute schon gezählt — morgen wieder.';
+          meldung.textContent = 'Diesen Platz hast du gerade erst gezählt — in ein paar Stunden wieder.';
           return;
         }
         var gebucht = bucheCheckin(aktuell, platz, Date.now(), coords);
