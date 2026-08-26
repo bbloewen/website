@@ -545,5 +545,53 @@
     "category": "Saison & Teams",
     "description": "Heimspiel Basketball Löwen Erfurt gegen Ahorn Camp Baskets am 28.03.2027 in der Riethsporthalle.",
     "keywords": "Heimspiel Tickets Ahorn Camp Baskets"
+  },
+  {
+    "title": "AGB",
+    "url": "/agb.html",
+    "category": "Sonstiges",
+    "description": "Allgemeine Geschäftsbedingungen der Basketball Löwen Erfurt für den Ticketkauf."
+  },
+  {
+    "title": "Beitragsordnung",
+    "url": "/beitragsordnung.html",
+    "category": "Sonstiges",
+    "description": "Die Beitragsordnung des Basketball Löwen e.V.: Mitgliederkategorien, Höhe der Beiträge und Aufnahmegebühr."
+  },
+  {
+    "title": "Satzung",
+    "url": "/satzung.html",
+    "category": "Sonstiges",
+    "description": "Die Satzung des Basketball Löwen e.V. im Volltext: Name und Sitz, Vereinszweck, Mitgliedschaft, Vorstand und Mitgliederversammlung."
+  },
+  {
+    "title": "Anmelden",
+    "url": "/mitglied-werden/formular.html",
+    "category": "Club",
+    "description": "Schließe deine Mitgliedschaft bei den Basketball Löwen Erfurt direkt online ab."
+  },
+  {
+    "title": "Teil des Freundeskreises werden",
+    "url": "/partner/freundeskreis-mitglied-werden.html",
+    "category": "Partner",
+    "description": "Teil des Freundeskreises der Basketball Löwen Erfurt werden — Unterstützungsvereinbarung direkt online ausfüllen."
+  },
+  {
+    "title": "Familienpass",
+    "url": "/tickets/familienpass.html",
+    "category": "Tickets",
+    "description": "Familienpass-Besitzer registrieren sich hier und erhalten per E-Mail einen kostenlosen Gutschein für das nächste Heimspiel."
+  },
+  {
+    "title": "Hallenzeiten im LÖWENPARK anfragen",
+    "url": "/trainieren/loewenpark-buchen.html",
+    "category": "Trainieren",
+    "description": "Hallenzeiten im LÖWENPARK am Südpark in Erfurt für Training, Camps und Veranstaltungen anfragen."
+  },
+  {
+    "title": "Neuer Cheftrainer: Leif Ibrahim übernimmt bei den Löwen",
+    "url": "/news/artikel/2026-08-13_verein_neuer-cheftrainer-ibrahim.html",
+    "category": "News",
+    "description": "Der Schwede Leif Ibrahim wird neuer Cheftrainer der Basketball Löwen Erfurt. Florian Gut wechselt in die sportliche Leitung, dazu kommen sieben Neuzugänge."
   }
 ]
