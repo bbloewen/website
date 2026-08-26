@@ -568,7 +568,7 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
   display: block; width: 22px; height: 22px; border-radius: 50%;
   background: var(--color-success); border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,18,45,.45);
 }
-.freiplatz-pin-eingeschraenkt span { background: #E57373; border-color: #fff; box-shadow: 0 1px 4px rgba(0,18,45,.35); }
+.freiplatz-pin-eingeschraenkt span { background: radial-gradient(circle, #E57373 0 35%, #fff 35% 100%); border-color: #fff; box-shadow: 0 1px 4px rgba(0,18,45,.35); }
 .freiplatz-pin-event span { background: var(--color-brand-navy); border-color: #fff; }
 .freiplatz-pin-probe.ist-event { background: var(--color-brand-navy); }
 .freiplatz-popup-event { color: #5B3FB0; font-weight: var(--weight-semibold); }
@@ -603,7 +603,7 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
   width: 16px; height: 16px; border-radius: 50%; flex: 0 0 16px;
   background: var(--color-success); border: 3px solid #fff; box-shadow: 0 1px 3px rgba(0,18,45,.4);
 }
-.freiplatz-pin-probe.ist-eingeschraenkt { background: #E57373; border-color: #fff; }
+.freiplatz-pin-probe.ist-eingeschraenkt { background: radial-gradient(circle, #E57373 0 35%, #fff 35% 100%); border-color: #fff; }
 .freiplaetze-map-klein { height: 260px; }
 
 /* ---- Court-Hunt (Freiplatz-Spiel, seit 24.08.2026) ---- */
