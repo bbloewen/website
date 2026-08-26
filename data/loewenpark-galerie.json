@@ -1,28 +1,120 @@
 {
   "hinweis": "Fotos vom Baufortschritt des LÖWENPARK. Jeder Eintrag braucht 'src' (Bildpfad) und 'alt' (Bildbeschreibung). Wird auf trainieren/loewenpark.html gezeigt (max. 50, wächst mit jedem Bauabschnitt).",
   "bilder": [
-    { "src": "/assets/img/news/loewenpark-dach.webp", "alt": "Luftaufnahme der Dachkonstruktion im Rohbau" },
-    { "src": "/assets/img/loewenpark-galerie-02.webp", "alt": "Rohbau des LÖWENPARK von außen" },
-    { "src": "/assets/img/loewenpark-galerie-03.webp", "alt": "Rohbau des LÖWENPARK, Außenansicht" },
-    { "src": "/assets/img/loewenpark-galerie-04.webp", "alt": "Baustelle mit Bäumen im Vordergrund" },
-    { "src": "/assets/img/loewenpark-galerie-05.webp", "alt": "Gerüst an der Gebäudefassade" },
-    { "src": "/assets/img/loewenpark-galerie-06.webp", "alt": "Gerüst an der Gebäudefassade, andere Ansicht" },
-    { "src": "/assets/img/loewenpark-galerie-07.webp", "alt": "Basketball-Löwen-Grafik an der Fassade" },
-    { "src": "/assets/img/loewenpark-galerie-08.webp", "alt": "Gebäudeaußenansicht mit Gerüst" },
-    { "src": "/assets/img/loewenpark-galerie-09.webp", "alt": "Richtfest am LÖWENPARK, Eingangsbereich" },
-    { "src": "/assets/img/loewenpark-galerie-10.webp", "alt": "Richtkranz wird auf dem Gerüst angebracht" },
-    { "src": "/assets/img/loewenpark-galerie-11.webp", "alt": "Gerüst an der Gebäudefassade beim Richtfest" },
-    { "src": "/assets/img/loewenpark-galerie-12.webp", "alt": "Ansprache beim Richtfest vor der Rohbauwand" },
-    { "src": "/assets/img/loewenpark-galerie-13.webp", "alt": "Anstoßen beim Richtfest vor dem Rohbau" },
-    { "src": "/assets/img/loewenpark-galerie-14.webp", "alt": "Flur im Innenausbau" },
-    { "src": "/assets/img/loewenpark-galerie-15.webp", "alt": "Sporthalle im Innenausbau, Weitwinkel" },
-    { "src": "/assets/img/loewenpark-galerie-16.webp", "alt": "Zwei Personen begutachten die Sporthalle" },
-    { "src": "/assets/img/loewenpark-galerie-17.webp", "alt": "Tür mit Beschriftung Trainer-Raum" },
-    { "src": "/assets/img/loewenpark-galerie-18.webp", "alt": "Person in der Sporthalle im Innenausbau" },
-    { "src": "/assets/img/loewenpark-galerie-19.webp", "alt": "Fenster- und Wandgestaltung im Innenausbau" },
-    { "src": "/assets/img/loewenpark-galerie-20.webp", "alt": "Gebäudeaußenansicht mit Wandgestaltung" },
-    { "src": "/assets/img/loewenpark-galerie-21.webp", "alt": "Basketball-Löwen-Logo als Wandgestaltung außen" },
-    { "src": "/assets/img/loewenpark-galerie-22.webp", "alt": "Großflächiger Basketball-Löwen-Schriftzug an der Fassade" },
-    { "src": "/assets/img/loewenpark-galerie-23.webp", "alt": "Hubarbeitsbühne bei Arbeiten am Gebäude" }
+    {
+      "src": "/assets/img/news/loewenpark-dach.webp",
+      "alt": "Luftaufnahme der Dachkonstruktion im Rohbau",
+      "thumb": "/assets/img/thumbs/loewenpark-dach.webp"
+    },
+    {
+      "src": "/assets/img/loewenpark-galerie-02.webp",
+      "alt": "Rohbau des LÖWENPARK von außen",
+      "thumb": "/assets/img/thumbs/loewenpark-galerie-02.webp"
+    },
+    {
+      "src": "/assets/img/loewenpark-galerie-03.webp",
+      "alt": "Rohbau des LÖWENPARK, Außenansicht",
+      "thumb": "/assets/img/thumbs/loewenpark-galerie-03.webp"
+    },
+    {
+      "src": "/assets/img/loewenpark-galerie-04.webp",
+      "alt": "Baustelle mit Bäumen im Vordergrund",
+      "thumb": "/assets/img/thumbs/loewenpark-galerie-04.webp"
+    },
+    {
+      "src": "/assets/img/loewenpark-galerie-05.webp",
+      "alt": "Gerüst an der Gebäudefassade",
+      "thumb": "/assets/img/thumbs/loewenpark-galerie-05.webp"
+    },
+    {
+      "src": "/assets/img/loewenpark-galerie-06.webp",
+      "alt": "Gerüst an der Gebäudefassade, andere Ansicht",
+      "thumb": "/assets/img/thumbs/loewenpark-galerie-06.webp"
+    },
+    {
+      "src": "/assets/img/loewenpark-galerie-07.webp",
+      "alt": "Basketball-Löwen-Grafik an der Fassade",
+      "thumb": "/assets/img/thumbs/loewenpark-galerie-07.webp"
+    },
+    {
+      "src": "/assets/img/loewenpark-galerie-08.webp",
+      "alt": "Gebäudeaußenansicht mit Gerüst",
+      "thumb": "/assets/img/thumbs/loewenpark-galerie-08.webp"
+    },
+    {
+      "src": "/assets/img/loewenpark-galerie-09.webp",
+      "alt": "Richtfest am LÖWENPARK, Eingangsbereich",
+      "thumb": "/assets/img/thumbs/loewenpark-galerie-09.webp"
+    },
+    {
+      "src": "/assets/img/loewenpark-galerie-10.webp",
+      "alt": "Richtkranz wird auf dem Gerüst angebracht",
+      "thumb": "/assets/img/thumbs/loewenpark-galerie-10.webp"
+    },
+    {
+      "src": "/assets/img/loewenpark-galerie-11.webp",
+      "alt": "Gerüst an der Gebäudefassade beim Richtfest",
+      "thumb": "/assets/img/thumbs/loewenpark-galerie-11.webp"
+    },
+    {
+      "src": "/assets/img/loewenpark-galerie-12.webp",
+      "alt": "Ansprache beim Richtfest vor der Rohbauwand",
+      "thumb": "/assets/img/thumbs/loewenpark-galerie-12.webp"
+    },
+    {
+      "src": "/assets/img/loewenpark-galerie-13.webp",
+      "alt": "Anstoßen beim Richtfest vor dem Rohbau",
+      "thumb": "/assets/img/thumbs/loewenpark-galerie-13.webp"
+    },
+    {
+      "src": "/assets/img/loewenpark-galerie-14.webp",
+      "alt": "Flur im Innenausbau",
+      "thumb": "/assets/img/thumbs/loewenpark-galerie-14.webp"
+    },
+    {
+      "src": "/assets/img/loewenpark-galerie-15.webp",
+      "alt": "Sporthalle im Innenausbau, Weitwinkel",
+      "thumb": "/assets/img/thumbs/loewenpark-galerie-15.webp"
+    },
+    {
+      "src": "/assets/img/loewenpark-galerie-16.webp",
+      "alt": "Zwei Personen begutachten die Sporthalle",
+      "thumb": "/assets/img/thumbs/loewenpark-galerie-16.webp"
+    },
+    {
+      "src": "/assets/img/loewenpark-galerie-17.webp",
+      "alt": "Tür mit Beschriftung Trainer-Raum",
+      "thumb": "/assets/img/thumbs/loewenpark-galerie-17.webp"
+    },
+    {
+      "src": "/assets/img/loewenpark-galerie-18.webp",
+      "alt": "Person in der Sporthalle im Innenausbau",
+      "thumb": "/assets/img/thumbs/loewenpark-galerie-18.webp"
+    },
+    {
+      "src": "/assets/img/loewenpark-galerie-19.webp",
+      "alt": "Fenster- und Wandgestaltung im Innenausbau",
+      "thumb": "/assets/img/thumbs/loewenpark-galerie-19.webp"
+    },
+    {
+      "src": "/assets/img/loewenpark-galerie-20.webp",
+      "alt": "Gebäudeaußenansicht mit Wandgestaltung",
+      "thumb": "/assets/img/thumbs/loewenpark-galerie-20.webp"
+    },
+    {
+      "src": "/assets/img/loewenpark-galerie-21.webp",
+      "alt": "Basketball-Löwen-Logo als Wandgestaltung außen",
+      "thumb": "/assets/img/thumbs/loewenpark-galerie-21.webp"
+    },
+    {
+      "src": "/assets/img/loewenpark-galerie-22.webp",
+      "alt": "Großflächiger Basketball-Löwen-Schriftzug an der Fassade",
+      "thumb": "/assets/img/thumbs/loewenpark-galerie-22.webp"
+    },
+    {
+      "src": "/assets/img/loewenpark-galerie-23.webp",
+      "alt": "Hubarbeitsbühne bei Arbeiten am Gebäude",
+      "thumb": "/assets/img/thumbs/loewenpark-galerie-23.webp"
+    }
   ]
 }

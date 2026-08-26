@@ -1,26 +1,114 @@
 {
   "bilder": [
-    { "src": "/assets/img/fanclub-04-jubel-arme.webp", "alt": "Die Fanclub-Mitglieder jubeln mit erhobenen Armen auf dem Petersberg" },
-    { "src": "/assets/img/fanclub-10-familie-dom.webp", "alt": "Familie mit zwei Kindern und Basketbällen, im Hintergrund der Erfurter Dom" },
-    { "src": "/assets/img/fanclub-01-banner-gruppe.webp", "alt": "Große Fangruppe hält das Banner „Wir brüllen euch zum Sieg“ hoch" },
-    { "src": "/assets/img/fanclub-11-kinder-baelle.webp", "alt": "Zwei Kinder mit Basketbällen, dahinter die Eltern mit Daumen nach oben" },
-    { "src": "/assets/img/fanclub-03-schal-hoch.webp", "alt": "Fans halten einen Löwen-Fanschal über den Köpfen" },
-    { "src": "/assets/img/fanclub-16-daumen-hoch.webp", "alt": "Drei Fans in „Ich bin ein Löwe“-Shirts zeigen nach oben, dahinter die Domspitzen" },
-    { "src": "/assets/img/fanclub-07-gruppe-panorama.webp", "alt": "Fangruppe auf der Mauer des Petersbergs mit Blick über Erfurt" },
-    { "src": "/assets/img/fanclub-12-familie-portrait.webp", "alt": "Eltern und zwei Kinder mit Basketbällen vor der Festungsmauer" },
-    { "src": "/assets/img/fanclub-05-jubel-faeuste.webp", "alt": "Fans recken die Fäuste in die Luft" },
-    { "src": "/assets/img/fanclub-18-gruppe-weiss.webp", "alt": "Fünf Fans in weißen Löwen-Shirts vor dem Erfurter Panorama" },
-    { "src": "/assets/img/fanclub-02-banner-jubel.webp", "alt": "Fangruppe hinter dem Banner, einige mit erhobenen Armen" },
-    { "src": "/assets/img/fanclub-13-kinder-nah.webp", "alt": "Nahaufnahme: zwei Kinder halten Basketbälle in den Händen" },
-    { "src": "/assets/img/fanclub-08-gruppe-baelle.webp", "alt": "Fans mit Basketbällen auf dem Petersberg, dahinter die Domspitzen" },
-    { "src": "/assets/img/fanclub-20-jubel-weiss.webp", "alt": "Fans in weißen Löwen-Shirts jubeln, ein Basketball fliegt über ihnen" },
-    { "src": "/assets/img/fanclub-06-jubel-nah.webp", "alt": "Fans und Kinder jubeln dicht beieinander in die Kamera" },
-    { "src": "/assets/img/fanclub-19-baelle-portrait.webp", "alt": "Vier Fans in weißen Shirts mit Basketbällen in den Armen" },
-    { "src": "/assets/img/fanclub-09-gruppe-arme-hoch.webp", "alt": "Weit aufgestellte Fangruppe mit erhobenen Armen über den Dächern Erfurts" },
-    { "src": "/assets/img/fanclub-14-familie-ball.webp", "alt": "Kleine Fangruppe mit Basketball vor der Domspitze" },
-    { "src": "/assets/img/fanclub-15-ball-in-der-luft.webp", "alt": "Fangruppe posiert, während ein Basketball in die Luft geworfen wird" },
-    { "src": "/assets/img/fanclub-17-gruppe-mauer.webp", "alt": "Fans lehnen entspannt an der Mauer des Petersbergs" },
-    { "src": "/assets/img/fanclub-saisoneroeffnung.webp", "alt": "Der Fanbeirat an der AnsprechBar im Foyer der Riethsporthalle" },
-    { "src": "/assets/img/fanclub-fans.webp", "alt": "Fans der Basketball Löwen feiern in der Riethsporthalle" }
+    {
+      "src": "/assets/img/fanclub-04-jubel-arme.webp",
+      "alt": "Die Fanclub-Mitglieder jubeln mit erhobenen Armen auf dem Petersberg",
+      "thumb": "/assets/img/thumbs/fanclub-04-jubel-arme.webp"
+    },
+    {
+      "src": "/assets/img/fanclub-10-familie-dom.webp",
+      "alt": "Familie mit zwei Kindern und Basketbällen, im Hintergrund der Erfurter Dom",
+      "thumb": "/assets/img/thumbs/fanclub-10-familie-dom.webp"
+    },
+    {
+      "src": "/assets/img/fanclub-01-banner-gruppe.webp",
+      "alt": "Große Fangruppe hält das Banner „Wir brüllen euch zum Sieg“ hoch",
+      "thumb": "/assets/img/thumbs/fanclub-01-banner-gruppe.webp"
+    },
+    {
+      "src": "/assets/img/fanclub-11-kinder-baelle.webp",
+      "alt": "Zwei Kinder mit Basketbällen, dahinter die Eltern mit Daumen nach oben",
+      "thumb": "/assets/img/thumbs/fanclub-11-kinder-baelle.webp"
+    },
+    {
+      "src": "/assets/img/fanclub-03-schal-hoch.webp",
+      "alt": "Fans halten einen Löwen-Fanschal über den Köpfen",
+      "thumb": "/assets/img/thumbs/fanclub-03-schal-hoch.webp"
+    },
+    {
+      "src": "/assets/img/fanclub-16-daumen-hoch.webp",
+      "alt": "Drei Fans in „Ich bin ein Löwe“-Shirts zeigen nach oben, dahinter die Domspitzen",
+      "thumb": "/assets/img/thumbs/fanclub-16-daumen-hoch.webp"
+    },
+    {
+      "src": "/assets/img/fanclub-07-gruppe-panorama.webp",
+      "alt": "Fangruppe auf der Mauer des Petersbergs mit Blick über Erfurt",
+      "thumb": "/assets/img/thumbs/fanclub-07-gruppe-panorama.webp"
+    },
+    {
+      "src": "/assets/img/fanclub-12-familie-portrait.webp",
+      "alt": "Eltern und zwei Kinder mit Basketbällen vor der Festungsmauer",
+      "thumb": "/assets/img/thumbs/fanclub-12-familie-portrait.webp"
+    },
+    {
+      "src": "/assets/img/fanclub-05-jubel-faeuste.webp",
+      "alt": "Fans recken die Fäuste in die Luft",
+      "thumb": "/assets/img/thumbs/fanclub-05-jubel-faeuste.webp"
+    },
+    {
+      "src": "/assets/img/fanclub-18-gruppe-weiss.webp",
+      "alt": "Fünf Fans in weißen Löwen-Shirts vor dem Erfurter Panorama",
+      "thumb": "/assets/img/thumbs/fanclub-18-gruppe-weiss.webp"
+    },
+    {
+      "src": "/assets/img/fanclub-02-banner-jubel.webp",
+      "alt": "Fangruppe hinter dem Banner, einige mit erhobenen Armen",
+      "thumb": "/assets/img/thumbs/fanclub-02-banner-jubel.webp"
+    },
+    {
+      "src": "/assets/img/fanclub-13-kinder-nah.webp",
+      "alt": "Nahaufnahme: zwei Kinder halten Basketbälle in den Händen",
+      "thumb": "/assets/img/thumbs/fanclub-13-kinder-nah.webp"
+    },
+    {
+      "src": "/assets/img/fanclub-08-gruppe-baelle.webp",
+      "alt": "Fans mit Basketbällen auf dem Petersberg, dahinter die Domspitzen",
+      "thumb": "/assets/img/thumbs/fanclub-08-gruppe-baelle.webp"
+    },
+    {
+      "src": "/assets/img/fanclub-20-jubel-weiss.webp",
+      "alt": "Fans in weißen Löwen-Shirts jubeln, ein Basketball fliegt über ihnen",
+      "thumb": "/assets/img/thumbs/fanclub-20-jubel-weiss.webp"
+    },
+    {
+      "src": "/assets/img/fanclub-06-jubel-nah.webp",
+      "alt": "Fans und Kinder jubeln dicht beieinander in die Kamera",
+      "thumb": "/assets/img/thumbs/fanclub-06-jubel-nah.webp"
+    },
+    {
+      "src": "/assets/img/fanclub-19-baelle-portrait.webp",
+      "alt": "Vier Fans in weißen Shirts mit Basketbällen in den Armen",
+      "thumb": "/assets/img/thumbs/fanclub-19-baelle-portrait.webp"
+    },
+    {
+      "src": "/assets/img/fanclub-09-gruppe-arme-hoch.webp",
+      "alt": "Weit aufgestellte Fangruppe mit erhobenen Armen über den Dächern Erfurts",
+      "thumb": "/assets/img/thumbs/fanclub-09-gruppe-arme-hoch.webp"
+    },
+    {
+      "src": "/assets/img/fanclub-14-familie-ball.webp",
+      "alt": "Kleine Fangruppe mit Basketball vor der Domspitze",
+      "thumb": "/assets/img/thumbs/fanclub-14-familie-ball.webp"
+    },
+    {
+      "src": "/assets/img/fanclub-15-ball-in-der-luft.webp",
+      "alt": "Fangruppe posiert, während ein Basketball in die Luft geworfen wird",
+      "thumb": "/assets/img/thumbs/fanclub-15-ball-in-der-luft.webp"
+    },
+    {
+      "src": "/assets/img/fanclub-17-gruppe-mauer.webp",
+      "alt": "Fans lehnen entspannt an der Mauer des Petersbergs",
+      "thumb": "/assets/img/thumbs/fanclub-17-gruppe-mauer.webp"
+    },
+    {
+      "src": "/assets/img/fanclub-saisoneroeffnung.webp",
+      "alt": "Der Fanbeirat an der AnsprechBar im Foyer der Riethsporthalle",
+      "thumb": "/assets/img/thumbs/fanclub-saisoneroeffnung.webp"
+    },
+    {
+      "src": "/assets/img/fanclub-fans.webp",
+      "alt": "Fans der Basketball Löwen feiern in der Riethsporthalle",
+      "thumb": "/assets/img/thumbs/fanclub-fans.webp"
+    }
   ]
 }

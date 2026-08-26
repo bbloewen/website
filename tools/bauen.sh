@@ -8,12 +8,15 @@
 #      width/height zurueck, die Masse muessen also zuletzt drauf.
 #   4. build-head-meta.py und build-sitemap.py am Ende, sie lesen Titel,
 #      Description und noindex der fertigen Seiten.
+#   build-lucide-icons und build-galerie-thumbs stehen vorn: sie erzeugen
+#   Dateien (Icon-Buendel, Vorschaubilder), auf die die Seiten dann verweisen.
 #
 # --check reicht das Flag an alle Skripte weiter (schreibt nichts).
 set -e
 cd "$(dirname "$0")/.."
 F="$1"
-for s in build-gameday-hub build-spieltagsseiten build-freiplatz-seiten \
+for s in build-lucide-icons build-galerie-thumbs \
+         build-gameday-hub build-spieltagsseiten build-freiplatz-seiten \
          build-partner-wall build-trainingszeiten-liste build-home-news \
          build-spielplan-liste build-news-list build-freiplaetze \
          build-instagram-archiv build-partials build-bildmasse \

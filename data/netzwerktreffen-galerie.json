@@ -1,28 +1,120 @@
 {
   "hinweis": "Fotos von Netzwerk-Treffen (Alley-Oop, Sponsorenturnier u.ä.). Jeder Eintrag braucht 'src' (Bildpfad) und 'alt' (Bildbeschreibung). Wird auf partner/netzwerktreffen.html gezeigt (max. 50, wächst mit jedem Event).",
   "bilder": [
-    { "src": "/assets/img/netzwerktreffen-galerie-01.webp", "alt": "Begrüßung auf der Bühne beim Alley-Oop 2025" },
-    { "src": "/assets/img/netzwerktreffen-galerie-02.webp", "alt": "Gäste im Gespräch an der Ansprechbar" },
-    { "src": "/assets/img/netzwerktreffen-galerie-03.webp", "alt": "Zwei Gäste im Gespräch und guter Stimmung" },
-    { "src": "/assets/img/netzwerktreffen-galerie-04.webp", "alt": "Zwei Gäste im Netzwerk-Gespräch" },
-    { "src": "/assets/img/netzwerktreffen-galerie-05.webp", "alt": "Herzliche Begrüßung zwischen zwei Gästen" },
-    { "src": "/assets/img/netzwerktreffen-galerie-06.webp", "alt": "Gäste tauschen sich im Gespräch aus" },
-    { "src": "/assets/img/netzwerktreffen-galerie-07.webp", "alt": "Gäste in angeregter Gesprächsrunde" },
-    { "src": "/assets/img/netzwerktreffen-galerie-08.webp", "alt": "Gruppe von Gästen im Netzwerk-Gespräch" },
-    { "src": "/assets/img/netzwerktreffen-galerie-09.webp", "alt": "Gäste tauschen sich in kleiner Runde aus" },
-    { "src": "/assets/img/netzwerktreffen-galerie-10.webp", "alt": "Gästinnen im angeregten Gespräch" },
-    { "src": "/assets/img/netzwerktreffen-galerie-11.webp", "alt": "Zwei Gäste lächeln in die Kamera" },
-    { "src": "/assets/img/netzwerktreffen-galerie-12.webp", "alt": "Gäste im Gespräch am Empfang" },
-    { "src": "/assets/img/netzwerktreffen-galerie-13.webp", "alt": "Gäste vor der AnsprechBar im Gespräch" },
-    { "src": "/assets/img/netzwerktreffen-galerie-14.webp", "alt": "Gespräch vor dem AnsprechBar-Banner des Fanclubs" },
-    { "src": "/assets/img/netzwerktreffen-galerie-15.webp", "alt": "Gäste im Gespräch in stimmungsvollem Licht" },
-    { "src": "/assets/img/netzwerktreffen-galerie-16.webp", "alt": "Gäste in Basketball-Löwen-Kleidung im Gespräch" },
-    { "src": "/assets/img/netzwerktreffen-galerie-17.webp", "alt": "Zwei Gäste stoßen gut gelaunt an" },
-    { "src": "/assets/img/netzwerktreffen-galerie-18.webp", "alt": "Willkommens-Folie Alley-Oop 2025" },
-    { "src": "/assets/img/netzwerktreffen-galerie-19.webp", "alt": "Gäste verfolgen den Vortrag im Saal" },
-    { "src": "/assets/img/netzwerktreffen-galerie-20.webp", "alt": "Vortrag auf der Bühne beim Alley-Oop" },
-    { "src": "/assets/img/netzwerktreffen-galerie-21.webp", "alt": "Vortragender vor der Alley-Oop-Bühnenwand" },
-    { "src": "/assets/img/netzwerktreffen-galerie-22.webp", "alt": "Zwei Vortragende auf der Alley-Oop-Bühne" },
-    { "src": "/assets/img/netzwerktreffen-galerie-23.webp", "alt": "Interviewrunde auf der Alley-Oop-Bühne" }
+    {
+      "src": "/assets/img/netzwerktreffen-galerie-01.webp",
+      "alt": "Begrüßung auf der Bühne beim Alley-Oop 2025",
+      "thumb": "/assets/img/thumbs/netzwerktreffen-galerie-01.webp"
+    },
+    {
+      "src": "/assets/img/netzwerktreffen-galerie-02.webp",
+      "alt": "Gäste im Gespräch an der Ansprechbar",
+      "thumb": "/assets/img/thumbs/netzwerktreffen-galerie-02.webp"
+    },
+    {
+      "src": "/assets/img/netzwerktreffen-galerie-03.webp",
+      "alt": "Zwei Gäste im Gespräch und guter Stimmung",
+      "thumb": "/assets/img/thumbs/netzwerktreffen-galerie-03.webp"
+    },
+    {
+      "src": "/assets/img/netzwerktreffen-galerie-04.webp",
+      "alt": "Zwei Gäste im Netzwerk-Gespräch",
+      "thumb": "/assets/img/thumbs/netzwerktreffen-galerie-04.webp"
+    },
+    {
+      "src": "/assets/img/netzwerktreffen-galerie-05.webp",
+      "alt": "Herzliche Begrüßung zwischen zwei Gästen",
+      "thumb": "/assets/img/thumbs/netzwerktreffen-galerie-05.webp"
+    },
+    {
+      "src": "/assets/img/netzwerktreffen-galerie-06.webp",
+      "alt": "Gäste tauschen sich im Gespräch aus",
+      "thumb": "/assets/img/thumbs/netzwerktreffen-galerie-06.webp"
+    },
+    {
+      "src": "/assets/img/netzwerktreffen-galerie-07.webp",
+      "alt": "Gäste in angeregter Gesprächsrunde",
+      "thumb": "/assets/img/thumbs/netzwerktreffen-galerie-07.webp"
+    },
+    {
+      "src": "/assets/img/netzwerktreffen-galerie-08.webp",
+      "alt": "Gruppe von Gästen im Netzwerk-Gespräch",
+      "thumb": "/assets/img/thumbs/netzwerktreffen-galerie-08.webp"
+    },
+    {
+      "src": "/assets/img/netzwerktreffen-galerie-09.webp",
+      "alt": "Gäste tauschen sich in kleiner Runde aus",
+      "thumb": "/assets/img/thumbs/netzwerktreffen-galerie-09.webp"
+    },
+    {
+      "src": "/assets/img/netzwerktreffen-galerie-10.webp",
+      "alt": "Gästinnen im angeregten Gespräch",
+      "thumb": "/assets/img/thumbs/netzwerktreffen-galerie-10.webp"
+    },
+    {
+      "src": "/assets/img/netzwerktreffen-galerie-11.webp",
+      "alt": "Zwei Gäste lächeln in die Kamera",
+      "thumb": "/assets/img/thumbs/netzwerktreffen-galerie-11.webp"
+    },
+    {
+      "src": "/assets/img/netzwerktreffen-galerie-12.webp",
+      "alt": "Gäste im Gespräch am Empfang",
+      "thumb": "/assets/img/thumbs/netzwerktreffen-galerie-12.webp"
+    },
+    {
+      "src": "/assets/img/netzwerktreffen-galerie-13.webp",
+      "alt": "Gäste vor der AnsprechBar im Gespräch",
+      "thumb": "/assets/img/thumbs/netzwerktreffen-galerie-13.webp"
+    },
+    {
+      "src": "/assets/img/netzwerktreffen-galerie-14.webp",
+      "alt": "Gespräch vor dem AnsprechBar-Banner des Fanclubs",
+      "thumb": "/assets/img/thumbs/netzwerktreffen-galerie-14.webp"
+    },
+    {
+      "src": "/assets/img/netzwerktreffen-galerie-15.webp",
+      "alt": "Gäste im Gespräch in stimmungsvollem Licht",
+      "thumb": "/assets/img/thumbs/netzwerktreffen-galerie-15.webp"
+    },
+    {
+      "src": "/assets/img/netzwerktreffen-galerie-16.webp",
+      "alt": "Gäste in Basketball-Löwen-Kleidung im Gespräch",
+      "thumb": "/assets/img/thumbs/netzwerktreffen-galerie-16.webp"
+    },
+    {
+      "src": "/assets/img/netzwerktreffen-galerie-17.webp",
+      "alt": "Zwei Gäste stoßen gut gelaunt an",
+      "thumb": "/assets/img/thumbs/netzwerktreffen-galerie-17.webp"
+    },
+    {
+      "src": "/assets/img/netzwerktreffen-galerie-18.webp",
+      "alt": "Willkommens-Folie Alley-Oop 2025",
+      "thumb": "/assets/img/thumbs/netzwerktreffen-galerie-18.webp"
+    },
+    {
+      "src": "/assets/img/netzwerktreffen-galerie-19.webp",
+      "alt": "Gäste verfolgen den Vortrag im Saal",
+      "thumb": "/assets/img/thumbs/netzwerktreffen-galerie-19.webp"
+    },
+    {
+      "src": "/assets/img/netzwerktreffen-galerie-20.webp",
+      "alt": "Vortrag auf der Bühne beim Alley-Oop",
+      "thumb": "/assets/img/thumbs/netzwerktreffen-galerie-20.webp"
+    },
+    {
+      "src": "/assets/img/netzwerktreffen-galerie-21.webp",
+      "alt": "Vortragender vor der Alley-Oop-Bühnenwand",
+      "thumb": "/assets/img/thumbs/netzwerktreffen-galerie-21.webp"
+    },
+    {
+      "src": "/assets/img/netzwerktreffen-galerie-22.webp",
+      "alt": "Zwei Vortragende auf der Alley-Oop-Bühne",
+      "thumb": "/assets/img/thumbs/netzwerktreffen-galerie-22.webp"
+    },
+    {
+      "src": "/assets/img/netzwerktreffen-galerie-23.webp",
+      "alt": "Interviewrunde auf der Alley-Oop-Bühne",
+      "thumb": "/assets/img/thumbs/netzwerktreffen-galerie-23.webp"
+    }
   ]
 }

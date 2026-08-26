@@ -231,6 +231,11 @@
     <div class="container container-narrow">
       <span class="eyebrow">Trainieren · <a href="/trainieren/freiplaetze.html">Freiplätze</a></span>
       <div id="freiplatz-detail">
+        <!-- Ueberschrift schon im Ladezustand: js/freiplaetze.js ersetzt den ganzen
+             Container samt h1 durch den echten Platznamen. Ohne diesen Platzhalter
+             hat die Seite bis dahin gar keine Ueberschrift, was fuer Screenreader
+             und Tastaturnavigation ein Loch ist. -->
+        <h1 class="t-h2">Freiplatz</h1>
         <p class="t-body">Platz wird geladen …</p>
       </div>
     </div>

@@ -26,7 +26,12 @@ function initCampGallery(containerId, campSlug, jsonPath, showComingSoon) {
 
     var html = bilder.map(function (b) {
       var alt = (b.alt || '').replace(/"/g, '&quot;');
-      return '<div class="camp-gallery-photo" data-lightbox-src="' + b.src + '" data-lightbox-alt="' + alt + '"><img src="' + b.src + '" alt="' + alt + '" loading="lazy" /></div>';
+      /* Im Streifen das Vorschaubild (480px breit, s. tools/build-galerie-thumbs.py),
+         in der Lightbox das Original. Die Kachel ist 240 mal 160 Pixel gross --
+         vorher lagen dort die Originale, die LOEWENPARK-Galerie allein 8,2 MB.
+         Rueckfall auf b.src, falls eine Galerie-Datei noch kein thumb hat. */
+      var klein = b.thumb || b.src;
+      return '<div class="camp-gallery-photo" data-lightbox-src="' + b.src + '" data-lightbox-alt="' + alt + '"><img src="' + klein + '" width="480" height="320" alt="' + alt + '" loading="lazy" /></div>';
     }).join('');
     if (showComingSoon) {
       html += '<div class="camp-gallery-photo camp-gallery-photo-soon"><span>Weitere Fotos<br>folgen in Kürze</span></div>';
