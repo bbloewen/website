@@ -20,14 +20,13 @@ Aufruf:
 """
 
 import argparse
-import html
 import json
 import re
 import sys
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from seo_common import BASE, REPO, canonical_url, indexable_pages
+from seo_common import BASE, REPO, attr, canonical_url, indexable_pages, text_of
 
 START = "<!-- SEO:auto START (tools/build-head-meta.py — nicht von Hand ändern) -->"
 END = "<!-- SEO:auto END -->"
@@ -105,6 +104,31 @@ LOEWENPARK = {
     },
 }
 
+# Die Spielstaette selbst -- nicht zu verwechseln mit dem Freiplatz an der
+# Riethsporthalle, der eine eigene Entitaet mit eigenem Knoten ist.
+# StadiumOrArena ist der schema.org-Untertyp fuer eine Spielstaette; er ist
+# praeziser als SportsActivityLocation und genau das, womit Google eine Halle
+# versteht. Kein SportsEvent auf dem Hub: Jedes Heimspiel deklariert sein Event
+# schon auf seiner eigenen Seite, und doppelte Events waren am 25.08.2026 genau
+# der Fehler, der auf spielplan.html und tickets.html aufgeraeumt wurde.
+RIETHSPORTHALLE = {
+    "@type": "StadiumOrArena",
+    "name": "Riethsporthalle",
+    "alternateName": "Riethsporthalle Erfurt",
+    "description": "Heimspielstätte der Basketball Löwen Erfurt — Profis, Löwinnen und U19.",
+    "url": BASE + "saison/profis/gameday/",
+    "mainEntityOfPage": {"@type": "WebPage", "@id": BASE + "saison/profis/gameday/"},
+    "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Essener Straße 20",
+        "postalCode": "99089",
+        "addressLocality": "Erfurt",
+        "addressRegion": "Thüringen",
+        "addressCountry": "DE",
+    },
+    "geo": {"@type": "GeoCoordinates", "latitude": 51.0032702, "longitude": 11.0127086},
+}
+
 # Erstes Pfadsegment -> Breadcrumb-Bezeichnung (Formulierung aus partials/header.html)
 SECTIONS = {
     "club": ("Club", "club/ueber-uns.html"),
@@ -123,15 +147,6 @@ H1_RE = re.compile(r"<h1[^>]*>(.*?)</h1>", re.S)
 HERO_NEWS_RE = re.compile(r"hero-news-([a-z0-9-]+)")
 ARTICLE_DATE_RE = re.compile(r"(\d{4}-\d{2}-\d{2})_")
 
-
-def text_of(fragment):
-    """HTML-Fragment -> reiner Text (Tags weg, Entities aufgelöst)."""
-    return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", fragment))).strip()
-
-
-def attr(value):
-    """Text -> sicherer HTML-Attributwert."""
-    return html.escape(value, quote=True)
 
 
 def jsonld(nodes):
@@ -416,6 +431,9 @@ def nodes_for(rel, text, page_title, social_title, description, image):
 
     if rel.startswith("trainieren/freiplatz/"):
         nodes.extend(freiplatz_seite(rel))
+
+    if rel == "saison/profis/gameday/index.html":
+        nodes.append(RIETHSPORTHALLE)
 
     if rel == "trainieren/court-hunt.html":
         nodes.extend(faq(text))

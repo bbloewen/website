@@ -11,6 +11,7 @@ beide HTTP 200 ohne Redirect (GitHub Pages), sind also zwei URLs mit gleichem
 Inhalt. Wir legen uns site-weit auf die Verzeichnisform fest.
 """
 
+import html
 import re
 import subprocess
 from pathlib import Path
@@ -81,3 +82,54 @@ def indexable_pages():
         if is_indexable(rel, text):
             pages.append((rel, text))
     return pages
+
+
+# ---------------------------------------------------------------- HTML-Helfer
+#
+# Diese vier Funktionen lagen bis 26.08.2026 als wortgleiche (oder fast
+# wortgleiche) Kopien in mehreren Build-Skripten -- gefunden bei einem
+# Konsistenz-Check. maps_url() hatte in build-freiplaetze.py sogar eine
+# unentdeckte Abweichung: & statt &amp; im href-Attribut, technisch ungültiges
+# HTML. Eine Quelle, ein Fix.
+
+def esc(text):
+    """Text -> HTML-sicherer Text (kein Attribut-Kontext, keine '-Maskierung)."""
+    return (str(text).replace("&", "&amp;").replace("<", "&lt;")
+            .replace(">", "&gt;").replace('"', "&quot;"))
+
+
+def attr(value):
+    """Text -> sicherer HTML-Attributwert (inkl. '-Maskierung)."""
+    return html.escape(value, quote=True)
+
+
+def text_of(fragment):
+    """HTML-Fragment -> reiner Text (Tags weg, Entities aufgelöst)."""
+    return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", fragment))).strip()
+
+
+def maps_url(f):
+    """Google-Maps-Suchlink für ein Objekt mit lat/lng, attribut-sicher escaped."""
+    return f"https://www.google.com/maps/search/?api=1&amp;query={f['lat']},{f['lng']}"
+
+
+def spielbar(f):
+    """Ist ein Freiplatz frei zugänglich (zählt im Court-Hunt)?"""
+    return f.get("zugang") != "eingeschraenkt"
+
+
+def mit_links(text, links):
+    """[Beschriftung] im Text gegen die Ziele aus links auflösen -- wie
+    mitLinks() in js/freiplaetze.js. Nur https-Ziele werden zu einem Link,
+    alles andere bleibt schlichter Text.
+    """
+    links = links or {}
+
+    def ersetze(m):
+        beschriftung = m.group(1)
+        ziel = links.get(beschriftung)
+        if ziel and ziel.startswith("https://"):
+            return f'<a href="{esc(ziel)}" target="_blank" rel="noopener">{esc(beschriftung)}</a>'
+        return esc(beschriftung)
+
+    return re.sub(r"\[([^\]]+)\]", ersetze, esc(text))

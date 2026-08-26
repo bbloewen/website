@@ -29,7 +29,7 @@ import re
 import sys
 import unicodedata
 
-from seo_common import BASE, REPO
+from seo_common import BASE, REPO, attr
 
 ARCHIV = REPO / "news" / "insta-archiv"
 SITE_NAME = "Basketball Löwen Erfurt"
@@ -100,10 +100,6 @@ def de_bold(s):
         out.append(mapped if mapped is not None else ch)
     # NFC: aus "a" + kombinierendem Umlaut wird ein echtes "ä"
     return unicodedata.normalize("NFC", "".join(out))
-
-
-def attr(value):
-    return html.escape(value, quote=True)
 
 
 def clean(raw_attr_value):

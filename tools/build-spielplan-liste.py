@@ -44,6 +44,8 @@ import sys
 from datetime import date
 from pathlib import Path
 
+from seo_common import esc
+
 REPO = Path(__file__).resolve().parent.parent
 DATEN = REPO / "data" / "heimspiele.json"
 
@@ -57,10 +59,6 @@ MAPS_SPIELPLAN = ("https://www.google.com/maps/search/?api=1&amp;query="
 MAPS_TICKETS = ("https://www.google.com/maps/search/?api=1&amp;query="
                 "Riethsporthalle+Erfurt+Essener+Stra%C3%9Fe+20+99089+Erfurt")
 
-
-def esc(text):
-    return (str(text).replace("&", "&amp;").replace("<", "&lt;")
-            .replace(">", "&gt;").replace('"', "&quot;"))
 
 
 def spiele():

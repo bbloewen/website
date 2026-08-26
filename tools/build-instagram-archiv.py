@@ -50,7 +50,7 @@ import html
 import re
 import sys
 
-from seo_common import REPO
+from seo_common import REPO, text_of
 
 ARCHIV = REPO / "news" / "insta-archiv"
 ZIEL = REPO / "news" / "instagram-archiv.html"
@@ -75,10 +75,6 @@ DATE_RE = re.compile(
     r"(\d{1,2})\.\s+(\w+)\s+(\d{4})"
 )
 OG_IMAGE_RE = re.compile(r'<meta property="og:image" content="(.*?)" />')
-
-
-def text_of(fragment):
-    return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", fragment))).strip()
 
 
 def eintrag(pfad):

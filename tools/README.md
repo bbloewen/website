@@ -20,13 +20,14 @@ Canonical dürfen nie auseinanderlaufen.
 | `data/freiplaetze.json` (Platz ergänzt/geändert) | `build-freiplatz-seiten.py`, `build-freiplaetze.py` |
 | Neue Insta-Archivseite unter `news/insta-archiv/` | `build-instagram-archiv.py` |
 | Neues Artikel-Hero in `assets/img/news/` | `build-share-images.py`, dann `build-head-meta.py` |
-| `data/heimspiele.json` (Spieltermine, neues Spiel, Vorverkauf gestartet) | `build-spieltagsseiten.py`, `build-spielplan-liste.py`, dann `build-head-meta.py` |
+| `data/heimspiele.json` (Spieltermine, neues Spiel, Vorverkauf gestartet) | `build-spieltagsseiten.py`, `build-gameday-hub.py`, `build-spielplan-liste.py`, dann `build-head-meta.py` |
 | `data/freiplaetze.json` (Platz ergänzt, Koordinaten geändert) | `build-freiplatz-qr.py` |
 
 Alles auf einmal, in dieser Reihenfolge:
 
 ```bash
 python3 tools/build-spieltagsseiten.py && \
+python3 tools/build-gameday-hub.py && \
 python3 tools/build-partials.py && \
 python3 tools/build-instagram-archiv.py && \
 python3 tools/build-news-list.py && \
@@ -46,6 +47,11 @@ der nachfolgende `build-partials.py`-/`build-head-meta.py`-Lauf füllt sie.
 Andersherum (wie ursprünglich in einem Zwischenstand versucht) setzt jeder
 Lauf von `build-spieltagsseiten.py` die von `build-partials.py` gerade erst
 eingefügten Header/Footer wieder auf leer zurück.
+
+`build-gameday-hub.py` aus demselben Grund wie `build-spieltagsseiten.py` vor
+`build-partials.py`: Es schreibt `saison/profis/gameday/index.html` bei jedem
+Lauf komplett neu, weil sich das naechste Heimspiel taeglich aendern kann, und
+rettet Header, Footer und den `SEO:auto`-Block aus der bestehenden Datei.
 
 `build-head-meta.py` zuletzt vor der Sitemap, weil es Titel und Description
 ausliest und `og:`-Angaben daraus ableitet.
@@ -142,6 +148,37 @@ wert.
 Die Markup-Struktur spiegelt `gameRowHTML()` aus `js/spielplan.js` und die
 `.ticket-row` aus dem Inline-Skript in `tickets.html`. Ändert sich eine der
 beiden, muss sie hier mitgezogen werden.
+
+**`build-gameday-hub.py`** — baut den immergruenen Gameday-Hub unter
+`saison/profis/gameday/index.html`, also der Adresse `/saison/profis/gameday/`.
+
+Diese Adresse ist der Grund, warum der Bereich am 26.08.2026 von `teams-saison/`
+in `saison/` umbenannt wurde: Die Vorgaenger-Agentur hatte dort eine immergruene
+Seite, die immer das aktuelle Heimspiel zeigte. Sie lieferte wochenlang 404 und
+sammelte **trotzdem 474 Impressionen pro Woche** und Platz 4 fuer
+„riethsporthalle“ (2.400 Suchen im Monat). Der Hub besetzt sie wieder — ohne
+Weiterleitung, die es hier nicht gibt.
+
+Inhalt: das naechste Heimspiel aus `data/heimspiele.json` (deshalb veraltet die
+Seite nie und laeuft im taeglichen Rebuild mit), die Halle mit Adresse und
+Blockplan, die weiteren Termine mit Links auf die Spieltagsseiten, Dauerkarte
+und Einzelticket. Ist die Saison vorbei, bleibt das letzte Spiel stehen statt
+einer leeren Seite — der Hub soll nie inhaltslos sein.
+
+**Bewusst ohne Anfahrt, Strassenbahn und Parken:** Diese Angaben stehen nirgends
+im Repo. Erfundene Verkehrsangaben auf einer Vereinsseite sind schlimmer als
+keine. Sobald sie vorliegen, gehoeren sie in `halle()`.
+
+Das dazugehoerige `StadiumOrArena` im JSON-LD steht in `build-head-meta.py` als
+Konstante `RIETHSPORTHALLE`. Nicht zu verwechseln mit dem Freiplatz an der
+Riethsporthalle, der eine eigene Entitaet mit eigenem Knoten ist. Bewusst **kein**
+`SportsEvent` auf dem Hub: Jedes Heimspiel deklariert sein Event auf seiner
+eigenen Seite, und doppelte Events waren am 25.08.2026 genau der Fehler, der auf
+`spielplan.html` und `tickets.html` aufgeraeumt wurde.
+
+Verlinkt ist der Hub aus `saison/spielplan.html` und `tickets.html`, jeweils
+**ausserhalb** der JavaScript-ersetzten Container — ein Link darin wuerde beim
+Laden fuer Menschen verschwinden.
 
 **`build-freiplatz-seiten.py`** — erzeugt je Freiplatz eine eigene, indexierbare
 Seite unter `trainieren/freiplatz/<slug>.html`. Vorher teilten sich alle sechs

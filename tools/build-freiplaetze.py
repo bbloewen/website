@@ -41,7 +41,7 @@ import sys
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from seo_common import REPO
+from seo_common import REPO, maps_url, mit_links, spielbar
 
 ZIEL = REPO / "trainieren" / "freiplaetze.html"
 QUELLE = REPO / "data" / "freiplaetze.json"
@@ -64,14 +64,6 @@ CONTAINER = {
 }
 
 
-def spielbar(f):
-    return f.get("zugang") != "eingeschraenkt"
-
-
-def maps_url(f):
-    return f"https://www.google.com/maps/search/?api=1&query={f['lat']},{f['lng']}"
-
-
 def platz_url(slug):
     """Spiegelt platzUrl() in js/freiplaetze.js.
 
@@ -82,23 +74,6 @@ def platz_url(slug):
     if slug.startswith("event-"):
         return "/trainieren/freiplatz.html?platz=" + slug
     return f"/trainieren/freiplatz/{slug}.html"
-
-
-def mit_links(text, links):
-    """[Beschriftung] im Text zu Links aufloesen -- wie mitLinks() im JavaScript.
-
-    Nur https-Ziele werden verlinkt, alles andere bleibt schlichter Text.
-    """
-    links = links or {}
-
-    def ersetze(m):
-        ziel = links.get(m.group(1), "")
-        if not str(ziel).startswith("https://"):
-            return html.escape(m.group(1))
-        return (f'<a href="{html.escape(ziel)}" target="_blank" rel="noopener">'
-                f"{html.escape(m.group(1))}</a>")
-
-    return re.sub(r"\[([^\]]+)\]", ersetze, html.escape(text))
 
 
 def kachel(f):

@@ -40,6 +40,8 @@ import re
 import sys
 from pathlib import Path
 
+from seo_common import esc, maps_url, mit_links, spielbar
+
 REPO = Path(__file__).resolve().parent.parent
 DATEN = REPO / "data" / "freiplaetze.json"
 VORLAGE = REPO / "trainieren" / "freiplatz.html"
@@ -47,40 +49,6 @@ ZIELORDNER = REPO / "trainieren" / "freiplatz"
 
 INHALT_START = "<!--FREIPLATZ:inhalt-->"
 INHALT_ENDE = "<!--/FREIPLATZ:inhalt-->"
-
-
-def esc(text):
-    return (str(text).replace("&", "&amp;").replace("<", "&lt;")
-            .replace(">", "&gt;").replace('"', "&quot;"))
-
-
-def maps_url(f):
-    """Gleiche Adresse wie mapsUrl() in js/freiplaetze.js."""
-    return f"https://www.google.com/maps/search/?api=1&amp;query={f['lat']},{f['lng']}"
-
-
-def spielbar(f):
-    return f.get("zugang") != "eingeschraenkt"
-
-
-def mit_links(text, links):
-    """[Beschriftung] im Text gegen die Ziele aus zugangLinks auflösen.
-
-    Spiegelt mitLinks() in js/freiplaetze.js, inklusive der Regel, dass nur
-    https-Ziele zu einem Link werden — alles andere bleibt schlichter Text.
-    """
-    links = links or {}
-
-    def ersetze(m):
-        beschriftung = m.group(1)
-        ziel = links.get(beschriftung)
-        if ziel and ziel.startswith("https://"):
-            return f'<a href="{esc(ziel)}" target="_blank" rel="noopener">{esc(beschriftung)}</a>'
-        return esc(beschriftung)
-
-    # Erst escapen, dann die Klammern ersetzen -- sonst landet HTML aus den Daten
-    # ungefiltert in der Seite.
-    return re.sub(r"\[([^\]]+)\]", ersetze, esc(text))
 
 
 def medien(f):
