@@ -65,6 +65,32 @@ def medien(f):
             f'<i data-lucide="image" class="icon-22"></i><span>Foto folgt</span>{qr}</div>')
 
 
+def court_hunt(f):
+    """Statischer Court-Hunt-Satz mit Link, den js/freiplaetze.js beim Laden ersetzt.
+
+    Anlass: Google setzte am 26.08.2026 fuer „court hunt erfurt" die Seite des
+    Riethsporthallen-Platzes auf Platz 1 — den einzigen Platz, der NICHT
+    mitspielt. Der Grund war der per JavaScript eingesetzte Hinweis „gehoert
+    nicht zum Court-Hunt": Der Begriff stand im gerenderten Text, aber keine
+    dieser sechs Seiten verlinkte die eigentliche Court-Hunt-Seite. Die hatte
+    genau einen internen Link auf der ganzen Website.
+
+    Jetzt steht der Satz statisch im HTML, mit Link, und unterscheidet die
+    beiden Faelle deutlich: die spielbaren Plaetze werben fuer das Spiel, der
+    gesperrte verweist weg. Das JS ueberschreibt den Container beim Laden wie
+    gehabt, fuer Besucher aendert sich nichts.
+    """
+    if spielbar(f):
+        return ('<p class="t-body-sm">Dieser Platz zählt im '
+                '<a href="/trainieren/court-hunt.html">Court-Hunt</a>: einchecken, Punkte '
+                'sammeln und einen Ticket-Gutschein fürs Heimspiel gewinnen.</p>')
+    return ('<p class="t-body-sm">Dieser Platz gehört nicht zum '
+            '<a href="/trainieren/court-hunt.html">Court-Hunt</a> — er ist nicht frei '
+            'zugänglich, deshalb gibt es hier keine Punkte. Auf allen '
+            '<a href="/trainieren/freiplaetze.html">öffentlichen Plätzen</a> '
+            'kannst du mitspielen.</p>')
+
+
 def inhalt(f):
     banner = ""
     detail = ""
@@ -85,7 +111,7 @@ def inhalt(f):
         + (f'      {banner}\n' if banner else "")
         + (f'      {detail}\n' if detail else "")
         + '      <div id="freiplatz-karte" class="freiplaetze-map freiplaetze-map-klein"></div>\n'
-        '      <div class="freiplatz-checkin" id="freiplatz-checkin"></div>\n'
+        f'      <div class="freiplatz-checkin" id="freiplatz-checkin">{court_hunt(f)}</div>\n'
         '      <div class="freiplatz-maengel">\n'
         '        <p>Ist am Platz etwas kaputt — Korb, Netz oder Belag?</p>\n'
         '        <a class="btn btn-ghost" href="https://maengelmelder.erfurt.de/" target="_blank" rel="noopener">'

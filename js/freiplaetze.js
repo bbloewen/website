@@ -978,8 +978,15 @@
     if (!el) return;
 
     if (!spielbar(platz)) {
-      el.innerHTML = '<p class="t-body-sm">Dieser Platz gehört nicht zum Court-Hunt — er ist nicht frei zugänglich, ' +
-        'deshalb gibt es hier keine Punkte. Auf allen öffentlichen Plätzen kannst du mitspielen.</p>' + teilenBlock();
+      // Court-Hunt ist hier verlinkt, nicht bloss erwaehnt. Grund: Google hat am
+      // 26.08.2026 fuer "court hunt erfurt" genau diese Seite auf Platz 1
+      // gesetzt und diesen Satz als Snippet gezeigt -- den Platz, der als
+      // einziger NICHT mitspielt. Der Begriff stand im Text, ohne Weg zur
+      // richtigen Seite. Jetzt fuehrt er dorthin.
+      el.innerHTML = '<p class="t-body-sm">Dieser Platz gehört nicht zum ' +
+        '<a href="/trainieren/court-hunt.html">Court-Hunt</a> — er ist nicht frei zugänglich, ' +
+        'deshalb gibt es hier keine Punkte. Auf allen ' +
+        '<a href="/trainieren/freiplaetze.html">öffentlichen Plätzen</a> kannst du mitspielen.</p>' + teilenBlock();
       teilenVerdrahten(el, platz);
       icons();
       return;
@@ -1019,7 +1026,10 @@
       '<p class="court-hunt-meldung" role="status" aria-live="polite">' +
         (gesperrt ? 'Gerade erst eingecheckt — dieser Platz zählt wieder in ' +
           stunden(COOLDOWN_MS - (Date.now() - letzterCheckin(stand, platz.slug))) + '.' : '') +
-      '</p>' + teilenBlock();
+      '</p>' +
+      '<p class="mt-4"><a class="card-link" href="/trainieren/court-hunt.html">' +
+        'Regeln, Punktestand und Rangliste <i data-lucide="arrow-right" class="icon-14"></i></a></p>' +
+      teilenBlock();
 
     teilenVerdrahten(el, platz);
     var knopf = el.querySelector('[data-checkin]');
