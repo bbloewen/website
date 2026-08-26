@@ -30,12 +30,14 @@ Aufruf:
 """
 
 import argparse
-import html
 import json
 import re
 import sys
 from datetime import date
 from pathlib import Path
+
+from seo_common import attr as esc
+from seo_common import ziel_url
 
 REPO = Path(__file__).resolve().parent.parent
 QUELLE = REPO / "data" / "heimspiele.json"
@@ -54,10 +56,6 @@ LEER_FOOTER = '<div id="site-footer-placeholder"></div>'
 
 SEO_START = "<!-- SEO:auto START"
 SEO_ENDE = "<!-- SEO:auto END -->"
-
-
-def esc(text):
-    return html.escape(str(text), quote=True)
 
 
 def spiele():
@@ -92,10 +90,6 @@ def naechstes(liste, heute):
     """
     kuenftig = [s for s in liste if datum(s) >= heute]
     return (kuenftig[0], True) if kuenftig else (liste[-1], False)
-
-
-def ziel_url(s):
-    return f"/saison/profis/gameday/{s['seiteSlug']}.html"
 
 
 def hero(s, kommt):
@@ -142,9 +136,7 @@ def halle():
       Erfurter Norden statt — die Profis in der Pro B, die Löwinnen in der Regionalliga und die
       U19 in der NBBL. Wer zu einem Löwen-Heimspiel geht, geht hierher.</p>
       <a class="freiplatz-adresse-link mt-4" href="%(maps)s" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Essener Straße 20, 99089 Erfurt</a>
-      <div class="card-media card-media-photo mt-4">
-        <img src="/assets/img/riethsporthalle-blockplan.webp" alt="Blockplan der Riethsporthalle Erfurt mit den Sitzplatzkategorien" loading="lazy" />
-      </div>
+      <img class="mt-4" src="/assets/img/riethsporthalle-blockplan.webp" alt="Blockplan der Riethsporthalle Erfurt mit den Sitzplatzkategorien" loading="lazy" style="width:100%;height:auto;display:block;border-radius:var(--radius-md,12px)" />
       <p class="t-body-sm mt-3" style="color:var(--text-secondary)">Der Blockplan zeigt, wie die
       Kategorien in der Halle liegen. Welcher Platz noch frei ist, siehst du beim Kauf auf der
       Seite des jeweiligen Spiels.</p>

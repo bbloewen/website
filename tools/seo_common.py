@@ -113,6 +113,11 @@ def maps_url(f):
     return f"https://www.google.com/maps/search/?api=1&amp;query={f['lat']},{f['lng']}"
 
 
+def ziel_url(s):
+    """Adresse der Spieltagsseite eines Heimspiels (data/heimspiele.json-Eintrag)."""
+    return f"/saison/profis/gameday/{s['seiteSlug']}.html"
+
+
 def spielbar(f):
     """Ist ein Freiplatz frei zugänglich (zählt im Court-Hunt)?"""
     return f.get("zugang") != "eingeschraenkt"

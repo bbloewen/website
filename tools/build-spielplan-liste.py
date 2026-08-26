@@ -44,7 +44,7 @@ import sys
 from datetime import date
 from pathlib import Path
 
-from seo_common import esc
+from seo_common import esc, ziel_url
 
 REPO = Path(__file__).resolve().parent.parent
 DATEN = REPO / "data" / "heimspiele.json"
@@ -77,10 +77,6 @@ def datum_text(s, mit_zeit):
     if mit_zeit and s.get("zeit"):
         text += f", {s['zeit']} Uhr"
     return text
-
-
-def ziel_url(s):
-    return f"/saison/profis/gameday/{s['seiteSlug']}.html"
 
 
 def paarung(s):
