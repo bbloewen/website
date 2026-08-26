@@ -978,15 +978,16 @@
     if (!el) return;
 
     if (!spielbar(platz)) {
-      // Court-Hunt ist hier verlinkt, nicht bloss erwaehnt. Grund: Google hat am
-      // 26.08.2026 fuer "court hunt erfurt" genau diese Seite auf Platz 1
-      // gesetzt und diesen Satz als Snippet gezeigt -- den Platz, der als
-      // einziger NICHT mitspielt. Der Begriff stand im Text, ohne Weg zur
-      // richtigen Seite. Jetzt fuehrt er dorthin.
-      el.innerHTML = '<p class="t-body-sm">Dieser Platz gehört nicht zum ' +
-        '<a href="/trainieren/court-hunt.html">Court-Hunt</a> — er ist nicht frei zugänglich, ' +
-        'deshalb gibt es hier keine Punkte. Auf allen ' +
-        '<a href="/trainieren/freiplaetze.html">öffentlichen Plätzen</a> kannst du mitspielen.</p>' + teilenBlock();
+      // Gesperrte Plaetze nennen Court-Hunt bewusst NICHT (Marko, 26.08.2026).
+      // Google hatte fuer "court hunt erfurt" genau diese Seite auf Platz 1
+      // gesetzt -- den einzigen Platz, der nicht mitspielt -- und diesen Satz
+      // als Snippet gezeigt. Der Begriff brachte hier nichts: An gesperrten
+      // Plaetzen haengt kein Court-Hunt-Aufkleber (s. build-freiplatz-qr.py),
+      // und dass man nicht hinein kann, sagt der Zugangs-Banner oben. Uebrig
+      // blieb nur der Schaden. Der Satz zeigt jetzt weiter, ohne den Begriff.
+      el.innerHTML = '<p class="t-body-sm">Hier kannst du keine Punkte sammeln. Alle Plätze, ' +
+        'an denen es geht, stehen in der ' +
+        '<a href="/trainieren/freiplaetze.html">Übersicht der Freiplätze</a>.</p>' + teilenBlock();
       teilenVerdrahten(el, platz);
       icons();
       return;

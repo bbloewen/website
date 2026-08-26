@@ -84,11 +84,17 @@ def court_hunt(f):
         return ('<p class="t-body-sm">Dieser Platz zählt im '
                 '<a href="/trainieren/court-hunt.html">Court-Hunt</a>: einchecken, Punkte '
                 'sammeln und einen Ticket-Gutschein fürs Heimspiel gewinnen.</p>')
-    return ('<p class="t-body-sm">Dieser Platz gehört nicht zum '
-            '<a href="/trainieren/court-hunt.html">Court-Hunt</a> — er ist nicht frei '
-            'zugänglich, deshalb gibt es hier keine Punkte. Auf allen '
-            '<a href="/trainieren/freiplaetze.html">öffentlichen Plätzen</a> '
-            'kannst du mitspielen.</p>')
+    # Gesperrte Plaetze nennen Court-Hunt bewusst NICHT (Marko, 26.08.2026).
+    # Der Begriff hatte hier keinen Nutzen und einen Schaden: An diesem Platz
+    # haengt kein Court-Hunt-Aufkleber (build-freiplatz-qr.py legt fuer
+    # zugang=eingeschraenkt keinen an), niemand steht also davor und erwartet
+    # einen Check-in. Dass man hier nicht spielen kann, sagt der Zugangs-Banner
+    # oben ohnehin. Uebrig blieb allein der Nebeneffekt, den Markenbegriff auf
+    # die falsche Seite zu setzen -- und genau die stand dann bei
+    # "court hunt erfurt" auf Platz 1.
+    return ('<p class="t-body-sm">Hier kannst du keine Punkte sammeln. Alle Plätze, an '
+            'denen es geht, stehen in der '
+            '<a href="/trainieren/freiplaetze.html">Übersicht der Freiplätze</a>.</p>')
 
 
 def inhalt(f):
