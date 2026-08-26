@@ -443,15 +443,22 @@
   /* Kachel eines Event-Spots. Bewusst nicht kachel(): Ein Spot hat kein Foto und
      keinen Zugangshinweis, dafuer ein Zeitfenster — und genau das ist die
      Information, wegen der jemand die Kachel ueberhaupt liest. */
+  /* Drei Zustaende, drei Texte — dieselbe Unterscheidung wie im spotZeile-Block
+     der Platzseite (initPlatzseite): vorbei, jetzt aktiv, oder noch bevorstehend. */
   function spotKachel(sp) {
+    var vorbei = spotVorbei(sp);
     var laeuft = spotOffen(sp);
-    return '<div class="card hoverable camp-slider-card">' +
+    var zeile = vorbei
+      ? 'War aktiv am ' + esc(spotZeitText(sp)) + '.'
+      : (laeuft ? 'Jetzt aktiv: ' + esc(spotZeitText(sp)) + ' — 50 Punkte am mobilen Korb.'
+        : 'Aktiv am ' + esc(spotZeitText(sp)) + ' — dann gibt es hier 50 Punkte.');
+    return '<div class="card hoverable camp-slider-card' + (vorbei ? ' ist-vorbei' : '') +
+        '" data-start="' + esc(sp.von) + '" data-ende="' + esc(sp.bis) + '">' +
       '<div class="card-media tint-violet" style="height:140px"><i data-lucide="calendar-clock" class="icon-32"></i></div>' +
       '<div class="card-body">' +
-        '<span class="card-label">' + (laeuft ? 'Heute aktiv' : 'Court-Hunt-Spot') + '</span>' +
+        '<span class="card-label">' + (vorbei ? 'Vorbei' : (laeuft ? 'Heute aktiv' : 'Court-Hunt-Spot')) + '</span>' +
         '<h3>' + esc(sp.name) + '</h3>' +
-        '<p class="freiplatz-spot-zeit"><i data-lucide="calendar-clock" class="icon-16"></i> ' +
-          esc(spotZeitText(sp)) + '</p>' +
+        '<p class="freiplatz-spot-zeit"><i data-lucide="calendar-clock" class="icon-16"></i> ' + zeile + '</p>' +
         (sp.adresse
           ? '<a class="freiplatz-adresse-link" href="' + mapsUrl(sp) + '" target="_blank" rel="noopener">' +
             '<i data-lucide="map-pin" class="icon-16"></i> ' + esc(sp.adresse) + '</a>'
@@ -463,25 +470,29 @@
     '</div>';
   }
 
-  /* Die Liste zeigt nur, was noch kommt oder gerade laeuft. Vergangene Spots
-     bleiben in den Daten und ueber ihre eigene Seite erreichbar (gedruckte
-     A3-Schilder und geteilte Links sollen nicht ins Leere zeigen) — in der
-     Uebersicht haetten sie aber nur die Wirkung, verpasste Gelegenheiten
-     aufzuzaehlen. */
+  /* Alle Court-Hunt-Spots aus den Community-Events, chronologisch — genau wie
+     initCommunityEvents() auf der Community-Events-Seite. Vergangene bleiben
+     stehen (ausgegraut, per data-start/data-ende), der Streifen scrollt beim
+     Laden aber gleich zum naechsten noch laufenden oder kommenden Spot, sodass
+     Vergangenes nur per Wischen/Pfeil nach links zu sehen ist. */
   function spotListe(sektion, spots) {
     if (!sektion) return;
-    var kommend = spots.filter(function (sp) { return !spotVorbei(sp); })
-      .sort(function (a, b) { return new Date(a.von) - new Date(b.von); });
-    if (!kommend.length) {
+    if (!spots.length) {
       sektion.hidden = true;
       return;
     }
+    var sortiert = spots.slice().sort(function (a, b) { return new Date(a.von) - new Date(b.von); });
 
     var wrap = sektion.querySelector('.camp-gallery-wrap');
     var track = wrap && wrap.querySelector('.news-slider-track');
     if (!track) return;
-    track.innerHTML = kommend.map(spotKachel).join('');
+    track.innerHTML = sortiert.map(spotKachel).join('');
     sektion.hidden = false;
+
+    var jetzt = new Date();
+    var karten = Array.prototype.slice.call(track.querySelectorAll('.camp-slider-card'));
+    var naechste = karten.find(function (k) { return new Date(k.getAttribute('data-ende')) >= jetzt; }) || karten[karten.length - 1];
+    if (naechste) track.scrollTo({ left: naechste.offsetLeft, behavior: 'instant' });
 
     var vor = wrap.querySelector('[data-gallery-prev]');
     var zurueck = wrap.querySelector('[data-gallery-next]');

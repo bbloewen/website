@@ -139,10 +139,11 @@ def berliner_zeit(wert):
 
 
 def spots_lesen(jetzt):
-    """Laufende und kommende Court-Hunt-Spots aus den Community-Events.
+    """Alle Court-Hunt-Spots aus den Community-Events, chronologisch.
 
-    Vergangene bleiben in der Datei stehen (Archiv, s. n8n-Workflow) und ueber
-    ihre eigene Seite erreichbar -- in der Uebersicht haben sie nichts verloren.
+    Vergangene bleiben mit drin (vorbei=True) statt zu verschwinden -- Aufkleber
+    und geteilte Links sollen nicht ins Leere zeigen, und wer den Streifen
+    zurueckscrollt, soll die Geschichte des Spiels sehen koennen.
     """
     if not EVENTS.exists():
         return []
@@ -157,13 +158,11 @@ def spots_lesen(jetzt):
             von, bis = berliner_zeit(e["spotVon"]), berliner_zeit(e["spotBis"])
         except ValueError:
             continue
-        if bis < jetzt:
-            continue
         spots.append({
             "slug": e["spotSlug"], "name": e.get("name", "Court-Hunt-Spot"),
             "adresse": re.sub(r",\s*(Deutschland|Germany)$", "", e.get("location", "")),
             "lat": e["lat"], "lng": e["lng"],
-            "von": von, "bis": bis, "laeuft": von <= jetzt <= bis,
+            "von": von, "bis": bis, "laeuft": von <= jetzt <= bis, "vorbei": bis < jetzt,
         })
     spots.sort(key=lambda sp: sp["von"])
     return spots
@@ -177,15 +176,21 @@ def spot_zeit_text(sp):
 
 def spot_kachel(sp):
     e = html.escape
+    vorbei_klasse = " ist-vorbei" if sp["vorbei"] else ""
+    if sp["vorbei"]:
+        status, zeile = "Vorbei", f'War aktiv am {e(spot_zeit_text(sp))}.'
+    elif sp["laeuft"]:
+        status, zeile = "Heute aktiv", f'Jetzt aktiv: {e(spot_zeit_text(sp))} — 50 Punkte am mobilen Korb.'
+    else:
+        status, zeile = "Court-Hunt-Spot", f'Aktiv am {e(spot_zeit_text(sp))} — dann gibt es hier 50 Punkte.'
     teile = [
-        '<div class="card hoverable camp-slider-card">',
+        f'<div class="card hoverable camp-slider-card{vorbei_klasse}">',
         '<div class="card-media tint-violet" style="height:140px">'
         '<i data-lucide="calendar-clock" class="icon-32"></i></div>',
         '<div class="card-body">',
-        f'<span class="card-label">{"Heute aktiv" if sp["laeuft"] else "Court-Hunt-Spot"}</span>',
+        f'<span class="card-label">{status}</span>',
         f'<h3>{e(sp["name"])}</h3>',
-        '<p class="freiplatz-spot-zeit"><i data-lucide="calendar-clock" class="icon-16"></i> '
-        + e(spot_zeit_text(sp)) + "</p>",
+        f'<p class="freiplatz-spot-zeit"><i data-lucide="calendar-clock" class="icon-16"></i> {zeile}</p>',
     ]
     if sp["adresse"]:
         teile.append(

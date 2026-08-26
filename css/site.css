@@ -1118,6 +1118,11 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 /* Kommende-Camps-Slider — gleiches Streifen-Prinzip, aber für ganze Karten
    statt Fotos (aktuelle + geplante Camps nebeneinander, scrollbar). */
 .camp-slider-card { flex: 0 0 380px; min-width: 320px; scroll-snap-align: start; }
+/* Vergangene Court-Hunt-Spots bleiben im Streifen (Aufkleber und geteilte Links
+   sollen nicht ins Leere zeigen), sind aber erledigt — Ausgrauen UND das Label
+   "Vorbei" im Text, nicht Farbe/Deckkraft allein als einziges Signal. */
+.camp-slider-card.ist-vorbei { opacity: .5; filter: grayscale(70%); }
+.camp-slider-card.ist-vorbei:hover { opacity: .7; }
 /* Pfeile brauchen Platz neben dem Streifen (wie beim News-Slider ab 1024px) —
    darunter reicht natives Wisch-Scrollen, sonst ragen sie über den Viewport-Rand. */
 @media (max-width: 1023px) {
