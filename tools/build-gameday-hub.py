@@ -135,14 +135,14 @@ def halle():
       <p class="t-body">Alle Heimspiele der Basketball Löwen finden in der Riethsporthalle im
       Erfurter Norden statt — die Profis in der Pro B, die Löwinnen in der Regionalliga und die
       U19 in der NBBL. Wer zu einem Löwen-Heimspiel geht, geht hierher.</p>
-      <a class="freiplatz-adresse-link mt-4" href="%(maps)s" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Essener Straße 20, 99089 Erfurt</a>
+      <a class="freiplatz-adresse-link mt-4" href="__MAPS__" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Essener Straße 20, 99089 Erfurt</a>
       <img class="mt-4" src="/assets/img/riethsporthalle-blockplan.webp" alt="Blockplan der Riethsporthalle Erfurt mit den Sitzplatzkategorien" loading="lazy" style="width:100%;height:auto;display:block;border-radius:var(--radius-md,12px)" />
       <p class="t-body-sm mt-3" style="color:var(--text-secondary)">Der Blockplan zeigt, wie die
       Kategorien in der Halle liegen. Welcher Platz noch frei ist, siehst du beim Kauf auf der
       Seite des jeweiligen Spiels.</p>
       <p class="mt-5"><a class="card-link" href="/trainieren/freiplatz/riethsporthalle.html">Der Freiplatz an der Riethsporthalle <i data-lucide="arrow-right" class="icon-14"></i></a></p>
     </div>
-  </section>""" % {"maps": MAPS}
+  </section>""".replace("__MAPS__", MAPS)
 
 
 def termine(liste, aktuelles):
