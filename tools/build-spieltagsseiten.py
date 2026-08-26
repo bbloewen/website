@@ -460,6 +460,14 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 <link rel="stylesheet" href="/css/seat-picker.css?v=1787760512" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
+<!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
+     Cookiefrei, kein Zugriff auf den Endgeraetespeicher (im Skript geprueft:
+     kein localStorage, kein Cookie). Empfaenger Ahrefs Pte Ltd, Singapur;
+     Standardvertragsklauseln Modul 2 am 25.08.2026 abgeschlossen, Abschnitt 4
+     der Datenschutzerklaerung. Entfernen: Block zwischen den beiden Markern
+     loeschen, in allen Seiten. -->
+<script src="https://analytics.ahrefs.com/analytics.js" data-key="5TVH543YAI/GzTMbTLbbbg" async></script>
+<!--/ANALYTICS:ahrefs-->
 {seo_block}</head>
 <body data-nav-group="saison" class="hide-mobile-cta">
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
