@@ -268,7 +268,7 @@ def kauf_section(game):
   </section>
 
   <script src="/js/voucher-utils.js?v=1786873000"></script>
-  <script src="/js/seat-picker.js?v=1786872716"></script>
+  <script src="/js/seat-picker.js?v=1787760512"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {{
       /* Spieldaten liegen fest in dieser Seite -- kein Fetch/?spiel=-Parameter
@@ -457,7 +457,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
 <link rel="stylesheet" href="/css/site.css?v=1787752095" />
-<link rel="stylesheet" href="/css/seat-picker.css?v=1786362756" />
+<link rel="stylesheet" href="/css/seat-picker.css?v=1787760512" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 {seo_block}</head>
@@ -485,7 +485,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 </main>
 {footer_html}
 <script src="https://unpkg.com/lucide@latest"></script>
-<script src="/js/nav.js?v=1787221181"></script>
+<script src="/js/nav.js?v=1787760037"></script>
 <script src="/js/include.js?v=1785398309"></script>
 </body>
 </html>

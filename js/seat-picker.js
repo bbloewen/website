@@ -614,6 +614,9 @@
           inner = '<span class="seatplan-mobile-tile-letter">' + id + '</span>' +
             '<span class="seatplan-mobile-tile-cat">' + escapeHtml(p.label) + '</span>';
         }
+        if (self.readonly) {
+          return '<div class="' + tileClass + '" style="' + tileStyle + '">' + inner + '</div>';
+        }
         return '<button type="button" class="' + tileClass + '" style="' + tileStyle + '" data-zone="' + key + '">' + inner + '</button>';
       }).join('');
       return '<div class="seatplan-mobile-tile-group' + (isNorth ? '' : ' seatplan-mobile-tile-group-south') + '">' + tiles + '</div>';
@@ -664,7 +667,7 @@
 
     this.root.innerHTML =
       '<h3 class="t-h4" style="text-align:center;margin:0 0 12px">' + escapeHtml(this.headline) + '</h3>' +
-      '<div class="seatplan-mobile-overview">' +
+      '<div class="seatplan-mobile-overview' + (this.readonly ? ' seatplan-readonly' : '') + '">' +
         '<div class="seatplan-mobile-entrance main" style="grid-column:1;grid-row:1 / 5"><span></span><i>Haupteingang</i><span></span></div>' +
         '<div class="seatplan-mobile-tiles" style="grid-column:2;grid-row:1">' + northTiles + '</div>' +
         '<div class="seatplan-mobile-bench-align" style="grid-column:2;grid-row:2">' +
@@ -685,6 +688,12 @@
               var clickable = !self.readonly && self.mode === 'blocks' && self.standing && self.standingPrice && self.standingBookable;
               var standingPending = clickable && self.pendingBlockId === 'STEHPLATZ';
               var standingClass = 'seatplan-mobile-standing' + (standingPending ? ' selected' : '') + (clickable ? '' : ' seatplan-mobile-standing--unavailable');
+              if (self.readonly) {
+                return '<div class="' + standingClass + '" aria-label="Stehplatz' +
+                  (self.standing ? ' (' + self.standing.capacity + ' Plätze)' : '') + '">' +
+                  '<span>Steh-</span><span>platz</span>' +
+                '</div>';
+              }
               return '<button type="button" class="' + standingClass + '"' +
                 (clickable ? ' data-zone="STEHPLATZ"' : '') +
                 ' aria-label="Stehplatz' + (self.standing ? ' (' + self.standing.capacity + ' Plätze)' : '') + (clickable ? '' : ', aktuell nicht buchbar') + '">' +
