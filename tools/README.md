@@ -95,7 +95,7 @@ Seite. Liest die Archivseiten nur — sie gehören weiterhin dem n8n-Workflow
 `GpAS0ONrenHrcTwS`.
 
 **`build-spieltagsseiten.py`** — erzeugt/pflegt eine Seite je Heimspiel unter
-`teams-saison/spiel/<seiteSlug>.html` (Marko, 25.08.2026: "eine Adresse für den
+`teams-saison/profis/gameday/<seiteSlug>.html` (Marko, 25.08.2026: "eine Adresse für den
 ganzen Lebenszyklus" — vorher Ankündigung, danach Ergebnis+Bericht, dieselbe
 URL). Vier Phasen (angekündigt/vorverkauf/spieltag/danach) werden aus `datum`
 und `ticketUrl` hergeleitet, nicht von Hand gepflegt. `seiteSlug` wird pro Spiel

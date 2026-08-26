@@ -82,7 +82,7 @@ def datum_text(s, mit_zeit):
 
 
 def ziel_url(s):
-    return f"/teams-saison/spiel/{s['seiteSlug']}.html"
+    return f"/teams-saison/profis/gameday/{s['seiteSlug']}.html"
 
 
 def paarung(s):

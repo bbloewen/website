@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Erzeugt/pflegt eine Seite je Heimspiel unter teams-saison/spiel/<seiteSlug>.html.
+"""Erzeugt/pflegt eine Seite je Heimspiel unter teams-saison/profis/gameday/<seiteSlug>.html.
 
 Marko-Vorgabe 25.08.2026: "Jedes Heimspiel bekommt eine Adresse — und behält sie
 sein ganzes Leben." Vor dem Spiel Ankündigung+Ticketverkauf, danach Ergebnis+
@@ -47,7 +47,7 @@ from zoneinfo import ZoneInfo
 from seo_common import REPO
 
 QUELLE = REPO / "data" / "heimspiele.json"
-ZIEL_DIR = REPO / "teams-saison" / "spiel"
+ZIEL_DIR = REPO / "teams-saison" / "profis" / "gameday"
 BERLIN = ZoneInfo("Europe/Berlin")
 
 MONATE = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli",
@@ -408,7 +408,7 @@ def bericht_section(bericht_inhalt):
 def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html=LEER_FOOTER, seo_block=LEER_SEO):
     d = parse_dmy(game["datum"])
     gegner = html.escape(game["gegner"])
-    url = f"https://basketball-loewen.com/teams-saison/spiel/{game['seiteSlug']}.html"
+    url = f"https://basketball-loewen.com/teams-saison/profis/gameday/{game['seiteSlug']}.html"
 
     phase_label = {
         "angekuendigt": "Angekündigt",
