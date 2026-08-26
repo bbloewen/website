@@ -3,17 +3,6 @@
   "publishFrom": "2026-08-22",
   "events": [
     {
-      "name": "CJD Sommerfest",
-      "category": "Straßenfest",
-      "status": "Genehmigt",
-      "start": "2026-08-21T07:00:00.000+00:00",
-      "end": "2026-08-21T11:00:00.000+00:00",
-      "isDatetime": true,
-      "description": "",
-      "location": "Donaustraße 2A, 99089 Erfurt, Deutschland",
-      "heroImage": ""
-    },
-    {
       "name": "Ehrenamtstreff",
       "category": "Vereinsfest",
       "status": "Abgeschlossen",
