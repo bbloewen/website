@@ -924,25 +924,15 @@
         zugangBanner(platz) +
         zugangDetail(platz) +
         '<div id="freiplatz-karte" class="freiplaetze-map freiplaetze-map-klein"></div>' +
-        '<div class="freiplatz-checkin" id="freiplatz-checkin"></div>' +
-        maengelHinweis();
+        '<div class="freiplatz-checkin" id="freiplatz-checkin"></div>';
+        /* Kein Mängelmelder-Hinweis hier: Der mobile Korb an Event-Spots
+           gehoert dem Verein, nicht der Stadt -- anders als bei den festen,
+           staedtischen Freiplaetzen (dort weiterhin in build-freiplatz-seiten.py). */
 
       zeichneKarte('freiplatz-karte', [platz]);
       checkinBereich(document.getElementById('freiplatz-checkin'), platz);
       icons();
     });
-  }
-
-  /* Zweiter Handlungsweg neben dem Check-in: Wer vor einem kaputten Korb steht,
-     soll ihn hier melden können. Die Plätze gehören der Stadt, deshalb führt der
-     Weg zu ihrem Mängelmelder — freundlich formuliert, nicht als Zurechtweisung. */
-  function maengelHinweis() {
-    return '<div class="freiplatz-maengel">' +
-      '<p>Ist am Platz etwas kaputt — Korb, Netz oder Belag?</p>' +
-      '<a class="btn btn-ghost" href="https://maengelmelder.erfurt.de/" target="_blank" rel="noopener">' +
-        '<i data-lucide="wrench" class="icon-16"></i> Beschädigung melden</a>' +
-      '<p class="freiplatz-maengel-fuss">Die Plätze gehören der Stadt Erfurt, sie kümmert sich um Reparaturen.</p>' +
-    '</div>';
   }
 
   /* Teilen ist hier keine Werbung für eine Website, sondern eine Einladung:
