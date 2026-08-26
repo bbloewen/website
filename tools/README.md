@@ -224,3 +224,33 @@ Muster und Dateiname anpassen:
         t2 = re.sub(muster, lambda m: m.group(1) + neu, t)
         if t2 != t: p.write_text(t2, encoding='utf-8')
     "
+
+## Inhalt, der nur im JavaScript stand (Fixhistorie, Fortsetzung)
+
+Am 26.08.2026 kamen bei einer Tiefenprüfung drei weitere Fälle desselben
+Musters heraus — Seiten, deren eigentlicher Inhalt erst per JavaScript entstand
+und im ausgelieferten HTML gar nicht vorkam:
+
+| Seite | vorher | Skript |
+|---|---|---|
+| `partner/sponsoring.html` | 0 von 23 Partnernamen im HTML | `build-partner-wall.py` |
+| `index.html` (Hauptpartner) | 0 von 10 Logos | `build-partner-wall.py` |
+| `trainieren/trainingszeiten.html` | 1 von 26 Gruppen, 604 Zeichen Text | `build-trainingszeiten-liste.py` |
+| `index.html` (News-Bento) | kein Link auf einen News-Artikel | `build-home-news.py` |
+
+Immer dasselbe Vorgehen: statischer Block zwischen Markern, den das vorhandene
+JavaScript beim Laden per `innerHTML` ersetzt. Für Besucher ändert sich nichts,
+ohne JavaScript bleibt der Inhalt lesbar, und eine Suchmaschine sieht ihn.
+
+Zwei Fallen dabei, beide beim Bauen aufgelaufen:
+
+1. **Nicht über das schließende `</div>` matchen.** Die eingesetzten Kacheln
+   enthalten selbst `</div>`; ein nicht-greedy Muster schneidet beim zweiten
+   Lauf mitten in der eigenen Ausgabe ab und zerlegt die Seite. Die Skripte
+   suchen deshalb beim ersten Lauf den *leeren* Container und danach nur noch
+   den Bereich zwischen den Markern.
+2. **Gespiegeltes Markup driftet.** Wo das JS-Markup gespiegelt wird
+   (`partnerTileHTML`, `tileHtml`), prüfen die Skripte beim Start auf feste
+   Ankerzeilen in der JS-Datei und brechen ab, wenn sich dort etwas geändert
+   hat. Bei den Trainingszeiten wurde das Markup bewusst **nicht** gespiegelt —
+   es hängt an zu vielen Nachschlagetabellen; dort steht eine schlichte Liste.
