@@ -111,8 +111,6 @@ def inhalt(f):
         f'{INHALT_START}\n'
         f'      <h1 class="t-h2">{esc(f["name"])}</h1>\n'
         f'      <p class="t-body mt-3">{esc(f["beschreibung"])}</p>\n'
-        '      <p class="mt-2"><a class="card-link" href="/trainieren/court-hunt.html">'
-        'Was ist Court-Hunt? <i data-lucide="arrow-right" class="icon-14"></i></a></p>\n'
         f'      <a class="freiplatz-adresse-link mt-4" href="{maps_url(f)}" target="_blank" rel="noopener">'
         f'<i data-lucide="map-pin" class="icon-16"></i> {esc(f["adresse"])}</a>\n'
         f'      {medien(f)}\n'
