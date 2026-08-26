@@ -680,6 +680,12 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .rangliste { width: 100%; border-collapse: collapse; background: #fff; font-size: 14px; }
 .rangliste th { text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--border-strong); font-weight: var(--weight-semibold); }
 .rangliste td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+/* Punkte sind Zahlen — rechtsbündig lassen sie sich als Spalte vergleichen,
+   linksbündig ergibt bei wechselnder Ziffernzahl (10, + 20, + 100) nur eine
+   ausgefranste Kante. Gilt für beide Tabellen mit .rangliste: die Punkteregeln
+   (2 Spalten) und die echte Rangliste (3 Spalten) — Punkte steht in beiden
+   zuletzt. */
+.rangliste th:last-child, .rangliste td:last-child { text-align: right; }
 .rangliste tbody tr:last-child td { border-bottom: 0; }
 .rangliste tr.ist-ich td { background: var(--color-orange-50); font-weight: var(--weight-semibold); }
 .rangliste-melden {
