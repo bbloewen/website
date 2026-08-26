@@ -9,11 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (!grid) return;
   var team = grid.getAttribute('data-team-news');
 
-  function parseDMY(str) {
-    var parts = (str || '').split('.');
-    if (parts.length !== 3) return new Date(0);
-    return new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
-  }
+  var parseDMY = SiteUtils.parseDMY;
   function byDateDesc(a, b) { return parseDMY(b.datum) - parseDMY(a.datum); }
 
   fetch('/data/news.json', { cache: 'no-cache' })

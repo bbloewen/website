@@ -14,14 +14,11 @@
   };
   var RIETHSPORTHALLE_MAPS_URL = 'https://www.google.com/maps/search/?api=1&query=Essener+Stra%C3%9Fe+20%2C+99089+Erfurt';
 
-  function parseDMY(str) {
-    var parts = str.split('.').map(Number);
-    return new Date(parts[2], parts[1] - 1, parts[0]);
-  }
-  function pad2(n) { return String(n).padStart(2, '0'); }
+  var parseDMY = SiteUtils.parseDMY;
+  var pad2 = SiteUtils.pad2;
   function formatShort(d) { return pad2(d.getDate()) + '.' + pad2(d.getMonth() + 1) + '.' + d.getFullYear(); }
   function dateKey(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
-  function gcalStamp(d) { return d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) + 'T' + pad2(d.getHours()) + pad2(d.getMinutes()) + '00'; }
+  var gcalStamp = SiteUtils.gcalStamp;
 
   function calendarLink(g) {
     var timeParts = (g.zeit || '00:00').split(':').map(Number);

@@ -5,10 +5,7 @@
 (function () {
   var MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 
-  function parseDMY(str) {
-    var parts = str.split('.').map(Number);
-    return new Date(parts[2], parts[1] - 1, parts[0]);
-  }
+  var parseDMY = SiteUtils.parseDMY;
 
   function gameSlideHTML(g, i) {
     var dateStr = g.date.getDate() + '. ' + MONATE[g.date.getMonth()] + ' ' + g.date.getFullYear();

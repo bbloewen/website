@@ -129,8 +129,8 @@ document.addEventListener('DOMContentLoaded', function () {
     return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(ortDisplay(ort));
   }
 
-  function pad2(n) { return String(n).padStart(2, '0'); }
-  function gcalStamp(d) { return d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) + 'T' + pad2(d.getHours()) + pad2(d.getMinutes()) + '00'; }
+  var pad2 = SiteUtils.pad2;
+  var gcalStamp = SiteUtils.gcalStamp;
 
   function nextWeekday(tag) {
     var target = WOCHENTAG_INDEX[tag];
