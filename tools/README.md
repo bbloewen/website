@@ -285,3 +285,23 @@ Maße, entfernt er bei jedem Lauf, was `build-bildmasse.py` zuvor ergänzt hat, 
 die Baukette ändert dieselben Dateien bei jedem Durchlauf hin und her. Genau das
 ist beim Bauen aufgelaufen. Prüfen lässt sich das jederzeit: Baukette zweimal
 laufen lassen, `git status` muss danach leer sein.
+
+## Icons: eigenes Bündel statt der ganzen Bibliothek
+
+`tools/build-lucide-icons.py` sammelt die tatsächlich benutzten
+`data-lucide`-Namen aus dem Repo, holt genau diese Symbole von `lucide-static`
+und schreibt sie mit einem kleinen Ersatz für `lucide.createIcons()` nach
+`js/vendor/lucide-icons.js`. 88 Symbole, 19 KB — vorher lag auf jeder Seite die
+komplette Bibliothek von unpkg, 419 KB und mit offener Versionsangabe `@latest`.
+
+Wird im HTML ein neuer Icon-Name benutzt, muss das Skript einmal laufen, sonst
+fehlt das Symbol im Bündel (der Platzhalter bleibt dann sichtbar stehen, das
+Skript meldet es beim nächsten Lauf).
+
+Bewusst **ohne** `defer`: mehrere Seiten rufen `lucide.createIcons()` aus
+Inline-Skripten auf. Bei 19 KB fällt das synchrone Laden nicht ins Gewicht, und
+die Ausführungsreihenfolge bleibt genau wie vorher.
+
+Leaflet (Kartenseiten) kommt weiter von unpkg, aber versionsfest
+(`leaflet@1.9.4`). Selbst hosten würde dort nichts an der Datenschutzlage ändern,
+weil die Kartenkacheln ohnehin von OpenStreetMap kommen.
