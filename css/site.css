@@ -589,6 +589,14 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
    ebenfalls ein span und wuerde die Flex-Basis sonst erben (300 px breite
    Wurst statt Punkt). */
 .freiplaetze-legende > span { display: flex; align-items: center; justify-content: center; gap: 8px; flex: 0 0 300px; }
+/* Auf schmalen Bildschirmen passt keine 300px-Spalte neben eine zweite --
+   jede Zeile faellt dann auf eine eigene Zeile herunter, und justify-content:
+   center auf dem Container zentriert diese Einzelzeilen sichtbar in der
+   Mitte. Linksbuendig wirkt das dagegen wie eine normale Liste. */
+@media (max-width: 599px) {
+  .freiplaetze-legende { justify-content: flex-start; }
+  .freiplaetze-legende > span { flex: 0 0 auto; justify-content: flex-start; }
+}
 /* Legendensymbole sind bewusst dieselben Kreise wie auf der Karte, nicht
    irgendein Icon — sonst muss man sich die Zuordnung selbst zusammenreimen. */
 .freiplatz-pin-probe {
