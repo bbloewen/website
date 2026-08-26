@@ -10,7 +10,7 @@
   var TEAM_META = {
     profis: { label: 'Pro B', badgeClass: 'team-badge-profis', url: '/saison/profis.html', tableUrl: '/saison/tabelle.html#tabelle-profis' },
     damen: { label: 'RLSO', badgeClass: 'team-badge-damen', url: '/saison/damen.html', tableUrl: '/saison/tabelle.html#tabelle-damen' },
-    nbbl: { label: 'NBBL', badgeClass: 'team-badge-nbbl', url: '/saison/u19.html', tableUrl: '/saison/tabelle.html#tabelle-nbbl' }
+    nbbl: { label: 'NBBL', badgeClass: 'team-badge-nbbl', url: '/saison/nbbl.html', tableUrl: '/saison/tabelle.html#tabelle-nbbl' }
   };
   var RIETHSPORTHALLE_MAPS_URL = 'https://www.google.com/maps/search/?api=1&query=Essener+Stra%C3%9Fe+20%2C+99089+Erfurt';
 
