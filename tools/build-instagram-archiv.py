@@ -50,7 +50,7 @@ import html
 import re
 import sys
 
-from seo_common import REPO, text_of
+from seo_common import REPO, bild_masse, text_of
 
 ARCHIV = REPO / "news" / "insta-archiv"
 ZIEL = REPO / "news" / "instagram-archiv.html"
@@ -113,7 +113,7 @@ def eintrag(pfad):
 def karte(e):
     return (
         f'<a class="card hoverable" href="{e["url"]}" style="text-decoration:none;color:inherit">'
-        f'<div class="card-media-photo"><img loading="lazy" src="{html.escape(e["bild"], quote=True)}" alt="" '
+        f'<div class="card-media-photo"><img loading="lazy" src="{html.escape(e["bild"], quote=True)}"{bild_masse(e["bild"])} alt="" '
         f"onerror=\"this.onerror=null;this.src='/assets/img/share/og-default.jpg'\" /></div>"
         f'<div class="card-body">'
         f'<span class="card-label">{html.escape(e["datum_anzeige"])} · {html.escape(e["account_label"])}</span>'

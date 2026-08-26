@@ -39,7 +39,7 @@ import sys
 from datetime import date
 from pathlib import Path
 
-from seo_common import esc
+from seo_common import bild_masse, esc
 
 REPO = Path(__file__).resolve().parent.parent
 DATEN = REPO / "data" / "news.json"
@@ -73,7 +73,7 @@ def kachel(a, rolle):
     label = f'{esc(a["datum"])} · Weiterlesen' if a.get("datum") else "Weiterlesen"
     return (
         f'<a class="{klasse}" href="{esc(a["url"])}">'
-        f'<img src="{esc(a.get("bild") or "")}" alt="" '
+        f'<img src="{esc(a.get("bild") or "")}"{bild_masse(a.get("bild") or "")} alt="" '
         "onerror=\"this.onerror=null;this.src='/assets/img/share/og-default.jpg'\" />"
         '<div class="news-tile-overlay">'
         f'<h3 class="news-tile-headline">{esc(a["titel"])}</h3>'

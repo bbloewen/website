@@ -40,7 +40,7 @@ import re
 import sys
 from pathlib import Path
 
-from seo_common import esc, maps_url, mit_links, spielbar
+from seo_common import bild_masse, esc, maps_url, mit_links, spielbar
 
 REPO = Path(__file__).resolve().parent.parent
 DATEN = REPO / "data" / "freiplaetze.json"
@@ -54,12 +54,12 @@ INHALT_ENDE = "<!--/FREIPLATZ:inhalt-->"
 def medien(f):
     """Spiegelt medienBlock(). Das QR-Overlay bleibt drin: Es zeigt auf Google
     Maps und ist fuer Leute am Rechner gedacht, die den Weg aufs Handy holen."""
-    qr = (f'<img class="freiplatz-qr" src="{esc(f["qr"])}" '
+    qr = (f'<img class="freiplatz-qr" src="{esc(f["qr"])}"{bild_masse(f["qr"])} '
           f'alt="QR-Code mit der Wegbeschreibung zum {esc(f["name"])}" loading="lazy" />'
           if f.get("qr") else "")
     if f.get("foto"):
         return ('<div class="card-media card-media-photo freiplatz-media">'
-                f'<img src="{esc(f["foto"])}" alt="{esc(f["name"])}" loading="lazy" />'
+                f'<img src="{esc(f["foto"])}"{bild_masse(f["foto"])} alt="{esc(f["name"])}" loading="lazy" />'
                 f'{qr}</div>')
     return ('<div class="card-media freiplatz-photo-placeholder freiplatz-media">'
             f'<i data-lucide="image" class="icon-22"></i><span>Foto folgt</span>{qr}</div>')

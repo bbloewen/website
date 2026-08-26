@@ -138,3 +138,52 @@ def mit_links(text, links):
         return esc(beschriftung)
 
     return re.sub(r"\[([^\]]+)\]", ersetze, esc(text))
+
+_MASSE_CACHE = {}
+
+
+def bild_masse(url):
+    """` width="W" height="H"` für ein Bild im Repo, sonst leerer String.
+
+    Gehört an jedes <img>, das ein Generator schreibt. Ohne die beiden Angaben
+    kennt der Browser das Seitenverhältnis erst, wenn das Bild geladen ist, und
+    alles darunter rutscht beim Laden nach unten — Cumulative Layout Shift, und
+    CLS ist ein Rankingsignal.
+
+    Warum der Helfer hier steht und nicht nur in build-bildmasse.py: Solange die
+    Generatoren ihre Kacheln ohne Maße schreiben, entfernt jeder Generatorlauf,
+    was build-bildmasse.py zuvor ergänzt hat — die Baukette ändert dann bei jedem
+    Durchlauf dieselben Dateien hin und her. build-bildmasse.py ist für die von
+    Hand geschriebenen Seiten da, dieser Helfer für die generierten.
+
+    Nimmt sowohl `/assets/...` als auch die eigene Domain absolut geschrieben —
+    letzteres steht so in den Insta-Archiv-Seiten.
+    """
+    if not url:
+        return ""
+    if url in _MASSE_CACHE:
+        return _MASSE_CACHE[url]
+    pfad_teil = url.split("?")[0]
+    if pfad_teil.startswith(BASE):
+        pfad_teil = "/" + pfad_teil[len(BASE):]
+    ergebnis = ""
+    if pfad_teil.startswith("/"):
+        pfad = REPO / pfad_teil.lstrip("/")
+        if pfad.is_file():
+            if pfad.suffix.lower() == ".svg":
+                m = re.search(r'viewBox="([\d.\-\s]+)"',
+                              pfad.read_text(encoding="utf-8", errors="ignore"))
+                if m:
+                    teile = m.group(1).split()
+                    if len(teile) == 4 and float(teile[2]) > 0 and float(teile[3]) > 0:
+                        ergebnis = (f' width="{round(float(teile[2]))}"'
+                                    f' height="{round(float(teile[3]))}"')
+            else:
+                try:
+                    from PIL import Image
+                    with Image.open(pfad) as bild:
+                        ergebnis = f' width="{bild.size[0]}" height="{bild.size[1]}"'
+                except Exception:
+                    ergebnis = ""
+    _MASSE_CACHE[url] = ergebnis
+    return ergebnis

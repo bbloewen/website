@@ -35,7 +35,7 @@ import re
 import sys
 from pathlib import Path
 
-from seo_common import esc
+from seo_common import bild_masse, esc
 
 REPO = Path(__file__).resolve().parent.parent
 DATEN = REPO / "data" / "sponsoren.json"
@@ -67,7 +67,7 @@ def kachel(p):
     """Spiegelt partnerTileHTML() aus js/partner-tile.js."""
     tier = p.get("tier") or ""
     if p.get("logo"):
-        front = f'<img src="{esc(p["logo"])}" alt="{esc(p["name"])}" loading="lazy" />'
+        front = f'<img src="{esc(p["logo"])}"{bild_masse(p["logo"])} alt="{esc(p["name"])}" loading="lazy" />'
     else:
         front = esc(p["name"])
     back = ""

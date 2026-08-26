@@ -254,3 +254,34 @@ Zwei Fallen dabei, beide beim Bauen aufgelaufen:
    Ankerzeilen in der JS-Datei und brechen ab, wenn sich dort etwas geändert
    hat. Bei den Trainingszeiten wurde das Markup bewusst **nicht** gespiegelt —
    es hängt an zu vielen Nachschlagetabellen; dort steht eine schlichte Liste.
+
+## Reihenfolge der Baukette
+
+`tools/bauen.sh` fährt alle Skripte in der Reihenfolge, in der sie laufen müssen.
+Die Reihenfolge ist nicht beliebig:
+
+1. **Seitengeneratoren** zuerst — sie schreiben ganze Seiten oder Blöcke neu.
+2. **build-partials.py** danach, es kopiert Header und Footer in jede Seite.
+3. **build-bildmasse.py** nach allen Generatoren.
+4. **build-head-meta.py** und **build-sitemap.py** zum Schluss, sie lesen Titel,
+   Description und `noindex` der fertigen Seiten.
+
+`sh tools/bauen.sh --check` reicht das Flag an alle Skripte weiter und schreibt
+nichts.
+
+### Bildmaße: zwei Wege, ein Ziel
+
+`width`/`height` an jedem `<img>` verhindern, dass beim Laden alles darunter
+nach unten rutscht (Cumulative Layout Shift, ein Rankingsignal). Dafür gibt es
+absichtlich zwei Stellen:
+
+* **`seo_common.bild_masse(url)`** — für Bilder, die ein Generator schreibt.
+  Jeder Generator, der ein `<img>` ausgibt, hängt den Rückgabewert direkt hinter
+  `src`.
+* **`build-bildmasse.py`** — für die von Hand geschriebenen Seiten.
+
+Beides zu haben ist kein Versehen: Schreibt ein Generator seine Kacheln ohne
+Maße, entfernt er bei jedem Lauf, was `build-bildmasse.py` zuvor ergänzt hat, und
+die Baukette ändert dieselben Dateien bei jedem Durchlauf hin und her. Genau das
+ist beim Bauen aufgelaufen. Prüfen lässt sich das jederzeit: Baukette zweimal
+laufen lassen, `git status` muss danach leer sein.

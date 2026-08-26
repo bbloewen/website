@@ -29,7 +29,7 @@ import json
 import re
 import sys
 
-from seo_common import REPO
+from seo_common import REPO, bild_masse
 
 ZIEL = REPO / "news" / "aktuelles.html"
 QUELLE = REPO / "data" / "news.json"
@@ -50,7 +50,7 @@ def karte(a):
     label = f"{a['datum']} · {a['kategorie']}" if a.get("datum") else a.get("kategorie", "")
     return (
         f'<a class="card hoverable" href="{a["url"]}" style="text-decoration:none;color:inherit">'
-        f'<div class="card-media-photo"><img loading="lazy" src="{a["bild"]}" alt="" /></div>'
+        f'<div class="card-media-photo"><img loading="lazy" src="{a["bild"]}"{bild_masse(a["bild"])} alt="" /></div>'
         f'<div class="card-body">'
         f'<span class="card-label">{html.escape(label)}</span>'
         f'<h3 style="font-size:18px">{html.escape(a["titel"])}</h3>'
