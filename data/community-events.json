@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-25T16:00:43.376+02:00",
+  "generatedAt": "2026-08-26T14:14:15.846+02:00",
   "publishFrom": "2026-08-22",
   "events": [
     {
@@ -36,9 +36,31 @@
       "heroImage": ""
     },
     {
+      "name": "Jubiläum Stöberhaus",
+      "category": "Straßenfest",
+      "status": "Genehmigt",
+      "start": "2026-09-05",
+      "end": null,
+      "isDatetime": false,
+      "description": "",
+      "location": "Swe Stöberhaus, Eugen-Richter-Straße 26, 99085 Erfurt, Deutschland",
+      "heroImage": ""
+    },
+    {
+      "name": "Stadtteilfest Wiesenhügel",
+      "category": "Straßenfest",
+      "status": "Genehmigt",
+      "start": "2026-09-12",
+      "end": null,
+      "isDatetime": false,
+      "description": "",
+      "location": "Jugendhaus Wiesenhügel, Färberwaidweg 10, 99097 Erfurt, Deutschland",
+      "heroImage": ""
+    },
+    {
       "name": "Hopfenbergfest",
       "category": "Straßenfest",
-      "status": "In Planung",
+      "status": "Genehmigt",
       "start": "2026-09-12",
       "end": null,
       "isDatetime": false,
