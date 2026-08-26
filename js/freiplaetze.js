@@ -915,6 +915,8 @@
       wurzel.innerHTML =
         '<h1 class="t-h2">' + esc(platz.name) + '</h1>' +
         '<p class="t-body mt-3">' + esc(platz.beschreibung) + '</p>' +
+        '<p class="mt-2"><a class="card-link" href="/trainieren/court-hunt.html">' +
+          'Was ist Court-Hunt? <i data-lucide="arrow-right" class="icon-14"></i></a></p>' +
         spotZeile +
         /* Adresse direkt unter die Überschrift: Wer die Seite am Handy öffnet,
            will als Erstes wissen, wo das ist — nicht erst nach dem Foto. */
