@@ -1,5 +1,5 @@
 {
-  "hinweis": "Fotos von Basketballcamps. Jeder Eintrag braucht 'src' (Bildpfad), 'alt' (Bildbeschreibung) und optional 'camp' (Slug, z.B. 'sommercamp-2026' — steuert, welche Rückblick-Seite das Foto zeigt). Auf trainieren/camps.html werden alle Fotos gezeigt (max. 50), in Rückblick-Artikeln nur die mit passendem 'camp'-Slug.",
+  "hinweis": "Fotos von Basketballcamps. Jeder Eintrag braucht 'src' (Bildpfad), 'alt' (Bildbeschreibung) und optional 'camp' (Slug, z.B. 'sommercamp-2026' — steuert, welche Rückblick-Seite das Foto zeigt). Auf trainieren/feriencamps.html werden alle Fotos gezeigt (max. 50), in Rückblick-Artikeln nur die mit passendem 'camp'-Slug.",
   "bilder": [
     { "src": "/assets/img/camps/impressionen-01.webp", "alt": "Drei Teilnehmerinnen beim SWE Sommercamp 2026", "camp": "sommercamp-2026" },
     { "src": "/assets/img/camps/impressionen-02.webp", "alt": "Gruppe beim SWE Sommercamp 2026", "camp": "sommercamp-2026" },
