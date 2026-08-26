@@ -80,8 +80,10 @@ function initCommunityEvents(containerId, jsonPath) {
       ? '<a class="t-caption" style="display:flex;align-items:center;gap:4px;margin:0 0 10px;color:var(--text-muted)" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(ev.location) + '" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-12"></i> ' + displayLocation + '</a>'
       : '';
     var description = ev.description || FALLBACK_DESCRIPTION;
-    var courtHuntHTML = ev.courtHunt
-      ? '<span class="badge badge-orange" style="margin-bottom:10px"><i data-lucide="target" class="icon-12"></i> Court-Hunt-Spot: mobiler Korb vor Ort</span>'
+    // Slug-Praefix "event-": Court-Hunt-Spots aus Community-Events nutzen die
+    // Huelle freiplatz.html?platz=, s. platzUrl() in freiplaetze.js.
+    var courtHuntHTML = (ev.courtHunt && ev.spotSlug)
+      ? '<a class="badge badge-orange" style="margin-bottom:10px" href="/trainieren/freiplatz.html?platz=' + encodeURIComponent(ev.spotSlug) + '"><i data-lucide="target" class="icon-12"></i> Court-Hunt-Spot: mobiler Korb vor Ort</a>'
       : '';
     return (
       '<div class="card hoverable camp-slider-card" data-start="' + ev.start + '">' +
