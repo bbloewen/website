@@ -18,7 +18,7 @@
     "url": "/club/organisation.html",
     "category": "Club",
     "description": "Die drei Säulen der Basketball Löwen und alle Verantwortlichen — alphabetisch, filterbar nach Organisation.",
-    "keywords": "Ansprechpartner Ansprechpartnerin Kontaktpersonen Zuständigkeiten wer macht was Vorstand Geschäftsstelle Mitarbeiter Team"
+    "keywords": "Ansprechpartner Ansprechpartnerin Kontaktpersonen Zuständigkeiten wer macht was Vorstand Geschäftsstelle Mitarbeiter Team Buchhaltung Finanzen Rechnung Rechnungen kaufmännisch Verwaltung IT Mitgliederverwaltung"
   },
   {
     "title": "Aaron Rommeley",
@@ -75,13 +75,6 @@
     "category": "Verantwortliche",
     "description": "Vorstand — zu finden auf der Organisation-Seite.",
     "keywords": "Vorstand Ansprechpartner"
-  },
-  {
-    "title": "Marko Fliege",
-    "url": "/club/organisation.html",
-    "category": "Verantwortliche",
-    "description": "Kaufmännischer Leiter — zu finden auf der Organisation-Seite.",
-    "keywords": "Kaufmännischer Leiter Finanzen Buchhaltung Rechnung Verwaltung IT Ansprechpartner"
   },
   {
     "title": "Nick Schmoock",
@@ -158,7 +151,7 @@
     "url": "/saison/nbbl.html",
     "category": "Saison & Teams",
     "description": "Die Basketball Löwen U19 in der NBBL: Kader, Trainerteam und die Kooperationen des Nachwuchsteams.",
-    "keywords": "NBBL U19 Nachwuchs Nachwuchs-Basketball-Bundesliga Junioren Erfurt"
+    "keywords": "NBBL U19 Nachwuchs Nachwuchs-Basketball-Bundesliga Junioren Erfurt U 19 Juniorinnen"
   },
   {
     "title": "Nachwuchs",
@@ -172,14 +165,14 @@
     "url": "/saison/profis/gameday/",
     "category": "Saison & Teams",
     "description": "Das nächste Heimspiel, die Halle mit Blockplan, alle Termine der Saison und die Karten.",
-    "keywords": "Gameday Heimspiel Riethsporthalle Halle Spielstätte Tickets Dauerkarte Blockplan Erfurt"
+    "keywords": "Gameday Heimspiel Riethsporthalle Halle Spielstätte Tickets Dauerkarte Blockplan Erfurt Spiel Spiele Gameday Game Day Anwurf Einlass Block Blöcke Kategorie Sitzplatz Stehplatz"
   },
   {
     "title": "Spielplan und Berichte",
     "url": "/saison/spielplan.html",
     "category": "Saison & Teams",
     "description": "Alle Spieltermine der Profis, Damen und U19 sowie Spielberichte der Basketball Löwen Erfurt im Überblick.",
-    "keywords": "Termine Spiele Spieltage Heimspiele Auswärtsspiele Ergebnisse Spielberichte Kalender Saisonplan"
+    "keywords": "Termine Spiele Spieltage Heimspiele Auswärtsspiele Ergebnisse Spielberichte Kalender Saisonplan Spiel Spiele Gegner Anwurf Uhrzeit"
   },
   {
     "title": "Tabelle",
@@ -193,7 +186,7 @@
     "url": "/trainieren/loewenpark.html",
     "category": "Trainieren",
     "description": "Der LÖWENPARK: neuer Trainingsstandort für den Basketball-Nachwuchs, Programm, Baufortschritt, Zeiten anfragen und die ganze Geschichte der Halle am Südpark.",
-    "keywords": "Halle Sporthalle Trainingshalle Südpark Neubau Bau Baufortschritt Trainingsstandort Hallenzeiten Eröffnung"
+    "keywords": "Halle Sporthalle Trainingshalle Südpark Neubau Bau Baufortschritt Trainingsstandort Hallenzeiten Eröffnung Loewenpark Lowenpark Sportpark"
   },
   {
     "title": "BasKIDball",
@@ -235,14 +228,14 @@
     "url": "/trainieren/trainingszeiten.html",
     "category": "Trainieren",
     "description": "Unverbindlich beim Training vorbeischauen — wir finden die passende Gruppe für dein Kind.",
-    "keywords": "Training Trainingsplan Trainingszeit Zeiten Probetraining Schnuppertraining mitmachen anmelden Gruppen Halle Kinder"
+    "keywords": "Training Trainingsplan Trainingszeit Zeiten Probetraining Schnuppertraining mitmachen anmelden Gruppen Halle Kinder Trainingszeit Uhrzeit Hallenzeiten Wochentag"
   },
   {
     "title": "Freiplätze",
     "url": "/trainieren/freiplaetze.html",
     "category": "Trainieren",
     "description": "Öffentliche Basketball-Freiplätze in Erfurt mit Adresse, Lage und Hinweisen zum Zugang — die Liste wächst mit jeder Meldung.",
-    "keywords": "Freiplatz Streetball 3x3 Basketballplatz Korb draußen Erfurt"
+    "keywords": "Freiplatz Streetball 3x3 Basketballplatz Korb draußen Erfurt Freiplätze Plätze Körbe Outdoor Court Courts"
   },
   {
     "title": "Freiplatz Neuer Ringelberg",
@@ -284,14 +277,14 @@
     "url": "/trainieren/freiplatz/loewenpark.html",
     "category": "Trainieren",
     "description": "Freiplatz direkt an unserem neuen Trainingsstandort im Erfurter Südpark.",
-    "keywords": "Freiplatz Basketballplatz Streetball 3x3 Korb LÖWENPARK Friedrich-Ebert-Straße 58 Erfurt"
+    "keywords": "Freiplatz Basketballplatz Streetball 3x3 Korb LÖWENPARK Friedrich-Ebert-Straße 58 Erfurt Loewenpark Lowenpark"
   },
   {
     "title": "Court-Hunt",
     "url": "/trainieren/court-hunt.html",
     "category": "Trainieren",
     "description": "An Erfurter Basketball-Freiplätzen einchecken, Punkte sammeln und Freikarten fürs Heimspiel gewinnen.",
-    "keywords": "Court-Hunt Gewinnspiel Freiplatz Check-in Punkte Freikarten"
+    "keywords": "Court-Hunt Gewinnspiel Freiplatz Check-in Punkte Freikarten Court Hunt Courthunt Spiel Gewinnspiel Freiplätze Checkin Monatssieger Gutschein QR-Code"
   },
   {
     "title": "Unsere Sponsoren",
@@ -375,7 +368,7 @@
     "url": "/tickets.html",
     "category": "Tickets",
     "description": "Tickets für Heimspiele der Basketball Löwen Erfurt.",
-    "keywords": "Karten Eintritt Eintrittskarte Ticketkauf Vorverkauf Preise Kategorie Einzelticket Dauerkarte Abendkasse Stehplatz Fanblock"
+    "keywords": "Karten Eintritt Eintrittskarte Ticketkauf Vorverkauf Preise Kategorie Einzelticket Dauerkarte Abendkasse Stehplatz Fanblock Ticket Karte Eintrittspreis Preis"
   },
   {
     "title": "Dauerkarte 2026/2027",
@@ -655,7 +648,7 @@
     "url": "/trainieren/loewenpark-buchen.html",
     "category": "Trainieren",
     "description": "Hallenzeiten im LÖWENPARK am Südpark in Erfurt für Training, Camps und Veranstaltungen anfragen.",
-    "keywords": "Halle mieten Sporthalle mieten Turnhalle Hallenzeiten buchen anfragen Vermietung Training Camp Veranstaltung Erfurt"
+    "keywords": "Halle mieten Sporthalle mieten Turnhalle Hallenzeiten buchen anfragen Vermietung Training Camp Veranstaltung Erfurt Loewenpark Lowenpark"
   },
   {
     "title": "Neuer Cheftrainer: Leif Ibrahim übernimmt bei den Löwen",
