@@ -442,6 +442,21 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 
     main_content = "\n".join(sections)
 
+    # Phase "angekuendigt" heisst: Spiel steht im Kalender, der Vorverkauf ist
+    # aber noch nicht offen. Diese Seiten tragen nur Gegner, Datum und den
+    # Hinweis "Vorverkauf noch nicht begonnen" -- rund 60 Woerter, von denen die
+    # Haelfte auf allen dreizehn Seiten identisch ist. Google sieht darin
+    # Beinah-Dubletten und indexiert davon typisch eine. Auf Markos Ansage
+    # (26.08.2026) bleiben sie deshalb bis zum Vorverkaufsstart auf noindex; die
+    # Sichtbarkeit traegt in der Zeit der immergruene Gameday-Hub. Sobald eine
+    # ticketUrl gesetzt ist, wechselt die Phase und die Seite wird von sich aus
+    # indexierbar -- kein zusaetzlicher Handgriff, und build-sitemap.py nimmt sie
+    # dann automatisch auf.
+    robots = ('<!-- noindex: Vorverkauf noch nicht offen, die Seite traegt bis dahin zu\n'
+              '     wenig eigenen Inhalt (s. Kommentar in tools/build-spieltagsseiten.py).\n'
+              '     Faellt automatisch weg, sobald data/heimspiele.json eine ticketUrl hat. -->\n'
+              '<meta name="robots" content="noindex" />\n') if phase == "angekuendigt" else ""
+
     return f"""<!doctype html>
 <html lang="de">
 <head>
@@ -450,7 +465,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 <meta name="format-detection" content="telephone=no" />
 <title>{gegner} — Basketball Löwen Erfurt</title>
 <meta name="description" content="{html.escape(description)}" />
-<link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
+{robots}<link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png" />
 <link rel="icon" type="image/png" sizes="16x16" href="/assets/logo/favicon-16.png" />
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
