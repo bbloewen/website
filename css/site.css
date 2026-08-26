@@ -566,7 +566,7 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
    darunter benennt beide zusätzlich in Worten. */
 .freiplatz-pin span {
   display: block; width: 22px; height: 22px; border-radius: 50%;
-  background: var(--color-brand-orange); border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,18,45,.45);
+  background: var(--color-success); border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,18,45,.45);
 }
 .freiplatz-pin-eingeschraenkt span { background: #fff; border-color: #F08A8A; box-shadow: 0 1px 4px rgba(0,18,45,.35); }
 .freiplatz-pin-event span { background: #7C5CD6; border-color: #fff; }
@@ -601,7 +601,7 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
    irgendein Icon — sonst muss man sich die Zuordnung selbst zusammenreimen. */
 .freiplatz-pin-probe {
   width: 16px; height: 16px; border-radius: 50%; flex: 0 0 16px;
-  background: var(--color-brand-orange); border: 3px solid #fff; box-shadow: 0 1px 3px rgba(0,18,45,.4);
+  background: var(--color-success); border: 3px solid #fff; box-shadow: 0 1px 3px rgba(0,18,45,.4);
 }
 .freiplatz-pin-probe.ist-eingeschraenkt { background: #fff; border-color: #F08A8A; }
 .freiplaetze-map-klein { height: 260px; }
