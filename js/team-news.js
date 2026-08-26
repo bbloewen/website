@@ -1,4 +1,4 @@
-/* Kompakter "Aktuelles zu ..."-Feed auf Teamseiten (z.B. teams-saison/profis.html).
+/* Kompakter "Aktuelles zu ..."-Feed auf Teamseiten (z.B. saison/profis.html).
    Zeigt die 3 neuesten News-Artikel mit passendem data-team-news="..."-Attribut
    (aus data/news.json, Feld "team"). Gibt es weniger als 3, werden mit den
    neuesten allgemeinen Artikeln (ohne "team") aufgefüllt, damit der Bereich

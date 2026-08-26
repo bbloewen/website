@@ -95,7 +95,7 @@ Seite. Liest die Archivseiten nur — sie gehören weiterhin dem n8n-Workflow
 `GpAS0ONrenHrcTwS`.
 
 **`build-spieltagsseiten.py`** — erzeugt/pflegt eine Seite je Heimspiel unter
-`teams-saison/profis/gameday/<seiteSlug>.html` (Marko, 25.08.2026: "eine Adresse für den
+`saison/profis/gameday/<seiteSlug>.html` (Marko, 25.08.2026: "eine Adresse für den
 ganzen Lebenszyklus" — vorher Ankündigung, danach Ergebnis+Bericht, dieselbe
 URL). Vier Phasen (angekündigt/vorverkauf/spieltag/danach) werden aus `datum`
 und `ticketUrl` hergeleitet, nicht von Hand gepflegt. `seiteSlug` wird pro Spiel
@@ -121,7 +121,7 @@ Medienblock — Karten-iframes würden beim ersten Aufbau laden und Sekunden sp�
 ersetzt, ohne für die Auffindbarkeit etwas beizutragen.
 
 **`build-spielplan-liste.py`** — schreibt die 14 Heimspiele statisch in
-`teams-saison/spielplan.html` **und** in `tickets.html`. Anlass war der Ahrefs-Crawl vom 25.08.2026: Alle
+`saison/spielplan.html` **und** in `tickets.html`. Anlass war der Ahrefs-Crawl vom 25.08.2026: Alle
 14 Spieltagsseiten galten als „Orphan page", weil ihre Adressen im Körper der
 Seite nicht ein einziges Mal als `href` standen — nur im JSON-LD im `<head>`.
 Die Liste entsteht sonst erst im Browser in `js/spielplan.js` (`renderDayList`

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Erzeugt/pflegt eine Seite je Heimspiel unter teams-saison/profis/gameday/<seiteSlug>.html.
+"""Erzeugt/pflegt eine Seite je Heimspiel unter saison/profis/gameday/<seiteSlug>.html.
 
 Marko-Vorgabe 25.08.2026: "Jedes Heimspiel bekommt eine Adresse — und behält sie
 sein ganzes Leben." Vor dem Spiel Ankündigung+Ticketverkauf, danach Ergebnis+
 Bericht+Impressionen, dieselbe URL. Diese eine Seite ist damit der einzige
-Heimatort eines Spiels — nicht mehr teams-saison/spielplan.html (das wird zum
+Heimatort eines Spiels — nicht mehr saison/spielplan.html (das wird zum
 reinen Verzeichnis) und nicht news/artikel/ (das bleibt Vereinsnews).
 
 Vier Phasen, hergeleitet statt von Hand gepflegt (phase()):
@@ -47,7 +47,7 @@ from zoneinfo import ZoneInfo
 from seo_common import REPO
 
 QUELLE = REPO / "data" / "heimspiele.json"
-ZIEL_DIR = REPO / "teams-saison" / "profis" / "gameday"
+ZIEL_DIR = REPO / "saison" / "profis" / "gameday"
 BERLIN = ZoneInfo("Europe/Berlin")
 
 MONATE = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli",
@@ -408,7 +408,7 @@ def bericht_section(bericht_inhalt):
 def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html=LEER_FOOTER, seo_block=LEER_SEO):
     d = parse_dmy(game["datum"])
     gegner = html.escape(game["gegner"])
-    url = f"https://basketball-loewen.com/teams-saison/profis/gameday/{game['seiteSlug']}.html"
+    url = f"https://basketball-loewen.com/saison/profis/gameday/{game['seiteSlug']}.html"
 
     phase_label = {
         "angekuendigt": "Angekündigt",
@@ -461,7 +461,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 {seo_block}</head>
-<body data-nav-group="teams-saison" class="hide-mobile-cta">
+<body data-nav-group="saison" class="hide-mobile-cta">
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
 {header_html}
 <main id="main">

@@ -82,7 +82,7 @@ def datum_text(s, mit_zeit):
 
 
 def ziel_url(s):
-    return f"/teams-saison/profis/gameday/{s['seiteSlug']}.html"
+    return f"/saison/profis/gameday/{s['seiteSlug']}.html"
 
 
 def paarung(s):
@@ -104,7 +104,7 @@ def zeile_spielplan(s):
         '<span class="venue-heim">Heimspiel</span>'
         '</div>'
         '<div class="fixture-mid">'
-        '<a class="team-badge team-badge-profis" href="/teams-saison/profis.html">Pro B</a>'
+        '<a class="team-badge team-badge-profis" href="/saison/profis.html">Pro B</a>'
         f'<div class="matchup"><a href="{esc(ziel)}">{esc(paarung(s))}</a></div>'
         '</div>'
         '<div class="fixture-day-actions">'
@@ -147,7 +147,7 @@ def zeile_tickets(s):
 
 # (Datei, Marker-Name, Container-Id, Zeilenbauer, Einrueckung)
 ZIELE = [
-    (REPO / "teams-saison" / "spielplan.html", "SPIELPLAN", "spielplan-tage",
+    (REPO / "saison" / "spielplan.html", "SPIELPLAN", "spielplan-tage",
      zeile_spielplan, "        ", "      "),
     (REPO / "tickets.html", "TICKETS", "heimspiele-liste",
      zeile_tickets, "              ", "            "),

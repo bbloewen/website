@@ -108,7 +108,7 @@ LOEWENPARK = {
 # Erstes Pfadsegment -> Breadcrumb-Bezeichnung (Formulierung aus partials/header.html)
 SECTIONS = {
     "club": ("Club", "club/ueber-uns.html"),
-    "teams-saison": ("Teams", "teams-saison/profis.html"),
+    "saison": ("Teams", "saison/profis.html"),
     "trainieren": ("Trainieren", "trainieren/loewenpark.html"),
     "partner": ("Partner", "partner/sponsoring.html"),
     "news": ("News", "news/aktuelles.html"),
@@ -218,7 +218,7 @@ def _spiel_event_node(g, mainEntityOfPage_url):
 
 
 def spiel_event_for(rel):
-    """SportsEvent fuer die Spieltagsseite teams-saison/profis/gameday/<seiteSlug>.html."""
+    """SportsEvent fuer die Spieltagsseite saison/profis/gameday/<seiteSlug>.html."""
     seite_slug = rel.split("/")[-1].removesuffix(".html")
     for g in heimspiele():
         if g.get("seiteSlug") == seite_slug:
@@ -234,7 +234,7 @@ def spielplan_itemlist():
         {
             "@type": "ListItem",
             "position": i,
-            "url": BASE + f"teams-saison/profis/gameday/{g['seiteSlug']}.html",
+            "url": BASE + f"saison/profis/gameday/{g['seiteSlug']}.html",
             "name": f"Basketball Löwen Erfurt – {g['gegner']}",
         }
         for i, g in enumerate(spiele, start=1)
@@ -400,12 +400,12 @@ def nodes_for(rel, text, page_title, social_title, description, image):
             node["datePublished"] = m.group(1)
         nodes.append(node)
 
-    if rel.startswith("teams-saison/profis/gameday/"):
+    if rel.startswith("saison/profis/gameday/"):
         event = spiel_event_for(rel)
         if event:
             nodes.append(event)
 
-    if rel == "teams-saison/spielplan.html":
+    if rel == "saison/spielplan.html":
         nodes.extend(spielplan_itemlist())
 
     if rel.startswith("trainieren/loewenpark"):

@@ -123,38 +123,38 @@
   },
   {
     "title": "Profis",
-    "url": "/teams-saison/profis.html",
+    "url": "/saison/profis.html",
     "category": "Teams & Saison",
     "description": "Die Basketball Löwen Erfurt in der Pro B: Kader, Trainerteam und Heimspielstätte der Profimannschaft."
   },
   {
     "title": "Damen",
-    "url": "/teams-saison/damen.html",
+    "url": "/saison/damen.html",
     "category": "Teams & Saison",
     "description": "Die Basketball Löwinnen Erfurt in der Regionalliga Südost: Kader, Trainerteam und Tabelle."
   },
   {
     "title": "U19",
-    "url": "/teams-saison/u19.html",
+    "url": "/saison/u19.html",
     "category": "Teams & Saison",
     "description": "Die Basketball Löwen U19 in der NBBL: Kader, Trainerteam und die Kooperationen des Nachwuchsteams.",
     "keywords": "NBBL Nachwuchs Basketball Bundesliga"
   },
   {
     "title": "Nachwuchs",
-    "url": "/teams-saison/nachwuchs.html",
+    "url": "/saison/nachwuchs.html",
     "category": "Teams & Saison",
     "description": "Der Nachwuchs der Basketball Löwen Erfurt — von den jüngeren Jahrgängen bis zur U19."
   },
   {
     "title": "Spielplan und Berichte",
-    "url": "/teams-saison/spielplan.html",
+    "url": "/saison/spielplan.html",
     "category": "Teams & Saison",
     "description": "Alle Spieltermine der Profis, Damen und U19 sowie Spielberichte der Basketball Löwen Erfurt im Überblick."
   },
   {
     "title": "Tabelle",
-    "url": "/teams-saison/tabelle.html",
+    "url": "/saison/tabelle.html",
     "category": "Teams & Saison",
     "description": "Die aktuellen Tabellenstände der Damen in der Regionalliga Südost und der U19 in der NBBL."
   },
@@ -450,98 +450,98 @@
   },
   {
     "title": "Porsche BBA Ludwigsburg",
-    "url": "/teams-saison/profis/gameday/2026-10-11-bba-ludwigsburg.html",
+    "url": "/saison/profis/gameday/2026-10-11-bba-ludwigsburg.html",
     "category": "Teams & Saison",
     "description": "Heimspiel Basketball Löwen Erfurt gegen Porsche BBA Ludwigsburg am 11.10.2026 in der Riethsporthalle.",
     "keywords": "Heimspiel Tickets Porsche BBA Ludwigsburg"
   },
   {
     "title": "TSG Reutlingen Ravens",
-    "url": "/teams-saison/profis/gameday/2026-10-18-tsg-reutlingen-ravens.html",
+    "url": "/saison/profis/gameday/2026-10-18-tsg-reutlingen-ravens.html",
     "category": "Teams & Saison",
     "description": "Heimspiel Basketball Löwen Erfurt gegen TSG Reutlingen Ravens am 18.10.2026 in der Riethsporthalle.",
     "keywords": "Heimspiel Tickets TSG Reutlingen Ravens"
   },
   {
     "title": "Culture City Weimar",
-    "url": "/teams-saison/profis/gameday/2026-11-08-culture-city-weimar.html",
+    "url": "/saison/profis/gameday/2026-11-08-culture-city-weimar.html",
     "category": "Teams & Saison",
     "description": "Heimspiel Basketball Löwen Erfurt gegen Culture City Weimar am 08.11.2026 in der Riethsporthalle.",
     "keywords": "Heimspiel Tickets Culture City Weimar"
   },
   {
     "title": "Dresden Titans",
-    "url": "/teams-saison/profis/gameday/2026-11-13-dresden-titans.html",
+    "url": "/saison/profis/gameday/2026-11-13-dresden-titans.html",
     "category": "Teams & Saison",
     "description": "Heimspiel Basketball Löwen Erfurt gegen Dresden Titans am 13.11.2026 in der Riethsporthalle.",
     "keywords": "Heimspiel Tickets Dresden Titans"
   },
   {
     "title": "FC Bayern Basketball II",
-    "url": "/teams-saison/profis/gameday/2026-11-20-fc-bayern-basketball.html",
+    "url": "/saison/profis/gameday/2026-11-20-fc-bayern-basketball.html",
     "category": "Teams & Saison",
     "description": "Heimspiel Basketball Löwen Erfurt gegen FC Bayern Basketball II am 20.11.2026 in der Riethsporthalle.",
     "keywords": "Heimspiel Tickets FC Bayern Basketball II"
   },
   {
     "title": "BG Hessing Leitershofen",
-    "url": "/teams-saison/profis/gameday/2026-12-06-bg-leitershofen.html",
+    "url": "/saison/profis/gameday/2026-12-06-bg-leitershofen.html",
     "category": "Teams & Saison",
     "description": "Heimspiel Basketball Löwen Erfurt gegen BG Hessing Leitershofen am 06.12.2026 in der Riethsporthalle.",
     "keywords": "Heimspiel Tickets BG Hessing Leitershofen"
   },
   {
     "title": "TSV Oberhaching Tropics",
-    "url": "/teams-saison/profis/gameday/2026-12-13-tsv-oberhaching-tropics.html",
+    "url": "/saison/profis/gameday/2026-12-13-tsv-oberhaching-tropics.html",
     "category": "Teams & Saison",
     "description": "Heimspiel Basketball Löwen Erfurt gegen TSV Oberhaching Tropics am 13.12.2026 in der Riethsporthalle.",
     "keywords": "Heimspiel Tickets TSV Oberhaching Tropics"
   },
   {
     "title": "Dragons Rhöndorf",
-    "url": "/teams-saison/profis/gameday/2027-01-03-dragons-rhoendorf.html",
+    "url": "/saison/profis/gameday/2027-01-03-dragons-rhoendorf.html",
     "category": "Teams & Saison",
     "description": "Heimspiel Basketball Löwen Erfurt gegen Dragons Rhöndorf am 03.01.2027 in der Riethsporthalle.",
     "keywords": "Heimspiel Tickets Dragons Rhöndorf"
   },
   {
     "title": "SKYLINERS Juniors",
-    "url": "/teams-saison/profis/gameday/2027-01-17-skyliners-juniors.html",
+    "url": "/saison/profis/gameday/2027-01-17-skyliners-juniors.html",
     "category": "Teams & Saison",
     "description": "Heimspiel Basketball Löwen Erfurt gegen SKYLINERS Juniors am 17.01.2027 in der Riethsporthalle.",
     "keywords": "Heimspiel Tickets SKYLINERS Juniors"
   },
   {
     "title": "BBC Coburg",
-    "url": "/teams-saison/profis/gameday/2027-01-31-bbc-coburg.html",
+    "url": "/saison/profis/gameday/2027-01-31-bbc-coburg.html",
     "category": "Teams & Saison",
     "description": "Heimspiel Basketball Löwen Erfurt gegen BBC Coburg am 31.01.2027 in der Riethsporthalle.",
     "keywords": "Heimspiel Tickets BBC Coburg"
   },
   {
     "title": "SV Fellbach Flashers",
-    "url": "/teams-saison/profis/gameday/2027-02-14-sv-fellbach-flashers.html",
+    "url": "/saison/profis/gameday/2027-02-14-sv-fellbach-flashers.html",
     "category": "Teams & Saison",
     "description": "Heimspiel Basketball Löwen Erfurt gegen SV Fellbach Flashers am 14.02.2027 in der Riethsporthalle.",
     "keywords": "Heimspiel Tickets SV Fellbach Flashers"
   },
   {
     "title": "Bayer Giants Leverkusen",
-    "url": "/teams-saison/profis/gameday/2027-03-07-giants-leverkusen.html",
+    "url": "/saison/profis/gameday/2027-03-07-giants-leverkusen.html",
     "category": "Teams & Saison",
     "description": "Heimspiel Basketball Löwen Erfurt gegen Bayer Giants Leverkusen am 07.03.2027 in der Riethsporthalle.",
     "keywords": "Heimspiel Tickets Bayer Giants Leverkusen"
   },
   {
     "title": "TV Langen",
-    "url": "/teams-saison/profis/gameday/2027-03-21-tv-langen.html",
+    "url": "/saison/profis/gameday/2027-03-21-tv-langen.html",
     "category": "Teams & Saison",
     "description": "Heimspiel Basketball Löwen Erfurt gegen TV Langen am 21.03.2027 in der Riethsporthalle.",
     "keywords": "Heimspiel Tickets TV Langen"
   },
   {
     "title": "Ahorn Camp Baskets",
-    "url": "/teams-saison/profis/gameday/2027-03-28-ahorn-camp-baskets.html",
+    "url": "/saison/profis/gameday/2027-03-28-ahorn-camp-baskets.html",
     "category": "Teams & Saison",
     "description": "Heimspiel Basketball Löwen Erfurt gegen Ahorn Camp Baskets am 28.03.2027 in der Riethsporthalle.",
     "keywords": "Heimspiel Tickets Ahorn Camp Baskets"
