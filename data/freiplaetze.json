@@ -8,7 +8,7 @@
       "lat": 50.993453777003076,
       "lng": 11.072305640372784,
       "qr": "/assets/img/freiplaetze/qr-neuer-ringelberg.svg",
-      "beschreibung": "Viel Platz und schöne Aussicht — manchmal geteilt mit ein paar Fußballern, aber genug Raum für Fußball und ein paar schöne Dunks.",
+      "beschreibung": "Öffentlicher Basketballplatz mit viel Platz und schöner Aussicht — manchmal geteilt mit ein paar Fußballern, aber genug Raum für Fußball und ein paar schöne Dunks.",
       "zugang": "oeffentlich",
       "foto": "/assets/img/freiplaetze-neuer-ringelberg.webp"
     },
@@ -19,7 +19,7 @@
       "lat": 50.9849486,
       "lng": 11.0657133,
       "qr": "/assets/img/freiplaetze/qr-ringelberg-radweg.svg",
-      "beschreibung": "Schöner Platz zum Chillen und für eine gemeinsame Fußball-Challenge. Körbe leider nur über dem Tor, daher ist Vorsicht geboten. But: Make this court your own!",
+      "beschreibung": "Öffentlicher Basketballplatz zum Chillen und für eine gemeinsame Fußball-Challenge. Körbe leider nur über dem Tor, daher ist Vorsicht geboten. But: Make this court your own!",
       "zugang": "oeffentlich",
       "foto": "/assets/img/freiplaetze-ringelberg-radweg.webp"
     },
@@ -31,7 +31,7 @@
       "lng": 11.0127086,
       "qr": "/assets/img/freiplaetze/qr-riethsporthalle.svg",
       "foto": "/assets/img/freiplaetze-riethsporthalle.webp",
-      "beschreibung": "Freiplatz direkt an unserer Heimspielstätte, der Riethsporthalle.",
+      "beschreibung": "Basketballplatz direkt an unserer Heimspielstätte, der Riethsporthalle.",
       "zugang": "eingeschraenkt",
       "zugangHinweis": "Leider nicht öffentlich zugänglich",
       "zugangDetail": "Der Platz wird vom [ESB] (Erfurter Sportbetrieb) betrieben und ist in der Regel verschlossen. Seit diesem Jahr hat der [BC Erfurt] dort einen temporären Zugang fürs Training — ein Glücksfall für den Platz.",
@@ -69,7 +69,7 @@
       "lng": 11.0385874,
       "qr": "/assets/img/freiplaetze/qr-loewenpark.svg",
       "foto": "/assets/img/freiplaetze-loewenpark.webp",
-      "beschreibung": "Freiplatz direkt an unserem neuen Trainingsstandort im Erfurter Südpark.",
+      "beschreibung": "Öffentlicher Basketballplatz direkt an unserem neuen Trainingsstandort im Erfurter Südpark.",
       "zugang": "oeffentlich"
     }
   ]
