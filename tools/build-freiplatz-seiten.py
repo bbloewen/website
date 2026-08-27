@@ -134,10 +134,22 @@ def inhalt(f):
 
 
 def titel(f):
-    """Nur der Platzname. Kein zusaetzliches "in Erfurt": Das Wort steht schon im
-    Suffix "Basketball Loewen Erfurt", und zweimal derselbe Ort im Titel liest
-    sich wie ein Platzhalter. Damit bleibt der laengste Titel bei 58 Zeichen."""
-    return f["name"]
+    """Platzname plus "Basketballplatz in Erfurt" — Muster von Marko, 27.08.2026.
+
+    Vorher stand im Titel nur der Name ("Freiplatz Nordpark") und dahinter das
+    Marken-Suffix. Damit fehlte auf allen sechs Seiten genau das Wort, nach dem
+    gesucht wird: "Basketballplatz". Title und h1 sind die staerksten Signale
+    einer Seite, und dort kam es nicht vor.
+
+    Der h1 behaelt bewusst den Namen — "Freiplatz X" ist die Bezeichnung in
+    data/freiplaetze.json, im Slug und auf den geplanten Aufklebern. Nur der
+    Titel wird laenger. Dafuer faellt das Marken-Suffix weg: "Erfurt" steht
+    weiter drin, der Verein steht im Kopf jeder Seite, und fuer diese
+    Long-Tail-Seiten ist der Suchbegriff mehr wert als der Markenname.
+
+    Laengster Titel damit 58 Zeichen (an der Riethsporthalle).
+    """
+    return f'{f["name"]}: Basketballplatz in Erfurt'
 
 
 def beschreibung(f):
@@ -162,7 +174,7 @@ def seite(f, vorlage):
     t = re.sub(r'<meta name="robots" content="noindex"\s*/?>\n', "", t)
 
     t = re.sub(r"<title>.*?</title>",
-               f"<title>{esc(titel(f))} — Basketball Löwen Erfurt</title>", t, count=1, flags=re.S)
+               f"<title>{esc(titel(f))}</title>", t, count=1, flags=re.S)
     t = re.sub(r'(<meta name="description" content=")(.*?)(")',
                lambda m: m.group(1) + esc(beschreibung(f)) + m.group(3), t, count=1, flags=re.S)
 
