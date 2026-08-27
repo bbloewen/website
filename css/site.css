@@ -2384,7 +2384,7 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
 }
 .footer-col img { height: 48px; margin-bottom: 16px; }
 .footer-brand-mark { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 16px; }
-.footer-brand-mark img { height: 64px; margin-bottom: 0; }
+.footer-brand-mark img { height: 64px; width: 68px; margin-bottom: 0; flex-shrink: 0; }
 .footer-brand-wordmark {
   display: flex; flex-direction: column; align-items: flex-start; height: 60px; justify-content: space-between;
   font-family: var(--font-display); font-weight: var(--weight-black);
