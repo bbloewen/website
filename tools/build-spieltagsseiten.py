@@ -52,6 +52,7 @@ BERLIN = ZoneInfo("Europe/Berlin")
 
 MONATE = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli",
           "August", "September", "Oktober", "November", "Dezember"]
+WOCHENTAGE = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
 
 RIETHSPORTHALLE_MAPS_URL = (
     "https://www.google.com/maps/search/?api=1&query="
@@ -78,6 +79,13 @@ def parse_dmy(s):
 
 def lang_datum(d):
     return f"{d.day}. {MONATE[d.month - 1]} {d.year}"
+
+
+def hero_datum(d):
+    """Wie lang_datum, aber mit abgekürztem Wochentag davor -- nur für den Hero-Lead
+    (Marko, 27.08.2026), z. B. "So, 11. Oktober 2026". lang_datum() bleibt für den
+    Kalender-Event-Text und den Angekündigt-Absatz unveraendert."""
+    return f"{WOCHENTAGE[d.weekday()][:2]}, {lang_datum(d)}"
 
 
 def phase_of(game, today):
@@ -421,16 +429,23 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 
     if phase == "danach":
         description = f"Ergebnis und Spielbericht: Basketball Löwen Erfurt gegen {game['gegner']} am {game['datum']}."
-        lead = f"{lang_datum(d)} · {game['zeit']} Uhr · Riethsporthalle"
+        lead = f"{hero_datum(d)} · {game['zeit']} Uhr · Riethsporthalle"
     elif phase == "spieltag":
         description = f"Heute Heimspiel: Basketball Löwen Erfurt gegen {game['gegner']} in der Riethsporthalle."
         lead = f"Heute, {game['zeit']} Uhr · Riethsporthalle"
     elif phase == "vorverkauf":
         description = f"Tickets für Basketball Löwen Erfurt gegen {game['gegner']} am {game['datum']} — Saalplan, Preise, Kategorien."
-        lead = f"{lang_datum(d)} · {game['zeit']} Uhr · Riethsporthalle"
+        lead = f"{hero_datum(d)} · {game['zeit']} Uhr · Riethsporthalle"
     else:
         description = f"Heimspiel gegen {game['gegner']} am {game['datum']} in der Riethsporthalle. Alle Infos zum Spieltag."
-        lead = f"{lang_datum(d)} · {game['zeit']} Uhr · Riethsporthalle"
+        lead = f"{hero_datum(d)} · {game['zeit']} Uhr · Riethsporthalle"
+
+    # "Angekuendigt" sagt noch nichts darueber, wer der Gegner ist -- auf Markos
+    # Ansage (27.08.2026) zeigt der Eyebrow hier stattdessen die Paarung selbst.
+    # Die anderen drei Phasen tragen mit dem Status (Vorverkauf/Spieltag/Ergebnis)
+    # eine Information, die "vs. Gegner" nicht ersetzen wuerde -- bleiben unveraendert.
+    eyebrow = (f"Basketball Löwen Erfurt vs. {gegner}" if phase == "angekuendigt"
+               else f"Heimspiel Basketball Löwen Erfurt · {phase_label}")
 
     sections = []
     if phase == "angekuendigt":
@@ -494,7 +509,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
     <div class="container">
       <div class="hero-lg-grid">
         <div>
-          <span class="eyebrow">Heimspiel Basketball Löwen Erfurt · {phase_label}</span>
+          <span class="eyebrow">{eyebrow}</span>
           <h1 class="nowrap-lg" style="font-size:clamp(20px,5vw,56px)"><span class="kw">{gegner}<span class="swoosh" aria-hidden="true"></span></span>.</h1>
           <p class="lead">{html.escape(lead)}</p>
           <a class="hero-location" href="{RIETHSPORTHALLE_MAPS_URL}" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Riethsporthalle, Essener Straße 20, 99089 Erfurt</a>

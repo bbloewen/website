@@ -104,7 +104,7 @@ def hero(s, kommt):
       <div class="hero-lg-grid">
         <div>
           <span class="eyebrow">{label} · Basketball Löwen Erfurt</span>
-          <h1 class="nowrap-lg" style="font-size:clamp(20px,5vw,56px)">Löwen gegen <span class="kw">{esc(s['gegner'])}<span class="swoosh" aria-hidden="true"></span></span>.</h1>
+          <h1 class="nowrap-lg" style="font-size:clamp(20px,5vw,56px)"><span class="kw">{esc(s['gegner'])}<span class="swoosh" aria-hidden="true"></span></span>.</h1>
           <p class="lead">{esc(zeile)}, Riethsporthalle Erfurt.</p>
           <a class="hero-location" href="{MAPS}" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Essener Straße 20, 99089 Erfurt</a>
         </div>
@@ -133,6 +133,11 @@ def halle():
     Bewusst ohne Anfahrt, Straßenbahnlinie und Parken: Diese Angaben stehen
     nirgends im Repo, und erfundene Verkehrsangaben auf einer Vereinsseite sind
     schlimmer als keine. Sobald Marko sie liefert, gehören sie hierher.
+
+    seatplan-root steckt seit 27.08.2026 in einem max-width:480px-Wrapper --
+    ungebremst war der Blockplan hier ~870px hoch und schob die Preisboxen aus
+    termine() weit nach unten. Aenderung an dieser Stelle immer synchron mit der
+    Handfassung in saison/profis/gameday/index.html halten.
     """
     return """  <section class="section">
     <div class="container container-narrow">
@@ -146,7 +151,7 @@ def halle():
       Erfurter Norden statt — die Profis in der Pro B, die Löwinnen in der Regionalliga und die
       U19 in der NBBL. Wer zu einem Löwen-Heimspiel geht, geht hierher.</p>
       <a class="freiplatz-adresse-link mt-4" href="__MAPS__" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Essener Straße 20, 99089 Erfurt</a>
-      <div id="seatplan-root" class="mt-5"></div>
+      <div style="max-width:480px;margin:0 auto"><div id="seatplan-root" class="mt-5"></div></div>
       <p class="t-body mt-5">Auf der einen Seite des Spielfelds liegen die <strong>Blöcke D, E und
       F</strong>, gegenüber die <strong>Blöcke A, B und C</strong>. Mittig zum Spielfeld sitzt man
       in <strong>Kategorie 1</strong> — das sind Block E und die Reihen 6 bis 12 von Block B.
@@ -221,10 +226,10 @@ def seite(liste, heute):
     aktuell, kommt = naechstes(liste, heute)
     zeit = f", {aktuell['zeit']} Uhr" if aktuell.get("zeit") else ""
     description = (f"Nächstes Heimspiel der Basketball Löwen Erfurt: gegen {aktuell['gegner']} "
-                   f"am {aktuell['datum']}{zeit} in der Riethsporthalle. Termine, Karten, Blockplan.")
+                   f"am {aktuell['datum']}{zeit} in der Riethsporthalle. Tickets & Dauerkarte.")
     if len(description) > 155:
         description = (f"Heimspiele der Basketball Löwen Erfurt in der Riethsporthalle: "
-                       f"nächster Gegner {aktuell['gegner']} am {aktuell['datum']}. Termine und Karten.")
+                       f"nächster Gegner {aktuell['gegner']} am {aktuell['datum']}. Tickets & Dauerkarte.")
 
     # rstrip, damit der zweite Lauf dasselbe Ergebnis liefert: das \s* der Regex
     # zieht sonst den Zeilenumbruch mit, den die Vorlage selbst schon setzt, und
@@ -245,7 +250,7 @@ def seite(liste, heute):
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="format-detection" content="telephone=no" />
-<title>Heimspiele in der Riethsporthalle — Basketball Löwen Erfurt</title>
+<title>Tickets & Heimspiele — Basketball Löwen Erfurt</title>
 <meta name="description" content="{esc(description)}" />
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png" />
