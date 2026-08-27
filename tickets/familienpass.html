@@ -243,7 +243,7 @@
     <div class="container">
     <span class="eyebrow">Tickets</span>
     <h1>Familienpass<span class="swoosh" aria-hidden="true"></span>.</h1>
-    <p class="lead">Registriere dich mit deinem Familienpass und sichere dir einen kostenlosen Gutschein für das nächste Heimspiel.</p>
+    <p class="lead">Die Stadt Erfurt und Basketball Löwen Erfurt machen es möglich - kostenlose Familienkarte für ein Heimspiel.</p>
     </div>
   </section>
 
@@ -261,8 +261,12 @@
         <h2 class="t-h2">Gutschein anfordern</h2>
         <form class="form-panel" id="familienpass-form" style="max-width:420px;margin:0 auto;text-align:left">
           <div class="field">
-            <label for="fp-name">Name (wie auf dem Familienpass) *</label>
-            <input type="text" id="fp-name" name="name" required autocomplete="name" />
+            <label for="fp-vorname">Vorname *</label>
+            <input type="text" id="fp-vorname" name="vorname" required autocomplete="given-name" />
+          </div>
+          <div class="field">
+            <label for="fp-nachname">Nachname (wie auf dem Familienpass) *</label>
+            <input type="text" id="fp-nachname" name="nachname" required autocomplete="family-name" />
           </div>
           <div class="field">
             <label for="fp-kinder">Anzahl Kinder *</label>
@@ -432,7 +436,8 @@
     submitBtn.disabled = true;
     submitBtn.textContent = 'Wird gesendet …';
     var payload = {
-      name: form.name.value,
+      vorname: form.vorname.value,
+      nachname: form.nachname.value,
       kinder: Number(form.kinder.value),
       email: form.email.value,
       firma: document.getElementById('fp-firma').value.trim(),
