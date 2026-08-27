@@ -233,6 +233,7 @@ def kauf_section(game):
         "zeit": game["zeit"],
         "subeventId": game["subeventId"],
         "stehplatzBuchbar": game.get("stehplatzBuchbar", True),
+        "zahlungPausiert": game.get("zahlungPausiert", False),
     }, ensure_ascii=False)
     return f"""  <section class="section">
     <div class="container">
@@ -320,7 +321,8 @@ def kauf_section(game):
           lines: summary.lines,
           total: summary.total,
           voucher: summary.voucher,
-          notiz: summary.notiz
+          notiz: summary.notiz,
+          zahlungPausiert: game.zahlungPausiert
         }}));
         window.location.href = '/tickets/checkout.html';
       }});

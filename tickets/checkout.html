@@ -541,6 +541,18 @@
     document.getElementById('checkout-event-label').textContent = cart.eventLabel;
     if (cart.notiz) document.getElementById('cf-notiz').value = cart.notiz;
 
+    if (cart.zahlungPausiert) {
+      var payBtn = document.querySelector('#checkout-form button[type="submit"]');
+      payBtn.disabled = true;
+      payBtn.textContent = 'Vorverkauf startet in Kürze';
+      document.querySelector('.voucher-box').style.display = 'none';
+      var pauseNotice = document.createElement('p');
+      pauseNotice.className = 't-caption';
+      pauseNotice.style.cssText = 'color:var(--text-muted);margin-top:10px;text-align:center';
+      pauseNotice.textContent = 'Der Ticketverkauf für dieses Spiel ist noch nicht freigeschaltet. Du kannst deine Auswahl schon jetzt testen.';
+      document.getElementById('checkout-form').appendChild(pauseNotice);
+    }
+
     /* Gutschein-/Wertgutschein-Einlösung läuft ausschließlich hier im Checkout und ist
        ab Klick auf "Einlösen" final: der Aufruf berechnet den Rabatt serverseitig gegen
        die echte pretix-API UND trägt ihn bei Wertgutscheinen sofort real ab (Guthaben
@@ -750,6 +762,7 @@
 
     document.getElementById('checkout-form').addEventListener('submit', function (e) {
       e.preventDefault();
+      if (cart.zahlungPausiert) return;
       var buyer = {
         email: document.getElementById('cf-email').value.trim(),
         vorname: document.getElementById('cf-vorname').value.trim(),
