@@ -40,7 +40,6 @@
   }
 
   function gameRowHTML(g, divider) {
-    var isPast = g.date < window.__spielplanToday;
     var meta = TEAM_META[g.team];
     var matchup = g.heim ? (g.teamLabel + ' – ' + g.gegner) : (g.gegner + ' – ' + g.teamLabel);
     var dateTimeStr = WOCHENTAGE[g.date.getDay()] + ', ' + formatShort(g.date) + (g.zeit ? ', ' + g.zeit + ' Uhr' : '');
@@ -64,11 +63,12 @@
     var actionsHTML = '<div class="fixture-day-actions">' +
       '<div class="fixture-result-row">' +
         '<div class="fixture-result">' + (g.ergebnis || '– – : – –') + '</div>' +
+        (g === naechstesHeimspiel ? '<a class="cal-link" href="/saison/profis/gameday/" title="Zum Gameday"><i data-lucide="ticket" style="width:16px;height:16px"></i></a>' : '') +
         (g.spielberichtUrl ? '<a class="cal-link" href="' + g.spielberichtUrl + '" title="Zum Spielbericht"><i data-lucide="file-text" style="width:16px;height:16px"></i></a>' : '') +
         '<a class="cal-link" href="' + meta.tableUrl + '" title="Zur Tabelle"><i data-lucide="list-ordered" style="width:16px;height:16px"></i></a>' +
         '<a class="cal-link" href="' + calendarLink(g) + '" target="_blank" rel="noopener" title="Ins Kalender eintragen"><i data-lucide="calendar-plus" style="width:16px;height:16px"></i></a>' +
       '</div>' +
-      (g.ticketUrl && !isPast ? '<a class="btn btn-outline-orange btn-sm" href="' + g.ticketUrl + '">Tickets <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>' : '') +
+      (g.heim && g.spielberichtUrl ? '<a class="btn btn-outline-orange btn-sm" href="' + g.spielberichtUrl + '">Zum Spiel <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>' : '') +
       '</div>';
     return '<div class="fixture-day-game' + (divider ? ' has-divider' : '') + '" data-team="' + g.team + '" data-heim="' + (g.heim ? '1' : '0') + '">' +
       '<div class="fixture-day-meta">' +
@@ -116,6 +116,13 @@
 
   var currentTeamFilter = 'alle';
   var onlyHeim = false;
+  /* Das naechste (oder, nach Saisonende, letzte) Profi-Heimspiel -- traegt in
+     gameRowHTML() das kleine Gameday-Icon, das so automatisch von Spiel zu
+     Spiel mitwandert, ohne dass am Game-Day-Skript (tools/build-gameday-hub.py)
+     etwas geaendert werden muesste: derselbe "naechstes Spiel"-Gedanke steckt
+     dort schon in naechstes(), hier reicht der clientseitige Vergleich mit
+     window.__spielplanToday (Marko, 27.08.2026). */
+  var naechstesHeimspiel = null;
 
   function applyFilter(filter) {
     if (typeof filter === 'string') currentTeamFilter = filter;
@@ -200,6 +207,18 @@
       if (a.date - b.date !== 0) return a.date - b.date;
       return (a.zeit || '').localeCompare(b.zeit || '');
     });
+
+    for (var ni = 0; ni < alleGames.length; ni++) {
+      if (alleGames[ni].heim && alleGames[ni].spielberichtUrl && alleGames[ni].date >= today) {
+        naechstesHeimspiel = alleGames[ni];
+        break;
+      }
+    }
+    if (!naechstesHeimspiel) {
+      for (var nj = alleGames.length - 1; nj >= 0; nj--) {
+        if (alleGames[nj].heim && alleGames[nj].spielberichtUrl) { naechstesHeimspiel = alleGames[nj]; break; }
+      }
+    }
 
     renderDayList(groupByDay(alleGames));
     initFilterChips();

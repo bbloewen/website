@@ -13,11 +13,12 @@ Vier Phasen, hergeleitet statt von Hand gepflegt (phase()):
   spieltag      heute ist Spieltag
   danach        Spiel liegt in der Vergangenheit
 
-Der Ticketkauf (Saalplan/Kategorien/Kasse) ist direkt eingebettet — dieselbe
-SeatPicker-Komponente, die vorher in der ungebundenen tickets/einzelticket.html
-lief (?spiel=<slug>, nie verlinkt). Jede Spieltagsseite kennt ihr Spiel bereits
-zur Bauzeit, deshalb kein Fetch/URL-Parameter mehr nötig — die Werte stehen
-direkt im Skript.
+Der Ticketkauf selbst (Saalplan/Kategorien/Kasse) lebt seit 27.08.2026 nicht
+mehr hier, sondern auf dem Gameday-Hub (tools/build-gameday-hub.py): weil
+ohnehin immer nur für ein Spiel gleichzeitig der Verkauf offen ist, ist der Hub
+in dem Moment schon die Kaufseite -- eine zusätzliche Spieltagsseite dafür war
+nur ein Umweg. Diese Seite hier zeigt vor dem Spiel nur noch, ob und wo gekauft
+werden kann, und verweist dafür auf den Hub.
 
 Bericht-Block: redaktioneller Inhalt (Ergebnis, Rückblick, Impressionen), den
 dieses Skript NIE überschreibt. Bei jedem Lauf wird die Seite komplett neu
@@ -44,7 +45,7 @@ import unicodedata
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from seo_common import REPO, gcal_link
+from seo_common import DAUERKARTE_CTA_STICHTAG, REPO, gcal_link
 
 QUELLE = REPO / "data" / "heimspiele.json"
 ZIEL_DIR = REPO / "saison" / "profis" / "gameday"
@@ -163,183 +164,21 @@ def extract_platzhalter(pfad, name, leer):
     return m.group(0) if m else leer
 
 
-PRETIX_ITEM_CATEGORY_MAP = {
-    23: "Stehplatz", 24: "Kategorie I", 25: "Kategorie II",
-    27: "Fanblock", 28: "Kategorie III",
-    29: "Kategorie II", 30: "Kategorie II", 31: "Kategorie II", 32: "C unten",
-    33: "Kategorie I", 34: "Rollstuhlplatz", 35: "Kategorie I", 40: "VIP",
-}
-
-PREISLISTE_HTML = """            <h3 class="t-h4 mb-3">Preise</h3>
-            <div class="price-row"><span>Kategorie 1</span><strong>16,00 €</strong></div>
-            <div class="price-row"><span>Kategorie 1 (ermäßigt)</span><strong>14,00 €</strong></div>
-            <div class="price-row"><span>Kategorie 2</span><strong>12,00 €</strong></div>
-            <div class="price-row"><span>Kategorie 2 (ermäßigt)</span><strong>8,50 €</strong></div>
-            <div class="price-row"><span>Kategorie 3</span><strong>10,50 €</strong></div>
-            <div class="price-row"><span>Kategorie 3 (ermäßigt)</span><strong>8,00 €</strong></div>
-            <div class="price-row"><span>Kategorie 3 (Kinder 7–14)</span><strong>5,00 €</strong></div>
-            <div class="price-row"><span>Fanblock</span><strong>10,50 €</strong></div>
-            <div class="price-row"><span>Fanblock (ermäßigt)</span><strong>8,00 €</strong></div>
-            <div class="price-row"{stehplatz_class}><span>Stehplatz</span><strong>8,00 €</strong></div>
-            <div class="price-row"><span>Rollstuhlfahrer (inkl. Begleitkarte)<br><span class="t-caption" style="color:var(--text-muted)">nur Block A, D, E, F</span></span><strong>8,00 €</strong></div>
-            <div class="price-row"><span>VIP</span><strong>119,00 €</strong></div>"""
-
-WISSENSWERTES_HTML = """      <span class="eyebrow" style="display:block;margin-top:40px;margin-bottom:16px">Wissenswertes</span>
-      <div class="grid-3">
-        <div class="info-tile info-tile-row info-tile-row-divided">
-          <div class="info-tile-row-head">
-            <div class="tile-icon"><i data-lucide="percent"></i></div>
-            <h3 class="t-h4">Ermäßigungen</h3>
-          </div>
-          <p class="t-body-sm">Beim Einzelticket gilt der ermäßigte Satz für Studierende, Azubis, FSJ, Menschen mit Behinderung ab 50&nbsp;% und Rentner*innen (jeweils mit Nachweis beim Einlass). Für Kinder von 7 bis 14 Jahren gibt es bei Tickets in Block A zusätzlich 25&nbsp;% Rabatt auf den ermäßigten Preis — schon ab dem ersten Kind.</p>
-        </div>
-        <div class="info-tile info-tile-row info-tile-row-divided">
-          <div class="info-tile-row-head">
-            <div class="tile-icon"><i data-lucide="armchair"></i></div>
-            <h3 class="t-h4">Vorteile</h3>
-          </div>
-          <p class="t-body-sm">Einen <strong>festen Sitzplatz</strong> gibt es ab dieser Saison nicht mehr beim Einzelticket — nur noch mit der Dauerkarte. Beim Einzelticket wählst du frei innerhalb deines gebuchten Blocks, pro Spiel neu.</p>
-        </div>
-        <div class="info-tile info-tile-row info-tile-row-divided">
-          <div class="info-tile-row-head">
-            <div class="tile-icon"><i data-lucide="smartphone"></i></div>
-            <h3 class="t-h4">Dein Ticket</h3>
-          </div>
-          <p class="t-body-sm">Digital als QR-Code per E-Mail — zum Einlass einfach aufs Handy holen oder ausdrucken. Der Kauf läuft direkt und sicher über unseren Ticketanbieter pretix.</p>
-        </div>
-        <div class="info-tile info-tile-row info-tile-row-divided">
-          <div class="info-tile-row-head">
-            <div class="tile-icon"><i data-lucide="door-open"></i></div>
-            <h3 class="t-h4">Einlass</h3>
-          </div>
-          <p class="t-body-sm">Eine Stunde vor Spielbeginn öffnen sich die Türen der Riethsporthalle. Kinder bis 6 Jahre haben freien Eintritt (ohne Anspruch auf einen eigenen Sitzplatz).</p>
-        </div>
-        <div class="info-tile info-tile-row info-tile-row-divided">
-          <div class="info-tile-row-head">
-            <div class="tile-icon"><i data-lucide="scale"></i></div>
-            <h3 class="t-h4">Rechtliches</h3>
-          </div>
-          <p class="t-body-sm">Alle Regelungen zu Kauf, Rücknahme und Verlust findest du in unseren <a href="/agb.html">AGB</a>.</p>
-        </div>
-        <div class="info-tile info-tile-row info-tile-row-divided">
-          <div class="info-tile-row-head">
-            <div class="tile-icon"><i data-lucide="chart-no-axes-column"></i></div>
-            <h3 class="t-h4">Auslastung</h3>
-          </div>
-          <div id="seatplan-occupancy"><p class="t-body-sm" style="color:var(--text-muted)">Wird geladen …</p></div>
-        </div>
-      </div>"""
-
-
-def kauf_section(game):
-    """Saalplan + Preise + Kasse -- identisch zur bisherigen tickets/einzelticket.html,
-    nur mit fest eingebetteten Spieldaten statt Fetch+?spiel=-Parameter."""
-    stehplatz_class = ' style="text-decoration:line-through;opacity:.55"' if game.get("stehplatzBuchbar") is False else ""
-    game_json = json.dumps({
-        "gegner": game["gegner"],
-        "datum": game["datum"],
-        "zeit": game["zeit"],
-        "subeventId": game["subeventId"],
-        "stehplatzBuchbar": game.get("stehplatzBuchbar", True),
-        "zahlungPausiert": game.get("zahlungPausiert", False),
-    }, ensure_ascii=False)
-    return f"""  <section class="section">
-    <div class="container">
-      <div class="buy-grid">
-          <div class="buy-prices-col">
-{PREISLISTE_HTML.format(stehplatz_class=stehplatz_class)}
-          </div>
-          <div class="buy-thumb-col">
-            <div id="seatplan-root"></div>
-          </div>
-          <div class="buy-cart-col">
-            <h3 class="t-h4 mb-1">Deine Auswahl</h3>
-            <p class="t-caption" style="color:var(--text-muted);margin-bottom:14px">Einzelticket für den {html.escape(game["datum"])}</p>
-            <div id="seatplan-cart"></div>
-            <div class="seatplan-cart-total"><span>Gesamt</span><span id="seatplan-total">0,00 €</span></div>
-            <button class="btn btn-primary btn-sm" id="seatplan-cta" style="margin-top:16px;width:100%;justify-content:center" disabled>Weiter zur Kasse</button>
-          </div>
-      </div>
-{WISSENSWERTES_HTML}
-    </div>
-  </section>
-
-  <section class="section bg-subtle">
-    <div class="container container-narrow">
-      <span class="eyebrow" style="display:block;text-align:center;margin-bottom:6px">Kontakt</span>
-      <h2 class="t-h2 text-center mb-5">Fragen zum Ticket?</h2>
-      <div class="contact-person-card contact-person-card-centered">
-        <div>
-          <a href="mailto:tickets@basketball-loewen.com">tickets@basketball-loewen.com</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <script src="/js/voucher-utils.js?v=1786873000"></script>
-  <script src="/js/seat-picker.js?v=1787760512"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {{
-      /* Spieldaten liegen fest in dieser Seite -- kein Fetch/?spiel=-Parameter
-         mehr noetig, die Seite kennt ihr Spiel bereits (s. tools/build-spieltagsseiten.py). */
-      var game = {game_json};
-      var eventLabel = 'Basketball Löwen Erfurt – ' + game.gegner + ', {html.escape(lang_datum(parse_dmy(game["datum"])))}';
-      var picker = new SeatPicker(document.getElementById('seatplan-root'), {{
-        mode: 'blocks',
-        nachwuchsBeitrag: true,
-        nachwuchsAmount: 2,
-        planUrl: '/assets/seating/riethsporthalle-seatingplan.json?v=1786585000',
-        seatStatusUrl: {('"https://poetic-patience-production-9290.up.railway.app/webhook/einzelticket-sitzplatz-status?subevent=' + str(game["subeventId"]) + '"') if game.get("subeventId") else "null"},
-        pretixEvent: 'saison2627',
-        pretixItemCategoryMap: {json.dumps(PRETIX_ITEM_CATEGORY_MAP)},
-        reservedSeats: [
-          {{ zone: 'A', rows: ['1'], excludeSeatNumbers: ['1', '2', '3', '4', '5', '6', '7', '19', '20'] }}
-        ],
-        nvSeats: [
-          {{ zone: 'A', rows: ['1', '2', '3'], maxSeatNumber: 7 }}
-        ],
-        northZones: ['D', 'E', 'F'],
-        southZones: ['A', 'B', 'C'],
-        prices: {{
-          'Kategorie I': {{ normal: 16, ermaessigt: 14 }},
-          'Kategorie II': {{ normal: 12, ermaessigt: 8.5 }},
-          'Kategorie III': {{ normal: 10.5, ermaessigt: 8, kind: 5 }},
-          'Fanblock': {{ normal: 10.5, ermaessigt: 8 }},
-          'C unten': {{ normal: 12, ermaessigt: 8.5 }},
-          'Rollstuhlplatz': {{ normal: 8 }},
-          'VIP': {{ normal: 119 }}
-        }},
-        standingPrice: 8,
-        standingBookable: game.stehplatzBuchbar !== false,
-        cartEl: document.getElementById('seatplan-cart'),
-        totalEl: document.getElementById('seatplan-total'),
-        ctaEl: document.getElementById('seatplan-cta'),
-        occupancyEl: document.getElementById('seatplan-occupancy')
-      }});
-
-      document.getElementById('seatplan-cta').addEventListener('click', function () {{
-        var summary = picker.getSummary();
-        sessionStorage.setItem('bl_cart', JSON.stringify({{
-          productType: 'einzelticket',
-          eventLabel: eventLabel,
-          pretixEventSlug: 'saison2627',
-          pretixSubeventId: game.subeventId,
-          spielDatum: game.datum,
-          gegner: game.gegner,
-          lines: summary.lines,
-          total: summary.total,
-          voucher: summary.voucher,
-          notiz: summary.notiz,
-          zahlungPausiert: game.zahlungPausiert
-        }}));
-        window.location.href = '/tickets/checkout.html';
-      }});
-    }});
-  </script>
-"""
-
-
-def angekuendigt_section(game, d):
+def heimspiel_infos_section(game, d, offen):
+    """Ersetzt die vorherige kauf_section() (jetzt auf dem Gameday-Hub, s.
+    tools/build-gameday-hub.py) -- diese Seite zeigt vor dem Spiel nur noch,
+    ob und wo Tickets zu haben sind. Bewusst ohne Status-Wortlaut wie
+    "Vorverkauf läuft"/"angekündigt" (Marko, 27.08.2026): Der Text sagt
+    schlicht, wo Tickets sind, statt eine Verkaufsphase zu benennen.
+    """
+    ticket_text = (
+        'Tickets für dieses Spiel gibt es auf dem <a href="/saison/profis/gameday/">Gameday-Hub</a>.'
+        if offen else
+        'Tickets für dieses Spiel gibt es, sobald der Verkauf freigeschaltet ist — wir '
+        'kündigen das rechtzeitig hier und über unsere Kanäle an. Mit der '
+        '<a href="/tickets/dauerkarte.html">Dauerkarte</a> sicherst du dir schon jetzt '
+        'einen festen Platz für die ganze Saison.'
+    )
     return f"""  <section class="section">
     <div class="container">
       <span class="eyebrow" style="display:block;margin-bottom:16px">Heimspiel-Infos</span>
@@ -361,9 +200,9 @@ def angekuendigt_section(game, d):
         <div class="info-tile info-tile-row info-tile-row-divided">
           <div class="info-tile-row-head">
             <div class="tile-icon"><i data-lucide="ticket"></i></div>
-            <h3 class="t-h4">Vorverkauf</h3>
+            <h3 class="t-h4">Tickets</h3>
           </div>
-          <p class="t-body-sm">Der Ticketverkauf für dieses Spiel hat noch nicht begonnen — wir kündigen den Start rechtzeitig hier und über unsere Kanäle an. Mit der <a href="/tickets/dauerkarte.html">Dauerkarte</a> sicherst du dir schon jetzt einen festen Platz für die ganze Saison.</p>
+          <p class="t-body-sm">{ticket_text}</p>
         </div>
       </div>
     </div>
@@ -415,17 +254,10 @@ def bericht_section(bericht_inhalt):
 """
 
 
-def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html=LEER_FOOTER, seo_block=LEER_SEO):
+def build_page(game, phase, bericht_inhalt, today, header_html=LEER_HEADER, footer_html=LEER_FOOTER, seo_block=LEER_SEO):
     d = parse_dmy(game["datum"])
     gegner = html.escape(game["gegner"])
     url = f"https://basketball-loewen.com/saison/profis/gameday/{game['seiteSlug']}.html"
-
-    phase_label = {
-        "angekuendigt": "Angekündigt",
-        "vorverkauf": "Vorverkauf läuft",
-        "spieltag": "Heute Spieltag",
-        "danach": "Ergebnis & Bericht",
-    }[phase]
 
     if phase == "danach":
         description = f"Ergebnis und Spielbericht: Basketball Löwen Erfurt gegen {game['gegner']} am {game['datum']}."
@@ -446,18 +278,23 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
     # abgekuerzt (hero_datum) -- auf dem Gameday-Hub steht er dagegen ausgeschrieben.
     kalender_link = gcal_link(game["gegner"], d, game["zeit"])
 
-    # "Angekuendigt" sagt noch nichts darueber, wer der Gegner ist -- auf Markos
-    # Ansage (27.08.2026) zeigt der Eyebrow hier stattdessen die Paarung selbst.
-    # Die anderen drei Phasen tragen mit dem Status (Vorverkauf/Spieltag/Ergebnis)
-    # eine Information, die "vs. Gegner" nicht ersetzen wuerde -- bleiben unveraendert.
-    eyebrow = (f"Basketball Löwen Erfurt vs. {gegner}" if phase == "angekuendigt"
-               else f"Heimspiel Basketball Löwen Erfurt · {phase_label}")
+    # Eyebrow zeigt in jeder Phase die Paarung statt eines Status-Worts: ein
+    # Status wie "Vorverkauf läuft" duplizierte sich optisch mit der Ueberschrift
+    # direkt darunter (die den Gegner ohnehin schon nennt) und stimmte bei
+    # zahlungPausiert-Spielen inhaltlich nicht mehr (Marko, 27.08.2026, am
+    # Beispiel Porsche BBA Ludwigsburg/TSG Reutlingen Ravens).
+    eyebrow = f"Heimspiel: Basketball Löwen Erfurt vs. {gegner}"
+
+    dauerkarte_cta = (
+        '        <div style="display:flex;align-items:center;justify-content:center">\n'
+        '          <a class="btn btn-primary" href="/tickets/dauerkarte.html">Dauerkarte kaufen und festen Platz sichern</a>\n'
+        '        </div>\n'
+    ) if today <= DAUERKARTE_CTA_STICHTAG else ""
+    hero_grid_style = "" if today <= DAUERKARTE_CTA_STICHTAG else ' style="grid-template-columns:1fr"'
 
     sections = []
-    if phase == "angekuendigt":
-        sections.append(angekuendigt_section(game, d))
-    if phase in ("vorverkauf", "spieltag"):
-        sections.append(kauf_section(game))
+    if phase in ("angekuendigt", "vorverkauf", "spieltag"):
+        sections.append(heimspiel_infos_section(game, d, offen=bool(game.get("ticketUrl"))))
     if phase == "spieltag":
         sections.append(spieltag_zusatz_section())
     if phase == "danach":
@@ -495,7 +332,6 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
 <link rel="stylesheet" href="/css/site.css?v=1787846983" />
-<link rel="stylesheet" href="/css/seat-picker.css?v=1787760512" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
@@ -513,17 +349,14 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 <main id="main">
   <section class="hero-photo hero-tickets hero-half">
     <div class="container">
-      <div class="hero-lg-grid">
+      <div class="hero-lg-grid"{hero_grid_style}>
         <div>
           <span class="eyebrow">{eyebrow}</span>
           <h1 class="nowrap-lg" style="font-size:clamp(20px,5vw,56px)"><span class="kw">{gegner}<span class="swoosh" aria-hidden="true"></span></span>.</h1>
           <p class="lead"><a href="{kalender_link}" target="_blank" rel="noopener" title="Ins Kalender eintragen" style="display:inline-flex;vertical-align:middle;color:inherit"><i data-lucide="calendar-plus" class="icon-16"></i></a> {html.escape(zeit_text)}</p>
           <a class="hero-location" href="{RIETHSPORTHALLE_MAPS_URL}" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Riethsporthalle, Essener Straße 20, 99089 Erfurt</a>
         </div>
-        <div style="display:flex;align-items:center;justify-content:center">
-          <a class="btn btn-primary" href="/tickets/dauerkarte.html">Dauerkarte kaufen und festen Platz sichern</a>
-        </div>
-      </div>
+{dauerkarte_cta}      </div>
     </div>
   </section>
 
@@ -556,7 +389,7 @@ def main():
         header_html = extract_platzhalter(pfad, "header", LEER_HEADER)
         footer_html = extract_platzhalter(pfad, "footer", LEER_FOOTER)
         seo_block = extract_seo_block(pfad)
-        neu = build_page(game, phase, bericht, header_html, footer_html, seo_block)
+        neu = build_page(game, phase, bericht, today, header_html, footer_html, seo_block)
         alt = pfad.read_text(encoding="utf-8") if pfad.exists() else None
         if neu == alt:
             unveraendert.append((game["seiteSlug"], phase))

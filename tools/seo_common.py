@@ -14,12 +14,19 @@ Inhalt. Wir legen uns site-weit auf die Verzeichnisform fest.
 import html
 import re
 import subprocess
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from urllib.parse import quote
 
 BASE = "https://basketball-loewen.com/"
 REPO = Path(__file__).resolve().parent.parent
+
+# Der Dauerkarte-CTA im Hero wirbt fuer einen festen Platz "die ganze Saison" --
+# das ergibt nach Weihnachten immer weniger Sinn, je naeher das Saisonende
+# rueckt. Gilt fuer beide Hero-Varianten, die dafuer werben: den Gameday-Hub
+# und die einzelnen Spieltagsseiten. Marko-Vorgabe 27.08.2026: CTA nur bis
+# einschliesslich Heiligabend 2026 zeigen.
+DAUERKARTE_CTA_STICHTAG = date(2026, 12, 25)
 
 NOINDEX_RE = re.compile(r'<meta\s+name=["\']robots["\']\s+content=["\'][^"\']*noindex', re.I)
 

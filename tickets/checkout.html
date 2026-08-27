@@ -302,7 +302,7 @@
     <div class="container">
 
       <div id="checkout-empty" class="card" style="padding:24px;display:none">
-        <p class="t-body-sm">Es liegt noch keine Auswahl vor. <a href="/tickets.html">Zurück zu den Tickets</a>.</p>
+        <p class="t-body-sm">Es liegt noch keine Auswahl vor. <a href="/saison/profis/gameday/">Zurück zu den Tickets</a>.</p>
       </div>
 
       <div id="checkout-content" class="checkout-grid hidden">
@@ -656,7 +656,13 @@
       vatNoteEl.style.display = cart.vatNote ? '' : 'none';
 
       var hasVoucher = findVoucherLineIndex() !== -1;
-      voucherBoxEl.style.display = hasVoucher ? 'none' : '';
+      /* cart.zahlungPausiert bleibt hier mit drin, nicht nur in der einmaligen
+         Weiche weiter oben: renderSummary() läuft danach noch mehrfach (Zeile
+         683 direkt beim Laden, dazu bei jeder Warenkorb-Änderung) und hätte das
+         Ausblenden sonst bei jedem Aufruf wieder rückgängig gemacht -- ein
+         Wertgutschein wäre dann trotz pausierter Zahlung real einlösbar
+         gewesen. */
+      voucherBoxEl.style.display = (hasVoucher || cart.zahlungPausiert) ? 'none' : '';
 
       var removeBtn = document.getElementById('voucher-remove');
       if (removeBtn) {

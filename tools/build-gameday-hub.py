@@ -37,6 +37,7 @@ from datetime import date
 from pathlib import Path
 
 from seo_common import attr as esc
+from seo_common import DAUERKARTE_CTA_STICHTAG
 from seo_common import gcal_link
 from seo_common import ziel_url
 
@@ -93,13 +94,17 @@ def naechstes(liste, heute):
     return (kuenftig[0], True) if kuenftig else (liste[-1], False)
 
 
-def hero(s, kommt):
+def hero(s, kommt, heute):
     zeit = s.get("zeit")
     zeile = lang_datum(s) + (f" · {zeit} Uhr" if zeit else "")
     label = "Nächstes Heimspiel" if kommt else "Letztes Heimspiel der Saison"
-    knopf = (f'<a class="btn btn-primary" href="{esc(ziel_url(s))}">Tickets und alle Infos zum Spiel</a>'
-             if s.get("ticketUrl") else
-             f'<a class="btn btn-primary" href="{esc(ziel_url(s))}">Alle Infos zum Spiel</a>')
+    # Dauerkarte-CTA mit demselben Stichtag wie auf den Einzelticket-Seiten
+    # (Marko, 27.08.2026). Ein zweiter Knopf zum Einzelticketkauf ist hier
+    # bewusst wieder raus -- der Kauf selbst zieht als Ganzes auf den Hub
+    # (s. Kommentar in kauf_section()/termine()), ein Verweis darauf waere in
+    # der Zwischenzeit nur Verwirrung gestiftet.
+    knopf = (f'<a class="btn btn-primary" href="/tickets/dauerkarte.html">Bis Weihnachten Dauerkarte kaufen</a>'
+             if heute <= DAUERKARTE_CTA_STICHTAG else "")
     # Zeit- und Ort-Zeile getrennt, Kalenderlink vorn in der Zeit-Zeile (Marko,
     # 27.08.2026) -- wie auf den Spieltagsseiten, hier aber mit ausgeschriebenem
     # Wochentag statt abgekuerzt (lang_datum() liefert den bereits so).
@@ -119,7 +124,7 @@ def hero(s, kommt):
           {zeit_zeile}
           <a class="hero-location" href="{MAPS}" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Riethsporthalle, Essener Straße 20, 99089 Erfurt</a>
         </div>
-        <div style="display:flex;align-items:center;justify-content:center">
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px">
           {knopf}
         </div>
       </div>
@@ -128,27 +133,18 @@ def hero(s, kommt):
 
 
 def halle():
-    """Die Halle als eigener Abschnitt — der Grund, warum diese Seite für
-    „riethsporthalle" ranken kann (2.400 Suchen im Monat, wir auf Platz 4).
+    """Die Halle als eigener Abschnitt, ganz unten auf der Seite (Marko,
+    27.08.2026): für den Kauf nicht wichtig, aber der Grund, warum diese Seite
+    für „riethsporthalle" ranken kann (2.400 Suchen im Monat, wir auf Platz 4).
 
-    Der Blockplan ist derselbe wie auf den Spieltagsseiten und der Dauerkarte
-    (js/seat-picker.js, Nur-Ansicht): eine zweite, eigene Darstellung derselben
-    Halle würde auseinanderlaufen, sobald sich ein Block ändert. Das alte Bild
-    assets/img/riethsporthalle-blockplan.webp stammt aus der Zeit vor dem
-    Redesign und ist damit hier raus.
-
-    Weil der Plan JavaScript braucht, steht die Blockaufteilung zusätzlich als
-    Text da — das ist der Teil, den eine Suchmaschine liest, und genau die
-    Lücke, die auf dieser Seite schon mehrfach aufgefallen ist.
+    Der Saalplan steht seit 27.08.2026 nicht mehr hier, sondern -- interaktiv,
+    mit echten Preisen und Belegung -- oben in kauf_bereich(): eine zweite,
+    rein informative Darstellung derselben Halle wäre hier nur Redundanz, und
+    ein zweites Element mit der ID seatplan-root auf derselben Seite ein Bug.
 
     Bewusst ohne Anfahrt, Straßenbahnlinie und Parken: Diese Angaben stehen
     nirgends im Repo, und erfundene Verkehrsangaben auf einer Vereinsseite sind
     schlimmer als keine. Sobald Marko sie liefert, gehören sie hierher.
-
-    seatplan-root steckt seit 27.08.2026 in einem max-width:480px-Wrapper --
-    ungebremst war der Blockplan hier ~870px hoch und schob die Preisboxen aus
-    termine() weit nach unten. Aenderung an dieser Stelle immer synchron mit der
-    Handfassung in saison/profis/gameday/index.html halten.
     """
     return """  <section class="section">
     <div class="container container-narrow">
@@ -162,7 +158,6 @@ def halle():
       Erfurter Norden statt — die Profis in der Pro B, die Löwinnen in der Regionalliga und die
       U19 in der NBBL. Wer zu einem Löwen-Heimspiel geht, geht hierher.</p>
       <a class="freiplatz-adresse-link mt-4" href="__MAPS__" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Essener Straße 20, 99089 Erfurt</a>
-      <div style="max-width:480px;margin:0 auto"><div id="seatplan-root" class="mt-5"></div></div>
       <p class="t-body mt-5">Auf der einen Seite des Spielfelds liegen die <strong>Blöcke D, E und
       F</strong>, gegenüber die <strong>Blöcke A, B und C</strong>. Mittig zum Spielfeld sitzt man
       in <strong>Kategorie 1</strong> — das sind Block E und die Reihen 6 bis 12 von Block B.
@@ -173,10 +168,246 @@ def halle():
       <strong>Stehplätze</strong> an der Längsseite. <strong>Rollstuhlplätze</strong> gibt es in
       Reihe 6 der Blöcke D, E und F und in Reihe 1 von Block A, jeweils mit Begleitkarte.</p>
       <p class="t-body-sm mt-3" style="color:var(--text-secondary)">Welcher Platz noch frei ist,
-      siehst du beim Kauf auf der Seite des jeweiligen Spiels.</p>
+      siehst du beim Kauf weiter oben, sobald der Verkauf für das nächste Spiel freigeschaltet ist.</p>
       <p class="mt-5"><a class="card-link" href="/trainieren/freiplatz/riethsporthalle.html">Der Freiplatz an der Riethsporthalle <i data-lucide="arrow-right" class="icon-14"></i></a></p>
     </div>
   </section>""".replace("__MAPS__", MAPS)
+
+
+PRETIX_ITEM_CATEGORY_MAP = {
+    23: "Stehplatz", 24: "Kategorie I", 25: "Kategorie II",
+    27: "Fanblock", 28: "Kategorie III",
+    29: "Kategorie II", 30: "Kategorie II", 31: "Kategorie II", 32: "C unten",
+    33: "Kategorie I", 34: "Rollstuhlplatz", 35: "Kategorie I", 40: "VIP",
+}
+
+PREISLISTE_HTML = """            <h3 class="t-h4 mb-3">Preise</h3>
+            <div class="price-row"><span>Kategorie 1</span><strong>16,00 €</strong></div>
+            <div class="price-row"><span>Kategorie 1 (ermäßigt)</span><strong>14,00 €</strong></div>
+            <div class="price-row"><span>Kategorie 2</span><strong>12,00 €</strong></div>
+            <div class="price-row"><span>Kategorie 2 (ermäßigt)</span><strong>8,50 €</strong></div>
+            <div class="price-row"><span>Kategorie 3</span><strong>10,50 €</strong></div>
+            <div class="price-row"><span>Kategorie 3 (ermäßigt)</span><strong>8,00 €</strong></div>
+            <div class="price-row"><span>Kategorie 3 (Kinder 7–14)</span><strong>5,00 €</strong></div>
+            <div class="price-row"><span>Fanblock</span><strong>10,50 €</strong></div>
+            <div class="price-row"><span>Fanblock (ermäßigt)</span><strong>8,00 €</strong></div>
+            <div class="price-row"{stehplatz_class}><span>Stehplatz</span><strong>8,00 €</strong></div>
+            <div class="price-row"><span>Rollstuhlfahrer (inkl. Begleitkarte)<br><span class="t-caption" style="color:var(--text-muted)">nur Block A, D, E, F</span></span><strong>8,00 €</strong></div>
+            <div class="price-row"><span>VIP</span><strong>119,00 €</strong></div>"""
+
+WISSENSWERTES_HTML = """      <span class="eyebrow" style="display:block;margin-top:40px;margin-bottom:16px">Wissenswertes</span>
+      <div class="grid-3">
+        <div class="info-tile info-tile-row info-tile-row-divided">
+          <div class="info-tile-row-head">
+            <div class="tile-icon"><i data-lucide="percent"></i></div>
+            <h3 class="t-h4">Ermäßigungen</h3>
+          </div>
+          <p class="t-body-sm">Beim Einzelticket gilt der ermäßigte Satz für Studierende, Azubis, FSJ, Menschen mit Behinderung ab 50&nbsp;% und Rentner*innen (jeweils mit Nachweis beim Einlass). Für Kinder von 7 bis 14 Jahren gibt es bei Tickets in Block A zusätzlich 25&nbsp;% Rabatt auf den ermäßigten Preis — schon ab dem ersten Kind.</p>
+        </div>
+        <div class="info-tile info-tile-row info-tile-row-divided">
+          <div class="info-tile-row-head">
+            <div class="tile-icon"><i data-lucide="armchair"></i></div>
+            <h3 class="t-h4">Vorteile</h3>
+          </div>
+          <p class="t-body-sm">Einen <strong>festen Sitzplatz</strong> gibt es ab dieser Saison nicht mehr beim Einzelticket — nur noch mit der Dauerkarte. Beim Einzelticket wählst du frei innerhalb deines gebuchten Blocks, pro Spiel neu.</p>
+        </div>
+        <div class="info-tile info-tile-row info-tile-row-divided">
+          <div class="info-tile-row-head">
+            <div class="tile-icon"><i data-lucide="smartphone"></i></div>
+            <h3 class="t-h4">Dein Ticket</h3>
+          </div>
+          <p class="t-body-sm">Digital als QR-Code per E-Mail — zum Einlass einfach aufs Handy holen oder ausdrucken. Der Kauf läuft direkt und sicher über unseren Ticketanbieter pretix.</p>
+        </div>
+        <div class="info-tile info-tile-row info-tile-row-divided">
+          <div class="info-tile-row-head">
+            <div class="tile-icon"><i data-lucide="door-open"></i></div>
+            <h3 class="t-h4">Einlass</h3>
+          </div>
+          <p class="t-body-sm">Eine Stunde vor Spielbeginn öffnen sich die Türen der Riethsporthalle. Kinder bis 6 Jahre haben freien Eintritt (ohne Anspruch auf einen eigenen Sitzplatz).</p>
+        </div>
+        <div class="info-tile info-tile-row info-tile-row-divided">
+          <div class="info-tile-row-head">
+            <div class="tile-icon"><i data-lucide="scale"></i></div>
+            <h3 class="t-h4">Rechtliches</h3>
+          </div>
+          <p class="t-body-sm">Alle Regelungen zu Kauf, Rücknahme und Verlust findest du in unseren <a href="/agb.html">AGB</a>.</p>
+        </div>
+        <div class="info-tile info-tile-row info-tile-row-divided">
+          <div class="info-tile-row-head">
+            <div class="tile-icon"><i data-lucide="chart-no-axes-column"></i></div>
+            <h3 class="t-h4">Auslastung</h3>
+          </div>
+          <div id="seatplan-occupancy"><p class="t-body-sm" style="color:var(--text-muted)">Wird geladen …</p></div>
+        </div>
+      </div>"""
+
+
+def spieltag_zusatz_section():
+    return f"""  <section class="section bg-subtle">
+    <div class="container">
+      <span class="eyebrow" style="display:block;margin-bottom:16px">Heute ist Spieltag</span>
+      <div class="grid-3">
+        <div class="info-tile info-tile-row info-tile-row-divided">
+          <div class="info-tile-row-head">
+            <div class="tile-icon"><i data-lucide="car"></i></div>
+            <h3 class="t-h4">Anfahrt</h3>
+          </div>
+          <p class="t-body-sm"><a href="{MAPS}" target="_blank" rel="noopener">Riethsporthalle, Essener Straße 20, 99089 Erfurt</a> — Anfahrt per Auto oder ÖPNV, Parkplätze direkt an der Halle.</p>
+        </div>
+        <div class="info-tile info-tile-row info-tile-row-divided">
+          <div class="info-tile-row-head">
+            <div class="tile-icon"><i data-lucide="door-open"></i></div>
+            <h3 class="t-h4">Einlass</h3>
+          </div>
+          <p class="t-body-sm">Die Türen öffnen eine Stunde vor Spielbeginn.</p>
+        </div>
+        <div class="info-tile info-tile-row info-tile-row-divided">
+          <div class="info-tile-row-head">
+            <div class="tile-icon"><i data-lucide="party-popper"></i></div>
+            <h3 class="t-h4">Rahmenprogramm</h3>
+          </div>
+          <p class="t-body-sm">Details zum Rahmenprogramm folgen kurzfristig.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+"""
+
+
+def kauf_bereich(aktuell, kommt, heute):
+    """Der Ticketkauf für das nächste Heimspiel -- seit 27.08.2026 (Marko)
+    direkt hier auf dem Hub statt auf der jeweiligen Spieltagsseite: Weil
+    ohnehin immer nur für ein Spiel gleichzeitig der Verkauf offen ist, ist der
+    Hub in dem Moment schon die Kaufseite -- eine eigene Seite je Spiel dafür
+    war nur ein Umweg. tools/build-spieltagsseiten.py baut die Spieltagsseiten
+    seitdem ohne diesen Abschnitt und verweist von dort nur noch hierher.
+
+    Drei Zustände: Saison vorbei (kein Kauf, kein Hinweis -- naechstes() liefert
+    dann kommt=False), Verkauf für das nächste Spiel noch nicht freigeschaltet
+    (kurzer Hinweis, bewusst ohne Status-Wortlaut wie "Vorverkauf läuft"), oder
+    Verkauf offen bzw. heute Spieltag (voller Kaufbereich -- Saalplan/
+    Warenkorb/Kasse, wortgleich zur früheren Logik auf den Spieltagsseiten, nur
+    mit den Daten des jeweils nächsten Spiels statt fest eingebettet).
+    """
+    if not kommt:
+        return ""
+    if not aktuell.get("ticketUrl"):
+        return """  <section class="section">
+    <div class="container container-narrow">
+      <span class="eyebrow" style="display:block;margin-bottom:16px">Tickets</span>
+      <p class="t-body">Tickets für das nächste Heimspiel gibt es, sobald der Verkauf freigeschaltet ist — wir kündigen das rechtzeitig hier und über unsere Kanäle an. Mit der <a href="/tickets/dauerkarte.html">Dauerkarte</a> sicherst du dir schon jetzt einen festen Platz für die ganze Saison.</p>
+    </div>
+  </section>
+"""
+    stehplatz_class = ' style="text-decoration:line-through;opacity:.55"' if aktuell.get("stehplatzBuchbar") is False else ""
+    game_json = json.dumps({
+        "gegner": aktuell["gegner"],
+        "datum": aktuell["datum"],
+        "zeit": aktuell.get("zeit"),
+        "subeventId": aktuell["subeventId"],
+        "stehplatzBuchbar": aktuell.get("stehplatzBuchbar", True),
+        "zahlungPausiert": aktuell.get("zahlungPausiert", False),
+    }, ensure_ascii=False)
+    zusatz = spieltag_zusatz_section() if datum(aktuell) == heute else ""
+    return f"""  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div class="head-text" style="max-width:none">
+          <span class="eyebrow">Nächstes Heimspiel</span>
+          <h2 class="t-h2">Einzelticket kaufen</h2>
+        </div>
+      </div>
+      <div class="buy-grid mt-5">
+          <div class="buy-prices-col">
+{PREISLISTE_HTML.format(stehplatz_class=stehplatz_class)}
+          </div>
+          <div class="buy-thumb-col">
+            <div id="seatplan-root"></div>
+          </div>
+          <div class="buy-cart-col">
+            <h3 class="t-h4 mb-1">Deine Auswahl</h3>
+            <p class="t-caption" style="color:var(--text-muted);margin-bottom:14px">Einzelticket für den {esc(aktuell["datum"])}</p>
+            <div id="seatplan-cart"></div>
+            <div class="seatplan-cart-total"><span>Gesamt</span><span id="seatplan-total">0,00 €</span></div>
+            <button class="btn btn-primary btn-sm" id="seatplan-cta" style="margin-top:16px;width:100%;justify-content:center" disabled>Weiter zur Kasse</button>
+          </div>
+      </div>
+{WISSENSWERTES_HTML}
+    </div>
+  </section>
+
+{zusatz}  <section class="section bg-subtle">
+    <div class="container container-narrow">
+      <span class="eyebrow" style="display:block;text-align:center;margin-bottom:6px">Kontakt</span>
+      <h2 class="t-h2 text-center mb-5">Fragen zum Ticket?</h2>
+      <div class="contact-person-card contact-person-card-centered">
+        <div>
+          <a href="mailto:tickets@basketball-loewen.com">tickets@basketball-loewen.com</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="/js/voucher-utils.js?v=1786873000"></script>
+  <script src="/js/seat-picker.js?v=1787760512"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {{
+      var game = {game_json};
+      var eventLabel = 'Basketball Löwen Erfurt – ' + game.gegner + ', {esc(lang_datum(aktuell))}';
+      var picker = new SeatPicker(document.getElementById('seatplan-root'), {{
+        mode: 'blocks',
+        nachwuchsBeitrag: true,
+        nachwuchsAmount: 2,
+        planUrl: '/assets/seating/riethsporthalle-seatingplan.json?v=1786585000',
+        seatStatusUrl: {('"https://poetic-patience-production-9290.up.railway.app/webhook/einzelticket-sitzplatz-status?subevent=' + str(aktuell["subeventId"]) + '"') if aktuell.get("subeventId") else "null"},
+        pretixEvent: 'saison2627',
+        pretixItemCategoryMap: {json.dumps(PRETIX_ITEM_CATEGORY_MAP)},
+        reservedSeats: [
+          {{ zone: 'A', rows: ['1'], excludeSeatNumbers: ['1', '2', '3', '4', '5', '6', '7', '19', '20'] }}
+        ],
+        nvSeats: [
+          {{ zone: 'A', rows: ['1', '2', '3'], maxSeatNumber: 7 }}
+        ],
+        northZones: ['D', 'E', 'F'],
+        southZones: ['A', 'B', 'C'],
+        prices: {{
+          'Kategorie I': {{ normal: 16, ermaessigt: 14 }},
+          'Kategorie II': {{ normal: 12, ermaessigt: 8.5 }},
+          'Kategorie III': {{ normal: 10.5, ermaessigt: 8, kind: 5 }},
+          'Fanblock': {{ normal: 10.5, ermaessigt: 8 }},
+          'C unten': {{ normal: 12, ermaessigt: 8.5 }},
+          'Rollstuhlplatz': {{ normal: 8 }},
+          'VIP': {{ normal: 119 }}
+        }},
+        standingPrice: 8,
+        standingBookable: game.stehplatzBuchbar !== false,
+        cartEl: document.getElementById('seatplan-cart'),
+        totalEl: document.getElementById('seatplan-total'),
+        ctaEl: document.getElementById('seatplan-cta'),
+        occupancyEl: document.getElementById('seatplan-occupancy')
+      }});
+
+      document.getElementById('seatplan-cta').addEventListener('click', function () {{
+        var summary = picker.getSummary();
+        sessionStorage.setItem('bl_cart', JSON.stringify({{
+          productType: 'einzelticket',
+          eventLabel: eventLabel,
+          pretixEventSlug: 'saison2627',
+          pretixSubeventId: game.subeventId,
+          spielDatum: game.datum,
+          gegner: game.gegner,
+          lines: summary.lines,
+          total: summary.total,
+          voucher: summary.voucher,
+          notiz: summary.notiz,
+          zahlungPausiert: game.zahlungPausiert
+        }}));
+        window.location.href = '/tickets/checkout.html';
+      }});
+    }});
+  </script>
+"""
 
 
 def termine(liste, aktuelles):
@@ -216,7 +447,7 @@ def termine(liste, aktuelles):
     return TERMINE_VORLAGE.replace("__ZEILEN__", "\n".join(zeilen))
 
 
-TERMINE_VORLAGE = '  <section class="section bg-subtle">\n    <div class="container">\n      <div class="section-head">\n        <div class="head-text" style="max-width:none">\n          <span class="eyebrow">Saison 2026/2027</span>\n          <h2 class="t-h2">Die weiteren Heimspiele</h2>\n          <p class="t-body mt-3">Vierzehn Heimspiele von Oktober bis März. Jedes hat seine eigene\n          Seite — vor dem Spiel mit Vorbericht und Kartenkauf, danach mit Ergebnis und Bericht.</p>\n        </div>\n      </div>\n      <div class="ticket-layout mt-5">\n        <div>\n          <div class="ticket-list">\n__ZEILEN__\n          </div>\n          <p class="mt-5"><a class="card-link" href="/saison/spielplan.html">Der komplette Spielplan mit Auswärtsspielen <i data-lucide="arrow-right" class="icon-14"></i></a></p>\n        </div>\n\n        <aside style="display:flex;flex-direction:column;gap:20px">\n          <div class="ticket-sidebar" style="position:static">\n            <div>\n              <span class="eyebrow">Preis pro Saison</span>\n              <h3 class="t-h4" style="margin:6px 0 8px">Dauerkarte</h3>\n              <div style="display:flex;gap:8px;flex-wrap:wrap">\n                <button type="button" class="badge badge-orange" id="overview-member-badge" style="border:none;cursor:pointer;font-family:inherit">\n                  -30 % Mitglieder des Basketball Löwen e.V.\n                </button>\n                <button type="button" class="badge badge-orange" id="overview-discount-badge" style="border:none;cursor:pointer;font-family:inherit">\n                  -20 % Frühbucher bis 31.08.\n                </button>\n              </div>\n            </div>\n            <p class="t-body-sm" style="margin:12px 0">Mit der Dauerkarte sicherst du dir deinen festen Platz für die ganze Saison — Spiel für Spiel derselbe Blick aufs Parkett.</p>\n            <div class="price-row"><span>Kategorie 1</span><strong>208,00 €</strong></div>\n            <div class="price-row"><span>Kategorie 1 (ermäßigt)</span><strong>182,00 €</strong></div>\n            <div class="price-row"><span>Kategorie 2</span><strong>156,00 €</strong></div>\n            <div class="price-row"><span>Kategorie 2 (ermäßigt)</span><strong>115,00 €</strong></div>\n            <div class="price-row"><span>VIP</span><strong>1.000,00 €</strong></div>\n            <a class="btn btn-primary btn-sm" style="margin-top:12px;width:100%;justify-content:center" href="/tickets/dauerkarte.html">Dauerkarte kaufen</a>\n          </div>\n          <div class="ticket-sidebar" style="position:static">\n            <span class="eyebrow">Preis pro Spiel</span>\n            <h3 class="t-h4" style="margin:6px 0 14px">Einzelticket</h3>\n            <p class="t-body-sm mb-3">Bei Einzeltickets wählst du deine Kategorie, nicht mehr deinen festen Platz — den sicherst du dir mit der Dauerkarte. Preise und Sitzplatzwahl stehen auf der Seite des jeweiligen Spiels.</p>\n            <div class="price-row"><span>Kategorie 1</span><strong>16,00 €</strong></div>\n            <div class="price-row"><span>Kategorie 1 (ermäßigt)</span><strong>14,00 €</strong></div>\n            <div class="price-row"><span>Kategorie 2</span><strong>12,00 €</strong></div>\n            <div class="price-row"><span>Kategorie 2 (ermäßigt)</span><strong>8,50 €</strong></div>\n          </div>\n        </aside>\n      </div>\n\n      <div class="modal-backdrop" id="overview-discount-modal-backdrop">\n        <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="overview-discount-modal-title">\n          <button class="modal-close" aria-label="Schließen" id="overview-discount-modal-close"><i data-lucide="x"></i></button>\n          <div class="modal-icon"><i data-lucide="percent"></i></div>\n          <span class="eyebrow" id="overview-discount-modal-title">Frühbucherrabatt</span>\n          <h3 class="t-h3" style="margin:8px 0 12px">Je früher, desto günstiger.</h3>\n          <p class="t-body-sm">Bestellst du bis zum 31.08.2026, sparst du 20&nbsp;%. Ab dem 01.09.2026 gilt der reguläre Preis.</p>\n          <p class="t-body-sm mt-3">Die hier angezeigten Preise enthalten den Rabatt bereits automatisch bis zum Stichtag.</p>\n        </div>\n      </div>\n\n      <div class="modal-backdrop" id="overview-member-modal-backdrop">\n        <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="overview-member-modal-title">\n          <button class="modal-close" aria-label="Schließen" id="overview-member-modal-close"><i data-lucide="x"></i></button>\n          <div class="modal-icon"><i data-lucide="percent"></i></div>\n          <span class="eyebrow" id="overview-member-modal-title">Mitgliedsrabatt</span>\n          <h3 class="t-h3" style="margin:8px 0 12px">Dauerhaft 30 % für Mitglieder des Basketball Löwen e.V.</h3>\n          <p class="t-body-sm">Mitglieder des Basketball Löwen e.V. erhalten dauerhaft 30&nbsp;% Rabatt auf die Dauerkarte.</p>\n          <p class="t-body-sm mt-3">Mitglieder unserer Kooperationsvereine (BC Erfurt, USV Erfurt, BIG Gotha) erhalten bei der Dauerkarte stattdessen den ermäßigten Satz.</p>\n          <p class="t-body-sm mt-3">Bis zum 31.08.2026 lässt sich der Mitgliedsrabatt mit dem Frühbucherrabatt kombinieren — macht zusammen 50&nbsp;% Rabatt. Ab dem 01.09.2026 gilt nur noch der Mitgliedsrabatt von 30&nbsp;%.</p>\n          <p class="t-body-sm mt-3">Nachweis der Mitgliedschaft beim Kauf erforderlich.</p>\n        </div>\n      </div>\n    </div>\n  </section>'
+TERMINE_VORLAGE = '  <section class="section bg-subtle">\n    <div class="container">\n      <div class="section-head">\n        <div class="head-text" style="max-width:none">\n          <span class="eyebrow">Saison 2026/2027</span>\n          <h2 class="t-h2">Die weiteren Heimspiele</h2>\n          <p class="t-body mt-3">Vierzehn Heimspiele von Oktober bis März. Jedes hat seine eigene\n          Seite — vor dem Spiel mit Vorbericht und Kartenkauf, danach mit Ergebnis und Bericht.</p>\n        </div>\n      </div>\n      <div class="ticket-layout mt-5">\n        <div>\n          <div class="ticket-list">\n__ZEILEN__\n          </div>\n          <p class="mt-5"><a class="card-link" href="/saison/spielplan.html">Der komplette Spielplan mit Auswärtsspielen <i data-lucide="arrow-right" class="icon-14"></i></a></p>\n        </div>\n\n        <aside style="display:flex;flex-direction:column;gap:20px">\n          <div class="ticket-sidebar" style="position:static">\n            <div>\n              <span class="eyebrow">Preis pro Saison</span>\n              <h3 class="t-h4" style="margin:6px 0 8px">Dauerkarte</h3>\n              <div style="display:flex;gap:8px;flex-wrap:wrap">\n                <button type="button" class="badge badge-orange" id="overview-member-badge" style="border:none;cursor:pointer;font-family:inherit">\n                  -30 % Mitglieder des Basketball Löwen e.V.\n                </button>\n                <button type="button" class="badge badge-orange" id="overview-discount-badge" style="border:none;cursor:pointer;font-family:inherit">\n                  -20 % Frühbucher bis 31.08.\n                </button>\n              </div>\n            </div>\n            <p class="t-body-sm" style="margin:12px 0">Mit der Dauerkarte sicherst du dir deinen festen Platz für die ganze Saison — Spiel für Spiel derselbe Blick aufs Parkett.</p>\n            <div class="price-row"><span>Kategorie 1</span><strong>208,00 €</strong></div>\n            <div class="price-row"><span>Kategorie 1 (ermäßigt)</span><strong>182,00 €</strong></div>\n            <div class="price-row"><span>Kategorie 2</span><strong>156,00 €</strong></div>\n            <div class="price-row"><span>Kategorie 2 (ermäßigt)</span><strong>115,00 €</strong></div>\n            <div class="price-row"><span>VIP</span><strong>1.000,00 €</strong></div>\n            <a class="btn btn-primary btn-sm" style="margin-top:12px;width:100%;justify-content:center" href="/tickets/dauerkarte.html">Dauerkarte kaufen</a>\n          </div>\n          <div class="ticket-sidebar" style="position:static">\n            <span class="eyebrow">Preis pro Spiel</span>\n            <h3 class="t-h4" style="margin:6px 0 14px">Einzelticket</h3>\n            <p class="t-body-sm mb-3">Bei Einzeltickets wählst du deine Kategorie, nicht mehr deinen festen Platz — den sicherst du dir mit der Dauerkarte. Saalplan und Kauf gibt es weiter oben, sobald der Verkauf für das nächste Spiel freigeschaltet ist.</p>\n            <div class="price-row"><span>Kategorie 1</span><strong>16,00 €</strong></div>\n            <div class="price-row"><span>Kategorie 1 (ermäßigt)</span><strong>14,00 €</strong></div>\n            <div class="price-row"><span>Kategorie 2</span><strong>12,00 €</strong></div>\n            <div class="price-row"><span>Kategorie 2 (ermäßigt)</span><strong>8,50 €</strong></div>\n          </div>\n        </aside>\n      </div>\n\n      <div class="modal-backdrop" id="overview-discount-modal-backdrop">\n        <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="overview-discount-modal-title">\n          <button class="modal-close" aria-label="Schließen" id="overview-discount-modal-close"><i data-lucide="x"></i></button>\n          <div class="modal-icon"><i data-lucide="percent"></i></div>\n          <span class="eyebrow" id="overview-discount-modal-title">Frühbucherrabatt</span>\n          <h3 class="t-h3" style="margin:8px 0 12px">Je früher, desto günstiger.</h3>\n          <p class="t-body-sm">Bestellst du bis zum 31.08.2026, sparst du 20&nbsp;%. Ab dem 01.09.2026 gilt der reguläre Preis.</p>\n          <p class="t-body-sm mt-3">Die hier angezeigten Preise enthalten den Rabatt bereits automatisch bis zum Stichtag.</p>\n        </div>\n      </div>\n\n      <div class="modal-backdrop" id="overview-member-modal-backdrop">\n        <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="overview-member-modal-title">\n          <button class="modal-close" aria-label="Schließen" id="overview-member-modal-close"><i data-lucide="x"></i></button>\n          <div class="modal-icon"><i data-lucide="percent"></i></div>\n          <span class="eyebrow" id="overview-member-modal-title">Mitgliedsrabatt</span>\n          <h3 class="t-h3" style="margin:8px 0 12px">Dauerhaft 30 % für Mitglieder des Basketball Löwen e.V.</h3>\n          <p class="t-body-sm">Mitglieder des Basketball Löwen e.V. erhalten dauerhaft 30&nbsp;% Rabatt auf die Dauerkarte.</p>\n          <p class="t-body-sm mt-3">Mitglieder unserer Kooperationsvereine (BC Erfurt, USV Erfurt, BIG Gotha) erhalten bei der Dauerkarte stattdessen den ermäßigten Satz.</p>\n          <p class="t-body-sm mt-3">Bis zum 31.08.2026 lässt sich der Mitgliedsrabatt mit dem Frühbucherrabatt kombinieren — macht zusammen 50&nbsp;% Rabatt. Ab dem 01.09.2026 gilt nur noch der Mitgliedsrabatt von 30&nbsp;%.</p>\n          <p class="t-body-sm mt-3">Nachweis der Mitgliedschaft beim Kauf erforderlich.</p>\n        </div>\n      </div>\n    </div>\n  </section>'
 
 
 def uebernehmen(muster, leer):
@@ -251,8 +482,12 @@ def seite(liste, heute):
     if seo:
         seo += "\n"
 
+    # Reihenfolge seit 27.08.2026 (Marko): Der Kauf steht gleich nach dem Hero,
+    # weil er jetzt die eigentliche Aufgabe dieser Seite ist. Die Halle-Infos
+    # sind fuer den Kauf nicht wichtig -- nur fuer SEO -- und wandern deshalb
+    # ganz ans Ende.
     inhalt = "\n\n".join(x for x in [
-        hero(aktuell, kommt), halle(), termine(liste, aktuell),
+        hero(aktuell, kommt, heute), kauf_bereich(aktuell, kommt, heute), termine(liste, aktuell), halle(),
     ] if x)
 
     return f"""<!doctype html>
@@ -289,32 +524,11 @@ def seite(liste, heute):
 {inhalt}
 </main>
 {footer}
-<script src="/js/seat-picker.js?v=1787760512"></script>
 <script>
-  /* Blockplan in der Nur-Ansicht: derselbe Plan wie auf den Spieltagsseiten, aber ohne
-     Warenkorb und ohne Klick (readonly, s. js/seat-picker.js). Diese Seite gehoert keinem
-     Spiel, deshalb bewusst kein seatStatusUrl -- ein Belegungsstand ohne Spiel waere
-     erfunden. Preise stehen hier nur, weil der Plan daran erkennt, welche Bereiche
-     ueberhaupt eigene Kacheln bekommen; angezeigt wird in dieser Ansicht keiner. */
+  /* Rabatt-Erklaerfenster fuer die Dauerkarten-Badges in termine() -- vom
+     Saalplan/Warenkorb in kauf_bereich() unabhaengig, deshalb hier unbedingt
+     verdrahtet statt in kauf_bereich()s eigenem Script-Block. */
   document.addEventListener('DOMContentLoaded', function () {{
-    new SeatPicker(document.getElementById('seatplan-root'), {{
-      mode: 'blocks',
-      readonly: true,
-      headline: 'Die Bl\u00f6cke in der Riethsporthalle',
-      planUrl: '/assets/seating/riethsporthalle-seatingplan.json?v=1786585000',
-      northZones: ['D', 'E', 'F'],
-      southZones: ['A', 'B', 'C'],
-      prices: {{
-        'Kategorie I': {{ normal: 16 }},
-        'Kategorie II': {{ normal: 12 }},
-        'Kategorie III': {{ normal: 10.5 }},
-        'Fanblock': {{ normal: 10.5 }},
-        'C unten': {{ normal: 12 }},
-        'VIP': {{ normal: 119 }}
-      }}
-    }});
-
-    /* Rabatt-Erklaerfenster, wortgleich wie in tickets.html. */
     function wireBadgeModal(badgeId, backdropId, closeId) {{
       var backdrop = document.getElementById(backdropId);
       document.getElementById(badgeId).addEventListener('click', function () {{ backdrop.classList.add('open'); }});

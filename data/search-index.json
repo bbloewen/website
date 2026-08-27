@@ -161,11 +161,11 @@
     "keywords": "Jugend Kinder Jugendmannschaften Jugendteams U19 U16 U14 U12 U10 Talente Mannschaften"
   },
   {
-    "title": "Heimspiele in der Riethsporthalle",
+    "title": "Game Day und Tickets",
     "url": "/saison/profis/gameday/",
     "category": "Saison & Teams",
-    "description": "Das nächste Heimspiel, die Halle mit Blockplan, alle Termine der Saison und die Karten.",
-    "keywords": "Gameday Heimspiel Riethsporthalle Halle Spielstätte Tickets Dauerkarte Blockplan Erfurt Spiel Spiele Gameday Game Day Anwurf Einlass Block Blöcke Kategorie Sitzplatz Stehplatz"
+    "description": "Das nächste Heimspiel, die Halle mit Blockplan, alle Termine der Saison, Dauerkarte und Einzelticket.",
+    "keywords": "Gameday Heimspiel Riethsporthalle Halle Spielstätte Tickets Dauerkarte Blockplan Erfurt Spiel Spiele Gameday Game Day Anwurf Einlass Block Blöcke Kategorie Sitzplatz Stehplatz Karten Eintritt Eintrittskarte Ticketkauf Vorverkauf Preise Einzelticket Abendkasse Fanblock Ticket Karte Eintrittspreis Preis"
   },
   {
     "title": "Spielplan und Berichte",
@@ -362,13 +362,6 @@
     "category": "Fans",
     "description": "Saisoneröffnung, Fanstammtische und mehr — die Community-Events der Basketball Löwen Erfurt.",
     "keywords": "Events Veranstaltungen Saisoneröffnung Fanstammtisch Termine Fans Community"
-  },
-  {
-    "title": "Tickets",
-    "url": "/tickets.html",
-    "category": "Tickets",
-    "description": "Tickets für Heimspiele der Basketball Löwen Erfurt.",
-    "keywords": "Karten Eintritt Eintrittskarte Ticketkauf Vorverkauf Preise Kategorie Einzelticket Dauerkarte Abendkasse Stehplatz Fanblock Ticket Karte Eintrittspreis Preis"
   },
   {
     "title": "Dauerkarte 2026/2027",
