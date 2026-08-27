@@ -202,7 +202,7 @@ a.no-underline:hover { text-decoration: none; }
 .brand-lockup .brand-name {
   font-family: var(--font-base); font-weight: var(--weight-extrabold);
   font-size: 17px; letter-spacing: -.01em; color: var(--text-primary);
-  white-space: nowrap; transition: opacity var(--dur-fast) var(--ease-out);
+  white-space: nowrap; transition: opacity var(--dur-fast) var(--ease-out), font-size var(--dur-med) var(--ease-out);
 }
 
 /* Logo spannt im Ruhezustand über Utility- und Hauptnav-Leiste, schrumpft beim Scrollen zurück */
@@ -211,6 +211,10 @@ a.no-underline:hover { text-decoration: none; }
     position: absolute; height: 106px; top: -58px; left: 0;
   }
   .site-header:not(.scrolled) .brand-lockup { padding-left: 122px; }
+  /* Schriftzug wuchs sonst nicht mit dem groesseren Logo mit und wirkte im
+     Ruhezustand verloren (Marko-Feedback 27.08.2026) -- skaliert jetzt mit hoch,
+     schrumpft beim Scrollen zusammen mit dem Logo zurueck auf 17px. */
+  .site-header:not(.scrolled) .brand-lockup .brand-name { font-size: 22px; }
 }
 
 .main-nav { display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; }
