@@ -53,7 +53,7 @@ jobs:
 
       - name: Aenderungen committen
         run: |
-          if git diff --quiet && git status --porcelain teams-saison/spiel/ | grep -q .; then
+          if git diff --quiet && git status --porcelain saison/profis/gameday/ | grep -q .; then
             :
           elif git diff --quiet; then
             echo "Nichts nachzuziehen."
@@ -61,7 +61,7 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add teams-saison/spiel/ data/heimspiele.json teams-saison/spielplan.html tickets.html sitemap.xml
+          git add saison/profis/gameday/ data/heimspiele.json saison/spielplan.html tickets.html sitemap.xml
           git diff --cached --quiet && { echo "Nichts nachzuziehen."; exit 0; }
           git commit -m "Spieltagsseiten: Phase/Sitemap nachgezogen"
           git push
