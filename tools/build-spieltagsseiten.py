@@ -44,7 +44,7 @@ import unicodedata
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from seo_common import REPO
+from seo_common import REPO, gcal_link
 
 QUELLE = REPO / "data" / "heimspiele.json"
 ZIEL_DIR = REPO / "saison" / "profis" / "gameday"
@@ -429,16 +429,22 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 
     if phase == "danach":
         description = f"Ergebnis und Spielbericht: Basketball Löwen Erfurt gegen {game['gegner']} am {game['datum']}."
-        lead = f"{hero_datum(d)} · {game['zeit']} Uhr · Riethsporthalle"
+        zeit_text = f"{hero_datum(d)} · {game['zeit']} Uhr"
     elif phase == "spieltag":
         description = f"Heute Heimspiel: Basketball Löwen Erfurt gegen {game['gegner']} in der Riethsporthalle."
-        lead = f"Heute, {game['zeit']} Uhr · Riethsporthalle"
+        zeit_text = f"Heute, {game['zeit']} Uhr"
     elif phase == "vorverkauf":
         description = f"Tickets für Basketball Löwen Erfurt gegen {game['gegner']} am {game['datum']} — Saalplan, Preise, Kategorien."
-        lead = f"{hero_datum(d)} · {game['zeit']} Uhr · Riethsporthalle"
+        zeit_text = f"{hero_datum(d)} · {game['zeit']} Uhr"
     else:
         description = f"Heimspiel gegen {game['gegner']} am {game['datum']} in der Riethsporthalle. Alle Infos zum Spieltag."
-        lead = f"{hero_datum(d)} · {game['zeit']} Uhr · Riethsporthalle"
+        zeit_text = f"{hero_datum(d)} · {game['zeit']} Uhr"
+
+    # Zeit- und Ort-Zeile getrennt (Marko, 27.08.2026): die vorherige, kombinierte
+    # Lead-Zeile ("Datum · Zeit · Riethsporthalle") war bei langen Gegnernamen zu
+    # lang fuer eine Zeile. Kalenderlink vorn in der Zeit-Zeile, Wochentag hier
+    # abgekuerzt (hero_datum) -- auf dem Gameday-Hub steht er dagegen ausgeschrieben.
+    kalender_link = gcal_link(game["gegner"], d, game["zeit"])
 
     # "Angekuendigt" sagt noch nichts darueber, wer der Gegner ist -- auf Markos
     # Ansage (27.08.2026) zeigt der Eyebrow hier stattdessen die Paarung selbst.
@@ -511,8 +517,8 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
         <div>
           <span class="eyebrow">{eyebrow}</span>
           <h1 class="nowrap-lg" style="font-size:clamp(20px,5vw,56px)"><span class="kw">{gegner}<span class="swoosh" aria-hidden="true"></span></span>.</h1>
-          <p class="lead">{html.escape(lead)}</p>
-          <a class="hero-location" href="{RIETHSPORTHALLE_MAPS_URL}" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Riethsporthalle, Essener Straße 20, 99089 Erfurt</a>
+          <a class="hero-location" href="{RIETHSPORTHALLE_MAPS_URL}" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Riethsporthalle Erfurt</a>
+          <p class="lead"><a href="{kalender_link}" target="_blank" rel="noopener" title="Ins Kalender eintragen" style="display:inline-flex;vertical-align:middle;color:inherit"><i data-lucide="calendar-plus" class="icon-16"></i></a> {html.escape(zeit_text)}</p>
         </div>
         <div style="display:flex;align-items:center;justify-content:center">
           <a class="btn btn-primary" href="/tickets/dauerkarte.html">Dauerkarte kaufen und festen Platz sichern</a>

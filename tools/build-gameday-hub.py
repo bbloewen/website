@@ -37,6 +37,7 @@ from datetime import date
 from pathlib import Path
 
 from seo_common import attr as esc
+from seo_common import gcal_link
 from seo_common import ziel_url
 
 REPO = Path(__file__).resolve().parent.parent
@@ -99,14 +100,24 @@ def hero(s, kommt):
     knopf = (f'<a class="btn btn-primary" href="{esc(ziel_url(s))}">Tickets und alle Infos zum Spiel</a>'
              if s.get("ticketUrl") else
              f'<a class="btn btn-primary" href="{esc(ziel_url(s))}">Alle Infos zum Spiel</a>')
+    # Zeit- und Ort-Zeile getrennt, Kalenderlink vorn in der Zeit-Zeile (Marko,
+    # 27.08.2026) -- wie auf den Spieltagsseiten, hier aber mit ausgeschriebenem
+    # Wochentag statt abgekuerzt (lang_datum() liefert den bereits so).
+    kalender_link = gcal_link(s["gegner"], datum(s), zeit) if zeit else None
+    zeit_zeile = (
+        f'<p class="lead"><a href="{kalender_link}" target="_blank" rel="noopener" '
+        f'title="Ins Kalender eintragen" style="display:inline-flex;vertical-align:middle;color:inherit">'
+        f'<i data-lucide="calendar-plus" class="icon-16"></i></a> {esc(zeile)}</p>'
+        if kalender_link else f'<p class="lead">{esc(zeile)}</p>'
+    )
     return f"""  <section class="hero-photo hero-tickets hero-half">
     <div class="container">
       <div class="hero-lg-grid">
         <div>
           <span class="eyebrow">{label} · Basketball Löwen Erfurt</span>
           <h1 class="nowrap-lg" style="font-size:clamp(20px,5vw,56px)"><span class="kw">{esc(s['gegner'])}<span class="swoosh" aria-hidden="true"></span></span>.</h1>
-          <p class="lead">{esc(zeile)}, Riethsporthalle Erfurt.</p>
-          <a class="hero-location" href="{MAPS}" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Essener Straße 20, 99089 Erfurt</a>
+          <a class="hero-location" href="{MAPS}" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Riethsporthalle Erfurt</a>
+          {zeit_zeile}
         </div>
         <div style="display:flex;align-items:center;justify-content:center">
           {knopf}
@@ -250,7 +261,7 @@ def seite(liste, heute):
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="format-detection" content="telephone=no" />
-<title>Tickets & Heimspiele — Basketball Löwen Erfurt</title>
+<title>Game Day und Tickets — Basketball Löwen Erfurt</title>
 <meta name="description" content="{esc(description)}" />
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png" />

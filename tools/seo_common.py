@@ -14,7 +14,9 @@ Inhalt. Wir legen uns site-weit auf die Verzeichnisform fest.
 import html
 import re
 import subprocess
+from datetime import datetime, timedelta
 from pathlib import Path
+from urllib.parse import quote
 
 BASE = "https://basketball-loewen.com/"
 REPO = Path(__file__).resolve().parent.parent
@@ -116,6 +118,31 @@ def maps_url(f):
 def ziel_url(s):
     """Adresse der Spieltagsseite eines Heimspiels (data/heimspiele.json-Eintrag)."""
     return f"/saison/profis/gameday/{s['seiteSlug']}.html"
+
+
+def gcal_link(gegner, d, zeit):
+    """Google-Kalender-Add-Link fuer ein Heimspiel, attribut-sicher escaped
+    (27.08.2026, Marko: Kalenderlink vorn in der Hero-Zeit-Zeile).
+
+    Feldnamen/Logik gespiegelt aus js/spielplan.js calendarLink() -- 2 Stunden
+    Standarddauer, Riethsporthalle als fester Ort/Details-Text -- damit der
+    serverseitig gebaute Link auf den Spieltagsseiten mit dem clientseitig
+    gebauten auf saison/spielplan.html uebereinstimmt.
+    """
+    stunde, minute = (int(x) for x in zeit.split(":"))
+    start = datetime(d.year, d.month, d.day, stunde, minute)
+    ende = start + timedelta(hours=2)
+    stamp = lambda dt: dt.strftime("%Y%m%dT%H%M00")
+    params = {
+        "action": "TEMPLATE",
+        "text": f"Basketball Löwen Erfurt – {gegner}",
+        "dates": f"{stamp(start)}/{stamp(ende)}",
+        "details": "Heimspiel der Basketball Löwen Erfurt in der Riethsporthalle.",
+        "location": "Essener Straße 20, 99089 Erfurt",
+        "ctz": "Europe/Berlin",
+    }
+    query = "&amp;".join(f"{k}={quote(v)}" for k, v in params.items())
+    return f"https://calendar.google.com/calendar/render?{query}"
 
 
 def spielbar(f):
