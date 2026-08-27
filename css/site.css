@@ -180,7 +180,7 @@ a.no-underline:hover { text-decoration: none; }
   color: var(--text-secondary);
   background: none; border: none; padding: 0; font-family: inherit; cursor: pointer;
 }
-.utility-link:hover { color: var(--color-brand-orange); text-decoration: none; }
+.utility-link:hover, .utility-link[aria-current="page"] { color: var(--color-brand-orange); text-decoration: none; }
 .utility-link .icon-label { display: inline; }
 /* Spenden-Herz bewusst in Neongrün statt Marken-Orange — Anspielung auf Thüringen
    als "das grüne Herz Deutschlands". */

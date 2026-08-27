@@ -83,10 +83,12 @@ def lang_datum(d):
 
 
 def hero_datum(d):
-    """Wie lang_datum, aber mit abgekürztem Wochentag davor -- nur für den Hero-Lead
-    (Marko, 27.08.2026), z. B. "So, 11. Oktober 2026". lang_datum() bleibt für den
-    Kalender-Event-Text und den Angekündigt-Absatz unveraendert."""
-    return f"{WOCHENTAGE[d.weekday()][:2]}, {lang_datum(d)}"
+    """Wie lang_datum, aber mit ausgeschriebenem Wochentag davor -- nur für den
+    Hero-Lead, z. B. "Sonntag, 11. Oktober 2026". Wortgleich zum Gameday-Hub
+    (Marko, 27.08.2026: sollte dort genauso ausgeschrieben sein wie dort).
+    lang_datum() bleibt für den Kalender-Event-Text und den Heimspiel-Infos-
+    Absatz unveraendert."""
+    return f"{WOCHENTAGE[d.weekday()]}, {lang_datum(d)}"
 
 
 def phase_of(game, today):
@@ -336,7 +338,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1787846983" />
+<link rel="stylesheet" href="/css/site.css?v=1787854003" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
@@ -348,7 +350,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 <script src="https://analytics.ahrefs.com/analytics.js" data-key="5TVH543YAI/GzTMbTLbbbg" async></script>
 <!--/ANALYTICS:ahrefs-->
 {seo_block}</head>
-<body data-nav-group="saison" class="hide-mobile-cta">
+<body data-nav-group="gameday" class="hide-mobile-cta">
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
 {header_html}
 <main id="main">
@@ -370,7 +372,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 {footer_html}
 <script src="/js/vendor/lucide-icons.js?v=1787766492"></script>
 <script src="/js/nav.js?v=1787760037"></script>
-<script src="/js/include.js?v=1785398309"></script>
+<script src="/js/include.js?v=1787854261"></script>
 </body>
 </html>
 """

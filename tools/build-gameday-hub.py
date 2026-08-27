@@ -314,8 +314,8 @@ def kauf_bereich(aktuell, kommt, heute):
     <div class="container">
       <div class="section-head">
         <div class="head-text" style="max-width:none">
-          <span class="eyebrow">Nächstes Heimspiel</span>
-          <h2 class="t-h2">Einzelticket kaufen</h2>
+          <span class="eyebrow">Game Day</span>
+          <h2 class="t-h2">Ticket kaufen</h2>
         </div>
       </div>
       <div class="buy-grid mt-5">
@@ -503,7 +503,7 @@ def seite(liste, heute):
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1787846983" />
+<link rel="stylesheet" href="/css/site.css?v=1787854003" />
 <link rel="stylesheet" href="/css/seat-picker.css?v=1787760512" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
@@ -516,7 +516,7 @@ def seite(liste, heute):
 <script src="https://analytics.ahrefs.com/analytics.js" data-key="5TVH543YAI/GzTMbTLbbbg" async></script>
 <!--/ANALYTICS:ahrefs-->
 {seo}</head>
-<body data-nav-group="saison" class="hide-mobile-cta">
+<body data-nav-group="gameday" class="hide-mobile-cta">
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
 {header}
 <main id="main">
@@ -546,7 +546,7 @@ def seite(liste, heute):
 </script>
 <script src="/js/vendor/lucide-icons.js?v=1787766492"></script>
 <script src="/js/nav.js?v=1787760037"></script>
-<script src="/js/include.js?v=1785398309"></script>
+<script src="/js/include.js?v=1787854261"></script>
 </body>
 </html>
 """

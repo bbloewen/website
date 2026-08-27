@@ -22,8 +22,9 @@
     ]).then(function () {
       var activeGroup = document.body.getAttribute('data-nav-group');
       if (activeGroup) {
-        var btn = document.querySelector('.nav-link[data-page-group="' + activeGroup + '"]');
-        if (btn) btn.setAttribute('aria-current', 'page');
+        document.querySelectorAll('[data-page-group="' + activeGroup + '"]').forEach(function (btn) {
+          btn.setAttribute('aria-current', 'page');
+        });
       }
       if (window.initNav) window.initNav();
       if (window.lucide) window.lucide.createIcons();
