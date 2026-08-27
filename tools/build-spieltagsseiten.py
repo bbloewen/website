@@ -45,7 +45,7 @@ import unicodedata
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from seo_common import DAUERKARTE_CTA_STICHTAG, REPO, gcal_link
+from seo_common import REPO, gcal_link
 
 QUELLE = REPO / "data" / "heimspiele.json"
 ZIEL_DIR = REPO / "saison" / "profis" / "gameday"
@@ -254,7 +254,7 @@ def bericht_section(bericht_inhalt):
 """
 
 
-def build_page(game, phase, bericht_inhalt, today, header_html=LEER_HEADER, footer_html=LEER_FOOTER, seo_block=LEER_SEO):
+def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html=LEER_FOOTER, seo_block=LEER_SEO):
     d = parse_dmy(game["datum"])
     gegner = html.escape(game["gegner"])
     url = f"https://basketball-loewen.com/saison/profis/gameday/{game['seiteSlug']}.html"
@@ -278,19 +278,22 @@ def build_page(game, phase, bericht_inhalt, today, header_html=LEER_HEADER, foot
     # abgekuerzt (hero_datum) -- auf dem Gameday-Hub steht er dagegen ausgeschrieben.
     kalender_link = gcal_link(game["gegner"], d, game["zeit"])
 
-    # Eyebrow zeigt in jeder Phase die Paarung statt eines Status-Worts: ein
-    # Status wie "Vorverkauf läuft" duplizierte sich optisch mit der Ueberschrift
-    # direkt darunter (die den Gegner ohnehin schon nennt) und stimmte bei
-    # zahlungPausiert-Spielen inhaltlich nicht mehr (Marko, 27.08.2026, am
-    # Beispiel Porsche BBA Ludwigsburg/TSG Reutlingen Ravens).
-    eyebrow = f"Heimspiel: Basketball Löwen Erfurt vs. {gegner}"
+    # Eyebrow nennt den Gegner nicht mehr -- die Ueberschrift direkt darunter
+    # tut das schon, und "Basketball Löwen Erfurt vs. Gegner" im Eyebrow plus
+    # "Gegner." als H1 war doppelt dieselbe Information (Marko, 27.08.2026, am
+    # Beispiel Porsche BBA Ludwigsburg). Trenner als Punkt, wie im Eyebrow des
+    # Gameday-Hubs.
+    eyebrow = "Heimspiel · Basketball Löwen Erfurt"
 
-    dauerkarte_cta = (
+    # Ein einziger Hero-CTA auf allen Spieltagsseiten (Marko, 27.08.2026):
+    # "Tickets kaufen" fuehrt immer zum Gameday-Hub -- der Kauf selbst lebt
+    # dort (s. kauf_bereich() in tools/build-gameday-hub.py), nicht mehr hier.
+    # Ersetzt den vorherigen, bis Weihnachten befristeten Dauerkarte-CTA.
+    tickets_cta = (
         '        <div style="display:flex;align-items:center;justify-content:center">\n'
-        '          <a class="btn btn-primary" href="/tickets/dauerkarte.html">Dauerkarte kaufen und festen Platz sichern</a>\n'
+        '          <a class="btn btn-primary" href="/saison/profis/gameday/">Tickets kaufen</a>\n'
         '        </div>\n'
-    ) if today <= DAUERKARTE_CTA_STICHTAG else ""
-    hero_grid_style = "" if today <= DAUERKARTE_CTA_STICHTAG else ' style="grid-template-columns:1fr"'
+    )
 
     sections = []
     if phase in ("angekuendigt", "vorverkauf", "spieltag"):
@@ -349,14 +352,14 @@ def build_page(game, phase, bericht_inhalt, today, header_html=LEER_HEADER, foot
 <main id="main">
   <section class="hero-photo hero-tickets hero-half">
     <div class="container">
-      <div class="hero-lg-grid"{hero_grid_style}>
+      <div class="hero-lg-grid">
         <div>
           <span class="eyebrow">{eyebrow}</span>
           <h1 class="nowrap-lg" style="font-size:clamp(20px,5vw,56px)"><span class="kw">{gegner}<span class="swoosh" aria-hidden="true"></span></span>.</h1>
           <p class="lead"><a href="{kalender_link}" target="_blank" rel="noopener" title="In Kalender eintragen" style="display:inline-flex;vertical-align:middle;color:inherit"><i data-lucide="calendar-plus" class="icon-16"></i></a> {html.escape(zeit_text)}</p>
           <a class="hero-location" href="{RIETHSPORTHALLE_MAPS_URL}" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Riethsporthalle, Essener Straße 20, 99089 Erfurt</a>
         </div>
-{dauerkarte_cta}      </div>
+{tickets_cta}      </div>
     </div>
   </section>
 
@@ -389,7 +392,7 @@ def main():
         header_html = extract_platzhalter(pfad, "header", LEER_HEADER)
         footer_html = extract_platzhalter(pfad, "footer", LEER_FOOTER)
         seo_block = extract_seo_block(pfad)
-        neu = build_page(game, phase, bericht, today, header_html, footer_html, seo_block)
+        neu = build_page(game, phase, bericht, header_html, footer_html, seo_block)
         alt = pfad.read_text(encoding="utf-8") if pfad.exists() else None
         if neu == alt:
             unveraendert.append((game["seiteSlug"], phase))
