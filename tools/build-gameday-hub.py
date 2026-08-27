@@ -98,12 +98,12 @@ def hero(s, kommt, heute):
     zeit = s.get("zeit")
     zeile = lang_datum(s) + (f" · {zeit} Uhr" if zeit else "")
     label = "Nächstes Heimspiel" if kommt else "Letztes Heimspiel der Saison"
-    # Dauerkarte-CTA mit demselben Stichtag wie auf den Einzelticket-Seiten
-    # (Marko, 27.08.2026). Ein zweiter Knopf zum Einzelticketkauf ist hier
-    # bewusst wieder raus -- der Kauf selbst zieht als Ganzes auf den Hub
-    # (s. Kommentar in kauf_section()/termine()), ein Verweis darauf waere in
-    # der Zwischenzeit nur Verwirrung gestiftet.
-    knopf = (f'<a class="btn btn-primary" href="/tickets/dauerkarte.html">Bis Weihnachten Dauerkarte kaufen</a>'
+    # Dauerkarte-CTA nur bis DAUERKARTE_CTA_STICHTAG sichtbar (Marko,
+    # 27.08.2026), Beschriftung/Markup wortgleich zu den anderen Dauerkarte-CTAs
+    # der Seite (saison/profis.html, saison/tabelle.html, saison/spielplan.html)
+    # -- "Bis Weihnachten" ist nur die Sichtbarkeits-Regel, nicht Teil des Texts.
+    knopf = ('<a class="btn btn-primary" style="color:#fff" href="/tickets/dauerkarte.html">'
+             '<i data-lucide="ticket" class="icon-16"></i> Dauerkarte kaufen</a>'
              if heute <= DAUERKARTE_CTA_STICHTAG else "")
     # Zeit- und Ort-Zeile getrennt, Kalenderlink vorn in der Zeit-Zeile (Marko,
     # 27.08.2026) -- wie auf den Spieltagsseiten, hier aber mit ausgeschriebenem
