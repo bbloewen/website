@@ -278,12 +278,13 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
     # abgekuerzt (hero_datum) -- auf dem Gameday-Hub steht er dagegen ausgeschrieben.
     kalender_link = gcal_link(game["gegner"], d, game["zeit"])
 
-    # Eyebrow nennt den Gegner nicht mehr -- die Ueberschrift direkt darunter
-    # tut das schon, und "Basketball Löwen Erfurt vs. Gegner" im Eyebrow plus
-    # "Gegner." als H1 war doppelt dieselbe Information (Marko, 27.08.2026, am
-    # Beispiel Porsche BBA Ludwigsburg). Trenner als Punkt, wie im Eyebrow des
-    # Gameday-Hubs.
-    eyebrow = "Heimspiel · Basketball Löwen Erfurt"
+    # Eyebrow endet auf "vs." und nennt den Gegner NICHT mehr namentlich -- die
+    # Ueberschrift direkt darunter tut das schon (das war die eigentliche
+    # Dopplung: "vs. Gegner" im Eyebrow plus "Gegner." als H1). Das "vs." bleibt
+    # bewusst stehen und wird optisch erst durch die Ueberschrift vervollstaendigt
+    # (Marko, 27.08.2026, am Beispiel Porsche BBA Ludwigsburg). Trenner als
+    # Punkt, wie im Eyebrow des Gameday-Hubs.
+    eyebrow = "Heimspiel · Basketball Löwen Erfurt vs."
 
     # Ein einziger Hero-CTA auf allen Spieltagsseiten (Marko, 27.08.2026):
     # "Tickets kaufen" fuehrt immer zum Gameday-Hub -- der Kauf selbst lebt

@@ -119,7 +119,7 @@ def hero(s, kommt, heute):
     <div class="container">
       <div class="hero-lg-grid">
         <div>
-          <span class="eyebrow">{label} · Basketball Löwen Erfurt vs. {esc(s['gegner'])}</span>
+          <span class="eyebrow">{label} · Basketball Löwen Erfurt vs.</span>
           <h1 class="nowrap-lg" style="font-size:clamp(20px,5vw,56px)"><span class="kw">{esc(s['gegner'])}<span class="swoosh" aria-hidden="true"></span></span>.</h1>
           {zeit_zeile}
           <a class="hero-location" href="{MAPS}" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Riethsporthalle, Essener Straße 20, 99089 Erfurt</a>
