@@ -94,10 +94,9 @@ def naechstes(liste, heute):
     return (kuenftig[0], True) if kuenftig else (liste[-1], False)
 
 
-def hero(s, kommt, heute):
+def hero(s, heute):
     zeit = s.get("zeit")
     zeile = lang_datum(s) + (f" · {zeit} Uhr" if zeit else "")
-    label = "Nächstes Heimspiel" if kommt else "Letztes Heimspiel der Saison"
     # Dauerkarte-CTA nur bis DAUERKARTE_CTA_STICHTAG sichtbar (Marko,
     # 27.08.2026), Beschriftung/Markup wortgleich zu den anderen Dauerkarte-CTAs
     # der Seite (saison/profis.html, saison/tabelle.html, saison/spielplan.html)
@@ -119,8 +118,12 @@ def hero(s, kommt, heute):
     <div class="container">
       <div class="hero-lg-grid">
         <div>
-          <span class="eyebrow">{label} · Basketball Löwen Erfurt vs.</span>
-          <h1 class="nowrap-lg" style="font-size:clamp(20px,5vw,56px)"><span class="kw">{esc(s['gegner'])}<span class="swoosh" aria-hidden="true"></span></span>.</h1>
+          <span class="eyebrow">Aktuelles Heimspiel</span>
+          <!-- white-space:normal, weil .hero-photo h1 site-weit auf nowrap steht (css/site.css);
+               mit dem ausgeschriebenen "Basketball Löwen Erfurt vs." passt die Zeile sonst nicht
+               mehr in die Spalte und die Seite scrollt waagerecht. Andere Hero-Varianten loesen
+               das ueber eigene Klassen (hero-article, hero-lg, ...), hier inline wie die Groesse. -->
+          <h1 style="font-size:clamp(22px,3.4vw,40px);white-space:normal">Basketball Löwen Erfurt vs. <span class="kw">{esc(s['gegner'])}<span class="swoosh" aria-hidden="true"></span></span>.</h1>
           {zeit_zeile}
           <a class="hero-location" href="{MAPS}" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Riethsporthalle, Essener Straße 20, 99089 Erfurt</a>
         </div>
@@ -203,6 +206,8 @@ WISSENSWERTES_HTML = """      <span class="eyebrow" style="display:block;margin-
             <h3 class="t-h4">Ermäßigungen</h3>
           </div>
           <p class="t-body-sm">Beim Einzelticket gilt der ermäßigte Satz für Studierende, Azubis, FSJ, Menschen mit Behinderung ab 50&nbsp;% und Rentner*innen (jeweils mit Nachweis beim Einlass). Für Kinder von 7 bis 14 Jahren gibt es bei Tickets in Block A zusätzlich 25&nbsp;% Rabatt auf den ermäßigten Preis — schon ab dem ersten Kind.</p>
+          <p class="t-body-sm mt-2">Wer den <strong>Familienpass der Stadt Erfurt</strong> hat, kommt mit zwei Erwachsenen und den eingetragenen Kindern kostenlos in Kategorie&nbsp;3 zu einem Heimspiel. Dafür brauchst du einen persönlichen Gutscheincode: einmal auf der Familienpass-Seite registrieren, der Code kommt per E-Mail und reduziert den Preis für die ganze Familie im Ticketshop auf 0,00&nbsp;€.</p>
+          <a class="card-link mt-2" href="/tickets/familienpass.html">Familienpass-Gutschein anfordern <i data-lucide="arrow-right" class="icon-14"></i></a>
         </div>
         <div class="info-tile info-tile-row info-tile-row-divided">
           <div class="info-tile-row-head">
@@ -486,7 +491,7 @@ def seite(liste, heute):
     # sind fuer den Kauf nicht wichtig -- nur fuer SEO -- und wandern deshalb
     # ganz ans Ende.
     inhalt = "\n\n".join(x for x in [
-        hero(aktuell, kommt, heute), kauf_bereich(aktuell, kommt, heute), termine(liste, aktuell), halle(),
+        hero(aktuell, heute), kauf_bereich(aktuell, kommt, heute), termine(liste, aktuell), halle(),
     ] if x)
 
     return f"""<!doctype html>
@@ -503,7 +508,7 @@ def seite(liste, heute):
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1787854003" />
+<link rel="stylesheet" href="/css/site.css?v=1787855243" />
 <link rel="stylesheet" href="/css/seat-picker.css?v=1787760512" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>

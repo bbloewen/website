@@ -126,7 +126,7 @@
       "lastmod": "2026-08-26"
     },
     "news/insta-archiv/loewen-17920245561201740.html": {
-      "hash": "88a0e4a4a0b1bb36df40246e1af6f08d51558d1d",
+      "hash": "ce055995e6827318868411e020a1025d006cfaf6",
       "lastmod": "2026-08-27"
     },
     "news/insta-archiv/loewen-18059405546758069.html": {
@@ -134,7 +134,7 @@
       "lastmod": "2026-08-26"
     },
     "news/insta-archiv/loewen-18107288966132528.html": {
-      "hash": "6ad0775f20a716ca84ccf5629f92e4c85118c43f",
+      "hash": "579c7c8f2183017dc256740126d4a304802babfd",
       "lastmod": "2026-08-27"
     },
     "news/insta-archiv/loewen-18456699166115024.html": {
@@ -142,15 +142,15 @@
       "lastmod": "2026-08-25"
     },
     "news/insta-archiv/loewenpark-18018155786700568.html": {
-      "hash": "48534abc0dc5cc8c4079ca6435da2448df592b02",
+      "hash": "7d7465349779e7d4540a701cb4830acc778b5252",
       "lastmod": "2026-08-27"
     },
     "news/insta-archiv/loewenpark-18057577886788062.html": {
-      "hash": "347c6deee3a18d4938dbbe9090a03796c017669e",
+      "hash": "23afc24ff80c9d4defe5cf6f209370a0ca124e14",
       "lastmod": "2026-08-27"
     },
     "news/insta-archiv/loewenpark-18082776263481467.html": {
-      "hash": "e8f3a4856232f877e79548ee2d7ff28791895f93",
+      "hash": "7788d31ef10983ef0e0e9ae9ff33b20866be7474",
       "lastmod": "2026-08-27"
     },
     "news/insta-archiv/loewenpark-18120295273678542.html": {
@@ -158,7 +158,7 @@
       "lastmod": "2026-08-26"
     },
     "news/insta-archiv/loewenpark-18135245524583630.html": {
-      "hash": "56801e99db09beee7826a86d93218ee8a75a2040",
+      "hash": "3f89a01d69c68b19c6b199dd471bf62af8b0963a",
       "lastmod": "2026-08-27"
     },
     "news/insta-archiv/loewenpark-18171405229416217.html": {
@@ -166,12 +166,12 @@
       "lastmod": "2026-08-26"
     },
     "news/insta-archiv/loewenpark-18359930035244735.html": {
-      "hash": "5ceddcd519af059da1e64cf5fad3cf8ac7f15015",
+      "hash": "22234fc7f79508e25579f1daa9274e3502360df0",
       "lastmod": "2026-08-27"
     },
     "news/instagram-archiv.html": {
-      "hash": "686291c2e8bce212aa7c1c1acbeb5b70719cf96e",
-      "lastmod": "2026-08-26"
+      "hash": "346db9fbc6dfd9a5674c139bc858bf980d41b6c4",
+      "lastmod": "2026-08-27"
     },
     "news/newsletter/index.html": {
       "hash": "55da62b09edd42208236afc6aa97977b1e9a9940",
@@ -222,11 +222,63 @@
       "lastmod": "2026-08-27"
     },
     "saison/profis/gameday/2026-10-11-bba-ludwigsburg.html": {
-      "hash": "104be30f525736bd5f9fba52378fe6926d2183c1",
+      "hash": "7e35e043fe84b857c281099bfc85adedddfd3696",
+      "lastmod": "2026-08-27"
+    },
+    "saison/profis/gameday/2026-10-18-tsg-reutlingen-ravens.html": {
+      "hash": "e6eea2852d4321074a7ed8f7cc2139d84a693d2d",
+      "lastmod": "2026-08-27"
+    },
+    "saison/profis/gameday/2026-11-08-culture-city-weimar.html": {
+      "hash": "a499479f33f540f72e6b5fe07cab6c48e96627f1",
+      "lastmod": "2026-08-27"
+    },
+    "saison/profis/gameday/2026-11-13-dresden-titans.html": {
+      "hash": "fa9b7799e38ea0e7aa9d28dc77bd23f70f0a0e2a",
+      "lastmod": "2026-08-27"
+    },
+    "saison/profis/gameday/2026-11-20-fc-bayern-basketball.html": {
+      "hash": "1b5a4116c733a936e0887e8130055f19437c386f",
+      "lastmod": "2026-08-27"
+    },
+    "saison/profis/gameday/2026-12-06-bg-leitershofen.html": {
+      "hash": "db7c4c7092351d7ad8840c307e295d8ecae7fbf4",
+      "lastmod": "2026-08-27"
+    },
+    "saison/profis/gameday/2026-12-13-tsv-oberhaching-tropics.html": {
+      "hash": "d196dbaf06713447b43ae845280ebdfb07e046c2",
+      "lastmod": "2026-08-27"
+    },
+    "saison/profis/gameday/2027-01-03-dragons-rhoendorf.html": {
+      "hash": "55bf70571c4cb7e256e3dc379efcbaf8bbbc535a",
+      "lastmod": "2026-08-27"
+    },
+    "saison/profis/gameday/2027-01-17-skyliners-juniors.html": {
+      "hash": "4cead05c078d3ae9966a9eaecd16ef0f0b92cc2d",
+      "lastmod": "2026-08-27"
+    },
+    "saison/profis/gameday/2027-01-31-bbc-coburg.html": {
+      "hash": "fb4037b45ec29659f3a2cc3f96146dc7fb89c584",
+      "lastmod": "2026-08-27"
+    },
+    "saison/profis/gameday/2027-02-14-sv-fellbach-flashers.html": {
+      "hash": "4a2e01e3e6dd0e7095098b8bf475cda516dab06c",
+      "lastmod": "2026-08-27"
+    },
+    "saison/profis/gameday/2027-03-07-giants-leverkusen.html": {
+      "hash": "180012486bbaf2b29c1f79681295c603eb5f1626",
+      "lastmod": "2026-08-27"
+    },
+    "saison/profis/gameday/2027-03-21-tv-langen.html": {
+      "hash": "c2e3c73a3f33f6989b1f56e25d6937cc932e6cb7",
+      "lastmod": "2026-08-27"
+    },
+    "saison/profis/gameday/2027-03-28-ahorn-camp-baskets.html": {
+      "hash": "a269044e84dbedcaa8ecdec8be5af2445bae52c1",
       "lastmod": "2026-08-27"
     },
     "saison/profis/gameday/index.html": {
-      "hash": "ee60262d33107158ef263240108e3d229866a9fe",
+      "hash": "ed917b043c4e9e003c824dbfa21feff71248d40e",
       "lastmod": "2026-08-27"
     },
     "saison/spielplan.html": {
@@ -262,8 +314,8 @@
       "lastmod": "2026-08-26"
     },
     "trainieren/feriencamps.html": {
-      "hash": "bd72660c024ff09adec9f0040bf51d5227a21ee2",
-      "lastmod": "2026-08-26"
+      "hash": "200173babefd532570ebd71c1b08aacdf9e64472",
+      "lastmod": "2026-08-27"
     },
     "trainieren/freiplaetze.html": {
       "hash": "775cf886e6d2a75ebc02662e5b46823c3c2aa08f",

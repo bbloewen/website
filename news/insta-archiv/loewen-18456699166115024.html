@@ -21,7 +21,7 @@
 <meta name="twitter:image" content="https://basketball-loewen.com/assets/img/share/og-default.jpg" />
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1787854003" />
+<link rel="stylesheet" href="/css/site.css?v=1787855243" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
@@ -152,7 +152,13 @@
 <nav class="nav-drawer" id="nav-drawer" aria-label="Mobile Navigation" aria-hidden="true" inert>
   <div class="nav-drawer-head">
     <img src="/assets/logo/loewen-logo-4c.svg" width="600" height="565" alt="Basketball Löwen Erfurt" style="height:36px" />
-    <button class="icon-btn" id="drawer-close" aria-label="Menü schließen"><i data-lucide="x"></i></button>
+    <div class="nav-drawer-head-actions">
+      <!-- Nur das Icon, ohne Beschriftung (Markos Ansage 27.08.2026) -- Gegenstueck
+           zur .mobile-cta in der Kopfleiste, gleiches Ziel, gleiche Optik. Auf den
+           Seiten mit body.hide-mobile-cta faellt es weg, weil man dort schon ist. -->
+      <a class="icon-btn drawer-cta" href="/saison/profis/gameday/" aria-label="Game Day"><i data-lucide="ticket" class="icon-18"></i></a>
+      <button class="icon-btn" id="drawer-close" aria-label="Menü schließen"><i data-lucide="x"></i></button>
+    </div>
   </div>
   <ul>
     <li class="drawer-nav-item core-item">

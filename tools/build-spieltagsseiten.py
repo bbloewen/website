@@ -309,36 +309,39 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 
     main_content = "\n".join(sections)
 
-    # Phase "angekuendigt" heisst: Spiel steht im Kalender, der Vorverkauf ist
-    # aber noch nicht offen. Diese Seiten tragen nur Gegner, Datum und den
-    # Hinweis "Vorverkauf noch nicht begonnen" -- rund 60 Woerter, von denen die
-    # Haelfte auf allen dreizehn Seiten identisch ist. Google sieht darin
-    # Beinah-Dubletten und indexiert davon typisch eine. Auf Markos Ansage
-    # (26.08.2026) bleiben sie deshalb bis zum Vorverkaufsstart auf noindex; die
-    # Sichtbarkeit traegt in der Zeit der immergruene Gameday-Hub. Sobald eine
-    # ticketUrl gesetzt ist, wechselt die Phase und die Seite wird von sich aus
-    # indexierbar -- kein zusaetzlicher Handgriff, und build-sitemap.py nimmt sie
-    # dann automatisch auf.
-    robots = ('<!-- noindex: Vorverkauf noch nicht offen, die Seite traegt bis dahin zu\n'
-              '     wenig eigenen Inhalt (s. Kommentar in tools/build-spieltagsseiten.py).\n'
-              '     Faellt automatisch weg, sobald data/heimspiele.json eine ticketUrl hat. -->\n'
-              '<meta name="robots" content="noindex" />\n') if phase == "angekuendigt" else ""
+    # Kein noindex mehr. Bis zum 27.08.2026 standen die Seiten in der Phase
+    # "angekuendigt" auf noindex: sie trugen nur Gegner, Datum und den Hinweis
+    # "Vorverkauf noch nicht begonnen", knapp 60 Woerter, davon die Haelfte auf
+    # allen dreizehn Seiten gleich -- Beinah-Dubletten, von denen Google typisch
+    # eine indexiert. Markos Ansage vom 27.08.2026 hebt das auf: jede
+    # Spieltagsseite bekommt Schritt fuer Schritt ihr eigenes Thema, damit
+    # entfaellt der Dubletten-Grund. build-sitemap.py nimmt die Seiten dadurch
+    # von sich aus auf (78 -> 91 URLs).
+    #
+    # Nebeneffekt, der der eigentliche Gewinn ist: die SportsEvent-Auszeichnung
+    # liegt seit dem Umbau nur noch auf diesen Seiten (s. Kommentar in
+    # tools/build-head-meta.py). Solange dreizehn davon auf noindex standen, sah
+    # Google genau ein Heimspiel statt vierzehn.
 
+    # Title bewusst "Löwen — <Gegner>" statt "<Gegner> — Basketball Löwen Erfurt"
+    # (Markos Ansage 27.08.2026): in der Browser-Tableiste ist nur der Anfang zu
+    # sehen, und dort soll die Paarung stehen, nicht der Vereinsname. "Löwen" ist
+    # die kurze Form, damit vom Gegner noch etwas sichtbar bleibt.
     return f"""<!doctype html>
 <html lang="de">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="format-detection" content="telephone=no" />
-<title>{gegner} — Basketball Löwen Erfurt</title>
+<title>Löwen — {gegner}</title>
 <meta name="description" content="{html.escape(description)}" />
-{robots}<link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
+<link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png" />
 <link rel="icon" type="image/png" sizes="16x16" href="/assets/logo/favicon-16.png" />
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1787854003" />
+<link rel="stylesheet" href="/css/site.css?v=1787855243" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
@@ -350,7 +353,11 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 <script src="https://analytics.ahrefs.com/analytics.js" data-key="5TVH543YAI/GzTMbTLbbbg" async></script>
 <!--/ANALYTICS:ahrefs-->
 {seo_block}</head>
-<body data-nav-group="gameday" class="hide-mobile-cta">
+<!-- Nav-Highlight auf "Saison & Teams", nicht auf "Game Day" (Markos Ansage
+     27.08.2026): die Seite eines einzelnen Spiels gehoert inhaltlich zum
+     Spielplan. "Game Day" leuchtet nur, wenn wirklich der Hub angezeigt wird.
+     Und ohne hide-mobile-cta, damit das Ticket-Icon hier auf den Hub zeigt. -->
+<body data-nav-group="saison">
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
 {header_html}
 <main id="main">

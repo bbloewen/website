@@ -305,7 +305,16 @@ a.no-underline:hover { text-decoration: none; }
 }
 .nav-drawer.open { transform: translateX(0); }
 .nav-drawer-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-.nav-drawer-head img { height: 36px; }
+/* width:auto + flex:none, sonst gibt Flexbox dem Logo die intrinsische Breite
+   (192px statt 38px) und das Wappen sitzt mittig in einer viel zu breiten Box --
+   es sieht dann zentriert aus, obwohl der Kopf space-between benutzt. */
+.nav-drawer-head img { height: 36px; width: auto; flex: none; }
+.nav-drawer-head-actions { display: flex; align-items: center; gap: 10px; }
+.nav-drawer-head .drawer-cta {
+  border-color: var(--color-brand-orange-text); color: var(--color-brand-orange-text);
+}
+.nav-drawer-head .drawer-cta:hover { background: var(--color-orange-100); border-color: var(--color-brand-orange); }
+body.hide-mobile-cta .nav-drawer-head .drawer-cta { display: none; }
 
 .drawer-nav-item { border-bottom: 1px solid var(--border); }
 .drawer-nav-link {

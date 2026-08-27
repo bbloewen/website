@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1787854003" />
+<link rel="stylesheet" href="/css/site.css?v=1787855243" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
@@ -161,7 +161,13 @@
 <nav class="nav-drawer" id="nav-drawer" aria-label="Mobile Navigation" aria-hidden="true" inert>
   <div class="nav-drawer-head">
     <img src="/assets/logo/loewen-logo-4c.svg" width="600" height="565" alt="Basketball Löwen Erfurt" style="height:36px" />
-    <button class="icon-btn" id="drawer-close" aria-label="Menü schließen"><i data-lucide="x"></i></button>
+    <div class="nav-drawer-head-actions">
+      <!-- Nur das Icon, ohne Beschriftung (Markos Ansage 27.08.2026) -- Gegenstueck
+           zur .mobile-cta in der Kopfleiste, gleiches Ziel, gleiche Optik. Auf den
+           Seiten mit body.hide-mobile-cta faellt es weg, weil man dort schon ist. -->
+      <a class="icon-btn drawer-cta" href="/saison/profis/gameday/" aria-label="Game Day"><i data-lucide="ticket" class="icon-18"></i></a>
+      <button class="icon-btn" id="drawer-close" aria-label="Menü schließen"><i data-lucide="x"></i></button>
+    </div>
   </div>
   <ul>
     <li class="drawer-nav-item core-item">
@@ -259,7 +265,7 @@
               <span class="card-label">12.–15.10.2026</span>
               <h3>Herbstcamp 2026</h3>
               <div class="t-caption" style="display:flex;align-items:center;gap:6px;margin:6px 0 8px;color:var(--text-muted)">
-                <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Herbstcamp+2026+%E2%80%93+Basketball+Loewen+Erfurt&dates=20261012%2F20261016&details=Ferien-Basketballcamp+der+Basketball+Loewen+Erfurt+in+den+Herbstferien.+Alle+Infos%3A+basketball-loewen.com%2Ftrainieren%2Fcamps.html&ctz=Europe%2FBerlin" target="_blank" rel="noopener" title="Ins Kalender eintragen" style="display:inline-flex;color:var(--color-brand-orange-text)"><i data-lucide="calendar-plus" class="icon-14"></i></a>
+                <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Herbstcamp+2026+%E2%80%93+Basketball+Loewen+Erfurt&dates=20261012%2F20261016&details=Ferien-Basketballcamp+der+Basketball+Loewen+Erfurt+in+den+Herbstferien.+Alle+Infos%3A+basketball-loewen.com%2Ftrainieren%2Fferiencamps.html&ctz=Europe%2FBerlin" target="_blank" rel="noopener" title="Ins Kalender eintragen" style="display:inline-flex;color:var(--color-brand-orange-text)"><i data-lucide="calendar-plus" class="icon-14"></i></a>
                 <span>12.–15.10.2026 ·</span>
                 <a href="https://www.google.com/maps/search/?api=1&query=Sporthalle+am+Suedpark%2C+Erfurt" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:var(--text-muted)"><i data-lucide="map-pin" class="icon-12"></i> Sporthalle am Südpark</a>
               </div>
@@ -274,7 +280,7 @@
               <span class="card-label">22.–26.03.2027</span>
               <h3>Ostercamp 2027</h3>
               <div class="t-caption" style="display:flex;align-items:center;gap:6px;margin:6px 0 8px;color:var(--text-muted)">
-                <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Ostercamp+2027+%E2%80%93+Basketball+Loewen+Erfurt&dates=20270322%2F20270327&details=Ferien-Basketballcamp+der+Basketball+Loewen+Erfurt+in+den+Osterferien+2027.+Termin+noch+nicht+offiziell+bestaetigt%2C+voraussichtlich+22.-26.+Maerz+2027+%28erste+Ferienwoche%29.+Alle+Infos%3A+basketball-loewen.com%2Ftrainieren%2Fcamps.html&ctz=Europe%2FBerlin" target="_blank" rel="noopener" title="Ins Kalender eintragen" style="display:inline-flex;color:var(--color-brand-orange-text)"><i data-lucide="calendar-plus" class="icon-14"></i></a>
+                <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Ostercamp+2027+%E2%80%93+Basketball+Loewen+Erfurt&dates=20270322%2F20270327&details=Ferien-Basketballcamp+der+Basketball+Loewen+Erfurt+in+den+Osterferien+2027.+Termin+noch+nicht+offiziell+bestaetigt%2C+voraussichtlich+22.-26.+Maerz+2027+%28erste+Ferienwoche%29.+Alle+Infos%3A+basketball-loewen.com%2Ftrainieren%2Fferiencamps.html&ctz=Europe%2FBerlin" target="_blank" rel="noopener" title="Ins Kalender eintragen" style="display:inline-flex;color:var(--color-brand-orange-text)"><i data-lucide="calendar-plus" class="icon-14"></i></a>
                 <span>22.–26.03.2027 ·</span>
                 <a href="/trainieren/loewenpark.html" style="display:inline-flex;align-items:center;gap:4px;color:var(--text-muted)"><i data-lucide="map-pin" class="icon-12"></i> Löwenpark</a>
               </div>
@@ -289,7 +295,7 @@
               <span class="card-label">12.–16.07.2027</span>
               <h3>Sommercamp 2027</h3>
               <div class="t-caption" style="display:flex;align-items:center;gap:6px;margin:6px 0 8px;color:var(--text-muted)">
-                <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Sommercamp+2027+%E2%80%93+Basketball+Loewen+Erfurt&dates=20270712%2F20270717&details=Ferien-Basketballcamp+der+Basketball+Loewen+Erfurt+in+den+Sommerferien+2027.+Termin+noch+nicht+offiziell+bestaetigt%2C+voraussichtlich+12.-16.+Juli+2027+%28erste+Ferienwoche%29.+Alle+Infos%3A+basketball-loewen.com%2Ftrainieren%2Fcamps.html&ctz=Europe%2FBerlin" target="_blank" rel="noopener" title="Ins Kalender eintragen" style="display:inline-flex;color:var(--color-brand-orange-text)"><i data-lucide="calendar-plus" class="icon-14"></i></a>
+                <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Sommercamp+2027+%E2%80%93+Basketball+Loewen+Erfurt&dates=20270712%2F20270717&details=Ferien-Basketballcamp+der+Basketball+Loewen+Erfurt+in+den+Sommerferien+2027.+Termin+noch+nicht+offiziell+bestaetigt%2C+voraussichtlich+12.-16.+Juli+2027+%28erste+Ferienwoche%29.+Alle+Infos%3A+basketball-loewen.com%2Ftrainieren%2Fferiencamps.html&ctz=Europe%2FBerlin" target="_blank" rel="noopener" title="Ins Kalender eintragen" style="display:inline-flex;color:var(--color-brand-orange-text)"><i data-lucide="calendar-plus" class="icon-14"></i></a>
                 <span>12.–16.07.2027 ·</span>
                 <a href="/trainieren/loewenpark.html" style="display:inline-flex;align-items:center;gap:4px;color:var(--text-muted)"><i data-lucide="map-pin" class="icon-12"></i> Löwenpark</a>
               </div>
