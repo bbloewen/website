@@ -116,8 +116,8 @@ def hero(s, kommt):
         <div>
           <span class="eyebrow">{label} · Basketball Löwen Erfurt</span>
           <h1 class="nowrap-lg" style="font-size:clamp(20px,5vw,56px)"><span class="kw">{esc(s['gegner'])}<span class="swoosh" aria-hidden="true"></span></span>.</h1>
-          <a class="hero-location" href="{MAPS}" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Riethsporthalle Erfurt</a>
           {zeit_zeile}
+          <a class="hero-location" href="{MAPS}" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Riethsporthalle, Essener Straße 20, 99089 Erfurt</a>
         </div>
         <div style="display:flex;align-items:center;justify-content:center">
           {knopf}

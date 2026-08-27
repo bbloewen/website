@@ -517,8 +517,8 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
         <div>
           <span class="eyebrow">{eyebrow}</span>
           <h1 class="nowrap-lg" style="font-size:clamp(20px,5vw,56px)"><span class="kw">{gegner}<span class="swoosh" aria-hidden="true"></span></span>.</h1>
-          <a class="hero-location" href="{RIETHSPORTHALLE_MAPS_URL}" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Riethsporthalle Erfurt</a>
           <p class="lead"><a href="{kalender_link}" target="_blank" rel="noopener" title="Ins Kalender eintragen" style="display:inline-flex;vertical-align:middle;color:inherit"><i data-lucide="calendar-plus" class="icon-16"></i></a> {html.escape(zeit_text)}</p>
+          <a class="hero-location" href="{RIETHSPORTHALLE_MAPS_URL}" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Riethsporthalle, Essener Straße 20, 99089 Erfurt</a>
         </div>
         <div style="display:flex;align-items:center;justify-content:center">
           <a class="btn btn-primary" href="/tickets/dauerkarte.html">Dauerkarte kaufen und festen Platz sichern</a>
