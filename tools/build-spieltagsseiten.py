@@ -323,17 +323,19 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
     # tools/build-head-meta.py). Solange dreizehn davon auf noindex standen, sah
     # Google genau ein Heimspiel statt vierzehn.
 
-    # Title bewusst "Löwen — <Gegner>" statt "<Gegner> — Basketball Löwen Erfurt"
-    # (Markos Ansage 27.08.2026): in der Browser-Tableiste ist nur der Anfang zu
-    # sehen, und dort soll die Paarung stehen, nicht der Vereinsname. "Löwen" ist
-    # die kurze Form, damit vom Gegner noch etwas sichtbar bleibt.
+    # Title "Basketball Löwen Erfurt — <Gegner>", nicht "<Gegner> — Basketball
+    # Löwen Erfurt" (Markos Ansage 27.08.2026): wir stehen vorn, der Gegner
+    # dahinter. Die Kurzform "Löwen" war zwischenzeitlich drin, damit in der
+    # Tableiste mehr von der Paarung zu sehen ist -- auf Markos Ansage wieder
+    # ausgeschrieben, weil der Markenname in allen 14 Titeln stehen soll.
+    # Laengster Fall bleibt mit 49 Zeichen unter der 60-Zeichen-Grenze.
     return f"""<!doctype html>
 <html lang="de">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="format-detection" content="telephone=no" />
-<title>Löwen — {gegner}</title>
+<title>Basketball Löwen Erfurt — {gegner}</title>
 <meta name="description" content="{html.escape(description)}" />
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png" />
