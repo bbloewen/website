@@ -291,7 +291,8 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
     # Ersetzt den vorherigen, bis Weihnachten befristeten Dauerkarte-CTA.
     tickets_cta = (
         '        <div style="display:flex;align-items:center;justify-content:center">\n'
-        '          <a class="btn btn-primary" href="/saison/profis/gameday/">Tickets kaufen</a>\n'
+        '          <a class="btn btn-primary" style="color:#fff" href="/saison/profis/gameday/">'
+        '<i data-lucide="ticket" class="icon-16"></i> Tickets kaufen</a>\n'
         '        </div>\n'
     )
 
