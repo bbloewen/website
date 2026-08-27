@@ -18,7 +18,7 @@
       '</p>' +
       /* Vorerst "Dauerkarte kaufen" statt "Tickets kaufen" (Saison noch nicht
          gestartet) — sobald der Spielbetrieb läuft, wieder auf Einzelticket-
-         Verlinkung (g.s.ticketUrl || /tickets.html) umstellen. */
+         Verlinkung (g.s.ticketUrl || '/saison/profis/gameday/') umstellen. */
       '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
         '<a class="btn btn-primary btn-sm" style="color:#fff" href="/tickets/dauerkarte.html"><i data-lucide="ticket" style="width:14px;height:14px"></i> Dauerkarte kaufen</a>' +
         '<a class="btn btn-ghost btn-sm" href="/saison/spielplan.html">Zum Spielplan</a>' +

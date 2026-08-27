@@ -111,7 +111,7 @@ def hero(s, kommt, heute):
     kalender_link = gcal_link(s["gegner"], datum(s), zeit) if zeit else None
     zeit_zeile = (
         f'<p class="lead"><a href="{kalender_link}" target="_blank" rel="noopener" '
-        f'title="Ins Kalender eintragen" style="display:inline-flex;vertical-align:middle;color:inherit">'
+        f'title="In Kalender eintragen" style="display:inline-flex;vertical-align:middle;color:inherit">'
         f'<i data-lucide="calendar-plus" class="icon-16"></i></a> {esc(zeile)}</p>'
         if kalender_link else f'<p class="lead">{esc(zeile)}</p>'
     )

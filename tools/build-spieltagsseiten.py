@@ -353,7 +353,7 @@ def build_page(game, phase, bericht_inhalt, today, header_html=LEER_HEADER, foot
         <div>
           <span class="eyebrow">{eyebrow}</span>
           <h1 class="nowrap-lg" style="font-size:clamp(20px,5vw,56px)"><span class="kw">{gegner}<span class="swoosh" aria-hidden="true"></span></span>.</h1>
-          <p class="lead"><a href="{kalender_link}" target="_blank" rel="noopener" title="Ins Kalender eintragen" style="display:inline-flex;vertical-align:middle;color:inherit"><i data-lucide="calendar-plus" class="icon-16"></i></a> {html.escape(zeit_text)}</p>
+          <p class="lead"><a href="{kalender_link}" target="_blank" rel="noopener" title="In Kalender eintragen" style="display:inline-flex;vertical-align:middle;color:inherit"><i data-lucide="calendar-plus" class="icon-16"></i></a> {html.escape(zeit_text)}</p>
           <a class="hero-location" href="{RIETHSPORTHALLE_MAPS_URL}" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Riethsporthalle, Essener Straße 20, 99089 Erfurt</a>
         </div>
 {dauerkarte_cta}      </div>

@@ -137,7 +137,7 @@ SECTIONS = {
     "partner": ("Partner", "partner/sponsoring.html"),
     "news": ("News", "news/aktuelles.html"),
     "fans": ("Fans", "fans/fanclub.html"),
-    "tickets": ("Tickets", "tickets.html"),
+    "tickets": ("Game Day", "saison/profis/gameday/"),
     "mitglied-werden": ("Mitglied werden", "mitglied-werden.html"),
 }
 
