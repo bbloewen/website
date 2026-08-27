@@ -164,15 +164,29 @@ def halle():
 
 
 def termine(liste, aktuelles):
-    """Alle weiteren Heimspiele. Der Gegnername ist der Ankertext — genau
-    danach wird gesucht, und er ist mehr wert als „mehr erfahren"."""
+    """Die weiteren Heimspiele — mit den Preisboxen als zweite Spalte.
+
+    Struktur seit dem 27.08.2026 von Hand umgebaut (Commits rund um die
+    Nav-Umstellung): Die Preisboxen sitzen nicht mehr in einem eigenen
+    Abschnitt darunter, sondern als `aside` im `ticket-layout` neben der
+    Spielliste — dasselbe Muster wie auf tickets.html. Dieser Generator war
+    danach eine Version hinterher und hätte die Handarbeit beim nächsten Lauf
+    stillschweigend überschrieben; genau das ist am 27.08. einmal passiert und
+    wurde zurückgesetzt. Deshalb ist die Handfassung hier die Vorlage.
+
+    Der Gegner-Name ist der Ankertext — genau danach wird gesucht, und er ist
+    mehr wert als „mehr erfahren".
+
+    Preisboxen und Erklärfenster sind wortgleich von tickets.html übernommen.
+    Ändern sich dort Preise oder Rabatte, muss es hier mit.
+    """
     zeilen = []
     for s in liste:
         if s["seiteSlug"] == aktuelles["seiteSlug"]:
             continue
         zeit = f" · {s['zeit']} Uhr" if s.get("zeit") else ""
         zeilen.append(
-            '        <div class="ticket-row">'
+            '            <div class="ticket-row">'
             '<div>'
             f'<div class="ticket-row-title"><strong>{esc(kurz_datum(s))}</strong>{esc(zeit)} · '
             f'<a href="{esc(ziel_url(s))}">Löwen gegen {esc(s["gegner"])}</a></div>'
@@ -183,97 +197,10 @@ def termine(liste, aktuelles):
         )
     if not zeilen:
         return ""
-    return ("""  <section class="section bg-subtle">
-    <div class="container container-narrow">
-      <div class="section-head">
-        <div class="head-text" style="max-width:none">
-          <span class="eyebrow">Saison 2026/2027</span>
-          <h2 class="t-h2">Die weiteren Heimspiele</h2>
-          <p class="t-body mt-3">Vierzehn Heimspiele von Oktober bis März. Jedes hat seine eigene
-          Seite — vor dem Spiel mit Vorbericht und Kartenkauf, danach mit Ergebnis und Bericht.</p>
-        </div>
-      </div>
-      <div class="ticket-list">
-"""
-            + "\n".join(zeilen)
-            + """
-      </div>
-      <p class="mt-5"><a class="card-link" href="/saison/spielplan.html">Der komplette Spielplan mit Auswärtsspielen <i data-lucide="arrow-right" class="icon-14"></i></a></p>
-    </div>
-  </section>""")
+    return TERMINE_VORLAGE.replace("__ZEILEN__", "\n".join(zeilen))
 
 
-# Preisboxen und die zwei Rabatt-Erklaerfenster sind unveraendert von tickets.html
-# uebernommen (dort .ticket-sidebar in der Aside-Spalte) -- eine zweite, eigene Fassung
-# der Preisliste wuerde spaetestens bei der naechsten Preisrunde auseinanderlaufen.
-# Wenn sich in tickets.html Preise oder Rabatte aendern, muss es hier mit.
-KARTEN = """  <section class="section">
-    <div class="container container-narrow">
-      <div class="section-head">
-        <div class="head-text" style="max-width:none">
-          <span class="eyebrow">Karten</span>
-          <h2 class="t-h2">Dauerkarte oder Einzelticket</h2>
-        </div>
-      </div>
-      <div class="grid-2 mt-5">
-        <div class="ticket-sidebar" style="position:static">
-          <div>
-            <span class="eyebrow">Preis pro Saison</span>
-            <h3 class="t-h4" style="margin:6px 0 8px">Dauerkarte</h3>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button type="button" class="badge badge-orange" id="overview-member-badge" style="border:none;cursor:pointer;font-family:inherit">
-                -30 % Mitglieder des Basketball Löwen e.V.
-              </button>
-              <button type="button" class="badge badge-orange" id="overview-discount-badge" style="border:none;cursor:pointer;font-family:inherit">
-                -20 % Frühbucher bis 31.08.
-              </button>
-            </div>
-          </div>
-          <p class="t-body-sm" style="margin:12px 0">Mit der Dauerkarte sicherst du dir deinen festen Platz für die ganze Saison — Spiel für Spiel derselbe Blick aufs Parkett.</p>
-          <div class="price-row"><span>Kategorie 1</span><strong>208,00 €</strong></div>
-          <div class="price-row"><span>Kategorie 1 (ermäßigt)</span><strong>182,00 €</strong></div>
-          <div class="price-row"><span>Kategorie 2</span><strong>156,00 €</strong></div>
-          <div class="price-row"><span>Kategorie 2 (ermäßigt)</span><strong>115,00 €</strong></div>
-          <div class="price-row"><span>VIP</span><strong>1.000,00 €</strong></div>
-          <a class="btn btn-primary btn-sm" style="margin-top:12px;width:100%;justify-content:center" href="/tickets/dauerkarte.html">Dauerkarte kaufen</a>
-        </div>
-        <div class="ticket-sidebar" style="position:static">
-          <span class="eyebrow">Preis pro Spiel</span>
-          <h3 class="t-h4" style="margin:6px 0 14px">Einzelticket</h3>
-          <p class="t-body-sm mb-3">Bei Einzeltickets wählst du deine Kategorie, nicht mehr deinen festen Platz — den sicherst du dir mit der Dauerkarte.</p>
-          <div class="price-row"><span>Kategorie 1</span><strong>16,00 €</strong></div>
-          <div class="price-row"><span>Kategorie 1 (ermäßigt)</span><strong>14,00 €</strong></div>
-          <div class="price-row"><span>Kategorie 2</span><strong>12,00 €</strong></div>
-          <div class="price-row"><span>Kategorie 2 (ermäßigt)</span><strong>8,50 €</strong></div>
-          <a class="card-link" style="margin-top:12px" href="/tickets.html">Kartenarten und Ermäßigungen <i data-lucide="arrow-right" class="icon-14"></i></a>
-        </div>
-      </div>
-
-      <div class="modal-backdrop" id="overview-discount-modal-backdrop">
-        <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="overview-discount-modal-title">
-          <button class="modal-close" aria-label="Schließen" id="overview-discount-modal-close"><i data-lucide="x"></i></button>
-          <div class="modal-icon"><i data-lucide="percent"></i></div>
-          <span class="eyebrow" id="overview-discount-modal-title">Frühbucherrabatt</span>
-          <h3 class="t-h3" style="margin:8px 0 12px">Je früher, desto günstiger.</h3>
-          <p class="t-body-sm">Bestellst du bis zum 31.08.2026, sparst du 20&nbsp;%. Ab dem 01.09.2026 gilt der reguläre Preis.</p>
-          <p class="t-body-sm mt-3">Die hier angezeigten Preise enthalten den Rabatt bereits automatisch bis zum Stichtag.</p>
-        </div>
-      </div>
-
-      <div class="modal-backdrop" id="overview-member-modal-backdrop">
-        <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="overview-member-modal-title">
-          <button class="modal-close" aria-label="Schließen" id="overview-member-modal-close"><i data-lucide="x"></i></button>
-          <div class="modal-icon"><i data-lucide="percent"></i></div>
-          <span class="eyebrow" id="overview-member-modal-title">Mitgliedsrabatt</span>
-          <h3 class="t-h3" style="margin:8px 0 12px">Dauerhaft 30 % für Mitglieder des Basketball Löwen e.V.</h3>
-          <p class="t-body-sm">Mitglieder des Basketball Löwen e.V. erhalten dauerhaft 30&nbsp;% Rabatt auf die Dauerkarte.</p>
-          <p class="t-body-sm mt-3">Mitglieder unserer Kooperationsvereine (BC Erfurt, USV Erfurt, BIG Gotha) erhalten bei der Dauerkarte stattdessen den ermäßigten Satz.</p>
-          <p class="t-body-sm mt-3">Bis zum 31.08.2026 lässt sich der Mitgliedsrabatt mit dem Frühbucherrabatt kombinieren — macht zusammen 50&nbsp;% Rabatt. Ab dem 01.09.2026 gilt nur noch der Mitgliedsrabatt von 30&nbsp;%.</p>
-          <p class="t-body-sm mt-3">Nachweis der Mitgliedschaft beim Kauf erforderlich.</p>
-        </div>
-      </div>
-    </div>
-  </section>"""
+TERMINE_VORLAGE = '  <section class="section bg-subtle">\n    <div class="container">\n      <div class="section-head">\n        <div class="head-text" style="max-width:none">\n          <span class="eyebrow">Saison 2026/2027</span>\n          <h2 class="t-h2">Die weiteren Heimspiele</h2>\n          <p class="t-body mt-3">Vierzehn Heimspiele von Oktober bis März. Jedes hat seine eigene\n          Seite — vor dem Spiel mit Vorbericht und Kartenkauf, danach mit Ergebnis und Bericht.</p>\n        </div>\n      </div>\n      <div class="ticket-layout mt-5">\n        <div>\n          <div class="ticket-list">\n__ZEILEN__\n          </div>\n          <p class="mt-5"><a class="card-link" href="/saison/spielplan.html">Der komplette Spielplan mit Auswärtsspielen <i data-lucide="arrow-right" class="icon-14"></i></a></p>\n        </div>\n\n        <aside style="display:flex;flex-direction:column;gap:20px">\n          <div class="ticket-sidebar" style="position:static">\n            <div>\n              <span class="eyebrow">Preis pro Saison</span>\n              <h3 class="t-h4" style="margin:6px 0 8px">Dauerkarte</h3>\n              <div style="display:flex;gap:8px;flex-wrap:wrap">\n                <button type="button" class="badge badge-orange" id="overview-member-badge" style="border:none;cursor:pointer;font-family:inherit">\n                  -30 % Mitglieder des Basketball Löwen e.V.\n                </button>\n                <button type="button" class="badge badge-orange" id="overview-discount-badge" style="border:none;cursor:pointer;font-family:inherit">\n                  -20 % Frühbucher bis 31.08.\n                </button>\n              </div>\n            </div>\n            <p class="t-body-sm" style="margin:12px 0">Mit der Dauerkarte sicherst du dir deinen festen Platz für die ganze Saison — Spiel für Spiel derselbe Blick aufs Parkett.</p>\n            <div class="price-row"><span>Kategorie 1</span><strong>208,00 €</strong></div>\n            <div class="price-row"><span>Kategorie 1 (ermäßigt)</span><strong>182,00 €</strong></div>\n            <div class="price-row"><span>Kategorie 2</span><strong>156,00 €</strong></div>\n            <div class="price-row"><span>Kategorie 2 (ermäßigt)</span><strong>115,00 €</strong></div>\n            <div class="price-row"><span>VIP</span><strong>1.000,00 €</strong></div>\n            <a class="btn btn-primary btn-sm" style="margin-top:12px;width:100%;justify-content:center" href="/tickets/dauerkarte.html">Dauerkarte kaufen</a>\n          </div>\n          <div class="ticket-sidebar" style="position:static">\n            <span class="eyebrow">Preis pro Spiel</span>\n            <h3 class="t-h4" style="margin:6px 0 14px">Einzelticket</h3>\n            <p class="t-body-sm mb-3">Bei Einzeltickets wählst du deine Kategorie, nicht mehr deinen festen Platz — den sicherst du dir mit der Dauerkarte. Preise und Sitzplatzwahl stehen auf der Seite des jeweiligen Spiels.</p>\n            <div class="price-row"><span>Kategorie 1</span><strong>16,00 €</strong></div>\n            <div class="price-row"><span>Kategorie 1 (ermäßigt)</span><strong>14,00 €</strong></div>\n            <div class="price-row"><span>Kategorie 2</span><strong>12,00 €</strong></div>\n            <div class="price-row"><span>Kategorie 2 (ermäßigt)</span><strong>8,50 €</strong></div>\n          </div>\n        </aside>\n      </div>\n\n      <div class="modal-backdrop" id="overview-discount-modal-backdrop">\n        <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="overview-discount-modal-title">\n          <button class="modal-close" aria-label="Schließen" id="overview-discount-modal-close"><i data-lucide="x"></i></button>\n          <div class="modal-icon"><i data-lucide="percent"></i></div>\n          <span class="eyebrow" id="overview-discount-modal-title">Frühbucherrabatt</span>\n          <h3 class="t-h3" style="margin:8px 0 12px">Je früher, desto günstiger.</h3>\n          <p class="t-body-sm">Bestellst du bis zum 31.08.2026, sparst du 20&nbsp;%. Ab dem 01.09.2026 gilt der reguläre Preis.</p>\n          <p class="t-body-sm mt-3">Die hier angezeigten Preise enthalten den Rabatt bereits automatisch bis zum Stichtag.</p>\n        </div>\n      </div>\n\n      <div class="modal-backdrop" id="overview-member-modal-backdrop">\n        <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="overview-member-modal-title">\n          <button class="modal-close" aria-label="Schließen" id="overview-member-modal-close"><i data-lucide="x"></i></button>\n          <div class="modal-icon"><i data-lucide="percent"></i></div>\n          <span class="eyebrow" id="overview-member-modal-title">Mitgliedsrabatt</span>\n          <h3 class="t-h3" style="margin:8px 0 12px">Dauerhaft 30 % für Mitglieder des Basketball Löwen e.V.</h3>\n          <p class="t-body-sm">Mitglieder des Basketball Löwen e.V. erhalten dauerhaft 30&nbsp;% Rabatt auf die Dauerkarte.</p>\n          <p class="t-body-sm mt-3">Mitglieder unserer Kooperationsvereine (BC Erfurt, USV Erfurt, BIG Gotha) erhalten bei der Dauerkarte stattdessen den ermäßigten Satz.</p>\n          <p class="t-body-sm mt-3">Bis zum 31.08.2026 lässt sich der Mitgliedsrabatt mit dem Frühbucherrabatt kombinieren — macht zusammen 50&nbsp;% Rabatt. Ab dem 01.09.2026 gilt nur noch der Mitgliedsrabatt von 30&nbsp;%.</p>\n          <p class="t-body-sm mt-3">Nachweis der Mitgliedschaft beim Kauf erforderlich.</p>\n        </div>\n      </div>\n    </div>\n  </section>'
 
 
 def uebernehmen(muster, leer):
@@ -309,7 +236,7 @@ def seite(liste, heute):
         seo += "\n"
 
     inhalt = "\n\n".join(x for x in [
-        hero(aktuell, kommt), halle(), termine(liste, aktuell), KARTEN,
+        hero(aktuell, kommt), halle(), termine(liste, aktuell),
     ] if x)
 
     return f"""<!doctype html>
