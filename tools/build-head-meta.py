@@ -121,6 +121,7 @@ RIETHSPORTHALLE = {
     "alternateName": "Riethsporthalle Erfurt",
     "description": "Heimspielstätte der Basketball Löwen Erfurt — Profis, Löwinnen und U19.",
     "url": BASE + "saison/profis/gameday/",
+    "image": DEFAULT_IMAGE,
     "mainEntityOfPage": {"@type": "WebPage", "@id": BASE + "saison/profis/gameday/"},
     "address": {
         "@type": "PostalAddress",
@@ -131,6 +132,13 @@ RIETHSPORTHALLE = {
         "addressCountry": "DE",
     },
     "geo": {"@type": "GeoCoordinates", "latitude": 51.0032702, "longitude": 11.0127086},
+    # Der Rich-Results-Test meldet zusaetzlich "telephone" und "priceRange" als
+    # fehlend (beide optional). Bewusst leer: die Halle gehoert der Stadt und
+    # wird vom Erfurter Sportbetrieb bewirtschaftet -- unsere Rufnummer daran zu
+    # haengen wuerde sie als unseren Betrieb ausgeben, und ein Preisbereich fuer
+    # eine Sporthalle ist nichts, was wir festsetzen. Fuer die lokale
+    # Sichtbarkeit der Halle ist ohnehin das Google-Unternehmensprofil der
+    # Hebel, nicht dieses Feld.
 }
 
 # Erstes Pfadsegment -> Breadcrumb-Bezeichnung (Formulierung aus partials/header.html)
@@ -240,6 +248,13 @@ def _spiel_event_node(g, mainEntityOfPage_url):
         "location": RIETHSPORTHALLE,
         "homeTeam": {"@type": "SportsTeam", "name": "Basketball Löwen Erfurt"},
         "awayTeam": {"@type": "SportsTeam", "name": g["gegner"]},
+        # performer zusaetzlich zu homeTeam/awayTeam: Googles Event-Doku kennt
+        # nur performer und meldete es sonst als fehlend (Rich-Results-Test,
+        # 28.08.2026). Bei einem Spiel sind die Auftretenden die beiden Teams.
+        "performer": [
+            {"@type": "SportsTeam", "name": "Basketball Löwen Erfurt"},
+            {"@type": "SportsTeam", "name": g["gegner"]},
+        ],
         "organizer": {
             "@id": ORG["@id"],
             "@type": "SportsOrganization",
