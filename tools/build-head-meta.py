@@ -201,6 +201,35 @@ def heimspiele():
     return json.loads((REPO / "data" / "heimspiele.json").read_text(encoding="utf-8")).get("spiele", [])
 
 
+_PREISE_CACHE = None
+PREIS_ROW_RE = re.compile(
+    r'class="price-row"[^>]*>.*?<strong>([\d.]+),(\d\d)(?:\s|&nbsp;)*€?\s*</strong>', re.S)
+
+
+def einzelticket_preise():
+    """Niedrigster und hoechster Einzelticketpreis, gelesen aus der Preistabelle
+    auf dem Game-Day-Hub.
+
+    Warum aus der gebauten Seite und nicht aus einer eigenen Konstante: die
+    Preise stehen als Wahrheit in PREISE_HTML in tools/build-gameday-hub.py und
+    damit sichtbar auf der Seite. Eine zweite Liste hier waere genau die Art
+    Dublette, die irgendwann auseinanderlaeuft -- und dann stimmt der Preis in
+    den strukturierten Daten nicht mehr mit dem auf der Seite. build-gameday-hub
+    laeuft in tools/bauen.sh vor diesem Skript, die Seite ist also aktuell.
+    """
+    global _PREISE_CACHE
+    if _PREISE_CACHE is None:
+        hub = (REPO / "saison" / "profis" / "gameday" / "index.html").read_text(encoding="utf-8")
+        # nur der Einzelticket-Block, nicht die Dauerkarten-Sidebar weiter unten
+        block = hub.split("Die weiteren Heimspiele")[0]
+        werte = sorted(float(f"{a.replace('.', '')}.{b}") for a, b in PREIS_ROW_RE.findall(block))
+        if not werte:
+            raise SystemExit("Keine Preiszeilen auf dem Game-Day-Hub gefunden -- "
+                             "Preistabelle umgebaut? einzelticket_preise() nachziehen.")
+        _PREISE_CACHE = (werte[0], werte[-1], len(werte))
+    return _PREISE_CACHE
+
+
 def _spiel_event_node(g, mainEntityOfPage_url):
     """Ein SportsEvent-Knoten fuer genau ein Heimspiel.
 
@@ -268,11 +297,22 @@ def _spiel_event_node(g, mainEntityOfPage_url):
         # data/heimspiele.json: seit dem Umbau vom 27.08.2026 laeuft der
         # Einzelticket-Kauf ausschliesslich dort. Die ticketUrl dient hier nur
         # noch als Schalter "Vorverkauf offen".
+        #
+        # AggregateOffer statt Offer, weil es fuer ein Spiel elf Preise gibt --
+        # von der Kinderkarte in Kategorie 3 bis VIP. Google meldete am
+        # 28.08.2026 "Feld price fehlt"; ein einzelner Preis waere hier eine
+        # willkuerliche Auswahl. validFrom bleibt offen, solange in
+        # data/heimspiele.json kein Vorverkaufsstart steht -- ein erfundenes
+        # Datum waere schlimmer als das fehlende Feld.
+        low, high, anzahl = einzelticket_preise()
         node["offers"] = {
-            "@type": "Offer",
+            "@type": "AggregateOffer",
             "url": BASE + "saison/profis/gameday/",
             "availability": "https://schema.org/InStock",
             "priceCurrency": "EUR",
+            "lowPrice": f"{low:.2f}",
+            "highPrice": f"{high:.2f}",
+            "offerCount": anzahl,
         }
     return node
 
