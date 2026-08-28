@@ -23,7 +23,7 @@ import argparse
 import json
 import re
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from seo_common import BASE, REPO, attr, canonical_url, indexable_pages, text_of
@@ -36,6 +36,10 @@ SKIP_PREFIXES = ("news/insta-archiv/",)
 
 SITE_NAME = "Basketball Löwen Erfurt"
 DEFAULT_IMAGE = BASE + "assets/img/share/og-default.jpg"
+
+# Geschaetzte Dauer eines ProB-Heimspiels, fuer endDate im SportsEvent:
+# 4 x 10 Minuten plus Viertelpausen, Halbzeit und Nachspielzeit.
+SPIELDAUER = timedelta(hours=2)
 
 ORG = {
     "@type": "SportsOrganization",
@@ -198,7 +202,22 @@ def _spiel_event_node(g, mainEntityOfPage_url):
 
     offers nur, wenn das Spiel eine ticketUrl hat (Vorverkauf ist offen). Ein
     Offer mit InStock fuer nicht verkaufbare Spiele waere eine Falschangabe in
-    den strukturierten Daten.
+    den strukturierten Daten. Die Search Console meldet dafuer am 28.08.2026
+    "Feld offers fehlt" -- ein nicht kritischer Hinweis, den wir bewusst in Kauf
+    nehmen: er verschwindet je Spiel von selbst, sobald in data/heimspiele.json
+    eine ticketUrl steht.
+
+    endDate ist geschaetzt: startDate + SPIELDAUER. Ein ProB-Spiel dauert mit
+    Viertelpausen und Halbzeit rund zwei Stunden. Google erlaubt bei unbekanntem
+    Ende ausdruecklich eine Schaetzung und meldet ein fehlendes endDate sonst
+    als Mangel (Search Console, 28.08.2026).
+
+    organizer traegt name und url im Klartext, nicht nur die @id-Referenz auf
+    ORG: der ORG-Knoten liegt nur im @graph der Startseite, auf einer
+    Spieltagsseite zeigt die Referenz ins Leere. Googles Parser loest sie nicht
+    ueber Seitengrenzen hinweg auf und meldete deshalb "Feld name/url fehlt (in
+    organizer)". Die @id bleibt zusaetzlich drin, damit die Verknuepfung dort
+    greift, wo beide Knoten im selben Graph stehen.
 
     mainEntityOfPage bindet das Event an genau seine eigene Spieltagsseite --
     seit 25.08.2026 (Marko: "eine Adresse fuer den ganzen Lebenszyklus") gibt es
@@ -214,18 +233,29 @@ def _spiel_event_node(g, mainEntityOfPage_url):
         "description": f"Heimspiel der Basketball Löwen Erfurt gegen {g['gegner']} "
                        f"in der Riethsporthalle.",
         "startDate": start.isoformat(),
+        "endDate": (start + SPIELDAUER).isoformat(),
         "eventStatus": "https://schema.org/EventScheduled",
         "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+        "image": DEFAULT_IMAGE,
         "location": RIETHSPORTHALLE,
         "homeTeam": {"@type": "SportsTeam", "name": "Basketball Löwen Erfurt"},
         "awayTeam": {"@type": "SportsTeam", "name": g["gegner"]},
-        "organizer": {"@id": ORG["@id"]},
+        "organizer": {
+            "@id": ORG["@id"],
+            "@type": "SportsOrganization",
+            "name": ORG["name"],
+            "url": ORG["url"],
+        },
         "mainEntityOfPage": {"@type": "WebPage", "@id": mainEntityOfPage_url},
     }
     if g.get("ticketUrl"):
+        # Offer.url zeigt auf den Game-Day-Hub, nicht auf die ticketUrl aus
+        # data/heimspiele.json: seit dem Umbau vom 27.08.2026 laeuft der
+        # Einzelticket-Kauf ausschliesslich dort. Die ticketUrl dient hier nur
+        # noch als Schalter "Vorverkauf offen".
         node["offers"] = {
             "@type": "Offer",
-            "url": BASE + g["ticketUrl"].lstrip("/"),
+            "url": BASE + "saison/profis/gameday/",
             "availability": "https://schema.org/InStock",
             "priceCurrency": "EUR",
         }
