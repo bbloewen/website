@@ -23,7 +23,7 @@ import argparse
 import json
 import re
 import sys
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from seo_common import BASE, REPO, attr, canonical_url, indexable_pages, text_of
@@ -40,6 +40,11 @@ DEFAULT_IMAGE = BASE + "assets/img/share/og-default.jpg"
 # Geschaetzte Dauer eines ProB-Heimspiels, fuer endDate im SportsEvent:
 # 4 x 10 Minuten plus Viertelpausen, Halbzeit und Nachspielzeit.
 SPIELDAUER = timedelta(hours=2)
+
+# Vorlauf des Einzelticket-Vorverkaufs (Markos Ansage 28.08.2026): der
+# Vorverkauf startet immer zwei Wochen vor dem Spiel. Daraus rechnet sich
+# offers.validFrom, statt es je Spiel von Hand zu pflegen.
+VORVERKAUF_VORLAUF = timedelta(days=14)
 
 ORG = {
     "@type": "SportsOrganization",
@@ -264,6 +269,7 @@ def _spiel_event_node(g, mainEntityOfPage_url):
     d, m, y = g["datum"].split(".")
     hh, mm = g["zeit"].split(":")
     start = datetime(int(y), int(m), int(d), int(hh), int(mm), tzinfo=berlin)
+    heute = date.today()
     node = {
         "@type": "SportsEvent",
         "name": f"Basketball Löwen Erfurt – {g['gegner']}",
@@ -292,18 +298,24 @@ def _spiel_event_node(g, mainEntityOfPage_url):
         },
         "mainEntityOfPage": {"@type": "WebPage", "@id": mainEntityOfPage_url},
     }
-    if g.get("ticketUrl"):
-        # Offer.url zeigt auf den Game-Day-Hub, nicht auf die ticketUrl aus
-        # data/heimspiele.json: seit dem Umbau vom 27.08.2026 laeuft der
-        # Einzelticket-Kauf ausschliesslich dort. Die ticketUrl dient hier nur
-        # noch als Schalter "Vorverkauf offen".
-        #
-        # AggregateOffer statt Offer, weil es fuer ein Spiel elf Preise gibt --
-        # von der Kinderkarte in Kategorie 3 bis VIP. Google meldete am
-        # 28.08.2026 "Feld price fehlt"; ein einzelner Preis waere hier eine
-        # willkuerliche Auswahl. validFrom bleibt offen, solange in
-        # data/heimspiele.json kein Vorverkaufsstart steht -- ein erfundenes
-        # Datum waere schlimmer als das fehlende Feld.
+    # Offer fuer jedes noch nicht gespielte Heimspiel, nicht nur fuer das mit
+    # offenem Vorverkauf (Markos Ansage 28.08.2026): die Preise stehen fuer die
+    # ganze Saison fest, und schema.org hat fuer "kaufbar ab" genau ein Feld --
+    # validFrom. Google liest es als "Datum, ab dem Karten verkauft werden", das
+    # Angebot darf also vor dem Verkaufsstart schon in den Daten stehen.
+    #
+    # Offer.url zeigt auf den Game-Day-Hub, nicht auf die ticketUrl aus
+    # data/heimspiele.json: seit dem Umbau vom 27.08.2026 laeuft der
+    # Einzelticket-Kauf ausschliesslich dort. Die ticketUrl dient hier nur noch
+    # als Schalter "Vorverkauf laeuft schon".
+    #
+    # AggregateOffer statt Offer, weil es fuer ein Spiel zwoelf Preise gibt --
+    # von der Kinderkarte in Kategorie 3 bis VIP. Ein einzelner price waere eine
+    # willkuerliche Auswahl.
+    #
+    # Gespielte Heimspiele bekommen kein Offer: ein Ticket dafuer gibt es nicht
+    # mehr, und InStock waere dann eine Falschangabe.
+    if start.date() >= heute:
         low, high, anzahl = einzelticket_preise()
         node["offers"] = {
             "@type": "AggregateOffer",
@@ -314,6 +326,21 @@ def _spiel_event_node(g, mainEntityOfPage_url):
             "highPrice": f"{high:.2f}",
             "offerCount": anzahl,
         }
+        # validFrom nur, wenn die Zwei-Wochen-Frist noch nicht erreicht ist.
+        # Sonderfall erstes Heimspiel der Saison 2026/2027: der Vorverkauf laeuft
+        # schon, obwohl die Frist erst am 27.09.2026 greift -- ein validFrom in
+        # der Zukunft waere dort nachweisbar falsch, weil man die Karte kaufen
+        # kann. "Heute" als Ersatz einzusetzen ist keine Loesung: der Wert wuerde
+        # sich bei jedem Lauf aendern und ueber data/seiten-stand.json taeglich
+        # das lastmod dieser Seite hochziehen, also eine Inhaltsaenderung an
+        # Google melden, die es nicht gab. Lieber der eine optionale Hinweis in
+        # der Search Console.
+        # Nur als Datum, ohne Uhrzeit: die Frist ist "zwei Wochen vorher", eine
+        # Startuhrzeit des Vorverkaufs gibt es nicht. Die Anstosszeit des Spiels
+        # als Verkaufsbeginn auszugeben waere eine erfundene Genauigkeit.
+        vorverkauf_ab = (start - VORVERKAUF_VORLAUF).date()
+        if vorverkauf_ab > heute and not g.get("ticketUrl"):
+            node["offers"]["validFrom"] = vorverkauf_ab.isoformat()
     return node
 
 
