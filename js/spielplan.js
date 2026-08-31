@@ -8,20 +8,17 @@
   var MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
   var WOCHENTAGE = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
   var TEAM_META = {
-    profis: { label: 'Pro B', badgeClass: 'team-badge-profis', url: '/teams-saison/profis.html', tableUrl: '/teams-saison/tabelle.html#tabelle-profis' },
-    damen: { label: 'RLSO', badgeClass: 'team-badge-damen', url: '/teams-saison/damen.html', tableUrl: '/teams-saison/tabelle.html#tabelle-damen' },
-    nbbl: { label: 'NBBL', badgeClass: 'team-badge-nbbl', url: '/teams-saison/u19.html', tableUrl: '/teams-saison/tabelle.html#tabelle-nbbl' }
+    profis: { label: 'Pro B', badgeClass: 'team-badge-profis', url: '/saison/profis.html', tableUrl: '/saison/tabelle.html#tabelle-profis' },
+    damen: { label: 'RLSO', badgeClass: 'team-badge-damen', url: '/saison/damen.html', tableUrl: '/saison/tabelle.html#tabelle-damen' },
+    nbbl: { label: 'NBBL', badgeClass: 'team-badge-nbbl', url: '/saison/nbbl.html', tableUrl: '/saison/tabelle.html#tabelle-nbbl' }
   };
   var RIETHSPORTHALLE_MAPS_URL = 'https://www.google.com/maps/search/?api=1&query=Essener+Stra%C3%9Fe+20%2C+99089+Erfurt';
 
-  function parseDMY(str) {
-    var parts = str.split('.').map(Number);
-    return new Date(parts[2], parts[1] - 1, parts[0]);
-  }
-  function pad2(n) { return String(n).padStart(2, '0'); }
+  var parseDMY = SiteUtils.parseDMY;
+  var pad2 = SiteUtils.pad2;
   function formatShort(d) { return pad2(d.getDate()) + '.' + pad2(d.getMonth() + 1) + '.' + d.getFullYear(); }
   function dateKey(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
-  function gcalStamp(d) { return d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) + 'T' + pad2(d.getHours()) + pad2(d.getMinutes()) + '00'; }
+  var gcalStamp = SiteUtils.gcalStamp;
 
   function calendarLink(g) {
     var timeParts = (g.zeit || '00:00').split(':').map(Number);
@@ -43,7 +40,6 @@
   }
 
   function gameRowHTML(g, divider) {
-    var isPast = g.date < window.__spielplanToday;
     var meta = TEAM_META[g.team];
     var matchup = g.heim ? (g.teamLabel + ' – ' + g.gegner) : (g.gegner + ' – ' + g.teamLabel);
     var dateTimeStr = WOCHENTAGE[g.date.getDay()] + ', ' + formatShort(g.date) + (g.zeit ? ', ' + g.zeit + ' Uhr' : '');
@@ -67,11 +63,12 @@
     var actionsHTML = '<div class="fixture-day-actions">' +
       '<div class="fixture-result-row">' +
         '<div class="fixture-result">' + (g.ergebnis || '– – : – –') + '</div>' +
+        (g === naechstesHeimspiel ? '<a class="cal-link" href="/saison/profis/gameday/" title="Zum Gameday"><i data-lucide="ticket" style="width:16px;height:16px"></i></a>' : '') +
         (g.spielberichtUrl ? '<a class="cal-link" href="' + g.spielberichtUrl + '" title="Zum Spielbericht"><i data-lucide="file-text" style="width:16px;height:16px"></i></a>' : '') +
         '<a class="cal-link" href="' + meta.tableUrl + '" title="Zur Tabelle"><i data-lucide="list-ordered" style="width:16px;height:16px"></i></a>' +
-        '<a class="cal-link" href="' + calendarLink(g) + '" target="_blank" rel="noopener" title="Ins Kalender eintragen"><i data-lucide="calendar-plus" style="width:16px;height:16px"></i></a>' +
+        '<a class="cal-link" href="' + calendarLink(g) + '" target="_blank" rel="noopener" title="In Kalender eintragen"><i data-lucide="calendar-plus" style="width:16px;height:16px"></i></a>' +
       '</div>' +
-      (g.ticketUrl && !isPast ? '<a class="btn btn-outline-orange btn-sm" href="' + g.ticketUrl + '">Tickets <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>' : '') +
+      (g.heim && g.spielberichtUrl ? '<a class="btn btn-outline-orange btn-sm" href="' + g.spielberichtUrl + '">Zum Spiel <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>' : '') +
       '</div>';
     return '<div class="fixture-day-game' + (divider ? ' has-divider' : '') + '" data-team="' + g.team + '" data-heim="' + (g.heim ? '1' : '0') + '">' +
       '<div class="fixture-day-meta">' +
@@ -119,6 +116,13 @@
 
   var currentTeamFilter = 'alle';
   var onlyHeim = false;
+  /* Das naechste (oder, nach Saisonende, letzte) Profi-Heimspiel -- traegt in
+     gameRowHTML() das kleine Gameday-Icon, das so automatisch von Spiel zu
+     Spiel mitwandert, ohne dass am Game-Day-Skript (tools/build-gameday-hub.py)
+     etwas geaendert werden muesste: derselbe "naechstes Spiel"-Gedanke steckt
+     dort schon in naechstes(), hier reicht der clientseitige Vergleich mit
+     window.__spielplanToday (Marko, 27.08.2026). */
+  var naechstesHeimspiel = null;
 
   function applyFilter(filter) {
     if (typeof filter === 'string') currentTeamFilter = filter;
@@ -203,6 +207,18 @@
       if (a.date - b.date !== 0) return a.date - b.date;
       return (a.zeit || '').localeCompare(b.zeit || '');
     });
+
+    for (var ni = 0; ni < alleGames.length; ni++) {
+      if (alleGames[ni].heim && alleGames[ni].spielberichtUrl && alleGames[ni].date >= today) {
+        naechstesHeimspiel = alleGames[ni];
+        break;
+      }
+    }
+    if (!naechstesHeimspiel) {
+      for (var nj = alleGames.length - 1; nj >= 0; nj--) {
+        if (alleGames[nj].heim && alleGames[nj].spielberichtUrl) { naechstesHeimspiel = alleGames[nj]; break; }
+      }
+    }
 
     renderDayList(groupByDay(alleGames));
     initFilterChips();

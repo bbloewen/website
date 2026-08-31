@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-23T16:51:58.608+02:00",
+  "generatedAt": "2026-08-31T16:00:43.853+02:00",
   "publishFrom": "2026-08-22",
   "events": [
     {
@@ -14,29 +14,85 @@
       "heroImage": "https://basketball-loewen.com/assets/img/patricks-pub-erfurt.webp"
     },
     {
+      "name": "Jubiläum Stöberhaus",
+      "category": "Straßenfest",
+      "status": "Genehmigt",
+      "start": "2026-09-05T09:00:00.000+02:00",
+      "end": "2026-09-05T13:00:00.000+02:00",
+      "isDatetime": true,
+      "description": "",
+      "location": "Swe Stöberhaus, Eugen-Richter-Straße 26, 99085 Erfurt, Deutschland",
+      "heroImage": ""
+    },
+    {
+      "name": "Sportstadt Erfurt. Vier Vereine. Eine Stadt.",
+      "category": "Straßenfest",
+      "status": "Genehmigt",
+      "start": "2026-09-05T10:00:00.000+02:00",
+      "end": "2026-09-05T14:00:00.000+02:00",
+      "isDatetime": true,
+      "description": "",
+      "location": "Riethsporthalle, Essener Straße 20, 99089 Erfurt, Deutschland",
+      "heroImage": ""
+    },
+    {
       "name": "Sommerfest Christophoruswerk",
       "category": "Straßenfest",
       "status": "Genehmigt",
-      "start": "2026-09-05",
-      "end": null,
-      "isDatetime": false,
+      "start": "2026-09-05T12:00:00.000+02:00",
+      "end": "2026-09-05T15:00:00.000+02:00",
+      "isDatetime": true,
       "description": "",
       "location": "Spittelgartenstraße 1, 99089 Erfurt, Deutschland",
       "heroImage": ""
     },
     {
+      "name": "Stadtteilfest Wiesenhügel",
+      "category": "Straßenfest",
+      "status": "Genehmigt",
+      "start": "2026-09-12",
+      "end": null,
+      "isDatetime": false,
+      "description": "",
+      "location": "Jugendhaus Wiesenhügel, Färberwaidweg 10, 99097 Erfurt, Deutschland",
+      "heroImage": ""
+    },
+    {
       "name": "Hopfenbergfest",
       "category": "Straßenfest",
-      "status": "In Planung",
+      "status": "Genehmigt",
       "start": "2026-09-12",
       "end": null,
       "isDatetime": false,
       "description": "",
       "location": "Am Hopfenberg, 99096 Erfurt, Deutschland",
-      "heroImage": ""
+      "heroImage": "https://drive.google.com/file/d/12V6g4CCZc5sMy7LsOO746Y0VUK0Sahyv/view?usp=drive_link",
+      "courtHunt": true,
+      "spotSlug": "event-hopfenbergfest-2026-09-12",
+      "lat": 50.96261,
+      "lng": 11.02906,
+      "spotVon": "2026-09-12T04:00:00Z",
+      "spotBis": "2026-09-12T20:00:00Z"
     },
     {
-      "name": "Avenida-Therme Stauseefest zum Kindertag – Mobiler Korb",
+      "name": "Thüringen Park – Mannschaftsvorstellung U19-Bundesliga",
+      "category": "Straßenfest",
+      "status": "Genehmigt",
+      "start": "2026-09-18T16:00:00.000+02:00",
+      "end": "2026-09-18T19:00:00.000+02:00",
+      "isDatetime": true,
+      "description": "",
+      "location": "Nordhäuser Str. 73 t, 99091 Erfurt",
+      "heroImage": "",
+      "courtHunt": true,
+      "spotSlug": "event-thueringen-park-mannschaftsvorst-2026-09-18",
+      "lat": 51.0085959,
+      "lng": 10.9940651,
+      "spotVon": "2026-09-18T13:00:00Z",
+      "spotBis": "2026-09-18T18:00:00Z"
+    },
+    {
+      "name": "Avenida-Therme",
       "category": "Straßenfest",
       "status": "In Planung",
       "start": "2026-09-20",

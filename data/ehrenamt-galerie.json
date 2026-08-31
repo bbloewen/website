@@ -1,13 +1,49 @@
 {
   "bilder": [
-    { "src": "/assets/img/ehrenamt-hallenaufbau.webp", "alt": "Ehrenamtliche bauen das Spielparkett auf" },
-    { "src": "/assets/img/ehrenamt-galerie-1.webp", "alt": "Ehrenamtliche markieren die Linien auf dem Spielfeld" },
-    { "src": "/assets/img/ehrenamt-imbiss.webp", "alt": "Ehrenamtliche am Imbiss-Stand" },
-    { "src": "/assets/img/ehrenamt-galerie-2.webp", "alt": "Ehrenamtlicher am Getränkestand" },
-    { "src": "/assets/img/ehrenamt-galerie-5.webp", "alt": "Ehrenamtlicher bereitet Getränke für das Team vor" },
-    { "src": "/assets/img/ehrenamt-livestream.webp", "alt": "Ehrenamtliche am Livestream-Tisch mit Headset" },
-    { "src": "/assets/img/ehrenamt-galerie-3.webp", "alt": "Ehrenamtliche der Orga-Crew beim Spiel" },
-    { "src": "/assets/img/ehrenamt-maskottchen.webp", "alt": "Unser Maskottchen mit einem Helfer" },
-    { "src": "/assets/img/ehrenamt-galerie-4.webp", "alt": "Ehrenamtliche beim Empfang einer Veranstaltung" }
+    {
+      "src": "/assets/img/ehrenamt-hallenaufbau.webp",
+      "alt": "Ehrenamtliche bauen das Spielparkett auf",
+      "thumb": "/assets/img/thumbs/ehrenamt-hallenaufbau.webp"
+    },
+    {
+      "src": "/assets/img/ehrenamt-galerie-1.webp",
+      "alt": "Ehrenamtliche markieren die Linien auf dem Spielfeld",
+      "thumb": "/assets/img/thumbs/ehrenamt-galerie-1.webp"
+    },
+    {
+      "src": "/assets/img/ehrenamt-imbiss.webp",
+      "alt": "Ehrenamtliche am Imbiss-Stand",
+      "thumb": "/assets/img/thumbs/ehrenamt-imbiss.webp"
+    },
+    {
+      "src": "/assets/img/ehrenamt-galerie-2.webp",
+      "alt": "Ehrenamtlicher am Getränkestand",
+      "thumb": "/assets/img/thumbs/ehrenamt-galerie-2.webp"
+    },
+    {
+      "src": "/assets/img/ehrenamt-galerie-5.webp",
+      "alt": "Ehrenamtlicher bereitet Getränke für das Team vor",
+      "thumb": "/assets/img/thumbs/ehrenamt-galerie-5.webp"
+    },
+    {
+      "src": "/assets/img/ehrenamt-livestream.webp",
+      "alt": "Ehrenamtliche am Livestream-Tisch mit Headset",
+      "thumb": "/assets/img/thumbs/ehrenamt-livestream.webp"
+    },
+    {
+      "src": "/assets/img/ehrenamt-galerie-3.webp",
+      "alt": "Ehrenamtliche der Orga-Crew beim Spiel",
+      "thumb": "/assets/img/thumbs/ehrenamt-galerie-3.webp"
+    },
+    {
+      "src": "/assets/img/ehrenamt-maskottchen.webp",
+      "alt": "Unser Maskottchen mit einem Helfer",
+      "thumb": "/assets/img/thumbs/ehrenamt-maskottchen.webp"
+    },
+    {
+      "src": "/assets/img/ehrenamt-galerie-4.webp",
+      "alt": "Ehrenamtliche beim Empfang einer Veranstaltung",
+      "thumb": "/assets/img/thumbs/ehrenamt-galerie-4.webp"
+    }
   ]
 }

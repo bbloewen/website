@@ -5,11 +5,7 @@
    Button). Zirkulär (Modulo statt null) — am neuesten Artikel springt der rechte
    Pfeil zum ältesten und umgekehrt, damit man endlos durchklicken kann. */
 (function () {
-  function parseGermanDate(str) {
-    var parts = (str || '').split('.');
-    if (parts.length !== 3) return new Date(0);
-    return new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
-  }
+  var parseGermanDate = SiteUtils.parseGermanDate;
 
   document.addEventListener('DOMContentLoaded', function () {
     var prevEl = document.getElementById('article-nav-prev');

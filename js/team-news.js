@@ -1,4 +1,4 @@
-/* Kompakter "Aktuelles zu ..."-Feed auf Teamseiten (z.B. teams-saison/profis.html).
+/* Kompakter "Aktuelles zu ..."-Feed auf Teamseiten (z.B. saison/profis.html).
    Zeigt die 3 neuesten News-Artikel mit passendem data-team-news="..."-Attribut
    (aus data/news.json, Feld "team"). Gibt es weniger als 3, werden mit den
    neuesten allgemeinen Artikeln (ohne "team") aufgefüllt, damit der Bereich
@@ -9,11 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (!grid) return;
   var team = grid.getAttribute('data-team-news');
 
-  function parseDMY(str) {
-    var parts = (str || '').split('.');
-    if (parts.length !== 3) return new Date(0);
-    return new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
-  }
+  var parseDMY = SiteUtils.parseDMY;
   function byDateDesc(a, b) { return parseDMY(b.datum) - parseDMY(a.datum); }
 
   fetch('/data/news.json', { cache: 'no-cache' })

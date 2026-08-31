@@ -12,9 +12,17 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1787394380" />
+<link rel="stylesheet" href="/css/site.css?v=1787855243" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
+<!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
+     Cookiefrei, kein Zugriff auf den Endgeraetespeicher (im Skript geprueft:
+     kein localStorage, kein Cookie). Empfaenger Ahrefs Pte Ltd, Singapur;
+     Standardvertragsklauseln Modul 2 am 25.08.2026 abgeschlossen, Abschnitt 4
+     der Datenschutzerklaerung. Entfernen: Block zwischen den beiden Markern
+     loeschen, in allen Seiten. -->
+<script src="https://analytics.ahrefs.com/analytics.js" data-key="5TVH543YAI/GzTMbTLbbbg" async></script>
+<!--/ANALYTICS:ahrefs-->
 <!-- SEO:auto START (tools/build-head-meta.py — nicht von Hand ändern) -->
 <link rel="canonical" href="https://basketball-loewen.com/fans/ehrenamt.html" />
 <meta property="og:type" content="website" />
@@ -41,7 +49,7 @@
   <div class="utility-bar">
     <div class="container">
       <button type="button" class="utility-link" data-search-toggle aria-label="Suche öffnen" aria-haspopup="true" aria-expanded="false"><i data-lucide="search" class="icon-16"></i></button>
-      <a class="utility-link" href="/tickets.html"><i data-lucide="ticket" class="icon-16"></i><span class="label-text">Tickets</span></a>
+      <a class="utility-link" data-page-group="gameday" href="/saison/profis/gameday/"><i data-lucide="ticket" class="icon-16"></i><span class="label-text">Game Day</span></a>
       <a class="utility-link" href="/fanshop.html"><i data-lucide="shopping-bag" class="icon-16"></i><span class="label-text">Fanshop</span></a>
       <a class="utility-link" href="/mitglied-werden.html"><i data-lucide="user-plus" class="icon-16"></i><span class="label-text">Mitglied werden</span></a>
       <a class="utility-link emphasis" href="/spenden.html" aria-label="Spenden"><i data-lucide="heart" class="icon-16"></i></a>
@@ -50,8 +58,8 @@
 
   <div class="main-nav-bar">
     <div class="container">
-      <a class="brand-lockup no-underline" href="/index.html">
-        <img class="brand-logo" src="/assets/logo/loewen-logo-4c.svg" alt="Basketball Löwen Erfurt" />
+      <a class="brand-lockup no-underline" href="/">
+        <img class="brand-logo" src="/assets/logo/loewen-logo-4c.svg" width="600" height="565" alt="Basketball Löwen Erfurt" />
         <span class="brand-name">Basketball Löwen</span>
       </a>
 
@@ -69,26 +77,26 @@
           </div>
         </div>
         <div class="nav-item" data-nav-item>
-          <button class="nav-link" data-page-group="teams-saison">Teams &amp; Saison <i data-lucide="chevron-down" class="chev icon-14"></i></button>
+          <button class="nav-link" data-page-group="saison">Saison &amp; Teams <i data-lucide="chevron-down" class="chev icon-14"></i></button>
           <div class="dropdown-panel">
-            <a href="/teams-saison/profis.html">Profis</a>
-            <a href="/teams-saison/damen.html">Damen</a>
-            <a href="/teams-saison/u19.html">NBBL (U19)</a>
-            <a href="/teams-saison/nachwuchs.html">Nachwuchs</a>
-            <a href="/teams-saison/spielplan.html">Spielplan &amp; -berichte</a>
-            <a href="/teams-saison/tabelle.html">Tabellen</a>
+            <a href="/saison/profis.html">Profis</a>
+            <!-- Damen vorübergehend aus der Navigation ausgeblendet -->
+            <!-- NBBL vorübergehend aus der Navigation ausgeblendet -->
+            <!-- Nachwuchs vorübergehend aus der Navigation ausgeblendet -->
+            <a href="/saison/spielplan.html">Spielplan</a>
+            <a href="/saison/tabelle.html">Tabellen</a>
           </div>
         </div>
         <div class="nav-item" data-nav-item>
           <button class="nav-link" data-page-group="trainieren">Trainieren <i data-lucide="chevron-down" class="chev icon-14"></i></button>
           <div class="dropdown-panel">
-            <a href="/trainieren/trainingszeiten.html">Trainingszeiten</a>
             <a href="/trainieren/loewenpark.html">LÖWENPARK</a>
             <a href="/trainieren/baskidball.html">BasKIDball</a>
             <a href="/trainieren/sportvernetzt.html">SPORT VERNETZT</a>
             <a href="/trainieren/schulprogramm.html">Schulprogramm</a>
-            <a href="/trainieren/camps.html">Feriencamps</a>
+            <a href="/trainieren/feriencamps.html">Feriencamps</a>
             <a href="/trainieren/inklusion.html">Waid-Löwen</a>
+            <a href="/trainieren/trainingszeiten.html">Trainingszeiten</a>
             <a href="/trainieren/freiplaetze.html">Freiplätze</a>
           </div>
         </div>
@@ -116,7 +124,7 @@
           <button class="nav-link" data-page-group="fans">Fans <i data-lucide="chevron-down" class="chev icon-14"></i></button>
           <div class="dropdown-panel">
             <a href="/fans/fanclub.html">Fanclub</a>
-            <a href="/mitglied-werden/formular.html?typ=fan">Mitglied werden</a>
+            <a href="/mitglied-werden/formular.html">Mitglied werden</a>
             <a href="/fans/ehrenamt.html">Ehrenamt</a>
             <a href="/fans/community-events.html">Community-Events</a>
           </div>
@@ -127,7 +135,7 @@
         <button class="more-btn" id="more-btn" aria-haspopup="true" aria-expanded="false">
           Mehr <i data-lucide="chevron-down" class="icon-14"></i>
         </button>
-        <a class="icon-btn mobile-cta" href="/tickets.html" aria-label="Tickets"><i data-lucide="ticket" class="icon-18"></i></a>
+        <a class="icon-btn mobile-cta" href="/saison/profis/gameday/" aria-label="Game Day"><i data-lucide="ticket" class="icon-18"></i></a>
         <button class="icon-btn hamburger-btn" id="hamburger-btn" aria-label="Menü öffnen" aria-haspopup="true" aria-expanded="false">
           <i data-lucide="menu"></i>
         </button>
@@ -152,8 +160,14 @@
 <div class="nav-drawer-backdrop" id="nav-drawer-backdrop"></div>
 <nav class="nav-drawer" id="nav-drawer" aria-label="Mobile Navigation" aria-hidden="true" inert>
   <div class="nav-drawer-head">
-    <img src="/assets/logo/loewen-logo-4c.svg" alt="Basketball Löwen Erfurt" style="height:36px" />
-    <button class="icon-btn" id="drawer-close" aria-label="Menü schließen"><i data-lucide="x"></i></button>
+    <img src="/assets/logo/loewen-logo-4c.svg" width="600" height="565" alt="Basketball Löwen Erfurt" style="height:36px" />
+    <div class="nav-drawer-head-actions">
+      <!-- Nur das Icon, ohne Beschriftung (Markos Ansage 27.08.2026) -- Gegenstueck
+           zur .mobile-cta in der Kopfleiste, gleiches Ziel, gleiche Optik. Auf den
+           Seiten mit body.hide-mobile-cta faellt es weg, weil man dort schon ist. -->
+      <a class="icon-btn drawer-cta" href="/saison/profis/gameday/" aria-label="Game Day"><i data-lucide="ticket" class="icon-18"></i></a>
+      <button class="icon-btn" id="drawer-close" aria-label="Menü schließen"><i data-lucide="x"></i></button>
+    </div>
   </div>
   <ul>
     <li class="drawer-nav-item core-item">
@@ -168,26 +182,26 @@
       </div>
     </li>
     <li class="drawer-nav-item core-item">
-      <button class="drawer-nav-link" data-drawer-toggle>Teams &amp; Saison <i data-lucide="chevron-down" class="chev icon-16"></i></button>
+      <button class="drawer-nav-link" data-drawer-toggle>Saison &amp; Teams <i data-lucide="chevron-down" class="chev icon-16"></i></button>
       <div class="drawer-sub-panel">
-        <a href="/teams-saison/profis.html">Profis</a>
-        <a href="/teams-saison/damen.html">Damen</a>
-        <a href="/teams-saison/u19.html">NBBL (U19)</a>
-        <a href="/teams-saison/nachwuchs.html">Nachwuchs</a>
-        <a href="/teams-saison/spielplan.html">Spielplan &amp; -berichte</a>
-        <a href="/teams-saison/tabelle.html">Tabellen</a>
+        <a href="/saison/profis.html">Profis</a>
+        <!-- Damen vorübergehend aus der Navigation ausgeblendet -->
+        <!-- NBBL vorübergehend aus der Navigation ausgeblendet -->
+        <!-- Nachwuchs vorübergehend aus der Navigation ausgeblendet -->
+        <a href="/saison/spielplan.html">Spielplan</a>
+        <a href="/saison/tabelle.html">Tabellen</a>
       </div>
     </li>
     <li class="drawer-nav-item core-item">
       <button class="drawer-nav-link" data-drawer-toggle>Trainieren <i data-lucide="chevron-down" class="chev icon-16"></i></button>
       <div class="drawer-sub-panel">
-        <a href="/trainieren/trainingszeiten.html">Trainingszeiten</a>
         <a href="/trainieren/loewenpark.html">LÖWENPARK</a>
         <a href="/trainieren/baskidball.html">BasKIDball</a>
         <a href="/trainieren/sportvernetzt.html">SPORT VERNETZT</a>
         <a href="/trainieren/schulprogramm.html">Schulprogramm</a>
-        <a href="/trainieren/camps.html">Feriencamps</a>
+        <a href="/trainieren/feriencamps.html">Feriencamps</a>
         <a href="/trainieren/inklusion.html">Waid-Löwen</a>
+        <a href="/trainieren/trainingszeiten.html">Trainingszeiten</a>
         <a href="/trainieren/freiplaetze.html">Freiplätze</a>
       </div>
     </li>
@@ -213,14 +227,14 @@
       <button class="drawer-nav-link" data-drawer-toggle>Fans <i data-lucide="chevron-down" class="chev icon-16"></i></button>
       <div class="drawer-sub-panel">
         <a href="/fans/fanclub.html">Fanclub</a>
-        <a href="/mitglied-werden/formular.html?typ=fan">Mitglied werden</a>
+        <a href="/mitglied-werden/formular.html">Mitglied werden</a>
         <a href="/fans/ehrenamt.html">Ehrenamt</a>
         <a href="/fans/community-events.html">Community-Events</a>
       </div>
     </li>
   </ul>
   <div class="drawer-utility-section">
-    <a href="/tickets.html">Tickets</a>
+    <a href="/saison/profis/gameday/">Game Day</a>
     <a href="/fanshop.html">Fanshop</a>
     <a href="/mitglied-werden.html">Mitglied werden</a>
     <a href="/spenden.html">Spenden</a>
@@ -243,103 +257,92 @@
         <div class="head-text">
           <span class="eyebrow">Möglichkeiten</span>
           <h2 class="t-h2">So kannst du mit anpacken</h2>
-          <p class="t-body">Ob vor, während oder nach dem Spiel — für jede Vorliebe gibt es eine passende Rolle.</p>
+          <p class="t-body">Ob vor, während oder nach dem Spiel — wir brauchen jede Hand.</p>
         </div>
       </div>
-      <div class="grid-3">
+      <h3 class="t-h3 mt-6 mb-3">Vor und nach dem Spiel</h3>
+      <div class="grid-3 tile-scroll-mobile">
         <div class="card hoverable">
-          <div class="card-media card-media-photo" style="height:140px"><img src="/assets/img/ehrenamt-hallenaufbau.webp" alt="" loading="lazy" /></div>
+          <div class="card-media card-media-photo" style="height:140px"><img src="/assets/img/ehrenamt-hallenaufbau.webp" width="2560" height="1707" alt="" loading="lazy" /></div>
           <div class="card-body">
             <h3>Hallenauf- und -abbau</h3>
-            <p>Vor dem Anpfiff und nach dem Schlusspfiff sorgst du dafür, dass in der Halle alles an seinem Platz ist.</p>
+            <p>Vor dem Anpfiff und nach dem Schlusspfiff baust du mit dem Team Parkett, Körbe und Werbebanden auf oder wieder ab.</p>
+            <p class="mt-2"><a class="card-link" href="https://erna-erfurt.de/engagiert-in-erfurt/#/angebot/344509" target="_blank" rel="noopener">Aufbau <i data-lucide="arrow-right" class="icon-14"></i></a> · <a class="card-link" href="https://erna-erfurt.de/engagiert-in-erfurt/#/angebot/344512" target="_blank" rel="noopener">Abbau <i data-lucide="arrow-right" class="icon-14"></i></a></p>
+          </div>
+        </div>
+        <div class="card hoverable">
+          <div class="card-media card-media-photo" style="height:140px"><img src="/assets/img/ehrenamt-einlasskontrolle.webp" width="250" height="166" alt="" loading="lazy" /></div>
+          <div class="card-body">
+            <h3>Einlasskontrolle</h3>
+            <p>Du kontrollierst die Tickets am Einlass und behältst den Überblick — Vorkenntnisse brauchst du keine, nur ein Mindestalter von 18 Jahren.</p>
+            <p class="mt-2"><a class="card-link" href="https://erna-erfurt.de/engagiert-in-erfurt/#/angebot/304396" target="_blank" rel="noopener">Weiter informieren <i data-lucide="arrow-right" class="icon-14"></i></a></p>
           </div>
         </div>
         <div class="card hoverable">
           <div class="card-media tint-orange"><i data-lucide="users" class="icon-32"></i></div>
           <div class="card-body">
             <h3>Team- und Schiedsrichterbetreuung</h3>
-            <p>Du kümmerst dich um Gastmannschaften und Schiedsrichter:innen und sorgst für einen reibungslosen Ablauf.</p>
+            <p>Du kümmerst dich um Gastmannschaften und Schiedsrichter:innen und sorgst für einen reibungslosen Ablauf am Spieltag.</p>
           </div>
         </div>
         <div class="card hoverable">
-          <div class="card-media card-media-photo" style="height:140px"><img src="/assets/img/ehrenamt-einlaufkinder.webp" alt="" loading="lazy" style="object-position:center 20%" /></div>
+          <div class="card-media card-media-photo" style="height:140px"><img src="/assets/img/ehrenamt-einlaufkinder.webp" width="900" height="576" alt="" loading="lazy" style="object-position:center 20%" /></div>
           <div class="card-body">
             <h3>Begleitung Einlaufkinder</h3>
-            <p>Du begleitest die Kinder beim Einlauf mit den Spieler:innen — ein Highlight für jedes Kind.</p>
+            <p>Du begleitest die Kinder beim Einlauf mit den Spieler:innen und sorgst für ein Highlight, das sie so schnell nicht vergessen.</p>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="t-h3 mt-6 mb-3">Während des Spiels</h3>
+      <div class="grid-3 tile-scroll-mobile">
+        <div class="card hoverable">
+          <div class="card-media card-media-photo" style="height:140px"><img src="/assets/img/ehrenamt-livestream.webp" width="2560" height="1707" alt="" loading="lazy" /></div>
+          <div class="card-body">
+            <h3>Livestream</h3>
+            <p>Du bedienst unsere feste Kamera, verfolgst das Spielgeschehen und arbeitest mit dem kleinen Produktionsteam zusammen — Schritt für Schritt angeleitet.</p>
+            <p class="mt-2"><a class="card-link" href="https://erna-erfurt.de/engagiert-in-erfurt/#/angebot/344496" target="_blank" rel="noopener">Weiter informieren <i data-lucide="arrow-right" class="icon-14"></i></a></p>
           </div>
         </div>
         <div class="card hoverable">
-          <div class="card-media tint-neutral"><i data-lucide="shield-check" class="icon-32"></i></div>
+          <div class="card-media tint-violet"><i data-lucide="clipboard-list" class="icon-32"></i></div>
           <div class="card-body">
-            <h3>Einlasskontrolle</h3>
-            <p>Du empfängst die Fans am Eingang und behältst den Überblick am Einlass.</p>
+            <h3>Kampfgericht</h3>
+            <p>Du bedienst die Spieluhr, trägst die Spielstatistik ein und unterstützt die Schiedsrichter im Ablauf — Basketball-Vorkenntnisse sind gefragt.</p>
+            <p class="mt-2"><a class="card-link" href="https://erna-erfurt.de/engagiert-in-erfurt/#/angebot/344467" target="_blank" rel="noopener">Weiter informieren <i data-lucide="arrow-right" class="icon-14"></i></a></p>
+          </div>
+        </div>
+        <div class="card hoverable">
+          <div class="card-media card-media-photo" style="height:140px"><img src="/assets/img/ehrenamt-imbiss.webp" width="2560" height="1707" alt="" loading="lazy" /></div>
+          <div class="card-body">
+            <h3>Verkaufsstände &amp; Merchandise</h3>
+            <p>Du stehst am Stand, verkaufst Fanartikel, zapfst Bier und gibst Snacks aus — immer im freundlichen Kontakt mit unseren Fans.</p>
+            <p class="mt-2"><a class="card-link" href="https://erna-erfurt.de/engagiert-in-erfurt/#/angebot/344508" target="_blank" rel="noopener">Weiter informieren <i data-lucide="arrow-right" class="icon-14"></i></a></p>
+          </div>
+        </div>
+        <div class="card hoverable">
+          <div class="card-media card-media-photo" style="height:140px"><img src="/assets/img/ehrenamt-maskottchen.webp" width="1200" height="927" alt="" loading="lazy" /></div>
+          <div class="card-body">
+            <h3>Maskottchen</h3>
+            <p>Du begrüßt Fans und Kinder, bist bei Einlauf und Halbzeit mit High-Fives und guter Laune dabei — Artistik brauchst du dafür nicht.</p>
+            <p class="mt-2"><a class="card-link" href="https://erna-erfurt.de/engagiert-in-erfurt/#/angebot/344472" target="_blank" rel="noopener">Weiter informieren <i data-lucide="arrow-right" class="icon-14"></i></a></p>
+          </div>
+        </div>
+        <div class="card hoverable">
+          <div class="card-media card-media-photo" style="height:140px"><img src="/assets/img/ehrenamt-trommler.webp" width="1200" height="1800" alt="" loading="lazy" /></div>
+          <div class="card-body">
+            <h3>Trommler</h3>
+            <p>Du gibst mit deiner Trommel den Takt vor, sorgst für die richtige Atmosphäre in der Halle und feuerst Team und Fans gemeinsam an.</p>
           </div>
         </div>
         <div class="card hoverable">
           <div class="card-media tint-blue"><i data-lucide="shield" class="icon-32"></i></div>
           <div class="card-body">
             <h3>Ordnungsdienst</h3>
-            <p>Du sorgst während des Spiels für einen sicheren und geordneten Ablauf in der Halle.</p>
+            <p>Gemeinsam mit dem Team sorgst du während des Spiels für einen sicheren, geordneten Ablauf in der Halle — ab 18 Jahren, ohne Vorkenntnisse.</p>
+            <p class="mt-2"><a class="card-link" href="https://erna-erfurt.de/engagiert-in-erfurt/#/angebot/304396" target="_blank" rel="noopener">Weiter informieren <i data-lucide="arrow-right" class="icon-14"></i></a></p>
           </div>
         </div>
-        <div class="card hoverable">
-          <div class="card-media card-media-photo" style="height:140px"><img src="/assets/img/ehrenamt-imbiss.webp" alt="" loading="lazy" /></div>
-          <div class="card-body">
-            <h3>Verkaufsstände &amp; Merchandise</h3>
-            <p>Du stehst am Stand, verkaufst Fanartikel und bist Ansprechperson für alle Fans.</p>
-          </div>
-        </div>
-        <div class="card hoverable">
-          <div class="card-media tint-violet"><i data-lucide="clipboard-list" class="icon-32"></i></div>
-          <div class="card-body">
-            <h3>Anschreiber &amp; Scouting</h3>
-            <p>Du hältst das Spielgeschehen fest — am Anschreibetisch oder bei der Spielanalyse.</p>
-          </div>
-        </div>
-        <div class="card hoverable">
-          <div class="card-media card-media-photo" style="height:140px"><img src="/assets/img/ehrenamt-maskottchen.webp" alt="" loading="lazy" /></div>
-          <div class="card-body">
-            <h3>Maskottchen</h3>
-            <p>Du sorgst im Kostüm für gute Stimmung und bringst Fans und Kinder zum Lachen.</p>
-          </div>
-        </div>
-        <div class="card hoverable">
-          <div class="card-media card-media-photo" style="height:140px"><img src="/assets/img/ehrenamt-livestream.webp" alt="" loading="lazy" /></div>
-          <div class="card-body">
-            <h3>Livestream</h3>
-            <p>Du sorgst dafür, dass Fans von zu Hause das Spiel live mitverfolgen können.</p>
-          </div>
-        </div>
-        <div class="card hoverable">
-          <div class="card-media card-media-photo" style="height:140px"><img src="/assets/img/ehrenamt-trommler.webp" alt="" loading="lazy" /></div>
-          <div class="card-body">
-            <h3>Trommler</h3>
-            <p>Du sorgst mit deiner Trommel für die richtige Atmosphäre in der Halle, gibst den Takt vor und feuerst Team und Fans an.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="container">
-      <div class="cta-panel">
-        <span class="eyebrow">Unterstützen</span>
-        <h2 class="t-h2">Keine Zeit, aber trotzdem dabei sein?</h2>
-        <p>Auch eine Spende hilft uns weiter und unterstützt direkt unsere Arbeit in Erfurt und der Region.</p>
-        <a class="btn btn-primary" href="/spenden.html">Zur Spenden-Seite</a>
-      </div>
-    </div>
-  </section>
-
-  <section class="section bg-subtle">
-    <div class="container">
-      <span class="eyebrow" style="display:block;margin-bottom:16px">Impressionen</span>
-      <div class="camp-gallery-wrap" id="ehrenamt-gallery">
-        <div class="news-slider-track"></div>
-        <button class="news-slider-arrow prev" data-gallery-prev aria-label="Vorheriges Bild"><i data-lucide="chevron-left" class="icon-18"></i></button>
-        <button class="news-slider-arrow next" data-gallery-next aria-label="Nächstes Bild"><i data-lucide="chevron-right" class="icon-18"></i></button>
-        <p class="t-body camp-gallery-empty hidden">Fotos folgen in Kürze.</p>
       </div>
     </div>
   </section>
@@ -358,6 +361,29 @@
       </div>
     </div>
   </section>
+
+  <section class="section bg-subtle">
+    <div class="container">
+      <span class="eyebrow" style="display:block;margin-bottom:16px">Impressionen</span>
+      <div class="camp-gallery-wrap" id="ehrenamt-gallery">
+        <div class="news-slider-track"></div>
+        <button class="news-slider-arrow prev" data-gallery-prev aria-label="Vorheriges Bild"><i data-lucide="chevron-left" class="icon-18"></i></button>
+        <button class="news-slider-arrow next" data-gallery-next aria-label="Nächstes Bild"><i data-lucide="chevron-right" class="icon-18"></i></button>
+        <p class="t-body camp-gallery-empty hidden">Fotos folgen in Kürze.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="cta-panel">
+        <span class="eyebrow">Unterstützen</span>
+        <h2 class="t-h2">Keine Zeit, aber trotzdem dabei sein?</h2>
+        <p>Auch eine Spende hilft uns weiter und unterstützt direkt unsere Arbeit in Erfurt und der Region.</p>
+        <a class="btn btn-primary" href="/spenden.html">Zur Spenden-Seite</a>
+      </div>
+    </div>
+  </section>
 </main>
 <div id="site-footer-placeholder"><!--PARTIAL:footer-->
 <footer class="site-footer">
@@ -365,7 +391,7 @@
     <div class="footer-grid">
       <div class="footer-col footer-col-brand">
         <div class="footer-brand-mark">
-          <img loading="lazy" src="/assets/logo/loewen-logo-4c.svg" alt="Basketball Löwen Erfurt"  />
+          <img loading="lazy" src="/assets/logo/loewen-logo-4c.svg" width="600" height="565" alt="Basketball Löwen Erfurt"  />
           <span class="footer-brand-wordmark"><span class="line-1">Gemeinsam</span><span class="line-2">wachsen</span></span>
         </div>
         <p>Mit sportlichen Vorbildern für Chancengerechtigkeit und Zusammenhalt in der Region. Profis, Damen und Nachwuchs: Basketball aus Thüringen.</p>
@@ -391,7 +417,7 @@
         <a href="/trainieren/baskidball.html">BasKIDball</a>
         <a href="/trainieren/sportvernetzt.html">SPORT VERNETZT</a>
         <a href="/trainieren/schulprogramm.html">Schul-AGs</a>
-        <a href="/trainieren/camps.html">Feriencamps</a>
+        <a href="/trainieren/feriencamps.html">Feriencamps</a>
         <a href="/trainieren/inklusion.html">Waid-Löwen</a>
       </div>
 
@@ -427,7 +453,7 @@
 
       <div class="footer-bottom-col footer-bottom-badge">
         <button type="button" class="footer-badge-btn" data-footer-badge-open aria-label="Zertifizierter Nachwuchsstandort 2024/2025 — Logo vergrößern">
-          <img loading="lazy" src="/assets/img/nachwuchsstandort-2024-25-silber.webp" alt="Zertifizierter Nachwuchsstandort 2024/2025"  />
+          <img loading="lazy" src="/assets/img/nachwuchsstandort-2024-25-silber.webp" width="495" height="700" alt="Zertifizierter Nachwuchsstandort 2024/2025"  />
         </button>
       </div>
 
@@ -449,14 +475,14 @@
   </div>
 </footer>
 
-<!-- Nachwuchsstandort-Badge-Popup: vergrößert das Zertifikat auf Klick, Erklärung dazu steht auf /teams-saison/nachwuchs.html.
+<!-- Nachwuchsstandort-Badge-Popup: vergrößert das Zertifikat auf Klick, Erklärung dazu steht auf /saison/nachwuchs.html.
      Kein weißer Modal-Hintergrund: Das Zertifikat-PNG hat transparente runde Ecken, die sonst gegen die
      weiße Modal-Box sichtbar würden statt gegen den dunklen Overlay-Hintergrund zu verschwinden. -->
 <div class="modal-backdrop" id="footer-badge-modal">
   <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="footer-badge-title" style="max-width:min(90vw,340px);padding:0;background:transparent;box-shadow:none">
     <button type="button" class="modal-close" data-footer-badge-close aria-label="Schließen" style="position:absolute;top:-14px;right:-14px;background:rgba(0,18,45,.7);color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:1"><i data-lucide="x" class="icon-18"></i></button>
-    <img loading="lazy" src="/assets/img/nachwuchsstandort-2024-25-silber.webp" alt="Zertifizierter Nachwuchsstandort 2024/2025" style="width:100%;display:block"  />
-    <p class="t-body-sm" id="footer-badge-title" style="margin:14px 0 0;color:rgba(255,255,255,.85);text-align:center">Zertifizierter Nachwuchsstandort seit 2022 — mehr dazu auf unserer <a href="/teams-saison/nachwuchs.html" style="color:#fff;text-decoration:underline">Nachwuchsseite</a>.</p>
+    <img loading="lazy" src="/assets/img/nachwuchsstandort-2024-25-silber.webp" width="495" height="700" alt="Zertifizierter Nachwuchsstandort 2024/2025" style="width:100%;display:block"  />
+    <p class="t-body-sm" id="footer-badge-title" style="margin:14px 0 0;color:rgba(255,255,255,.85);text-align:center">Zertifizierter Nachwuchsstandort seit 2022 — mehr dazu auf unserer <a href="/saison/nachwuchs.html" style="color:#fff;text-decoration:underline">Nachwuchsseite</a>.</p>
   </div>
 </div>
 
@@ -489,10 +515,10 @@
   </div>
 </div>
 <!--/PARTIAL:footer--></div>
-<script src="https://unpkg.com/lucide@latest"></script>
-<script src="/js/nav.js?v=1787221181"></script>
-<script src="/js/include.js?v=1785398309"></script>
-<script src="/js/camp-galerie.js?v=1786323000"></script>
+<script src="/js/vendor/lucide-icons.js?v=1787766492"></script>
+<script src="/js/nav.js?v=1787760037"></script>
+<script src="/js/include.js?v=1787854261"></script>
+<script src="/js/camp-galerie.js?v=1787766656"></script>
 <script>initCampGallery('ehrenamt-gallery', null, '/data/ehrenamt-galerie.json');</script>
 </body>
 </html>

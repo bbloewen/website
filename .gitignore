@@ -1,1 +1,5 @@
 .DS_Store
+
+# Python-Bytecode der tools/-Skripte
+__pycache__/
+*.pyc

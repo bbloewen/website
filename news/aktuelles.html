@@ -12,9 +12,17 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1787394380" />
+<link rel="stylesheet" href="/css/site.css?v=1787855243" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
+<!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
+     Cookiefrei, kein Zugriff auf den Endgeraetespeicher (im Skript geprueft:
+     kein localStorage, kein Cookie). Empfaenger Ahrefs Pte Ltd, Singapur;
+     Standardvertragsklauseln Modul 2 am 25.08.2026 abgeschlossen, Abschnitt 4
+     der Datenschutzerklaerung. Entfernen: Block zwischen den beiden Markern
+     loeschen, in allen Seiten. -->
+<script src="https://analytics.ahrefs.com/analytics.js" data-key="5TVH543YAI/GzTMbTLbbbg" async></script>
+<!--/ANALYTICS:ahrefs-->
 <!-- SEO:auto START (tools/build-head-meta.py — nicht von Hand ändern) -->
 <link rel="canonical" href="https://basketball-loewen.com/news/aktuelles.html" />
 <meta property="og:type" content="website" />
@@ -41,7 +49,7 @@
   <div class="utility-bar">
     <div class="container">
       <button type="button" class="utility-link" data-search-toggle aria-label="Suche öffnen" aria-haspopup="true" aria-expanded="false"><i data-lucide="search" class="icon-16"></i></button>
-      <a class="utility-link" href="/tickets.html"><i data-lucide="ticket" class="icon-16"></i><span class="label-text">Tickets</span></a>
+      <a class="utility-link" data-page-group="gameday" href="/saison/profis/gameday/"><i data-lucide="ticket" class="icon-16"></i><span class="label-text">Game Day</span></a>
       <a class="utility-link" href="/fanshop.html"><i data-lucide="shopping-bag" class="icon-16"></i><span class="label-text">Fanshop</span></a>
       <a class="utility-link" href="/mitglied-werden.html"><i data-lucide="user-plus" class="icon-16"></i><span class="label-text">Mitglied werden</span></a>
       <a class="utility-link emphasis" href="/spenden.html" aria-label="Spenden"><i data-lucide="heart" class="icon-16"></i></a>
@@ -50,8 +58,8 @@
 
   <div class="main-nav-bar">
     <div class="container">
-      <a class="brand-lockup no-underline" href="/index.html">
-        <img class="brand-logo" src="/assets/logo/loewen-logo-4c.svg" alt="Basketball Löwen Erfurt" />
+      <a class="brand-lockup no-underline" href="/">
+        <img class="brand-logo" src="/assets/logo/loewen-logo-4c.svg" width="600" height="565" alt="Basketball Löwen Erfurt" />
         <span class="brand-name">Basketball Löwen</span>
       </a>
 
@@ -69,26 +77,26 @@
           </div>
         </div>
         <div class="nav-item" data-nav-item>
-          <button class="nav-link" data-page-group="teams-saison">Teams &amp; Saison <i data-lucide="chevron-down" class="chev icon-14"></i></button>
+          <button class="nav-link" data-page-group="saison">Saison &amp; Teams <i data-lucide="chevron-down" class="chev icon-14"></i></button>
           <div class="dropdown-panel">
-            <a href="/teams-saison/profis.html">Profis</a>
-            <a href="/teams-saison/damen.html">Damen</a>
-            <a href="/teams-saison/u19.html">NBBL (U19)</a>
-            <a href="/teams-saison/nachwuchs.html">Nachwuchs</a>
-            <a href="/teams-saison/spielplan.html">Spielplan &amp; -berichte</a>
-            <a href="/teams-saison/tabelle.html">Tabellen</a>
+            <a href="/saison/profis.html">Profis</a>
+            <!-- Damen vorübergehend aus der Navigation ausgeblendet -->
+            <!-- NBBL vorübergehend aus der Navigation ausgeblendet -->
+            <!-- Nachwuchs vorübergehend aus der Navigation ausgeblendet -->
+            <a href="/saison/spielplan.html">Spielplan</a>
+            <a href="/saison/tabelle.html">Tabellen</a>
           </div>
         </div>
         <div class="nav-item" data-nav-item>
           <button class="nav-link" data-page-group="trainieren">Trainieren <i data-lucide="chevron-down" class="chev icon-14"></i></button>
           <div class="dropdown-panel">
-            <a href="/trainieren/trainingszeiten.html">Trainingszeiten</a>
             <a href="/trainieren/loewenpark.html">LÖWENPARK</a>
             <a href="/trainieren/baskidball.html">BasKIDball</a>
             <a href="/trainieren/sportvernetzt.html">SPORT VERNETZT</a>
             <a href="/trainieren/schulprogramm.html">Schulprogramm</a>
-            <a href="/trainieren/camps.html">Feriencamps</a>
+            <a href="/trainieren/feriencamps.html">Feriencamps</a>
             <a href="/trainieren/inklusion.html">Waid-Löwen</a>
+            <a href="/trainieren/trainingszeiten.html">Trainingszeiten</a>
             <a href="/trainieren/freiplaetze.html">Freiplätze</a>
           </div>
         </div>
@@ -116,7 +124,7 @@
           <button class="nav-link" data-page-group="fans">Fans <i data-lucide="chevron-down" class="chev icon-14"></i></button>
           <div class="dropdown-panel">
             <a href="/fans/fanclub.html">Fanclub</a>
-            <a href="/mitglied-werden/formular.html?typ=fan">Mitglied werden</a>
+            <a href="/mitglied-werden/formular.html">Mitglied werden</a>
             <a href="/fans/ehrenamt.html">Ehrenamt</a>
             <a href="/fans/community-events.html">Community-Events</a>
           </div>
@@ -127,7 +135,7 @@
         <button class="more-btn" id="more-btn" aria-haspopup="true" aria-expanded="false">
           Mehr <i data-lucide="chevron-down" class="icon-14"></i>
         </button>
-        <a class="icon-btn mobile-cta" href="/tickets.html" aria-label="Tickets"><i data-lucide="ticket" class="icon-18"></i></a>
+        <a class="icon-btn mobile-cta" href="/saison/profis/gameday/" aria-label="Game Day"><i data-lucide="ticket" class="icon-18"></i></a>
         <button class="icon-btn hamburger-btn" id="hamburger-btn" aria-label="Menü öffnen" aria-haspopup="true" aria-expanded="false">
           <i data-lucide="menu"></i>
         </button>
@@ -152,8 +160,14 @@
 <div class="nav-drawer-backdrop" id="nav-drawer-backdrop"></div>
 <nav class="nav-drawer" id="nav-drawer" aria-label="Mobile Navigation" aria-hidden="true" inert>
   <div class="nav-drawer-head">
-    <img src="/assets/logo/loewen-logo-4c.svg" alt="Basketball Löwen Erfurt" style="height:36px" />
-    <button class="icon-btn" id="drawer-close" aria-label="Menü schließen"><i data-lucide="x"></i></button>
+    <img src="/assets/logo/loewen-logo-4c.svg" width="600" height="565" alt="Basketball Löwen Erfurt" style="height:36px" />
+    <div class="nav-drawer-head-actions">
+      <!-- Nur das Icon, ohne Beschriftung (Markos Ansage 27.08.2026) -- Gegenstueck
+           zur .mobile-cta in der Kopfleiste, gleiches Ziel, gleiche Optik. Auf den
+           Seiten mit body.hide-mobile-cta faellt es weg, weil man dort schon ist. -->
+      <a class="icon-btn drawer-cta" href="/saison/profis/gameday/" aria-label="Game Day"><i data-lucide="ticket" class="icon-18"></i></a>
+      <button class="icon-btn" id="drawer-close" aria-label="Menü schließen"><i data-lucide="x"></i></button>
+    </div>
   </div>
   <ul>
     <li class="drawer-nav-item core-item">
@@ -168,26 +182,26 @@
       </div>
     </li>
     <li class="drawer-nav-item core-item">
-      <button class="drawer-nav-link" data-drawer-toggle>Teams &amp; Saison <i data-lucide="chevron-down" class="chev icon-16"></i></button>
+      <button class="drawer-nav-link" data-drawer-toggle>Saison &amp; Teams <i data-lucide="chevron-down" class="chev icon-16"></i></button>
       <div class="drawer-sub-panel">
-        <a href="/teams-saison/profis.html">Profis</a>
-        <a href="/teams-saison/damen.html">Damen</a>
-        <a href="/teams-saison/u19.html">NBBL (U19)</a>
-        <a href="/teams-saison/nachwuchs.html">Nachwuchs</a>
-        <a href="/teams-saison/spielplan.html">Spielplan &amp; -berichte</a>
-        <a href="/teams-saison/tabelle.html">Tabellen</a>
+        <a href="/saison/profis.html">Profis</a>
+        <!-- Damen vorübergehend aus der Navigation ausgeblendet -->
+        <!-- NBBL vorübergehend aus der Navigation ausgeblendet -->
+        <!-- Nachwuchs vorübergehend aus der Navigation ausgeblendet -->
+        <a href="/saison/spielplan.html">Spielplan</a>
+        <a href="/saison/tabelle.html">Tabellen</a>
       </div>
     </li>
     <li class="drawer-nav-item core-item">
       <button class="drawer-nav-link" data-drawer-toggle>Trainieren <i data-lucide="chevron-down" class="chev icon-16"></i></button>
       <div class="drawer-sub-panel">
-        <a href="/trainieren/trainingszeiten.html">Trainingszeiten</a>
         <a href="/trainieren/loewenpark.html">LÖWENPARK</a>
         <a href="/trainieren/baskidball.html">BasKIDball</a>
         <a href="/trainieren/sportvernetzt.html">SPORT VERNETZT</a>
         <a href="/trainieren/schulprogramm.html">Schulprogramm</a>
-        <a href="/trainieren/camps.html">Feriencamps</a>
+        <a href="/trainieren/feriencamps.html">Feriencamps</a>
         <a href="/trainieren/inklusion.html">Waid-Löwen</a>
+        <a href="/trainieren/trainingszeiten.html">Trainingszeiten</a>
         <a href="/trainieren/freiplaetze.html">Freiplätze</a>
       </div>
     </li>
@@ -213,14 +227,14 @@
       <button class="drawer-nav-link" data-drawer-toggle>Fans <i data-lucide="chevron-down" class="chev icon-16"></i></button>
       <div class="drawer-sub-panel">
         <a href="/fans/fanclub.html">Fanclub</a>
-        <a href="/mitglied-werden/formular.html?typ=fan">Mitglied werden</a>
+        <a href="/mitglied-werden/formular.html">Mitglied werden</a>
         <a href="/fans/ehrenamt.html">Ehrenamt</a>
         <a href="/fans/community-events.html">Community-Events</a>
       </div>
     </li>
   </ul>
   <div class="drawer-utility-section">
-    <a href="/tickets.html">Tickets</a>
+    <a href="/saison/profis/gameday/">Game Day</a>
     <a href="/fanshop.html">Fanshop</a>
     <a href="/mitglied-werden.html">Mitglied werden</a>
     <a href="/spenden.html">Spenden</a>
@@ -242,19 +256,19 @@
         <div class="aktuelles-news">
           <span class="eyebrow" style="display:block;margin-bottom:16px">Club-News</span>
           <div class="grid-2" id="news-grid"><!--NEWS:auto-->
-            <a class="card hoverable" href="/news/artikel/2026-08-13_verein_neuer-cheftrainer-ibrahim.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/news/neuer-cheftrainer-ibrahim.webp" alt="" /></div><div class="card-body"><span class="card-label">13.08.2026 · Profis</span><h3 style="font-size:18px">Neuer Mann auf der Bank: Leif Ibrahim wird Cheftrainer der Löwen</h3><p>Der 31-jährige Schwede unterschreibt für zwei Jahre — Florian Gut wechselt in die sportliche Leitung.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
-            <a class="card hoverable" href="/news/artikel/2026-07-06_verein_swe-sommercamp.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/news/swe-sommercamp.webp" alt="" /></div><div class="card-body"><span class="card-label">06.07.2026 · Verein</span><h3 style="font-size:18px">Rückblick SWE Sommercamp 2026</h3><p>60 Kinder und Jugendliche erlebten eine Woche voller Sport, Spaß und Meet &amp; Greets mit den Profis.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
-            <a class="card hoverable" href="/news/artikel/2026-06-19_verein_loewenpark-meilenstein.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/news/loewenpark-dach.webp" alt="" /></div><div class="card-body"><span class="card-label">19.06.2026 · Löwenpark</span><h3 style="font-size:18px">Wichtige Meilensteine für den Löwenpark</h3><p>Der Stadtrat hat die Kostensteigerung gedeckt — nach dem Richtfest im April ist die Eröffnung greifbar nah.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
-            <a class="card hoverable" href="/news/artikel/2026-03-31_verein_spielbericht-saisonrueckblick-2025-26.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/team-prob.webp" alt="" /></div><div class="card-body"><span class="card-label">31.03.2026 · Profis</span><h3 style="font-size:18px">Saisonrückblick 2025/2026: Platz 12, Bilanz 8:16</h3><p>Die Profis verpassen die Playoffs — Coach Florian Gut zieht Bilanz und blickt nach vorn.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
-            <a class="card hoverable" href="/news/artikel/2026-03-04_verein_mitchell-abgang.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/news/mitchell-abgang.webp" alt="" /></div><div class="card-body"><span class="card-label">04.03.2026 · Profis</span><h3 style="font-size:18px">Vier wichtige Spiele — und ein sportlicher Abgang</h3><p>Vor der entscheidenden Schlussphase verlässt Mike Mitchell das Team aus persönlichen Gründen.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
-            <a class="card hoverable" href="/news/artikel/2025-09-25_verein_saisonstart-dauerkarten.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/news/saisonstart-2025.webp" alt="" /></div><div class="card-body"><span class="card-label">25.09.2025 · Profis</span><h3 style="font-size:18px">Löwen-Saisonstart und Dauerkartenverkauf</h3><p>Nach dem Testspiel startet die Saison zu Hause gegen die BBC Coburg.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
-            <a class="card hoverable" href="/news/artikel/2025-08-26_verein_catl-verlaengert.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/hero-basketball.webp" alt="" /></div><div class="card-body"><span class="card-label">26.08.2025 · Partner</span><h3 style="font-size:18px">CATL verlängert Partnerschaft</h3><p>Der Batteriezellen-Hersteller bleibt Namenssponsor der Profimannschaft — schon die vierte gemeinsame Saison.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
-            <a class="card hoverable" href="/news/artikel/2025-08-08_verein_sommerinterview-teil3.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/hero-basketball.webp" alt="" /></div><div class="card-body"><span class="card-label">08.08.2025 · Sommerinterview</span><h3 style="font-size:18px">Sommerinterview Teil 3: LÖWENPARK und Vorbereitung</h3><p>Florian Gut über Finanzierung und Zeitplan des LÖWENPARK sowie den Start in die Saisonvorbereitung.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
-            <a class="card hoverable" href="/news/artikel/2025-08-01_verein_sommerinterview-teil2.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/news/damen-regionalliga.webp" alt="" /></div><div class="card-body"><span class="card-label">01.08.2025 · Sommerinterview</span><h3 style="font-size:18px">Sommerinterview Teil 2: Neue Damenmannschaft</h3><p>Florian Gut über langfristige Vereinsziele und den Start der Löwinnen in der Regionalliga.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
-            <a class="card hoverable" href="/news/artikel/2025-07-21_verein_sommerinterview-teil1.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/team-prob.webp" alt="" /></div><div class="card-body"><span class="card-label">21.07.2025 · Sommerinterview</span><h3 style="font-size:18px">Sommerinterview Teil 1: Kaderplanung</h3><p>Florian Gut über Abgänge, gesuchte Neuzugänge und einen starken Sommer für Musa Abra.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
-            <a class="card hoverable" href="/news/artikel/2025-05-19_verein_kaderplanung-naechste-saison.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/team-prob.webp" alt="" /></div><div class="card-body"><span class="card-label">19.05.2025 · Profis</span><h3 style="font-size:18px">Löwen-Kaderplanung für die nächste Saison</h3><p>Vier langjährige Spieler verlassen den Verein — Florian Gut über die Hintergründe.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
-            <a class="card hoverable" href="/news/artikel/2025-04-29_verein_achtelfinale-aus.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/news/achtelfinale.webp" alt="" /></div><div class="card-body"><span class="card-label">29.04.2025 · Profis</span><h3 style="font-size:18px">CATL Basketball Löwen scheiden im Achtelfinale aus</h3><p>Knappe 82:84-Heimniederlage gegen Paderborn beendet die Playoff-Saison.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
-            <a class="card hoverable" href="/news/artikel/2025-04-22_verein_playoff-heimspiel-freitag.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/news/playoff-heimspiel.webp" alt="" /></div><div class="card-body"><span class="card-label">22.04.2025 · Profis</span><h3 style="font-size:18px">Playoff-Heimspiel am Freitagabend</h3><p>Nach knapper Auswärtsniederlage geht die Serie gegen Paderborn in der Riethsporthalle weiter.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
+            <a class="card hoverable" href="/news/artikel/2026-08-13_verein_neuer-cheftrainer-ibrahim.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/news/neuer-cheftrainer-ibrahim.webp" width="1600" height="1955" alt="" /></div><div class="card-body"><span class="card-label">13.08.2026 · Profis</span><h3 style="font-size:18px">Neuer Mann auf der Bank: Leif Ibrahim wird Cheftrainer der Löwen</h3><p>Der 31-jährige Schwede unterschreibt für zwei Jahre — Florian Gut wechselt in die sportliche Leitung.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
+            <a class="card hoverable" href="/news/artikel/2026-07-06_verein_swe-sommercamp.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/news/swe-sommercamp.webp" width="2560" height="1882" alt="" /></div><div class="card-body"><span class="card-label">06.07.2026 · Verein</span><h3 style="font-size:18px">Rückblick SWE Sommercamp 2026</h3><p>60 Kinder und Jugendliche erlebten eine Woche voller Sport, Spaß und Meet &amp; Greets mit den Profis.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
+            <a class="card hoverable" href="/news/artikel/2026-06-19_verein_loewenpark-meilenstein.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/news/loewenpark-dach.webp" width="2560" height="1707" alt="" /></div><div class="card-body"><span class="card-label">19.06.2026 · Löwenpark</span><h3 style="font-size:18px">Wichtige Meilensteine für den Löwenpark</h3><p>Der Stadtrat hat die Kostensteigerung gedeckt — nach dem Richtfest im April ist die Eröffnung greifbar nah.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
+            <a class="card hoverable" href="/news/artikel/2026-03-31_verein_spielbericht-saisonrueckblick-2025-26.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/team-prob.webp" width="1920" height="1280" alt="" /></div><div class="card-body"><span class="card-label">31.03.2026 · Profis</span><h3 style="font-size:18px">Saisonrückblick 2025/2026: Platz 12, Bilanz 8:16</h3><p>Die Profis verpassen die Playoffs — Coach Florian Gut zieht Bilanz und blickt nach vorn.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
+            <a class="card hoverable" href="/news/artikel/2026-03-04_verein_mitchell-abgang.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/news/mitchell-abgang.webp" width="2560" height="1848" alt="" /></div><div class="card-body"><span class="card-label">04.03.2026 · Profis</span><h3 style="font-size:18px">Vier wichtige Spiele — und ein sportlicher Abgang</h3><p>Vor der entscheidenden Schlussphase verlässt Mike Mitchell das Team aus persönlichen Gründen.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
+            <a class="card hoverable" href="/news/artikel/2025-09-25_verein_saisonstart-dauerkarten.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/news/saisonstart-2025.webp" width="1499" height="1000" alt="" /></div><div class="card-body"><span class="card-label">25.09.2025 · Profis</span><h3 style="font-size:18px">Löwen-Saisonstart und Dauerkartenverkauf</h3><p>Nach dem Testspiel startet die Saison zu Hause gegen die BBC Coburg.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
+            <a class="card hoverable" href="/news/artikel/2025-08-26_verein_catl-verlaengert.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/hero-basketball.webp" width="2400" height="1600" alt="" /></div><div class="card-body"><span class="card-label">26.08.2025 · Partner</span><h3 style="font-size:18px">CATL verlängert Partnerschaft</h3><p>Der Batteriezellen-Hersteller bleibt Namenssponsor der Profimannschaft — schon die vierte gemeinsame Saison.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
+            <a class="card hoverable" href="/news/artikel/2025-08-08_verein_sommerinterview-teil3.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/hero-basketball.webp" width="2400" height="1600" alt="" /></div><div class="card-body"><span class="card-label">08.08.2025 · Sommerinterview</span><h3 style="font-size:18px">Sommerinterview Teil 3: LÖWENPARK und Vorbereitung</h3><p>Florian Gut über Finanzierung und Zeitplan des LÖWENPARK sowie den Start in die Saisonvorbereitung.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
+            <a class="card hoverable" href="/news/artikel/2025-08-01_verein_sommerinterview-teil2.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/news/damen-regionalliga.webp" width="1500" height="1875" alt="" /></div><div class="card-body"><span class="card-label">01.08.2025 · Sommerinterview</span><h3 style="font-size:18px">Sommerinterview Teil 2: Neue Damenmannschaft</h3><p>Florian Gut über langfristige Vereinsziele und den Start der Löwinnen in der Regionalliga.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
+            <a class="card hoverable" href="/news/artikel/2025-07-21_verein_sommerinterview-teil1.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/team-prob.webp" width="1920" height="1280" alt="" /></div><div class="card-body"><span class="card-label">21.07.2025 · Sommerinterview</span><h3 style="font-size:18px">Sommerinterview Teil 1: Kaderplanung</h3><p>Florian Gut über Abgänge, gesuchte Neuzugänge und einen starken Sommer für Musa Abra.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
+            <a class="card hoverable" href="/news/artikel/2025-05-19_verein_kaderplanung-naechste-saison.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/team-prob.webp" width="1920" height="1280" alt="" /></div><div class="card-body"><span class="card-label">19.05.2025 · Profis</span><h3 style="font-size:18px">Löwen-Kaderplanung für die nächste Saison</h3><p>Vier langjährige Spieler verlassen den Verein — Florian Gut über die Hintergründe.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
+            <a class="card hoverable" href="/news/artikel/2025-04-29_verein_achtelfinale-aus.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/news/achtelfinale.webp" width="1920" height="1280" alt="" /></div><div class="card-body"><span class="card-label">29.04.2025 · Profis</span><h3 style="font-size:18px">CATL Basketball Löwen scheiden im Achtelfinale aus</h3><p>Knappe 82:84-Heimniederlage gegen Paderborn beendet die Playoff-Saison.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
+            <a class="card hoverable" href="/news/artikel/2025-04-22_verein_playoff-heimspiel-freitag.html" style="text-decoration:none;color:inherit"><div class="card-media-photo"><img loading="lazy" src="/assets/img/news/playoff-heimspiel.webp" width="1499" height="1000" alt="" /></div><div class="card-body"><span class="card-label">22.04.2025 · Profis</span><h3 style="font-size:18px">Playoff-Heimspiel am Freitagabend</h3><p>Nach knapper Auswärtsniederlage geht die Serie gegen Paderborn in der Riethsporthalle weiter.</p><span class="card-link">weiterlesen <i data-lucide="arrow-right" class="icon-14"></i></span></div></a>
             <!--/NEWS:auto--></div>
         </div>
         <aside class="aktuelles-sidebar">
@@ -282,6 +296,9 @@
               <a class="card-link mt-3" href="https://www.instagram.com/loewenpark.hallenmeister/" target="_blank" rel="noopener">Alle Beiträge ansehen <i data-lucide="arrow-up-right" class="icon-14"></i></a>
             </div>
           </div>
+          <div class="info-tile" style="text-align:center">
+            <a class="card-link" href="/news/instagram-archiv.html">Alle Beiträge im Archiv <i data-lucide="arrow-right" class="icon-14"></i></a>
+          </div>
         </aside>
         <div class="aktuelles-newsletter card" style="padding:28px;text-align:center">
           <h3 class="t-h3" style="font-size:20px">Keine News mehr verpassen?</h3>
@@ -298,7 +315,7 @@
     <div class="footer-grid">
       <div class="footer-col footer-col-brand">
         <div class="footer-brand-mark">
-          <img loading="lazy" src="/assets/logo/loewen-logo-4c.svg" alt="Basketball Löwen Erfurt"  />
+          <img loading="lazy" src="/assets/logo/loewen-logo-4c.svg" width="600" height="565" alt="Basketball Löwen Erfurt"  />
           <span class="footer-brand-wordmark"><span class="line-1">Gemeinsam</span><span class="line-2">wachsen</span></span>
         </div>
         <p>Mit sportlichen Vorbildern für Chancengerechtigkeit und Zusammenhalt in der Region. Profis, Damen und Nachwuchs: Basketball aus Thüringen.</p>
@@ -324,7 +341,7 @@
         <a href="/trainieren/baskidball.html">BasKIDball</a>
         <a href="/trainieren/sportvernetzt.html">SPORT VERNETZT</a>
         <a href="/trainieren/schulprogramm.html">Schul-AGs</a>
-        <a href="/trainieren/camps.html">Feriencamps</a>
+        <a href="/trainieren/feriencamps.html">Feriencamps</a>
         <a href="/trainieren/inklusion.html">Waid-Löwen</a>
       </div>
 
@@ -360,7 +377,7 @@
 
       <div class="footer-bottom-col footer-bottom-badge">
         <button type="button" class="footer-badge-btn" data-footer-badge-open aria-label="Zertifizierter Nachwuchsstandort 2024/2025 — Logo vergrößern">
-          <img loading="lazy" src="/assets/img/nachwuchsstandort-2024-25-silber.webp" alt="Zertifizierter Nachwuchsstandort 2024/2025"  />
+          <img loading="lazy" src="/assets/img/nachwuchsstandort-2024-25-silber.webp" width="495" height="700" alt="Zertifizierter Nachwuchsstandort 2024/2025"  />
         </button>
       </div>
 
@@ -382,14 +399,14 @@
   </div>
 </footer>
 
-<!-- Nachwuchsstandort-Badge-Popup: vergrößert das Zertifikat auf Klick, Erklärung dazu steht auf /teams-saison/nachwuchs.html.
+<!-- Nachwuchsstandort-Badge-Popup: vergrößert das Zertifikat auf Klick, Erklärung dazu steht auf /saison/nachwuchs.html.
      Kein weißer Modal-Hintergrund: Das Zertifikat-PNG hat transparente runde Ecken, die sonst gegen die
      weiße Modal-Box sichtbar würden statt gegen den dunklen Overlay-Hintergrund zu verschwinden. -->
 <div class="modal-backdrop" id="footer-badge-modal">
   <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="footer-badge-title" style="max-width:min(90vw,340px);padding:0;background:transparent;box-shadow:none">
     <button type="button" class="modal-close" data-footer-badge-close aria-label="Schließen" style="position:absolute;top:-14px;right:-14px;background:rgba(0,18,45,.7);color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:1"><i data-lucide="x" class="icon-18"></i></button>
-    <img loading="lazy" src="/assets/img/nachwuchsstandort-2024-25-silber.webp" alt="Zertifizierter Nachwuchsstandort 2024/2025" style="width:100%;display:block"  />
-    <p class="t-body-sm" id="footer-badge-title" style="margin:14px 0 0;color:rgba(255,255,255,.85);text-align:center">Zertifizierter Nachwuchsstandort seit 2022 — mehr dazu auf unserer <a href="/teams-saison/nachwuchs.html" style="color:#fff;text-decoration:underline">Nachwuchsseite</a>.</p>
+    <img loading="lazy" src="/assets/img/nachwuchsstandort-2024-25-silber.webp" width="495" height="700" alt="Zertifizierter Nachwuchsstandort 2024/2025" style="width:100%;display:block"  />
+    <p class="t-body-sm" id="footer-badge-title" style="margin:14px 0 0;color:rgba(255,255,255,.85);text-align:center">Zertifizierter Nachwuchsstandort seit 2022 — mehr dazu auf unserer <a href="/saison/nachwuchs.html" style="color:#fff;text-decoration:underline">Nachwuchsseite</a>.</p>
   </div>
 </div>
 
@@ -422,9 +439,9 @@
   </div>
 </div>
 <!--/PARTIAL:footer--></div>
-<script src="https://unpkg.com/lucide@latest"></script>
-<script src="/js/nav.js?v=1787221181"></script>
-<script src="/js/include.js?v=1785398309"></script>
+<script src="/js/vendor/lucide-icons.js?v=1787766492"></script>
+<script src="/js/nav.js?v=1787760037"></script>
+<script src="/js/include.js?v=1787854261"></script>
 <script>
   // Vereinsnews (data/news.json) füllen die breite linke Spalte und wachsen
   // beliebig weiter (endlos scrollend); die schmale rechte Spalte bleibt beim
@@ -464,10 +481,16 @@
     if (window.lucide) { lucide.createIcons(); }
   });
 
-  // Vorschaubild aus der im Repo gesicherten Kopie statt aus Beholds CDN:
-  // Beholds URLs sind signiert und verfallen, sobald der Post aus dem Feed fällt.
+  // Diese Posts stehen alle noch im laufenden Feed -- Beholds Live-URL (p.image)
+  // ist also gueltig und immer aktuell. Die gesicherte Kopie unter
+  // assets/img/insta/ existiert erst, sobald ein Post aus dem Feed faellt und
+  // archiviert wird; bis dahin haette der Pfad hierher gezeigt und waere ins
+  // Leere gelaufen (onerror-Rueckfall auf dasselbe Platzhalterbild fuer fast
+  // jeden Post, Feedback Marko 25.08.2026). Rueckfall auf die Kopie bleibt fuer
+  // den (aktuell nie eintretenden) Fall, dass p.image mal fehlt.
   function instaImage(p) {
-    if (!p.persistedUrl) return p.image;
+    if (p.image) return p.image;
+    if (!p.persistedUrl) return '/assets/img/share/og-default.jpg';
     return p.persistedUrl.replace('/news/insta-archiv/', '/assets/img/insta/').replace('.html', '.jpg');
   }
 

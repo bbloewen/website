@@ -12,9 +12,17 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1787394380" />
+<link rel="stylesheet" href="/css/site.css?v=1787855243" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
+<!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
+     Cookiefrei, kein Zugriff auf den Endgeraetespeicher (im Skript geprueft:
+     kein localStorage, kein Cookie). Empfaenger Ahrefs Pte Ltd, Singapur;
+     Standardvertragsklauseln Modul 2 am 25.08.2026 abgeschlossen, Abschnitt 4
+     der Datenschutzerklaerung. Entfernen: Block zwischen den beiden Markern
+     loeschen, in allen Seiten. -->
+<script src="https://analytics.ahrefs.com/analytics.js" data-key="5TVH543YAI/GzTMbTLbbbg" async></script>
+<!--/ANALYTICS:ahrefs-->
 <!-- SEO:auto START (tools/build-head-meta.py — nicht von Hand ändern) -->
 <link rel="canonical" href="https://basketball-loewen.com/datenschutz.html" />
 <meta property="og:type" content="website" />
@@ -41,7 +49,7 @@
   <div class="utility-bar">
     <div class="container">
       <button type="button" class="utility-link" data-search-toggle aria-label="Suche öffnen" aria-haspopup="true" aria-expanded="false"><i data-lucide="search" class="icon-16"></i></button>
-      <a class="utility-link" href="/tickets.html"><i data-lucide="ticket" class="icon-16"></i><span class="label-text">Tickets</span></a>
+      <a class="utility-link" data-page-group="gameday" href="/saison/profis/gameday/"><i data-lucide="ticket" class="icon-16"></i><span class="label-text">Game Day</span></a>
       <a class="utility-link" href="/fanshop.html"><i data-lucide="shopping-bag" class="icon-16"></i><span class="label-text">Fanshop</span></a>
       <a class="utility-link" href="/mitglied-werden.html"><i data-lucide="user-plus" class="icon-16"></i><span class="label-text">Mitglied werden</span></a>
       <a class="utility-link emphasis" href="/spenden.html" aria-label="Spenden"><i data-lucide="heart" class="icon-16"></i></a>
@@ -50,8 +58,8 @@
 
   <div class="main-nav-bar">
     <div class="container">
-      <a class="brand-lockup no-underline" href="/index.html">
-        <img class="brand-logo" src="/assets/logo/loewen-logo-4c.svg" alt="Basketball Löwen Erfurt" />
+      <a class="brand-lockup no-underline" href="/">
+        <img class="brand-logo" src="/assets/logo/loewen-logo-4c.svg" width="600" height="565" alt="Basketball Löwen Erfurt" />
         <span class="brand-name">Basketball Löwen</span>
       </a>
 
@@ -69,26 +77,26 @@
           </div>
         </div>
         <div class="nav-item" data-nav-item>
-          <button class="nav-link" data-page-group="teams-saison">Teams &amp; Saison <i data-lucide="chevron-down" class="chev icon-14"></i></button>
+          <button class="nav-link" data-page-group="saison">Saison &amp; Teams <i data-lucide="chevron-down" class="chev icon-14"></i></button>
           <div class="dropdown-panel">
-            <a href="/teams-saison/profis.html">Profis</a>
-            <a href="/teams-saison/damen.html">Damen</a>
-            <a href="/teams-saison/u19.html">NBBL (U19)</a>
-            <a href="/teams-saison/nachwuchs.html">Nachwuchs</a>
-            <a href="/teams-saison/spielplan.html">Spielplan &amp; -berichte</a>
-            <a href="/teams-saison/tabelle.html">Tabellen</a>
+            <a href="/saison/profis.html">Profis</a>
+            <!-- Damen vorübergehend aus der Navigation ausgeblendet -->
+            <!-- NBBL vorübergehend aus der Navigation ausgeblendet -->
+            <!-- Nachwuchs vorübergehend aus der Navigation ausgeblendet -->
+            <a href="/saison/spielplan.html">Spielplan</a>
+            <a href="/saison/tabelle.html">Tabellen</a>
           </div>
         </div>
         <div class="nav-item" data-nav-item>
           <button class="nav-link" data-page-group="trainieren">Trainieren <i data-lucide="chevron-down" class="chev icon-14"></i></button>
           <div class="dropdown-panel">
-            <a href="/trainieren/trainingszeiten.html">Trainingszeiten</a>
             <a href="/trainieren/loewenpark.html">LÖWENPARK</a>
             <a href="/trainieren/baskidball.html">BasKIDball</a>
             <a href="/trainieren/sportvernetzt.html">SPORT VERNETZT</a>
             <a href="/trainieren/schulprogramm.html">Schulprogramm</a>
-            <a href="/trainieren/camps.html">Feriencamps</a>
+            <a href="/trainieren/feriencamps.html">Feriencamps</a>
             <a href="/trainieren/inklusion.html">Waid-Löwen</a>
+            <a href="/trainieren/trainingszeiten.html">Trainingszeiten</a>
             <a href="/trainieren/freiplaetze.html">Freiplätze</a>
           </div>
         </div>
@@ -116,7 +124,7 @@
           <button class="nav-link" data-page-group="fans">Fans <i data-lucide="chevron-down" class="chev icon-14"></i></button>
           <div class="dropdown-panel">
             <a href="/fans/fanclub.html">Fanclub</a>
-            <a href="/mitglied-werden/formular.html?typ=fan">Mitglied werden</a>
+            <a href="/mitglied-werden/formular.html">Mitglied werden</a>
             <a href="/fans/ehrenamt.html">Ehrenamt</a>
             <a href="/fans/community-events.html">Community-Events</a>
           </div>
@@ -127,7 +135,7 @@
         <button class="more-btn" id="more-btn" aria-haspopup="true" aria-expanded="false">
           Mehr <i data-lucide="chevron-down" class="icon-14"></i>
         </button>
-        <a class="icon-btn mobile-cta" href="/tickets.html" aria-label="Tickets"><i data-lucide="ticket" class="icon-18"></i></a>
+        <a class="icon-btn mobile-cta" href="/saison/profis/gameday/" aria-label="Game Day"><i data-lucide="ticket" class="icon-18"></i></a>
         <button class="icon-btn hamburger-btn" id="hamburger-btn" aria-label="Menü öffnen" aria-haspopup="true" aria-expanded="false">
           <i data-lucide="menu"></i>
         </button>
@@ -152,8 +160,14 @@
 <div class="nav-drawer-backdrop" id="nav-drawer-backdrop"></div>
 <nav class="nav-drawer" id="nav-drawer" aria-label="Mobile Navigation" aria-hidden="true" inert>
   <div class="nav-drawer-head">
-    <img src="/assets/logo/loewen-logo-4c.svg" alt="Basketball Löwen Erfurt" style="height:36px" />
-    <button class="icon-btn" id="drawer-close" aria-label="Menü schließen"><i data-lucide="x"></i></button>
+    <img src="/assets/logo/loewen-logo-4c.svg" width="600" height="565" alt="Basketball Löwen Erfurt" style="height:36px" />
+    <div class="nav-drawer-head-actions">
+      <!-- Nur das Icon, ohne Beschriftung (Markos Ansage 27.08.2026) -- Gegenstueck
+           zur .mobile-cta in der Kopfleiste, gleiches Ziel, gleiche Optik. Auf den
+           Seiten mit body.hide-mobile-cta faellt es weg, weil man dort schon ist. -->
+      <a class="icon-btn drawer-cta" href="/saison/profis/gameday/" aria-label="Game Day"><i data-lucide="ticket" class="icon-18"></i></a>
+      <button class="icon-btn" id="drawer-close" aria-label="Menü schließen"><i data-lucide="x"></i></button>
+    </div>
   </div>
   <ul>
     <li class="drawer-nav-item core-item">
@@ -168,26 +182,26 @@
       </div>
     </li>
     <li class="drawer-nav-item core-item">
-      <button class="drawer-nav-link" data-drawer-toggle>Teams &amp; Saison <i data-lucide="chevron-down" class="chev icon-16"></i></button>
+      <button class="drawer-nav-link" data-drawer-toggle>Saison &amp; Teams <i data-lucide="chevron-down" class="chev icon-16"></i></button>
       <div class="drawer-sub-panel">
-        <a href="/teams-saison/profis.html">Profis</a>
-        <a href="/teams-saison/damen.html">Damen</a>
-        <a href="/teams-saison/u19.html">NBBL (U19)</a>
-        <a href="/teams-saison/nachwuchs.html">Nachwuchs</a>
-        <a href="/teams-saison/spielplan.html">Spielplan &amp; -berichte</a>
-        <a href="/teams-saison/tabelle.html">Tabellen</a>
+        <a href="/saison/profis.html">Profis</a>
+        <!-- Damen vorübergehend aus der Navigation ausgeblendet -->
+        <!-- NBBL vorübergehend aus der Navigation ausgeblendet -->
+        <!-- Nachwuchs vorübergehend aus der Navigation ausgeblendet -->
+        <a href="/saison/spielplan.html">Spielplan</a>
+        <a href="/saison/tabelle.html">Tabellen</a>
       </div>
     </li>
     <li class="drawer-nav-item core-item">
       <button class="drawer-nav-link" data-drawer-toggle>Trainieren <i data-lucide="chevron-down" class="chev icon-16"></i></button>
       <div class="drawer-sub-panel">
-        <a href="/trainieren/trainingszeiten.html">Trainingszeiten</a>
         <a href="/trainieren/loewenpark.html">LÖWENPARK</a>
         <a href="/trainieren/baskidball.html">BasKIDball</a>
         <a href="/trainieren/sportvernetzt.html">SPORT VERNETZT</a>
         <a href="/trainieren/schulprogramm.html">Schulprogramm</a>
-        <a href="/trainieren/camps.html">Feriencamps</a>
+        <a href="/trainieren/feriencamps.html">Feriencamps</a>
         <a href="/trainieren/inklusion.html">Waid-Löwen</a>
+        <a href="/trainieren/trainingszeiten.html">Trainingszeiten</a>
         <a href="/trainieren/freiplaetze.html">Freiplätze</a>
       </div>
     </li>
@@ -213,14 +227,14 @@
       <button class="drawer-nav-link" data-drawer-toggle>Fans <i data-lucide="chevron-down" class="chev icon-16"></i></button>
       <div class="drawer-sub-panel">
         <a href="/fans/fanclub.html">Fanclub</a>
-        <a href="/mitglied-werden/formular.html?typ=fan">Mitglied werden</a>
+        <a href="/mitglied-werden/formular.html">Mitglied werden</a>
         <a href="/fans/ehrenamt.html">Ehrenamt</a>
         <a href="/fans/community-events.html">Community-Events</a>
       </div>
     </li>
   </ul>
   <div class="drawer-utility-section">
-    <a href="/tickets.html">Tickets</a>
+    <a href="/saison/profis/gameday/">Game Day</a>
     <a href="/fanshop.html">Fanshop</a>
     <a href="/mitglied-werden.html">Mitglied werden</a>
     <a href="/spenden.html">Spenden</a>
@@ -295,6 +309,22 @@
       <p class="t-body mt-2">Diese Website nutzt GoatCounter, einen datenschutzfreundlichen, selbst gehosteten Webanalysedienst. GoatCounter verwendet keine Cookies und erstellt keine personenbezogenen Nutzerprofile. Es werden keine IP-Adressen gespeichert und keine Daten an Dritte oder in Länder außerhalb der EU übertragen — die Auswertung läuft auf unserer eigenen, in der EU gehosteten Instanz.</p>
       <p class="t-body mt-3">Erfasst werden lediglich anonyme, aggregierte Informationen wie aufgerufene Seiten, grober Zeitpunkt des Aufrufs und die verweisende Seite (Referrer), um die Nutzung unserer Website statistisch auszuwerten und das Angebot zu verbessern. Da keine personenbezogenen Daten und keine Cookies verwendet werden, ist für den Einsatz von GoatCounter keine Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO erforderlich; die Verarbeitung erfolgt auf Grundlage unseres berechtigten Interesses an einer anonymen Reichweitenmessung (Art. 6 Abs. 1 lit. f DSGVO).</p>
 
+      <h3 class="t-h4 mt-6">Ahrefs Web Analytics</h3>
+      <p class="t-body mt-2">Zusätzlich zu GoatCounter nutzen wir zur Reichweitenmessung Ahrefs Web Analytics, einen Dienst der Ahrefs Pte. Ltd., 16 Raffles Quay, #33-03 Hong Leong Building, Singapur 048581. Auch dieser Dienst arbeitet ohne Cookies und erstellt keine personenbezogenen Nutzerprofile. Er legt nichts im Speicher deines Endgeräts ab und liest nichts daraus aus — es entsteht kein Cookie und kein Eintrag im lokalen Speicher deines Browsers. Eine Einwilligung nach § 25 Abs. 1 TDDDG ist dafür nicht erforderlich.</p>
+      <p class="t-body mt-3">Erfasst werden die aufgerufene Adresse, der Seitentitel, die verweisende Seite (Referrer), die Größe deines Bildschirms, die in deinem Browser eingestellte Sprache und der Zeitpunkt des Aufrufs. Deine IP-Adresse wird bei der Übertragung technisch verarbeitet, um das Herkunftsland zu bestimmen und Aufrufe voneinander zu unterscheiden; sie wird nicht gespeichert. Rechtsgrundlage ist unser berechtigtes Interesse an einer anonymen Reichweitenmessung und an der Verbesserung unseres Angebots (Art. 6 Abs. 1 lit. f DSGVO).</p>
+      <p class="t-body mt-3"><strong>Übermittlung nach Singapur.</strong> Anders als bei GoatCounter verlassen diese Daten die Europäische Union: Empfänger ist die Ahrefs Pte. Ltd. mit Sitz in Singapur. Für Singapur besteht kein Angemessenheitsbeschluss der Europäischen Kommission. Die Übermittlung stützt sich daher auf die Standardvertragsklauseln der Europäischen Kommission (Art. 46 Abs. 2 lit. c DSGVO), die Bestandteil des mit Ahrefs geschlossenen Vertrags zur Auftragsverarbeitung sind. Trotz dieser Garantien lässt sich nicht vollständig ausschließen, dass Behörden im Empfängerland auf die Daten zugreifen.</p>
+      <p class="t-body mt-3"><strong>Widerspruch.</strong> Du kannst dieser Verarbeitung jederzeit widersprechen (Art. 21 DSGVO) — eine formlose Nachricht an die im Impressum genannte Adresse genügt. Technisch verhindern gängige Inhalte-Blocker das Laden des Skripts vollständig; die Einstellung „Do Not Track" wertet der Dienst nicht aus.</p>
+      <h2 class="t-h3 mt-8" id="court-hunt">5. Court-Hunt (Freiplatz-Spiel)</h2>
+      <p class="t-body mt-2">Auf unseren Freiplatz-Seiten kannst du am Court-Hunt teilnehmen: An einem öffentlichen Basketball-Freiplatz einchecken, Punkte sammeln und am Monatsende einen Ticket-Gutschein gewinnen. Die Teilnahme ist freiwillig. Wer die Seiten nur liest, bei dem passiert nichts von dem, was hier beschrieben ist — es beginnt erst mit deinem Klick auf „Mitspielen".</p>
+      <p class="t-body mt-3"><strong>Zwei Einwilligungen, ein Klick.</strong> Mit „Mitspielen" willigst du in zweierlei ein, das rechtlich getrennt zu betrachten ist. Zum einen in den Zugriff auf deinen Endgerätespeicher nach § 25 Abs. 1 TDDDG (Telekommunikation-Digitale-Dienste-Datenschutz-Gesetz, vormals TTDSG) — das betrifft das Ablegen und Auslesen deines Spielstands im lokalen Speicher deines Browsers. Zum anderen in die anschließende Verarbeitung dieser Daten nach Art. 6 Abs. 1 lit. a DSGVO. Beide Einwilligungen kannst du jederzeit für die Zukunft widerrufen, indem du deinen Spielstand löschst; wir entfernen dann auch den zugehörigen Eintrag auf unserem Server. Ohne diese Einwilligung bleiben alle übrigen Inhalte der Website unverändert nutzbar.</p>
+      <p class="t-body mt-3"><strong>Spielstand auf deinem Gerät.</strong> Mit dem Start legt dein Browser im lokalen Speicher (localStorage) einen Eintrag „loewen-court-hunt" an: eine zufällig erzeugte Spiel-ID, deinen selbst gewählten Spielernamen, deine Check-ins und deinen Punktestand. Das ist kein Cookie und wird nicht an Dritte übertragen. Du kannst den Eintrag jederzeit über die Schaltfläche „Meinen Spielstand löschen" oder über die Einstellungen deines Browsers entfernen.</p>
+      <p class="t-body mt-3"><strong>Standort.</strong> Beim Check-in fragen wir — und nur nach einem Klick auf die Schaltfläche — über deinen Browser deine aktuelle Position ab, um zu prüfen, ob du wirklich am Platz stehst. Deine Koordinaten speichern wir nicht dauerhaft; gespeichert werden der Platz, der Zeitpunkt und ein gerundeter Abstandswert. Ohne Standortfreigabe kannst du die übrigen Inhalte der Seite unverändert nutzen, nur der Check-in entfällt.</p>
+      <p class="t-body mt-3"><strong>Punktestand und Rangliste.</strong> Zur Auswertung übermitteln wir Spiel-ID, Spielername, Platz, Zeitpunkt und Punkte an unseren eigenen, in der EU gehosteten Spielserver. Diese Daten sind pseudonym: Wir können daraus keine Person bestimmen, solange du uns keinen echten Namen als Spielernamen gibst. In der öffentlichen Rangliste erscheinen ausschließlich Spielername und Punkte. Zum Schutz vor Missbrauch speichern wir außerdem einen mit einem geheimen Zusatz verschlüsselten Wert deiner IP-Adresse (Hash) — die IP-Adresse selbst legen wir nicht ab. Spätestens drei Monate nach Ende der jeweiligen Wertung löschen wir die Spieldaten.</p>
+      <p class="t-body mt-3"><strong>Freiplatz melden.</strong> Wenn du uns über das Formular einen neuen Freiplatz meldest, übertragen wir deine Angaben zu Name, Lage und Beschreibung des Platzes, auf Wunsch ein Foto und — falls du mitspielst — deine Spiel-ID, damit wir dir die Meldeprämie gutschreiben können. Übernimmst du dabei deinen Standort, senden wir die Koordinaten des Platzes mit. Die Meldung landet in unserer internen Datenbank und per E-Mail bei der zuständigen Person im Verein. Rechtsgrundlage ist unser berechtigtes Interesse an der Pflege dieser Übersicht (Art. 6 Abs. 1 lit. f DSGVO). Ein mitgeschicktes Foto sollte keine Personen zeigen.</p>
+      <p class="t-body mt-3"><strong>Teilen.</strong> Der Teilen-Knopf auf den Platzseiten übergibt ausschließlich den Link zur Platzseite an die Teilen-Funktion deines Geräts oder in deine Zwischenablage. Es werden dabei weder Standort- noch Spieldaten übertragen, und es entsteht keine Verbindung zu einem sozialen Netzwerk.</p>
+      <p class="t-body mt-3"><strong>Gewinn.</strong> Erst wenn du gewinnst und den Gutschein anforderst, erheben wir einen Namen und deine E-Mail-Adresse, um dir den Gutschein zuzustellen (Art. 6 Abs. 1 lit. b DSGVO). Teilnehmende unter 16 Jahren geben dafür die E-Mail-Adresse eines Erziehungsberechtigten an.</p>
+      <p class="t-body mt-3"><strong>Gewinner-Historie.</strong> Diese Angaben — E-Mail-Adresse, Spiel-ID und der von dir genannte Name — speichern wir getrennt vom Spielstand und bewahren sie auf, um die Ausgabe der Gutscheine nachvollziehen zu können und die Regel einzuhalten, dass eine Person höchstens zwei Gutscheine innerhalb von zwölf Monaten erhält (Art. 6 Abs. 1 lit. f DSGVO). Ein festes Löschdatum gibt es dafür nicht; wir löschen den Eintrag, sobald du es verlangst — eine formlose Nachricht an die im Impressum genannte Adresse genügt. Der Knopf „Meinen Spielstand löschen" entfernt dagegen nur das Spiel selbst; ein bereits angeforderter oder ausgestellter Gutschein bleibt in dieser Übersicht stehen, bis du uns schreibst. Weitere Rechte, insbesondere auf Auskunft und Löschung, findest du weiter unten.</p>
+      <p class="t-body mt-3"><strong>Post von uns.</strong> Deine E-Mail-Adresse verwenden wir nicht von sich aus für Newsletter oder Einladungen. Möchtest du das, setzt du beim Anfordern des Gutscheins ein eigenes Häkchen (Art. 6 Abs. 1 lit. a DSGVO); erst dann nehmen wir dich in den Verteiler auf, und auch das kannst du jederzeit widerrufen.</p>
     </div>
   </section>
 </main>
@@ -304,7 +334,7 @@
     <div class="footer-grid">
       <div class="footer-col footer-col-brand">
         <div class="footer-brand-mark">
-          <img loading="lazy" src="/assets/logo/loewen-logo-4c.svg" alt="Basketball Löwen Erfurt"  />
+          <img loading="lazy" src="/assets/logo/loewen-logo-4c.svg" width="600" height="565" alt="Basketball Löwen Erfurt"  />
           <span class="footer-brand-wordmark"><span class="line-1">Gemeinsam</span><span class="line-2">wachsen</span></span>
         </div>
         <p>Mit sportlichen Vorbildern für Chancengerechtigkeit und Zusammenhalt in der Region. Profis, Damen und Nachwuchs: Basketball aus Thüringen.</p>
@@ -330,7 +360,7 @@
         <a href="/trainieren/baskidball.html">BasKIDball</a>
         <a href="/trainieren/sportvernetzt.html">SPORT VERNETZT</a>
         <a href="/trainieren/schulprogramm.html">Schul-AGs</a>
-        <a href="/trainieren/camps.html">Feriencamps</a>
+        <a href="/trainieren/feriencamps.html">Feriencamps</a>
         <a href="/trainieren/inklusion.html">Waid-Löwen</a>
       </div>
 
@@ -366,7 +396,7 @@
 
       <div class="footer-bottom-col footer-bottom-badge">
         <button type="button" class="footer-badge-btn" data-footer-badge-open aria-label="Zertifizierter Nachwuchsstandort 2024/2025 — Logo vergrößern">
-          <img loading="lazy" src="/assets/img/nachwuchsstandort-2024-25-silber.webp" alt="Zertifizierter Nachwuchsstandort 2024/2025"  />
+          <img loading="lazy" src="/assets/img/nachwuchsstandort-2024-25-silber.webp" width="495" height="700" alt="Zertifizierter Nachwuchsstandort 2024/2025"  />
         </button>
       </div>
 
@@ -388,14 +418,14 @@
   </div>
 </footer>
 
-<!-- Nachwuchsstandort-Badge-Popup: vergrößert das Zertifikat auf Klick, Erklärung dazu steht auf /teams-saison/nachwuchs.html.
+<!-- Nachwuchsstandort-Badge-Popup: vergrößert das Zertifikat auf Klick, Erklärung dazu steht auf /saison/nachwuchs.html.
      Kein weißer Modal-Hintergrund: Das Zertifikat-PNG hat transparente runde Ecken, die sonst gegen die
      weiße Modal-Box sichtbar würden statt gegen den dunklen Overlay-Hintergrund zu verschwinden. -->
 <div class="modal-backdrop" id="footer-badge-modal">
   <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="footer-badge-title" style="max-width:min(90vw,340px);padding:0;background:transparent;box-shadow:none">
     <button type="button" class="modal-close" data-footer-badge-close aria-label="Schließen" style="position:absolute;top:-14px;right:-14px;background:rgba(0,18,45,.7);color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:1"><i data-lucide="x" class="icon-18"></i></button>
-    <img loading="lazy" src="/assets/img/nachwuchsstandort-2024-25-silber.webp" alt="Zertifizierter Nachwuchsstandort 2024/2025" style="width:100%;display:block"  />
-    <p class="t-body-sm" id="footer-badge-title" style="margin:14px 0 0;color:rgba(255,255,255,.85);text-align:center">Zertifizierter Nachwuchsstandort seit 2022 — mehr dazu auf unserer <a href="/teams-saison/nachwuchs.html" style="color:#fff;text-decoration:underline">Nachwuchsseite</a>.</p>
+    <img loading="lazy" src="/assets/img/nachwuchsstandort-2024-25-silber.webp" width="495" height="700" alt="Zertifizierter Nachwuchsstandort 2024/2025" style="width:100%;display:block"  />
+    <p class="t-body-sm" id="footer-badge-title" style="margin:14px 0 0;color:rgba(255,255,255,.85);text-align:center">Zertifizierter Nachwuchsstandort seit 2022 — mehr dazu auf unserer <a href="/saison/nachwuchs.html" style="color:#fff;text-decoration:underline">Nachwuchsseite</a>.</p>
   </div>
 </div>
 
@@ -428,8 +458,8 @@
   </div>
 </div>
 <!--/PARTIAL:footer--></div>
-<script src="https://unpkg.com/lucide@latest"></script>
-<script src="/js/nav.js?v=1787221181"></script>
-<script src="/js/include.js?v=1785398309"></script>
+<script src="/js/vendor/lucide-icons.js?v=1787766492"></script>
+<script src="/js/nav.js?v=1787760037"></script>
+<script src="/js/include.js?v=1787854261"></script>
 </body>
 </html>

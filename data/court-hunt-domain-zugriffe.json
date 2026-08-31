@@ -1,0 +1,17 @@
+{
+  "hinweis": "Manueller Monatsschnappschuss: wie viele Zugriffe kommen über die beiden Court-Hunt-Domains (www.court-hunt.de und www.court-hunt.com, beide seit 24.08.2026 registriert)? Nicht automatisiert, weil GoatCounter für den API-Abruf einen eigenen Token bräuchte und der Wert einmal im Monat genügt. Quelle: GoatCounter → Settings → Manage pageviews, Suche %von=court-hunt% — die Summe über alle Treffer. Der Parameter entsteht, weil die Regfish-Weiterleitung den angefragten Pfad an das Ziel anhängt: ohne den Parameter landete der angehängte Slash hinter der .html und erzeugte einen 404. Der Parameter fängt ihn ab und macht die Zugriffe gleichzeitig zählbar. ACHTUNG: Beide Domains zeigen auf dasselbe Ziel, der Wert ist also die Summe aus .de und .com und lässt sich nicht aufteilen. Wer das trennen will, muss bei Regfish je Domain einen eigenen Parameter setzen (z. B. von=court-hunt-de und von=court-hunt-com). Turnus: einmal im Monat, zusammen mit dem Instagram-Follower-Schnappschuss (s. Skill website-wartung).",
+  "quelle": "GoatCounter, Pfadsuche %von=court-hunt%",
+  "domains": [
+    "www.court-hunt.de",
+    "www.court-hunt.com"
+  ],
+  "ziel": "/trainieren/freiplaetze.html?von=court-hunt",
+  "schnappschuesse": [
+    {
+      "monat": "2026-08",
+      "stand": "2026-08-26",
+      "zugriffe": 0,
+      "notiz": "Startwert. Weiterleitung erst am 26.08.2026 funktionsfähig; die zwei Treffer aus den Konfigurationsversuchen liefen auf einen falsch zusammengesetzten Pfad und damit auf die 404-Seite — auf Markos Ansage gelöscht, damit die Zählung bei null beginnt."
+    }
+  ]
+}

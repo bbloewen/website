@@ -22,6 +22,8 @@ Aufruf:
 """
 
 import argparse
+import hashlib
+import json
 import re
 import subprocess
 import sys
@@ -39,16 +41,60 @@ PRIORITY_RULES = [
 DEFAULT_PRIORITY = "0.7"
 
 
-def lastmod(rel):
-    """Datum des letzten Commits; Fallback Dateimtime für noch nicht committete Seiten."""
-    out = subprocess.run(
-        ["git", "log", "-1", "--format=%cI", "--", rel],
-        cwd=REPO, capture_output=True, text=True,
-    ).stdout.strip()
-    if out:
-        return out[:10]
-    ts = (REPO / rel).stat().st_mtime
-    return datetime.fromtimestamp(ts).date().isoformat()
+STAND = REPO / "data" / "seiten-stand.json"
+
+
+def inhalt_hash(text):
+    """Fingerabdruck dessen, was auf der Seite wirklich steht: der main-Block plus
+    Title und Description, ohne Cache-Buster.
+
+    Warum nicht einfach die ganze Datei hashen: Ein `?v=`-Sprung an einer CSS- oder
+    JS-Referenz ändert jede Datei, ohne dass sich für einen Leser irgendetwas
+    ändert. Genau das ist am 26.08.2026 aufgefallen — der site-weite
+    Cache-Buster-Sweep hatte alle 99 Seiten in einem Commit angefasst, und weil
+    lastmod aus dem letzten Commit kam, behauptete die Sitemap für alle 92 URLs
+    denselben Änderungstag. Eine Sitemap, die bei jeder Kleinigkeit "alles neu"
+    meldet, entwertet ihr eigenes Signal: Google nutzt lastmod, um den Recrawl zu
+    priorisieren, und lernt dann, es zu ignorieren.
+    """
+    m = re.search(r"<main\b.*?</main>", text, re.S)
+    koerper = m.group(0) if m else text
+    ti = re.search(r"<title>(.*?)</title>", text, re.S)
+    de = re.search(r'<meta name="description" content="(.*?)"', text, re.S)
+    roh = koerper + (ti.group(1) if ti else "") + (de.group(1) if de else "")
+    roh = re.sub(r"\?v=\d+", "", roh)
+    return hashlib.sha1(roh.encode("utf-8")).hexdigest()
+
+
+def stand_laden():
+    if not STAND.exists():
+        return {}
+    return json.loads(STAND.read_text(encoding="utf-8")).get("seiten", {})
+
+
+def stand_schreiben(seiten):
+    STAND.write_text(json.dumps({
+        "hinweis": "Von tools/build-sitemap.py gepflegt: je indexierbare Seite der Hash "
+                   "ihres Inhalts (main-Block plus Title/Description, ohne Cache-Buster) "
+                   "und das Datum, an dem sich dieser Inhalt zuletzt geaendert hat. "
+                   "Grundlage fuer lastmod in sitemap.xml. Nicht von Hand pflegen.",
+        "seiten": dict(sorted(seiten.items())),
+    }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def lastmod(rel, stand, heute):
+    """Datum der letzten *inhaltlichen* Änderung, aus data/seiten-stand.json.
+
+    Neue Seite oder geänderter Inhalt: heute. Unveränderter Inhalt: das
+    gespeicherte Datum bleibt stehen, auch wenn die Datei zwischenzeitlich wegen
+    eines Cache-Busters oder eines neuen Analytics-Blocks committet wurde.
+    """
+    h = inhalt_hash((REPO / rel).read_text(encoding="utf-8"))
+    eintrag = stand.get(rel)
+    if eintrag and eintrag.get("hash") == h:
+        return eintrag["lastmod"]
+    stand[rel] = {"hash": h, "lastmod": heute}
+    return heute
 
 
 def priority(path):
@@ -59,12 +105,21 @@ def priority(path):
 
 
 def build():
+    stand = stand_laden()
+    heute = date.today().isoformat()
     entries = []
     for rel in tracked_html():
         if not is_indexable(rel):
             continue
         path = url_path(rel)
-        entries.append((path, lastmod(rel), priority(path)))
+        entries.append((path, lastmod(rel, stand, heute), priority(path)))
+    # Seiten, die es nicht mehr gibt oder die auf noindex gewandert sind, fliegen
+    # aus dem Stand -- sonst wüchse die Datei mit jeder Umbenennung.
+    aktuell = {rel for rel in tracked_html() if is_indexable(rel)}
+    for verwaist in [k for k in stand if k not in aktuell]:
+        del stand[verwaist]
+    stand_schreiben(stand)
+
     # Startseite zuerst, danach alphabetisch — stabile Diffs
     entries.sort(key=lambda e: (e[0] != "", e[0]))
 

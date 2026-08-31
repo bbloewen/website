@@ -14,7 +14,7 @@ dann `http://localhost:4179/` öffnen. (Läuft auch über den Claude-Code-Previe
 ## Struktur
 
 - `index.html` — Startseite
-- `verein/`, `teams-saison/`, `trainieren/`, `loewenpark/`, `partner/`, `news/`, `fans/` — Hauptnav-Bereiche
+- `verein/`, `saison/`, `trainieren/`, `loewenpark/`, `partner/`, `news/`, `fans/` — Hauptnav-Bereiche
 - `kontakt.html`, `impressum.html`, `datenschutz.html`, `tickets.html`, `fanshop.html`,
   `mitglied-werden.html`, `spenden.html` — Footer/Utility-Seiten
 - `partials/header.html`, `partials/footer.html` — werden zur Laufzeit per `js/include.js`

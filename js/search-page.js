@@ -1,7 +1,7 @@
 /* Eigene Suchergebnisseite (/suche.html?q=...) — ergänzt das Dropdown im
    Header (js/nav.js) um eine klassische Ergebnisliste ohne 8er-Deckel.
-   Die Filterlogik ist bewusst dieselbe wie in nav.js; bei Änderungen an
-   einer Stelle bitte auch die andere anpassen. */
+   loadSearchIndex() teilt sich die Ladung/den Cache mit nav.js über
+   SiteUtils (js/nav.js) — beide brauchen dieselben Daten. */
 (function () {
   var input = document.getElementById('search-page-input');
   var results = document.getElementById('search-page-results');
@@ -10,10 +10,7 @@
   var searchIndex = null;
 
   function loadSearchIndex() {
-    if (searchIndex) return Promise.resolve(searchIndex);
-    return fetch('/data/search-index.json').then(function (res) { return res.json(); })
-      .then(function (data) { searchIndex = data; return data; })
-      .catch(function () { searchIndex = []; return []; });
+    return SiteUtils.loadSearchIndex().then(function (data) { searchIndex = data; return data; });
   }
 
   function render(query) {

@@ -2,7 +2,7 @@
   <div class="utility-bar">
     <div class="container">
       <button type="button" class="utility-link" data-search-toggle aria-label="Suche öffnen" aria-haspopup="true" aria-expanded="false"><i data-lucide="search" class="icon-16"></i></button>
-      <a class="utility-link" href="/tickets.html"><i data-lucide="ticket" class="icon-16"></i><span class="label-text">Tickets</span></a>
+      <a class="utility-link" data-page-group="gameday" href="/saison/profis/gameday/"><i data-lucide="ticket" class="icon-16"></i><span class="label-text">Game Day</span></a>
       <a class="utility-link" href="/fanshop.html"><i data-lucide="shopping-bag" class="icon-16"></i><span class="label-text">Fanshop</span></a>
       <a class="utility-link" href="/mitglied-werden.html"><i data-lucide="user-plus" class="icon-16"></i><span class="label-text">Mitglied werden</span></a>
       <a class="utility-link emphasis" href="/spenden.html" aria-label="Spenden"><i data-lucide="heart" class="icon-16"></i></a>
@@ -11,8 +11,8 @@
 
   <div class="main-nav-bar">
     <div class="container">
-      <a class="brand-lockup no-underline" href="/index.html">
-        <img class="brand-logo" src="/assets/logo/loewen-logo-4c.svg" alt="Basketball Löwen Erfurt" />
+      <a class="brand-lockup no-underline" href="/">
+        <img class="brand-logo" src="/assets/logo/loewen-logo-4c.svg" width="600" height="565" alt="Basketball Löwen Erfurt" />
         <span class="brand-name">Basketball Löwen</span>
       </a>
 
@@ -30,26 +30,26 @@
           </div>
         </div>
         <div class="nav-item" data-nav-item>
-          <button class="nav-link" data-page-group="teams-saison">Teams &amp; Saison <i data-lucide="chevron-down" class="chev icon-14"></i></button>
+          <button class="nav-link" data-page-group="saison">Saison &amp; Teams <i data-lucide="chevron-down" class="chev icon-14"></i></button>
           <div class="dropdown-panel">
-            <a href="/teams-saison/profis.html">Profis</a>
-            <a href="/teams-saison/damen.html">Damen</a>
-            <a href="/teams-saison/u19.html">NBBL (U19)</a>
-            <a href="/teams-saison/nachwuchs.html">Nachwuchs</a>
-            <a href="/teams-saison/spielplan.html">Spielplan &amp; -berichte</a>
-            <a href="/teams-saison/tabelle.html">Tabellen</a>
+            <a href="/saison/profis.html">Profis</a>
+            <!-- Damen vorübergehend aus der Navigation ausgeblendet -->
+            <!-- NBBL vorübergehend aus der Navigation ausgeblendet -->
+            <!-- Nachwuchs vorübergehend aus der Navigation ausgeblendet -->
+            <a href="/saison/spielplan.html">Spielplan</a>
+            <a href="/saison/tabelle.html">Tabellen</a>
           </div>
         </div>
         <div class="nav-item" data-nav-item>
           <button class="nav-link" data-page-group="trainieren">Trainieren <i data-lucide="chevron-down" class="chev icon-14"></i></button>
           <div class="dropdown-panel">
-            <a href="/trainieren/trainingszeiten.html">Trainingszeiten</a>
             <a href="/trainieren/loewenpark.html">LÖWENPARK</a>
             <a href="/trainieren/baskidball.html">BasKIDball</a>
             <a href="/trainieren/sportvernetzt.html">SPORT VERNETZT</a>
             <a href="/trainieren/schulprogramm.html">Schulprogramm</a>
-            <a href="/trainieren/camps.html">Feriencamps</a>
+            <a href="/trainieren/feriencamps.html">Feriencamps</a>
             <a href="/trainieren/inklusion.html">Waid-Löwen</a>
+            <a href="/trainieren/trainingszeiten.html">Trainingszeiten</a>
             <a href="/trainieren/freiplaetze.html">Freiplätze</a>
           </div>
         </div>
@@ -77,7 +77,7 @@
           <button class="nav-link" data-page-group="fans">Fans <i data-lucide="chevron-down" class="chev icon-14"></i></button>
           <div class="dropdown-panel">
             <a href="/fans/fanclub.html">Fanclub</a>
-            <a href="/mitglied-werden/formular.html?typ=fan">Mitglied werden</a>
+            <a href="/mitglied-werden/formular.html">Mitglied werden</a>
             <a href="/fans/ehrenamt.html">Ehrenamt</a>
             <a href="/fans/community-events.html">Community-Events</a>
           </div>
@@ -88,7 +88,7 @@
         <button class="more-btn" id="more-btn" aria-haspopup="true" aria-expanded="false">
           Mehr <i data-lucide="chevron-down" class="icon-14"></i>
         </button>
-        <a class="icon-btn mobile-cta" href="/tickets.html" aria-label="Tickets"><i data-lucide="ticket" class="icon-18"></i></a>
+        <a class="icon-btn mobile-cta" href="/saison/profis/gameday/" aria-label="Game Day"><i data-lucide="ticket" class="icon-18"></i></a>
         <button class="icon-btn hamburger-btn" id="hamburger-btn" aria-label="Menü öffnen" aria-haspopup="true" aria-expanded="false">
           <i data-lucide="menu"></i>
         </button>
@@ -113,8 +113,14 @@
 <div class="nav-drawer-backdrop" id="nav-drawer-backdrop"></div>
 <nav class="nav-drawer" id="nav-drawer" aria-label="Mobile Navigation" aria-hidden="true" inert>
   <div class="nav-drawer-head">
-    <img src="/assets/logo/loewen-logo-4c.svg" alt="Basketball Löwen Erfurt" style="height:36px" />
-    <button class="icon-btn" id="drawer-close" aria-label="Menü schließen"><i data-lucide="x"></i></button>
+    <img src="/assets/logo/loewen-logo-4c.svg" width="600" height="565" alt="Basketball Löwen Erfurt" style="height:36px" />
+    <div class="nav-drawer-head-actions">
+      <!-- Nur das Icon, ohne Beschriftung (Markos Ansage 27.08.2026) -- Gegenstueck
+           zur .mobile-cta in der Kopfleiste, gleiches Ziel, gleiche Optik. Auf den
+           Seiten mit body.hide-mobile-cta faellt es weg, weil man dort schon ist. -->
+      <a class="icon-btn drawer-cta" href="/saison/profis/gameday/" aria-label="Game Day"><i data-lucide="ticket" class="icon-18"></i></a>
+      <button class="icon-btn" id="drawer-close" aria-label="Menü schließen"><i data-lucide="x"></i></button>
+    </div>
   </div>
   <ul>
     <li class="drawer-nav-item core-item">
@@ -129,26 +135,26 @@
       </div>
     </li>
     <li class="drawer-nav-item core-item">
-      <button class="drawer-nav-link" data-drawer-toggle>Teams &amp; Saison <i data-lucide="chevron-down" class="chev icon-16"></i></button>
+      <button class="drawer-nav-link" data-drawer-toggle>Saison &amp; Teams <i data-lucide="chevron-down" class="chev icon-16"></i></button>
       <div class="drawer-sub-panel">
-        <a href="/teams-saison/profis.html">Profis</a>
-        <a href="/teams-saison/damen.html">Damen</a>
-        <a href="/teams-saison/u19.html">NBBL (U19)</a>
-        <a href="/teams-saison/nachwuchs.html">Nachwuchs</a>
-        <a href="/teams-saison/spielplan.html">Spielplan &amp; -berichte</a>
-        <a href="/teams-saison/tabelle.html">Tabellen</a>
+        <a href="/saison/profis.html">Profis</a>
+        <!-- Damen vorübergehend aus der Navigation ausgeblendet -->
+        <!-- NBBL vorübergehend aus der Navigation ausgeblendet -->
+        <!-- Nachwuchs vorübergehend aus der Navigation ausgeblendet -->
+        <a href="/saison/spielplan.html">Spielplan</a>
+        <a href="/saison/tabelle.html">Tabellen</a>
       </div>
     </li>
     <li class="drawer-nav-item core-item">
       <button class="drawer-nav-link" data-drawer-toggle>Trainieren <i data-lucide="chevron-down" class="chev icon-16"></i></button>
       <div class="drawer-sub-panel">
-        <a href="/trainieren/trainingszeiten.html">Trainingszeiten</a>
         <a href="/trainieren/loewenpark.html">LÖWENPARK</a>
         <a href="/trainieren/baskidball.html">BasKIDball</a>
         <a href="/trainieren/sportvernetzt.html">SPORT VERNETZT</a>
         <a href="/trainieren/schulprogramm.html">Schulprogramm</a>
-        <a href="/trainieren/camps.html">Feriencamps</a>
+        <a href="/trainieren/feriencamps.html">Feriencamps</a>
         <a href="/trainieren/inklusion.html">Waid-Löwen</a>
+        <a href="/trainieren/trainingszeiten.html">Trainingszeiten</a>
         <a href="/trainieren/freiplaetze.html">Freiplätze</a>
       </div>
     </li>
@@ -174,14 +180,14 @@
       <button class="drawer-nav-link" data-drawer-toggle>Fans <i data-lucide="chevron-down" class="chev icon-16"></i></button>
       <div class="drawer-sub-panel">
         <a href="/fans/fanclub.html">Fanclub</a>
-        <a href="/mitglied-werden/formular.html?typ=fan">Mitglied werden</a>
+        <a href="/mitglied-werden/formular.html">Mitglied werden</a>
         <a href="/fans/ehrenamt.html">Ehrenamt</a>
         <a href="/fans/community-events.html">Community-Events</a>
       </div>
     </li>
   </ul>
   <div class="drawer-utility-section">
-    <a href="/tickets.html">Tickets</a>
+    <a href="/saison/profis/gameday/">Game Day</a>
     <a href="/fanshop.html">Fanshop</a>
     <a href="/mitglied-werden.html">Mitglied werden</a>
     <a href="/spenden.html">Spenden</a>

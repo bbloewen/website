@@ -325,6 +325,11 @@
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
 }
 .seatplan-mobile-tile:active { transform: scale(.96); }
+/* Nur-Ansicht (readonly, s. js/seat-picker.js): die Kacheln sind hier keine Buttons,
+   sondern reine Beschriftung — kein Zeigefinger, kein Druck-Feedback. */
+.seatplan-readonly .seatplan-mobile-tile,
+.seatplan-readonly .seatplan-mobile-standing { cursor: default; }
+.seatplan-readonly .seatplan-mobile-tile:active { transform: none; }
 .seatplan-mobile-tile:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 2px; }
 .seatplan-mobile-tile-letter { font-size: 15px; font-weight: 700; }
 .seatplan-mobile-tile-cat { font-size: 8px; font-weight: 600; letter-spacing: .02em; opacity: .8; text-align: center; padding: 0 4px; }

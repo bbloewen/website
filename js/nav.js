@@ -1,4 +1,43 @@
 /* Nav interactions: desktop dropdowns, tablet "Mehr" panel, mobile drawer. */
+
+/* Kleine Helfer, die mehrere Seiten-Skripte brauchen (spielplan.js,
+   trainingszeiten.js, home-next-game.js, team-news.js, article-nav.js,
+   home-news-feed.js, search-page.js). nav.js ist auf jeder Seite als erstes
+   Skript eingebunden -- deshalb hier statt in einer eigenen utils.js, die
+   jede Seite zusaetzlich einbinden muesste. Gefunden als Kopien mit
+   teils abweichendem Verhalten bei einem Konsistenz-Check (26.08.2026). */
+window.SiteUtils = (function () {
+  var searchIndex = null;
+
+  function parseGermanDate(str) {
+    var parts = (str || '').split('.');
+    if (parts.length !== 3) return new Date(0);
+    return new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+  }
+
+  function pad2(n) { return String(n).padStart(2, '0'); }
+
+  function gcalStamp(d) {
+    return d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) + 'T' +
+      pad2(d.getHours()) + pad2(d.getMinutes()) + '00';
+  }
+
+  function loadSearchIndex() {
+    if (searchIndex) return Promise.resolve(searchIndex);
+    return fetch('/data/search-index.json').then(function (res) { return res.json(); })
+      .then(function (data) { searchIndex = data; return data; })
+      .catch(function () { searchIndex = []; return []; });
+  }
+
+  return {
+    parseGermanDate: parseGermanDate,
+    parseDMY: parseGermanDate,
+    pad2: pad2,
+    gcalStamp: gcalStamp,
+    loadSearchIndex: loadSearchIndex
+  };
+})();
+
 window.initNav = function initNav() {
   var navItems = document.querySelectorAll('[data-nav-item]');
   var moreBtn = document.getElementById('more-btn');
@@ -88,10 +127,7 @@ window.initNav = function initNav() {
     var searchActiveIndex = -1;
 
     function loadSearchIndex() {
-      if (searchIndex) return Promise.resolve(searchIndex);
-      return fetch('/data/search-index.json').then(function (res) { return res.json(); })
-        .then(function (data) { searchIndex = data; return data; })
-        .catch(function () { searchIndex = []; return []; });
+      return SiteUtils.loadSearchIndex().then(function (data) { searchIndex = data; return data; });
     }
 
     function renderResults(query) {
