@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-27T16:00:43.322+02:00",
+  "generatedAt": "2026-08-30T16:00:44.083+02:00",
   "publishFrom": "2026-08-22",
   "events": [
     {
@@ -66,13 +66,30 @@
       "isDatetime": false,
       "description": "",
       "location": "Am Hopfenberg, 99096 Erfurt, Deutschland",
-      "heroImage": "",
+      "heroImage": "https://drive.google.com/file/d/12V6g4CCZc5sMy7LsOO746Y0VUK0Sahyv/view?usp=drive_link",
       "courtHunt": true,
       "spotSlug": "event-hopfenbergfest-2026-09-12",
       "lat": 50.96261,
       "lng": 11.02906,
       "spotVon": "2026-09-12T04:00:00Z",
       "spotBis": "2026-09-12T20:00:00Z"
+    },
+    {
+      "name": "Thüringen Park – Mannschaftsvorstellung U19-Bundesliga",
+      "category": "Straßenfest",
+      "status": "Genehmigt",
+      "start": "2026-09-18",
+      "end": null,
+      "isDatetime": false,
+      "description": "",
+      "location": "Nordhäuser Str. 73 t, 99091 Erfurt",
+      "heroImage": "",
+      "courtHunt": true,
+      "spotSlug": "event-thueringen-park-mannschaftsvorst-2026-09-18",
+      "lat": 51.0085959,
+      "lng": 10.9940651,
+      "spotVon": "2026-09-18T04:00:00Z",
+      "spotBis": "2026-09-18T20:00:00Z"
     },
     {
       "name": "Avenida-Therme",
