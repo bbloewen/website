@@ -355,6 +355,19 @@ Absicherung obendrauf: Im alten Code war `pct = (member ? 30 : 0) + (earlyBirdAc
 ist also rechnerisch identisch mit dem, was der Workflow einen Tag später von selbst
 gerechnet hätte. Das Publishen hat das Verhalten nur um wenige Stunden vorgezogen.
 
+**Wo der Rabatt auf der Website stand** (Stand nach dem Gameday-Hub-Umbau): Badge und
+Warenkorb-Logik in `tickets/dauerkarte.html` + `js/seat-picker.js`, die Vorteilslisten in
+`mitglied-werden.html` und `fans/fanclub.html`, das Suchwort in `data/search-index.json`
+— und die Preis-Sidebar samt Rabatt-Modal auf `saison/profis/gameday/index.html`. Die
+Hub-Seite ist **generiert**: geändert wurde `tools/build-gameday-hub.py`
+(`TERMINE_VORLAGE` und der `wireBadgeModal`-Block), danach der Generator neu laufen
+gelassen. Wer nur die HTML-Datei anfasst, bekommt den Rabatt beim nächsten Lauf zurück.
+
+Zwei Fallstricke beim Entfernen eines solchen Badge-Modal-Paars: Der
+`wireBadgeModal`-Aufruf muss mit weg (sonst `addEventListener` auf `null`), und der
+Escape-Handler zählt die Modal-IDs einzeln auf — bleibt die ID des entfernten Modals dort
+stehen, wirft **jeder** Escape-Tastendruck auf der Seite.
+
 **Bewusst nicht angefasst:** Die archivierten Instagram-Posts unter `news/insta-archiv/`
 und die Captions in `data/instagram-loewen.json` nennen weiterhin „-20% für Frühbucher" —
 das sind wortgetreue Kopien echter Posts (Historie), und der automatische Instagram-Sync
