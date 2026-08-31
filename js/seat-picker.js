@@ -207,12 +207,12 @@
     this.voucherError = null;
     this.voucherChecking = false;
     this.notiz = '';
-    /* Dauerkarte: Frühbucher (automatisch, für alle) + Mitglieder des Basketball
-       Löwen e.V. (30 %, Nachweis nötig, als eigene Tarif-Option wählbar).
-       Kombinierbar bis zum Frühbucher-Stichtag ("zusammen 50 %"), danach nur noch
-       der Mitgliedsrabatt. Nicht zu verwechseln mit dem ermäßigten Satz, den u. a.
-       Mitglieder der Kooperationsvereine bekommen — das ist eine Preisstufe, kein
-       Rabatt, und gilt nur bei der Dauerkarte, nicht beim Einzelticket. */
+    /* Dauerkarte: Mitglieder des Basketball Löwen e.V. (30 %, Nachweis nötig, als
+       eigene Tarif-Option wählbar). Nicht zu verwechseln mit dem ermäßigten Satz,
+       den u. a. Mitglieder der Kooperationsvereine bekommen — das ist eine
+       Preisstufe, kein Rabatt, und gilt nur bei der Dauerkarte, nicht beim
+       Einzelticket. Der früher zusätzlich gewährte Frühbucherrabatt (20 % bis
+       31.08.2026, mit dem Mitgliedsrabatt kombinierbar) ist ersatzlos entfallen. */
     this.dkDiscount = opts.dauerkarteDiscount || null;
     // Für Ehrenamtliche reservierte Plätze (z.B. Block A, Reihe 1-3) — physisch belegt
     // unabhängig vom Ticket-Typ (Dauerkarte + Einzelticket), daher über Zone+Reihe
@@ -342,14 +342,9 @@
     return this.nachwuchsAmount;
   };
 
-  SeatPicker.prototype._earlyBirdActive = function () {
-    if (!this.dkDiscount) return false;
-    return new Date() <= new Date(this.dkDiscount.earlyBirdUntil + 'T23:59:59');
-  };
-
   SeatPicker.prototype._dkPrice = function (basePrice, member) {
-    if (!this.dkDiscount || basePrice === undefined) return basePrice;
-    var pct = (member ? this.dkDiscount.memberPercent : 0) + (this._earlyBirdActive() ? this.dkDiscount.earlyBirdPercent : 0);
+    if (!this.dkDiscount || basePrice === undefined || !member) return basePrice;
+    var pct = this.dkDiscount.memberPercent;
     return Math.round(basePrice * (1 - pct / 100) * 100) / 100;
   };
 
@@ -399,11 +394,11 @@
     });
   };
 
-  /* Rechnet die Rabattkette transparent vor, statt nur den fertigen Endpreis zu
-     zeigen — jede Rabattzeile ("abzüglich 20 % Frühbucherrabatt", "abzüglich
-     30 % Mitgliedsrabatt (Löwen e.V.)") bekommt eine eigene, fett gedruckte
-     Zeile statt kommagetrennt in einem Satz zu verschwinden. Der Endpreis
-     selbst steht separat rechts in der Zeile (s. _renderCart), nicht hier. */
+  /* Rechnet den Rabatt transparent vor, statt nur den fertigen Endpreis zu
+     zeigen — die Rabattzeile ("abzüglich 30 % Mitgliedsrabatt (Löwen e.V.)")
+     bekommt eine eigene, fett gedruckte Zeile statt im Satz zu verschwinden.
+     Der Endpreis selbst steht separat rechts in der Zeile (s. _renderCart),
+     nicht hier. */
   SeatPicker.prototype._dkBreakdownText = function (priceInfo, tarif) {
     if (tarif === 'begleitung') return DK_TARIF_LABELS.begleitung;
     var isKind = tarif.indexOf('kind') === 0;
@@ -411,9 +406,8 @@
     var base = isKind ? priceInfo.kind : isErmaessigt ? priceInfo.ermaessigt : priceInfo.normal;
     var label = isKind ? DK_TARIF_LABELS.kind : isErmaessigt ? 'Ermäßigt' : 'Normalpreis';
     var lines = [label + ' ' + fmtEUR(base) + ' € je Ticket'];
-    if (this.dkDiscount) {
-      if (this._earlyBirdActive()) lines.push('<strong>abzüglich ' + this.dkDiscount.earlyBirdPercent + ' % Frühbucherrabatt</strong>');
-      if (tarif.indexOf('_member') !== -1) lines.push('<strong>abzüglich ' + this.dkDiscount.memberPercent + ' % Mitgliedsrabatt (Löwen e.V.)</strong>');
+    if (this.dkDiscount && tarif.indexOf('_member') !== -1) {
+      lines.push('<strong>abzüglich ' + this.dkDiscount.memberPercent + ' % Mitgliedsrabatt (Löwen e.V.)</strong>');
     }
     return lines.join('<br>');
   };
