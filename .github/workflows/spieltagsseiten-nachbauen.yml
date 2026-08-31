@@ -61,7 +61,7 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add saison/profis/gameday/ data/heimspiele.json saison/spielplan.html tickets.html sitemap.xml
+          git add saison/profis/gameday/ data/heimspiele.json saison/spielplan.html sitemap.xml
           git diff --cached --quiet && { echo "Nichts nachzuziehen."; exit 0; }
           git commit -m "Spieltagsseiten: Phase/Sitemap nachgezogen"
           git push
