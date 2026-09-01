@@ -314,3 +314,61 @@ dessen 400-Antwort fälschlich als Ergebnis protokolliert wurde. **Lehre:** Bei 
 pretix pruefen (`GET .../orders/{code}/`, Positionsanzahl vs. erwartete Anzahl), bevor man
 von einem echten Datenverlust ausgeht — die Meldung allein beweist noch keine fehlende
 Position.
+
+## Frühbucherrabatt abgeschafft (31.08.2026)
+
+Der Frühbucherrabatt auf die Dauerkarte (20 %, Stichtag 31.08.2026, mit dem
+Mitgliedsrabatt auf zusammen 50 % kombinierbar) ist auf Wunsch des Vereins ersatzlos
+entfallen — nicht abgelaufen, sondern entfernt. Es gilt nur noch der dauerhafte
+Mitgliedsrabatt von 30 % für Mitglieder des Basketball Löwen e.V.
+
+**Warum das nur zusammen geht:** Der Preis wird an **zwei** Stellen unabhängig
+voneinander gerechnet — im Browser für die Warenkorb-Anzeige (`js/seat-picker.js`,
+konfiguriert über `dauerkarteDiscount` in `tickets/dauerkarte.html`) und serverseitig im
+Bestell-Workflow, der die pretix-Order anlegt. Eine einseitige Änderung hätte
+Warenkorb-Anzeige und Order-Total auseinanderlaufen lassen — derselbe Fehlertyp wie beim
+Begleitperson-Vorfall (Order `JBCKH`, 13.08.).
+
+**Serverseitig betroffen** (Workflow `HyUXW4kbhaQVbG0A`) waren **zwei** Code-Nodes, die
+den Rabatt jeweils mit eigener Konstante kannten — beim Suchen nach `EARLY_BIRD_PERCENT`
+fällt der zweite leicht durchs Raster:
+
+1. `Preis serverseitig berechnen` → `tarifPrice()`, die reguläre Preisberechnung
+2. `Mitgliedsrabatt verifizieren` → `basePriceFor()`, die **Neu**berechnung für den Fall,
+   dass ein beanspruchter Mitgliedsrabatt nicht gegen die Mitgliederliste bestätigt
+   werden kann und die Zeile auf den Tarif ohne `_member` zurückfällt
+
+**Wie getestet wurde (und warum nicht per `test_workflow`):** Ein Testlauf über den
+Webhook-Trigger schied hier aus. `prepare_workflow_pin_data` liefert für sechs Nodes kein
+Schema (u. a. `DK: Order kostenlos - mark_paid`, `Notion: Kontakt taggen`,
+`Alarm: Positionen nachtragen fehlgeschlagen`), und die Data-Table-Nodes
+(`Bestellung in Data Table speichern`, `Reservierung: Zeilen einfuegen`) laufen bei
+`test_workflow` grundsätzlich **echt** — ein Testlauf hätte reale Sitze in der
+Belegte-Sitze-Tabelle als besetzt eingetragen (s. Vorfall 13.08.). Stattdessen wurden die
+beiden geänderten Code-Bodies isoliert in Node gegen einen nachgebauten Warenkorb
+gefahren (alle Tarife inkl. `kind`, `begleitung`, `_member` und Downgrade-Pfad) und
+Zeile für Zeile gegen `_dkTarifPrice()` aus der echten `js/seat-picker.js` verglichen:
+keine Abweichung.
+
+Absicherung obendrauf: Im alten Code war `pct = (member ? 30 : 0) + (earlyBirdActive ? 20
+: 0)`. Ab dem 01.09.2026 wäre `earlyBirdActive` ohnehin `false` gewesen — der neue Code
+ist also rechnerisch identisch mit dem, was der Workflow einen Tag später von selbst
+gerechnet hätte. Das Publishen hat das Verhalten nur um wenige Stunden vorgezogen.
+
+**Wo der Rabatt auf der Website stand** (Stand nach dem Gameday-Hub-Umbau): Badge und
+Warenkorb-Logik in `tickets/dauerkarte.html` + `js/seat-picker.js`, die Vorteilslisten in
+`mitglied-werden.html` und `fans/fanclub.html`, das Suchwort in `data/search-index.json`
+— und die Preis-Sidebar samt Rabatt-Modal auf `saison/profis/gameday/index.html`. Die
+Hub-Seite ist **generiert**: geändert wurde `tools/build-gameday-hub.py`
+(`TERMINE_VORLAGE` und der `wireBadgeModal`-Block), danach der Generator neu laufen
+gelassen. Wer nur die HTML-Datei anfasst, bekommt den Rabatt beim nächsten Lauf zurück.
+
+Zwei Fallstricke beim Entfernen eines solchen Badge-Modal-Paars: Der
+`wireBadgeModal`-Aufruf muss mit weg (sonst `addEventListener` auf `null`), und der
+Escape-Handler zählt die Modal-IDs einzeln auf — bleibt die ID des entfernten Modals dort
+stehen, wirft **jeder** Escape-Tastendruck auf der Seite.
+
+**Bewusst nicht angefasst:** Die archivierten Instagram-Posts unter `news/insta-archiv/`
+und die Captions in `data/instagram-loewen.json` nennen weiterhin „-20% für Frühbucher" —
+das sind wortgetreue Kopien echter Posts (Historie), und der automatische Instagram-Sync
+würde eine Änderung ohnehin wieder überschreiben.

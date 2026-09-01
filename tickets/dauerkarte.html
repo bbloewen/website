@@ -267,7 +267,6 @@
             <h3 class="t-h4" style="margin-bottom:8px">Preise</h3>
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
               <span class="badge badge-orange">-30 % Mitglieder des Basketball Löwen e.V.</span>
-              <span class="badge badge-orange">-20 % Frühbucher bis 31.08.</span>
             </div>
             <div class="price-row"><span>Kategorie 1</span><strong id="dk-price-kat1" data-base="208">208,00 €</strong></div>
             <div class="price-row"><span>Kategorie 1 (ermäßigt)</span><strong id="dk-price-kat1-erm" data-base="182">182,00 €</strong></div>
@@ -510,11 +509,11 @@
 <script src="/js/nav.js?v=1787760037"></script>
 <script src="/js/include.js?v=1787854261"></script>
 <script src="/js/voucher-utils.js?v=1786873000"></script>
-<script src="/js/seat-picker.js?v=1787760512"></script>
+<script src="/js/seat-picker.js?v=1788208888"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    /* Preisbox zeigt bewusst den Normalpreis (data-base) statisch an. Rabatte
-       (Frühbucher/Mitgliedsrabatt Löwen e.V.) werden erst im Warenkorb-Widget bei Auswahl
+    /* Preisbox zeigt bewusst den Normalpreis (data-base) statisch an. Der
+       Mitgliedsrabatt (Löwen e.V.) wird erst im Warenkorb-Widget bei Auswahl
        des Tarifs berechnet und angezeigt, s. seat-picker.js dauerkarteDiscount. */
 
     /* Die Auslastungskachel zeigte hier lange einen EIGENEN, spieltag-unabhängigen
@@ -614,7 +613,9 @@
         'Rollstuhlplatz': { normal: 104 },
         'VIP': { normal: 1290, ermaessigt: 495 }
       },
-      dauerkarteDiscount: { earlyBirdPercent: 20, earlyBirdUntil: '2026-08-31', memberPercent: 30 },
+      // Frühbucherrabatt (20 % bis 31.08.2026) am 31.08.2026 ersatzlos entfernt —
+      // hier bleibt nur noch der dauerhafte Mitgliedsrabatt des Löwen e.V.
+      dauerkarteDiscount: { memberPercent: 30 },
       cartEl: document.getElementById('seatplan-cart'),
       totalEl: document.getElementById('seatplan-total'),
       ctaEl: document.getElementById('seatplan-cta'),
