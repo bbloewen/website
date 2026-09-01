@@ -326,21 +326,24 @@ def _spiel_event_node(g, mainEntityOfPage_url):
             "highPrice": f"{high:.2f}",
             "offerCount": anzahl,
         }
-        # validFrom nur, wenn die Zwei-Wochen-Frist noch nicht erreicht ist.
-        # Sonderfall erstes Heimspiel der Saison 2026/2027: der Vorverkauf laeuft
-        # schon, obwohl die Frist erst am 27.09.2026 greift -- ein validFrom in
-        # der Zukunft waere dort nachweisbar falsch, weil man die Karte kaufen
-        # kann. "Heute" als Ersatz einzusetzen ist keine Loesung: der Wert wuerde
-        # sich bei jedem Lauf aendern und ueber data/seiten-stand.json taeglich
-        # das lastmod dieser Seite hochziehen, also eine Inhaltsaenderung an
-        # Google melden, die es nicht gab. Lieber der eine optionale Hinweis in
-        # der Search Console.
+        # validFrom: das Datum, ab dem Karten verkauft werden.
+        #
+        # Regelfall ist die Zwei-Wochen-Frist (Marko, 28.08.2026). Weicht ein
+        # Spiel davon ab, traegt es "vorverkaufAb" in data/heimspiele.json, und
+        # dieses Datum gewinnt. Genau der Fall liegt beim ersten Heimspiel der
+        # Saison 2026/2027 vor: verkaeuflich seit dem 07.07.2026, also lange vor
+        # der Frist. Das Datum ist nicht geschaetzt, sondern belegt -- Commit
+        # 741ba4eb "echtes erstes Spiel verkaeuflich" hat an dem Tag die erste
+        # ticketUrl gesetzt. Ein validFrom aus der Regel waere dort nachweisbar
+        # falsch gewesen, weil man die Karte seit Wochen kaufen kann.
+        #
         # Nur als Datum, ohne Uhrzeit: die Frist ist "zwei Wochen vorher", eine
         # Startuhrzeit des Vorverkaufs gibt es nicht. Die Anstosszeit des Spiels
         # als Verkaufsbeginn auszugeben waere eine erfundene Genauigkeit.
-        vorverkauf_ab = (start - VORVERKAUF_VORLAUF).date()
-        if vorverkauf_ab > heute and not g.get("ticketUrl"):
-            node["offers"]["validFrom"] = vorverkauf_ab.isoformat()
+        node["offers"]["validFrom"] = (
+            g["vorverkaufAb"] if g.get("vorverkaufAb")
+            else (start - VORVERKAUF_VORLAUF).date().isoformat()
+        )
     return node
 
 
