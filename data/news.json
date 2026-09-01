@@ -2,6 +2,17 @@
   "hinweis": "Zentrale Liste aller News-Beiträge. Inhalte stammen von der bisherigen Vereinswebsite (basketball-loewen.com) und wurden hierher übernommen. 'topNews': true steuert, ob ein Beitrag im Top-News-Bereich der Startseite erscheint — Beiträge ohne dieses Flag (oder mit false) werden nur auf der Aktuelles-Seite gelistet, nicht im Startseiten-Slider. 'bild' wird für die Foto-Kacheln im Startseiten-Newsfeed verwendet. 'team' (optional: 'profis' | 'damen' | 'nbbl') ordnet einen Artikel einem Team zu, für die 'Aktuelles zu ...'-Sektionen auf den Teamseiten (js/team-news.js) — Artikel ohne 'team' gelten als allgemein und füllen bei Bedarf auf.",
   "artikel": [
     {
+      "datum": "01.09.2026",
+      "kategorie": "Pressemitteilung",
+      "tint": "tint-neutral",
+      "icon": "handshake",
+      "titel": "CATL und Basketball Löwen Erfurt richten Partnerschaft auf Nachwuchs, Frauenbasketball und den neuen LÖWENPARK aus",
+      "kurztext": "Namenssponsoring künftig für Damenmannschaft, U19-Bundesligateam und die neue Trainings- und Begegnungsstätte am Erfurter Südpark.",
+      "url": "/news/artikel/2026-09-01_verein_catl-partnerschaft-neuausrichtung.html",
+      "bild": "/assets/img/hero-basketball.webp",
+      "topNews": true
+    },
+    {
       "datum": "13.08.2026",
       "kategorie": "Profis",
       "tint": "tint-blue",

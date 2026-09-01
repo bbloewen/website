@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://basketball-loewen.com/</loc>
-    <lastmod>2026-08-26</lastmod>
+    <lastmod>2026-09-01</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
@@ -87,7 +87,7 @@
   </url>
   <url>
     <loc>https://basketball-loewen.com/news/aktuelles.html</loc>
-    <lastmod>2026-08-26</lastmod>
+    <lastmod>2026-09-01</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -153,6 +153,11 @@
   <url>
     <loc>https://basketball-loewen.com/news/artikel/2026-08-13_verein_neuer-cheftrainer-ibrahim.html</loc>
     <lastmod>2026-08-26</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://basketball-loewen.com/news/artikel/2026-09-01_verein_catl-partnerschaft-neuausrichtung.html</loc>
+    <lastmod>2026-09-01</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -397,7 +402,7 @@
   </url>
   <url>
     <loc>https://basketball-loewen.com/trainieren/court-hunt.html</loc>
-    <lastmod>2026-08-26</lastmod>
+    <lastmod>2026-09-01</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
