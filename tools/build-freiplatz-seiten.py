@@ -166,12 +166,41 @@ def beschreibung(f):
     return rest[:schnitt].rstrip(" .,;–—") + schwanz
 
 
-def seite(f, vorlage):
+SEO_START = "<!-- SEO:auto START (tools/build-head-meta.py — nicht von Hand ändern) -->"
+SEO_END = "<!-- SEO:auto END -->"
+
+
+def seo_block_uebernehmen(ziel):
+    """SEO:auto-Block unveraendert aus der bestehenden Zieldatei uebernehmen.
+
+    Gleicher Kniff wie extract_seo_block() in build-spieltagsseiten.py und aus
+    demselben Grund: Diese Funktion baut die Seite bei jedem Lauf komplett neu
+    aus der Vorlage zusammen, die selbst noindex ist und deshalb nie einen
+    SEO-Block bekommt. Ohne diese Uebernahme wuerde build-freiplatz-seiten.py
+    bei jedem Lauf zunichtemachen, was build-head-meta.py zuletzt eingetragen
+    hat, und beide Skripte haetten sich in der Baukette gegenseitig nie zur
+    Ruhe kommen lassen (bei jedem bauen.sh-Durchlauf erneut "6 geschrieben"
+    statt "unveraendert" -- aufgefallen am 01.09.2026). Fehlt der Block noch
+    (Seite lief noch nie durch build-head-meta.py), bleibt er leer -- der
+    naechste bauen.sh-Lauf ergaenzt ihn.
+    """
+    if not ziel.exists():
+        return ""
+    treffer = re.search(re.escape(SEO_START) + r".*?" + re.escape(SEO_END) + r"\n?",
+                         ziel.read_text(encoding="utf-8"), re.S)
+    return treffer.group(0) if treffer else ""
+
+
+def seite(f, vorlage, ziel):
     t = vorlage
 
     # noindex muss weg -- genau das ist der Zweck dieser Seiten.
     t = re.sub(r"<!-- noindex:.*?-->\n", "", t, flags=re.S)
     t = re.sub(r'<meta name="robots" content="noindex"\s*/?>\n', "", t)
+
+    seo = seo_block_uebernehmen(ziel)
+    if seo:
+        t = t.replace("</head>", seo + "</head>", 1)
 
     t = re.sub(r"<title>.*?</title>",
                f"<title>{esc(titel(f))}</title>", t, count=1, flags=re.S)
@@ -211,7 +240,7 @@ def main():
     geschrieben = offen = 0
     for f in plaetze:
         ziel = ZIELORDNER / f"{f['slug']}.html"
-        neu = seite(f, vorlage)
+        neu = seite(f, vorlage, ziel)
         alt = ziel.read_text(encoding="utf-8") if ziel.exists() else None
         if alt == neu:
             continue
