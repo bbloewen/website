@@ -1,9 +1,9 @@
 {
-  "hinweis": "Quelle: internes Trainingszeiten-Sheet, Stand 20.08.2026, für BC Erfurt gegen bcerfurt.de/training verifiziert (deckt sich exakt). USV-Erfurt-Einträge am 22.08.2026 durch echte Daten von usv-erfurt-basketball.de/training ersetzt — Achtung, diese Seite selbst gibt einen Gültigkeitszeitraum bis 03.07.2026 an (Vorsaison), USV hat also selbst noch nicht auf 2026/27 aktualisiert; als vorläufiger Platzhalter übernommen, bis USV neue Zeiten veröffentlicht. U13m (USV) hat dort keine Entsprechung (USV führt kein reines U13-Team) und blieb daher unverändert auf 'Zeiten folgen in Kürze'. U19m (USV) am 22.08.2026 auf Marko-Hinweis von 2007/2008/2009 auf 2008/2009/2010 korrigiert — USVs Seite listet weiterhin 2007-2009 (Vorsaison-Stand, per Live-Check am 22.08.2026 bestätigt), 2007 ist aber laut Marko für 2026/27 aus der U19 raus; an BC Erfurts bereits verifizierten aktuellen U19-Jahrgang angeglichen. Trainernamen durchgängig nur Vorname (auch bei USV, wo das Sheet bisher Nachnamen enthielt). Enthält Minibasketball, Jugendteams und weibliche Jugendteams (U12 und jünger bis U19) der Partnervereine BC Erfurt und USV Erfurt. Am 23.08.2026 die fünf BC-Erfurt-Erwachsenenteams (Oberliga Herren, Landesliga Herren 2, Landesliga Herren 3, Damen, Freizeit Mixed) auf Aaron-Hinweis ergänzt, Zeiten/Orte/Trainer live gegen bcerfurt.de/training verifiziert; Jahrgang einheitlich als '2007+' angegeben (älter als U19). BC Erfurts eigene interne Team-Nummerierung ('Herren 1/2/3', gehört uns nicht und könnte sich bei anderen Partnervereinen wie USV anders darstellen) bewusst nicht als Liga-Bezeichnung übernommen: Oberliga Herren steht ohne Nummer (nur ein Team), Landesliga Herren 2 und 3 behalten die Nummer nur zur Unterscheidung der beiden Kacheln — im Team-Filter-Dropdown werden beide unter der gemeinsamen Option 'Landesliga Herren' zusammengefasst (siehe TEAM_KEY in js/trainingszeiten.js). SPORT VERNETZT, BasKIDball und Waid-Löwen haben eigene Seiten und sind hier weiterhin bewusst nicht enthalten, ebenso Erwachsenenteams von USV Erfurt und Basketball Löwen.",
+  "hinweis": "Quelle: internes Trainingszeiten-Sheet, Stand 20.08.2026, für BC Erfurt gegen bcerfurt.de/training verifiziert (deckt sich exakt). USV-Erfurt-Einträge am 01.09.2026 vollständig gegen usv-erfurt-basketball.de/training abgeglichen; die Seite gibt dort jetzt den Gültigkeitszeitraum 01.08.2026–03.07.2027 an, die Zeiten sind also der aktuelle Saisonstand und nicht mehr vorläufig — der Vermerk 'noch nicht bestätigt' ist bei diesen Teams deshalb entfallen. U13m hat bei USV erstmals echte Zeiten (dort 'U13 Jungen I'), der Platzhalter 'Zeiten folgen in Kürze' ist weg. U12m/1 heißt bei USV inzwischen 'U12 mix' und wurde entsprechend in U12mix umbenannt. AUSNAHME U19m: Auf USVs neuer Liste gibt es kein U19-Jungen-Team mehr (nur noch 'U16/U19 Mädchen'); der Eintrag blieb daher unverändert auf dem Vorsaison-Stand und behält den Vermerk 'noch nicht bestätigt', bis geklärt ist, ob das Team noch existiert. Nicht übernommen, weil auf unserer Seite anderweitig abgebildet oder bewusst außen vor: USVs Mädchenteams (laufen bei uns als Löwinnen-Teams) sowie USVs Erwachsenenteams (Landesliga/Oberliga Herren, Ü40) und die Funkelcrew. Trainernamen durchgängig nur Vorname (auch bei USV, wo das Sheet bisher Nachnamen enthielt). Enthält Minibasketball, Jugendteams und weibliche Jugendteams (U12 und jünger bis U19) der Partnervereine BC Erfurt und USV Erfurt. Am 23.08.2026 die fünf BC-Erfurt-Erwachsenenteams (Oberliga Herren, Landesliga Herren 2, Landesliga Herren 3, Damen, Freizeit Mixed) auf Aaron-Hinweis ergänzt, Zeiten/Orte/Trainer live gegen bcerfurt.de/training verifiziert; Jahrgang einheitlich als '2007+' angegeben (älter als U19). BC Erfurts eigene interne Team-Nummerierung ('Herren 1/2/3', gehört uns nicht und könnte sich bei anderen Partnervereinen wie USV anders darstellen) bewusst nicht als Liga-Bezeichnung übernommen: Oberliga Herren steht ohne Nummer (nur ein Team), Landesliga Herren 2 und 3 behalten die Nummer nur zur Unterscheidung der beiden Kacheln — im Team-Filter-Dropdown werden beide unter der gemeinsamen Option 'Landesliga Herren' zusammengefasst (siehe TEAM_KEY in js/trainingszeiten.js). SPORT VERNETZT, BasKIDball und Waid-Löwen haben eigene Seiten und sind hier weiterhin bewusst nicht enthalten, ebenso Erwachsenenteams von USV Erfurt und Basketball Löwen.",
   "gruppen": [
     {
       "team": "U8mix und jünger",
-      "jahrgang": "2018–2020",
+      "jahrgang": "2019–2021",
       "verein": "usv-erfurt",
       "termine": [
         {
@@ -14,11 +14,10 @@
       ],
       "trainer": "Lars",
       "jahre": [
-        2018,
         2019,
-        2020
-      ],
-      "bestaetigt": false
+        2020,
+        2021
+      ]
     },
     {
       "team": "U9mix",
@@ -70,27 +69,26 @@
     },
     {
       "team": "U10mix und jünger",
-      "jahrgang": "2016–2018",
+      "jahrgang": "2017–2019",
       "verein": "usv-erfurt",
       "termine": [
         {
           "tag": "Di",
-          "zeit": "16:30–18:00 Uhr",
-          "ort": "Südparkhalle (Feld 3)"
+          "zeit": "17:00–18:00 Uhr",
+          "ort": "Ullrich-von-Hutten-Schule"
         },
         {
-          "tag": "Do",
+          "tag": "Fr",
           "zeit": "16:30–18:00 Uhr",
-          "ort": "Südparkhalle (Feld 2)"
+          "ort": "Südparkhalle (Feld 2+3)"
         }
       ],
       "trainer": "Cornelius",
       "jahre": [
-        2016,
         2017,
-        2018
-      ],
-      "bestaetigt": false
+        2018,
+        2019
+      ]
     },
     {
       "team": "U10w und jünger",
@@ -159,27 +157,26 @@
       ]
     },
     {
-      "team": "U12m/1",
-      "jahrgang": "2014/2015",
+      "team": "U12mix",
+      "jahrgang": "2015/2016",
       "verein": "usv-erfurt",
       "termine": [
         {
           "tag": "Mo",
-          "zeit": "16:00–17:30 Uhr",
-          "ort": "Ullrich-von-Hutten-Schule"
+          "zeit": "17:00–18:30 Uhr",
+          "ort": "Domsporthalle"
         },
         {
           "tag": "Fr",
-          "zeit": "15:30–17:00 Uhr",
+          "zeit": "16:30–18:00 Uhr",
           "ort": "Bukarester Straße"
         }
       ],
-      "trainer": "Christian",
+      "trainer": "Christian, Dominic",
       "jahre": [
-        2014,
-        2015
-      ],
-      "bestaetigt": false
+        2015,
+        2016
+      ]
     },
     {
       "team": "U12w",
@@ -223,8 +220,19 @@
       "team": "U13m",
       "jahrgang": "2014",
       "verein": "usv-erfurt",
-      "termine": [],
-      "hinweis": "Zeiten folgen in Kürze",
+      "termine": [
+        {
+          "tag": "Mo",
+          "zeit": "18:30–20:00 Uhr",
+          "ort": "Hirnzigenweg"
+        },
+        {
+          "tag": "Do",
+          "zeit": "17:00–18:30 Uhr",
+          "ort": "Europaschule"
+        }
+      ],
+      "trainer": "Pirmin, Valentin",
       "jahre": [
         2014
       ]
@@ -257,20 +265,19 @@
       "termine": [
         {
           "tag": "Mo",
-          "zeit": "17:00–18:30 Uhr",
-          "ort": "Domsporthalle"
+          "zeit": "16:30–18:00 Uhr",
+          "ort": "Ullrich-von-Hutten-Schule"
         },
         {
           "tag": "Mi",
           "zeit": "16:30–18:00 Uhr",
-          "ort": "Südparkhalle"
+          "ort": "Südparkhalle (Feld 3)"
         }
       ],
-      "trainer": "Pirmin, Valentin",
+      "trainer": "Matthes, Willi",
       "jahre": [
         2013
-      ],
-      "bestaetigt": false
+      ]
     },
     {
       "team": "U14w",
@@ -338,26 +345,25 @@
     },
     {
       "team": "U16m",
-      "jahrgang": "2010/2011",
+      "jahrgang": "2011/2012",
       "verein": "usv-erfurt",
       "termine": [
         {
-          "tag": "Mi",
-          "zeit": "17:00–18:30 Uhr",
-          "ort": "Südparkhalle (Feld 3)"
+          "tag": "Mo",
+          "zeit": "18:00–20:00 Uhr",
+          "ort": "Ullrich-von-Hutten-Schule"
         },
         {
-          "tag": "Fr",
-          "zeit": "18:00–19:30 Uhr",
-          "ort": "Ullrich-von-Hutten-Schule"
+          "tag": "Do",
+          "zeit": "17:45–19:00 Uhr",
+          "ort": "Puschkinschule"
         }
       ],
-      "trainer": "Thomas",
+      "trainer": "Uwe, Kevin",
       "jahre": [
-        2010,
-        2011
-      ],
-      "bestaetigt": false
+        2011,
+        2012
+      ]
     },
     {
       "team": "U16w",

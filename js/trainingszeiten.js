@@ -36,7 +36,6 @@ document.addEventListener('DOMContentLoaded', function () {
     'U10w und jünger': 'U10w',
     'U11mix': 'U11mix',
     'U12mix': 'U12mix',
-    'U12m/1': 'U12m',
     'U12w': 'U12w',
     'U13mix': 'U13mix',
     'U13m': 'U13m',
@@ -90,7 +89,15 @@ document.addEventListener('DOMContentLoaded', function () {
     'Südparkhalle': 'Südparkhalle, Johann-Sebastian-Bach-Straße 7, 99096 Erfurt',
     'Riethsporthalle (Feld 1)': 'Riethsporthalle, Essener Straße 20, 99089 Erfurt',
     'Ullrich-von-Hutten-Schule': 'Turnhalle Ullrich-von-Hutten-Schule, Grünstraße 9, 99084 Erfurt',
-    'Domsporthalle': 'Domsporthalle, Domstraße 1C, 99084 Erfurt'
+    'Domsporthalle': 'Domsporthalle, Domstraße 1C, 99084 Erfurt',
+    /* Seit 01.09.2026 durch USV dazugekommen (Ausweichhallen waehrend der Sanierung
+       der Universitaetssporthalle). Strasse/PLZ sind hier bewusst unvollstaendig bzw.
+       ungeprueft — sie stammen nicht aus einer Primaerquelle, sondern nur aus einer
+       Websuche; der Maps-Link findet die Halle auch so, die genaue Anschrift sollte
+       aber noch beim Verein bestaetigt und hier nachgetragen werden. */
+    'Hirnzigenweg': 'Sporthalle Gemeinschaftsschule 9, Hirnzigenweg 31, Erfurt',
+    'Puschkinschule': 'Sporthalle Puschkinschule, Kartäuserstraße 50, 99084 Erfurt',
+    'Europaschule': 'Turnhalle Europaschule, Erfurt'
   };
 
   var WOCHENTAG_INDEX = { 'So': 0, 'Mo': 1, 'Di': 2, 'Mi': 3, 'Do': 4, 'Fr': 5, 'Sa': 6 };
@@ -117,7 +124,11 @@ document.addEventListener('DOMContentLoaded', function () {
      die exakten Jahrgänge aus dem Sheet (z.B. "2008/2009/2010" bei U19), nicht
      zusammengefasst auf den jüngsten Jahrgang. */
   function jahrgangLabel(g) {
-    if (g.team.indexOf('und jünger') !== -1) return Math.max.apply(null, g.jahre) + ' und jünger';
+    /* "2019 und jünger" meint den AELTESTEN zugelassenen Jahrgang -- alle spaeter
+       Geborenen sind eingeschlossen. Bis 01.09.2026 stand hier Math.max, das ergab
+       aus jahre [2019,2020,2021] die Angabe "2021 und jünger" und schloss damit
+       genau die Kinder aus, fuer die das Team gedacht ist. */
+    if (g.team.indexOf('und jünger') !== -1) return Math.min.apply(null, g.jahre) + ' und jünger';
     return g.jahrgang;
   }
 
