@@ -1086,7 +1086,9 @@
       (rest === 0 ? 'heute' : rest === 1 ? '1 Tag' : rest + ' Tage') + '.';
   }
 
-  function rangliste(el) {
+  /* Gemeinsamer Rahmen fuer Monats- und Langzeitwertung — gleiche Tabelle,
+     gleiches Melden-Verhalten, nur Endpunkt und Leertext unterscheiden sich. */
+  function ranglisteRendern(el, endpunkt, leerText) {
     if (!el) return;
 
     if (!API_BASE) {
@@ -1099,10 +1101,10 @@
     var stand = ladeStand();
     var abfrage = stand ? '?ich=' + encodeURIComponent(stand.geraeteId) : '';
 
-    fetch(API_BASE + '/rangliste' + abfrage).then(function (r) { return r.json(); }).then(function (daten) {
+    fetch(API_BASE + endpunkt + abfrage).then(function (r) { return r.json(); }).then(function (daten) {
       var zeilen = daten.eintraege || [];
       if (!zeilen.length) {
-        el.innerHTML = '<p class="t-body">Diesen Monat hat noch niemand eingecheckt. Sei die Erste oder der Erste.</p>';
+        el.innerHTML = '<p class="t-body">' + leerText + '</p>';
         return;
       }
       el.innerHTML = '<div class="rangliste-wrap"><table class="rangliste">' +
@@ -1125,6 +1127,16 @@
     }).catch(function () {
       el.innerHTML = '<p class="t-body">Die Rangliste ist gerade nicht erreichbar. Deine Punkte auf dem Gerät sind davon nicht betroffen.</p>';
     });
+  }
+
+  function rangliste(el) {
+    ranglisteRendern(el, '/rangliste', 'Diesen Monat hat noch niemand eingecheckt. Sei die Erste oder der Erste.');
+  }
+
+  /* Langzeitwertung: dieselben Punkte, aber ohne Monatsgrenze — sie verfallen
+     nicht, nur der Gewinn haengt weiter am Kalendermonat. */
+  function ranglisteGesamt(el) {
+    ranglisteRendern(el, '/rangliste/gesamt', 'Noch hat niemand Punkte gesammelt.');
   }
 
   function meldenVerdrahten(el) {
@@ -1175,6 +1187,7 @@
     var panel = document.getElementById('court-hunt-panel');
     if (panel) standPanel(panel);
     rangliste(document.getElementById('court-hunt-rangliste'));
+    ranglisteGesamt(document.getElementById('court-hunt-rangliste-gesamt'));
     icons();
   }
 
