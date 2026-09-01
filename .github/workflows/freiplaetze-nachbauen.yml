@@ -64,6 +64,6 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add trainieren/freiplaetze.html sitemap.xml
+          git add trainieren/freiplaetze.html sitemap.xml data/seiten-stand.json
           git commit -m "Freiplaetze: statische Liste und Sitemap nachgezogen"
           git push
