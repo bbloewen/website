@@ -42,8 +42,8 @@
       "lastmod": "2026-08-28"
     },
     "fans/fanclub.html": {
-      "hash": "cf46bda691da5434fd93a92b2afabe820f7c1cd8",
-      "lastmod": "2026-08-26"
+      "hash": "05169e3601be95956003b64b5cea735a8fc26f87",
+      "lastmod": "2026-09-01"
     },
     "fanshop.html": {
       "hash": "b4b2db4bba6e7d1051f614c2df2acfdbc050f349",
@@ -62,8 +62,8 @@
       "lastmod": "2026-08-23"
     },
     "mitglied-werden.html": {
-      "hash": "78b6e1e3ea74a9f4816e3230cc9e48e6c21a15a4",
-      "lastmod": "2026-08-26"
+      "hash": "af1910642472d1278a9500c5fd52c36517a72e7a",
+      "lastmod": "2026-09-01"
     },
     "mitglied-werden/formular.html": {
       "hash": "5de2563501435f1d67a13e233f26580415955605",
@@ -126,48 +126,56 @@
       "lastmod": "2026-08-26"
     },
     "news/insta-archiv/loewen-17920245561201740.html": {
-      "hash": "3c948ac7e7cf1f5407b24db1ba579f0d95af0860",
-      "lastmod": "2026-08-28"
+      "hash": "fbc74985df77f2ba259929605927156ac1917103",
+      "lastmod": "2026-09-01"
     },
     "news/insta-archiv/loewen-18059405546758069.html": {
       "hash": "aa14934b771fb6d95b9fb0961e3e26991cce434a",
       "lastmod": "2026-08-26"
     },
     "news/insta-archiv/loewen-18107288966132528.html": {
-      "hash": "4524239a87177a3704cec4f38a679f3c71022eee",
-      "lastmod": "2026-08-28"
+      "hash": "ccb62b4e8783dfa2f6f11f6549679afc29dfa544",
+      "lastmod": "2026-09-01"
+    },
+    "news/insta-archiv/loewen-18110403281040299.html": {
+      "hash": "98c1d696403dc07f316acbdd6ff3af54ed0d39a5",
+      "lastmod": "2026-09-01"
+    },
+    "news/insta-archiv/loewen-18138301552526087.html": {
+      "hash": "717ae9d642ba8930a57a26d8f1e6b48fb572eefd",
+      "lastmod": "2026-09-01"
     },
     "news/insta-archiv/loewen-18456699166115024.html": {
       "hash": "de24087fc41d61a927ee9dce07bb7efe8f77daaa",
       "lastmod": "2026-08-25"
     },
     "news/insta-archiv/loewenpark-18018155786700568.html": {
-      "hash": "7d7465349779e7d4540a701cb4830acc778b5252",
-      "lastmod": "2026-08-27"
+      "hash": "48534abc0dc5cc8c4079ca6435da2448df592b02",
+      "lastmod": "2026-09-01"
     },
     "news/insta-archiv/loewenpark-18057577886788062.html": {
-      "hash": "23afc24ff80c9d4defe5cf6f209370a0ca124e14",
-      "lastmod": "2026-08-27"
+      "hash": "347c6deee3a18d4938dbbe9090a03796c017669e",
+      "lastmod": "2026-09-01"
     },
     "news/insta-archiv/loewenpark-18082776263481467.html": {
-      "hash": "7788d31ef10983ef0e0e9ae9ff33b20866be7474",
-      "lastmod": "2026-08-27"
+      "hash": "e8f3a4856232f877e79548ee2d7ff28791895f93",
+      "lastmod": "2026-09-01"
     },
     "news/insta-archiv/loewenpark-18120295273678542.html": {
       "hash": "ce84b0b84f2d8f436f4ccd7dd066121c0b5ccfa1",
       "lastmod": "2026-08-26"
     },
     "news/insta-archiv/loewenpark-18135245524583630.html": {
-      "hash": "3f89a01d69c68b19c6b199dd471bf62af8b0963a",
-      "lastmod": "2026-08-27"
+      "hash": "56801e99db09beee7826a86d93218ee8a75a2040",
+      "lastmod": "2026-09-01"
     },
     "news/insta-archiv/loewenpark-18171405229416217.html": {
       "hash": "1d01773dae21d2492b175b96cb9cd5362582e5cc",
       "lastmod": "2026-08-26"
     },
     "news/insta-archiv/loewenpark-18359930035244735.html": {
-      "hash": "22234fc7f79508e25579f1daa9274e3502360df0",
-      "lastmod": "2026-08-27"
+      "hash": "bce69528d0af82329ee40628f0cd53a702615fb2",
+      "lastmod": "2026-09-01"
     },
     "news/instagram-archiv.html": {
       "hash": "346db9fbc6dfd9a5674c139bc858bf980d41b6c4",
@@ -278,8 +286,8 @@
       "lastmod": "2026-08-27"
     },
     "saison/profis/gameday/index.html": {
-      "hash": "ed917b043c4e9e003c824dbfa21feff71248d40e",
-      "lastmod": "2026-08-27"
+      "hash": "4043c4d85896cf3946db3feb0c989c3818283db6",
+      "lastmod": "2026-09-01"
     },
     "saison/spielplan.html": {
       "hash": "4a97bdddf75a5b704d954266ce3fb5bf122a2fe6",
@@ -298,8 +306,8 @@
       "lastmod": "2026-08-01"
     },
     "tickets/dauerkarte.html": {
-      "hash": "2aa8f032ed90bb2e9bb6e0c1f4c6a5fe5d28eb29",
-      "lastmod": "2026-08-25"
+      "hash": "bcfc02d1bfdcb61ae530cec116fa8be11511fcc3",
+      "lastmod": "2026-09-01"
     },
     "tickets/familienpass.html": {
       "hash": "6209a2a01d60fbde9c8c9cd62dbe03dece72c6f1",
@@ -318,8 +326,8 @@
       "lastmod": "2026-08-27"
     },
     "trainieren/freiplaetze.html": {
-      "hash": "775cf886e6d2a75ebc02662e5b46823c3c2aa08f",
-      "lastmod": "2026-08-27"
+      "hash": "db21ce7e7f1fb1f088477a9e00454e1365875f65",
+      "lastmod": "2026-09-01"
     },
     "trainieren/freiplatz/loewenpark.html": {
       "hash": "06a4ce12eee8deb853d2f0ddc9a7b230c21cd466",
