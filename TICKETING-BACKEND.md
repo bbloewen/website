@@ -372,3 +372,51 @@ stehen, wirft **jeder** Escape-Tastendruck auf der Seite.
 und die Captions in `data/instagram-loewen.json` nennen weiterhin „-20% für Frühbucher" —
 das sind wortgetreue Kopien echter Posts (Historie), und der automatische Instagram-Sync
 würde eine Änderung ohnehin wieder überschreiben.
+
+## Automatischer Bestellungs-Ablauf abgeschaltet (06.09.2026)
+
+Marko meldete eine pretix-Mail „Ihre Bestellung läuft bald ab" zur Order `DXXAX` als
+„falsch und unnötig". Die Mail war inhaltlich korrekt — falsch war die Einstellung
+dahinter.
+
+**Das Problem:** Dauerkarten werden per SEPA-Lastschrift bezahlt, die der Verein selbst
+einzieht (Workflow „BH: SEPA-Lastschrift erzeugen"). pretix sieht davon nie einen
+Zahlungseingang: Die Orders stehen dauerhaft auf `status: n` (pending) mit leerem
+`payments`-Array. Das Event `saison2627` hatte aber `payment_term_expire_automatically:
+true` bei `payment_term_days: 14` — pretix hätte die Bestellungen also der Reihe nach
+automatisch storniert und **die Sitzplätze wieder freigegeben**. Die Warnmail
+(`mail_days_order_expire_warning: 3`) war lediglich die Ankündigung davon.
+
+Betroffen waren zum Zeitpunkt der Prüfung **sieben offene Bestellungen über zusammen
+1.728 €**, die zwischen dem 08.09. und 15.09.2026 abgelaufen wären — die erste zwei Tage
+nach der Meldung.
+
+**Fix (Marko-Entscheidung, 06.09.2026):**
+
+```
+PATCH /api/v1/organizers/xxl/events/saison2627/settings/
+{"payment_term_expire_automatically": false, "mail_days_order_expire_warning": 0}
+```
+
+`expire_automatically: false` ist der eigentliche Fix — Bestellungen laufen gar nicht
+mehr ab, die Plätze bleiben belegt, und damit entfällt auch der Anlass für die Mail.
+`mail_days_order_expire_warning: 0` steht zusätzlich drin, damit garantiert nichts mehr
+rausgeht, unabhängig davon wie pretix die Warnung intern auslöst.
+
+**Preis dieser Einstellung:** Eine wirklich abgebrochene, nie bezahlte Bestellung gibt
+ihren Sitzplatz jetzt nicht mehr von selbst frei. Solche Fälle müssen von Hand storniert
+werden. Das ist der bewusst akzeptierte Nachteil gegenüber dem Risiko, bezahlte
+Dauerkarten stillschweigend zu verlieren.
+
+**Der strukturell saubere Fix wäre ein anderer:** Der Dauerkarten-Bestellworkflow
+müsste die Order bei erteiltem SEPA-Mandat in pretix als bezahlt markieren (`mark_paid`),
+so wie es der Einzelticket-Workflow nach der PayPal-Zahlung tut. Dann stimmte der
+pretix-Status mit der Realität überein und die Ablauf-Logik könnte anbleiben. Bewusst
+nicht in einem Zug miterledigt: Das greift in die Order-Anlage und damit in
+Rechnungsstellung und Buchhaltung ein und gehört separat geplant.
+
+**Wie geändert:** Die pretix-API ist aus der Claude-Session nicht direkt erreichbar
+(Egress-Policy). Der Aufruf lief über einen temporär angelegten n8n-Workflow („Claude:
+pretix Diagnose (temporaer)", `4b5L1MxytRjBtzTZ`) mit der bestehenden Credential
+„Pretix XXL - Ticketing", zuerst rein lesend zur Diagnose, dann mit dem PATCH und einem
+separaten Kontroll-GET. Der Workflow wurde danach archiviert.
