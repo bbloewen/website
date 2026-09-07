@@ -247,15 +247,18 @@
     <div class="container">
     <span class="eyebrow">Tickets</span>
     <h1>Familienpass<span class="swoosh" aria-hidden="true"></span>.</h1>
-    <p class="lead">Die Stadt Erfurt und Basketball Löwen Erfurt machen es möglich - kostenlose Familienkarte für ein Heimspiel.</p>
+    <p class="lead">Die Stadt Erfurt und Basketball Löwen Erfurt machen es möglich - kostenlose Familienkarte für ein Heimspiel. Die Aktion gilt für den neuen Familienpass ab 2027.</p>
     </div>
   </section>
 
   <section class="section">
     <div class="container" style="max-width:720px">
+      <p class="mb-3"><span class="badge badge-info">Registrierung ab 01.01.2027</span></p>
+      <p class="t-body mb-5">Diese Aktion gilt für den <strong>neuen Familienpass, der ab 2027 gültig ist</strong>. Registrieren kannst du dich deshalb erst <strong>ab dem 1. Januar 2027</strong>. Vorher nehmen wir keine Anmeldungen an und geben auch keine Gutscheincodes aus.</p>
+
       <ol class="t-body mb-5">
         <li>Der Familienpass gilt für zwei Erwachsene und die eingetragenen Kinder in Kategorie 3.</li>
-        <li>Trag deinen Namen (wie auf dem Familienpass), die Anzahl deiner Kinder und deine E-Mail-Adresse ein.</li>
+        <li><strong>Ab dem 1. Januar 2027</strong> trägst du hier deinen Namen (wie auf dem Familienpass), die Anzahl deiner Kinder und deine E-Mail-Adresse ein.</li>
         <li>Du bekommst danach deinen persönlichen Gutscheincode für das nächste Heimspiel per E-Mail.</li>
         <li>Der Code reduziert den Ticketpreis für deine ganze Familie im Ticketshop auf 0 € und gilt bis zum Spieltag.</li>
       </ol>
@@ -266,26 +269,26 @@
         <form class="form-panel" id="familienpass-form" style="max-width:420px;margin:0 auto;text-align:left">
           <div class="field">
             <label for="fp-vorname">Vorname *</label>
-            <input type="text" id="fp-vorname" name="vorname" required autocomplete="given-name" />
+            <input type="text" id="fp-vorname" name="vorname" required autocomplete="given-name" disabled />
           </div>
           <div class="field">
             <label for="fp-nachname">Nachname (wie auf dem Familienpass) *</label>
-            <input type="text" id="fp-nachname" name="nachname" required autocomplete="family-name" />
+            <input type="text" id="fp-nachname" name="nachname" required autocomplete="family-name" disabled />
           </div>
           <div class="field">
             <label for="fp-kinder">Anzahl Kinder *</label>
-            <input type="number" id="fp-kinder" name="kinder" min="0" max="6" step="1" required />
+            <input type="number" id="fp-kinder" name="kinder" min="0" max="6" step="1" required disabled />
           </div>
           <div class="field">
             <label for="fp-email">E-Mail *</label>
-            <input type="email" id="fp-email" name="email" required autocomplete="email" />
+            <input type="email" id="fp-email" name="email" required autocomplete="email" disabled />
           </div>
           <div style="position:absolute;left:-9999px" aria-hidden="true">
             <label for="fp-firma">Firma</label>
             <input type="text" id="fp-firma" name="firma" tabindex="-1" autocomplete="off">
           </div>
-          <button type="submit" class="btn btn-primary btn-block">Gutschein anfordern</button>
-          <p class="t-caption" style="margin-top:16px;color:var(--text-muted)">Eine Registrierung ist einmal pro E-Mail-Adresse und Jahr möglich. Der Gutscheincode wird dir direkt im Anschluss per E-Mail zugeschickt.</p>
+          <button type="submit" class="btn btn-primary btn-block" id="fp-submit" disabled>Registrierung ab 01.01.2027</button>
+          <p class="t-caption" style="margin-top:16px;color:var(--text-muted)" id="fp-hinweis">Das Formular öffnet am 1. Januar 2027. Bis dahin ist keine Registrierung möglich und es wird kein Gutscheincode verschickt.</p>
           <div class="form-status success" id="familienpass-status">Registrierung erfolgreich — dein Gutschein wurde per E-Mail verschickt.</div>
           <div class="form-status error" id="familienpass-error">Das hat leider nicht geklappt.</div>
         </form>
@@ -427,9 +430,29 @@
 <script src="/js/nav.js?v=1787760037"></script>
 <script src="/js/include.js?v=1787854261"></script>
 <script>
+  /* Die Aktion gilt erst fuer den neuen Familienpass ab 2027 (Marko, 07.09.2026):
+     vor dem 01.01.2027 keine Registrierung und kein Gutscheincode. Deshalb stehen
+     Felder und Button DEAKTIVIERT im ausgelieferten HTML -- so greift die Sperre
+     auch ohne JavaScript -- und werden hier erst ab dem Stichtag freigeschaltet.
+     Die eigentliche Absicherung liegt im n8n-Workflow "Familienpass: Registrierung
+     verarbeiten": die Webhook-URL steht unten im Klartext, eine reine
+     Browser-Sperre waere also wirkungslos. */
+  var FP_START = new Date('2027-01-01T00:00:00+01:00');
+  var fpOffen = Date.now() >= FP_START.getTime();
+  var fpForm = document.getElementById('familienpass-form');
+  if (fpOffen) {
+    Array.prototype.forEach.call(fpForm.querySelectorAll('input, button'), function (el) {
+      el.disabled = false;
+    });
+    document.getElementById('fp-submit').textContent = 'Gutschein anfordern';
+    document.getElementById('fp-hinweis').textContent =
+      'Eine Registrierung ist einmal pro E-Mail-Adresse und Jahr möglich. Der Gutscheincode wird dir direkt im Anschluss per E-Mail zugeschickt.';
+  }
+
   var familienpassFormLoadedAt = Date.now();
-  document.getElementById('familienpass-form').addEventListener('submit', function (e) {
+  fpForm.addEventListener('submit', function (e) {
     e.preventDefault();
+    if (!fpOffen) return;
     var form = e.target;
     var statusOk = document.getElementById('familienpass-status');
     var statusError = document.getElementById('familienpass-error');
