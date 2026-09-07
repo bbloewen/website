@@ -206,8 +206,8 @@ WISSENSWERTES_HTML = """      <span class="eyebrow" style="display:block;margin-
             <h3 class="t-h4">Ermäßigungen</h3>
           </div>
           <p class="t-body-sm">Beim Einzelticket gilt der ermäßigte Satz für Studierende, Azubis, FSJ, Menschen mit Behinderung ab 50&nbsp;% und Rentner*innen (jeweils mit Nachweis beim Einlass). Für Kinder von 7 bis 14 Jahren gibt es bei Tickets in Block A zusätzlich 25&nbsp;% Rabatt auf den ermäßigten Preis — schon ab dem ersten Kind.</p>
-          <p class="t-body-sm mt-2">Wer den <strong>Familienpass der Stadt Erfurt</strong> hat, kommt mit zwei Erwachsenen und den eingetragenen Kindern kostenlos in Kategorie&nbsp;3 zu einem Heimspiel. Dafür brauchst du einen persönlichen Gutscheincode: einmal auf der Familienpass-Seite registrieren, der Code kommt per E-Mail und reduziert den Preis für die ganze Familie im Ticketshop auf 0,00&nbsp;€.</p>
-          <a class="card-link mt-2" href="/tickets/familienpass.html">Familienpass-Gutschein anfordern <i data-lucide="arrow-right" class="icon-14"></i></a>
+          <p class="t-body-sm mt-2">Wer den <strong>Familienpass der Stadt Erfurt</strong> hat, kommt mit zwei Erwachsenen und den eingetragenen Kindern kostenlos in Kategorie&nbsp;3 zu einem Heimspiel. Die Aktion gilt für den neuen Familienpass ab 2027: registrieren kannst du dich ab dem <strong>1. Januar 2027</strong>, danach kommt dein persönlicher Gutscheincode per E-Mail und reduziert den Preis für die ganze Familie im Ticketshop auf 0,00&nbsp;€.</p>
+          <a class="card-link mt-2" href="/tickets/familienpass.html">So funktioniert der Familienpass <i data-lucide="arrow-right" class="icon-14"></i></a>
         </div>
         <div class="info-tile info-tile-row info-tile-row-divided">
           <div class="info-tile-row-head">
