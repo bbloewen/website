@@ -2,8 +2,8 @@
   "hinweis": "Von tools/build-sitemap.py gepflegt: je indexierbare Seite der Hash ihres Inhalts (main-Block plus Title/Description, ohne Cache-Buster) und das Datum, an dem sich dieser Inhalt zuletzt geaendert hat. Grundlage fuer lastmod in sitemap.xml. Nicht von Hand pflegen.",
   "seiten": {
     "agb.html": {
-      "hash": "a96b868b0afa77d7f3f77a6f0c79bbd6fd6de48c",
-      "lastmod": "2026-08-02"
+      "hash": "871efe92e8c4b8edefa7fb70882ccd7c90936b9e",
+      "lastmod": "2026-09-07"
     },
     "beitragsordnung.html": {
       "hash": "2d22c5f10a5ce8b2fa9627ecbdc67b4b0e0894f2",
