@@ -2,8 +2,8 @@
   "hinweis": "Von tools/build-sitemap.py gepflegt: je indexierbare Seite der Hash ihres Inhalts (main-Block plus Title/Description, ohne Cache-Buster) und das Datum, an dem sich dieser Inhalt zuletzt geaendert hat. Grundlage fuer lastmod in sitemap.xml. Nicht von Hand pflegen.",
   "seiten": {
     "agb.html": {
-      "hash": "a96b868b0afa77d7f3f77a6f0c79bbd6fd6de48c",
-      "lastmod": "2026-08-02"
+      "hash": "871efe92e8c4b8edefa7fb70882ccd7c90936b9e",
+      "lastmod": "2026-09-07"
     },
     "beitragsordnung.html": {
       "hash": "2d22c5f10a5ce8b2fa9627ecbdc67b4b0e0894f2",
@@ -138,52 +138,52 @@
       "lastmod": "2026-08-26"
     },
     "news/insta-archiv/loewen-18059917688535291.html": {
-      "hash": "2db7c58a79edbfc3fa3c51a4b7629a663e20e5e3",
-      "lastmod": "2026-09-07"
+      "hash": "5ff5af45f82e3883046be781ac6d23f6450da261",
+      "lastmod": "2026-09-08"
     },
     "news/insta-archiv/loewen-18107288966132528.html": {
       "hash": "ca9ecbefb46bc919651e18116f4ec5e3b87437a3",
       "lastmod": "2026-09-07"
     },
     "news/insta-archiv/loewen-18110403281040299.html": {
-      "hash": "16b40a114bfeda15fc1131a15835f2854b970031",
-      "lastmod": "2026-09-07"
+      "hash": "b6975a71ca8bfe8be565892213ceedd8ad5f37ea",
+      "lastmod": "2026-09-08"
     },
     "news/insta-archiv/loewen-18138301552526087.html": {
-      "hash": "241a8f36a061bd3ddc0566b1c08a41da7450bfb5",
-      "lastmod": "2026-09-07"
+      "hash": "d96603cb56bdfadd34d5eab0975a312d2e43b176",
+      "lastmod": "2026-09-08"
     },
     "news/insta-archiv/loewen-18456699166115024.html": {
       "hash": "de24087fc41d61a927ee9dce07bb7efe8f77daaa",
       "lastmod": "2026-08-25"
     },
     "news/insta-archiv/loewenpark-18018155786700568.html": {
-      "hash": "7d7465349779e7d4540a701cb4830acc778b5252",
-      "lastmod": "2026-09-07"
+      "hash": "48534abc0dc5cc8c4079ca6435da2448df592b02",
+      "lastmod": "2026-09-08"
     },
     "news/insta-archiv/loewenpark-18057577886788062.html": {
-      "hash": "175b1733b0ec48fbcd5e5b529ca9615fe2c5bc12",
-      "lastmod": "2026-09-07"
+      "hash": "0867ac5e64d7f113cda1405148071ed4b9c78ebe",
+      "lastmod": "2026-09-08"
     },
     "news/insta-archiv/loewenpark-18082776263481467.html": {
-      "hash": "7788d31ef10983ef0e0e9ae9ff33b20866be7474",
-      "lastmod": "2026-09-07"
+      "hash": "e8f3a4856232f877e79548ee2d7ff28791895f93",
+      "lastmod": "2026-09-08"
     },
     "news/insta-archiv/loewenpark-18120295273678542.html": {
       "hash": "ce84b0b84f2d8f436f4ccd7dd066121c0b5ccfa1",
       "lastmod": "2026-08-26"
     },
     "news/insta-archiv/loewenpark-18135245524583630.html": {
-      "hash": "3f89a01d69c68b19c6b199dd471bf62af8b0963a",
-      "lastmod": "2026-09-07"
+      "hash": "56801e99db09beee7826a86d93218ee8a75a2040",
+      "lastmod": "2026-09-08"
     },
     "news/insta-archiv/loewenpark-18171405229416217.html": {
       "hash": "1d01773dae21d2492b175b96cb9cd5362582e5cc",
       "lastmod": "2026-08-26"
     },
     "news/insta-archiv/loewenpark-18359930035244735.html": {
-      "hash": "00200184d6798e7b06baef70b4cfb4c4adf97904",
-      "lastmod": "2026-09-07"
+      "hash": "bce69528d0af82329ee40628f0cd53a702615fb2",
+      "lastmod": "2026-09-08"
     },
     "news/instagram-archiv.html": {
       "hash": "49ddab288844813025ae7df76147c00d8fd84c44",
