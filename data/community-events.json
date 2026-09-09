@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-08T16:00:43.385+02:00",
+  "generatedAt": "2026-09-09T16:00:42.951+02:00",
   "publishFrom": "2026-08-22",
   "events": [
     {
@@ -58,23 +58,6 @@
       "heroImage": ""
     },
     {
-      "name": "Hopfenbergfest",
-      "category": "Straßenfest",
-      "status": "Genehmigt",
-      "start": "2026-09-12",
-      "end": null,
-      "isDatetime": false,
-      "description": "",
-      "location": "Am Hopfenberg, 99096 Erfurt, Deutschland",
-      "heroImage": "https://drive.google.com/file/d/12V6g4CCZc5sMy7LsOO746Y0VUK0Sahyv/view?usp=drive_link",
-      "courtHunt": true,
-      "spotSlug": "event-hopfenbergfest-2026-09-12",
-      "lat": 50.96261,
-      "lng": 11.02906,
-      "spotVon": "2026-09-12T04:00:00Z",
-      "spotBis": "2026-09-12T20:00:00Z"
-    },
-    {
       "name": "Zooparklauf – Basketballkorb-Aktion (SSV Nord)",
       "category": "Straßenfest",
       "status": "Genehmigt",
@@ -84,6 +67,23 @@
       "description": "",
       "location": "Am Zoopark 1, 99087 Erfurt",
       "heroImage": ""
+    },
+    {
+      "name": "Hopfenbergfest",
+      "category": "Straßenfest",
+      "status": "Genehmigt",
+      "start": "2026-09-12T13:00:00.000+02:00",
+      "end": "2026-09-12T18:00:00.000+02:00",
+      "isDatetime": true,
+      "description": "",
+      "location": "Am Hopfenberg, 99096 Erfurt, Deutschland",
+      "heroImage": "https://drive.google.com/file/d/12V6g4CCZc5sMy7LsOO746Y0VUK0Sahyv/view?usp=drive_link",
+      "courtHunt": true,
+      "spotSlug": "event-hopfenbergfest-2026-09-12",
+      "lat": 50.96261,
+      "lng": 11.02906,
+      "spotVon": "2026-09-12T10:00:00Z",
+      "spotBis": "2026-09-12T17:00:00Z"
     },
     {
       "name": "Infoveranstaltung Erfurt-Crowd",
@@ -122,6 +122,17 @@
       "isDatetime": false,
       "description": "",
       "location": "Am Stausee 1, 99448 Hohenfelden, Germany",
+      "heroImage": ""
+    },
+    {
+      "name": "Saisoneröffnung",
+      "category": "Vereinsfest",
+      "status": "Genehmigt",
+      "start": "2026-09-24T17:00:00.000+02:00",
+      "end": null,
+      "isDatetime": true,
+      "description": "",
+      "location": "Riethsporthalle, Essener Straße 20, 99089 Erfurt, Deutschland",
       "heroImage": ""
     }
   ]
