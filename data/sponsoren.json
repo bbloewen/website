@@ -25,6 +25,7 @@
     { "name": "dotflow", "tier": "weitere", "logo": "/assets/logos/Logo_dotflow.svg", "website": "https://dotflow.com/", "beschreibung": "B2B-Digitalagentur aus Erfurt." },
     { "name": "Erfurt Mitte", "tier": "weitere", "logo": "/assets/logos/Logo_Erfurt-Mitte.svg", "website": "https://erfurt-mitte.de/", "beschreibung": "Werbegemeinschaft der Erfurter Innenstadt." },
     { "name": "Ergo", "tier": "weitere", "betrag": 2000, "logo": "/assets/logos/Logo_Ergo.webp", "website": "https://christoph-kuehn.ergo.de/", "beschreibung": "Geschäftsstelle Christoph Kühn — Versicherung und Vorsorge, ERGO Beratung und Vertrieb AG." },
+    { "name": "Flächen Thüringen", "tier": "weitere", "logo": "/assets/logos/Logo_Flaechen-Thueringen.webp", "website": "https://www.flächen-thüringen.de", "beschreibung": "Flächenportal für Gewerbe- und Wohnstandorte in Thüringen." },
     { "name": "Glinicke Automobile", "tier": "weitere", "logo": "/assets/logos/Logo_Glinicke.svg", "website": "https://www.glinicke.de/autohaus/erfurt/hyundai/", "beschreibung": "Autohaus in Erfurt." },
     { "name": "IBA University", "tier": "weitere", "logo": "/assets/logos/Logo_IBA-University.svg", "website": "https://www.ibadual.com/Erfurt", "beschreibung": "Internationale Berufsakademie, Campus Erfurt." },
     { "name": "Kallinich Media", "tier": "weitere", "logo": "/assets/logos/Logo_Kallinich-Media.svg", "website": "https://www.kallinich-media.de/", "beschreibung": "Werbeagentur." },
