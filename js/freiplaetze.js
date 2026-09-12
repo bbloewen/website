@@ -76,6 +76,7 @@
             lat: e.lat,
             lng: e.lng,
             beschreibung: e.description || 'Mobiler Korb der Löwen — nur an diesem Tag, dafür 50 Punkte.',
+            foto: e.heroImage || null,
             typ: 'event',
             punkte: PUNKTE.spot,
             von: e.spotVon,
