@@ -441,9 +441,11 @@
     '</div>';
   }
 
-  /* Kachel eines Event-Spots. Bewusst nicht kachel(): Ein Spot hat kein Foto und
-     keinen Zugangshinweis, dafuer ein Zeitfenster — und genau das ist die
-     Information, wegen der jemand die Kachel ueberhaupt liest. */
+  /* Kachel eines Event-Spots. Bewusst nicht kachel(): keinen Zugangshinweis,
+     dafuer ein Zeitfenster — und genau das ist die Information, wegen der
+     jemand die Kachel ueberhaupt liest. Foto zeigen, wenn vorhanden (aus dem
+     Community-Event uebernommen, s. ladeSpots()), sonst violettes Kalender-Icon
+     als Fallback. */
   /* Drei Zustaende, drei Texte — dieselbe Unterscheidung wie im spotZeile-Block
      der Platzseite (initPlatzseite): vorbei, jetzt aktiv, oder noch bevorstehend. */
   function spotKachel(sp) {
@@ -453,9 +455,12 @@
       ? 'War aktiv am ' + esc(spotZeitText(sp)) + '.'
       : (laeuft ? 'Jetzt aktiv: ' + esc(spotZeitText(sp)) + ' — 50 Punkte am mobilen Korb.'
         : 'Aktiv am ' + esc(spotZeitText(sp)) + ' — dann gibt es hier 50 Punkte.');
+    var media = sp.foto
+      ? '<div class="card-media card-media-photo" style="height:140px"><img src="' + esc(sp.foto) + '" alt="' + esc(sp.name) + '" loading="lazy" /></div>'
+      : '<div class="card-media tint-violet" style="height:140px"><i data-lucide="calendar-clock" class="icon-32"></i></div>';
     return '<div class="card hoverable camp-slider-card' + (vorbei ? ' ist-vorbei' : '') +
         '" data-start="' + esc(sp.von) + '" data-ende="' + esc(sp.bis) + '">' +
-      '<div class="card-media tint-violet" style="height:140px"><i data-lucide="calendar-clock" class="icon-32"></i></div>' +
+      media +
       '<div class="card-body">' +
         '<span class="card-label">' + (vorbei ? 'Vorbei' : (laeuft ? 'Heute aktiv' : 'Court-Hunt-Spot')) + '</span>' +
         '<h3>' + esc(sp.name) + '</h3>' +

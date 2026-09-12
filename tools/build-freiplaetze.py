@@ -136,7 +136,7 @@ def spots_lesen(jetzt):
         spots.append({
             "slug": e["spotSlug"], "name": e.get("name", "Court-Hunt-Spot"),
             "adresse": re.sub(r",\s*(Deutschland|Germany)$", "", e.get("location", "")),
-            "lat": e["lat"], "lng": e["lng"],
+            "lat": e["lat"], "lng": e["lng"], "foto": e.get("heroImage") or None,
             "von": von, "bis": bis, "laeuft": von <= jetzt <= bis, "vorbei": bis < jetzt,
         })
     spots.sort(key=lambda sp: sp["von"])
@@ -158,10 +158,16 @@ def spot_kachel(sp):
         status, zeile = "Heute aktiv", f'Jetzt aktiv: {e(spot_zeit_text(sp))} — 50 Punkte am mobilen Korb.'
     else:
         status, zeile = "Court-Hunt-Spot", f'Aktiv am {e(spot_zeit_text(sp))} — dann gibt es hier 50 Punkte.'
+    media = (
+        f'<div class="card-media card-media-photo" style="height:140px">'
+        f'<img src="{e(sp["foto"])}" alt="{e(sp["name"])}" loading="lazy" /></div>'
+        if sp.get("foto") else
+        '<div class="card-media tint-violet" style="height:140px">'
+        '<i data-lucide="calendar-clock" class="icon-32"></i></div>'
+    )
     teile = [
         f'<div class="card hoverable camp-slider-card{vorbei_klasse}">',
-        '<div class="card-media tint-violet" style="height:140px">'
-        '<i data-lucide="calendar-clock" class="icon-32"></i></div>',
+        media,
         '<div class="card-body">',
         f'<span class="card-label">{status}</span>',
         f'<h3>{e(sp["name"])}</h3>',
