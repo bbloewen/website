@@ -162,8 +162,8 @@
       "beschreibung": "Kostenfreies, niedrigschwelliges Bewegungsangebot in Kitas/Schulen.",
       "termine": [
         { "tag": "Mo", "zeit": "16:30–18:00 Uhr", "ort": "KGS am Schwemmbach" },
-        { "tag": "Mi", "zeit": "16:30–18:00 Uhr", "ort": "KGS am Schwemmbach" },
-        { "tag": "Fr", "zeit": "20:30–22:00 Uhr", "ort": "Domsporthalle" }
+        { "tag": "Fr", "zeit": "16:30–18:00 Uhr", "ort": "KGS am Schwemmbach" },
+        { "tag": "Fr", "zeit": "20:00–21:30 Uhr", "ort": "Domsporthalle" }
       ]
     },
     {
