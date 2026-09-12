@@ -2616,7 +2616,7 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
   position: relative; display: block; width: 100%; max-width: 440px; border: none; padding: 0; cursor: pointer;
   border-radius: var(--radius-lg); overflow: hidden; background: none;
 }
-.teamfoto-placeholder img { width: 100%; display: block; filter: blur(5px); transform: scale(1.08); }
+.teamfoto-placeholder img { width: 100%; height: auto; display: block; filter: blur(5px); transform: scale(1.08); }
 .teamfoto-placeholder-note {
   position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 4px; background: rgba(0,18,45,.35); color: #fff; font-size: 12px; font-weight: var(--weight-semibold);
