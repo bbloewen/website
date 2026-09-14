@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-13T16:00:43.296+02:00",
+  "generatedAt": "2026-09-14T16:00:43.337+02:00",
   "publishFrom": "2026-08-22",
   "events": [
     {
@@ -103,9 +103,9 @@
       "start": "2026-09-18T16:00:00.000+02:00",
       "end": "2026-09-18T19:00:00.000+02:00",
       "isDatetime": true,
-      "description": "",
+      "description": "Mannschaftsvorstellung U19 \n",
       "location": "Nordhäuser Str. 73 t, 99091 Erfurt",
-      "heroImage": "",
+      "heroImage": "https://drive.google.com/file/d/1i2U0yUrOtJQDFxiSXq816O5f0g2ifa3N/view?usp=drivesdk",
       "courtHunt": true,
       "spotSlug": "event-thueringen-park-mannschaftsvorst-2026-09-18",
       "lat": 51.0085959,
@@ -114,22 +114,39 @@
       "spotBis": "2026-09-18T18:00:00Z"
     },
     {
-      "name": "Avenida-Therme",
+      "name": "Avenida-Therme Kinderfest – Mobiler Korb (Außenbereich)",
+      "category": "Vereinsfest",
+      "status": "Genehmigt",
+      "start": "2026-09-20T10:00:00.000+02:00",
+      "end": "2026-09-20T16:00:00.000+02:00",
+      "isDatetime": true,
+      "description": "Kindertagsfest in der Avenida-Therme",
+      "location": "Am Stausee 1, 99448 Hohenfelden, Germany",
+      "heroImage": "https://www.avenida-therme.de/sites/default/files/Kindertag%20News%20Website.png",
+      "courtHunt": true,
+      "spotSlug": "event-avenida-therme-kinderfest-mobile-2026-09-20",
+      "lat": 50.8786139,
+      "lng": 11.1855576,
+      "spotVon": "2026-09-20T07:00:00Z",
+      "spotBis": "2026-09-20T15:00:00Z"
+    },
+    {
+      "name": "Kinderfest am Zughafen",
       "category": "Straßenfest",
       "status": "Genehmigt",
-      "start": "2026-09-20",
-      "end": null,
-      "isDatetime": false,
+      "start": "2026-09-20T13:00:00.000+02:00",
+      "end": "2026-09-20T18:00:00.000+02:00",
+      "isDatetime": true,
       "description": "",
-      "location": "Am Stausee 1, 99448 Hohenfelden, Germany",
-      "heroImage": ""
+      "location": "Zum Güterbahnhof 20, 99085 Erfurt, Deutschland",
+      "heroImage": "https://zughafen.de/wp-content/uploads/2026/08/750871078_1487025386786502_1354404874415387774_n-1920x1005.jpg"
     },
     {
       "name": "Saisoneröffnung",
       "category": "Vereinsfest",
       "status": "Genehmigt",
       "start": "2026-09-24T17:00:00.000+02:00",
-      "end": null,
+      "end": "2026-09-24T21:00:00.000+02:00",
       "isDatetime": true,
       "description": "",
       "location": "Riethsporthalle, Essener Straße 20, 99089 Erfurt, Deutschland",
