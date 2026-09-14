@@ -2791,37 +2791,49 @@
     });
   };
 
+  /* Warenkorb im Modus "blocks": ein Ticket = eine Zeile mit eigenem Tarif-Dropdown,
+     statt einer Sammelzeile "4× Normalpreis" mit EINEM Dropdown fuer die ganze Menge
+     (Marko, 14.09.2026, nach Kundenrueckmeldung: "wenn ich vier Karten in den
+     Warenkorb lege, moechte ich pro Ticket den Typ auswaehlen koennen, so wie wir
+     das bei der Dauerkarte auch machen" — dort hat jeder Sitz sein eigenes Dropdown,
+     weil jeder Sitz ohnehin eine eigene Zeile ist). blockCounts bleibt unveraendert
+     ein Zaehler pro Tarif (kein Array), nur die DARSTELLUNG explodiert jeden Zaehler
+     >0 in so viele Einzelzeilen wie er Tickets enthaelt — Kapazitaets-/Begleitperson-
+     Logik in _stepBlock/_setBlockCount bleibt dadurch unangetastet. */
   SeatPicker.prototype._renderCartBlocks = function () {
     var self = this;
-    var lines = [];
+    var units = [];
     Object.keys(this.blockCounts).forEach(function (blockKey) {
       var c = self.blockCounts[blockKey];
       BLOCK_TARIFS.forEach(function (tarif) {
-        if (c[tarif] > 0) {
-          lines.push({ blockKey: blockKey, tarif: tarif, label: BLOCK_TARIF_LABELS[tarif], count: c[tarif], price: blockTarifPrice(c.priceInfo, tarif), zoneLabel: c.zoneLabel });
+        for (var i = 0; i < (c[tarif] || 0); i++) {
+          units.push({ blockKey: blockKey, tarif: tarif, label: BLOCK_TARIF_LABELS[tarif], price: blockTarifPrice(c.priceInfo, tarif), zoneLabel: c.zoneLabel });
         }
       });
     });
-    var ticketCount = lines.reduce(function (sum, l) { return sum + l.count; }, 0);
+    var ticketCount = units.length;
 
     this.cartEl.innerHTML = '';
-    if (lines.length === 0) this._renderDirectAddRow();
+    // Auswahl-Zeile bleibt immer stehen, auch wenn schon Tickets im Warenkorb liegen —
+    // sonst war nach dem ersten "Auswahl uebernehmen" kein Weg mehr sichtbar, weitere
+    // Tickets hinzuzufuegen (Marko, 14.09.2026).
+    this._renderDirectAddRow();
 
-    if (lines.length === 0) {
+    if (units.length === 0) {
       var emptyEl = document.createElement('div');
       emptyEl.className = 'seatplan-cart-empty';
       emptyEl.textContent = 'Noch keine Tickets ausgewählt.';
       this.cartEl.appendChild(emptyEl);
       this.ctaEl.disabled = true;
     } else {
-      lines.forEach(function (l) {
+      var seenBlockKey = {};
+      units.forEach(function (l) {
         var row = document.createElement('div');
         row.className = 'seatplan-cart-item';
         var lineCategory = self.blockCounts[l.blockKey].category;
         var linePriceInfo = self.blockCounts[l.blockKey].priceInfo;
         var hasErmaessigt = linePriceInfo.ermaessigt !== undefined;
         var hasKind = linePriceInfo.kind !== undefined;
-        var freeCount = self._blockFreeCount(l.blockKey.split('::')[0], lineCategory);
         // Begleitperson (kostenlos): als Tarif-Umwandlung fuer eine bereits im Warenkorb
         // liegende Zeile anbieten, nicht als eigener Direktwahl-Eintrag — Rollstuhlplatz
         // selbst ist block-unabhaengig (pseudo-Zone 'ROLLSTUHL', s. _renderDirectAddRow),
@@ -2830,6 +2842,10 @@
         // (Marko, 13.08.2026: "auch bei Einzelticketbuchungen so umsetzen").
         var hasBegleitung = lineCategory !== 'Rollstuhlplatz' && self.prices['Rollstuhlplatz'] &&
           self._companionSlotsRemaining(l.blockKey) > 0;
+        // Hinweis nur einmal pro Block zeigen, nicht bei jedem einzelnen Rollstuhlplatz-
+        // Ticket wiederholen, wenn mehrere davon im selben Block liegen.
+        var showRollstuhlHint = lineCategory === 'Rollstuhlplatz' && !seenBlockKey[l.blockKey];
+        seenBlockKey[l.blockKey] = true;
         row.innerHTML =
           '<div>' + l.zoneLabel +
           '<br><span class="t-caption">' + fmtEUR(l.price) + ' € je Ticket</span>' +
@@ -2842,15 +2858,10 @@
           // Hinweis direkt bei der Rollstuhlplatz-Zeile, da es hier (anders als im
           // "seats"-Modus mit seinem Hinweis im Sitzplan-Popup) keine vergleichbare
           // Stelle gibt, an der die Begleitperson-Option sonst auffallen wuerde.
-          (lineCategory === 'Rollstuhlplatz' ? '<br><span class="seatplan-pending-hint">Für deine Begleitperson kannst du bei einem anderen Ticket unten den Tarif auf „Begleitperson (kostenlos)“ umstellen.</span>' : '') +
+          (showRollstuhlHint ? '<br><span class="seatplan-pending-hint">Für deine Begleitperson kannst du bei einem anderen Ticket unten den Tarif auf „Begleitperson (kostenlos)“ umstellen.</span>' : '') +
           '</div>' +
-          '<div class="seatplan-cart-item-right">' +
-            '<span class="seatplan-stepper">' +
-              '<button type="button" data-cart-step="-1" data-zone="' + l.blockKey + '" data-tarif="' + l.tarif + '" aria-label="weniger">−</button>' +
-              '<span style="min-width:16px;text-align:center;font-weight:700">' + l.count + '</span>' +
-              '<button type="button" data-cart-step="1" data-zone="' + l.blockKey + '" data-tarif="' + l.tarif + '" aria-label="mehr" ' + (l.count >= freeCount ? 'disabled' : '') + '>+</button>' +
-            '</span>' +
-            '<span>' + fmtEUR(l.count * l.price) + ' €</span></div>';
+          '<div class="seatplan-cart-item-right seatplan-cart-item-right-removable"><span>' + fmtEUR(l.price) + ' €</span>' +
+            '<button type="button" data-cart-step="-1" data-zone="' + l.blockKey + '" data-tarif="' + l.tarif + '">entfernen</button></div>';
         self.cartEl.appendChild(row);
       });
 
@@ -2877,19 +2888,19 @@
         var newTarif = this.value;
         if (newTarif === oldTarif) return;
         var counts = self.blockCounts[blockKey];
-        // Bei Begleitperson nur so viele Tickets umwandeln, wie noch freie Slots da
-        // sind (max. 1 pro Rollstuhlplatz im Warenkorb, s. _companionSlotsRemaining) —
-        // der Rest bleibt im alten Tarif, statt die ganze Zeile pauschal umzubuchen.
+        // Jedes Dropdown steht jetzt fuer genau EIN Ticket (s. Kommentar oben an
+        // _renderCartBlocks) — es wird also immer genau 1 Stueck umgebucht, nicht
+        // mehr die gesamte Sammelmenge des alten Tarifs.
         var moveQty = newTarif === 'begleitung'
-          ? Math.min(counts[oldTarif], self._companionSlotsRemaining(blockKey))
-          : counts[oldTarif];
+          ? Math.min(1, self._companionSlotsRemaining(blockKey))
+          : 1;
         counts[newTarif] = (counts[newTarif] || 0) + moveQty;
         counts[oldTarif] -= moveQty;
         self._renderCart();
       });
     });
 
-    var total = lines.reduce(function (sum, l) { return sum + l.count * l.price; }, 0);
+    var total = units.reduce(function (sum, l) { return sum + l.price; }, 0);
     total += this._nachwuchsAmountFor(ticketCount > 0);
     total -= this._voucherDiscount(total);
     this.totalEl.textContent = fmtEUR(total) + ' €';
