@@ -90,14 +90,14 @@
      der echten pretix-API — Voucher- und Gift-Card-Endpunkte sind nicht ohne
      API-Token erreichbar). Webhook-URL ohne Workflow-ID im Pfad, s. Hinweis in
      tickets/dauerkarte.html. */
-  var VOUCHER_CHECK_URL = 'https://poetic-patience-production-9290.up.railway.app/webhook/gutschein-pruefen';
+  var VOUCHER_CHECK_URL = 'https://ticketing.basketball-loewen.com/webhook/gutschein-pruefen';
 
   /* Mitgliedsrabatt (30 % Löwen e.V.) braucht pro Sitzplatz eine Namensprüfung gegen
      die aktiven Mitglieder — sonst könnte ein Käufer den Rabatt für beliebig viele
      fremde Plätze mitnehmen (nur weil er selbst Mitglied ist). Die Prüfung ist final:
      bei Treffer wird der Rabatt für diesen Namen+diese Saison serverseitig gesperrt,
      ein zweiter Versuch mit demselben Namen schlägt danach bewusst fehl. */
-  var MITGLIEDSRABATT_PRUEFEN_URL = 'https://poetic-patience-production-9290.up.railway.app/webhook/mitgliedsrabatt-pruefen';
+  var MITGLIEDSRABATT_PRUEFEN_URL = 'https://ticketing.basketball-loewen.com/webhook/mitgliedsrabatt-pruefen';
   var MITGLIEDSRABATT_SAISON = '2026/2027';
 
   /* Dauerkarte-Tarife inkl. Mitgliedsrabatt — nur relevant, wenn opts.dauerkarteDiscount

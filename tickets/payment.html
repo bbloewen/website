@@ -496,7 +496,7 @@
 <!--/PARTIAL:footer--></div>
 
 <script src="/js/vendor/lucide-icons.js?v=1787766492"></script>
-<script src="/js/nav.js?v=1787760037"></script>
+<script src="/js/nav.js?v=1789506036"></script>
 <script src="/js/include.js?v=1787854261"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
@@ -564,7 +564,7 @@
        Webhook berechnet den Preis serverseitig neu (inkl. Gutschein-Pruefung) und
        liefert eine echte PayPal-Order-ID; erst nach PayPal-Bestaetigung (Capture)
        wird die pretix-Order angelegt. */
-    var EINZELTICKET_ORDER_CREATE_URL = 'https://poetic-patience-production-9290.up.railway.app/webhook/einzelticket-paypal-order-erstellen';
+    var EINZELTICKET_ORDER_CREATE_URL = 'https://ticketing.basketball-loewen.com/webhook/einzelticket-paypal-order-erstellen';
 
     if (cart.productType === 'einzelticket' && !isFreeOrder) {
       document.getElementById('pay-btn').classList.add('hidden');
@@ -573,7 +573,7 @@
 
       var PAYPAL_CLIENT_ID = 'BAAOl2K5Out1-IOUhPHJZYF4dKreSwFFEmJQxB8VP8L0fpOm95gxlfqppYMfyu7RLiIaWukS6Ei5doDvVI';
       var ORDER_CREATE_URL = EINZELTICKET_ORDER_CREATE_URL;
-      var CAPTURE_URL = 'https://poetic-patience-production-9290.up.railway.app/webhook/einzelticket-paypal-capture-erfassen';
+      var CAPTURE_URL = 'https://ticketing.basketball-loewen.com/webhook/einzelticket-paypal-capture-erfassen';
 
       var sdkScript = document.createElement('script');
       sdkScript.src = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(PAYPAL_CLIENT_ID) + '&currency=EUR&intent=capture';
@@ -624,8 +624,8 @@
       paypalContainerFanshop.classList.remove('hidden');
 
       var PAYPAL_CLIENT_ID_FANSHOP = 'BAAOl2K5Out1-IOUhPHJZYF4dKreSwFFEmJQxB8VP8L0fpOm95gxlfqppYMfyu7RLiIaWukS6Ei5doDvVI';
-      var GUTSCHEIN_ORDER_CREATE_URL = 'https://poetic-patience-production-9290.up.railway.app/webhook/fanshop-gutschein-order-erstellen';
-      var GUTSCHEIN_CAPTURE_URL = 'https://poetic-patience-production-9290.up.railway.app/webhook/fanshop-gutschein-capture-erfassen';
+      var GUTSCHEIN_ORDER_CREATE_URL = 'https://ticketing.basketball-loewen.com/webhook/fanshop-gutschein-order-erstellen';
+      var GUTSCHEIN_CAPTURE_URL = 'https://ticketing.basketball-loewen.com/webhook/fanshop-gutschein-capture-erfassen';
 
       var sdkScriptFanshop = document.createElement('script');
       sdkScriptFanshop.src = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(PAYPAL_CLIENT_ID_FANSHOP) + '&currency=EUR&intent=capture';
@@ -688,7 +688,7 @@
        normalen SEPA-Submit und den kostenlosen Bestellen-Button (leere
        Kontodaten, method="kostenlos"). */
     function submitDauerkarteOrder(kontoinhaber, iban, bic, method, btn) {
-      var webhookUrl = 'https://poetic-patience-production-9290.up.railway.app/webhook/dauerkarte-bestellung';
+      var webhookUrl = 'https://ticketing.basketball-loewen.com/webhook/dauerkarte-bestellung';
       var payload = { buyer: buyer, cart: cart, sepa: { kontoinhaber: kontoinhaber, iban: iban, bic: bic } };
       /* Schutz gegen Doppel-Bestellungen: das blosse btn.disabled reicht nur
          innerhalb desselben Seitenaufrufs. Bei einem Reload (z.B. nach langsamer
@@ -730,7 +730,7 @@
        Notion-Kontakt an/taggt ihn, generiert das SEPA-Mandat und speichert die
        Lastschrift-Daten. Gleicher Doppel-Bestellungs-Schutz wie bei der Dauerkarte. */
     function submitClub100Order(kontoinhaber, iban, bic, method, btn) {
-      var webhookUrl = 'https://poetic-patience-production-9290.up.railway.app/webhook/club100-anmeldung';
+      var webhookUrl = 'https://ticketing.basketball-loewen.com/webhook/club100-anmeldung';
       var payload = { buyer: buyer, cart: cart, sepa: { kontoinhaber: kontoinhaber, iban: iban, bic: bic } };
       if (btn.disabled) return;
       var payloadKey = JSON.stringify(payload);

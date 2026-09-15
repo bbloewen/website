@@ -359,7 +359,7 @@ def kauf_bereich(aktuell, kommt, heute):
   </section>
 
   <script src="/js/voucher-utils.js?v=1786873000"></script>
-  <script src="/js/seat-picker.js?v=1789409832"></script>
+  <script src="/js/seat-picker.js?v=1789506036"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {{
       var game = {game_json};
@@ -369,7 +369,7 @@ def kauf_bereich(aktuell, kommt, heute):
         nachwuchsBeitrag: true,
         nachwuchsAmount: 2,
         planUrl: '/assets/seating/riethsporthalle-seatingplan.json?v=1786585000',
-        seatStatusUrl: {('"https://poetic-patience-production-9290.up.railway.app/webhook/einzelticket-sitzplatz-status?subevent=' + str(aktuell["subeventId"]) + '"') if aktuell.get("subeventId") else "null"},
+        seatStatusUrl: {('"https://ticketing.basketball-loewen.com/webhook/einzelticket-sitzplatz-status?subevent=' + str(aktuell["subeventId"]) + '"') if aktuell.get("subeventId") else "null"},
         pretixEvent: 'saison2627',
         pretixItemCategoryMap: {json.dumps(PRETIX_ITEM_CATEGORY_MAP)},
         reservedSeats: [
@@ -551,7 +551,7 @@ def seite(liste, heute):
   }});
 </script>
 <script src="/js/vendor/lucide-icons.js?v=1787766492"></script>
-<script src="/js/nav.js?v=1787760037"></script>
+<script src="/js/nav.js?v=1789506036"></script>
 <script src="/js/include.js?v=1787854261"></script>
 </body>
 </html>

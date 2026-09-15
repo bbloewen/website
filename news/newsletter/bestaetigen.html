@@ -366,7 +366,7 @@
 </div>
 <!--/PARTIAL:footer--></div>
 <script src="/js/vendor/lucide-icons.js?v=1787766492"></script>
-<script src="/js/nav.js?v=1787760037"></script>
+<script src="/js/nav.js?v=1789506036"></script>
 <script src="/js/include.js?v=1787854261"></script>
 <script>
   var heading = document.getElementById('bestaetigen-heading');
@@ -384,7 +384,7 @@
   if (!token) {
     showResult(false, 'Es fehlt ein Bestätigungs-Code in diesem Link. Bitte nutze den Link direkt aus der E-Mail.');
   } else {
-    fetch('https://poetic-patience-production-9290.up.railway.app/webhook/newsletter-bestaetigen', {
+    fetch('https://ticketing.basketball-loewen.com/webhook/newsletter-bestaetigen', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: token })

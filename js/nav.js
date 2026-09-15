@@ -356,7 +356,7 @@ window.initNav = function initNav() {
           payload.fotoName = fotoFields.name;
           payload.fotoType = fotoFields.type;
         }
-        fetch('https://poetic-patience-production-9290.up.railway.app/webhook/website-feedback', {
+        fetch('https://ticketing.basketball-loewen.com/webhook/website-feedback', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)

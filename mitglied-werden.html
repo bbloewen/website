@@ -513,7 +513,7 @@
 </div>
 <!--/PARTIAL:footer--></div>
 <script src="/js/vendor/lucide-icons.js?v=1787766492"></script>
-<script src="/js/nav.js?v=1787760037"></script>
+<script src="/js/nav.js?v=1789506036"></script>
 <script src="/js/include.js?v=1787854261"></script>
 <script>
   var kgToggle = document.getElementById('kuendigung-toggle');
@@ -544,7 +544,7 @@
       webseite: document.getElementById('kg-webseite').value.trim(),
       elapsedMs: Date.now() - kuendigungFormLoadedAt
     };
-    fetch('https://poetic-patience-production-9290.up.railway.app/webhook/mitglied-kuendigung', {
+    fetch('https://ticketing.basketball-loewen.com/webhook/mitglied-kuendigung', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)

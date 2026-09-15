@@ -418,7 +418,7 @@
 </div>
 <!--/PARTIAL:footer--></div>
 <script src="/js/vendor/lucide-icons.js?v=1787766492"></script>
-<script src="/js/nav.js?v=1787760037"></script>
+<script src="/js/nav.js?v=1789506036"></script>
 <script src="/js/include.js?v=1787854261"></script>
 <script>
   var newsletterFormLoadedAt = Date.now();
@@ -438,7 +438,7 @@
       firma: document.getElementById('nl-firma').value.trim(),
       elapsedMs: Date.now() - newsletterFormLoadedAt
     };
-    fetch('https://poetic-patience-production-9290.up.railway.app/webhook/newsletter-anmeldung', {
+    fetch('https://ticketing.basketball-loewen.com/webhook/newsletter-anmeldung', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)

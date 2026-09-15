@@ -1199,7 +1199,7 @@
 
   /* ------------------------------------------------- Freiplatz melden */
 
-  var MELDE_WEBHOOK = 'https://poetic-patience-production-9290.up.railway.app/webhook/freiplatz-melden';
+  var MELDE_WEBHOOK = 'https://ticketing.basketball-loewen.com/webhook/freiplatz-melden';
 
   /* Das Meldeformular lag bis 25.08.2026 auf dem allgemeinen Feedback-Widget.
      Fuer die Meldepraemie braucht es aber eigene Felder: Standort, Foto und die

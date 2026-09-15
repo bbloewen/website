@@ -506,10 +506,10 @@
 <!--/PARTIAL:footer--></div>
 
 <script src="/js/vendor/lucide-icons.js?v=1787766492"></script>
-<script src="/js/nav.js?v=1787760037"></script>
+<script src="/js/nav.js?v=1789506036"></script>
 <script src="/js/include.js?v=1787854261"></script>
 <script src="/js/voucher-utils.js?v=1786873000"></script>
-<script src="/js/seat-picker.js?v=1789409832"></script>
+<script src="/js/seat-picker.js?v=1789506036"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     /* Preisbox zeigt bewusst den Normalpreis (data-base) statisch an. Der
@@ -550,7 +550,7 @@
       // Gültig ist immer nur .../webhook/<pfad> — analog einzelticket.html, mit
       // demselben Subevent, damit beide Kacheln synchron sind (s. Kommentar oben).
       seatStatusUrl: game.subeventId
-        ? 'https://poetic-patience-production-9290.up.railway.app/webhook/einzelticket-sitzplatz-status?subevent=' + game.subeventId
+        ? 'https://ticketing.basketball-loewen.com/webhook/einzelticket-sitzplatz-status?subevent=' + game.subeventId
         : null,
       standingBookable: game.stehplatzBuchbar !== false,
       pretixEvent: 'saison2627',
