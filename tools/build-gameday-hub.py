@@ -294,6 +294,10 @@ def kauf_bereich(aktuell, kommt, heute):
     Verkauf offen bzw. heute Spieltag (voller Kaufbereich -- Saalplan/
     Warenkorb/Kasse, wortgleich zur früheren Logik auf den Spieltagsseiten, nur
     mit den Daten des jeweils nächsten Spiels statt fest eingebettet).
+
+    reservedSeats/nvSeats (Block A, Reihe 1, EA-Reservierung/NV) müssen mit
+    tickets/dauerkarte.html mitziehen -- Begründung und Historie der
+    Ausnahmen steht dort, nicht hier.
     """
     if not kommt:
         return ""
@@ -355,7 +359,7 @@ def kauf_bereich(aktuell, kommt, heute):
   </section>
 
   <script src="/js/voucher-utils.js?v=1786873000"></script>
-  <script src="/js/seat-picker.js?v=1787760512"></script>
+  <script src="/js/seat-picker.js?v=1789409832"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {{
       var game = {game_json};
@@ -369,7 +373,7 @@ def kauf_bereich(aktuell, kommt, heute):
         pretixEvent: 'saison2627',
         pretixItemCategoryMap: {json.dumps(PRETIX_ITEM_CATEGORY_MAP)},
         reservedSeats: [
-          {{ zone: 'A', rows: ['1'], excludeSeatNumbers: ['1', '2', '3', '4', '5', '6', '7', '19', '20'] }}
+          {{ zone: 'A', rows: ['1'], excludeSeatNumbers: ['1', '2', '3', '4', '5', '6', '7', '16', '17', '19', '20'] }}
         ],
         nvSeats: [
           {{ zone: 'A', rows: ['1', '2', '3'], maxSeatNumber: 7 }}
@@ -508,7 +512,7 @@ def seite(liste, heute):
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1787855243" />
+<link rel="stylesheet" href="/css/site.css?v=1789213987" />
 <link rel="stylesheet" href="/css/seat-picker.css?v=1787760512" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
