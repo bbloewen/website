@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-15T16:00:43.440+02:00",
+  "generatedAt": "2026-09-16T16:00:43.315+02:00",
   "publishFrom": "2026-08-22",
   "events": [
     {
@@ -117,8 +117,8 @@
       "name": "Avenida-Therme Kinderfest – Mobiler Korb (Außenbereich)",
       "category": "Vereinsfest",
       "status": "Genehmigt",
-      "start": "2026-09-20T10:00:00.000+02:00",
-      "end": "2026-09-20T16:00:00.000+02:00",
+      "start": "2026-09-20T11:30:00.000+02:00",
+      "end": "2026-09-20T15:15:00.000+02:00",
       "isDatetime": true,
       "description": "Kindertagsfest in der Avenida-Therme",
       "location": "Am Stausee 1, 99448 Hohenfelden, Germany",
@@ -127,8 +127,8 @@
       "spotSlug": "event-avenida-therme-kinderfest-mobile-2026-09-20",
       "lat": 50.8786139,
       "lng": 11.1855576,
-      "spotVon": "2026-09-20T07:00:00Z",
-      "spotBis": "2026-09-20T15:00:00Z"
+      "spotVon": "2026-09-20T08:30:00Z",
+      "spotBis": "2026-09-20T14:15:00Z"
     },
     {
       "name": "Kinderfest am Zughafen",
@@ -150,7 +150,7 @@
       "isDatetime": true,
       "description": "",
       "location": "Riethsporthalle, Essener Straße 20, 99089 Erfurt, Deutschland",
-      "heroImage": ""
+      "heroImage": "https://drive.google.com/drive/u/1/folders/1uGaoWf4V2oxw4jOwB_hHQ6Yvoec603SN"
     }
   ]
 }
