@@ -26,7 +26,8 @@ import sys
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from seo_common import BASE, REPO, attr, canonical_url, indexable_pages, text_of
+from seo_common import (BASE, REPO, artikel_datum, attr, canonical_url,
+                        indexable_pages, text_of)
 
 START = "<!-- SEO:auto START (tools/build-head-meta.py — nicht von Hand ändern) -->"
 END = "<!-- SEO:auto END -->"
@@ -162,7 +163,6 @@ TITLE_RE = re.compile(r"<title>(.*?)</title>", re.S)
 DESC_RE = re.compile(r'<meta\s+name=["\']description["\']\s+content=["\'](.*?)["\']\s*/?>', re.S)
 H1_RE = re.compile(r"<h1[^>]*>(.*?)</h1>", re.S)
 HERO_NEWS_RE = re.compile(r"hero-news-([a-z0-9-]+)")
-ARTICLE_DATE_RE = re.compile(r"(\d{4}-\d{2}-\d{2})_")
 
 
 
@@ -514,7 +514,9 @@ def nodes_for(rel, text, page_title, social_title, description, image):
         })
 
     if rel.startswith("news/artikel/"):
-        m = ARTICLE_DATE_RE.search(rel.split("/")[-1])
+        # datePublished kommt aus dem Datums-Präfix des Dateinamens, nicht aus
+        # dem "datum"-Feld in data/news.json — siehe seo_common.artikel_datum.
+        veroeffentlicht = artikel_datum(rel)
         h1 = H1_RE.search(text)
         node = {
             "@type": "NewsArticle",
@@ -526,8 +528,8 @@ def nodes_for(rel, text, page_title, social_title, description, image):
             "publisher": PUBLISHER,
             "author": PUBLISHER,
         }
-        if m:
-            node["datePublished"] = m.group(1)
+        if veroeffentlicht:
+            node["datePublished"] = veroeffentlicht.isoformat()
         nodes.append(node)
 
     if rel.startswith("saison/profis/gameday/"):

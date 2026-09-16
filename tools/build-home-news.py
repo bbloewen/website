@@ -36,10 +36,9 @@ import argparse
 import json
 import re
 import sys
-from datetime import date
 from pathlib import Path
 
-from seo_common import bild_masse, esc
+from seo_common import bild_masse, esc, veroeffentlicht
 
 REPO = Path(__file__).resolve().parent.parent
 DATEN = REPO / "data" / "news.json"
@@ -59,12 +58,9 @@ JS_ANKER = [
     "var desktopRoles = ['news-tile-featured', 'news-tile-side', 'news-tile-small'",
     "'<div class=\"news-tile-overlay\">' +",
     "takeMax(newsItems, 3)",
+    # Sortierschluessel: hier wie dort das Veroeffentlichungsdatum, nicht "datum".
+    "date: publishDate(a),",
 ]
-
-
-def datum(s):
-    tag, monat, jahr = (int(x) for x in s.split("."))
-    return date(jahr, monat, tag)
 
 
 def kachel(a, rolle):
@@ -116,7 +112,7 @@ def main():
 
     artikel = [a for a in json.loads(DATEN.read_text(encoding="utf-8"))["artikel"]
                if a.get("topNews")]
-    artikel.sort(key=lambda a: datum(a["datum"]), reverse=True)
+    artikel.sort(key=veroeffentlicht, reverse=True)
     artikel = artikel[:ANZAHL]
     if not artikel:
         raise SystemExit("data/news.json: kein Artikel mit topNews")

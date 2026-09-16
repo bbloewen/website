@@ -29,21 +29,13 @@ import json
 import re
 import sys
 
-from seo_common import REPO, bild_masse
+from seo_common import REPO, bild_masse, veroeffentlicht
 
 ZIEL = REPO / "news" / "aktuelles.html"
 QUELLE = REPO / "data" / "news.json"
 CONTAINER = '<div class="grid-2" id="news-grid">'
 START = "<!--NEWS:auto-->"
 END = "<!--/NEWS:auto-->"
-
-
-def sortdatum(artikel):
-    """Deutsches Datum TT.MM.JJJJ sortierbar machen (wie parseGermanDate im JS)."""
-    teile = (artikel.get("datum") or "").split(".")
-    if len(teile) != 3:
-        return (0, 0, 0)
-    return (int(teile[2]), int(teile[1]), int(teile[0]))
 
 
 def karte(a):
@@ -66,7 +58,7 @@ def main():
     args = ap.parse_args()
 
     artikel = json.loads(QUELLE.read_text(encoding="utf-8")).get("artikel", [])
-    artikel = sorted(artikel, key=sortdatum, reverse=True)
+    artikel = sorted(artikel, key=veroeffentlicht, reverse=True)
     karten = "\n".join("            " + karte(a) for a in artikel)
     block = f"{CONTAINER}{START}\n{karten}\n            {END}</div>"
 

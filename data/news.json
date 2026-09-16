@@ -1,5 +1,5 @@
 {
-  "hinweis": "Zentrale Liste aller News-Beiträge. Inhalte stammen von der bisherigen Vereinswebsite (basketball-loewen.com) und wurden hierher übernommen. 'topNews': true steuert, ob ein Beitrag im Top-News-Bereich der Startseite erscheint — Beiträge ohne dieses Flag (oder mit false) werden nur auf der Aktuelles-Seite gelistet, nicht im Startseiten-Slider. 'bild' wird für die Foto-Kacheln im Startseiten-Newsfeed verwendet. 'team' (optional: 'profis' | 'damen' | 'nbbl' | 'baskidball') ordnet einen Artikel einem Team oder Programmbereich zu, für die 'Aktuelles zu ...'-Sektionen auf den Teamseiten und die BasKIDball-Sidebar (js/team-news.js) — Artikel ohne 'team' gelten als allgemein und füllen bei Bedarf auf.",
+  "hinweis": "Zentrale Liste aller News-Beiträge. Inhalte stammen von der bisherigen Vereinswebsite (basketball-loewen.com) und wurden hierher übernommen. 'datum' ist die Zeile, die auf der Kachel steht — bei einem Bericht über einen Termin darf dort der Termin stehen. Sortiert wird NICHT danach, sondern nach dem Veröffentlichungsdatum aus dem Datums-Präfix des Dateinamens (2026-09-16_verein_....html) — derselbe Wert, den tools/build-head-meta.py als datePublished ins JSON-LD schreibt (seo_common.veroeffentlicht bzw. SiteUtils.publishDate in js/nav.js). 'topNews': true steuert, ob ein Beitrag im Top-News-Bereich der Startseite erscheint — Beiträge ohne dieses Flag (oder mit false) werden nur auf der Aktuelles-Seite gelistet, nicht im Startseiten-Slider. 'bild' wird für die Foto-Kacheln im Startseiten-Newsfeed verwendet. 'team' (optional: 'profis' | 'damen' | 'nbbl' | 'baskidball') ordnet einen Artikel einem Team oder Programmbereich zu, für die 'Aktuelles zu ...'-Sektionen auf den Teamseiten und die BasKIDball-Sidebar (js/team-news.js) — Artikel ohne 'team' gelten als allgemein und füllen bei Bedarf auf.",
   "artikel": [
     {
       "datum": "11.09.2026",
@@ -8,7 +8,7 @@
       "icon": "heart-handshake",
       "titel": "Neue Schirmherrschaft für BasKIDball: Dirk Nowitzki und Svenja Brunckhorst",
       "kurztext": "Beim BasKIDballtalk 2026 in Berlin wurde Svenja Brunckhorst offiziell als neue Schirmherrin begrüßt — mit dabei: rund 30 BasKIDs, auch aus Erfurt.",
-      "url": "/news/artikel/2026-09-11_verein_baskidballtalk-berlin-schirmherrschaft.html",
+      "url": "/news/artikel/2026-09-16_verein_baskidballtalk-berlin-schirmherrschaft.html",
       "bild": "/assets/img/news/baskidballtalk-berlin-2026.webp",
       "topNews": true,
       "team": "baskidball"
