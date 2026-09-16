@@ -804,12 +804,15 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .baskidball-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 40px; align-items: start; }
 .baskidball-layout > div { min-width: 0; }
 .baskidball-sidebar {
-  display: flex; flex-direction: column; gap: 20px; position: sticky; top: 96px;
+  /* margin-top gleicht die Höhe von Eyebrow+Logo in der Hauptspalte aus, damit
+     die Sidebar mit der Überschrift bündig startet statt mit dem Eyebrow
+     (Marko, 16.09.2026). */
+  display: flex; flex-direction: column; gap: 20px; position: sticky; top: 96px; margin-top: 99px;
 }
 .baskidball-sidebar .info-tile { gap: 6px; }
 @media (max-width: 1023px) {
   .baskidball-layout { grid-template-columns: minmax(0, 1fr); }
-  .baskidball-sidebar { position: static; }
+  .baskidball-sidebar { position: static; margin-top: 0; }
 }
 
 /* LÖWENPARK-Countdown: Live-Countdown bis zum Ende der Thüringer Herbstferien. */
