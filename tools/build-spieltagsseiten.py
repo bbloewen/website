@@ -380,7 +380,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 </main>
 {footer_html}
 <script src="/js/vendor/lucide-icons.js?v=1787766492"></script>
-<script src="/js/nav.js?v=1787760037"></script>
+<script src="/js/nav.js?v=1789585539"></script>
 <script src="/js/include.js?v=1787854261"></script>
 </body>
 </html>

@@ -15,6 +15,23 @@ window.SiteUtils = (function () {
     return new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
   }
 
+  /* Veröffentlichungsdatum eines News-Artikels aus data/news.json.
+
+     Quelle ist der Datums-Präfix im Dateinamen (2026-09-16_verein_....html) —
+     derselbe Wert, den tools/build-head-meta.py als datePublished ins JSON-LD
+     schreibt. Das Feld "datum" ist davon getrennt: es ist die Zeile, die auf
+     der Kachel steht, und darf ein anderes Datum tragen als der Tag der
+     Veröffentlichung — etwa der Termin, über den berichtet wird.
+
+     Bis 16.09.2026 wurde nach "datum" sortiert. Ein Artikel über einen
+     zurückliegenden Termin rutschte damit sofort nach unten, obwohl er der
+     neueste war. Dieselbe Regel auf der Python-Seite: seo_common.veroeffentlicht. */
+  function publishDate(a) {
+    var m = /(?:^|\/)(\d{4})-(\d{2})-(\d{2})_/.exec((a && a.url) || '');
+    if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+    return parseGermanDate(a && a.datum);
+  }
+
   function pad2(n) { return String(n).padStart(2, '0'); }
 
   function gcalStamp(d) {
@@ -32,6 +49,7 @@ window.SiteUtils = (function () {
   return {
     parseGermanDate: parseGermanDate,
     parseDMY: parseGermanDate,
+    publishDate: publishDate,
     pad2: pad2,
     gcalStamp: gcalStamp,
     loadSearchIndex: loadSearchIndex

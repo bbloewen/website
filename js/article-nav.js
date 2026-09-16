@@ -1,11 +1,12 @@
 /* Vorheriger/Nächster-Artikel-Pfeile für News-Artikelseiten. Sortiert data/news.json
-   nach Datum absteigend (gleiche Reihenfolge wie news/aktuelles.html), findet den
+   nach Veröffentlichungsdatum absteigend (gleiche Reihenfolge wie
+   news/aktuelles.html), findet den
    aktuellen Artikel anhand der URL und rendert je einen Kreis-Pfeil in die Elemente
    mit id="article-nav-prev" und id="article-nav-next" (unten neben dem Newsletter-
    Button). Zirkulär (Modulo statt null) — am neuesten Artikel springt der rechte
    Pfeil zum ältesten und umgekehrt, damit man endlos durchklicken kann. */
 (function () {
-  var parseGermanDate = SiteUtils.parseGermanDate;
+  var publishDate = SiteUtils.publishDate;
 
   document.addEventListener('DOMContentLoaded', function () {
     var prevEl = document.getElementById('article-nav-prev');
@@ -14,7 +15,7 @@
 
     fetch('/data/news.json').then(function (r) { return r.json(); }).then(function (data) {
       var items = (data.artikel || []).slice().sort(function (a, b) {
-        return parseGermanDate(b.datum) - parseGermanDate(a.datum);
+        return publishDate(b) - publishDate(a);
       });
       var path = window.location.pathname;
       var idx = items.findIndex(function (a) { return a.url === path; });
