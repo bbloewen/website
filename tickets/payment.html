@@ -605,7 +605,7 @@
             });
           },
           onError: function (err) {
-            alert((err && err.message) || 'Es gab ein Problem mit der PayPal-Zahlung. Bitte versuche es erneut oder schreib uns direkt an info@basketball-loewen.com.');
+            alert((err && err.message) || 'Es gab ein Problem mit der PayPal-Zahlung. Bitte versuche es erneut oder schreib uns direkt an tickets@basketball-loewen.com.');
           }
         }).render('#paypal-button-container');
       };
@@ -657,7 +657,7 @@
             });
           },
           onError: function (err) {
-            alert((err && err.message) || 'Es gab ein Problem mit der PayPal-Zahlung. Bitte versuche es erneut oder schreib uns direkt an info@basketball-loewen.com.');
+            alert((err && err.message) || 'Es gab ein Problem mit der PayPal-Zahlung. Bitte versuche es erneut oder schreib uns direkt an tickets@basketball-loewen.com.');
           }
         }).render('#paypal-button-container');
       };
@@ -699,7 +699,7 @@
       if (btn.disabled) return;
       var payloadKey = JSON.stringify(payload);
       if (sessionStorage.getItem('bl_dauerkarte_sent') === payloadKey) {
-        alert('Diese Bestellung wurde bereits gesendet. Bitte prüfe dein Postfach auf die Bestätigungs-E-Mail, bevor du es erneut versuchst. Bei Fragen schreib uns gerne an info@basketball-loewen.com.');
+        alert('Diese Bestellung wurde bereits gesendet. Bitte prüfe dein Postfach auf die Bestätigungs-E-Mail, bevor du es erneut versuchst. Bei Fragen schreib uns gerne an tickets@basketball-loewen.com.');
         return;
       }
       var originalBtnText = btn.textContent;
@@ -721,7 +721,7 @@
         sessionStorage.removeItem('bl_dauerkarte_sent');
         btn.disabled = false;
         btn.textContent = originalBtnText;
-        alert('Deine Bestellung konnte nicht gesendet werden. Bitte versuche es gleich noch einmal oder schreib uns direkt an info@basketball-loewen.com.');
+        alert('Deine Bestellung konnte nicht gesendet werden. Bitte versuche es gleich noch einmal oder schreib uns direkt an tickets@basketball-loewen.com.');
       });
     }
 
@@ -735,7 +735,7 @@
       if (btn.disabled) return;
       var payloadKey = JSON.stringify(payload);
       if (sessionStorage.getItem('bl_club100_sent') === payloadKey) {
-        alert('Diese Anmeldung wurde bereits gesendet. Bitte prüfen Sie Ihr Postfach auf die Bestätigungs-E-Mail, bevor Sie es erneut versuchen. Bei Fragen schreiben Sie uns gerne an info@basketball-loewen.com.');
+        alert('Diese Anmeldung wurde bereits gesendet. Bitte prüfen Sie Ihr Postfach auf die Bestätigungs-E-Mail, bevor Sie es erneut versuchen. Bei Fragen schreiben Sie uns gerne an tickets@basketball-loewen.com.');
         return;
       }
       var originalBtnText = btn.textContent;
@@ -757,7 +757,7 @@
         sessionStorage.removeItem('bl_club100_sent');
         btn.disabled = false;
         btn.textContent = originalBtnText;
-        alert('Ihre Anmeldung konnte nicht gesendet werden. Bitte versuchen Sie es gleich noch einmal oder schreiben Sie uns direkt an info@basketball-loewen.com.');
+        alert('Ihre Anmeldung konnte nicht gesendet werden. Bitte versuchen Sie es gleich noch einmal oder schreiben Sie uns direkt an tickets@basketball-loewen.com.');
       });
     }
 
@@ -787,7 +787,7 @@
         }).catch(function (err) {
           btn.disabled = false;
           btn.textContent = originalBtnText;
-          alert((err && err.message) || 'Die Bestellung konnte nicht gesendet werden. Bitte versuche es gleich noch einmal oder schreib uns direkt an info@basketball-loewen.com.');
+          alert((err && err.message) || 'Die Bestellung konnte nicht gesendet werden. Bitte versuche es gleich noch einmal oder schreib uns direkt an tickets@basketball-loewen.com.');
         });
       });
     }
