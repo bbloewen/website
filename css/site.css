@@ -798,6 +798,20 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
   .loewenpark-sidebar { position: static; }
 }
 
+/* BasKIDball-Seite: gleiches Prinzip wie LÖWENPARK — 2/3 Hauptspalte,
+   1/3 Sidebar mit den neuesten News zum Programm (js/team-news.js,
+   data-team-news-compact). */
+.baskidball-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+.baskidball-layout > div { min-width: 0; }
+.baskidball-sidebar {
+  display: flex; flex-direction: column; gap: 20px; position: sticky; top: 96px;
+}
+.baskidball-sidebar .info-tile { gap: 6px; }
+@media (max-width: 1023px) {
+  .baskidball-layout { grid-template-columns: minmax(0, 1fr); }
+  .baskidball-sidebar { position: static; }
+}
+
 /* LÖWENPARK-Countdown: Live-Countdown bis zum Ende der Thüringer Herbstferien. */
 .loewenpark-countdown { margin: 20px 0 28px; }
 .countdown-grid { display: flex; gap: 12px; }
@@ -1810,9 +1824,9 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 
 .hero-photo.hero-kinderschutz { --hero-photo-url: url('/assets/img/hero-kinderschutz.webp'); background-position: center 20%; }
 .hero-photo.hero-waidloewen { --hero-photo-url: url('/assets/img/hero-waidloewen.webp'); background-position: center 40%; }
-.hero-photo.hero-soziales { --hero-photo-url: url('/assets/img/hero-soziales-engagement.webp'); background-position: 70% 60%; }
+.hero-photo.hero-soziales { --hero-photo-url: url('/assets/img/hero-soziales-engagement.webp'); background-position: center 15%; }
 
-.hero-photo.hero-baskidball { --hero-photo-url: url('/assets/img/hero-baskidball.webp'); background-position: 70% 60%; }
+.hero-photo.hero-baskidball { --hero-photo-url: url('/assets/img/hero-baskidball.webp'); background-position: center 15%; }
 
 /* Hero SPORT VERNETZT — Fototermin-Gruppe steht rechts im Panoramabild,
    deshalb Bildausschnitt weit nach rechts verschoben (Gruppe bleibt auch auf
