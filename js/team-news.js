@@ -11,8 +11,8 @@
      (z.B. BasKIDball) — bei leerem Ergebnis wird nur der Sidebar-Block selbst
      ausgeblendet, nicht die ganze Sektion, da daneben die Hauptspalte steht. */
 document.addEventListener('DOMContentLoaded', function () {
-  var parseDMY = SiteUtils.parseDMY;
-  function byDateDesc(a, b) { return parseDMY(b.datum) - parseDMY(a.datum); }
+  var publishDate = SiteUtils.publishDate;
+  function byDateDesc(a, b) { return publishDate(b) - publishDate(a); }
 
   function loadNews(callback) {
     fetch('/data/news.json', { cache: 'no-cache' })

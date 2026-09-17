@@ -93,6 +93,51 @@ def indexable_pages():
     return pages
 
 
+# ------------------------------------------------------------- News-Artikel
+#
+# Ein News-Artikel hat zwei Daten, und die dürfen auseinanderlaufen:
+#
+#   * Der Datums-Präfix im Dateinamen (2026-09-16_verein_....html) ist der Tag
+#     der Veröffentlichung. build-head-meta.py schreibt ihn als datePublished
+#     ins JSON-LD, und danach wird überall sortiert: Startseiten-Bento,
+#     news/aktuelles.html, die Pfeile auf der Artikelseite, die Team-Feeds.
+#   * Das Feld "datum" in data/news.json ist die Zeile, die auf der Kachel
+#     steht. Sie darf ein anderes Datum tragen — etwa den Termin, über den
+#     berichtet wird (BasKIDballtalk am 11.09., veröffentlicht am 16.09.).
+#
+# Bis 16.09.2026 wurde nach "datum" sortiert. Dadurch rutschte ein Artikel über
+# einen zurückliegenden Termin sofort nach unten, obwohl er der neueste war.
+# Wer hier etwas ändert, muss SiteUtils.publishDate in js/nav.js mitändern —
+# die JS-Seite sortiert nach derselben Regel.
+
+ARTIKEL_DATUM_RE = re.compile(r"(?:^|/)(\d{4})-(\d{2})-(\d{2})_")
+
+
+def artikel_datum(url):
+    """Veröffentlichungsdatum aus dem Dateinamen einer Artikel-URL, sonst None."""
+    m = ARTIKEL_DATUM_RE.search(url or "")
+    if not m:
+        return None
+    try:
+        return date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+    except ValueError:
+        return None
+
+
+def veroeffentlicht(artikel):
+    """Sortierdatum eines Eintrags aus data/news.json (Dateiname, sonst "datum")."""
+    d = artikel_datum(artikel.get("url"))
+    if d:
+        return d
+    teile = (artikel.get("datum") or "").split(".")
+    if len(teile) == 3:
+        try:
+            return date(int(teile[2]), int(teile[1]), int(teile[0]))
+        except ValueError:
+            pass
+    return date.min
+
+
 # ---------------------------------------------------------------- HTML-Helfer
 #
 # Diese vier Funktionen lagen bis 26.08.2026 als wortgleiche (oder fast
