@@ -2098,6 +2098,27 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .badge-info { background: var(--color-info-bg); color: #001B70; }
 .badge-success { background: var(--color-success-bg); color: #0E5A36; }
 
+/* Gameday-Zusatzinhalt: hinterlegte Karte zwischen Hero und Info-Grid auf
+   einzelnen Spieltagsseiten, wenn zu diesem Termin ein Sponsoring- oder
+   Themen-Spieltag stattfindet (z. B. Erfurt Crowd, Tag des Handwerks). Bewusst
+   ohne Badge/Eyebrow im Hero (Markos Ansage, Sept. 2026) — nur diese Karte
+   erklärt den Anlass. Zwei Farbvarianten, sonst identischer Aufbau. */
+.gameday-extra { padding: 26px 0; }
+.gameday-extra-card { display: flex; gap: 18px; align-items: flex-start; padding: 22px 24px; border-radius: var(--radius-lg); }
+.gameday-extra-card.tint-blue { background: linear-gradient(135deg, var(--color-blue-50), var(--color-blue-100)); }
+.gameday-extra-card.tint-orange { background: linear-gradient(135deg, #FDF1E6, #F6BE86); }
+.gameday-extra-icon {
+  flex-shrink: 0; width: 44px; height: 44px; border-radius: var(--radius-md);
+  background: #fff; display: flex; align-items: center; justify-content: center;
+}
+.gameday-extra-card.tint-blue .gameday-extra-icon { color: var(--color-blue-700); }
+.gameday-extra-card.tint-orange .gameday-extra-icon { color: var(--color-orange-700); }
+.gameday-extra-card h2 { margin: 0 0 4px; font-size: 18px; font-weight: var(--weight-extrabold); }
+.gameday-extra-card.tint-blue h2 { color: var(--color-blue-700); }
+.gameday-extra-card.tint-orange h2 { color: var(--color-orange-700); }
+.gameday-extra-card p { margin: 0; font-size: 14px; color: var(--text-primary); line-height: 1.6; }
+@media (max-width: 599px) { .gameday-extra-card { flex-direction: column; } }
+
 /* =====================================================================
    FIXTURE / SCHEDULE ROWS
    ===================================================================== */
