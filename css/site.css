@@ -2027,6 +2027,15 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   .hero-photo.hero-lg p.lead { margin-bottom: 14px; }
   .hero-side-card { padding: 18px; }
 }
+/* Kader-Collage im "Hungriger Kader"-Block (Profis-Seite): nur ab der
+   Zweispalten-Breite breiter ziehen, damit die Kollage oben mit der
+   Überschrift und unten mit der Button-Reihe abschließt -- unterhalb von
+   1024px greift die normale .hero-lg-grid-Stapelung, daher nur dort ueberschreiben
+   (Marko, 19.09.2026). 27px Versatz entspricht Zeilenhöhe+Abstand der Eyebrow davor. */
+@media (min-width: 1024px) {
+  .kader-photo-grid { grid-template-columns: 1.1fr 1fr; }
+  .kader-photo-wrap { margin-top: 27px; }
+}
 
 /* Simple page hero (subpages) — lighter than homepage hero */
 .page-hero { padding: 56px 0 40px; }
