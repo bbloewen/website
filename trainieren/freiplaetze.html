@@ -526,17 +526,6 @@
 <script src="/js/freiplaetze.js?v=1789506036"></script>
 <script>
   Freiplaetze.initUebersicht();
-
-  /* „Freiplatz melden" nutzt vorerst das allgemeine Feedback-Widget aus dem
-     Footer; ein eigenes Formular mit Standort und Foto kommt mit der
-     Court-Hunt-Meldeprämie. */
-  var freiplatzMeldenBtn = document.getElementById('freiplatz-melden-btn');
-  if (freiplatzMeldenBtn) {
-    freiplatzMeldenBtn.addEventListener('click', function () {
-      var toggle = document.getElementById('feedback-widget-toggle');
-      if (toggle) toggle.click();
-    });
-  }
 </script>
 </body>
 </html>
