@@ -1202,7 +1202,10 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   overflow: hidden; z-index: 1; pointer-events: none;
 }
 .card-media-ribbon {
-  position: absolute; top: 40px; right: -25px; width: 225px;
+  /* top/right so zentriert, dass das Band nach der Drehung genau durch die
+     Mitte des 150x150-Eckrahmens läuft -- sonst ragt eine Bandecke sichtbar
+     rein und der Text sitzt nicht mittig im Ausschnitt (Marko, 18.09.2026). */
+  position: absolute; top: 61px; right: -38px; width: 225px;
   display: block; text-align: center; pointer-events: auto;
   transform: rotate(45deg); background: var(--color-brand-orange-text); color: #fff;
   font-size: 11px; font-weight: var(--weight-semibold); letter-spacing: .03em;
