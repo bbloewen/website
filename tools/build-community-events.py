@@ -108,7 +108,7 @@ def card_html(ev):
     if location == "Online":
         location_html = (
             '<span class="t-caption card-location" style="display:flex;align-items:center;gap:4px;'
-            'margin:0 0 10px;color:var(--text-muted)"><i data-lucide="video" class="icon-12"></i> '
+            'margin:0 0 10px;color:var(--text-muted)"><i data-lucide="map-pin" class="icon-12"></i> '
             '<span class="card-location-text">Online</span></span>'
         )
     elif location:

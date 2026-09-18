@@ -89,7 +89,7 @@ function initCommunityEvents(containerId, jsonPath) {
     // "Online" ist kein Ort mit Maps-Link, sondern ein reiner Hinweis (z.B.
     // Erfurt-Crowd-Seminar per Videocall) -- eigenes Icon, kein <a>.
     var locationHTML = ev.location === 'Online'
-      ? '<span class="t-caption card-location" style="display:flex;align-items:center;gap:4px;margin:0 0 10px;color:var(--text-muted)"><i data-lucide="video" class="icon-12"></i> <span class="card-location-text">Online</span></span>'
+      ? '<span class="t-caption card-location" style="display:flex;align-items:center;gap:4px;margin:0 0 10px;color:var(--text-muted)"><i data-lucide="map-pin" class="icon-12"></i> <span class="card-location-text">Online</span></span>'
       : ev.location
         ? '<a class="t-caption card-location" style="display:flex;align-items:center;gap:4px;margin:0 0 10px;color:var(--text-muted)" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(ev.location) + '" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-12"></i> <span class="card-location-text">' + displayLocation + '</span></a>'
         : '';
