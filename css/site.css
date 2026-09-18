@@ -549,6 +549,9 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .card-media-photo img[src*="freiplaetze-loewenpark"] { object-position: center 22%; }
 .card-media-photo img[src*="freiplaetze-neuer-ringelberg"] { object-position: center 20%; }
 .card-media-photo img[src*="freiplaetze-ringelberg-radweg"] { object-position: center 28%; }
+/* Team-Gruppenfoto Saisoneröffnung: Köpfe sitzen im oberen Bilddrittel,
+   center-Crop (50%) hätte sie in der 180px-Kachel abgeschnitten. */
+.card-media-photo img[src*="saisoneroeffnung-2026"] { object-position: center 20%; }
 /* QR-Code liegt seit 24.08.2026 als kleines Overlay unten rechts im Kachelbild
    statt als eigene Zeile in der Textspalte: als Block darunter wirkte er wie ein
    Fremdkörper und drängte sich vor die eigentliche Platzbeschreibung. */
