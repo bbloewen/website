@@ -103,10 +103,17 @@ function initCommunityEvents(containerId, jsonPath) {
       '<div class="card hoverable camp-slider-card" data-start="' + ev.start + '" data-end="' + (ev.end || '') + '">' +
         mediaHTML +
         '<div class="card-body">' +
-          '<span class="card-label">' + ev.name + '</span>' +
-          '<h3 style="display:flex;align-items:center;gap:8px">' + dateLabel(ev) +
+          // Eventname ist die eigentliche Ueberschrift der Kachel (h3) --
+          // Datum/Zeit ist nur ein Hinweis-Label davor, nicht umgekehrt.
+          // Gleiche Rollenverteilung wie bei den Court-Hunt-Spot-Kacheln auf
+          // freiplaetze.html (dort traegt .card-label auch nur "Vorbei"/
+          // Status, nicht den Eventnamen) -- vorher war es auf dieser Seite
+          // seitenverkehrt, was echten Content aus der SEO-relevanten
+          // Ueberschrift verdraengt hat (Marko, 18.09.2026: "SEO pruefen").
+          '<span class="card-label" style="display:flex;align-items:center;gap:8px">' + dateLabel(ev) +
             ' <a href="' + calendarLink(ev) + '" target="_blank" rel="noopener" title="Ins Kalender eintragen" style="display:inline-flex;color:var(--color-brand-orange-text)"><i data-lucide="calendar-plus" class="icon-18"></i></a>' +
-          '</h3>' +
+          '</span>' +
+          '<h3>' + ev.name + '</h3>' +
           locationHTML +
           '<p>' + description + '</p>' +
           urlHTML +

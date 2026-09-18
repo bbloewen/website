@@ -132,8 +132,8 @@
       "end": "2026-09-20T15:15:00.000+02:00",
       "isDatetime": true,
       "description": "Weltkindertag in der <a href=\"https://avenida-therme.de/events/kinderfest\" target=\"_blank\" rel=\"noopener\">Avenida-Therme</a>: Wer schon immer mal mit den Basketball Löwen einen Korb werfen wollte, hat hier die Chance — dazu Wettrutschen, Hüpfburg, Bastelstation und Kindertanz.",
-      "location": "Am Stausee 1, 99448 Hohenfelden, Germany",
-      "heroImage": "https://www.avenida-therme.de/sites/default/files/Kindertag%20News%20Website.png",
+      "location": "Avenida-Therme, Am Stausee 1, 99448 Hohenfelden, Deutschland",
+      "heroImage": "https://basketball-loewen.com/assets/img/avenida-therme-kinderfest-2026.webp",
       "courtHunt": true,
       "spotSlug": "event-avenida-therme-kinderfest-mobile-2026-09-20",
       "lat": 50.8786139,
@@ -149,7 +149,7 @@
       "end": "2026-09-20T18:00:00.000+02:00",
       "isDatetime": true,
       "description": "Kinderfest zum Weltkindertag im Zughafen: Die <a href=\"https://zughafen.de/event/fete-du-papillon-2026/\" target=\"_blank\" rel=\"noopener\">Fête du Papillon</a> unterstützt mit jeder Spende auch die <a href=\"/trainieren/inklusion.html\">Waid-Löwen</a>, unser Special-Olympics-Team bei den Basketball Löwen — Schirmherr ist der gebürtige Erfurter Clemens Fritz (SV Werder Bremen).",
-      "location": "Zum Güterbahnhof 20, 99085 Erfurt, Deutschland",
+      "location": "Zughafen, Zum Güterbahnhof 20, 99085 Erfurt, Deutschland",
       "heroImage": "https://basketball-loewen.com/assets/img/zughafen-kinderfest-2026.webp"
     },
     {

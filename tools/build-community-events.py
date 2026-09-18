@@ -30,7 +30,7 @@ from datetime import datetime
 from urllib.parse import quote, urlencode
 from zoneinfo import ZoneInfo
 
-from seo_common import REPO
+from seo_common import BASE, REPO
 
 ZIEL = REPO / "fans" / "community-events.html"
 QUELLE = REPO / "data" / "community-events.json"
@@ -136,11 +136,14 @@ def card_html(ev):
         f'data-end="{e(ev.get("end") or "")}">'
         + media
         + '<div class="card-body">'
-        + f'<span class="card-label">{e(ev.get("name", ""))}</span>'
-        + f'<h3 style="display:flex;align-items:center;gap:8px">{e(date_label(ev))} '
+        # Eventname ist die Ueberschrift der Kachel (h3), Datum/Zeit nur ein
+        # Hinweis-Label davor -- gleiche Rollenverteilung wie bei den Court-
+        # Hunt-Spot-Kacheln auf freiplaetze.html (Marko, 18.09.2026).
+        + f'<span class="card-label" style="display:flex;align-items:center;gap:8px">{e(date_label(ev))} '
         + f'<a href="{calendar_link(ev)}" target="_blank" rel="noopener" title="Ins Kalender eintragen" '
         + 'style="display:inline-flex;color:var(--color-brand-orange-text)">'
-        + '<i data-lucide="calendar-plus" class="icon-18"></i></a></h3>'
+        + '<i data-lucide="calendar-plus" class="icon-18"></i></a></span>'
+        + f'<h3>{e(ev.get("name", ""))}</h3>'
         + location_html
         + f'<p>{description}</p>'
         + url_html
@@ -154,6 +157,52 @@ def events_schreiben(seite, events):
               if events else "<!--COMMUNITY:events--><!--/COMMUNITY:events-->")
     return re.sub(
         r"<!--COMMUNITY:events-->.*?<!--/COMMUNITY:events-->", lambda _: inhalt, seite,
+        count=1, flags=re.S,
+    )
+
+
+TAG_RE = re.compile(r"<[^>]+>")
+
+
+def event_ldjson(ev):
+    """Ein Event-Objekt nach schema.org, gleiche Bauart wie die SportsEvent-
+    Objekte auf den Gameday-Seiten (tools/build-head-meta.py-Aequivalent
+    dort ist von Hand in jeder Gameday-Seite gepflegt) -- hier automatisch
+    aus den gleichen Feldern, die auch die Kachel fuellen, damit sich Text
+    und Strukturdaten nie auseinander entwickeln."""
+    obj = {
+        "@type": "Event",
+        "name": ev.get("name", ""),
+        "description": TAG_RE.sub("", ev.get("description") or FALLBACK_DESCRIPTION),
+        "startDate": ev["start"],
+        "eventStatus": "https://schema.org/EventScheduled",
+        "organizer": {"@type": "Organization", "name": "Basketball Löwen Erfurt", "url": BASE},
+    }
+    if ev.get("end"):
+        obj["endDate"] = ev["end"]
+    if ev.get("heroImage"):
+        obj["image"] = ev["heroImage"]
+    location = ev.get("location") or ""
+    if location == "Online":
+        obj["eventAttendanceMode"] = "https://schema.org/OnlineEventAttendanceMode"
+        obj["location"] = {"@type": "VirtualLocation", "url": f"{BASE}fans/community-events.html"}
+    elif location:
+        obj["eventAttendanceMode"] = "https://schema.org/OfflineEventAttendanceMode"
+        place = {"@type": "Place", "name": location, "address": location}
+        if ev.get("lat") and ev.get("lng"):
+            place["geo"] = {"@type": "GeoCoordinates", "latitude": ev["lat"], "longitude": ev["lng"]}
+        obj["location"] = place
+    return obj
+
+
+def events_ldjson_schreiben(seite, events):
+    ldjson = json.dumps(
+        {"@context": "https://schema.org", "@graph": [event_ldjson(ev) for ev in events]},
+        ensure_ascii=False, separators=(",", ":"),
+    )
+    inhalt = f'<!--COMMUNITY:eventsld--><script type="application/ld+json">{ldjson}</script><!--/COMMUNITY:eventsld-->'
+    return re.sub(
+        r"<!--COMMUNITY:eventsld-->.*?<!--/COMMUNITY:eventsld-->", lambda _: inhalt, seite,
         count=1, flags=re.S,
     )
 
@@ -180,7 +229,18 @@ def main():
             + alt[einfuegestelle + len(marker):]
         )
 
+    # Event-Strukturdaten separat von SEO:auto (tools/build-head-meta.py),
+    # damit sich die beiden Skripte beim Ueberschreiben nicht in die Quere
+    # kommen -- eigener Marker direkt nach dessen Block.
+    if "<!--COMMUNITY:eventsld-->" not in alt:
+        anker = "<!-- SEO:auto END -->"
+        if anker not in alt:
+            print("  ACHTUNG SEO:auto END nicht gefunden", file=sys.stderr)
+            return 1
+        alt = alt.replace(anker, anker + "\n<!--COMMUNITY:eventsld--><!--/COMMUNITY:eventsld-->", 1)
+
     neu = events_schreiben(alt, events)
+    neu = events_ldjson_schreiben(neu, events)
 
     fehlend = [ev["name"] for ev in events if html.escape(ev["name"]) not in neu]
     if fehlend:
