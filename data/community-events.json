@@ -69,13 +69,13 @@
       "heroImage": "https://basketball-loewen.com/assets/img/zooparklauf-2026.webp"
     },
     {
-      "name": "Hopfenbergfest",
+      "name": "Hopfenbergfest 2026",
       "category": "Straßenfest",
       "status": "Genehmigt",
       "start": "2026-09-12T13:00:00.000+02:00",
       "end": "2026-09-12T18:00:00.000+02:00",
       "isDatetime": true,
-      "description": "",
+      "description": "Traditionelles <a href=\"https://www.facebook.com/p/Hopfenbergfestverein-Erfurt-100066699968277/\" target=\"_blank\" rel=\"noopener\">Hopfenbergfest</a>: Kinder umliegender Schulen eröffnen mit Liedern, dazu Verkaufsstände, Kaffee und Kuchen — die Basketball Löwen sind mit einem mobilen Korb vor Ort.",
       "location": "Am Hopfenberg, 99096 Erfurt, Deutschland",
       "heroImage": "https://basketball-loewen.com/assets/img/hopfenbergfest-strassenfest.webp",
       "courtHunt": true,

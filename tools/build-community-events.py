@@ -81,30 +81,34 @@ def calendar_link(ev):
 def card_html(ev):
     e = html.escape
     icon, tint = CATEGORY_ICON.get(ev.get("category", ""), ("calendar", "tint-neutral"))
+    # Court-Hunt-Spot-Hinweis als schraeges Eckband ueber dem Bild statt als
+    # Pillen-Badge im Kartentext -- kuerzerer Text, aber weiterhin ein Link
+    # zum Freiplatz (Marko, 18.09.2026).
+    court_hunt_ribbon = (
+        f'<div class="ribbon-corner"><a class="card-media-ribbon" '
+        f'href="/trainieren/freiplatz.html?platz={quote(ev["spotSlug"])}">Court-Hunt-Spot</a></div>'
+        if ev.get("courtHunt") and ev.get("spotSlug") else ""
+    )
     if ev.get("heroImage"):
         media = (
             f'<div class="card-media card-media-photo" style="height:180px">'
-            f'<img src="{e(ev["heroImage"])}" alt="{e(ev.get("name", ""))}" loading="lazy" /></div>'
+            f'<img src="{e(ev["heroImage"])}" alt="{e(ev.get("name", ""))}" loading="lazy" />'
+            + court_hunt_ribbon + '</div>'
         )
     else:
         media = (
             f'<div class="card-media {tint}" style="height:180px">'
-            f'<i data-lucide="{icon}" class="icon-32"></i></div>'
+            f'<i data-lucide="{icon}" class="icon-32"></i>' + court_hunt_ribbon + '</div>'
         )
     location = ev.get("location") or ""
     display_location = re.sub(r",\s*(Deutschland|Germany)$", "", location)
+    display_location = re.sub(r"\b\d{5}\s+(Erfurt)\b", r"\1", display_location)
     location_html = (
-        f'<a class="t-caption" style="display:flex;align-items:center;gap:4px;margin:0 0 10px;'
+        f'<a class="t-caption card-location" style="display:flex;align-items:center;gap:4px;margin:0 0 10px;'
         f'color:var(--text-muted)" href="https://www.google.com/maps/search/?api=1&amp;query='
         f'{quote(location)}" target="_blank" rel="noopener">'
-        f'<i data-lucide="map-pin" class="icon-12"></i> {e(display_location)}</a>'
+        f'<i data-lucide="map-pin" class="icon-12"></i> <span class="card-location-text">{e(display_location)}</span></a>'
         if location else ""
-    )
-    court_hunt_html = (
-        f'<a class="badge badge-orange" style="margin-bottom:10px" '
-        f'href="/trainieren/freiplatz.html?platz={quote(ev["spotSlug"])}">'
-        f'<i data-lucide="target" class="icon-12"></i> Court-Hunt-Spot: mobiler Korb vor Ort</a>'
-        if ev.get("courtHunt") and ev.get("spotSlug") else ""
     )
     # Bewusst nicht html.escape()-t (anders als sonst): description darf einen
     # einfachen <a>-Link enthalten (z.B. Verweis auf die Seite des externen
@@ -128,7 +132,6 @@ def card_html(ev):
         + 'style="display:inline-flex;color:var(--color-brand-orange-text)">'
         + '<i data-lucide="calendar-plus" class="icon-18"></i></a></h3>'
         + location_html
-        + court_hunt_html
         + f'<p>{description}</p>'
         + url_html
         + '</div></div>'

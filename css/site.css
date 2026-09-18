@@ -1181,6 +1181,35 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   overflow: hidden; line-height: 1.25; min-height: calc(1.25em * 2);
 }
+/* Ort immer einzeilig: Icon behaelt seine Groesse, der Text bekommt Ellipsis
+   statt umzubrechen (Marko, 18.09.2026) -- min-width:0 ist noetig, damit ein
+   Flex-Kind ueberhaupt unter seine Inhaltsbreite schrumpfen darf. */
+.card-location-text {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+}
+/* Court-Hunt-Spot-Hinweis als schraeges Eckband ueber dem Bild statt als
+   Pillen-Badge im Kartentext -- kuerzerer Text, weiterhin ein Link zum
+   Freiplatz (Marko, 18.09.2026: "schräg über dem Bild über die Ecke"). Die
+   Kartenoberfläche selbst (.card) schneidet das Band per overflow:hidden an
+   der Rundung ab, .card-media braucht dafür nur position:relative. */
+.camp-slider-card .card-media { position: relative; }
+/* Aeusserer Rahmen ist exakt auf die Kartenecke gesetzt und schneidet das
+   Band sauber am Rand ab (klassisches Eckband-Rezept) -- ohne diesen eigenen,
+   klein bemessenen Rahmen wuerde .card ihn erst am ganzen Kartenrand kappen
+   und dabei mitten im Text abschneiden statt nur die leeren Bandenden. */
+.ribbon-corner {
+  position: absolute; top: -10px; right: -10px; width: 150px; height: 150px;
+  overflow: hidden; z-index: 1; pointer-events: none;
+}
+.card-media-ribbon {
+  position: absolute; top: 40px; right: -25px; width: 225px;
+  display: block; text-align: center; pointer-events: auto;
+  transform: rotate(45deg); background: var(--color-brand-orange-text); color: #fff;
+  font-size: 11px; font-weight: var(--weight-semibold); letter-spacing: .03em;
+  text-transform: uppercase; padding: 7px 0; box-shadow: 0 2px 6px rgba(0, 0, 0, .25);
+  text-decoration: none;
+}
+.card-media-ribbon:hover { text-decoration: underline; }
 /* Vergangene Court-Hunt-Spots bleiben im Streifen (Aufkleber und geteilte Links
    sollen nicht ins Leere zeigen), sind aber erledigt — Ausgrauen UND das Label
    "Vorbei" im Text, nicht Farbe/Deckkraft allein als einziges Signal. */
