@@ -97,13 +97,13 @@
       "heroImage": "https://basketball-loewen.com/assets/img/erfurt-crowd-infoveranstaltung-2026.webp"
     },
     {
-      "name": "Thüringen Park – Mannschaftsvorstellung U19-Bundesliga",
+      "name": "Thüringen Park – Mannschaftsvorstellung U19",
       "category": "Straßenfest",
       "status": "Genehmigt",
       "start": "2026-09-18T16:00:00.000+02:00",
       "end": "2026-09-18T19:00:00.000+02:00",
       "isDatetime": true,
-      "description": "Mannschaftsvorstellung der Basketball Löwen <a href=\"/saison/nbbl.html\">U19</a> im Thüringen Park: Die Nachwuchs-Bundesligamannschaft stellt sich vor, dazu ist ein mobiler Korb der Basketball Löwen vor Ort.",
+      "description": "Mannschaftsvorstellung der <a href=\"/saison/nbbl.html\">Basketball Löwen U19</a> im Thüringen Park: Die Nachwuchs-Bundesligamannschaft stellt sich vor, dazu ist ein mobiler Korb der Basketball Löwen vor Ort.",
       "location": "Thüringen Park, Nordhäuser Str. 73, 99091 Erfurt",
       "heroImage": "https://basketball-loewen.com/assets/img/thueringen-park-2026.webp",
       "courtHunt": true,
@@ -114,13 +114,13 @@
       "spotBis": "2026-09-18T18:00:00Z"
     },
     {
-      "name": "Avenida-Therme Kinderfest – Mobiler Korb (Außenbereich)",
+      "name": "Avenida-Therme Kinderfest",
       "category": "Vereinsfest",
       "status": "Genehmigt",
       "start": "2026-09-20T11:30:00.000+02:00",
       "end": "2026-09-20T15:15:00.000+02:00",
       "isDatetime": true,
-      "description": "Kindertagsfest in der Avenida-Therme",
+      "description": "Weltkindertag in der Avenida-Therme: Wer schon immer mal mit einem Basketball-Profi der Löwen einen Korb werfen wollte, hat hier die Chance — dazu Wettrutschen, Hüpfburg, Bastelstation und Kindertanz.",
       "location": "Am Stausee 1, 99448 Hohenfelden, Germany",
       "heroImage": "https://www.avenida-therme.de/sites/default/files/Kindertag%20News%20Website.png",
       "courtHunt": true,
