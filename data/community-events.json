@@ -89,12 +89,12 @@
       "name": "Infoveranstaltung Erfurt-Crowd",
       "category": "Straßenfest",
       "status": "Genehmigt",
-      "start": "2026-09-16",
-      "end": null,
-      "isDatetime": false,
-      "description": "",
+      "start": "2026-09-16T17:00:00.000+02:00",
+      "end": "2026-09-16T18:00:00.000+02:00",
+      "isDatetime": true,
+      "description": "Online-Infoveranstaltung der Erfurt-Crowd: Wer für sein Vereinsprojekt Fördergelder sammeln möchte, erfährt hier, wie Crowdfunding funktioniert — passend zur Aktion „Dreier werfen, Projekte fördern\": Bei jedem Dreier der Basketball Löwen in den ersten fünf Heimspielen wandern 100 € in den Fördertopf der Erfurt-Crowd, bis zu 5.000 €.",
       "location": "",
-      "heroImage": ""
+      "heroImage": "https://basketball-loewen.com/assets/img/erfurt-crowd-infoveranstaltung-2026.webp"
     },
     {
       "name": "Thüringen Park – Mannschaftsvorstellung U19-Bundesliga",
