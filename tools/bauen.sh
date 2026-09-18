@@ -19,7 +19,7 @@ for s in build-lucide-icons build-galerie-thumbs \
          build-gameday-hub build-spieltagsseiten build-freiplatz-seiten \
          build-partner-wall build-trainingszeiten-liste build-home-news \
          build-spielplan-liste build-news-list build-freiplaetze \
-         build-instagram-archiv build-partials build-bildmasse \
+         build-community-events build-instagram-archiv build-partials build-bildmasse \
          build-head-meta build-sitemap; do
   printf '%s\n' "$s"
   python3 "tools/$s.py" $F

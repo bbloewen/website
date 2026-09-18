@@ -14,6 +14,11 @@
 # abend abgelaufen ist, bis zum naechsten Notion-Sync um 16 Uhr statisch stehen
 # (im Browser blendet ihn das JavaScript sofort aus, ein Crawler saehe ihn noch).
 #
+# Seit 18.09.2026 baut derselbe Lauf zusaetzlich die komplette Community-
+# Events-Liste auf fans/community-events.html statisch mit (build-community-
+# events.py) -- die Kacheln standen vorher nur im JavaScript-Rendering, ein
+# Crawler ohne JS sah dort gar nichts (Website-Feedback MF, 18.09.2026).
+#
 # Die QR-Codes bleiben bewusst aussen vor: sie entstehen separat.
 
 name: Freiplaetze nachbauen
@@ -50,9 +55,10 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Statische Platzliste, Head-Meta und Sitemap neu bauen
+      - name: Statische Platzliste, Community-Events, Head-Meta und Sitemap neu bauen
         run: |
           python3 tools/build-freiplaetze.py
+          python3 tools/build-community-events.py
           python3 tools/build-head-meta.py
           python3 tools/build-sitemap.py
 
@@ -64,6 +70,6 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add trainieren/freiplaetze.html sitemap.xml data/seiten-stand.json
-          git commit -m "Freiplaetze: statische Liste und Sitemap nachgezogen"
+          git add trainieren/freiplaetze.html fans/community-events.html sitemap.xml data/seiten-stand.json
+          git commit -m "Freiplaetze/Community-Events: statische Liste und Sitemap nachgezogen"
           git push
