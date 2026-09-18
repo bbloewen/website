@@ -140,7 +140,7 @@ def card_html(ev):
         # Hinweis-Label davor -- gleiche Rollenverteilung wie bei den Court-
         # Hunt-Spot-Kacheln auf freiplaetze.html (Marko, 18.09.2026).
         + f'<span class="card-label" style="display:flex;align-items:center;gap:8px">{e(date_label(ev))} '
-        + f'<a href="{calendar_link(ev)}" target="_blank" rel="noopener" title="Ins Kalender eintragen" '
+        + f'<a href="{calendar_link(ev)}" target="_blank" rel="noopener" title="In Kalender eintragen" '
         + 'style="display:inline-flex;color:var(--color-brand-orange-text)">'
         + '<i data-lucide="calendar-plus" class="icon-18"></i></a></span>'
         + f'<h3>{e(ev.get("name", ""))}</h3>'

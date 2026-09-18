@@ -111,7 +111,7 @@ function initCommunityEvents(containerId, jsonPath) {
           // seitenverkehrt, was echten Content aus der SEO-relevanten
           // Ueberschrift verdraengt hat (Marko, 18.09.2026: "SEO pruefen").
           '<span class="card-label" style="display:flex;align-items:center;gap:8px">' + dateLabel(ev) +
-            ' <a href="' + calendarLink(ev) + '" target="_blank" rel="noopener" title="Ins Kalender eintragen" style="display:inline-flex;color:var(--color-brand-orange-text)"><i data-lucide="calendar-plus" class="icon-18"></i></a>' +
+            ' <a href="' + calendarLink(ev) + '" target="_blank" rel="noopener" title="In Kalender eintragen" style="display:inline-flex;color:var(--color-brand-orange-text)"><i data-lucide="calendar-plus" class="icon-18"></i></a>' +
           '</span>' +
           '<h3>' + ev.name + '</h3>' +
           locationHTML +
