@@ -86,7 +86,7 @@ function initCommunityEvents(containerId, jsonPath) {
       ? '<a class="badge badge-orange" style="margin-bottom:10px" href="/trainieren/freiplatz.html?platz=' + encodeURIComponent(ev.spotSlug) + '"><i data-lucide="target" class="icon-12"></i> Court-Hunt-Spot: mobiler Korb vor Ort</a>'
       : '';
     return (
-      '<div class="card hoverable camp-slider-card" data-start="' + ev.start + '">' +
+      '<div class="card hoverable camp-slider-card" data-start="' + ev.start + '" data-end="' + (ev.end || '') + '">' +
         mediaHTML +
         '<div class="card-body">' +
           '<span class="card-label">' + ev.name + '</span>' +
@@ -109,11 +109,20 @@ function initCommunityEvents(containerId, jsonPath) {
     track.innerHTML = events.map(cardHTML).join('');
     if (window.lucide) lucide.createIcons();
 
-    // Auf das naechste anstehende Event scrollen (erstes Event mit Start >= jetzt);
-    // gibt es keins mehr (alle vergangen), bleibt die Ansicht ganz rechts (letztes Event).
+    // Auf das naechste anstehende ODER laufende Event scrollen: massgeblich ist
+    // das Ende, nicht der Start -- sonst faellt ein heute schon begonnenes Event
+    // (Start in der Vergangenheit, aber noch nicht vorbei) faelschlich raus und
+    // die Ansicht scrollt schon zum naechsten Tag (Website-Feedback MF, 18.09.2026).
+    // Ohne Endzeit (ganztaegig/nur Datum) gilt das Event bis Tagesende als aktuell.
     var now = new Date();
     var cards = Array.prototype.slice.call(track.querySelectorAll('.camp-slider-card'));
-    var nextCard = cards.find(function (c) { return new Date(c.getAttribute('data-start')) >= now; }) || cards[cards.length - 1];
+    var nextCard = cards.find(function (c) {
+      var end = c.getAttribute('data-end');
+      if (end) return new Date(end) >= now;
+      var start = new Date(c.getAttribute('data-start'));
+      var endOfStartDay = new Date(start.getFullYear(), start.getMonth(), start.getDate(), 23, 59, 59, 999);
+      return endOfStartDay >= now;
+    }) || cards[cards.length - 1];
     // .news-slider-track hat scroll-behavior:smooth per CSS -- eine direkte
     // scrollLeft-Zuweisung wuerde dadurch animiert statt sofort springen.
     // behavior:'instant' erzwingt den sofortigen Sprung beim ersten Rendern.

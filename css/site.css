@@ -1162,6 +1162,14 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 /* Kommende-Camps-Slider — gleiches Streifen-Prinzip, aber für ganze Karten
    statt Fotos (aktuelle + geplante Camps nebeneinander, scrollbar). */
 .camp-slider-card { flex: 0 0 380px; min-width: 320px; scroll-snap-align: start; }
+/* Eventname (.card-label) auf 2 Zeilen begrenzt, sonst schieben lange Namen
+   (z.B. "Avenida-Therme Kinderfest – Mobiler Korb (Außenbereich)") Datum/Ort/Text
+   je Karte unterschiedlich weit nach unten und die Kachelreihe wirkt uneinheitlich
+   (Website-Feedback MF, 18.09.2026). */
+.camp-slider-card .card-label {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; line-height: 1.35; min-height: calc(1.35em * 2);
+}
 /* Vergangene Court-Hunt-Spots bleiben im Streifen (Aufkleber und geteilte Links
    sollen nicht ins Leere zeigen), sind aber erledigt — Ausgrauen UND das Label
    "Vorbei" im Text, nicht Farbe/Deckkraft allein als einziges Signal. */
