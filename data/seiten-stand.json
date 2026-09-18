@@ -2,8 +2,8 @@
   "hinweis": "Von tools/build-sitemap.py gepflegt: je indexierbare Seite der Hash ihres Inhalts (main-Block plus Title/Description, ohne Cache-Buster) und das Datum, an dem sich dieser Inhalt zuletzt geaendert hat. Grundlage fuer lastmod in sitemap.xml. Nicht von Hand pflegen.",
   "seiten": {
     "agb.html": {
-      "hash": "871efe92e8c4b8edefa7fb70882ccd7c90936b9e",
-      "lastmod": "2026-09-07"
+      "hash": "c692eb7e84ccd906ec78a21a6592a7120e3e859b",
+      "lastmod": "2026-09-18"
     },
     "beitragsordnung.html": {
       "hash": "2d22c5f10a5ce8b2fa9627ecbdc67b4b0e0894f2",
@@ -30,8 +30,8 @@
       "lastmod": "2026-08-26"
     },
     "datenschutz.html": {
-      "hash": "f5d13b040f41ced197ea4ba3b4f9377d4650e0bc",
-      "lastmod": "2026-08-25"
+      "hash": "2f17d59430fcda07ef7568715624dfc5b9a27132",
+      "lastmod": "2026-09-18"
     },
     "fans/community-events.html": {
       "hash": "a435db12f13c8cb49190c88aad0b2e23ee848ddc",
@@ -246,11 +246,11 @@
       "lastmod": "2026-08-27"
     },
     "saison/profis/gameday/2026-10-11-bba-ludwigsburg.html": {
-      "hash": "14d84f3460145388399b00bbb2ae3dff98224620",
+      "hash": "5c26c72ae05f98ee2add5051aeb37ad0ce4e78a9",
       "lastmod": "2026-09-18"
     },
     "saison/profis/gameday/2026-10-18-tsg-reutlingen-ravens.html": {
-      "hash": "53938e124adc0280aa71b851142d6904d8ac3026",
+      "hash": "9b9fd433af0b5c3e4d0aecc09802ea3fbe0ac379",
       "lastmod": "2026-09-18"
     },
     "saison/profis/gameday/2026-11-08-culture-city-weimar.html": {
@@ -342,8 +342,8 @@
       "lastmod": "2026-09-14"
     },
     "trainieren/freiplaetze.html": {
-      "hash": "0cec6e20bab77a997a4da2898c772c2fc6137e39",
-      "lastmod": "2026-09-17"
+      "hash": "b2876936f587c4e47f7da95f97ad895e2881f0dd",
+      "lastmod": "2026-09-18"
     },
     "trainieren/freiplatz/loewenpark.html": {
       "hash": "06a4ce12eee8deb853d2f0ddc9a7b230c21cd466",
