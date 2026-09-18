@@ -58,13 +58,13 @@
       "heroImage": "https://basketball-loewen.com/assets/img/stadtteilfest-wiesenhuegel-2026.webp"
     },
     {
-      "name": "Zooparklauf – Basketballkorb-Aktion (SSV Nord)",
+      "name": "Zooparklauf – Basketballkorb-Aktion",
       "category": "Straßenfest",
       "status": "Genehmigt",
       "start": "2026-09-12T09:00:00.000+02:00",
       "end": "2026-09-12T16:00:00.000+02:00",
       "isDatetime": true,
-      "description": "",
+      "description": "Beim 28. Erfurter Zooparklauf sorgen die Basketball Löwen mit einer Basketballkorb-Aktion für Abwechslung — der traditionelle Familienlauf des <a href=\"https://ssv-erfurt-nord.de/\" target=\"_blank\" rel=\"noopener\">SSV Erfurt-Nord</a> führt durchs Zoopark-Gelände.",
       "location": "Am Zoopark 1, 99087 Erfurt",
       "heroImage": ""
     },
