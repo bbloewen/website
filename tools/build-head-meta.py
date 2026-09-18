@@ -63,8 +63,8 @@ ORG = {
     "telephone": "+49 175 6100411",
     "address": {
         "@type": "PostalAddress",
-        "streetAddress": "Leipziger Straße 71",
-        "postalCode": "99085",
+        "streetAddress": "Friedrich-Ebert-Straße 58",
+        "postalCode": "99096",
         "addressLocality": "Erfurt",
         "addressRegion": "Thüringen",
         "addressCountry": "DE",
