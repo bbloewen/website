@@ -222,14 +222,14 @@
       "verein": "usv-erfurt",
       "termine": [
         {
-          "tag": "Mo",
-          "zeit": "18:30–20:00 Uhr",
-          "ort": "Hirnzigenweg"
+          "tag": "Di",
+          "zeit": "17:00–18:15 Uhr",
+          "ort": "Domsporthalle"
         },
         {
-          "tag": "Do",
-          "zeit": "17:00–18:30 Uhr",
-          "ort": "Europaschule"
+          "tag": "Fr",
+          "zeit": "16:30–18:00 Uhr",
+          "ort": "Ullrich von Hutten"
         }
       ],
       "trainer": "Pirmin, Valentin",
