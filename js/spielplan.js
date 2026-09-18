@@ -50,10 +50,13 @@
       // spielen ebenfalls dort).
       venueHTML = '<div class="fixture-venue-line"><a href="' + RIETHSPORTHALLE_MAPS_URL + '" target="_blank" rel="noopener"><i data-lucide="map-pin" style="width:14px;height:14px"></i> Riethsporthalle</a></div>';
       statusHTML = '<span class="venue-heim">Heimspiel</span>';
+    } else if (g.halle && g.adresse) {
+      /* Echte Hallenadresse (s. Hinweis in data/spielplan-saison.json), recherchiert
+         über die Team-Info-Seiten der 2. Basketball Bundesliga — Website-Feedback
+         von Nick, 17.09.2026. g.ort bleibt als Fallback für Zeilen ohne Adresse. */
+      venueHTML = '<div class="fixture-venue-line"><a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(g.adresse) + '" target="_blank" rel="noopener"><i data-lucide="map-pin" style="width:14px;height:14px"></i> ' + g.halle + '</a></div>';
+      statusHTML = '<span class="venue-auswaerts">Auswärts</span>';
     } else if (g.ort) {
-      /* g.ort ist ein best-effort abgeleiteter Ort fürs Auswärtsspiel (kein
-         exakter Hallenname), s. Hinweis in data/spielplan-saison.json — dient
-         nur als grober Orientierungslink, wie weit das Spiel von Erfurt entfernt ist. */
       venueHTML = '<div class="fixture-venue-line"><a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(g.ort) + '" target="_blank" rel="noopener"><i data-lucide="map-pin" style="width:14px;height:14px"></i> ' + g.ort + '</a></div>';
       statusHTML = '<span class="venue-auswaerts">Auswärts</span>';
     } else {
@@ -183,7 +186,7 @@
 
   Promise.all([
     fetch('/data/heimspiele.json?v=1786356737').then(function (r) { return r.json(); }),
-    fetch('/data/spielplan-saison.json?v=1786381322').then(function (r) { return r.json(); })
+    fetch('/data/spielplan-saison.json?v=1789738545').then(function (r) { return r.json(); })
   ]).then(function (results) {
     var heim = results[0], saison = results[1];
 
