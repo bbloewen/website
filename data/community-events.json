@@ -3,6 +3,17 @@
   "publishFrom": "2026-08-22",
   "events": [
     {
+      "name": "LÖWENPARK – Öffentliche Baustellenführung",
+      "category": "Vereinsfest",
+      "status": "Genehmigt",
+      "start": "2026-09-19T10:00:00.000+02:00",
+      "end": "2026-09-19T11:00:00.000+02:00",
+      "isDatetime": true,
+      "description": "Öffentliche Baustellenführung im LÖWENPARK für unsere Ehrenamtlichen: aktuelle News rund um den Umbau unserer neuen Trainingshalle.",
+      "location": "LÖWENPARK, Friedrich-Ebert-Straße 58, 99096 Erfurt",
+      "heroImage": "https://basketball-loewen.com/assets/img/loewenpark-galerie-22.webp"
+    },
+    {
       "name": "Ehrenamtstreff",
       "category": "Vereinsfest",
       "status": "Abgeschlossen",
