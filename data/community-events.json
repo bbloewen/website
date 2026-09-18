@@ -20,7 +20,7 @@
       "start": "2026-09-05T09:00:00.000+02:00",
       "end": "2026-09-05T13:00:00.000+02:00",
       "isDatetime": true,
-      "description": "30 Jahre SWE Stöberhaus: Jubiläums-Stöbermarkt mit Rabattaktion, Tombola und Korbwerfen mit den Basketball Löwen im größten Gebrauchtwarenhaus Thüringens.",
+      "description": "30 Jahre <a href=\"https://swefuererfurt.de/2026/04/17/30-jahre-stoeberhaus-ein-ort-mit-herz-und-teamgeist/\" target=\"_blank\" rel=\"noopener\">SWE Stöberhaus</a>: Jubiläums-Stöbermarkt mit Rabattaktion, Tombola und Korbwerfen mit den Basketball Löwen im größten Gebrauchtwarenhaus Thüringens.",
       "location": "SWE Stöberhaus, Eugen-Richter-Straße 26, 99085 Erfurt, Deutschland",
       "heroImage": "https://basketball-loewen.com/assets/img/stoeberhaus-jubilaeum-2026.webp"
     },
@@ -42,10 +42,9 @@
       "start": "2026-09-05T12:00:00.000+02:00",
       "end": "2026-09-05T15:00:00.000+02:00",
       "isDatetime": true,
-      "description": "Sommerfest des Christophoruswerks: Die Basketball Löwen sind zu Gast bei der Diakonie-Einrichtung für Menschen mit Behinderung an der Christophorus-Schule in Erfurt.",
+      "description": "Sommerfest des <a href=\"https://www.christophoruswerk.de/veranstaltung/ankuendigung-jahresfest-2026/\" target=\"_blank\" rel=\"noopener\">Christophoruswerks</a>: Die Basketball Löwen sind zu Gast bei der Diakonie-Einrichtung für Menschen mit Behinderung an der Christophorus-Schule in Erfurt.",
       "location": "Spittelgartenstraße 1, 99089 Erfurt, Deutschland",
-      "heroImage": "https://basketball-loewen.com/assets/img/gemeinschaft-generisch-2026.webp",
-      "url": "https://www.christophoruswerk.de/veranstaltung/ankuendigung-jahresfest-2026/"
+      "heroImage": "https://basketball-loewen.com/assets/img/gemeinschaft-generisch-2026.webp"
     },
     {
       "name": "Stadtteilfest Wiesenhügel",

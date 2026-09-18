@@ -106,7 +106,12 @@ def card_html(ev):
         f'<i data-lucide="target" class="icon-12"></i> Court-Hunt-Spot: mobiler Korb vor Ort</a>'
         if ev.get("courtHunt") and ev.get("spotSlug") else ""
     )
-    description = e(ev.get("description") or FALLBACK_DESCRIPTION)
+    # Bewusst nicht html.escape()-t (anders als sonst): description darf einen
+    # einfachen <a>-Link enthalten (z.B. Verweis auf die Seite des externen
+    # Veranstalters mitten im Satz), analog zur JS-Fassung, die description
+    # ebenfalls ungeprueft einfuegt. Kommt nur aus unserer eigenen Pflege,
+    # nicht direkt aus Notion-Nutzereingaben.
+    description = ev.get("description") or FALLBACK_DESCRIPTION
     url_html = (
         f'<a class="card-link mt-2" href="{e(ev["url"])}" target="_blank" rel="noopener">'
         f'Mehr erfahren <i data-lucide="arrow-right" class="icon-14"></i></a>'
