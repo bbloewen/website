@@ -107,6 +107,11 @@ def card_html(ev):
         if ev.get("courtHunt") and ev.get("spotSlug") else ""
     )
     description = e(ev.get("description") or FALLBACK_DESCRIPTION)
+    url_html = (
+        f'<a class="card-link mt-2" href="{e(ev["url"])}" target="_blank" rel="noopener">'
+        f'Mehr erfahren <i data-lucide="arrow-right" class="icon-14"></i></a>'
+        if ev.get("url") else ""
+    )
     return (
         f'<div class="card hoverable camp-slider-card" data-start="{e(ev["start"])}" '
         f'data-end="{e(ev.get("end") or "")}">'
@@ -120,6 +125,7 @@ def card_html(ev):
         + location_html
         + court_hunt_html
         + f'<p>{description}</p>'
+        + url_html
         + '</div></div>'
     )
 

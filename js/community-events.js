@@ -85,6 +85,11 @@ function initCommunityEvents(containerId, jsonPath) {
     var courtHuntHTML = (ev.courtHunt && ev.spotSlug)
       ? '<a class="badge badge-orange" style="margin-bottom:10px" href="/trainieren/freiplatz.html?platz=' + encodeURIComponent(ev.spotSlug) + '"><i data-lucide="target" class="icon-12"></i> Court-Hunt-Spot: mobiler Korb vor Ort</a>'
       : '';
+    // Optionaler Link zur Veranstaltungsseite des Veranstalters (nicht bei uns
+    // organisiert, z.B. Christophoruswerk-Jahresfest) -- neuer Tab.
+    var urlHTML = ev.url
+      ? '<a class="card-link mt-2" href="' + ev.url + '" target="_blank" rel="noopener">Mehr erfahren <i data-lucide="arrow-right" class="icon-14"></i></a>'
+      : '';
     return (
       '<div class="card hoverable camp-slider-card" data-start="' + ev.start + '" data-end="' + (ev.end || '') + '">' +
         mediaHTML +
@@ -96,6 +101,7 @@ function initCommunityEvents(containerId, jsonPath) {
           locationHTML +
           courtHuntHTML +
           '<p>' + description + '</p>' +
+          urlHTML +
         '</div>' +
       '</div>'
     );

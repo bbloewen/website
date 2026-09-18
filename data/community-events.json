@@ -42,9 +42,10 @@
       "start": "2026-09-05T12:00:00.000+02:00",
       "end": "2026-09-05T15:00:00.000+02:00",
       "isDatetime": true,
-      "description": "",
+      "description": "Sommerfest des Christophoruswerks: Die Basketball Löwen sind zu Gast bei der Diakonie-Einrichtung für Menschen mit Behinderung an der Christophorus-Schule in Erfurt.",
       "location": "Spittelgartenstraße 1, 99089 Erfurt, Deutschland",
-      "heroImage": ""
+      "heroImage": "",
+      "url": "https://www.christophoruswerk.de/veranstaltung/ankuendigung-jahresfest-2026/"
     },
     {
       "name": "Stadtteilfest Wiesenhügel",
