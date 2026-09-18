@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1789759438" />
+<link rel="stylesheet" href="/css/site.css?v=1789767453" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
@@ -286,9 +286,9 @@
           </div>
         </div>
         <div style="display:flex;justify-content:center">
-          <button type="button" id="teamfoto-open" class="teamfoto-placeholder" aria-label="Teamfoto vergrößern (Platzhalter, aktuelles Foto folgt)">
-            <img loading="lazy" src="/assets/img/team-prob.webp" width="1920" height="1280" alt=""  />
-            <span class="teamfoto-placeholder-note"><i data-lucide="zoom-in" class="icon-16"></i> Teamfoto folgt</span>
+          <button type="button" id="teamfoto-open" class="teamfoto-placeholder is-collage" aria-label="Kader-Collage vergrößern">
+            <img loading="lazy" src="/assets/img/team-kader-collage.webp" width="1430" height="1430" alt="Kader-Collage aus den 16 Spielerporträts der Basketball Löwen Pro B"  />
+            <span class="teamfoto-placeholder-note"><i data-lucide="zoom-in" class="icon-16"></i> Echtes Teamfoto folgt</span>
           </button>
         </div>
       </div>
@@ -432,13 +432,14 @@
     </div>
   </section>
 
-  <!-- Teamfoto-Popup: Platzhalter (letztjähriges Foto stark weichgezeichnet,
-       damit es nicht als solches erkennbar ist), bis ein aktuelles Teamfoto da ist. -->
+  <!-- Teamfoto-Popup: zeigt die Kader-Collage aus den 16 Spielerportraits
+       (echtes zusammengesetztes Bild, kein Platzhalter), bis ein echtes
+       Mannschaftsfoto entsteht. -->
   <div class="modal-backdrop" id="teamfoto-modal">
     <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="teamfoto-title" style="max-width:min(90vw,640px);padding:0;overflow:hidden">
       <button type="button" class="modal-close" data-teamfoto-close aria-label="Schließen" style="background:rgba(0,18,45,.55);color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:1"><i data-lucide="x" class="icon-18"></i></button>
-      <img loading="lazy" src="/assets/img/team-prob.webp" width="1920" height="1280" alt="" style="width:100%;display:block;filter:blur(8px);transform:scale(1.06)"  />
-      <p class="t-body-sm" id="teamfoto-title" style="padding:16px 20px;margin:0;color:var(--text-secondary);text-align:center">Aktuelles Teamfoto folgt in Kürze.</p>
+      <img loading="lazy" src="/assets/img/team-kader-collage.webp" width="1430" height="1430" alt="Kader-Collage aus den 16 Spielerporträts der Basketball Löwen Pro B" style="width:100%;display:block"  />
+      <p class="t-body-sm" id="teamfoto-title" style="padding:16px 20px;margin:0;color:var(--text-secondary);text-align:center">Kader-Collage aus den Spielerportraits — ein echtes Mannschaftsfoto folgt.</p>
     </div>
   </div>
 </main>

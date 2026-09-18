@@ -2707,6 +2707,10 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
   border-radius: var(--radius-lg); overflow: hidden; background: none;
 }
 .teamfoto-placeholder img { width: 100%; height: auto; display: block; filter: blur(5px); transform: scale(1.08); }
+/* Profis-Kader-Collage ist ein echtes, zusammengesetztes Bild (16 eigene
+   Spielerportraits), kein unkenntlich gemachtes Alt-Foto -- Weichzeichner
+   und Zoom der generischen Regel oben gelten hier nicht (Marko, 18.09.2026). */
+.teamfoto-placeholder.is-collage img { filter: none; transform: none; }
 .teamfoto-placeholder-note {
   position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 4px; background: rgba(0,18,45,.35); color: #fff; font-size: 12px; font-weight: var(--weight-semibold);
