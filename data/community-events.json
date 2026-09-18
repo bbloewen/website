@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-18T16:00:43.292+02:00",
+  "generatedAt": "2026-09-18T17:18:16.856+02:00",
   "publishFrom": "2026-08-22",
   "events": [
     {
@@ -105,7 +105,7 @@
       "isDatetime": true,
       "description": "Mannschaftsvorstellung U19 \n",
       "location": "Nordhäuser Str. 73 t, 99091 Erfurt",
-      "heroImage": "https://basketball-loewen.com/assets/img/thueringen-park-2026.webp",
+      "heroImage": "https://drive.google.com/file/d/1i2U0yUrOtJQDFxiSXq816O5f0g2ifa3N/view?usp=drivesdk",
       "courtHunt": true,
       "spotSlug": "event-thueringen-park-mannschaftsvorst-2026-09-18",
       "lat": 51.0085959,
@@ -150,7 +150,7 @@
       "isDatetime": true,
       "description": "",
       "location": "Riethsporthalle, Essener Straße 20, 99089 Erfurt, Deutschland",
-      "heroImage": "https://basketball-loewen.com/assets/img/saisoneroeffnung-2026.webp"
+      "heroImage": "https://drive.google.com/file/d/1YgdqCPgNqHD570iHR3dXzZTSbKDquKVh/view?usp=sharing"
     }
   ]
 }
