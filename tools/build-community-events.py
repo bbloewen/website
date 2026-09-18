@@ -103,13 +103,23 @@ def card_html(ev):
     location = ev.get("location") or ""
     display_location = re.sub(r",\s*(Deutschland|Germany)$", "", location)
     display_location = re.sub(r"\b\d{5}\s+(Erfurt)\b", r"\1", display_location)
-    location_html = (
-        f'<a class="t-caption card-location" style="display:flex;align-items:center;gap:4px;margin:0 0 10px;'
-        f'color:var(--text-muted)" href="https://www.google.com/maps/search/?api=1&amp;query='
-        f'{quote(location)}" target="_blank" rel="noopener">'
-        f'<i data-lucide="map-pin" class="icon-12"></i> <span class="card-location-text">{e(display_location)}</span></a>'
-        if location else ""
-    )
+    # "Online" ist kein Ort mit Maps-Link, sondern ein reiner Hinweis (z.B.
+    # Erfurt-Crowd-Seminar per Videocall) -- eigenes Icon, kein <a>.
+    if location == "Online":
+        location_html = (
+            '<span class="t-caption card-location" style="display:flex;align-items:center;gap:4px;'
+            'margin:0 0 10px;color:var(--text-muted)"><i data-lucide="video" class="icon-12"></i> '
+            '<span class="card-location-text">Online</span></span>'
+        )
+    elif location:
+        location_html = (
+            f'<a class="t-caption card-location" style="display:flex;align-items:center;gap:4px;margin:0 0 10px;'
+            f'color:var(--text-muted)" href="https://www.google.com/maps/search/?api=1&amp;query='
+            f'{quote(location)}" target="_blank" rel="noopener">'
+            f'<i data-lucide="map-pin" class="icon-12"></i> <span class="card-location-text">{e(display_location)}</span></a>'
+        )
+    else:
+        location_html = ""
     # Bewusst nicht html.escape()-t (anders als sonst): description darf einen
     # einfachen <a>-Link enthalten (z.B. Verweis auf die Seite des externen
     # Veranstalters mitten im Satz), analog zur JS-Fassung, die description
