@@ -131,15 +131,14 @@ function initCommunityEvents(containerId, jsonPath) {
     if (window.lucide) lucide.createIcons();
 
     // Auf das naechste anstehende ODER laufende Event scrollen: massgeblich ist
-    // das Ende, nicht der Start -- sonst faellt ein heute schon begonnenes Event
-    // (Start in der Vergangenheit, aber noch nicht vorbei) faelschlich raus und
-    // die Ansicht scrollt schon zum naechsten Tag (Website-Feedback MF, 18.09.2026).
-    // Ohne Endzeit (ganztaegig/nur Datum) gilt das Event bis Tagesende als aktuell.
+    // immer das Tagesende, nie die genaue Endzeit -- ein Event von heute soll
+    // den ganzen Tag ueber die aktuelle Kachel bleiben, auch nachdem seine
+    // Uhrzeit vorbei ist (Website-Feedback MF, 18.09.2026: "nicht nur bis zum
+    // Ende des Events... den ganzen Tag"). Vorher fiel ein Event schon
+    // waehrend des Tages raus, sobald seine Endzeit erreicht war.
     var now = new Date();
     var cards = Array.prototype.slice.call(track.querySelectorAll('.camp-slider-card'));
     var nextCard = cards.find(function (c) {
-      var end = c.getAttribute('data-end');
-      if (end) return new Date(end) >= now;
       var start = new Date(c.getAttribute('data-start'));
       var endOfStartDay = new Date(start.getFullYear(), start.getMonth(), start.getDate(), 23, 59, 59, 999);
       return endOfStartDay >= now;
