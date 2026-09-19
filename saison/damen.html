@@ -81,7 +81,7 @@
           <div class="dropdown-panel">
             <a href="/saison/profis.html">Profis</a>
             <!-- Damen vorübergehend aus der Navigation ausgeblendet -->
-            <!-- NBBL vorübergehend aus der Navigation ausgeblendet -->
+            <a href="/saison/nbbl.html">NBBL</a>
             <!-- Nachwuchs vorübergehend aus der Navigation ausgeblendet -->
             <a href="/saison/spielplan.html">Spielplan</a>
             <a href="/saison/tabelle.html">Tabellen</a>
@@ -186,7 +186,7 @@
       <div class="drawer-sub-panel">
         <a href="/saison/profis.html">Profis</a>
         <!-- Damen vorübergehend aus der Navigation ausgeblendet -->
-        <!-- NBBL vorübergehend aus der Navigation ausgeblendet -->
+        <a href="/saison/nbbl.html">NBBL</a>
         <!-- Nachwuchs vorübergehend aus der Navigation ausgeblendet -->
         <a href="/saison/spielplan.html">Spielplan</a>
         <a href="/saison/tabelle.html">Tabellen</a>
@@ -824,7 +824,8 @@
       wrap.setAttribute('role', 'button');
       wrap.setAttribute('tabindex', '0');
       function advance() {
-        var step = (parseInt(wrap.getAttribute('data-step'), 10) + 1) % 3;
+        var frameCount = wrap.querySelectorAll('.panini-photo-frame').length;
+        var step = (parseInt(wrap.getAttribute('data-step'), 10) + 1) % frameCount;
         wrap.setAttribute('data-step', String(step));
       }
       wrap.addEventListener('click', advance);
