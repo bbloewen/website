@@ -1946,7 +1946,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   .hero-photo.hero-profis .hero-lg-grid { grid-template-columns: 1fr .95fr; gap: 28px; }
 }
 .hero-photo.hero-damen { --hero-photo-url: url('/assets/img/team-damen-hero-blur.webp'); background-position: center 20%; }
-.hero-photo.hero-u19 { --hero-photo-url: url('/assets/img/team-nbbl-hero-blur.webp'); background-position: center 20%; }
+.hero-photo.hero-u19 { --hero-photo-url: url('/assets/img/team-nbbl-hero.webp'); background-position: center 55%; }
 
 /* Hero-Varianten für einzelne News-Artikel mit echtem Pressefoto */
 .hero-photo.hero-news-saisonstart-2025 { --hero-photo-url: url('/assets/img/news/saisonstart-2025.webp'); background-position: center 30%; }
