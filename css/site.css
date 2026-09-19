@@ -2664,6 +2664,7 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
   color: rgba(255,255,255,.16); line-height: 1;
 }
 .panini-card-photo > i { position: relative; z-index: 1; width: 30px; height: 30px; color: rgba(255,255,255,.55); }
+.panini-card-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .panini-card-badge {
   position: absolute; top: 6px; left: 6px; z-index: 2; background: var(--color-brand-orange-text); color: #fff;
   font-weight: var(--weight-extrabold); font-size: 12px; width: 22px; height: 22px; border-radius: 50%;
