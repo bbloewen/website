@@ -1649,7 +1649,11 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 @media (max-width: 599px) {
   .hero-eyebrow-row ~ h1, .hero-eyebrow-row ~ p.lead { padding-right: 90px; }
 }
-.hero-badge-stack { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+/* align-items:center statt flex-end -- die beiden Badges haben unterschiedlich
+   viel Innenabstand (.hero-league-badge padding:6px 14px, .hero-badge-plain
+   padding:0), rechtsbündig sassen ihre Logos dadurch sichtbar versetzt statt
+   auf gemeinsamer Mittelachse (Marko, 19.09.2026). */
+.hero-badge-stack { display: flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0; }
 /* Zwei gestapelte Badges (z. B. NBBL-Liga-Logo + Nachwuchsstandort-Plakette auf
    der U19-Seite) müssen kleiner sein als ein einzelnes Badge, sonst passen sie
    nicht mehr in die seit 30.07.2026 einheitlich kompakte Hero-Höhe. */
