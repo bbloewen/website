@@ -61,6 +61,11 @@ KEIN_NAME = ("mehr", "hier", "zur", "zum", "alle", "folge", "beschädigung", "au
              "abbau", "die beste", "weitere", "jetzt", "ansehen", "melden", "kontakt",
              "website", "mail", "anrufen", "route")
 
+# Wortverbindungen, in denen der Name nur Bestandteil eines Eigennamens ist und
+# ein Link auf die Organisation in die Irre fuehren wuerde. "CATL LÖWENPARK"
+# ist der Name unserer Halle, kein Verweis auf den Batteriehersteller.
+KEIN_VERWEIS = ("CATL LÖWENPARK",)
+
 # Plattformen: dort steht der Name im Profilnamen, nicht als Organisationsnennung.
 KEINE_ORG_HOSTS = ("google.com", "instagram.com", "facebook.com", "youtube.com",
                    "wa.me", "x.com", "linkedin.com", "maps.")
@@ -117,12 +122,24 @@ def namensliste(texte):
     return paare
 
 
-def text_ohne_anker(text):
-    """Sichtbarer Text ohne Ankertexte — eine Nennung im Linktext ist verlinkt."""
-    for muster in (r"<script.*?</script>", r"<style.*?</style>", r"<!--.*?-->",
-                   r"<a\b[^>]*>.*?</a>"):
+P_BLOCK = re.compile(r"<p\b[^>]*>.*?</p>", re.S)
+
+
+def fliesstext(text):
+    """Nur der Text in <p>-Absätzen, ohne Ankertexte.
+
+    Absichtlich eng: gemeldet werden soll, was sich auch verlinken lässt. In
+    einer Überschrift wird nach Repo-Konvention nicht verlinkt, ein Filterknopf
+    oder ein Badge ist kein Fließtext, und ein Name in alt="" ist gar nicht
+    sichtbar. Ohne diese Einschränkung meldet das Skript dauerhaft dieselben
+    Stellen, die niemand anfassen wird -- etwa "Der CATL LÖWENPARK" in der H1
+    oder die Vereins-Chips im Trainingszeiten-Filter.
+    """
+    for muster in (r"<script.*?</script>", r"<style.*?</style>", r"<!--.*?-->"):
         text = re.sub(muster, " ", text, flags=re.S)
-    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", text))
+    absaetze = " ".join(P_BLOCK.findall(text))
+    absaetze = re.sub(r"<a\b[^>]*>.*?</a>", " ", absaetze, flags=re.S)
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", absaetze))
 
 
 def ziel_datei(url, quelle):
@@ -172,7 +189,11 @@ def pruefe_konsistenz(texte):
         for rel, text in texte.items():
             if rel.startswith("news/insta-archiv/"):
                 continue
-            if not muster.search(text_ohne_anker(text)):
+            sichtbar = fliesstext(text)
+            for verbindung in KEIN_VERWEIS:
+                if name in verbindung:
+                    sichtbar = sichtbar.replace(verbindung, " ")
+            if not muster.search(sichtbar):
                 continue
             hrefs = HREF.findall(text)
             if ziel in {host_von(u) for u in hrefs if u.startswith("http")}:
