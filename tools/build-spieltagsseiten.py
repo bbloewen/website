@@ -206,6 +206,24 @@ def heimspiel_infos_section(game, d, offen):
     "Vorverkauf läuft"/"angekündigt" (Marko, 27.08.2026): Der Text sagt
     schlicht, wo Tickets sind, statt eine Verkaufsphase zu benennen.
     """
+    # Link auf die Vereinsseite des Gegners, wenn data/heimspiele.json eine
+    # gegnerUrl fuehrt -- als Zeile unter dem Kachelraster, nicht als vierte
+    # Kachel: das Raster hat drei Spalten, eine vierte Kachel stuende allein in
+    # einer zweiten Reihe. Dasselbe Muster wie auf dem Gameday-Hub unter der
+    # Spieleliste. Der
+    # Gegnername steht sonst nur in H1 und Eyebrow, und dort wird nach
+    # Repo-Konvention nicht verlinkt -- die Seite des Gegners war damit von
+    # unserer Spieltagsseite aus nicht erreichbar (Markos Ansage, 19.09.2026:
+    # moeglichst viele Links auf externe Vereine).
+    gegner_link = ""
+    if game.get("gegnerUrl"):
+        gegner_link = (
+            '      <p class="mt-5"><a class="card-link" '
+            f'href="{html.escape(game["gegnerUrl"])}" target="_blank" rel="noopener">'
+            f'{html.escape(game["gegner"])} — zur Vereinsseite '
+            '<i data-lucide="arrow-right" class="icon-14"></i></a></p>\n'
+        )
+
     ticket_text = (
         'Tickets für dieses Spiel gibt es auf dem <a href="/saison/profis/gameday/">Gameday-Hub</a>.'
         if offen else
@@ -240,6 +258,7 @@ def heimspiel_infos_section(game, d, offen):
           <p class="t-body-sm">{ticket_text}</p>
         </div>
       </div>
+{gegner_link}
     </div>
   </section>
 """
