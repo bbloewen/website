@@ -44,6 +44,7 @@ import re
 import subprocess
 import sys
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -189,15 +190,31 @@ def pruefe_extern(texte):
             if u.startswith("http") and "basketball-loewen.com" not in u:
                 if not any(x in u for x in ("calendar.google.com", "google.com/maps", "wa.me")):
                     urls.add(u.replace("&amp;", "&"))
-    kaputt = []
-    for u in sorted(urls):
+    def status(u):
+        # Umlaut-Domains vor dem Abruf nach Punycode wandeln. curl bricht sonst
+        # mit "Connection reset by peer" ab, obwohl der Link im Browser
+        # funktioniert -- Browser wandeln selbst um. Betraf
+        # www.flächen-thüringen.de auf partner/sponsoring.html.
+        abruf = u
+        teile = urlparse(u)
+        if any(ord(z) > 127 for z in teile.netloc):
+            try:
+                abruf = teile._replace(
+                    netloc=teile.netloc.encode("idna").decode()).geturl()
+            except UnicodeError:
+                pass
         r = subprocess.run(["curl", "-sS", "-o", "/dev/null", "-m", "15", "-L",
-                            "-A", "Mozilla/5.0", "-w", "%{http_code}", u],
+                            "-A", "Mozilla/5.0", "-w", "%{http_code}", abruf],
                            capture_output=True, text=True)
-        code = r.stdout.strip()
-        if code not in ("200", "403", "429", "999"):
-            kaputt.append((code or "000", u))
-    return len(urls), kaputt
+        return (r.stdout.strip() or "000"), u
+
+    # Parallel, sonst dauert der Durchlauf bei ueber hundert Adressen Minuten.
+    # 403/429/999 sind Bot-Sperren, keine kaputten Links -- sie zaehlen als
+    # erreichbar, sonst meldet das Skript jedes Mal dieselben Fehlalarme.
+    with ThreadPoolExecutor(max_workers=12) as pool:
+        ergebnisse = list(pool.map(status, sorted(urls)))
+    kaputt = [(c, u) for c, u in ergebnisse if c not in ("200", "403", "429", "999")]
+    return len(urls), sorted(kaputt)
 
 
 def main():
