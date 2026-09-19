@@ -1330,30 +1330,25 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 /* 'performance' (eigene Sektion seit 18.08.2026, direkt unter Förderpartner):
    Flexbox statt Grid, da meist nur ein bis wenige Mitglieder — so bleiben die
    Kacheln zentriert statt am linken Rand zu kleben, statt eine feste Spalten-
-   zahl vorzugeben. */
+   zahl vorzugeben. Seit 19.09.2026 kommt die Rahmenfarbe vom Notion-CRM-Feld
+   Sponsoren-Level (data-level="gold|silber|bronze", s. build-partner-wall.py)
+   statt einheitlich orange — Gold/Silber/Bronze bleiben eine gemeinsame
+   Liste ohne eigenen Filter, nur optisch unterschieden. */
 .partner-wall-performance { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
 .partner-tile-performance { flex: 0 1 220px; height: 110px; }
 .partner-tile-performance .partner-tile-front { padding: 8px; font-size: 18px; font-weight: var(--weight-semibold); border: 2px solid var(--color-brand-orange); }
-/* 'partner' (vierspaltiges Grid, vier Mitglieder seit 18.08.2026 — vormals
-   Teil von 'sponsoren'/'hauptsponsoren') braucht eine eigene, kleinere
-   Kachel-Box, getrennt von Förderpartner/Top, die ihre größere Kachelgröße
-   in .partner-wall behalten. */
-.partner-wall-partner { gap: 12px; }
-.partner-tile-partner { flex-basis: calc(25% - 9px); height: 85px; }
-.partner-tile-partner .partner-tile-front { padding: 10px; font-size: 14px; font-weight: var(--weight-medium); border: 1px solid var(--color-brand-orange); }
-/* 'basis' (dreispaltiges Grid, seit 18.08.2026 — vormals Teil von 'sponsoren'/
-   'hauptsponsoren'): eine Stufe kleiner als 'partner', neutraler grauer statt
-   farbiger Rand — Zwischengröße vor 'weitere' (Unterstützer), die als kleinste
-   Stufe ganz ohne Rand bleibt. */
-.partner-wall-basis { gap: 10px; }
-.partner-tile-basis { flex-basis: calc(25% - 7.5px); height: 76px; }
-.partner-tile-basis .partner-tile-front { padding: 10px; font-size: 13px; font-weight: var(--weight-medium); border: 1px solid var(--border); }
-.partner-tile-weitere .partner-tile-front { padding: 10px; font-size: 13px; font-weight: var(--weight-medium); }
-/* Flexbox statt Grid (seit 19.08.2026): eine nicht volle letzte Zeile wird so
-   automatisch zentriert statt linksbündig mit Lücke rechts zu enden — bei
-   jeder beliebigen Anzahl Kacheln, nicht nur bei genau einer übrig bleibenden. */
-.partner-wall-weitere { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
-.partner-tile-weitere { flex: 0 1 150px; height: 64px; }
+.partner-tile-performance[data-level="gold"] .partner-tile-front { border-color: #C9A227; }
+.partner-tile-performance[data-level="silber"] .partner-tile-front { border-color: #A8A8A8; }
+.partner-tile-performance[data-level="bronze"] .partner-tile-front { border-color: #B5651D; }
+/* 'partner' = Kategorie "Partner und Unterstützer" (seit 19.09.2026
+   zusammengelegt aus den vormals getrennten Tiers 'partner'/'basis'/
+   'weitere' — eine gemeinsame Liste, neutraler statt farbiger Rand, keine
+   eigene Rangfolge mehr innerhalb der Kategorie). Flexbox statt Grid, damit
+   eine nicht volle letzte Zeile automatisch zentriert wird statt linksbündig
+   mit Lücke zu enden. */
+.partner-wall-partner { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.partner-tile-partner { flex: 0 1 calc(25% - 7.5px); height: 76px; }
+.partner-tile-partner .partner-tile-front { padding: 10px; font-size: 13px; font-weight: var(--weight-medium); border: 1px solid var(--border); }
 .partner-tile-back {
   background: var(--color-brand-navy); color: #fff; transform: rotateY(180deg);
   flex-direction: column; gap: 6px;
@@ -1365,8 +1360,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   .partner-tile { flex-basis: calc(50% - 8px); }
   .partner-tile-top, .partner-tile.is-enlarged { flex-basis: 100%; }
   .partner-wall-foerderpartner .partner-tile { flex-basis: 100%; }
-  .partner-tile-partner { flex-basis: calc(50% - 6px); }
-  .partner-tile-basis { flex-basis: calc(50% - 5px); }
+  .partner-tile-partner { flex-basis: calc(50% - 5px); }
 }
 
 /* Business-Club-Wand: 10 anonyme Platzhalter-Kacheln (noch keine echten
