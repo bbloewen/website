@@ -1,18 +1,7 @@
 {
-  "generatedAt": "2026-09-18T17:19:00.733+02:00",
+  "generatedAt": "2026-09-19T17:20:36.922+02:00",
   "publishFrom": "2026-08-22",
   "events": [
-    {
-      "name": "LÖWENPARK – Öffentliche Baustellenführung",
-      "category": "Vereinsfest",
-      "status": "Genehmigt",
-      "start": "2026-09-19T10:00:00.000+02:00",
-      "end": "2026-09-19T11:00:00.000+02:00",
-      "isDatetime": true,
-      "description": "Öffentliche Baustellenführung im CATL LÖWENPARK für unsere Ehrenamtlichen: aktuelle News rund um den Umbau unserer neuen Trainingshalle.",
-      "location": "LÖWENPARK, Friedrich-Ebert-Straße 58, 99096 Erfurt",
-      "heroImage": "https://basketball-loewen.com/assets/img/loewenpark-baustellenfuehrung-2026.webp"
-    },
     {
       "name": "Ehrenamtstreff",
       "category": "Vereinsfest",
@@ -58,17 +47,6 @@
       "heroImage": "https://basketball-loewen.com/assets/img/gemeinschaft-generisch-2026.webp"
     },
     {
-      "name": "Stadtteilfest Wiesenhügel",
-      "category": "Straßenfest",
-      "status": "Genehmigt",
-      "start": "2026-09-12T14:00:00.000+02:00",
-      "end": "2026-09-12T20:00:00.000+02:00",
-      "isDatetime": true,
-      "description": "Stadtteilfest „Der Wiesenhügel ist bunt\": Die Basketball Löwen sind mit dabei beim Bühnenprogramm und den Aktionen für alle Generationen im Erfurter Wiesenhügel, organisiert vom Lokalen Aktionsplan gegen Rechtsextremismus.",
-      "location": "Jugendhaus Wiesenhügel, Färberwaidweg 10, 99097 Erfurt, Deutschland",
-      "heroImage": "https://basketball-loewen.com/assets/img/stadtteilfest-wiesenhuegel-2026.webp"
-    },
-    {
       "name": "Zooparklauf – Basketballkorb-Aktion",
       "category": "Straßenfest",
       "status": "Genehmigt",
@@ -97,6 +75,17 @@
       "spotBis": "2026-09-12T17:00:00Z"
     },
     {
+      "name": "Stadtteilfest Wiesenhügel",
+      "category": "Straßenfest",
+      "status": "Genehmigt",
+      "start": "2026-09-12T14:00:00.000+02:00",
+      "end": "2026-09-12T20:00:00.000+02:00",
+      "isDatetime": true,
+      "description": "Stadtteilfest „Der Wiesenhügel ist bunt\": Die Basketball Löwen sind mit dabei beim Bühnenprogramm und den Aktionen für alle Generationen im Erfurter Wiesenhügel, organisiert vom Lokalen Aktionsplan gegen Rechtsextremismus.",
+      "location": "Jugendhaus Wiesenhügel, Färberwaidweg 10, 99097 Erfurt, Deutschland",
+      "heroImage": "https://basketball-loewen.com/assets/img/stadtteilfest-wiesenhuegel-2026.webp"
+    },
+    {
       "name": "Erfurt-Crowd Infoveranstaltung",
       "category": "Straßenfest",
       "status": "Genehmigt",
@@ -123,6 +112,17 @@
       "lng": 10.9940651,
       "spotVon": "2026-09-18T13:00:00Z",
       "spotBis": "2026-09-18T18:00:00Z"
+    },
+    {
+      "name": "LÖWENPARK – Öffentliche Baustellenführung",
+      "category": "Vereinsfest",
+      "status": "Genehmigt",
+      "start": "2026-09-19T10:00:00.000+02:00",
+      "end": "2026-09-19T11:00:00.000+02:00",
+      "isDatetime": true,
+      "description": "Öffentliche Baustellenführung im CATL LÖWENPARK für unsere Ehrenamtlichen: aktuelle News rund um den Umbau unserer neuen Trainingshalle.",
+      "location": "LÖWENPARK, Friedrich-Ebert-Straße 58, 99096 Erfurt",
+      "heroImage": "https://basketball-loewen.com/assets/img/loewenpark-baustellenfuehrung-2026.webp"
     },
     {
       "name": "Avenida-Therme Kinderfest",
