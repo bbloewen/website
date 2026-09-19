@@ -2664,7 +2664,11 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
   color: rgba(255,255,255,.16); line-height: 1;
 }
 .panini-card-photo > i { position: relative; z-index: 1; width: 30px; height: 30px; color: rgba(255,255,255,.55); }
-.panini-card-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* object-position oben statt mittig: .panini-card-photo ist innen niedriger als
+   das 3:4-Seitenverhaeltnis der Fotos (Namenszeile unten nimmt Platz weg), object-fit:cover
+   wuerde bei mittiger Position oben UND unten gleich viel abschneiden und dabei
+   in die Koepfe schneiden (Marko, 19.09.2026: "Kopf scheint immer abgeschnitten"). */
+.panini-card-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; }
 .panini-card-badge {
   position: absolute; top: 6px; left: 6px; z-index: 2; background: var(--color-brand-orange-text); color: #fff;
   font-weight: var(--weight-extrabold); font-size: 12px; width: 22px; height: 22px; border-radius: 50%;
