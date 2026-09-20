@@ -31,7 +31,11 @@ function initCampGallery(containerId, campSlug, jsonPath, showComingSoon) {
          vorher lagen dort die Originale, die LOEWENPARK-Galerie allein 8,2 MB.
          Rueckfall auf b.src, falls eine Galerie-Datei noch kein thumb hat. */
       var klein = b.thumb || b.src;
-      return '<div class="camp-gallery-photo" data-lightbox-src="' + b.src + '" data-lightbox-alt="' + alt + '"><img src="' + klein + '" width="480" height="320" alt="' + alt + '" loading="lazy" /></div>';
+      // Optionales 'event'-Feld: kleines Label auf der Kachel, damit Fotos
+      // verschiedener Events im gemeinsamen Streifen unterscheidbar bleiben
+      // (z.B. wenn mehrere Veranstaltungen kurz hintereinander Fotos liefern).
+      var event = b.event ? '<span class="camp-gallery-event">' + (b.event + '').replace(/</g, '&lt;') + '</span>' : '';
+      return '<div class="camp-gallery-photo" data-lightbox-src="' + b.src + '" data-lightbox-alt="' + alt + '" data-lightbox-event="' + (b.event ? (b.event + '').replace(/"/g, '&quot;') : '') + '"><img src="' + klein + '" width="480" height="320" alt="' + alt + '" loading="lazy" />' + event + '</div>';
     }).join('');
     if (showComingSoon) {
       html += '<div class="camp-gallery-photo camp-gallery-photo-soon"><span>Weitere Fotos<br>folgen in Kürze</span></div>';
@@ -53,7 +57,7 @@ function initCampGallery(containerId, campSlug, jsonPath, showComingSoon) {
       var tile = e.target.closest('.camp-gallery-photo[data-lightbox-src]');
       if (!tile) return;
       var tiles = Array.prototype.slice.call(track.querySelectorAll('.camp-gallery-photo[data-lightbox-src]'));
-      var items = tiles.map(function (t) { return { src: t.getAttribute('data-lightbox-src'), alt: t.getAttribute('data-lightbox-alt') }; });
+      var items = tiles.map(function (t) { return { src: t.getAttribute('data-lightbox-src'), alt: t.getAttribute('data-lightbox-alt'), event: t.getAttribute('data-lightbox-event') }; });
       openGalleryLightbox(items, tiles.indexOf(tile));
     });
   });
@@ -79,6 +83,7 @@ function openGalleryLightbox(items, index) {
       '<button type="button" class="gallery-lightbox-close" aria-label="Schließen">&times;</button>' +
       '<button type="button" class="gallery-lightbox-nav prev" aria-label="Vorheriges Foto">&lsaquo;</button>' +
       '<img alt="" />' +
+      '<span class="gallery-lightbox-caption"></span>' +
       '<button type="button" class="gallery-lightbox-nav next" aria-label="Nächstes Foto">&rsaquo;</button>';
     document.body.appendChild(overlay);
     overlay.addEventListener('click', function (e) {
@@ -112,6 +117,11 @@ function renderGalleryLightbox() {
   var img = overlay.querySelector('img');
   img.src = item.src;
   img.alt = item.alt || '';
+  var caption = overlay.querySelector('.gallery-lightbox-caption');
+  if (caption) {
+    caption.textContent = item.event || '';
+    caption.hidden = !item.event;
+  }
   var multi = __galleryItems.length > 1;
   overlay.querySelectorAll('.gallery-lightbox-nav').forEach(function (btn) { btn.hidden = !multi; });
 }

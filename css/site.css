@@ -1121,9 +1121,24 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
    Kontexten (dort schrumpft der Container ohnehin schon auf die Spalte). */
 .camp-gallery-wrap { position: relative; min-width: 0; }
 .camp-gallery-wrap .news-slider-track { gap: 12px; }
-.camp-gallery-photo { flex: 0 0 240px; min-width: 240px; height: 160px; border-radius: var(--radius-md); overflow: hidden; scroll-snap-align: start; }
+.camp-gallery-photo { position: relative; flex: 0 0 240px; min-width: 240px; height: 160px; border-radius: var(--radius-md); overflow: hidden; scroll-snap-align: start; }
 .camp-gallery-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .camp-gallery-photo[data-lightbox-src] { cursor: zoom-in; }
+/* Event-Label auf der Kachel (optionales 'event'-Feld je Foto, s. js/camp-
+   galerie.js) -- macht sichtbar, zu welcher Veranstaltung ein Foto gehört,
+   wenn der Streifen mit der Zeit Fotos mehrerer Events sammelt. */
+.camp-gallery-event {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 4px 8px;
+  background: linear-gradient(to top, rgba(0,18,45,.85), rgba(0,18,45,0));
+  color: #fff; font-size: 11px; font-weight: var(--weight-medium); line-height: 1.3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.gallery-lightbox-caption {
+  position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%);
+  background: rgba(0,18,45,.75); color: #fff; font-size: 13px; font-weight: var(--weight-medium);
+  padding: 6px 14px; border-radius: var(--radius-full, 999px); max-width: 90vw;
+}
+.gallery-lightbox-caption[hidden] { display: none; }
 /* Gemeinsames Lightbox-Overlay für alle Bildergalerien (js/camp-galerie.js) —
    ein Klick auf ein Foto zeigt es groß, unabhängig davon, auf welcher Seite. */
 .gallery-lightbox {
