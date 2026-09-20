@@ -8,7 +8,7 @@
       "icon": "trophy",
       "titel": "Vorbereitung erfolgreich abgeschlossen: Löwen siegen in Breitengüßbach",
       "kurztext": "87:75-Auswärtssieg beim Regionalligisten TSV Tröster Breitengüßbach beschließt die Vorbereitung auf die neue Saison 2026/2027.",
-      "url": "/news/artikel/2026-09-20_club_testspiel-breitenguessbach.html",
+      "url": "/news/artikel/2026-09-20_profis_testspiel-breitenguessbach.html",
       "bild": "/assets/img/hero-basketball.webp",
       "topNews": true,
       "team": "profis"
@@ -20,7 +20,7 @@
       "icon": "heart-handshake",
       "titel": "Neue Schirmherrschaft für BasKIDball: Dirk Nowitzki und Svenja Brunckhorst",
       "kurztext": "Beim BasKIDballtalk 2026 in Berlin wurde Svenja Brunckhorst offiziell als neue Schirmherrin begrüßt — mit dabei: rund 30 BasKIDs, auch aus Erfurt.",
-      "url": "/news/artikel/2026-09-16_club_baskidballtalk-berlin-schirmherrschaft.html",
+      "url": "/news/artikel/2026-09-16_baskidball_baskidballtalk-berlin-schirmherrschaft.html",
       "bild": "/assets/img/news/baskidballtalk-berlin-2026.webp",
       "topNews": true,
       "team": "baskidball"
@@ -32,7 +32,7 @@
       "icon": "handshake",
       "titel": "CATL und Basketball Löwen Erfurt richten Partnerschaft auf Nachwuchs, Frauenbasketball und den neuen LÖWENPARK aus",
       "kurztext": "Namenssponsoring künftig für Damenmannschaft, U19-Bundesligateam und die neue Trainings- und Begegnungsstätte am Erfurter Südpark.",
-      "url": "/news/artikel/2026-09-01_club_catl-partnerschaft-neuausrichtung.html",
+      "url": "/news/artikel/2026-09-01_pressemitteilung_catl-partnerschaft-neuausrichtung.html",
       "bild": "/assets/img/hero-basketball.webp",
       "topNews": true
     },
@@ -43,7 +43,7 @@
       "icon": "users",
       "titel": "Neuer Mann auf der Bank: Leif Ibrahim wird Cheftrainer der Löwen",
       "kurztext": "Der 31-jährige Schwede unterschreibt für zwei Jahre — Florian Gut wechselt in die sportliche Leitung.",
-      "url": "/news/artikel/2026-08-13_club_neuer-cheftrainer-ibrahim.html",
+      "url": "/news/artikel/2026-08-13_profis_neuer-cheftrainer-ibrahim.html",
       "bild": "/assets/img/news/neuer-cheftrainer-ibrahim.webp",
       "topNews": true,
       "team": "profis"
@@ -66,7 +66,7 @@
       "icon": "hammer",
       "titel": "Wichtige Meilensteine für den Löwenpark",
       "kurztext": "Der Stadtrat hat die Kostensteigerung gedeckt — nach dem Richtfest im April ist die Eröffnung greifbar nah.",
-      "url": "/news/artikel/2026-06-19_club_loewenpark-meilenstein.html",
+      "url": "/news/artikel/2026-06-19_loewenpark_loewenpark-meilenstein.html",
       "bild": "/assets/img/news/loewenpark-dach.webp",
       "topNews": true
     },
@@ -77,7 +77,7 @@
       "icon": "trophy",
       "titel": "Saisonrückblick 2025/2026: Platz 12, Bilanz 8:16",
       "kurztext": "Die Profis verpassen die Playoffs — Coach Florian Gut zieht Bilanz und blickt nach vorn.",
-      "url": "/news/artikel/2026-03-31_club_spielbericht-saisonrueckblick-2025-26.html",
+      "url": "/news/artikel/2026-03-31_profis_spielbericht-saisonrueckblick-2025-26.html",
       "bild": "/assets/img/team-prob.webp",
       "topNews": true,
       "team": "profis"
@@ -89,7 +89,7 @@
       "icon": "users",
       "titel": "Vier wichtige Spiele — und ein sportlicher Abgang",
       "kurztext": "Vor der entscheidenden Schlussphase verlässt Mike Mitchell das Team aus persönlichen Gründen.",
-      "url": "/news/artikel/2026-03-04_club_mitchell-abgang.html",
+      "url": "/news/artikel/2026-03-04_profis_mitchell-abgang.html",
       "bild": "/assets/img/news/mitchell-abgang.webp",
       "topNews": true,
       "team": "profis"
@@ -101,7 +101,7 @@
       "icon": "calendar",
       "titel": "Löwen-Saisonstart und Dauerkartenverkauf",
       "kurztext": "Nach dem Testspiel startet die Saison zu Hause gegen die BBC Coburg.",
-      "url": "/news/artikel/2025-09-25_club_saisonstart-dauerkarten.html",
+      "url": "/news/artikel/2025-09-25_profis_saisonstart-dauerkarten.html",
       "bild": "/assets/img/news/saisonstart-2025.webp",
       "topNews": true,
       "team": "profis"
@@ -113,7 +113,7 @@
       "icon": "handshake",
       "titel": "CATL verlängert Partnerschaft",
       "kurztext": "Der Batteriezellen-Hersteller bleibt Namenssponsor der Profimannschaft — schon die vierte gemeinsame Saison.",
-      "url": "/news/artikel/2025-08-26_club_catl-verlaengert.html",
+      "url": "/news/artikel/2025-08-26_partner_catl-verlaengert.html",
       "bild": "/assets/img/hero-basketball.webp",
       "topNews": false,
       "team": "profis"
@@ -160,7 +160,7 @@
       "icon": "users",
       "titel": "Löwen-Kaderplanung für die nächste Saison",
       "kurztext": "Vier langjährige Spieler verlassen den Verein — Florian Gut über die Hintergründe.",
-      "url": "/news/artikel/2025-05-19_club_kaderplanung-naechste-saison.html",
+      "url": "/news/artikel/2025-05-19_profis_kaderplanung-naechste-saison.html",
       "bild": "/assets/img/team-prob.webp",
       "topNews": false,
       "team": "profis"
@@ -172,7 +172,7 @@
       "icon": "trophy",
       "titel": "CATL Basketball Löwen scheiden im Achtelfinale aus",
       "kurztext": "Knappe 82:84-Heimniederlage gegen Paderborn beendet die Playoff-Saison.",
-      "url": "/news/artikel/2025-04-29_club_achtelfinale-aus.html",
+      "url": "/news/artikel/2025-04-29_profis_achtelfinale-aus.html",
       "bild": "/assets/img/news/achtelfinale.webp",
       "topNews": false,
       "team": "profis"
@@ -184,7 +184,7 @@
       "icon": "calendar",
       "titel": "Playoff-Heimspiel am Freitagabend",
       "kurztext": "Nach knapper Auswärtsniederlage geht die Serie gegen Paderborn in der Riethsporthalle weiter.",
-      "url": "/news/artikel/2025-04-22_club_playoff-heimspiel-freitag.html",
+      "url": "/news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html",
       "bild": "/assets/img/news/playoff-heimspiel.webp",
       "topNews": false,
       "team": "profis"
