@@ -54,8 +54,8 @@
       "lastmod": "2026-09-18"
     },
     "index.html": {
-      "hash": "9ed22d7bd84e5dbcb2a0bf7c992e00d938d646ec",
-      "lastmod": "2026-09-19"
+      "hash": "a0ac7011e54696ec18758dbd1ca7c6e4b574f91c",
+      "lastmod": "2026-09-20"
     },
     "kontakt.html": {
       "hash": "01033561eccfc4a2b4f1d577c86430b3bd5cd886",
@@ -70,68 +70,72 @@
       "lastmod": "2026-08-08"
     },
     "news/aktuelles.html": {
-      "hash": "f8c6b8ef0c0bf3dce6c7e4073b5f2253b72a920a",
-      "lastmod": "2026-09-16"
+      "hash": "a6b97b418fe826fe10f06c7e4b1fb2a6aaad0278",
+      "lastmod": "2026-09-20"
     },
-    "news/artikel/2025-04-22_verein_playoff-heimspiel-freitag.html": {
+    "news/artikel/2025-04-22_club_playoff-heimspiel-freitag.html": {
       "hash": "662c9cae44d0da4276064e10d63201905f9a8548",
       "lastmod": "2026-09-19"
     },
-    "news/artikel/2025-04-29_verein_achtelfinale-aus.html": {
+    "news/artikel/2025-04-29_club_achtelfinale-aus.html": {
       "hash": "370d245b8c21049f977dee0058c387922c0e80ed",
       "lastmod": "2026-09-19"
     },
-    "news/artikel/2025-05-19_verein_kaderplanung-naechste-saison.html": {
+    "news/artikel/2025-05-19_club_kaderplanung-naechste-saison.html": {
       "hash": "0fb85e80e5be05ec62d98b2baed18baac240dd17",
       "lastmod": "2026-09-19"
     },
-    "news/artikel/2025-07-21_verein_sommerinterview-teil1.html": {
+    "news/artikel/2025-07-21_club_sommerinterview-teil1.html": {
       "hash": "e67dda5a23c41cc9ad3ed644f6e7d8125402e4b5",
       "lastmod": "2026-09-19"
     },
-    "news/artikel/2025-08-01_verein_sommerinterview-teil2.html": {
+    "news/artikel/2025-08-01_club_sommerinterview-teil2.html": {
       "hash": "e398abd5c3a25662e55c4e0015312a97a962906e",
       "lastmod": "2026-09-19"
     },
-    "news/artikel/2025-08-08_verein_sommerinterview-teil3.html": {
+    "news/artikel/2025-08-08_club_sommerinterview-teil3.html": {
       "hash": "fca16026477ac730f09e76a28138a50ef1dea734",
       "lastmod": "2026-09-19"
     },
-    "news/artikel/2025-08-26_verein_catl-verlaengert.html": {
+    "news/artikel/2025-08-26_club_catl-verlaengert.html": {
       "hash": "713551a7d3b6d74cb35ff466cd453112abec6216",
       "lastmod": "2026-09-19"
     },
-    "news/artikel/2025-09-25_verein_saisonstart-dauerkarten.html": {
+    "news/artikel/2025-09-25_club_saisonstart-dauerkarten.html": {
       "hash": "6fa9618e6882268ef86bb2ac613fcc7496b20a5c",
       "lastmod": "2026-09-19"
     },
-    "news/artikel/2026-03-04_verein_mitchell-abgang.html": {
+    "news/artikel/2026-03-04_club_mitchell-abgang.html": {
       "hash": "788df8fdfc1727c5d753d70c07306f2e3bb0d000",
       "lastmod": "2026-09-19"
     },
-    "news/artikel/2026-03-31_verein_spielbericht-saisonrueckblick-2025-26.html": {
+    "news/artikel/2026-03-31_club_spielbericht-saisonrueckblick-2025-26.html": {
       "hash": "39aca171afbf8ad60336baf6c95ecb92c8e5ee7c",
       "lastmod": "2026-09-19"
     },
-    "news/artikel/2026-06-19_verein_loewenpark-meilenstein.html": {
+    "news/artikel/2026-06-19_club_loewenpark-meilenstein.html": {
       "hash": "a60970091e4c55e86a70cc9abad8851e58ba4033",
       "lastmod": "2026-09-19"
     },
-    "news/artikel/2026-07-06_verein_swe-sommercamp.html": {
+    "news/artikel/2026-07-06_club_swe-sommercamp.html": {
       "hash": "8a15b7cec40db8fd041d5a494eee3f735ea3c894",
       "lastmod": "2026-09-19"
     },
-    "news/artikel/2026-08-13_verein_neuer-cheftrainer-ibrahim.html": {
+    "news/artikel/2026-08-13_club_neuer-cheftrainer-ibrahim.html": {
       "hash": "37d56b26ca939e2bef918219ec4d545f63a37591",
       "lastmod": "2026-09-18"
     },
-    "news/artikel/2026-09-01_verein_catl-partnerschaft-neuausrichtung.html": {
+    "news/artikel/2026-09-01_club_catl-partnerschaft-neuausrichtung.html": {
       "hash": "5f6a55e7b87f3018e854ead515a664ccb8c19ff4",
       "lastmod": "2026-09-19"
     },
-    "news/artikel/2026-09-16_verein_baskidballtalk-berlin-schirmherrschaft.html": {
+    "news/artikel/2026-09-16_club_baskidballtalk-berlin-schirmherrschaft.html": {
       "hash": "c2a924768efa2f10c0b02c906f123c19e852bfc4",
       "lastmod": "2026-09-18"
+    },
+    "news/artikel/2026-09-20_club_testspiel-breitenguessbach.html": {
+      "hash": "13d542b8789e5849553d5daf0e5effa3f2aef20d",
+      "lastmod": "2026-09-20"
     },
     "news/insta-archiv/loewen-17920245561201740.html": {
       "hash": "062fdb016b29c8b4ec569c7be76d5dd62d87efe3",
@@ -338,7 +342,7 @@
       "lastmod": "2026-09-01"
     },
     "trainieren/feriencamps.html": {
-      "hash": "4493b1cfb322e9b5b7ae8e846adb3d30b8d80bd8",
+      "hash": "4f156aa15bafb6ac8698bcc0a55d0841f00a6dfc",
       "lastmod": "2026-09-20"
     },
     "trainieren/freiplaetze.html": {
