@@ -51,7 +51,12 @@ ORG = {
     "@type": "SportsOrganization",
     "@id": BASE + "#organization",
     "name": "Basketball Löwen Erfurt",
-    "alternateName": ["Basketball Löwen e.V.", "CATL Basketball Löwen", "Basketball Löwinnen Erfurt"],
+    # "CATL Basketball Löwen" ist seit der Neuausrichtung vom 01.09.2026 nicht
+    # mehr der Vereins- oder Profiteamname, sondern der des U19-Bundesligateams.
+    # Als alternateName der Organisation haette er Google weiter einen Namen
+    # gelehrt, den der Verein nicht mehr fuehrt. CATL ist Namensgeber nur noch
+    # fuer Damen, U19 und den CATL LOEWENPARK.
+    "alternateName": ["Basketball Löwen e.V.", "Basketball Löwen", "Basketball Löwinnen Erfurt"],
     "sport": "Basketball",
     "foundingDate": "2018",
     "url": BASE,
