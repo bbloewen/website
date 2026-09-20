@@ -401,7 +401,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1789908048" />
+<link rel="stylesheet" href="/css/site.css?v=1789923276" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.

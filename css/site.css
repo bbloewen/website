@@ -1966,6 +1966,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .hero-photo.hero-news-mitchell-abgang { --hero-photo-url: url('/assets/img/news/mitchell-abgang.webp'); background-position: center 25%; }
 .hero-photo.hero-news-loewenpark-dach { --hero-photo-url: url('/assets/img/news/loewenpark-dach.webp'); background-position: center 55%; }
 .hero-photo.hero-news-swe-sommercamp { --hero-photo-url: url('/assets/img/news/swe-sommercamp.webp'); background-position: center 40%; }
+.hero-photo.hero-news-sportsponsoring { --hero-photo-url: url('/assets/img/hero-loewen-unterstuetzer.webp'); background-position: center 55%; }
 .hero-photo.hero-news-damen-regionalliga { --hero-photo-url: url('/assets/img/news/damen-regionalliga.webp'); background-position: center 25%; }
 .hero-photo.hero-news-achtelfinale { --hero-photo-url: url('/assets/img/news/achtelfinale.webp'); background-position: center 35%; }
 .hero-photo.hero-news-playoff-heimspiel { --hero-photo-url: url('/assets/img/news/playoff-heimspiel.webp'); background-position: center 35%; }
