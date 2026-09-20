@@ -113,6 +113,16 @@ LOEWENPARK = {
         "addressRegion": "Thüringen",
         "addressCountry": "DE",
     },
+    # Koordinaten und CID am 20.09.2026 aus dem eigenen Google-Unternehmens-
+    # profil abgelesen (Kategorie dort: Sportanlage). sameAs auf den Maps-
+    # Eintrag ist die deutlichste Aussage an Google, dass Seite und Profil
+    # denselben Ort meinen.
+    "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 50.963033,
+        "longitude": 11.040786,
+    },
+    "sameAs": ["https://maps.google.com/?cid=17483735935586458406"],
 }
 
 # Die Spielstaette selbst -- nicht zu verwechseln mit dem Freiplatz an der
