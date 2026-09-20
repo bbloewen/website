@@ -30,8 +30,8 @@
   }
   .fanshop-product-img img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-md); }
   .fanshop-product h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; line-height: 1.3; }
-  a.fanshop-teaser { text-decoration: none; color: inherit; display: block; }
-  a.fanshop-teaser:hover { border-color: var(--color-brand-orange); }
+  .fanshop-teaser { text-decoration: none; color: inherit; display: block; padding: 16px; }
+  .fanshop-teaser:hover { border-color: var(--color-brand-orange); }
   .fanshop-teaser-img { position: relative; }
   .fanshop-teaser-stamp {
     position: absolute; top: 22%; left: -12%; width: 124%;
@@ -43,7 +43,24 @@
     display: inline-flex; align-items: center; gap: 4px;
     font-size: 13px; font-weight: 600; color: var(--color-brand-orange-text);
   }
-  a.fanshop-teaser:hover .fanshop-teaser-shop { text-decoration: underline; }
+  a.fanshop-teaser:hover .fanshop-teaser-shop, .fanshop-teaser-hero:hover .fanshop-teaser-shop { text-decoration: underline; }
+  /* Kategorie-Kacheln (T-Shirt/Sweatjacke/Pullover/Hoodie): Hero-Produkt oben
+     verlinkt, darunter ein zweiter, dezenterer Link zu allen Varianten der
+     Kategorie -- Erfurt Mitte fuehrt je Artikel mehrere Farben/Groessen, die
+     nicht alle einzeln als Kachel Platz haben (Marko, 20.09.2026). */
+  .fanshop-teaser-hero { text-decoration: none; color: inherit; display: block; }
+  .fanshop-teaser-more {
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+    margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);
+    font-size: 12px; font-weight: 600; color: var(--text-muted); text-decoration: none;
+  }
+  .fanshop-teaser-more:hover { color: var(--color-brand-orange-text); text-decoration: underline; }
+  .fanshop-teaser-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .fanshop-teaser-list a {
+    display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600;
+    color: var(--color-brand-orange-text); text-decoration: none;
+  }
+  .fanshop-teaser-list a:hover { text-decoration: underline; }
   .fanshop-giftcard-card { display: grid; grid-template-columns: 260px 1fr; gap: 8px 24px; padding: 20px; margin-bottom: 24px; align-items: center; }
   @media (max-width: 680px) { .fanshop-giftcard-card { grid-template-columns: 1fr; } }
   .fanshop-giftcard-heading { grid-column: 1 / -1; }
@@ -473,28 +490,96 @@
       { id: 'gutschein-50', name: 'Gutschein 50,00 €', price: 50.00, category: 'gutschein' }
     ];
     /* Teaser-Kacheln fuer Produkte, die (noch) nicht im eigenen Fanshop bestellbar sind,
-       sondern bei Kooperationspartnern - verlinken raus statt Warenkorb-Funktion. */
+       sondern bei Kooperationspartnern - verlinken raus statt Warenkorb-Funktion.
+       kind 'simple': ein Artikel, ganze Kachel ein Link. kind 'category': Hero-
+       Artikel oben verlinkt (url), darunter ein zweiter Link zu allen Varianten
+       der Kategorie (moreUrl, z.B. Erfurt-Mitte-Tag-Filter). kind 'accessories':
+       mehrere kleine Artikel als Liste statt einer Hero-Kachel.
+       Jeder Link bekommt UTM-Parameter (utm) fuers Partner-eigene Analytics und
+       ein data-track fuers eigene GoatCounter (Pfad /out/<track>, s. bindOutboundTracking). */
+    var EM_BASE = 'https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt';
     var TEASERS = [
-      { name: 'Kaffee-Kollektion', image: '/assets/img/shop-kaffee-loewen.webp', shopName: 'DenkMahl', shopUrl: 'https://denkmahl-kaffee.de/' },
-      { name: 'Pullover-Kollektion', image: '/assets/img/stock-shop-hoodie.webp', shopName: 'Erfurt Mitte', shopUrl: 'https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt' },
-      { name: 'T-Shirt-Kollektion', image: '/assets/img/stock-shop-tshirt.webp', shopName: 'Rays Shop', shopUrl: '' }
+      { kind: 'simple', name: 'Kaffee-Kollektion', image: '/assets/img/shop-kaffee-loewen.webp', shopName: 'DenkMahl',
+        url: 'https://denkmahl-kaffee.de/', utm: 'kaffee', track: 'denkmahl-kaffee' },
+      { kind: 'category', name: 'T-Shirt-Kollektion', image: '/assets/img/shop-tshirt-loewen.webp', shopName: 'Erfurt Mitte',
+        url: EM_BASE + '/products/t-shirt-stamp-basketball-loewen-erfurt',
+        moreUrl: EM_BASE + '?filter.p.tag=T-Shirt', moreLabel: 'Weitere T-Shirts ansehen',
+        utm: 'tshirt', track: 'erfurt-mitte-tshirt' },
+      { kind: 'category', name: 'Sweatjacken-Kollektion', image: '/assets/img/shop-sweatjacke-loewen.webp', shopName: 'Erfurt Mitte',
+        url: EM_BASE + '/products/sweatjacke-herren-stamp-basketball-loewen-erfurt',
+        moreUrl: EM_BASE + '?filter.p.tag=Sweatjacke', moreLabel: 'Weitere Sweatjacken ansehen',
+        utm: 'sweatjacke', track: 'erfurt-mitte-sweatjacke' },
+      { kind: 'category', name: 'Pullover-Kollektion', image: '/assets/img/shop-pullover-loewen.webp', shopName: 'Erfurt Mitte',
+        url: EM_BASE + '/products/pullover-stamp-basketball-loewen-erfurt-unisex',
+        moreUrl: EM_BASE + '?filter.p.tag=Pullover', moreLabel: 'Weitere Pullover ansehen',
+        utm: 'pullover', track: 'erfurt-mitte-pullover' },
+      { kind: 'category', name: 'Hoodie-Kollektion', image: '/assets/img/shop-hoodie-loewen.webp', shopName: 'Erfurt Mitte',
+        url: EM_BASE + '/products/hoodie-stamp-basketball-loewen-erfurt-unisex',
+        moreUrl: EM_BASE + '?filter.p.tag=Hoodie', moreLabel: 'Weitere Hoodies ansehen',
+        utm: 'hoodie', track: 'erfurt-mitte-hoodie' },
+      { kind: 'accessories', name: 'Accessoires', image: '/assets/img/shop-accessoires-loewen.webp', shopName: 'Erfurt Mitte',
+        items: [
+          { label: 'Fanschal', url: EM_BASE + '/products/basketball-loewen-erfurt-fanschal-schal', utm: 'schal', track: 'erfurt-mitte-schal' },
+          { label: 'Pin / Anstecknadel', url: EM_BASE + '/products/basketball-loewen-erfurt-pin-anstecknadel', utm: 'pin', track: 'erfurt-mitte-pin' },
+          { label: 'Tasse / Kaffeebecher', url: EM_BASE + '/products/basketball-loewen-erfurt-tasse-kaffeebecher', utm: 'tasse', track: 'erfurt-mitte-tasse' },
+          { label: 'Stickerset', url: EM_BASE + '/products/stickerset-basketball-loewen-erfurt-aufkleber', utm: 'sticker', track: 'erfurt-mitte-sticker' }
+        ] },
+      { kind: 'simple', name: 'Archived Tee', image: '/assets/img/stock-shop-tshirt.webp', shopName: 'Fortyoneunit',
+        url: 'https://fortyoneunit.com/products/archived-by-41-tee-vintage-cream', utm: 'fortyoneunit-tee', track: 'fortyoneunit-tshirt' }
     ];
     var cart = {}; // id -> qty
 
     function formatMoney(n) { return n.toFixed(2).replace('.', ',') + ' €'; }
 
-    var grid = document.getElementById('fanshop-products');
-    grid.innerHTML = TEASERS.map(function (t) {
-      return '<a class="card fanshop-product fanshop-teaser" style="padding:16px" href="' + t.shopUrl + '" target="_blank" rel="noopener">' +
-        '<div class="fanshop-product-img fanshop-teaser-img">' +
-          '<img loading="lazy" src="' + t.image + '" alt="' + t.name + '" />' +
-          '<span class="fanshop-teaser-stamp">Bald auch hier zu bestellen</span>' +
-        '</div>' +
-        '<h4>' + t.name + '</h4>' +
+    function withUtm(url, content) {
+      var sep = url.indexOf('?') === -1 ? '?' : '&';
+      return url + sep + 'utm_source=basketball-loewen&utm_medium=referral&utm_campaign=fanshop&utm_content=' + encodeURIComponent(content);
+    }
+
+    var STAMP = '<span class="fanshop-teaser-stamp">Bald auch hier zu bestellen</span>';
+
+    function teaserHTML(t) {
+      var img = '<div class="fanshop-product-img fanshop-teaser-img"><img loading="lazy" src="' + t.image + '" alt="' + t.name + '" />' + STAMP + '</div>';
+      if (t.kind === 'accessories') {
+        var items = t.items.map(function (i) {
+          return '<li><a href="' + withUtm(i.url, i.utm) + '" target="_blank" rel="noopener" data-track="' + i.track + '">' +
+            i.label + ' <i data-lucide="arrow-up-right" class="icon-12"></i></a></li>';
+        }).join('');
+        return '<div class="card fanshop-product fanshop-teaser">' + img + '<h4>' + t.name + '</h4>' +
+          '<ul class="fanshop-teaser-list">' + items + '</ul></div>';
+      }
+      if (t.kind === 'category') {
+        return '<div class="card fanshop-product fanshop-teaser">' +
+          '<a class="fanshop-teaser-hero" href="' + withUtm(t.url, t.utm) + '" target="_blank" rel="noopener" data-track="' + t.track + '">' +
+            img + '<h4>' + t.name + '</h4>' +
+            '<span class="fanshop-teaser-shop">Zum Shop von ' + t.shopName + ' <i data-lucide="arrow-up-right" class="icon-14"></i></span>' +
+          '</a>' +
+          '<a class="fanshop-teaser-more" href="' + withUtm(t.moreUrl, t.utm + '-weitere') + '" target="_blank" rel="noopener" data-track="' + t.track + '-weitere">' +
+            t.moreLabel + ' <i data-lucide="arrow-right" class="icon-12"></i></a>' +
+        '</div>';
+      }
+      return '<a class="card fanshop-product fanshop-teaser" href="' + withUtm(t.url, t.utm) + '" target="_blank" rel="noopener" data-track="' + t.track + '">' +
+        img + '<h4>' + t.name + '</h4>' +
         '<span class="fanshop-teaser-shop">Zum Shop von ' + t.shopName + ' <i data-lucide="arrow-up-right" class="icon-14"></i></span>' +
       '</a>';
-    }).join('');
+    }
+
+    var grid = document.getElementById('fanshop-products');
+    grid.innerHTML = TEASERS.map(teaserHTML).join('');
     if (window.lucide) window.lucide.createIcons();
+
+    /* Eigenes Klick-Tracking ueber das site-weit eingebundene GoatCounter (s.
+       partials/header.html) -- zaehlt jeden Klick als Event unter /out/<id>,
+       unabhaengig davon, ob der Partner UTM-Parameter selbst auswertet. Alle
+       Links oeffnen in neuem Tab (target=_blank), die aktuelle Seite wird also
+       nie verlassen -- kein Race gegen die Navigation noetig. */
+    grid.querySelectorAll('[data-track]').forEach(function (a) {
+      a.addEventListener('click', function () {
+        if (window.goatcounter && window.goatcounter.count) {
+          window.goatcounter.count({ path: '/out/' + a.dataset.track, title: a.dataset.track, event: true });
+        }
+      });
+    });
 
     var giftcardRows = document.getElementById('fanshop-giftcard-rows');
     giftcardRows.innerHTML = PRODUCTS.filter(function (p) { return p.category === 'gutschein'; }).map(function (p) {
