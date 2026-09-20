@@ -39,6 +39,7 @@
     font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em;
     padding: 6px 0; transform: rotate(-10deg); box-shadow: 0 2px 8px rgba(0,0,0,.3);
   }
+  .fanshop-teaser-stamp-soldout { background: var(--text-muted); }
   .fanshop-teaser-shop {
     display: inline-flex; align-items: center; gap: 4px;
     font-size: 13px; font-weight: 600; color: var(--color-brand-orange-text);
@@ -524,7 +525,7 @@
           { label: 'Tasse / Kaffeebecher', url: EM_BASE + '/products/basketball-loewen-erfurt-tasse-kaffeebecher', utm: 'tasse', track: 'erfurt-mitte-tasse' },
           { label: 'Stickerset', url: EM_BASE + '/products/stickerset-basketball-loewen-erfurt-aufkleber', utm: 'sticker', track: 'erfurt-mitte-sticker' }
         ] },
-      { kind: 'simple', name: 'Archived Tee', image: '/assets/img/stock-shop-tshirt.webp', shopName: 'Fortyoneunit',
+      { kind: 'simple', name: 'Archived Tee', image: '/assets/img/stock-shop-tshirt.webp', shopName: 'Fortyoneunit', soldOut: true,
         url: 'https://fortyoneunit.com/products/archived-by-41-tee-vintage-cream', utm: 'fortyoneunit-tee', track: 'fortyoneunit-tshirt' }
     ];
     var cart = {}; // id -> qty
@@ -536,10 +537,17 @@
       return url + sep + 'utm_source=basketball-loewen&utm_medium=referral&utm_campaign=fanshop&utm_content=' + encodeURIComponent(content);
     }
 
-    var STAMP = '<span class="fanshop-teaser-stamp">Bald auch hier zu bestellen</span>';
+    function stampHTML(t) {
+      // soldOut = Platzhalter, bis der Partner den Verkaufsstatus bestaetigt
+      // (z.B. Fortyoneunit vor Rays Rueckmeldung) -- Klick zaehlt trotzdem und
+      // leitet weiter, nur die Erwartung an den Besucher wird ehrlich gesetzt.
+      var text = t.soldOut ? 'Ausverkauft' : 'Bald auch hier zu bestellen';
+      var cls = 'fanshop-teaser-stamp' + (t.soldOut ? ' fanshop-teaser-stamp-soldout' : '');
+      return '<span class="' + cls + '">' + text + '</span>';
+    }
 
     function teaserHTML(t) {
-      var img = '<div class="fanshop-product-img fanshop-teaser-img"><img loading="lazy" src="' + t.image + '" alt="' + t.name + '" />' + STAMP + '</div>';
+      var img = '<div class="fanshop-product-img fanshop-teaser-img"><img loading="lazy" src="' + t.image + '" alt="' + t.name + '" />' + stampHTML(t) + '</div>';
       if (t.kind === 'accessories') {
         var items = t.items.map(function (i) {
           return '<li><a href="' + withUtm(i.url, i.utm) + '" target="_blank" rel="noopener" data-track="' + i.track + '">' +
