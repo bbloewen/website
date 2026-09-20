@@ -1,0 +1,38 @@
+{
+  "hinweis": "Fanshop-Inhalte fuer fanshop.html: eigene Gutschein-Betraege (gutscheine, im eigenen Warenkorb bestellbar) und Teaser-Kacheln zu externen Partner-Kollektionen (teaser, verlinken raus statt Warenkorb-Funktion). Wird von tools/build-fanshop.py statisch ins HTML geschrieben UND von js/fanshop.js zur Laufzeit clientseitig nachgerendert -- beides muss auf demselben Stand bleiben, siehe kachel()/reihe() dort. teaser.kind: 'simple' = ein Artikel, ganze Kachel ein Link. 'category' = Hero-Artikel oben verlinkt (url), darunter ein zweiter Link zu allen Varianten der Kategorie (moreUrl, z.B. Erfurt-Mitte-Tag-Filter). soldOut = Platzhalter-Status, bis der Partner den Verkaufsstatus bestaetigt (z.B. Fortyoneunit vor Rays Rueckmeldung zur Kooperation, Stand 20.09.2026) -- Klick zaehlt trotzdem und leitet weiter, nur die Erwartung an den Besucher wird ehrlich gesetzt. Jeder Teaser-Link bekommt UTM-Parameter (utm) fuers Partner-eigene Analytics und ein data-track fuers eigenes GoatCounter (Pfad /out/<track>). Reihenfolge seit 20.09.2026 (Marko): Kaffee, dann die vier Accessoires einzeln, dann Fortyoneunit, dann die uebrigen Erfurt-Mitte-Kategorien.",
+  "gutscheine": [
+    { "id": "gutschein-10", "name": "Gutschein 10,00 €", "price": 10.00 },
+    { "id": "gutschein-20", "name": "Gutschein 20,00 €", "price": 20.00 },
+    { "id": "gutschein-50", "name": "Gutschein 50,00 €", "price": 50.00 }
+  ],
+  "teasers": [
+    { "kind": "simple", "name": "Kaffee-Kollektion", "image": "/assets/img/shop-kaffee-loewen.webp", "shopName": "DenkMahl",
+      "url": "https://denkmahl-kaffee.de/loewen-kaffee", "utm": "kaffee", "track": "denkmahl-kaffee" },
+    { "kind": "simple", "name": "Fanschal", "image": "/assets/img/shop-schal-loewen.webp", "shopName": "Erfurt Mitte",
+      "url": "https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt/products/basketball-loewen-erfurt-fanschal-schal", "utm": "schal", "track": "erfurt-mitte-schal" },
+    { "kind": "simple", "name": "Pin / Anstecknadel", "image": "/assets/img/shop-pin-loewen.webp", "shopName": "Erfurt Mitte",
+      "url": "https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt/products/basketball-loewen-erfurt-pin-anstecknadel", "utm": "pin", "track": "erfurt-mitte-pin" },
+    { "kind": "simple", "name": "Tasse / Kaffeebecher", "image": "/assets/img/shop-tasse-loewen.webp", "shopName": "Erfurt Mitte",
+      "url": "https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt/products/basketball-loewen-erfurt-tasse-kaffeebecher", "utm": "tasse", "track": "erfurt-mitte-tasse" },
+    { "kind": "simple", "name": "Stickerset", "image": "/assets/img/shop-stickerset-loewen.webp", "shopName": "Erfurt Mitte",
+      "url": "https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt/products/stickerset-basketball-loewen-erfurt-aufkleber", "utm": "sticker", "track": "erfurt-mitte-sticker" },
+    { "kind": "simple", "name": "41 T-Shirt", "image": "/assets/img/shop-tee-fortyoneunit.webp", "shopName": "Fortyoneunit", "soldOut": true,
+      "url": "https://fortyoneunit.com/products/archived-by-41-tee-vintage-cream", "utm": "fortyoneunit-tee", "track": "fortyoneunit-tshirt" },
+    { "kind": "category", "name": "T-Shirt-Kollektion", "image": "/assets/img/shop-tshirt-loewen.webp", "shopName": "Erfurt Mitte",
+      "url": "https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt/products/t-shirt-stamp-basketball-loewen-erfurt",
+      "moreUrl": "https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt?filter.p.tag=T-Shirt", "moreLabel": "Weitere T-Shirts ansehen",
+      "utm": "tshirt", "track": "erfurt-mitte-tshirt" },
+    { "kind": "category", "name": "Sweatjacken-Kollektion", "image": "/assets/img/shop-sweatjacke-loewen.webp", "shopName": "Erfurt Mitte",
+      "url": "https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt/products/sweatjacke-herren-stamp-basketball-loewen-erfurt",
+      "moreUrl": "https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt?filter.p.tag=Sweatjacke", "moreLabel": "Weitere Sweatjacken ansehen",
+      "utm": "sweatjacke", "track": "erfurt-mitte-sweatjacke" },
+    { "kind": "category", "name": "Pullover-Kollektion", "image": "/assets/img/shop-pullover-loewen.webp", "shopName": "Erfurt Mitte",
+      "url": "https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt/products/pullover-stamp-basketball-loewen-erfurt-unisex",
+      "moreUrl": "https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt?filter.p.tag=Pullover", "moreLabel": "Weitere Pullover ansehen",
+      "utm": "pullover", "track": "erfurt-mitte-pullover" },
+    { "kind": "category", "name": "Hoodie-Kollektion", "image": "/assets/img/shop-hoodie-loewen.webp", "shopName": "Erfurt Mitte",
+      "url": "https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt/products/hoodie-stamp-basketball-loewen-erfurt-unisex",
+      "moreUrl": "https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt?filter.p.tag=Hoodie", "moreLabel": "Weitere Hoodies ansehen",
+      "utm": "hoodie", "track": "erfurt-mitte-hoodie" }
+  ]
+}
