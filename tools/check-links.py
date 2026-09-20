@@ -137,9 +137,12 @@ def fliesstext(text):
     """
     for muster in (r"<script.*?</script>", r"<style.*?</style>", r"<!--.*?-->"):
         text = re.sub(muster, " ", text, flags=re.S)
-    absaetze = " ".join(P_BLOCK.findall(text))
-    absaetze = re.sub(r"<a\b[^>]*>.*?</a>", " ", absaetze, flags=re.S)
-    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", absaetze))
+    # Anker VOR den Absaetzen entfernen, nicht danach: eine News-Kachel ist ein
+    # grosses <a>, das ganze <p> liegen darin. Erst <p> zu sammeln und dann
+    # Anker zu streichen laesst den Teaser stehen und meldet ihn als unverlinkt,
+    # obwohl die Kachel als Ganzes ein Link ist.
+    text = re.sub(r"<a\b[^>]*>.*?</a>", " ", text, flags=re.S)
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", " ".join(P_BLOCK.findall(text))))
 
 
 def ziel_datei(url, quelle):
