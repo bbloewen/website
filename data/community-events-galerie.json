@@ -1,4 +1,30 @@
 {
   "hinweis": "Fotos von Community-Events (Saisoneröffnung, Fanstammtische u.ä.). Jeder Eintrag braucht 'src' (Bildpfad) und 'alt' (Bildbeschreibung). Wird auf fans/community-events.html gezeigt (max. 50, wächst mit jedem Event).",
-  "bilder": []
+  "bilder": [
+    {
+      "src": "/assets/img/zughafen-kinderfest-galerie-01.webp",
+      "alt": "Infostand der Basketball Löwen mit Flyern und Fanartikeln beim Kinderfest am Zughafen",
+      "thumb": "/assets/img/thumbs/zughafen-kinderfest-galerie-01.webp"
+    },
+    {
+      "src": "/assets/img/zughafen-kinderfest-galerie-02.webp",
+      "alt": "Korbwerfen auf dem mobilen Spielfeld beim Kinderfest am Zughafen",
+      "thumb": "/assets/img/thumbs/zughafen-kinderfest-galerie-02.webp"
+    },
+    {
+      "src": "/assets/img/zughafen-kinderfest-galerie-03.webp",
+      "alt": "Bühnenprogramm in der Festhalle des Zughafens",
+      "thumb": "/assets/img/thumbs/zughafen-kinderfest-galerie-03.webp"
+    },
+    {
+      "src": "/assets/img/zughafen-kinderfest-galerie-04.webp",
+      "alt": "Festlich geschmückte Halle beim Kinderfest am Zughafen",
+      "thumb": "/assets/img/thumbs/zughafen-kinderfest-galerie-04.webp"
+    },
+    {
+      "src": "/assets/img/zughafen-kinderfest-galerie-05.webp",
+      "alt": "Besucher beim Entspannen auf den Sitzkissen im Zughafen",
+      "thumb": "/assets/img/thumbs/zughafen-kinderfest-galerie-05.webp"
+    }
+  ]
 }
