@@ -538,12 +538,14 @@
     }
 
     function stampHTML(t) {
-      // soldOut = Platzhalter, bis der Partner den Verkaufsstatus bestaetigt
-      // (z.B. Fortyoneunit vor Rays Rueckmeldung) -- Klick zaehlt trotzdem und
-      // leitet weiter, nur die Erwartung an den Besucher wird ehrlich gesetzt.
-      var text = t.soldOut ? 'Ausverkauft' : 'Bald auch hier zu bestellen';
-      var cls = 'fanshop-teaser-stamp' + (t.soldOut ? ' fanshop-teaser-stamp-soldout' : '');
-      return '<span class="' + cls + '">' + text + '</span>';
+      // Kein "Bald..."-Hinweis mehr auf den echten, laufenden Kacheln (Marko,
+      // 20.09.2026: die Direktlinks fuehren ja schon jetzt in den Warenkorb --
+      // "Bald" wirkte da nur verwirrend). soldOut = Platzhalter, bis der
+      // Partner den Verkaufsstatus bestaetigt (z.B. Fortyoneunit vor Rays
+      // Rueckmeldung) -- Klick zaehlt trotzdem und leitet weiter, nur die
+      // Erwartung an den Besucher wird ehrlich gesetzt.
+      if (!t.soldOut) return '';
+      return '<span class="fanshop-teaser-stamp fanshop-teaser-stamp-soldout">Ausverkauft</span>';
     }
 
     function teaserHTML(t) {
