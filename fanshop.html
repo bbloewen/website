@@ -33,13 +33,10 @@
   .fanshop-teaser { text-decoration: none; color: inherit; display: block; padding: 16px; }
   .fanshop-teaser:hover { border-color: var(--color-brand-orange); }
   .fanshop-teaser-img { position: relative; }
-  .fanshop-teaser-stamp {
-    position: absolute; top: 22%; left: -12%; width: 124%;
-    background: var(--color-brand-navy); color: #fff; text-align: center;
-    font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em;
-    padding: 6px 0; transform: rotate(-10deg); box-shadow: 0 2px 8px rgba(0,0,0,.3);
-  }
-  .fanshop-teaser-stamp-soldout { background: var(--text-muted); }
+  /* Eckband statt Stempel (Marko, 20.09.2026) -- selbes .ribbon-corner/
+     .card-media-ribbon-Muster wie beim Court-Hunt-Spot auf den Community-
+     Events-Kacheln (css/site.css), nur in Rot statt Orange fuer "Ausverkauft". */
+  .fanshop-teaser-stamp-soldout { background: #a8201a; }
   .fanshop-teaser-shop {
     display: inline-flex; align-items: center; gap: 4px;
     font-size: 13px; font-weight: 600; color: var(--color-brand-orange-text);
@@ -56,12 +53,6 @@
     font-size: 12px; font-weight: 600; color: var(--text-muted); text-decoration: none;
   }
   .fanshop-teaser-more:hover { color: var(--color-brand-orange-text); text-decoration: underline; }
-  .fanshop-teaser-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-  .fanshop-teaser-list a {
-    display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600;
-    color: var(--color-brand-orange-text); text-decoration: none;
-  }
-  .fanshop-teaser-list a:hover { text-decoration: underline; }
   .fanshop-giftcard-card { display: grid; grid-template-columns: 260px 1fr; gap: 8px 24px; padding: 20px; margin-bottom: 24px; align-items: center; }
   @media (max-width: 680px) { .fanshop-giftcard-card { grid-template-columns: 1fr; } }
   .fanshop-giftcard-heading { grid-column: 1 / -1; }
@@ -494,14 +485,27 @@
        sondern bei Kooperationspartnern - verlinken raus statt Warenkorb-Funktion.
        kind 'simple': ein Artikel, ganze Kachel ein Link. kind 'category': Hero-
        Artikel oben verlinkt (url), darunter ein zweiter Link zu allen Varianten
-       der Kategorie (moreUrl, z.B. Erfurt-Mitte-Tag-Filter). kind 'accessories':
-       mehrere kleine Artikel als Liste statt einer Hero-Kachel.
+       der Kategorie (moreUrl, z.B. Erfurt-Mitte-Tag-Filter).
+       Reihenfolge seit 20.09.2026 (Marko): Kaffee, dann die vier Accessoires
+       einzeln, dann Fortyoneunit, dann die uebrigen Erfurt-Mitte-Kategorien.
+       Die frueher gebuendelte Accessoires-Kachel ist entfallen — jeder Artikel
+       hat jetzt sein eigenes Produktfoto vom Partner.
        Jeder Link bekommt UTM-Parameter (utm) fuers Partner-eigene Analytics und
        ein data-track fuers eigene GoatCounter (Pfad /out/<track>, s. bindOutboundTracking). */
     var EM_BASE = 'https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt';
     var TEASERS = [
       { kind: 'simple', name: 'Kaffee-Kollektion', image: '/assets/img/shop-kaffee-loewen.webp', shopName: 'DenkMahl',
         url: 'https://denkmahl-kaffee.de/', utm: 'kaffee', track: 'denkmahl-kaffee' },
+      { kind: 'simple', name: 'Fanschal', image: '/assets/img/shop-schal-loewen.webp', shopName: 'Erfurt Mitte',
+        url: EM_BASE + '/products/basketball-loewen-erfurt-fanschal-schal', utm: 'schal', track: 'erfurt-mitte-schal' },
+      { kind: 'simple', name: 'Pin / Anstecknadel', image: '/assets/img/shop-pin-loewen.webp', shopName: 'Erfurt Mitte',
+        url: EM_BASE + '/products/basketball-loewen-erfurt-pin-anstecknadel', utm: 'pin', track: 'erfurt-mitte-pin' },
+      { kind: 'simple', name: 'Tasse / Kaffeebecher', image: '/assets/img/shop-tasse-loewen.webp', shopName: 'Erfurt Mitte',
+        url: EM_BASE + '/products/basketball-loewen-erfurt-tasse-kaffeebecher', utm: 'tasse', track: 'erfurt-mitte-tasse' },
+      { kind: 'simple', name: 'Stickerset', image: '/assets/img/shop-stickerset-loewen.webp', shopName: 'Erfurt Mitte',
+        url: EM_BASE + '/products/stickerset-basketball-loewen-erfurt-aufkleber', utm: 'sticker', track: 'erfurt-mitte-sticker' },
+      { kind: 'simple', name: 'Archived Tee', image: '/assets/img/shop-tee-fortyoneunit.webp', shopName: 'Fortyoneunit', soldOut: true,
+        url: 'https://fortyoneunit.com/products/archived-by-41-tee-vintage-cream', utm: 'fortyoneunit-tee', track: 'fortyoneunit-tshirt' },
       { kind: 'category', name: 'T-Shirt-Kollektion', image: '/assets/img/shop-tshirt-loewen.webp', shopName: 'Erfurt Mitte',
         url: EM_BASE + '/products/t-shirt-stamp-basketball-loewen-erfurt',
         moreUrl: EM_BASE + '?filter.p.tag=T-Shirt', moreLabel: 'Weitere T-Shirts ansehen',
@@ -518,15 +522,6 @@
         url: EM_BASE + '/products/hoodie-stamp-basketball-loewen-erfurt-unisex',
         moreUrl: EM_BASE + '?filter.p.tag=Hoodie', moreLabel: 'Weitere Hoodies ansehen',
         utm: 'hoodie', track: 'erfurt-mitte-hoodie' },
-      { kind: 'accessories', name: 'Accessoires', image: '/assets/img/shop-accessoires-loewen.webp', shopName: 'Erfurt Mitte',
-        items: [
-          { label: 'Fanschal', url: EM_BASE + '/products/basketball-loewen-erfurt-fanschal-schal', utm: 'schal', track: 'erfurt-mitte-schal' },
-          { label: 'Pin / Anstecknadel', url: EM_BASE + '/products/basketball-loewen-erfurt-pin-anstecknadel', utm: 'pin', track: 'erfurt-mitte-pin' },
-          { label: 'Tasse / Kaffeebecher', url: EM_BASE + '/products/basketball-loewen-erfurt-tasse-kaffeebecher', utm: 'tasse', track: 'erfurt-mitte-tasse' },
-          { label: 'Stickerset', url: EM_BASE + '/products/stickerset-basketball-loewen-erfurt-aufkleber', utm: 'sticker', track: 'erfurt-mitte-sticker' }
-        ] },
-      { kind: 'simple', name: 'Archived Tee', image: '/assets/img/stock-shop-tshirt.webp', shopName: 'Fortyoneunit', soldOut: true,
-        url: 'https://fortyoneunit.com/products/archived-by-41-tee-vintage-cream', utm: 'fortyoneunit-tee', track: 'fortyoneunit-tshirt' }
     ];
     var cart = {}; // id -> qty
 
@@ -545,19 +540,11 @@
       // Rueckmeldung) -- Klick zaehlt trotzdem und leitet weiter, nur die
       // Erwartung an den Besucher wird ehrlich gesetzt.
       if (!t.soldOut) return '';
-      return '<span class="fanshop-teaser-stamp fanshop-teaser-stamp-soldout">Ausverkauft</span>';
+      return '<div class="ribbon-corner"><span class="card-media-ribbon fanshop-teaser-stamp-soldout">Ausverkauft</span></div>';
     }
 
     function teaserHTML(t) {
       var img = '<div class="fanshop-product-img fanshop-teaser-img"><img loading="lazy" src="' + t.image + '" alt="' + t.name + '" />' + stampHTML(t) + '</div>';
-      if (t.kind === 'accessories') {
-        var items = t.items.map(function (i) {
-          return '<li><a href="' + withUtm(i.url, i.utm) + '" target="_blank" rel="noopener" data-track="' + i.track + '">' +
-            i.label + ' <i data-lucide="arrow-up-right" class="icon-12"></i></a></li>';
-        }).join('');
-        return '<div class="card fanshop-product fanshop-teaser">' + img + '<h4>' + t.name + '</h4>' +
-          '<ul class="fanshop-teaser-list">' + items + '</ul></div>';
-      }
       if (t.kind === 'category') {
         return '<div class="card fanshop-product fanshop-teaser">' +
           '<a class="fanshop-teaser-hero" href="' + withUtm(t.url, t.utm) + '" target="_blank" rel="noopener" data-track="' + t.track + '">' +
