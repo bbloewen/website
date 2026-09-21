@@ -44,6 +44,29 @@ from seo_common import ziel_url
 REPO = Path(__file__).resolve().parent.parent
 QUELLE = REPO / "data" / "heimspiele.json"
 ZIEL = REPO / "saison" / "profis" / "gameday" / "index.html"
+DAUERKARTE = REPO / "tickets" / "dauerkarte.html"
+
+# Die Dauerkarten-Preisbox in der Spalte neben den weiteren Heimspielen. Bewusst
+# eine Auswahl, nicht die volle Liste -- die ganze Preistabelle steht auf
+# tickets/dauerkarte.html, hierher gehoert nur der Anreiss.
+#
+# Die Zahlen gehoeren nicht hierher, sie gehoeren dorthin: pro Zeile steht die
+# id des <strong data-base="..."> auf tickets/dauerkarte.html, und
+# pruefe_dauerkartenpreise() vergleicht sie bei jedem Lauf. Ohne diesen
+# Abgleich lief die Box auseinander: der Hub zeigte vom ersten Tag an (e8f5a63,
+# 26.08.2026) 1.000,00 EUR fuer die VIP-Dauerkarte, waehrend auf
+# tickets/dauerkarte.html und in pretix seit dem 22.08.2026 1.290,00 EUR standen
+# -- 290 EUR daneben, vier Wochen lang, gefunden erst durch Markos Blick auf die
+# Seite (21.09.2026). Ein Kommentar "bitte mitziehen" stand da schon; er hat
+# nicht gereicht.
+DK_PREISE = [
+    ("Kategorie 1", "dk-price-kat1"),
+    ("Kategorie 1 (ermäßigt)", "dk-price-kat1-erm"),
+    ("Kategorie 2", "dk-price-kat2"),
+    ("Kategorie 2 (ermäßigt)", "dk-price-kat2-erm"),
+    ("VIP", "dk-price-vip"),
+    ("VIP (ermäßigt)", "dk-price-vip-erm"),
+]
 
 WOCHENTAGE = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
 MONATE = ["Januar", "Februar", "März", "April", "Mai", "Juni",
@@ -419,6 +442,33 @@ def kauf_bereich(aktuell, kommt, heute):
 """
 
 
+DK_BASE_RE = re.compile(r'id="([a-z0-9-]+)"\s+data-base="([0-9.]+)"')
+
+
+def dauerkartenpreise():
+    """{id: Betrag} aus den data-base-Attributen von tickets/dauerkarte.html."""
+    return {i: float(b) for i, b in DK_BASE_RE.findall(DAUERKARTE.read_text(encoding="utf-8"))}
+
+
+def eur(betrag):
+    """1290.0 -> '1.290,00 €' (deutsche Schreibweise wie auf allen Preisseiten)."""
+    return f"{betrag:,.2f} €".replace(",", "#").replace(".", ",").replace("#", ".")
+
+
+def dk_preiszeilen():
+    """Die Zeilen der Dauerkarten-Preisbox, Betraege aus tickets/dauerkarte.html."""
+    preise = dauerkartenpreise()
+    fehlt = [pid for _, pid in DK_PREISE if pid not in preise]
+    if fehlt:
+        raise SystemExit("tickets/dauerkarte.html: kein data-base zu " + ", ".join(fehlt)
+                         + " — DK_PREISE in diesem Skript muss nachgezogen werden.")
+    return "\n".join(
+        f'            <div class="price-row"><span>{esc(label)}</span>'
+        f'<strong>{eur(preise[pid])}</strong></div>'
+        for label, pid in DK_PREISE
+    )
+
+
 def termine(liste, aktuelles):
     """Die weiteren Heimspiele — mit der Dauerkarten-Preisbox als zweite Spalte.
 
@@ -431,9 +481,10 @@ def termine(liste, aktuelles):
     Der Gegner-Name ist der Ankertext — genau danach wird gesucht, und er ist
     mehr wert als „mehr erfahren".
 
-    Dauerkarten-Preisbox und Erklärfenster: Ändern sich Preise oder Rabatte,
-    muss tickets/dauerkarte.html mitziehen (dort stehen dieselben Zahlen von
-    Hand).
+    Dauerkarten-Preisbox: die Betraege kommen aus tickets/dauerkarte.html
+    (s. DK_PREISE oben), eine Preisaenderung dort zieht hier automatisch mit.
+    Der Mitgliedsrabatt im Erklaerfenster steht dagegen weiter von Hand in
+    beiden Dateien -- aendert er sich, muessen beide angefasst werden.
     """
     zeilen = []
     for s in liste:
@@ -452,10 +503,12 @@ def termine(liste, aktuelles):
         )
     if not zeilen:
         return ""
-    return TERMINE_VORLAGE.replace("__ZEILEN__", "\n".join(zeilen))
+    return (TERMINE_VORLAGE
+            .replace("__ZEILEN__", "\n".join(zeilen))
+            .replace("__DK_PREISE__", dk_preiszeilen()))
 
 
-TERMINE_VORLAGE = '  <section class="section bg-subtle">\n    <div class="container">\n      <div class="section-head">\n        <div class="head-text" style="max-width:none">\n          <span class="eyebrow">Saison 2026/2027</span>\n          <h2 class="t-h2">Die weiteren Heimspiele</h2>\n          <p class="t-body mt-3">Vierzehn Heimspiele von Oktober bis März. Jedes hat seine eigene\n          Seite — vor dem Spiel mit Vorbericht und Kartenkauf, danach mit Ergebnis und Bericht.</p>\n        </div>\n      </div>\n      <div class="ticket-layout mt-5">\n        <div>\n          <div class="ticket-list">\n__ZEILEN__\n          </div>\n          <p class="mt-5"><a class="card-link" href="/saison/spielplan.html?team=profis">Der komplette Spielplan mit Auswärtsspielen <i data-lucide="arrow-right" class="icon-14"></i></a></p>\n        </div>\n\n        <aside style="display:flex;flex-direction:column;gap:20px">\n          <div class="ticket-sidebar" style="position:static">\n            <div>\n              <span class="eyebrow">Preis pro Saison</span>\n              <h3 class="t-h4" style="margin:6px 0 8px">Dauerkarte</h3>\n              <div style="display:flex;gap:8px;flex-wrap:wrap">\n                <button type="button" class="badge badge-orange" id="overview-member-badge" style="border:none;cursor:pointer;font-family:inherit">\n                  -30 % Mitglieder des Basketball Löwen e.V.\n                </button>\n              </div>\n            </div>\n            <p class="t-body-sm" style="margin:12px 0">Mit der Dauerkarte sicherst du dir deinen festen Platz für die ganze Saison — Spiel für Spiel derselbe Blick aufs Parkett.</p>\n            <div class="price-row"><span>Kategorie 1</span><strong>208,00 €</strong></div>\n            <div class="price-row"><span>Kategorie 1 (ermäßigt)</span><strong>182,00 €</strong></div>\n            <div class="price-row"><span>Kategorie 2</span><strong>156,00 €</strong></div>\n            <div class="price-row"><span>Kategorie 2 (ermäßigt)</span><strong>115,00 €</strong></div>\n            <div class="price-row"><span>VIP</span><strong>1.000,00 €</strong></div>\n            <a class="btn btn-primary btn-sm" style="margin-top:12px;width:100%;justify-content:center" href="/tickets/dauerkarte.html">Dauerkarte kaufen</a>\n          </div>\n        </aside>\n      </div>\n\n      <div class="modal-backdrop" id="overview-member-modal-backdrop">\n        <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="overview-member-modal-title">\n          <button class="modal-close" aria-label="Schließen" id="overview-member-modal-close"><i data-lucide="x"></i></button>\n          <div class="modal-icon"><i data-lucide="percent"></i></div>\n          <span class="eyebrow" id="overview-member-modal-title">Mitgliedsrabatt</span>\n          <h3 class="t-h3" style="margin:8px 0 12px">Dauerhaft 30 % für Mitglieder des Basketball Löwen e.V.</h3>\n          <p class="t-body-sm">Mitglieder des Basketball Löwen e.V. erhalten dauerhaft 30&nbsp;% Rabatt auf die Dauerkarte.</p>\n          <p class="t-body-sm mt-3">Mitglieder unserer Kooperationsvereine (<a href=\"https://bcerfurt.de/\" target=\"_blank\" rel=\"noopener\">BC Erfurt</a>, <a href=\"https://usv-erfurt-basketball.de/\" target=\"_blank\" rel=\"noopener\">USV Erfurt</a>, <a href=\"https://www.big-gotha.de/\" target=\"_blank\" rel=\"noopener\">BIG Gotha</a>) erhalten bei der Dauerkarte stattdessen den ermäßigten Satz.</p>\n          <p class="t-body-sm mt-3">Nachweis der Mitgliedschaft beim Kauf erforderlich.</p>\n        </div>\n      </div>\n    </div>\n  </section>'
+TERMINE_VORLAGE = '  <section class="section bg-subtle">\n    <div class="container">\n      <div class="section-head">\n        <div class="head-text" style="max-width:none">\n          <span class="eyebrow">Saison 2026/2027</span>\n          <h2 class="t-h2">Die weiteren Heimspiele</h2>\n          <p class="t-body mt-3">Vierzehn Heimspiele von Oktober bis März. Jedes hat seine eigene\n          Seite — vor dem Spiel mit Vorbericht und Kartenkauf, danach mit Ergebnis und Bericht.</p>\n        </div>\n      </div>\n      <div class="ticket-layout mt-5">\n        <div>\n          <div class="ticket-list">\n__ZEILEN__\n          </div>\n          <p class="mt-5"><a class="card-link" href="/saison/spielplan.html?team=profis">Der komplette Spielplan mit Auswärtsspielen <i data-lucide="arrow-right" class="icon-14"></i></a></p>\n        </div>\n\n        <aside style="display:flex;flex-direction:column;gap:20px">\n          <div class="ticket-sidebar" style="position:static">\n            <div>\n              <span class="eyebrow">Preis pro Saison</span>\n              <h3 class="t-h4" style="margin:6px 0 8px">Dauerkarte</h3>\n              <div style="display:flex;gap:8px;flex-wrap:wrap">\n                <button type="button" class="badge badge-orange" id="overview-member-badge" style="border:none;cursor:pointer;font-family:inherit">\n                  -30 % Mitglieder des Basketball Löwen e.V.\n                </button>\n              </div>\n            </div>\n            <p class="t-body-sm" style="margin:12px 0">Mit der Dauerkarte sicherst du dir deinen festen Platz für die ganze Saison — Spiel für Spiel derselbe Blick aufs Parkett.</p>\n__DK_PREISE__\n            <a class="btn btn-primary btn-sm" style="margin-top:12px;width:100%;justify-content:center" href="/tickets/dauerkarte.html">Dauerkarte kaufen</a>\n          </div>\n        </aside>\n      </div>\n\n      <div class="modal-backdrop" id="overview-member-modal-backdrop">\n        <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="overview-member-modal-title">\n          <button class="modal-close" aria-label="Schließen" id="overview-member-modal-close"><i data-lucide="x"></i></button>\n          <div class="modal-icon"><i data-lucide="percent"></i></div>\n          <span class="eyebrow" id="overview-member-modal-title">Mitgliedsrabatt</span>\n          <h3 class="t-h3" style="margin:8px 0 12px">Dauerhaft 30 % für Mitglieder des Basketball Löwen e.V.</h3>\n          <p class="t-body-sm">Mitglieder des Basketball Löwen e.V. erhalten dauerhaft 30&nbsp;% Rabatt auf die Dauerkarte.</p>\n          <p class="t-body-sm mt-3">Mitglieder unserer Kooperationsvereine (<a href=\"https://bcerfurt.de/\" target=\"_blank\" rel=\"noopener\">BC Erfurt</a>, <a href=\"https://usv-erfurt-basketball.de/\" target=\"_blank\" rel=\"noopener\">USV Erfurt</a>, <a href=\"https://www.big-gotha.de/\" target=\"_blank\" rel=\"noopener\">BIG Gotha</a>) erhalten bei der Dauerkarte stattdessen den ermäßigten Satz.</p>\n          <p class="t-body-sm mt-3">Nachweis der Mitgliedschaft beim Kauf erforderlich.</p>\n        </div>\n      </div>\n    </div>\n  </section>'
 
 
 def uebernehmen(muster, leer):
