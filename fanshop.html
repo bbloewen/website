@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1789582151" />
+<link rel="stylesheet" href="/css/site.css?v=1789923276" />
 <link rel="stylesheet" href="/css/seat-picker.css?v=1787760512" />
 <style>
   .fanshop-grid-wrap { display: grid; grid-template-columns: 1fr 360px; gap: 32px; align-items: start; }
@@ -30,20 +30,29 @@
   }
   .fanshop-product-img img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-md); }
   .fanshop-product h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; line-height: 1.3; }
-  a.fanshop-teaser { text-decoration: none; color: inherit; display: block; }
-  a.fanshop-teaser:hover { border-color: var(--color-brand-orange); }
+  .fanshop-teaser { text-decoration: none; color: inherit; display: block; padding: 16px; }
+  .fanshop-teaser:hover { border-color: var(--color-brand-orange); }
   .fanshop-teaser-img { position: relative; }
-  .fanshop-teaser-stamp {
-    position: absolute; top: 22%; left: -12%; width: 124%;
-    background: var(--color-brand-navy); color: #fff; text-align: center;
-    font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em;
-    padding: 6px 0; transform: rotate(-10deg); box-shadow: 0 2px 8px rgba(0,0,0,.3);
-  }
+  /* Eckband statt Stempel (Marko, 20.09.2026) -- selbes .ribbon-corner/
+     .card-media-ribbon-Muster wie beim Court-Hunt-Spot auf den Community-
+     Events-Kacheln (css/site.css), nur in Rot statt Orange fuer "Ausverkauft". */
+  .fanshop-teaser-stamp-soldout { background: #a8201a; }
   .fanshop-teaser-shop {
     display: inline-flex; align-items: center; gap: 4px;
     font-size: 13px; font-weight: 600; color: var(--color-brand-orange-text);
   }
-  a.fanshop-teaser:hover .fanshop-teaser-shop { text-decoration: underline; }
+  a.fanshop-teaser:hover .fanshop-teaser-shop, .fanshop-teaser-hero:hover .fanshop-teaser-shop { text-decoration: underline; }
+  /* Kategorie-Kacheln (T-Shirt/Sweatjacke/Pullover/Hoodie): Hero-Produkt oben
+     verlinkt, darunter ein zweiter, dezenterer Link zu allen Varianten der
+     Kategorie -- Erfurt Mitte fuehrt je Artikel mehrere Farben/Groessen, die
+     nicht alle einzeln als Kachel Platz haben (Marko, 20.09.2026). */
+  .fanshop-teaser-hero { text-decoration: none; color: inherit; display: block; }
+  .fanshop-teaser-more {
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+    margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);
+    font-size: 12px; font-weight: 600; color: var(--text-muted); text-decoration: none;
+  }
+  .fanshop-teaser-more:hover { color: var(--color-brand-orange-text); text-decoration: underline; }
   .fanshop-giftcard-card { display: grid; grid-template-columns: 260px 1fr; gap: 8px 24px; padding: 20px; margin-bottom: 24px; align-items: center; }
   @media (max-width: 680px) { .fanshop-giftcard-card { grid-template-columns: 1fr; } }
   .fanshop-giftcard-heading { grid-column: 1 / -1; }
@@ -123,9 +132,9 @@
         <div class="nav-item" data-nav-item>
           <button class="nav-link" data-page-group="saison">Saison &amp; Teams <i data-lucide="chevron-down" class="chev icon-14"></i></button>
           <div class="dropdown-panel">
-            <!-- Profis vorübergehend aus der Navigation ausgeblendet -->
+            <a href="/saison/profis.html">Profis</a>
             <!-- Damen vorübergehend aus der Navigation ausgeblendet -->
-            <!-- NBBL vorübergehend aus der Navigation ausgeblendet -->
+            <a href="/saison/nbbl.html">NBBL</a>
             <!-- Nachwuchs vorübergehend aus der Navigation ausgeblendet -->
             <a href="/saison/spielplan.html">Spielplan</a>
             <a href="/saison/tabelle.html">Tabellen</a>
@@ -228,9 +237,9 @@
     <li class="drawer-nav-item core-item">
       <button class="drawer-nav-link" data-drawer-toggle>Saison &amp; Teams <i data-lucide="chevron-down" class="chev icon-16"></i></button>
       <div class="drawer-sub-panel">
-        <!-- Profis vorübergehend aus der Navigation ausgeblendet -->
+        <a href="/saison/profis.html">Profis</a>
         <!-- Damen vorübergehend aus der Navigation ausgeblendet -->
-        <!-- NBBL vorübergehend aus der Navigation ausgeblendet -->
+        <a href="/saison/nbbl.html">NBBL</a>
         <!-- Nachwuchs vorübergehend aus der Navigation ausgeblendet -->
         <a href="/saison/spielplan.html">Spielplan</a>
         <a href="/saison/tabelle.html">Tabellen</a>
@@ -308,10 +317,26 @@
             <div class="fanshop-giftcard-img">
               <img src="/assets/img/fanshop-gutschein-karte.webp" alt="Löwen-Gutschein — Schenk was Großes. Erhältlich im Wert von 10 €, 20 € oder 50 €." width="1000" height="616" loading="lazy" />
             </div>
-            <div id="fanshop-giftcard-rows"></div>
+            <div id="fanshop-giftcard-rows"><!--FANSHOP:fanshop-giftcard-rows-->
+        <div class="fanshop-giftcard-amount-row"><strong>10,00 €</strong><button type="button" class="btn btn-sm btn-outline-orange giftcard-toggle-btn" data-product="gutschein-10" aria-pressed="false"><i data-lucide="plus" class="icon-16"></i>Hinzufügen</button></div>
+        <div class="fanshop-giftcard-amount-row"><strong>20,00 €</strong><button type="button" class="btn btn-sm btn-outline-orange giftcard-toggle-btn" data-product="gutschein-20" aria-pressed="false"><i data-lucide="plus" class="icon-16"></i>Hinzufügen</button></div>
+        <div class="fanshop-giftcard-amount-row"><strong>50,00 €</strong><button type="button" class="btn btn-sm btn-outline-orange giftcard-toggle-btn" data-product="gutschein-50" aria-pressed="false"><i data-lucide="plus" class="icon-16"></i>Hinzufügen</button></div>
+        <!--/FANSHOP:fanshop-giftcard-rows--></div>
           </div>
 
-          <div class="fanshop-products mt-6" id="fanshop-products"></div>
+          <span class="eyebrow" style="display:block;margin:32px 0 12px">Kollektionen unserer Partner</span>
+          <div class="fanshop-products mt-6" id="fanshop-products"><!--FANSHOP:fanshop-products-->
+        <a class="card fanshop-product fanshop-teaser" href="https://denkmahl-kaffee.de/loewen-kaffee?utm_source=basketball-loewen&amp;utm_medium=referral&amp;utm_campaign=fanshop&amp;utm_content=kaffee" target="_blank" rel="noopener" data-track="denkmahl-kaffee"><div class="fanshop-product-img fanshop-teaser-img"><img loading="lazy" src="/assets/img/shop-kaffee-loewen.webp" width="800" height="1200" alt="Kaffee-Kollektion" /></div><h4>Kaffee-Kollektion</h4><span class="fanshop-teaser-shop">Zum Shop von DenkMahl <i data-lucide="arrow-up-right" class="icon-14"></i></span></a>
+        <a class="card fanshop-product fanshop-teaser" href="https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt/products/basketball-loewen-erfurt-fanschal-schal?utm_source=basketball-loewen&amp;utm_medium=referral&amp;utm_campaign=fanshop&amp;utm_content=schal" target="_blank" rel="noopener" data-track="erfurt-mitte-schal"><div class="fanshop-product-img fanshop-teaser-img"><img loading="lazy" src="/assets/img/shop-schal-loewen.webp" width="1200" height="1600" alt="Fanschal" /></div><h4>Fanschal</h4><span class="fanshop-teaser-shop">Zum Shop von Erfurt Mitte <i data-lucide="arrow-up-right" class="icon-14"></i></span></a>
+        <a class="card fanshop-product fanshop-teaser" href="https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt/products/basketball-loewen-erfurt-pin-anstecknadel?utm_source=basketball-loewen&amp;utm_medium=referral&amp;utm_campaign=fanshop&amp;utm_content=pin" target="_blank" rel="noopener" data-track="erfurt-mitte-pin"><div class="fanshop-product-img fanshop-teaser-img"><img loading="lazy" src="/assets/img/shop-pin-loewen.webp" width="1200" height="1600" alt="Pin / Anstecknadel" /></div><h4>Pin / Anstecknadel</h4><span class="fanshop-teaser-shop">Zum Shop von Erfurt Mitte <i data-lucide="arrow-up-right" class="icon-14"></i></span></a>
+        <a class="card fanshop-product fanshop-teaser" href="https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt/products/basketball-loewen-erfurt-tasse-kaffeebecher?utm_source=basketball-loewen&amp;utm_medium=referral&amp;utm_campaign=fanshop&amp;utm_content=tasse" target="_blank" rel="noopener" data-track="erfurt-mitte-tasse"><div class="fanshop-product-img fanshop-teaser-img"><img loading="lazy" src="/assets/img/shop-tasse-loewen.webp" width="1200" height="1600" alt="Tasse / Kaffeebecher" /></div><h4>Tasse / Kaffeebecher</h4><span class="fanshop-teaser-shop">Zum Shop von Erfurt Mitte <i data-lucide="arrow-up-right" class="icon-14"></i></span></a>
+        <a class="card fanshop-product fanshop-teaser" href="https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt/products/stickerset-basketball-loewen-erfurt-aufkleber?utm_source=basketball-loewen&amp;utm_medium=referral&amp;utm_campaign=fanshop&amp;utm_content=sticker" target="_blank" rel="noopener" data-track="erfurt-mitte-sticker"><div class="fanshop-product-img fanshop-teaser-img"><img loading="lazy" src="/assets/img/shop-stickerset-loewen.webp" width="1200" height="1600" alt="Stickerset" /></div><h4>Stickerset</h4><span class="fanshop-teaser-shop">Zum Shop von Erfurt Mitte <i data-lucide="arrow-up-right" class="icon-14"></i></span></a>
+        <a class="card fanshop-product fanshop-teaser" href="https://fortyoneunit.com/products/archived-by-41-tee-vintage-cream?utm_source=basketball-loewen&amp;utm_medium=referral&amp;utm_campaign=fanshop&amp;utm_content=fortyoneunit-tee" target="_blank" rel="noopener" data-track="fortyoneunit-tshirt"><div class="fanshop-product-img fanshop-teaser-img"><img loading="lazy" src="/assets/img/shop-tee-fortyoneunit.webp" width="1200" height="1600" alt="41 T-Shirt" /><div class="ribbon-corner"><span class="card-media-ribbon fanshop-teaser-stamp-soldout">Ausverkauft</span></div></div><h4>41 T-Shirt</h4><span class="fanshop-teaser-shop">Zum Shop von Fortyoneunit <i data-lucide="arrow-up-right" class="icon-14"></i></span></a>
+        <div class="card fanshop-product fanshop-teaser"><a class="fanshop-teaser-hero" href="https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt/products/t-shirt-stamp-basketball-loewen-erfurt?utm_source=basketball-loewen&amp;utm_medium=referral&amp;utm_campaign=fanshop&amp;utm_content=tshirt" target="_blank" rel="noopener" data-track="erfurt-mitte-tshirt"><div class="fanshop-product-img fanshop-teaser-img"><img loading="lazy" src="/assets/img/shop-tshirt-loewen.webp" width="1200" height="1600" alt="T-Shirt-Kollektion" /></div><h4>T-Shirt-Kollektion</h4><span class="fanshop-teaser-shop">Zum Shop von Erfurt Mitte <i data-lucide="arrow-up-right" class="icon-14"></i></span></a><a class="fanshop-teaser-more" href="https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt?filter.p.tag=T-Shirt&amp;utm_source=basketball-loewen&amp;utm_medium=referral&amp;utm_campaign=fanshop&amp;utm_content=tshirt-weitere" target="_blank" rel="noopener" data-track="erfurt-mitte-tshirt-weitere">Weitere T-Shirts ansehen <i data-lucide="arrow-right" class="icon-12"></i></a></div>
+        <div class="card fanshop-product fanshop-teaser"><a class="fanshop-teaser-hero" href="https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt/products/sweatjacke-herren-stamp-basketball-loewen-erfurt?utm_source=basketball-loewen&amp;utm_medium=referral&amp;utm_campaign=fanshop&amp;utm_content=sweatjacke" target="_blank" rel="noopener" data-track="erfurt-mitte-sweatjacke"><div class="fanshop-product-img fanshop-teaser-img"><img loading="lazy" src="/assets/img/shop-sweatjacke-loewen.webp" width="1200" height="1600" alt="Sweatjacken-Kollektion" /></div><h4>Sweatjacken-Kollektion</h4><span class="fanshop-teaser-shop">Zum Shop von Erfurt Mitte <i data-lucide="arrow-up-right" class="icon-14"></i></span></a><a class="fanshop-teaser-more" href="https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt?filter.p.tag=Sweatjacke&amp;utm_source=basketball-loewen&amp;utm_medium=referral&amp;utm_campaign=fanshop&amp;utm_content=sweatjacke-weitere" target="_blank" rel="noopener" data-track="erfurt-mitte-sweatjacke-weitere">Weitere Sweatjacken ansehen <i data-lucide="arrow-right" class="icon-12"></i></a></div>
+        <div class="card fanshop-product fanshop-teaser"><a class="fanshop-teaser-hero" href="https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt/products/pullover-stamp-basketball-loewen-erfurt-unisex?utm_source=basketball-loewen&amp;utm_medium=referral&amp;utm_campaign=fanshop&amp;utm_content=pullover" target="_blank" rel="noopener" data-track="erfurt-mitte-pullover"><div class="fanshop-product-img fanshop-teaser-img"><img loading="lazy" src="/assets/img/shop-pullover-loewen.webp" width="1200" height="1600" alt="Pullover-Kollektion" /></div><h4>Pullover-Kollektion</h4><span class="fanshop-teaser-shop">Zum Shop von Erfurt Mitte <i data-lucide="arrow-up-right" class="icon-14"></i></span></a><a class="fanshop-teaser-more" href="https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt?filter.p.tag=Pullover&amp;utm_source=basketball-loewen&amp;utm_medium=referral&amp;utm_campaign=fanshop&amp;utm_content=pullover-weitere" target="_blank" rel="noopener" data-track="erfurt-mitte-pullover-weitere">Weitere Pullover ansehen <i data-lucide="arrow-right" class="icon-12"></i></a></div>
+        <div class="card fanshop-product fanshop-teaser"><a class="fanshop-teaser-hero" href="https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt/products/hoodie-stamp-basketball-loewen-erfurt-unisex?utm_source=basketball-loewen&amp;utm_medium=referral&amp;utm_campaign=fanshop&amp;utm_content=hoodie" target="_blank" rel="noopener" data-track="erfurt-mitte-hoodie"><div class="fanshop-product-img fanshop-teaser-img"><img loading="lazy" src="/assets/img/shop-hoodie-loewen.webp" width="1200" height="1600" alt="Hoodie-Kollektion" /></div><h4>Hoodie-Kollektion</h4><span class="fanshop-teaser-shop">Zum Shop von Erfurt Mitte <i data-lucide="arrow-up-right" class="icon-14"></i></span></a><a class="fanshop-teaser-more" href="https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt?filter.p.tag=Hoodie&amp;utm_source=basketball-loewen&amp;utm_medium=referral&amp;utm_campaign=fanshop&amp;utm_content=hoodie-weitere" target="_blank" rel="noopener" data-track="erfurt-mitte-hoodie-weitere">Weitere Hoodies ansehen <i data-lucide="arrow-right" class="icon-12"></i></a></div>
+        <!--/FANSHOP:fanshop-products--></div>
         </div>
 
         <div class="card" id="order-summary-card" style="padding:24px;background:var(--bg-subtle)">
@@ -374,9 +399,14 @@
 
       <div class="footer-col">
         <h4>Kontakt</h4>
-        <p class="footer-address">Basketball Löwen e.V.<br>(XXL Baskets GmbH)<br><a href="https://www.google.com/maps/search/?api=1&query=Leipziger+Stra%C3%9Fe+71%2C+99085+Erfurt" target="_blank" rel="noopener">Leipziger Straße 71<br>99085 Erfurt</a></p>
+        <p class="footer-address">Basketball Löwen e.V.<br>(XXL Baskets GmbH)<br>99096 Erfurt</p>
         <a href="tel:+491756100411">+49 175 6100411</a>
         <a href="mailto:info@basketball-loewen.com">info@basketball-loewen.com</a>
+        <!-- Leerzeile: gleicht die kuerzere Kontakt-Spalte optisch an die
+             6-zeiligen Nachbarspalten "Basketball"/"Organisation" an, damit
+             "Kontaktformular" auf Desktop auf gleicher Hoehe steht (Marko,
+             18.09.2026). Hoehe/Abstand einer normalen Link-Zeile nachgebaut. -->
+        <span aria-hidden="true" style="display:block;height:14px;margin-bottom:10px"></span>
         <a href="/kontakt.html">Kontaktformular</a>
       </div>
     </div>
@@ -462,34 +492,70 @@
 <script src="/js/include.js?v=1787854261"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    var PRODUCTS = [
-      { id: 'gutschein-10', name: 'Gutschein 10,00 €', price: 10.00, category: 'gutschein' },
-      { id: 'gutschein-20', name: 'Gutschein 20,00 €', price: 20.00, category: 'gutschein' },
-      { id: 'gutschein-50', name: 'Gutschein 50,00 €', price: 50.00, category: 'gutschein' }
-    ];
-    /* Teaser-Kacheln fuer Produkte, die (noch) nicht im eigenen Fanshop bestellbar sind,
-       sondern bei Kooperationspartnern - verlinken raus statt Warenkorb-Funktion. */
-    var TEASERS = [
-      { name: 'Kaffee-Kollektion', image: '/assets/img/shop-kaffee-loewen.webp', shopName: 'DenkMahl', shopUrl: 'https://denkmahl-kaffee.de/' },
-      { name: 'Pullover-Kollektion', image: '/assets/img/stock-shop-hoodie.webp', shopName: 'Erfurt Mitte', shopUrl: 'https://erfurt-mitte.de/collections/fanshop-basketball-loewen-erfurt' },
-      { name: 'T-Shirt-Kollektion', image: '/assets/img/stock-shop-tshirt.webp', shopName: 'Rays Shop', shopUrl: '' }
-    ];
+    /* Gutschein-Betraege und Partner-Teaser stehen in data/fanshop.json --
+       einzige Datenquelle, aus der auch tools/build-fanshop.py die statische
+       Fassung fuer Crawler ohne JavaScript baut (kein "Bald..."-Hinweis mehr:
+       die Direktlinks fuehren ja schon jetzt in den Warenkorb). Bei Aenderung
+       an kachel()/reihe() hier muss das Python-Pendant mitgezogen werden. */
+    fetch('/data/fanshop.json?v=1789938556').then(function (r) { return r.json(); }).then(function (data) {
+    var PRODUCTS = (data.gutscheine || []).map(function (g) {
+      return { id: g.id, name: g.name, price: g.price, category: 'gutschein' };
+    });
+    var TEASERS = data.teasers || [];
     var cart = {}; // id -> qty
 
     function formatMoney(n) { return n.toFixed(2).replace('.', ',') + ' €'; }
 
-    var grid = document.getElementById('fanshop-products');
-    grid.innerHTML = TEASERS.map(function (t) {
-      return '<a class="card fanshop-product fanshop-teaser" style="padding:16px" href="' + t.shopUrl + '" target="_blank" rel="noopener">' +
-        '<div class="fanshop-product-img fanshop-teaser-img">' +
-          '<img loading="lazy" src="' + t.image + '" alt="' + t.name + '" />' +
-          '<span class="fanshop-teaser-stamp">Bald auch hier zu bestellen</span>' +
-        '</div>' +
-        '<h4>' + t.name + '</h4>' +
+    function withUtm(url, content) {
+      var sep = url.indexOf('?') === -1 ? '?' : '&';
+      return url + sep + 'utm_source=basketball-loewen&utm_medium=referral&utm_campaign=fanshop&utm_content=' + encodeURIComponent(content);
+    }
+
+    function stampHTML(t) {
+      // Kein "Bald..."-Hinweis mehr auf den echten, laufenden Kacheln (Marko,
+      // 20.09.2026: die Direktlinks fuehren ja schon jetzt in den Warenkorb --
+      // "Bald" wirkte da nur verwirrend). soldOut = Platzhalter, bis der
+      // Partner den Verkaufsstatus bestaetigt (z.B. Fortyoneunit vor Rays
+      // Rueckmeldung) -- Klick zaehlt trotzdem und leitet weiter, nur die
+      // Erwartung an den Besucher wird ehrlich gesetzt.
+      if (!t.soldOut) return '';
+      return '<div class="ribbon-corner"><span class="card-media-ribbon fanshop-teaser-stamp-soldout">Ausverkauft</span></div>';
+    }
+
+    function teaserHTML(t) {
+      var img = '<div class="fanshop-product-img fanshop-teaser-img"><img loading="lazy" src="' + t.image + '" alt="' + t.name + '" />' + stampHTML(t) + '</div>';
+      if (t.kind === 'category') {
+        return '<div class="card fanshop-product fanshop-teaser">' +
+          '<a class="fanshop-teaser-hero" href="' + withUtm(t.url, t.utm) + '" target="_blank" rel="noopener" data-track="' + t.track + '">' +
+            img + '<h4>' + t.name + '</h4>' +
+            '<span class="fanshop-teaser-shop">Zum Shop von ' + t.shopName + ' <i data-lucide="arrow-up-right" class="icon-14"></i></span>' +
+          '</a>' +
+          '<a class="fanshop-teaser-more" href="' + withUtm(t.moreUrl, t.utm + '-weitere') + '" target="_blank" rel="noopener" data-track="' + t.track + '-weitere">' +
+            t.moreLabel + ' <i data-lucide="arrow-right" class="icon-12"></i></a>' +
+        '</div>';
+      }
+      return '<a class="card fanshop-product fanshop-teaser" href="' + withUtm(t.url, t.utm) + '" target="_blank" rel="noopener" data-track="' + t.track + '">' +
+        img + '<h4>' + t.name + '</h4>' +
         '<span class="fanshop-teaser-shop">Zum Shop von ' + t.shopName + ' <i data-lucide="arrow-up-right" class="icon-14"></i></span>' +
       '</a>';
-    }).join('');
+    }
+
+    var grid = document.getElementById('fanshop-products');
+    grid.innerHTML = TEASERS.map(teaserHTML).join('');
     if (window.lucide) window.lucide.createIcons();
+
+    /* Eigenes Klick-Tracking ueber das site-weit eingebundene GoatCounter (s.
+       partials/header.html) -- zaehlt jeden Klick als Event unter /out/<id>,
+       unabhaengig davon, ob der Partner UTM-Parameter selbst auswertet. Alle
+       Links oeffnen in neuem Tab (target=_blank), die aktuelle Seite wird also
+       nie verlassen -- kein Race gegen die Navigation noetig. */
+    grid.querySelectorAll('[data-track]').forEach(function (a) {
+      a.addEventListener('click', function () {
+        if (window.goatcounter && window.goatcounter.count) {
+          window.goatcounter.count({ path: '/out/' + a.dataset.track, title: a.dataset.track, event: true });
+        }
+      });
+    });
 
     var giftcardRows = document.getElementById('fanshop-giftcard-rows');
     giftcardRows.innerHTML = PRODUCTS.filter(function (p) { return p.category === 'gutschein'; }).map(function (p) {
@@ -583,6 +649,7 @@
         voucher: null
       }));
       window.location.href = '/tickets/checkout.html';
+    });
     });
   });
 </script>

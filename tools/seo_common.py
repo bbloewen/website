@@ -97,7 +97,7 @@ def indexable_pages():
 #
 # Ein News-Artikel hat zwei Daten, und die dürfen auseinanderlaufen:
 #
-#   * Der Datums-Präfix im Dateinamen (2026-09-16_verein_....html) ist der Tag
+#   * Der Datums-Präfix im Dateinamen (2026-09-16_club_....html) ist der Tag
 #     der Veröffentlichung. build-head-meta.py schreibt ihn als datePublished
 #     ins JSON-LD, und danach wird überall sortiert: Startseiten-Bento,
 #     news/aktuelles.html, die Pfeile auf der Artikelseite, die Team-Feeds.

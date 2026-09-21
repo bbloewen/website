@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1789582151" />
+<link rel="stylesheet" href="/css/site.css?v=1789923276" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
@@ -39,7 +39,7 @@
 <meta name="twitter:title" content="LÖWENPARK" />
 <meta name="twitter:description" content="Der LÖWENPARK: neuer Trainingsstandort für den Basketball-Nachwuchs, Programm, Baufortschritt, Zeiten anfragen und die ganze Geschichte der Halle am Südpark." />
 <meta name="twitter:image" content="https://basketball-loewen.com/assets/img/share/og-default.jpg" />
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SportsActivityLocation","name":"LÖWENPARK","description":"Trainingsstandort der Basketball Löwen Erfurt am Südpark.","address":{"@type":"PostalAddress","postalCode":"99089","addressLocality":"Erfurt","addressRegion":"Thüringen","addressCountry":"DE"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Start","item":"https://basketball-loewen.com/"},{"@type":"ListItem","position":2,"name":"LÖWENPARK","item":"https://basketball-loewen.com/trainieren/loewenpark.html"}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SportsActivityLocation","name":"LÖWENPARK","alternateName":"CATL LÖWENPARK","description":"Sanierte Sporthalle am Erfurter Südpark — Trainingsstandort der Basketball Löwen Erfurt für Nachwuchsleistungssport, Damenbasketball, BasKIDball und Feriencamps.","url":"https://basketball-loewen.com/trainieren/loewenpark.html","image":"https://basketball-loewen.com/assets/img/share/og-default.jpg","mainEntityOfPage":{"@type":"WebPage","@id":"https://basketball-loewen.com/trainieren/loewenpark.html"},"address":{"@type":"PostalAddress","streetAddress":"Friedrich-Ebert-Straße 58","postalCode":"99096","addressLocality":"Erfurt","addressRegion":"Thüringen","addressCountry":"DE"},"geo":{"@type":"GeoCoordinates","latitude":50.963033,"longitude":11.040786},"sameAs":["https://maps.google.com/?cid=17483735935586458406"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Start","item":"https://basketball-loewen.com/"},{"@type":"ListItem","position":2,"name":"LÖWENPARK","item":"https://basketball-loewen.com/trainieren/loewenpark.html"}]}]}</script>
 <!-- SEO:auto END -->
 </head>
 <body data-nav-group="trainieren">
@@ -79,9 +79,9 @@
         <div class="nav-item" data-nav-item>
           <button class="nav-link" data-page-group="saison">Saison &amp; Teams <i data-lucide="chevron-down" class="chev icon-14"></i></button>
           <div class="dropdown-panel">
-            <!-- Profis vorübergehend aus der Navigation ausgeblendet -->
+            <a href="/saison/profis.html">Profis</a>
             <!-- Damen vorübergehend aus der Navigation ausgeblendet -->
-            <!-- NBBL vorübergehend aus der Navigation ausgeblendet -->
+            <a href="/saison/nbbl.html">NBBL</a>
             <!-- Nachwuchs vorübergehend aus der Navigation ausgeblendet -->
             <a href="/saison/spielplan.html">Spielplan</a>
             <a href="/saison/tabelle.html">Tabellen</a>
@@ -184,9 +184,9 @@
     <li class="drawer-nav-item core-item">
       <button class="drawer-nav-link" data-drawer-toggle>Saison &amp; Teams <i data-lucide="chevron-down" class="chev icon-16"></i></button>
       <div class="drawer-sub-panel">
-        <!-- Profis vorübergehend aus der Navigation ausgeblendet -->
+        <a href="/saison/profis.html">Profis</a>
         <!-- Damen vorübergehend aus der Navigation ausgeblendet -->
-        <!-- NBBL vorübergehend aus der Navigation ausgeblendet -->
+        <a href="/saison/nbbl.html">NBBL</a>
         <!-- Nachwuchs vorübergehend aus der Navigation ausgeblendet -->
         <a href="/saison/spielplan.html">Spielplan</a>
         <a href="/saison/tabelle.html">Tabellen</a>
@@ -272,6 +272,8 @@
 
           <p class="t-body" style="margin:0 0 20px;color:var(--text-secondary)">Bald geht's los: Mehr als 500 Kinder werden pro Woche hier optimale Bedingungen in einer modern ausgestatteten, energieeffizienten Trainingshalle vorfinden.</p>
 
+          <p class="t-body" style="margin:0 0 20px;color:var(--text-secondary)">Die Halle am Südpark gehört seit 1971 zum Sport in dieser Stadt: Erst bereiteten sich hier Erfurter Leichtathletinnen und Leichtathleten auf Olympia vor, jetzt wird sie zur Trainingsstätte für mehr als 500 Kinder pro Woche. Für die Sportstadt Erfurt kommt damit eine Adresse dazu, die den Basketball im Stadtgebiet mit der <a href="/saison/profis/gameday/">Riethsporthalle</a>, den <a href="/trainieren/trainingszeiten.html">Trainingszeiten in den Schulhallen</a> und den <a href="/trainieren/freiplaetze.html">Freiplätzen unter freiem Himmel</a> verbindet.</p>
+
           <div class="grid-2">
             <a class="card hoverable" style="text-decoration:none;color:inherit" href="/saison/nbbl.html">
               <div class="card-body">
@@ -311,7 +313,31 @@
           <h2 class="t-h2 mb-5">Baufortschritt in Bildern</h2>
           <div class="camp-gallery-wrap" id="loewenpark-gallery">
             <span class="swipe-hint" aria-hidden="true"><i data-lucide="chevron-right" class="icon-16"></i></span>
-            <div class="news-slider-track"></div>
+            <div class="news-slider-track"><!--GALERIE:loewenpark-gallery-->
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/news/loewenpark-dach.webp" data-lightbox-alt="Luftaufnahme der Dachkonstruktion im Rohbau"><img src="/assets/img/thumbs/loewenpark-dach.webp" width="480" height="320" alt="Luftaufnahme der Dachkonstruktion im Rohbau" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/loewenpark-galerie-02.webp" data-lightbox-alt="Rohbau des LÖWENPARK von außen"><img src="/assets/img/thumbs/loewenpark-galerie-02.webp" width="480" height="320" alt="Rohbau des LÖWENPARK von außen" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/loewenpark-galerie-03.webp" data-lightbox-alt="Rohbau des LÖWENPARK, Außenansicht"><img src="/assets/img/thumbs/loewenpark-galerie-03.webp" width="480" height="320" alt="Rohbau des LÖWENPARK, Außenansicht" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/loewenpark-galerie-04.webp" data-lightbox-alt="Baustelle mit Bäumen im Vordergrund"><img src="/assets/img/thumbs/loewenpark-galerie-04.webp" width="480" height="320" alt="Baustelle mit Bäumen im Vordergrund" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/loewenpark-galerie-05.webp" data-lightbox-alt="Gerüst an der Gebäudefassade"><img src="/assets/img/thumbs/loewenpark-galerie-05.webp" width="480" height="320" alt="Gerüst an der Gebäudefassade" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/loewenpark-galerie-06.webp" data-lightbox-alt="Gerüst an der Gebäudefassade, andere Ansicht"><img src="/assets/img/thumbs/loewenpark-galerie-06.webp" width="480" height="320" alt="Gerüst an der Gebäudefassade, andere Ansicht" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/loewenpark-galerie-07.webp" data-lightbox-alt="Basketball-Löwen-Grafik an der Fassade"><img src="/assets/img/thumbs/loewenpark-galerie-07.webp" width="480" height="320" alt="Basketball-Löwen-Grafik an der Fassade" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/loewenpark-galerie-08.webp" data-lightbox-alt="Gebäudeaußenansicht mit Gerüst"><img src="/assets/img/thumbs/loewenpark-galerie-08.webp" width="480" height="320" alt="Gebäudeaußenansicht mit Gerüst" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/loewenpark-galerie-09.webp" data-lightbox-alt="Richtfest am LÖWENPARK, Eingangsbereich"><img src="/assets/img/thumbs/loewenpark-galerie-09.webp" width="480" height="320" alt="Richtfest am LÖWENPARK, Eingangsbereich" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/loewenpark-galerie-10.webp" data-lightbox-alt="Richtkranz wird auf dem Gerüst angebracht"><img src="/assets/img/thumbs/loewenpark-galerie-10.webp" width="480" height="320" alt="Richtkranz wird auf dem Gerüst angebracht" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/loewenpark-galerie-11.webp" data-lightbox-alt="Gerüst an der Gebäudefassade beim Richtfest"><img src="/assets/img/thumbs/loewenpark-galerie-11.webp" width="480" height="320" alt="Gerüst an der Gebäudefassade beim Richtfest" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/loewenpark-galerie-12.webp" data-lightbox-alt="Ansprache beim Richtfest vor der Rohbauwand"><img src="/assets/img/thumbs/loewenpark-galerie-12.webp" width="480" height="320" alt="Ansprache beim Richtfest vor der Rohbauwand" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/loewenpark-galerie-13.webp" data-lightbox-alt="Anstoßen beim Richtfest vor dem Rohbau"><img src="/assets/img/thumbs/loewenpark-galerie-13.webp" width="480" height="320" alt="Anstoßen beim Richtfest vor dem Rohbau" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/loewenpark-galerie-14.webp" data-lightbox-alt="Flur im Innenausbau"><img src="/assets/img/thumbs/loewenpark-galerie-14.webp" width="480" height="320" alt="Flur im Innenausbau" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/loewenpark-galerie-15.webp" data-lightbox-alt="Sporthalle im Innenausbau, Weitwinkel"><img src="/assets/img/thumbs/loewenpark-galerie-15.webp" width="480" height="320" alt="Sporthalle im Innenausbau, Weitwinkel" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/loewenpark-galerie-16.webp" data-lightbox-alt="Zwei Personen begutachten die Sporthalle"><img src="/assets/img/thumbs/loewenpark-galerie-16.webp" width="480" height="320" alt="Zwei Personen begutachten die Sporthalle" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/loewenpark-galerie-17.webp" data-lightbox-alt="Tür mit Beschriftung Trainer-Raum"><img src="/assets/img/thumbs/loewenpark-galerie-17.webp" width="480" height="320" alt="Tür mit Beschriftung Trainer-Raum" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/loewenpark-galerie-18.webp" data-lightbox-alt="Person in der Sporthalle im Innenausbau"><img src="/assets/img/thumbs/loewenpark-galerie-18.webp" width="480" height="320" alt="Person in der Sporthalle im Innenausbau" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/loewenpark-galerie-19.webp" data-lightbox-alt="Fenster- und Wandgestaltung im Innenausbau"><img src="/assets/img/thumbs/loewenpark-galerie-19.webp" width="480" height="320" alt="Fenster- und Wandgestaltung im Innenausbau" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/loewenpark-galerie-20.webp" data-lightbox-alt="Gebäudeaußenansicht mit Wandgestaltung"><img src="/assets/img/thumbs/loewenpark-galerie-20.webp" width="480" height="320" alt="Gebäudeaußenansicht mit Wandgestaltung" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/loewenpark-galerie-21.webp" data-lightbox-alt="Basketball-Löwen-Logo als Wandgestaltung außen"><img src="/assets/img/thumbs/loewenpark-galerie-21.webp" width="480" height="320" alt="Basketball-Löwen-Logo als Wandgestaltung außen" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/loewenpark-galerie-22.webp" data-lightbox-alt="Großflächiger Basketball-Löwen-Schriftzug an der Fassade"><img src="/assets/img/thumbs/loewenpark-galerie-22.webp" width="480" height="320" alt="Großflächiger Basketball-Löwen-Schriftzug an der Fassade" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/loewenpark-galerie-23.webp" data-lightbox-alt="Hubarbeitsbühne bei Arbeiten am Gebäude"><img src="/assets/img/thumbs/loewenpark-galerie-23.webp" width="480" height="320" alt="Hubarbeitsbühne bei Arbeiten am Gebäude" loading="lazy" /></div>
+        <!--/GALERIE:loewenpark-gallery--></div>
             <button class="news-slider-arrow prev" data-gallery-prev aria-label="Vorheriges Bild"><i data-lucide="chevron-left" class="icon-18"></i></button>
             <button class="news-slider-arrow next" data-gallery-next aria-label="Nächstes Bild"><i data-lucide="chevron-right" class="icon-18"></i></button>
             <p class="t-body camp-gallery-empty hidden">Fotos folgen in Kürze.</p>
@@ -341,13 +367,13 @@
             </a>
             <a class="partner-tile partner-tile-weitere" style="height:120px" href="https://www.leg-thueringen.de/" target="_blank" rel="noopener">
               <div class="partner-tile-inner">
-                <div class="partner-tile-front"><img loading="lazy" src="/assets/logos/Logo_LEG-Thueringen.svg" width="162" height="52" alt="LEG Thüringen"  /></div>
+                <div class="partner-tile-front"><img loading="lazy" src="/assets/logos/Logo_LEG-Thueringen.webp" width="162" height="52" alt="LEG Thüringen"  /></div>
                 <div class="partner-tile-back"><span class="partner-desc">Landesentwicklungsgesellschaft Thüringen mbH — Wirtschaftsförderung, Fachkräfte, Immobilien.</span></div>
               </div>
             </a>
             <a class="partner-tile partner-tile-weitere" style="height:120px" href="http://crestcomleadership.com/de/agent/fuehrungsschule-thueringen/" target="_blank" rel="noopener">
               <div class="partner-tile-inner">
-                <div class="partner-tile-front"><img loading="lazy" src="/assets/logos/Logo_Crestcom.svg" width="542" height="75" alt="Crestcom"  /></div>
+                <div class="partner-tile-front"><img loading="lazy" src="/assets/logos/Logo_Crestcom.webp" width="542" height="75" alt="Crestcom"  /></div>
                 <div class="partner-tile-back"><span class="partner-desc">Internationales Trainingsunternehmen für Führungskräfteentwicklung, in Erfurt vor Ort vertreten.</span></div>
               </div>
             </a>
@@ -459,9 +485,14 @@
 
       <div class="footer-col">
         <h4>Kontakt</h4>
-        <p class="footer-address">Basketball Löwen e.V.<br>(XXL Baskets GmbH)<br><a href="https://www.google.com/maps/search/?api=1&query=Leipziger+Stra%C3%9Fe+71%2C+99085+Erfurt" target="_blank" rel="noopener">Leipziger Straße 71<br>99085 Erfurt</a></p>
+        <p class="footer-address">Basketball Löwen e.V.<br>(XXL Baskets GmbH)<br>99096 Erfurt</p>
         <a href="tel:+491756100411">+49 175 6100411</a>
         <a href="mailto:info@basketball-loewen.com">info@basketball-loewen.com</a>
+        <!-- Leerzeile: gleicht die kuerzere Kontakt-Spalte optisch an die
+             6-zeiligen Nachbarspalten "Basketball"/"Organisation" an, damit
+             "Kontaktformular" auf Desktop auf gleicher Hoehe steht (Marko,
+             18.09.2026). Hoehe/Abstand einer normalen Link-Zeile nachgebaut. -->
+        <span aria-hidden="true" style="display:block;height:14px;margin-bottom:10px"></span>
         <a href="/kontakt.html">Kontaktformular</a>
       </div>
     </div>
@@ -544,7 +575,7 @@
 <script src="/js/vendor/lucide-icons.js?v=1787766492"></script>
 <script src="/js/nav.js?v=1789585539"></script>
 <script src="/js/include.js?v=1787854261"></script>
-<script src="/js/camp-galerie.js?v=1787766656"></script>
+<script src="/js/camp-galerie.js?v=1789908048"></script>
 <script src="/js/history-timeline.js?v=1786331000"></script>
 <script>initCampGallery('loewenpark-gallery', null, '/data/loewenpark-galerie.json');</script>
 <script>

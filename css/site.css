@@ -549,6 +549,9 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .card-media-photo img[src*="freiplaetze-loewenpark"] { object-position: center 22%; }
 .card-media-photo img[src*="freiplaetze-neuer-ringelberg"] { object-position: center 20%; }
 .card-media-photo img[src*="freiplaetze-ringelberg-radweg"] { object-position: center 28%; }
+/* Team-Gruppenfoto Saisoneröffnung: Köpfe sitzen im oberen Bilddrittel,
+   center-Crop (50%) hätte sie in der 180px-Kachel abgeschnitten. */
+.card-media-photo img[src*="saisoneroeffnung-2026"] { object-position: center 20%; }
 /* QR-Code liegt seit 24.08.2026 als kleines Overlay unten rechts im Kachelbild
    statt als eigene Zeile in der Textspalte: als Block darunter wirkte er wie ein
    Fremdkörper und drängte sich vor die eigentliche Platzbeschreibung. */
@@ -1118,9 +1121,24 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
    Kontexten (dort schrumpft der Container ohnehin schon auf die Spalte). */
 .camp-gallery-wrap { position: relative; min-width: 0; }
 .camp-gallery-wrap .news-slider-track { gap: 12px; }
-.camp-gallery-photo { flex: 0 0 240px; min-width: 240px; height: 160px; border-radius: var(--radius-md); overflow: hidden; scroll-snap-align: start; }
+.camp-gallery-photo { position: relative; flex: 0 0 240px; min-width: 240px; height: 160px; border-radius: var(--radius-md); overflow: hidden; scroll-snap-align: start; }
 .camp-gallery-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .camp-gallery-photo[data-lightbox-src] { cursor: zoom-in; }
+/* Event-Label auf der Kachel (optionales 'event'-Feld je Foto, s. js/camp-
+   galerie.js) -- macht sichtbar, zu welcher Veranstaltung ein Foto gehört,
+   wenn der Streifen mit der Zeit Fotos mehrerer Events sammelt. */
+.camp-gallery-event {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 4px 8px;
+  background: linear-gradient(to top, rgba(0,18,45,.85), rgba(0,18,45,0));
+  color: #fff; font-size: 11px; font-weight: var(--weight-medium); line-height: 1.3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.gallery-lightbox-caption {
+  position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%);
+  background: rgba(0,18,45,.75); color: #fff; font-size: 13px; font-weight: var(--weight-medium);
+  padding: 6px 14px; border-radius: var(--radius-full, 999px); max-width: 90vw;
+}
+.gallery-lightbox-caption[hidden] { display: none; }
 /* Gemeinsames Lightbox-Overlay für alle Bildergalerien (js/camp-galerie.js) —
    ein Klick auf ein Foto zeigt es groß, unabhängig davon, auf welcher Seite. */
 .gallery-lightbox {
@@ -1162,6 +1180,54 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 /* Kommende-Camps-Slider — gleiches Streifen-Prinzip, aber für ganze Karten
    statt Fotos (aktuelle + geplante Camps nebeneinander, scrollbar). */
 .camp-slider-card { flex: 0 0 380px; min-width: 320px; scroll-snap-align: start; }
+/* Eventname (.card-label) auf 2 Zeilen begrenzt, sonst schieben lange Namen
+   (z.B. "Avenida-Therme Kinderfest – Mobiler Korb (Außenbereich)") Datum/Ort/Text
+   je Karte unterschiedlich weit nach unten und die Kachelreihe wirkt uneinheitlich
+   (Website-Feedback MF, 18.09.2026). */
+.camp-slider-card .card-label {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; line-height: 1.35; min-height: calc(1.35em * 2);
+}
+/* Gleiche Begrenzung für die Court-Hunt-Spot-Kacheln (Freiplätze-Seite): dort
+   steht der lange Eventname im <h3>, nicht im .card-label (das trägt dort nur
+   den kurzen Status "Vorbei"/"Heute aktiv") — ohne Deckelung schiebt ein langer
+   Name Zeit/Adresse je Kachel unterschiedlich weit runter (Marko, 18.09.2026). */
+.camp-slider-card h3 {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; line-height: 1.25; min-height: calc(1.25em * 2);
+}
+/* Ort immer einzeilig: Icon behaelt seine Groesse, der Text bekommt Ellipsis
+   statt umzubrechen (Marko, 18.09.2026) -- min-width:0 ist noetig, damit ein
+   Flex-Kind ueberhaupt unter seine Inhaltsbreite schrumpfen darf. */
+.card-location-text {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+}
+/* Court-Hunt-Spot-Hinweis als schraeges Eckband ueber dem Bild statt als
+   Pillen-Badge im Kartentext -- kuerzerer Text, weiterhin ein Link zum
+   Freiplatz (Marko, 18.09.2026: "schräg über dem Bild über die Ecke"). Die
+   Kartenoberfläche selbst (.card) schneidet das Band per overflow:hidden an
+   der Rundung ab, .card-media braucht dafür nur position:relative. */
+.camp-slider-card .card-media { position: relative; }
+/* Aeusserer Rahmen ist exakt auf die Kartenecke gesetzt und schneidet das
+   Band sauber am Rand ab (klassisches Eckband-Rezept) -- ohne diesen eigenen,
+   klein bemessenen Rahmen wuerde .card ihn erst am ganzen Kartenrand kappen
+   und dabei mitten im Text abschneiden statt nur die leeren Bandenden. */
+.ribbon-corner {
+  position: absolute; top: -10px; right: -10px; width: 150px; height: 150px;
+  overflow: hidden; z-index: 1; pointer-events: none;
+}
+.card-media-ribbon {
+  /* top/right so zentriert, dass das Band nach der Drehung genau durch die
+     Mitte des 150x150-Eckrahmens läuft -- sonst ragt eine Bandecke sichtbar
+     rein und der Text sitzt nicht mittig im Ausschnitt (Marko, 18.09.2026). */
+  position: absolute; top: 61px; right: -38px; width: 225px;
+  display: block; text-align: center; pointer-events: auto;
+  transform: rotate(45deg); background: var(--color-brand-orange-text); color: #fff;
+  font-size: 11px; font-weight: var(--weight-semibold); letter-spacing: .03em;
+  text-transform: uppercase; padding: 7px 0; box-shadow: 0 2px 6px rgba(0, 0, 0, .25);
+  text-decoration: none;
+}
+.card-media-ribbon:hover { text-decoration: underline; }
 /* Vergangene Court-Hunt-Spots bleiben im Streifen (Aufkleber und geteilte Links
    sollen nicht ins Leere zeigen), sind aber erledigt — Ausgrauen UND das Label
    "Vorbei" im Text, nicht Farbe/Deckkraft allein als einziges Signal. */
@@ -1279,30 +1345,25 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 /* 'performance' (eigene Sektion seit 18.08.2026, direkt unter Förderpartner):
    Flexbox statt Grid, da meist nur ein bis wenige Mitglieder — so bleiben die
    Kacheln zentriert statt am linken Rand zu kleben, statt eine feste Spalten-
-   zahl vorzugeben. */
+   zahl vorzugeben. Seit 19.09.2026 kommt die Rahmenfarbe vom Notion-CRM-Feld
+   Sponsoren-Level (data-level="gold|silber|bronze", s. build-partner-wall.py)
+   statt einheitlich orange — Gold/Silber/Bronze bleiben eine gemeinsame
+   Liste ohne eigenen Filter, nur optisch unterschieden. */
 .partner-wall-performance { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
 .partner-tile-performance { flex: 0 1 220px; height: 110px; }
 .partner-tile-performance .partner-tile-front { padding: 8px; font-size: 18px; font-weight: var(--weight-semibold); border: 2px solid var(--color-brand-orange); }
-/* 'partner' (vierspaltiges Grid, vier Mitglieder seit 18.08.2026 — vormals
-   Teil von 'sponsoren'/'hauptsponsoren') braucht eine eigene, kleinere
-   Kachel-Box, getrennt von Förderpartner/Top, die ihre größere Kachelgröße
-   in .partner-wall behalten. */
-.partner-wall-partner { gap: 12px; }
-.partner-tile-partner { flex-basis: calc(25% - 9px); height: 85px; }
-.partner-tile-partner .partner-tile-front { padding: 10px; font-size: 14px; font-weight: var(--weight-medium); border: 1px solid var(--color-brand-orange); }
-/* 'basis' (dreispaltiges Grid, seit 18.08.2026 — vormals Teil von 'sponsoren'/
-   'hauptsponsoren'): eine Stufe kleiner als 'partner', neutraler grauer statt
-   farbiger Rand — Zwischengröße vor 'weitere' (Unterstützer), die als kleinste
-   Stufe ganz ohne Rand bleibt. */
-.partner-wall-basis { gap: 10px; }
-.partner-tile-basis { flex-basis: calc(25% - 7.5px); height: 76px; }
-.partner-tile-basis .partner-tile-front { padding: 10px; font-size: 13px; font-weight: var(--weight-medium); border: 1px solid var(--border); }
-.partner-tile-weitere .partner-tile-front { padding: 10px; font-size: 13px; font-weight: var(--weight-medium); }
-/* Flexbox statt Grid (seit 19.08.2026): eine nicht volle letzte Zeile wird so
-   automatisch zentriert statt linksbündig mit Lücke rechts zu enden — bei
-   jeder beliebigen Anzahl Kacheln, nicht nur bei genau einer übrig bleibenden. */
-.partner-wall-weitere { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
-.partner-tile-weitere { flex: 0 1 150px; height: 64px; }
+.partner-tile-performance[data-level="gold"] .partner-tile-front { border-color: #C9A227; }
+.partner-tile-performance[data-level="silber"] .partner-tile-front { border-color: #A8A8A8; }
+.partner-tile-performance[data-level="bronze"] .partner-tile-front { border-color: #B5651D; }
+/* 'partner' = Kategorie "Partner und Unterstützer" (seit 19.09.2026
+   zusammengelegt aus den vormals getrennten Tiers 'partner'/'basis'/
+   'weitere' — eine gemeinsame Liste, neutraler statt farbiger Rand, keine
+   eigene Rangfolge mehr innerhalb der Kategorie). Flexbox statt Grid, damit
+   eine nicht volle letzte Zeile automatisch zentriert wird statt linksbündig
+   mit Lücke zu enden. */
+.partner-wall-partner { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.partner-tile-partner { flex: 0 1 calc(25% - 7.5px); height: 76px; }
+.partner-tile-partner .partner-tile-front { padding: 10px; font-size: 13px; font-weight: var(--weight-medium); border: 1px solid var(--border); }
 .partner-tile-back {
   background: var(--color-brand-navy); color: #fff; transform: rotateY(180deg);
   flex-direction: column; gap: 6px;
@@ -1314,8 +1375,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   .partner-tile { flex-basis: calc(50% - 8px); }
   .partner-tile-top, .partner-tile.is-enlarged { flex-basis: 100%; }
   .partner-wall-foerderpartner .partner-tile { flex-basis: 100%; }
-  .partner-tile-partner { flex-basis: calc(50% - 6px); }
-  .partner-tile-basis { flex-basis: calc(50% - 5px); }
+  .partner-tile-partner { flex-basis: calc(50% - 5px); }
 }
 
 /* Business-Club-Wand: 10 anonyme Platzhalter-Kacheln (noch keine echten
@@ -1598,7 +1658,11 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 @media (max-width: 599px) {
   .hero-eyebrow-row ~ h1, .hero-eyebrow-row ~ p.lead { padding-right: 90px; }
 }
-.hero-badge-stack { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+/* align-items:center statt flex-end -- die beiden Badges haben unterschiedlich
+   viel Innenabstand (.hero-league-badge padding:6px 14px, .hero-badge-plain
+   padding:0), rechtsbündig sassen ihre Logos dadurch sichtbar versetzt statt
+   auf gemeinsamer Mittelachse (Marko, 19.09.2026). */
+.hero-badge-stack { display: flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0; }
 /* Zwei gestapelte Badges (z. B. NBBL-Liga-Logo + Nachwuchsstandort-Plakette auf
    der U19-Seite) müssen kleiner sein als ein einzelnes Badge, sonst passen sie
    nicht mehr in die seit 30.07.2026 einheitlich kompakte Hero-Höhe. */
@@ -1895,13 +1959,14 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   .hero-photo.hero-profis .hero-lg-grid { grid-template-columns: 1fr .95fr; gap: 28px; }
 }
 .hero-photo.hero-damen { --hero-photo-url: url('/assets/img/team-damen-hero-blur.webp'); background-position: center 20%; }
-.hero-photo.hero-u19 { --hero-photo-url: url('/assets/img/team-nbbl-hero-blur.webp'); background-position: center 20%; }
+.hero-photo.hero-u19 { --hero-photo-url: url('/assets/img/team-nbbl-hero.webp'); background-position: center 55%; }
 
 /* Hero-Varianten für einzelne News-Artikel mit echtem Pressefoto */
 .hero-photo.hero-news-saisonstart-2025 { --hero-photo-url: url('/assets/img/news/saisonstart-2025.webp'); background-position: center 30%; }
 .hero-photo.hero-news-mitchell-abgang { --hero-photo-url: url('/assets/img/news/mitchell-abgang.webp'); background-position: center 25%; }
 .hero-photo.hero-news-loewenpark-dach { --hero-photo-url: url('/assets/img/news/loewenpark-dach.webp'); background-position: center 55%; }
 .hero-photo.hero-news-swe-sommercamp { --hero-photo-url: url('/assets/img/news/swe-sommercamp.webp'); background-position: center 40%; }
+.hero-photo.hero-news-sportsponsoring { --hero-photo-url: url('/assets/img/hero-loewen-unterstuetzer.webp'); background-position: center 55%; }
 .hero-photo.hero-news-damen-regionalliga { --hero-photo-url: url('/assets/img/news/damen-regionalliga.webp'); background-position: center 25%; }
 .hero-photo.hero-news-achtelfinale { --hero-photo-url: url('/assets/img/news/achtelfinale.webp'); background-position: center 35%; }
 .hero-photo.hero-news-playoff-heimspiel { --hero-photo-url: url('/assets/img/news/playoff-heimspiel.webp'); background-position: center 35%; }
@@ -1975,6 +2040,15 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   .hero-lg-grid { gap: 20px; }
   .hero-photo.hero-lg p.lead { margin-bottom: 14px; }
   .hero-side-card { padding: 18px; }
+}
+/* Kader-Collage im "Hungriger Kader"-Block (Profis-Seite): nur ab der
+   Zweispalten-Breite breiter ziehen, damit die Kollage oben mit der
+   Überschrift und unten mit der Button-Reihe abschließt -- unterhalb von
+   1024px greift die normale .hero-lg-grid-Stapelung, daher nur dort ueberschreiben
+   (Marko, 19.09.2026). 27px Versatz entspricht Zeilenhöhe+Abstand der Eyebrow davor. */
+@media (min-width: 1024px) {
+  .kader-photo-grid { grid-template-columns: 1.1fr 1fr; }
+  .kader-photo-wrap { margin-top: 27px; }
 }
 
 /* Simple page hero (subpages) — lighter than homepage hero */
@@ -2097,6 +2171,27 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .badge-orange { background: var(--color-orange-50); color: var(--color-orange-700); border: 1px solid var(--color-orange-100); }
 .badge-info { background: var(--color-info-bg); color: #001B70; }
 .badge-success { background: var(--color-success-bg); color: #0E5A36; }
+
+/* Gameday-Zusatzinhalt: hinterlegte Karte zwischen Hero und Info-Grid auf
+   einzelnen Spieltagsseiten, wenn zu diesem Termin ein Sponsoring- oder
+   Themen-Spieltag stattfindet (z. B. Erfurt Crowd, Tag des Handwerks). Bewusst
+   ohne Badge/Eyebrow im Hero (Markos Ansage, Sept. 2026) — nur diese Karte
+   erklärt den Anlass. Zwei Farbvarianten, sonst identischer Aufbau. */
+.gameday-extra { padding: 26px 0; }
+.gameday-extra-card { display: flex; gap: 18px; align-items: flex-start; padding: 22px 24px; border-radius: var(--radius-lg); }
+.gameday-extra-card.tint-blue { background: linear-gradient(135deg, var(--color-blue-50), var(--color-blue-100)); }
+.gameday-extra-card.tint-orange { background: linear-gradient(135deg, #FDF1E6, #F6BE86); }
+.gameday-extra-icon {
+  flex-shrink: 0; width: 44px; height: 44px; border-radius: var(--radius-md);
+  background: #fff; display: flex; align-items: center; justify-content: center;
+}
+.gameday-extra-card.tint-blue .gameday-extra-icon { color: var(--color-blue-700); }
+.gameday-extra-card.tint-orange .gameday-extra-icon { color: var(--color-orange-700); }
+.gameday-extra-card h2 { margin: 0 0 4px; font-size: 18px; font-weight: var(--weight-extrabold); }
+.gameday-extra-card.tint-blue h2 { color: var(--color-blue-700); }
+.gameday-extra-card.tint-orange h2 { color: var(--color-orange-700); }
+.gameday-extra-card p { margin: 0; font-size: 14px; color: var(--text-primary); line-height: 1.6; }
+@media (max-width: 599px) { .gameday-extra-card { flex-direction: column; } }
 
 /* =====================================================================
    FIXTURE / SCHEDULE ROWS
@@ -2583,6 +2678,11 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
   color: rgba(255,255,255,.16); line-height: 1;
 }
 .panini-card-photo > i { position: relative; z-index: 1; width: 30px; height: 30px; color: rgba(255,255,255,.55); }
+/* object-position oben statt mittig: .panini-card-photo ist innen niedriger als
+   das 3:4-Seitenverhaeltnis der Fotos (Namenszeile unten nimmt Platz weg), object-fit:cover
+   wuerde bei mittiger Position oben UND unten gleich viel abschneiden und dabei
+   in die Koepfe schneiden (Marko, 19.09.2026: "Kopf scheint immer abgeschnitten"). */
+.panini-card-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; }
 .panini-card-badge {
   position: absolute; top: 6px; left: 6px; z-index: 2; background: var(--color-brand-orange-text); color: #fff;
   font-weight: var(--weight-extrabold); font-size: 12px; width: 22px; height: 22px; border-radius: 50%;
@@ -2608,7 +2708,11 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
 .panini-photo-frame-1:has(img) { padding: 0; }
 .panini-photo-frame-0 { opacity: 1; }
 .panini-photo-frame-1 span { font-size: 10px; color: rgba(255,255,255,.65); }
-.panini-photo-frame-2 { align-items: stretch; justify-content: center; padding: 12px; overflow-y: auto; }
+/* Oben/links mehr Abstand als die Basis-Klasse: die runde Trikotnummer
+   (.panini-card-badge, oben links, z-index 2) liegt sonst genau auf der
+   ersten Steckbrief-Zeile (Marko, 18.09.2026: "Steckbrief muss nach unten
+   und rechts rutschen"). */
+.panini-photo-frame-2 { align-items: stretch; justify-content: center; padding: 32px 14px 14px 32px; overflow-y: auto; }
 .panini-steckbrief {
   list-style: none; margin: 0; padding: 0; width: 100%; height: 100%;
   display: flex; flex-direction: column; justify-content: flex-start; gap: 7px;
@@ -2635,6 +2739,10 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
   border-radius: var(--radius-lg); overflow: hidden; background: none;
 }
 .teamfoto-placeholder img { width: 100%; height: auto; display: block; filter: blur(5px); transform: scale(1.08); }
+/* Profis-Kader-Collage ist ein echtes, zusammengesetztes Bild (16 eigene
+   Spielerportraits), kein unkenntlich gemachtes Alt-Foto -- Weichzeichner
+   und Zoom der generischen Regel oben gelten hier nicht (Marko, 18.09.2026). */
+.teamfoto-placeholder.is-collage img { filter: none; transform: none; }
 .teamfoto-placeholder-note {
   position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 4px; background: rgba(0,18,45,.35); color: #fff; font-size: 12px; font-weight: var(--weight-semibold);

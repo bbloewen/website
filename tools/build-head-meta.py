@@ -51,7 +51,12 @@ ORG = {
     "@type": "SportsOrganization",
     "@id": BASE + "#organization",
     "name": "Basketball Löwen Erfurt",
-    "alternateName": ["Basketball Löwen e.V.", "CATL Basketball Löwen", "Basketball Löwinnen Erfurt"],
+    # "CATL Basketball Löwen" ist seit der Neuausrichtung vom 01.09.2026 nicht
+    # mehr der Vereins- oder Profiteamname, sondern der des U19-Bundesligateams.
+    # Als alternateName der Organisation haette er Google weiter einen Namen
+    # gelehrt, den der Verein nicht mehr fuehrt. CATL ist Namensgeber nur noch
+    # fuer Damen, U19 und den CATL LOEWENPARK.
+    "alternateName": ["Basketball Löwen e.V.", "Basketball Löwen", "Basketball Löwinnen Erfurt"],
     "sport": "Basketball",
     "foundingDate": "2018",
     "url": BASE,
@@ -63,8 +68,8 @@ ORG = {
     "telephone": "+49 175 6100411",
     "address": {
         "@type": "PostalAddress",
-        "streetAddress": "Leipziger Straße 71",
-        "postalCode": "99085",
+        "streetAddress": "Friedrich-Ebert-Straße 58",
+        "postalCode": "99096",
         "addressLocality": "Erfurt",
         "addressRegion": "Thüringen",
         "addressCountry": "DE",
@@ -82,36 +87,47 @@ PUBLISHER = {
     "logo": {"@type": "ImageObject", "url": ORG["logo"]},
 }
 
-RIETHSPORTHALLE = {
-    "@type": "SportsActivityLocation",
-    "name": "Riethsporthalle",
-    "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "Essener Straße 20",
-        "postalCode": "99089",
-        "addressLocality": "Erfurt",
-        "addressRegion": "Thüringen",
-        "addressCountry": "DE",
-    },
-}
-
 # Kein "sport"-Feld: schema.org definiert sport nur auf SportsOrganization,
 # SportsEvent und SportsTeam, nicht auf Place-Typen wie SportsActivityLocation.
 # Der Ahrefs-Crawl vom 25.08.2026 hat es als "Unexpected property" gemeldet --
 # sechsmal auf der Freiplatz-Seite, je einmal auf den beiden LOEWENPARK-Seiten.
 # Die Sportart steht ohnehin im Namen, in der Beschreibung und im Namen der
 # ItemList.
+# Die Adresse muss Zeichen fuer Zeichen zum Google-Unternehmensprofil
+# "LOEWENPARK Erfurt" passen -- nur dann verknuepft Google Schema und Profil zu
+# einer Entitaet. Bis 20.09.2026 stand hier die Postleitzahl der Riethsporthalle
+# (99089) und gar keine Strasse; die Halle liegt in der 99096.
 LOEWENPARK = {
     "@type": "SportsActivityLocation",
     "name": "LÖWENPARK",
-    "description": "Trainingsstandort der Basketball Löwen Erfurt am Südpark.",
+    "alternateName": "CATL LÖWENPARK",
+    "description": "Sanierte Sporthalle am Erfurter Südpark — Trainingsstandort "
+                   "der Basketball Löwen Erfurt für Nachwuchsleistungssport, "
+                   "Damenbasketball, BasKIDball und Feriencamps.",
+    "url": BASE + "trainieren/loewenpark.html",
+    "image": DEFAULT_IMAGE,
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": BASE + "trainieren/loewenpark.html",
+    },
     "address": {
         "@type": "PostalAddress",
-        "postalCode": "99089",
+        "streetAddress": "Friedrich-Ebert-Straße 58",
+        "postalCode": "99096",
         "addressLocality": "Erfurt",
         "addressRegion": "Thüringen",
         "addressCountry": "DE",
     },
+    # Koordinaten und CID am 20.09.2026 aus dem eigenen Google-Unternehmens-
+    # profil abgelesen (Kategorie dort: Sportanlage). sameAs auf den Maps-
+    # Eintrag ist die deutlichste Aussage an Google, dass Seite und Profil
+    # denselben Ort meinen.
+    "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 50.963033,
+        "longitude": 11.040786,
+    },
+    "sameAs": ["https://maps.google.com/?cid=17483735935586458406"],
 }
 
 # Die Spielstaette selbst -- nicht zu verwechseln mit dem Freiplatz an der
@@ -540,7 +556,10 @@ def nodes_for(rel, text, page_title, social_title, description, image):
     if rel == "saison/spielplan.html":
         nodes.extend(spielplan_itemlist())
 
-    if rel.startswith("trainieren/loewenpark"):
+    # Nur die Hauptseite, nicht auch die Buchungsseite: zwei Knoten gleichen
+    # Namens mit verschiedenen Adressen haetten Google zwei Orte statt einem
+    # gezeigt. Die Buchungsseite steht ohnehin auf noindex.
+    if rel == "trainieren/loewenpark.html":
         nodes.append(LOEWENPARK)
 
     if rel == "trainieren/freiplaetze.html":

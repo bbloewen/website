@@ -1,21 +1,21 @@
 {
   "hinweis": "Ergänzende Saisondaten 2026/2027 für die Spielplan-Übersicht (saison/spielplan.html). Profis-Heimspiele kommen aus data/heimspiele.json (echte, von der Liga terminierte Spiele). Profis-Auswärtstermine und Damen (RLD) am 20.07.2026 vollständig aus Markos Google-Sheet 'Spielansetzungen' übernommen (Marko hat Kontext geliefert: RL1/BIG Basketball in Gotha ist ein anderer Verein, nicht relevant; eine Zeile 'Thuringia Bulls vs. Köln' war kein Löwen-Spiel, ausgeschlossen; Zeiten mit '00:00' im Sheet = noch offen, auf 15:00 gelegt). Am 26.07.2026 gegen Markos Live-Sheet 'Saison 26-27 Leistungsteams' (Tabs 'Spielplanung Leistungsteams' + 'Annas Liste') gegengeprüft: ProB und Damen stimmen überein bis auf 31.10.2026 Damen-Heimspiel (17:00 statt 15:00, Riethsporthalle), korrigiert. NBBL: Spieltag-Termine stehen fest, Gegner aber noch nicht — daher gegner:'Noch offen' je Zeile; bei doppelt gelisteten Alternativterminen (z.B. Spieltag 1.3, 21./22.11.2026) wurde nur der erste Termin übernommen.",
-  "ortHinweis": "Feld 'ort' je Auswärtsspiel ist ein best-effort abgeleiteter Stadt-/Ortsname für einen Google-Maps-Link (kein exakter Hallenname) — siehe Notion-Feedback vom 28.07.2026 ('Zumindest einen Link auf Röndorf oder Erlangen setzen, damit man sieht, wie weit das von Erfurt ist'). Bei Gelegenheit gegen die echten Hallenadressen gegenprüfen.",
+  "ortHinweis": "Feld 'ort' je Auswärtsspiel ist ein grober Stadt-/Ortsname, urspr. für einen Google-Maps-Link gedacht — siehe Notion-Feedback vom 28.07.2026 ('Zumindest einen Link auf Röndorf oder Erlangen setzen, damit man sieht, wie weit das von Erfurt ist'). Am 18.09.2026 auf Website-Feedback von Nick (17.09.2026, mit Links auf alle 14 Team-Info-Seiten der 2. Basketball Bundesliga) um 'halle' (Hallenname) und 'adresse' (Straße, PLZ, Ort) je Gegner ergänzt, recherchiert über 2basketballbundesliga.de/teams/kader/<id>/#tab-info — der Maps-Link auf der Spielplan-Seite zeigt jetzt auf die echte Halle statt auf die Stadt. 'ort' bleibt als Fallback stehen, falls halle/adresse mal fehlen sollten.",
   "profisAuswaerts": [
-    { "datum": "26.09.2026", "zeit": "19:00", "gegner": "Dragons Rhöndorf", "ort": "Rhöndorf" },
-    { "datum": "04.10.2026", "zeit": "16:00", "gegner": "Bayer Giants Leverkusen", "ort": "Leverkusen" },
-    { "datum": "13.10.2026", "zeit": "19:00", "gegner": "TV Langen", "ort": "Langen (Hessen)" },
-    { "datum": "24.10.2026", "zeit": "17:30", "gegner": "SV Fellbach Flashers", "ort": "Fellbach" },
-    { "datum": "15.11.2026", "zeit": "16:00", "gegner": "SKYLINERS Juniors", "ort": "Frankfurt am Main" },
-    { "datum": "28.11.2026", "zeit": "19:00", "gegner": "Ahorn Camp Baskets", "ort": "Speyer" },
-    { "datum": "18.12.2026", "zeit": "19:00", "gegner": "BBC Coburg", "ort": "Coburg" },
-    { "datum": "10.01.2027", "zeit": "16:30", "gegner": "BG Hessing Leitershofen", "ort": "Stadtbergen (bei Augsburg)" },
-    { "datum": "23.01.2027", "zeit": "19:00", "gegner": "TSG Reutlingen Ravens", "ort": "Reutlingen" },
-    { "datum": "27.01.2027", "zeit": "19:30", "gegner": "Dresden Titans", "ort": "Dresden" },
-    { "datum": "07.02.2027", "zeit": "16:00", "gegner": "TSV Oberhaching Tropics", "ort": "Oberhaching (bei München)" },
-    { "datum": "27.02.2027", "zeit": "16:00", "gegner": "Porsche BBA Ludwigsburg", "ort": "Ludwigsburg" },
-    { "datum": "14.03.2027", "zeit": "16:00", "gegner": "Culture City Weimar", "ort": "Weimar" },
-    { "datum": "03.04.2027", "zeit": "18:30", "gegner": "FC Bayern Basketball II", "ort": "München" }
+    { "datum": "26.09.2026", "zeit": "19:00", "gegner": "Dragons Rhöndorf", "ort": "Rhöndorf", "halle": "DragonDome", "adresse": "Menzenberger Straße 72, 53604 Bad Honnef" },
+    { "datum": "04.10.2026", "zeit": "16:00", "gegner": "Bayer Giants Leverkusen", "ort": "Leverkusen", "halle": "Ostermann Arena", "adresse": "Bismarckstr. 125, 51373 Leverkusen" },
+    { "datum": "13.10.2026", "zeit": "19:00", "gegner": "TV Langen", "ort": "Langen (Hessen)", "halle": "Sportpark Oberlinden", "adresse": "Berliner Straße 85, 63225 Langen" },
+    { "datum": "24.10.2026", "zeit": "17:30", "gegner": "SV Fellbach Flashers", "ort": "Fellbach", "halle": "Gäuäckersporthalle I", "adresse": "Bühlstr. 141, 70736 Fellbach" },
+    { "datum": "15.11.2026", "zeit": "16:00", "gegner": "SKYLINERS Juniors", "ort": "Frankfurt am Main", "halle": "Basketball City Mainhattan", "adresse": "Walter-Möller-Platz 2, 60439 Frankfurt am Main" },
+    { "datum": "28.11.2026", "zeit": "19:00", "gegner": "Ahorn Camp Baskets", "ort": "Speyer", "halle": "Sporthalle Speyer-Nord", "adresse": "Birkenweg 10, 67346 Speyer" },
+    { "datum": "18.12.2026", "zeit": "19:00", "gegner": "BBC Coburg", "ort": "Coburg", "halle": "HUK-COBURG arena", "adresse": "Oudenaarder Straße 1, 96450 Coburg" },
+    { "datum": "10.01.2027", "zeit": "16:30", "gegner": "BG Hessing Leitershofen", "ort": "Stadtbergen (bei Augsburg)", "halle": "Mehrzweckhalle Stadtbergen", "adresse": "Am Sportpark 1, 86391 Stadtbergen" },
+    { "datum": "23.01.2027", "zeit": "19:00", "gegner": "TSG Reutlingen Ravens", "ort": "Reutlingen", "halle": "Oskar-Kalbfell-Sporthalle", "adresse": "Kanzleistraße 30, 72764 Reutlingen" },
+    { "datum": "27.01.2027", "zeit": "19:30", "gegner": "Dresden Titans", "ort": "Dresden", "halle": "Margon Arena", "adresse": "Bodenbacher Straße 154, 01277 Dresden" },
+    { "datum": "07.02.2027", "zeit": "16:00", "gegner": "TSV Oberhaching Tropics", "ort": "Oberhaching (bei München)", "halle": "Grundschule Deisenhofen", "adresse": "Schulstraße 4, 82041 Oberhaching" },
+    { "datum": "27.02.2027", "zeit": "16:00", "gegner": "Porsche BBA Ludwigsburg", "ort": "Ludwigsburg", "halle": "Rundsporthalle Ludwigsburg", "adresse": "Kurfürstenstraße 23, 71636 Ludwigsburg" },
+    { "datum": "14.03.2027", "zeit": "16:00", "gegner": "Culture City Weimar", "ort": "Weimar", "halle": "Sparkassen-Arena Jena", "adresse": "Keßlerstraße 28, 07745 Jena" },
+    { "datum": "03.04.2027", "zeit": "18:30", "gegner": "FC Bayern Basketball II", "ort": "München", "halle": "BMW Park", "adresse": "Siegenburgerstr. 45, 81373 München" }
   ],
   "damen": {
     "spiele": [

@@ -49,9 +49,7 @@ ZIELE = [
     ("partner/sponsoring.html", "partner-wall", "top", False),
     ("partner/sponsoring.html", "partner-wall-foerderpartner", "wirkungspartner", True),
     ("partner/sponsoring.html", "partner-wall-performance", "performance", False),
-    ("partner/sponsoring.html", "partner-wall-partner", "partner", False),
-    ("partner/sponsoring.html", "partner-wall-basis", "basis", False),
-    ("partner/sponsoring.html", "partner-wall-weitere", "weitere", False),
+    ("partner/sponsoring.html", "partner-wall-partner", "partner", True),
     ("index.html", "hauptpartner-grid", "@hauptpartner", True),
 ]
 
@@ -60,6 +58,7 @@ JS_ANKER = [
     "var front = p.logo ?",
     'if (tier === \'wirkungspartner\') back += \'<span class="partner-tag">Wirkungspartner</span>\';',
     "var cls = 'partner-tile partner-tile-' + tier;",
+    "var level = p.level ? ' data-level=\"' + p.level + '\"' : '';",
 ]
 
 
@@ -82,10 +81,11 @@ def kachel(p):
              f'<div class="partner-tile-back">{back}</div>'
              "</div>")
     cls = f"partner-tile partner-tile-{tier}"
+    level_attr = f' data-level="{esc(p["level"])}"' if p.get("level") else ""
     if p.get("website"):
-        return (f'<a class="{cls}" data-tier="{esc(tier)}" href="{esc(p["website"])}" '
+        return (f'<a class="{cls}" data-tier="{esc(tier)}"{level_attr} href="{esc(p["website"])}" '
                 f'target="_blank" rel="noopener">{inner}</a>')
-    return f'<div class="{cls}" data-tier="{esc(tier)}">{inner}</div>'
+    return f'<div class="{cls}" data-tier="{esc(tier)}"{level_attr}>{inner}</div>'
 
 
 def auswahl(partner, filt, sortieren):

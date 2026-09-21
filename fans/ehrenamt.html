@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1789582151" />
+<link rel="stylesheet" href="/css/site.css?v=1789923276" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
@@ -79,9 +79,9 @@
         <div class="nav-item" data-nav-item>
           <button class="nav-link" data-page-group="saison">Saison &amp; Teams <i data-lucide="chevron-down" class="chev icon-14"></i></button>
           <div class="dropdown-panel">
-            <!-- Profis vorübergehend aus der Navigation ausgeblendet -->
+            <a href="/saison/profis.html">Profis</a>
             <!-- Damen vorübergehend aus der Navigation ausgeblendet -->
-            <!-- NBBL vorübergehend aus der Navigation ausgeblendet -->
+            <a href="/saison/nbbl.html">NBBL</a>
             <!-- Nachwuchs vorübergehend aus der Navigation ausgeblendet -->
             <a href="/saison/spielplan.html">Spielplan</a>
             <a href="/saison/tabelle.html">Tabellen</a>
@@ -184,9 +184,9 @@
     <li class="drawer-nav-item core-item">
       <button class="drawer-nav-link" data-drawer-toggle>Saison &amp; Teams <i data-lucide="chevron-down" class="chev icon-16"></i></button>
       <div class="drawer-sub-panel">
-        <!-- Profis vorübergehend aus der Navigation ausgeblendet -->
+        <a href="/saison/profis.html">Profis</a>
         <!-- Damen vorübergehend aus der Navigation ausgeblendet -->
-        <!-- NBBL vorübergehend aus der Navigation ausgeblendet -->
+        <a href="/saison/nbbl.html">NBBL</a>
         <!-- Nachwuchs vorübergehend aus der Navigation ausgeblendet -->
         <a href="/saison/spielplan.html">Spielplan</a>
         <a href="/saison/tabelle.html">Tabellen</a>
@@ -366,7 +366,17 @@
     <div class="container">
       <span class="eyebrow" style="display:block;margin-bottom:16px">Impressionen</span>
       <div class="camp-gallery-wrap" id="ehrenamt-gallery">
-        <div class="news-slider-track"></div>
+        <div class="news-slider-track"><!--GALERIE:ehrenamt-gallery-->
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/ehrenamt-hallenaufbau.webp" data-lightbox-alt="Ehrenamtliche bauen das Spielparkett auf"><img src="/assets/img/thumbs/ehrenamt-hallenaufbau.webp" width="480" height="320" alt="Ehrenamtliche bauen das Spielparkett auf" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/ehrenamt-galerie-1.webp" data-lightbox-alt="Ehrenamtliche markieren die Linien auf dem Spielfeld"><img src="/assets/img/thumbs/ehrenamt-galerie-1.webp" width="480" height="320" alt="Ehrenamtliche markieren die Linien auf dem Spielfeld" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/ehrenamt-imbiss.webp" data-lightbox-alt="Ehrenamtliche am Imbiss-Stand"><img src="/assets/img/thumbs/ehrenamt-imbiss.webp" width="480" height="320" alt="Ehrenamtliche am Imbiss-Stand" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/ehrenamt-galerie-2.webp" data-lightbox-alt="Ehrenamtlicher am Getränkestand"><img src="/assets/img/thumbs/ehrenamt-galerie-2.webp" width="480" height="320" alt="Ehrenamtlicher am Getränkestand" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/ehrenamt-galerie-5.webp" data-lightbox-alt="Ehrenamtlicher bereitet Getränke für das Team vor"><img src="/assets/img/thumbs/ehrenamt-galerie-5.webp" width="480" height="320" alt="Ehrenamtlicher bereitet Getränke für das Team vor" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/ehrenamt-livestream.webp" data-lightbox-alt="Ehrenamtliche am Livestream-Tisch mit Headset"><img src="/assets/img/thumbs/ehrenamt-livestream.webp" width="480" height="320" alt="Ehrenamtliche am Livestream-Tisch mit Headset" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/ehrenamt-galerie-3.webp" data-lightbox-alt="Ehrenamtliche der Orga-Crew beim Spiel"><img src="/assets/img/thumbs/ehrenamt-galerie-3.webp" width="480" height="320" alt="Ehrenamtliche der Orga-Crew beim Spiel" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/ehrenamt-maskottchen.webp" data-lightbox-alt="Unser Maskottchen mit einem Helfer"><img src="/assets/img/thumbs/ehrenamt-maskottchen.webp" width="480" height="320" alt="Unser Maskottchen mit einem Helfer" loading="lazy" /></div>
+        <div class="camp-gallery-photo" data-lightbox-src="/assets/img/ehrenamt-galerie-4.webp" data-lightbox-alt="Ehrenamtliche beim Empfang einer Veranstaltung"><img src="/assets/img/thumbs/ehrenamt-galerie-4.webp" width="480" height="320" alt="Ehrenamtliche beim Empfang einer Veranstaltung" loading="lazy" /></div>
+        <!--/GALERIE:ehrenamt-gallery--></div>
         <button class="news-slider-arrow prev" data-gallery-prev aria-label="Vorheriges Bild"><i data-lucide="chevron-left" class="icon-18"></i></button>
         <button class="news-slider-arrow next" data-gallery-next aria-label="Nächstes Bild"><i data-lucide="chevron-right" class="icon-18"></i></button>
         <p class="t-body camp-gallery-empty hidden">Fotos folgen in Kürze.</p>
@@ -433,9 +443,14 @@
 
       <div class="footer-col">
         <h4>Kontakt</h4>
-        <p class="footer-address">Basketball Löwen e.V.<br>(XXL Baskets GmbH)<br><a href="https://www.google.com/maps/search/?api=1&query=Leipziger+Stra%C3%9Fe+71%2C+99085+Erfurt" target="_blank" rel="noopener">Leipziger Straße 71<br>99085 Erfurt</a></p>
+        <p class="footer-address">Basketball Löwen e.V.<br>(XXL Baskets GmbH)<br>99096 Erfurt</p>
         <a href="tel:+491756100411">+49 175 6100411</a>
         <a href="mailto:info@basketball-loewen.com">info@basketball-loewen.com</a>
+        <!-- Leerzeile: gleicht die kuerzere Kontakt-Spalte optisch an die
+             6-zeiligen Nachbarspalten "Basketball"/"Organisation" an, damit
+             "Kontaktformular" auf Desktop auf gleicher Hoehe steht (Marko,
+             18.09.2026). Hoehe/Abstand einer normalen Link-Zeile nachgebaut. -->
+        <span aria-hidden="true" style="display:block;height:14px;margin-bottom:10px"></span>
         <a href="/kontakt.html">Kontaktformular</a>
       </div>
     </div>
@@ -518,7 +533,7 @@
 <script src="/js/vendor/lucide-icons.js?v=1787766492"></script>
 <script src="/js/nav.js?v=1789585539"></script>
 <script src="/js/include.js?v=1787854261"></script>
-<script src="/js/camp-galerie.js?v=1787766656"></script>
+<script src="/js/camp-galerie.js?v=1789908048"></script>
 <script>initCampGallery('ehrenamt-gallery', null, '/data/ehrenamt-galerie.json');</script>
 </body>
 </html>

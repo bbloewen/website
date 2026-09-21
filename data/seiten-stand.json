@@ -2,8 +2,8 @@
   "hinweis": "Von tools/build-sitemap.py gepflegt: je indexierbare Seite der Hash ihres Inhalts (main-Block plus Title/Description, ohne Cache-Buster) und das Datum, an dem sich dieser Inhalt zuletzt geaendert hat. Grundlage fuer lastmod in sitemap.xml. Nicht von Hand pflegen.",
   "seiten": {
     "agb.html": {
-      "hash": "871efe92e8c4b8edefa7fb70882ccd7c90936b9e",
-      "lastmod": "2026-09-07"
+      "hash": "c692eb7e84ccd906ec78a21a6592a7120e3e859b",
+      "lastmod": "2026-09-18"
     },
     "beitragsordnung.html": {
       "hash": "2d22c5f10a5ce8b2fa9627ecbdc67b4b0e0894f2",
@@ -22,116 +22,120 @@
       "lastmod": "2026-08-26"
     },
     "club/soziales-engagement.html": {
-      "hash": "9fc06c680738c5f637408c6d6613641a4fca3281",
-      "lastmod": "2026-09-16"
+      "hash": "74397c5e93fdbbae66f67b9e6bfeca8db20872e8",
+      "lastmod": "2026-09-19"
     },
     "club/ueber-uns.html": {
-      "hash": "3140a7047c5b03fe63c37226d2e35c86e12cae15",
-      "lastmod": "2026-08-26"
+      "hash": "91ca50a4bf45a28328ca08e5ff124e6b89af696c",
+      "lastmod": "2026-09-19"
     },
     "datenschutz.html": {
-      "hash": "f5d13b040f41ced197ea4ba3b4f9377d4650e0bc",
-      "lastmod": "2026-08-25"
+      "hash": "2f17d59430fcda07ef7568715624dfc5b9a27132",
+      "lastmod": "2026-09-18"
     },
     "fans/community-events.html": {
-      "hash": "a435db12f13c8cb49190c88aad0b2e23ee848ddc",
-      "lastmod": "2026-08-26"
+      "hash": "d26bc61c3e5644d00dacf674d1bb3a75f92bfe59",
+      "lastmod": "2026-09-20"
     },
     "fans/ehrenamt.html": {
-      "hash": "194534906c35954a29b52602c083e09171612b24",
-      "lastmod": "2026-08-28"
+      "hash": "2858b455075e4683b9aebdf530a36f1ce71c64df",
+      "lastmod": "2026-09-20"
     },
     "fans/fanclub.html": {
-      "hash": "05169e3601be95956003b64b5cea735a8fc26f87",
-      "lastmod": "2026-09-01"
+      "hash": "8cd5c777116649fba67dc0d15b57b693c19801dc",
+      "lastmod": "2026-09-20"
     },
     "fanshop.html": {
-      "hash": "b4b2db4bba6e7d1051f614c2df2acfdbc050f349",
-      "lastmod": "2026-08-17"
+      "hash": "c0d1b989b5258eb7f81f30c48e356a381ad55177",
+      "lastmod": "2026-09-20"
     },
     "impressum.html": {
-      "hash": "83c0b5b2e06643b6ccded48968b31b6aba545626",
-      "lastmod": "2026-07-27"
+      "hash": "fb84cdd2d09f438f16742e540e5099de22198fb6",
+      "lastmod": "2026-09-18"
     },
     "index.html": {
-      "hash": "f374405595e1a916f498540b8967427bc5502357",
-      "lastmod": "2026-09-16"
+      "hash": "6b2ecc550931cc2e50e38c0ecafc706f0f27cff3",
+      "lastmod": "2026-09-20"
     },
     "kontakt.html": {
-      "hash": "3d21720e3221829cc4ecb1d8a1da716afe942046",
-      "lastmod": "2026-08-23"
+      "hash": "01033561eccfc4a2b4f1d577c86430b3bd5cd886",
+      "lastmod": "2026-09-18"
     },
     "mitglied-werden.html": {
-      "hash": "af1910642472d1278a9500c5fd52c36517a72e7a",
-      "lastmod": "2026-09-01"
+      "hash": "1a25da23c343511e4e2fa5d106880e71884118d5",
+      "lastmod": "2026-09-19"
     },
     "mitglied-werden/formular.html": {
       "hash": "5de2563501435f1d67a13e233f26580415955605",
       "lastmod": "2026-08-08"
     },
     "news/aktuelles.html": {
-      "hash": "f8c6b8ef0c0bf3dce6c7e4073b5f2253b72a920a",
-      "lastmod": "2026-09-16"
+      "hash": "acd003dffa1ef2bf9cdfdf9b1004f0875e9e46b0",
+      "lastmod": "2026-09-20"
     },
-    "news/artikel/2025-04-22_verein_playoff-heimspiel-freitag.html": {
-      "hash": "25ad0bff6eaa9100ba0d3d31823ad6d7138b115d",
-      "lastmod": "2026-07-30"
+    "news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html": {
+      "hash": "c2735ebfc9462a07384e6a94bff61364f691fae5",
+      "lastmod": "2026-09-20"
     },
-    "news/artikel/2025-04-29_verein_achtelfinale-aus.html": {
-      "hash": "521eaf81a452e8a9def3c251fadc1bdfb5a98523",
-      "lastmod": "2026-08-26"
+    "news/artikel/2025-04-29_profis_achtelfinale-aus.html": {
+      "hash": "cf749c3962fb38fb93f67ad9610c102508e69af3",
+      "lastmod": "2026-09-20"
     },
-    "news/artikel/2025-05-19_verein_kaderplanung-naechste-saison.html": {
-      "hash": "c5c308e871e2be34cb4524e8cb247b3246e201e8",
-      "lastmod": "2026-08-26"
+    "news/artikel/2025-05-19_profis_kaderplanung-naechste-saison.html": {
+      "hash": "72d014b51edba8c643acaffa0556108992b85788",
+      "lastmod": "2026-09-20"
     },
-    "news/artikel/2025-07-21_verein_sommerinterview-teil1.html": {
-      "hash": "3437f78f15f4c83cb82369cb4df4d712ad3e78f5",
-      "lastmod": "2026-07-30"
+    "news/artikel/2025-07-21_club_sommerinterview-teil1.html": {
+      "hash": "06d49146fdafb253f069beb062cf944a1bac26e0",
+      "lastmod": "2026-09-20"
     },
-    "news/artikel/2025-08-01_verein_sommerinterview-teil2.html": {
-      "hash": "752c5f31a00ed8d0499dd2fe9e37eb7fd41a39d9",
-      "lastmod": "2026-08-26"
+    "news/artikel/2025-08-01_club_sommerinterview-teil2.html": {
+      "hash": "5fe59cdf1f31999ecdc29a4ee9dbb9f3dd9c23c9",
+      "lastmod": "2026-09-20"
     },
-    "news/artikel/2025-08-08_verein_sommerinterview-teil3.html": {
-      "hash": "5ec75f32cc5d8fb7e3ea70bdd20c52b13d29b40d",
-      "lastmod": "2026-08-26"
+    "news/artikel/2025-08-08_club_sommerinterview-teil3.html": {
+      "hash": "ee3b96fba12bdfdc51caeee8fc3060f5e021a6f7",
+      "lastmod": "2026-09-20"
     },
-    "news/artikel/2025-08-26_verein_catl-verlaengert.html": {
-      "hash": "fa2c334275f9771ca3d23f0890a674cbcef2425e",
-      "lastmod": "2026-07-30"
+    "news/artikel/2025-08-26_partner_catl-verlaengert.html": {
+      "hash": "611c67ff675d0e039bd82c090a3623459065be44",
+      "lastmod": "2026-09-20"
     },
-    "news/artikel/2025-09-25_verein_saisonstart-dauerkarten.html": {
-      "hash": "0f051dc9dbe45606d7b0c62229f21c672679f3ea",
-      "lastmod": "2026-08-27"
+    "news/artikel/2025-09-25_profis_saisonstart-dauerkarten.html": {
+      "hash": "c5db8f8f0294bd89cbfaa5a940813dfec9089447",
+      "lastmod": "2026-09-20"
     },
-    "news/artikel/2026-03-04_verein_mitchell-abgang.html": {
-      "hash": "2c8cee2820e24e0d3ca43155d677167df7448ce2",
-      "lastmod": "2026-08-26"
+    "news/artikel/2026-03-04_profis_mitchell-abgang.html": {
+      "hash": "dc74255af5410a949882702983518ff9d505164d",
+      "lastmod": "2026-09-20"
     },
-    "news/artikel/2026-03-31_verein_spielbericht-saisonrueckblick-2025-26.html": {
-      "hash": "60dc978747de112adcdac1a4e761ce6a19362b7e",
-      "lastmod": "2026-08-26"
+    "news/artikel/2026-03-31_profis_spielbericht-saisonrueckblick-2025-26.html": {
+      "hash": "aaddbd85660cf8aab4d28dda0f6b31eb2b7d66cc",
+      "lastmod": "2026-09-20"
     },
-    "news/artikel/2026-06-19_verein_loewenpark-meilenstein.html": {
-      "hash": "30e4ab029659e48d6f4c012e544f33f2bff871c7",
-      "lastmod": "2026-07-30"
+    "news/artikel/2026-06-19_loewenpark_loewenpark-meilenstein.html": {
+      "hash": "7a2429410e78106534feaae89b944fed53472f56",
+      "lastmod": "2026-09-20"
     },
-    "news/artikel/2026-07-06_verein_swe-sommercamp.html": {
-      "hash": "9542e1ab08f10d7baeeed2b6bcaf7ea0d0b5cafb",
-      "lastmod": "2026-07-31"
+    "news/artikel/2026-07-06_club_swe-sommercamp.html": {
+      "hash": "604fb592a83dc8a8dc4de68d36199b7ae949e364",
+      "lastmod": "2026-09-20"
     },
-    "news/artikel/2026-08-13_verein_neuer-cheftrainer-ibrahim.html": {
-      "hash": "6d7077b43b0108ed99410faf13e58427e12ac481",
-      "lastmod": "2026-08-26"
+    "news/artikel/2026-08-13_profis_neuer-cheftrainer-ibrahim.html": {
+      "hash": "7bc11b637b47c1b679354b2db02f65337362134a",
+      "lastmod": "2026-09-20"
     },
-    "news/artikel/2026-09-01_verein_catl-partnerschaft-neuausrichtung.html": {
-      "hash": "c6df9341e8e8c238df956863c795c1e197cc6016",
-      "lastmod": "2026-09-07"
+    "news/artikel/2026-09-01_pressemitteilung_catl-partnerschaft-neuausrichtung.html": {
+      "hash": "3eba621ba4dd5255f03efb441bcbdc87a8c8d373",
+      "lastmod": "2026-09-20"
     },
-    "news/artikel/2026-09-16_verein_baskidballtalk-berlin-schirmherrschaft.html": {
-      "hash": "13946afa282738703fac85f13f54054dc6425322",
-      "lastmod": "2026-09-16"
+    "news/artikel/2026-09-16_baskidball_baskidballtalk-berlin-schirmherrschaft.html": {
+      "hash": "17bf8cff0aa59ce29dd4798ed2c8cfa2b09f485e",
+      "lastmod": "2026-09-20"
+    },
+    "news/artikel/2026-09-18_profis_testspiel-breitenguessbach.html": {
+      "hash": "970965cc92948e7f50665e9e0fcf9ea089260c62",
+      "lastmod": "2026-09-20"
     },
     "news/insta-archiv/loewen-17920245561201740.html": {
       "hash": "062fdb016b29c8b4ec569c7be76d5dd62d87efe3",
@@ -142,8 +146,8 @@
       "lastmod": "2026-08-26"
     },
     "news/insta-archiv/loewen-18059917688535291.html": {
-      "hash": "d5593a37e788dae44e537a5ed3d16c6417d456ad",
-      "lastmod": "2026-09-16"
+      "hash": "86967005dc3a892002bd6692b84bd49959cb9501",
+      "lastmod": "2026-09-20"
     },
     "news/insta-archiv/loewen-18107288966132528.html": {
       "hash": "ca9ecbefb46bc919651e18116f4ec5e3b87437a3",
@@ -154,8 +158,8 @@
       "lastmod": "2026-09-15"
     },
     "news/insta-archiv/loewen-18112264744852178.html": {
-      "hash": "eab284b34ea5fa0780f6905b2dbbc35360bd5e2d",
-      "lastmod": "2026-09-16"
+      "hash": "bda0f999fa06c6144014ea95c6e3d02840fb767b",
+      "lastmod": "2026-09-20"
     },
     "news/insta-archiv/loewen-18138301552526087.html": {
       "hash": "beb1e364ae50dc2959a1f5da118f4c622d43303b",
@@ -167,15 +171,15 @@
     },
     "news/insta-archiv/loewenpark-18018155786700568.html": {
       "hash": "7d7465349779e7d4540a701cb4830acc778b5252",
-      "lastmod": "2026-09-16"
+      "lastmod": "2026-09-18"
     },
     "news/insta-archiv/loewenpark-18057577886788062.html": {
       "hash": "175b1733b0ec48fbcd5e5b529ca9615fe2c5bc12",
-      "lastmod": "2026-09-16"
+      "lastmod": "2026-09-20"
     },
     "news/insta-archiv/loewenpark-18082776263481467.html": {
       "hash": "7788d31ef10983ef0e0e9ae9ff33b20866be7474",
-      "lastmod": "2026-09-16"
+      "lastmod": "2026-09-20"
     },
     "news/insta-archiv/loewenpark-18120295273678542.html": {
       "hash": "ce84b0b84f2d8f436f4ccd7dd066121c0b5ccfa1",
@@ -183,7 +187,7 @@
     },
     "news/insta-archiv/loewenpark-18135245524583630.html": {
       "hash": "3f89a01d69c68b19c6b199dd471bf62af8b0963a",
-      "lastmod": "2026-09-16"
+      "lastmod": "2026-09-20"
     },
     "news/insta-archiv/loewenpark-18171405229416217.html": {
       "hash": "1d01773dae21d2492b175b96cb9cd5362582e5cc",
@@ -191,15 +195,15 @@
     },
     "news/insta-archiv/loewenpark-18359930035244735.html": {
       "hash": "00200184d6798e7b06baef70b4cfb4c4adf97904",
-      "lastmod": "2026-09-16"
+      "lastmod": "2026-09-20"
     },
     "news/instagram-archiv.html": {
       "hash": "4e620368811b1de93076f3a4e39f1677ccf8f5ea",
       "lastmod": "2026-09-15"
     },
     "news/newsletter/index.html": {
-      "hash": "55da62b09edd42208236afc6aa97977b1e9a9940",
-      "lastmod": "2026-08-08"
+      "hash": "4caad0fb0b2a0fd640456d7f98fa89ad0d374cb4",
+      "lastmod": "2026-09-20"
     },
     "news/presse.html": {
       "hash": "db5bdbeb0fa766dcd5e7934af10b244664184b46",
@@ -214,96 +218,96 @@
       "lastmod": "2026-08-25"
     },
     "partner/freundeskreis.html": {
-      "hash": "736e608455f609af264c1a8802929349cc09f137",
-      "lastmod": "2026-08-17"
+      "hash": "e863726b952288928ab9e384f44352126de14e0c",
+      "lastmod": "2026-09-20"
     },
     "partner/investoren.html": {
       "hash": "14df3f60b7a1f299f519da96ec1b544f46954cf8",
       "lastmod": "2026-08-17"
     },
     "partner/netzwerktreffen.html": {
-      "hash": "1c979de6c7d3fce636f21fc1a64b26d0591bbc5e",
-      "lastmod": "2026-08-26"
+      "hash": "b7bd6cf1d9cd902be2b0af16cfa0a1e57a0dde8c",
+      "lastmod": "2026-09-20"
     },
     "partner/sponsoring.html": {
-      "hash": "89dfc157be6469c83da102169c85bd3c3e673760",
-      "lastmod": "2026-09-12"
+      "hash": "97a3aebce7a6fb258c955bbc4bc4d917cd55218d",
+      "lastmod": "2026-09-19"
     },
     "saison/damen.html": {
       "hash": "ac7257c585034f8adf25dbe1d927171b16941097",
       "lastmod": "2026-08-26"
     },
     "saison/nachwuchs.html": {
-      "hash": "b0b04f716f1d48f15aaa9ab0369b407c33009e6d",
-      "lastmod": "2026-08-26"
+      "hash": "b63a763476cfd3ccc1619191f79c11ab25035c42",
+      "lastmod": "2026-09-19"
     },
     "saison/nbbl.html": {
-      "hash": "577fafbd3a6fc18ba47707658c764154c139ae84",
-      "lastmod": "2026-08-26"
+      "hash": "d4b760be6bcbd5e93b00b32e39908b1c25db0ef9",
+      "lastmod": "2026-09-20"
     },
     "saison/profis.html": {
-      "hash": "7753648b871af311c7d31eb135cd5c3ae0fcacd8",
-      "lastmod": "2026-08-27"
+      "hash": "13da72015262e5a69b428bd20d3ef4b02c06b9af",
+      "lastmod": "2026-09-20"
     },
     "saison/profis/gameday/2026-10-11-bba-ludwigsburg.html": {
-      "hash": "14d84f3460145388399b00bbb2ae3dff98224620",
-      "lastmod": "2026-08-27"
+      "hash": "0dfb2d0f5388f0d4d0e9f7945cf2ef241cabf504",
+      "lastmod": "2026-09-19"
     },
     "saison/profis/gameday/2026-10-18-tsg-reutlingen-ravens.html": {
-      "hash": "53938e124adc0280aa71b851142d6904d8ac3026",
-      "lastmod": "2026-08-27"
+      "hash": "a6d966b40ea5c394abb1c45928a9801e0ecc8cf0",
+      "lastmod": "2026-09-19"
     },
     "saison/profis/gameday/2026-11-08-culture-city-weimar.html": {
-      "hash": "3e6ed2401d976184ae2b0366b17e5c55c317f739",
-      "lastmod": "2026-08-27"
+      "hash": "b9652d5b2c54617636d6bbdeb43463267ae35b66",
+      "lastmod": "2026-09-19"
     },
     "saison/profis/gameday/2026-11-13-dresden-titans.html": {
-      "hash": "e390d5e9bdfbd28a43c7813d27add1fd00fe391c",
-      "lastmod": "2026-08-27"
+      "hash": "b893031af99b5de0060b596fa968d5504a18bfbe",
+      "lastmod": "2026-09-19"
     },
     "saison/profis/gameday/2026-11-20-fc-bayern-basketball.html": {
-      "hash": "d67238df82f95460ebc426f02cee3622c16b535e",
-      "lastmod": "2026-08-27"
+      "hash": "268cd334780490ebc250d6fa52b0646ce3408e78",
+      "lastmod": "2026-09-19"
     },
     "saison/profis/gameday/2026-12-06-bg-leitershofen.html": {
-      "hash": "1c6144ec3ffce655cb7b5162945e80231c93ce9b",
-      "lastmod": "2026-08-27"
+      "hash": "2d48c94ffb3fad876a5ba63d0184da90497d3a52",
+      "lastmod": "2026-09-19"
     },
     "saison/profis/gameday/2026-12-13-tsv-oberhaching-tropics.html": {
-      "hash": "514f4ea5fc0ef6d14d6a38dc40111123b5423fe7",
-      "lastmod": "2026-08-27"
+      "hash": "98253e0bfaff965378297b3750be7c3b161526c5",
+      "lastmod": "2026-09-19"
     },
     "saison/profis/gameday/2027-01-03-dragons-rhoendorf.html": {
-      "hash": "94cecdc5056c41a7d281a1a385a04223cf3865f4",
-      "lastmod": "2026-08-27"
+      "hash": "648cb377367ba635e1998a22cae9966b164fcef8",
+      "lastmod": "2026-09-19"
     },
     "saison/profis/gameday/2027-01-17-skyliners-juniors.html": {
-      "hash": "54fae71554e3315295bc772473c27673481af57a",
-      "lastmod": "2026-08-27"
+      "hash": "5f23ab396d0b0597b43524109be98156a1b26583",
+      "lastmod": "2026-09-19"
     },
     "saison/profis/gameday/2027-01-31-bbc-coburg.html": {
-      "hash": "b7d29522dd590e4d17a491edc87fcf63fc28bf73",
-      "lastmod": "2026-08-27"
+      "hash": "5d001951f803928978a399035c86dcc05abd86a0",
+      "lastmod": "2026-09-19"
     },
     "saison/profis/gameday/2027-02-14-sv-fellbach-flashers.html": {
-      "hash": "65741ffe7dc0d0c993d9e68f0a5bcac7462e7e3e",
-      "lastmod": "2026-08-27"
+      "hash": "1a369997c71e18fbecf7612e7c469e0621d4b340",
+      "lastmod": "2026-09-19"
     },
     "saison/profis/gameday/2027-03-07-giants-leverkusen.html": {
-      "hash": "f76de096b8b27c5d34a02895ffdd76af11d39a57",
-      "lastmod": "2026-08-27"
+      "hash": "0e87e0126091c9ca89403f3ae3da563e03f63511",
+      "lastmod": "2026-09-19"
     },
     "saison/profis/gameday/2027-03-21-tv-langen.html": {
-      "hash": "507affd74e7577f4fc7b82602cd0cd920b7bff8b",
-      "lastmod": "2026-08-27"
+      "hash": "ce17955ae2bfa0d85a528ea2502d02db5bf37602",
+      "lastmod": "2026-09-19"
     },
     "saison/profis/gameday/2027-03-28-ahorn-camp-baskets.html": {
-      "hash": "4854d12c27da00aaf79a11ab62f16e051cc90c4f",
-      "lastmod": "2026-08-27"
+      "hash": "19d786096d2ddbd08e08954a529723e23dd6a26c",
+      "lastmod": "2026-09-19"
     },
     "saison/profis/gameday/index.html": {
-      "hash": "838f33744ea26550ccb09559bae4d8b3212b7350",
-      "lastmod": "2026-09-15"
+      "hash": "e03765a45715f637eaa5bc24a46b612872c90111",
+      "lastmod": "2026-09-20"
     },
     "saison/spielplan.html": {
       "hash": "4a97bdddf75a5b704d954266ce3fb5bf122a2fe6",
@@ -330,20 +334,20 @@
       "lastmod": "2026-09-07"
     },
     "trainieren/baskidball.html": {
-      "hash": "99e486ef0ad1ed1bda9430fcbdff795c5033b731",
-      "lastmod": "2026-09-16"
+      "hash": "6cd013334958fe42c0d80cea6cc80143191d6b7c",
+      "lastmod": "2026-09-20"
     },
     "trainieren/court-hunt.html": {
       "hash": "c2386f83a68e62677c114154817529fe334f7b06",
       "lastmod": "2026-09-01"
     },
     "trainieren/feriencamps.html": {
-      "hash": "bdf4e86b7b6a5d2ae7c7bf70bcedc74523e03b80",
-      "lastmod": "2026-09-14"
+      "hash": "4f156aa15bafb6ac8698bcc0a55d0841f00a6dfc",
+      "lastmod": "2026-09-20"
     },
     "trainieren/freiplaetze.html": {
-      "hash": "eb774daada9aab1b8802864ea501931fcb751852",
-      "lastmod": "2026-09-16"
+      "hash": "d5d4fc90a46605c65fb9e8180602bf4d9b0f65c7",
+      "lastmod": "2026-09-20"
     },
     "trainieren/freiplatz/loewenpark.html": {
       "hash": "06a4ce12eee8deb853d2f0ddc9a7b230c21cd466",
@@ -374,8 +378,8 @@
       "lastmod": "2026-08-26"
     },
     "trainieren/loewenpark.html": {
-      "hash": "fd199f79491d546fa85b115054916b7be262a93e",
-      "lastmod": "2026-09-02"
+      "hash": "0f4ca57cc89b6d16014deb39a84e6703ff0baf96",
+      "lastmod": "2026-09-20"
     },
     "trainieren/schulprogramm.html": {
       "hash": "0d186782794a03aea8c78f06f5c1b6175dd3d8ba",
@@ -386,8 +390,8 @@
       "lastmod": "2026-08-26"
     },
     "trainieren/trainingszeiten.html": {
-      "hash": "5bfcabdc419a43d54a04bc040bc99a8d76a750f0",
-      "lastmod": "2026-09-15"
+      "hash": "63308bad9e43faeed21de9d42805918f39349a74",
+      "lastmod": "2026-09-18"
     }
   }
 }

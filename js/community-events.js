@@ -70,32 +70,53 @@ function initCommunityEvents(containerId, jsonPath) {
     // .card-media (Icon-Fallback) ist per Basis-CSS 140px hoch, .card-media-photo
     // 180px -- ohne diese Angleichung springt das Kachel-Layout je nachdem, ob ein
     // Event ein Hero-Image hat oder nicht.
-    var mediaHTML = ev.heroImage
-      ? '<div class="card-media card-media-photo" style="height:180px"><img src="' + ev.heroImage + '" alt="' + (ev.name || '').replace(/"/g, '&quot;') + '" loading="lazy" /></div>'
-      : '<div class="card-media ' + cat.tint + '" style="height:180px"><i data-lucide="' + cat.icon + '" class="icon-32"></i></div>';
-    // Land am Ende der Adresse weglassen (immer Deutschland) -- nur fuer die
-    // Anzeige, der volle Adressstring (mit Land) bleibt fuer den Maps-Link erhalten.
-    var displayLocation = (ev.location || '').replace(/,\s*(Deutschland|Germany)$/, '');
-    var locationHTML = ev.location
-      ? '<a class="t-caption" style="display:flex;align-items:center;gap:4px;margin:0 0 10px;color:var(--text-muted)" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(ev.location) + '" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-12"></i> ' + displayLocation + '</a>'
+    // Court-Hunt-Spot-Hinweis als schraeges Eckband ueber dem Bild statt als
+    // Pillen-Badge im Kartentext -- kuerzerer Text, aber weiterhin ein Link
+    // zum Freiplatz (Marko, 18.09.2026).
+    var courtHuntRibbon = (ev.courtHunt && ev.spotSlug)
+      ? '<div class="ribbon-corner"><a class="card-media-ribbon" href="/trainieren/freiplatz.html?platz=' + encodeURIComponent(ev.spotSlug) + '">Court-Hunt-Spot</a></div>'
       : '';
+    var mediaHTML = ev.heroImage
+      ? '<div class="card-media card-media-photo" style="height:180px"><img src="' + ev.heroImage + '" alt="' + (ev.name || '').replace(/"/g, '&quot;') + '" loading="lazy" />' + courtHuntRibbon + '</div>'
+      : '<div class="card-media ' + cat.tint + '" style="height:180px"><i data-lucide="' + cat.icon + '" class="icon-32"></i>' + courtHuntRibbon + '</div>';
+    // Land am Ende der Adresse weglassen (immer Deutschland) und die Postleitzahl
+    // vor "Erfurt" (fast alle Orte) -- nur fuer die Anzeige, der volle Adressstring
+    // (mit Land und PLZ) bleibt fuer den Maps-Link erhalten. Zusammen mit dem
+    // CSS-Ellipsis auf .card-location-text bleibt die Zeile immer einzeilig.
+    var displayLocation = (ev.location || '')
+      .replace(/,\s*(Deutschland|Germany)$/, '')
+      .replace(/\b\d{5}\s+(Erfurt)\b/, '$1');
+    // "Online" ist kein Ort mit Maps-Link, sondern ein reiner Hinweis (z.B.
+    // Erfurt-Crowd-Seminar per Videocall) -- eigenes Icon, kein <a>.
+    var locationHTML = ev.location === 'Online'
+      ? '<span class="t-caption card-location" style="display:flex;align-items:center;gap:4px;margin:0 0 10px;color:var(--text-muted)"><i data-lucide="map-pin" class="icon-12"></i> <span class="card-location-text">Online</span></span>'
+      : ev.location
+        ? '<a class="t-caption card-location" style="display:flex;align-items:center;gap:4px;margin:0 0 10px;color:var(--text-muted)" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(ev.location) + '" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-12"></i> <span class="card-location-text">' + displayLocation + '</span></a>'
+        : '';
     var description = ev.description || FALLBACK_DESCRIPTION;
-    // Slug-Praefix "event-": Court-Hunt-Spots aus Community-Events nutzen die
-    // Huelle freiplatz.html?platz=, s. platzUrl() in freiplaetze.js.
-    var courtHuntHTML = (ev.courtHunt && ev.spotSlug)
-      ? '<a class="badge badge-orange" style="margin-bottom:10px" href="/trainieren/freiplatz.html?platz=' + encodeURIComponent(ev.spotSlug) + '"><i data-lucide="target" class="icon-12"></i> Court-Hunt-Spot: mobiler Korb vor Ort</a>'
+    // Optionaler Link zur Veranstaltungsseite des Veranstalters (nicht bei uns
+    // organisiert, z.B. Christophoruswerk-Jahresfest) -- neuer Tab.
+    var urlHTML = ev.url
+      ? '<a class="card-link mt-2" href="' + ev.url + '" target="_blank" rel="noopener">Mehr erfahren <i data-lucide="arrow-right" class="icon-14"></i></a>'
       : '';
     return (
-      '<div class="card hoverable camp-slider-card" data-start="' + ev.start + '">' +
+      '<div class="card hoverable camp-slider-card" data-start="' + ev.start + '" data-end="' + (ev.end || '') + '">' +
         mediaHTML +
         '<div class="card-body">' +
-          '<span class="card-label">' + ev.name + '</span>' +
-          '<h3 style="display:flex;align-items:center;gap:8px">' + dateLabel(ev) +
-            ' <a href="' + calendarLink(ev) + '" target="_blank" rel="noopener" title="Ins Kalender eintragen" style="display:inline-flex;color:var(--color-brand-orange-text)"><i data-lucide="calendar-plus" class="icon-18"></i></a>' +
-          '</h3>' +
+          // Eventname ist die eigentliche Ueberschrift der Kachel (h3) --
+          // Datum/Zeit ist nur ein Hinweis-Label davor, nicht umgekehrt.
+          // Gleiche Rollenverteilung wie bei den Court-Hunt-Spot-Kacheln auf
+          // freiplaetze.html (dort traegt .card-label auch nur "Vorbei"/
+          // Status, nicht den Eventnamen) -- vorher war es auf dieser Seite
+          // seitenverkehrt, was echten Content aus der SEO-relevanten
+          // Ueberschrift verdraengt hat (Marko, 18.09.2026: "SEO pruefen").
+          '<span class="card-label" style="display:flex;align-items:center;gap:8px">' + dateLabel(ev) +
+            ' <a href="' + calendarLink(ev) + '" target="_blank" rel="noopener" title="In Kalender eintragen" style="display:inline-flex;color:var(--color-brand-orange-text)"><i data-lucide="calendar-plus" class="icon-18"></i></a>' +
+          '</span>' +
+          '<h3>' + ev.name + '</h3>' +
           locationHTML +
-          courtHuntHTML +
           '<p>' + description + '</p>' +
+          urlHTML +
         '</div>' +
       '</div>'
     );
@@ -109,11 +130,19 @@ function initCommunityEvents(containerId, jsonPath) {
     track.innerHTML = events.map(cardHTML).join('');
     if (window.lucide) lucide.createIcons();
 
-    // Auf das naechste anstehende Event scrollen (erstes Event mit Start >= jetzt);
-    // gibt es keins mehr (alle vergangen), bleibt die Ansicht ganz rechts (letztes Event).
+    // Auf das naechste anstehende ODER laufende Event scrollen: massgeblich ist
+    // immer das Tagesende, nie die genaue Endzeit -- ein Event von heute soll
+    // den ganzen Tag ueber die aktuelle Kachel bleiben, auch nachdem seine
+    // Uhrzeit vorbei ist (Website-Feedback MF, 18.09.2026: "nicht nur bis zum
+    // Ende des Events... den ganzen Tag"). Vorher fiel ein Event schon
+    // waehrend des Tages raus, sobald seine Endzeit erreicht war.
     var now = new Date();
     var cards = Array.prototype.slice.call(track.querySelectorAll('.camp-slider-card'));
-    var nextCard = cards.find(function (c) { return new Date(c.getAttribute('data-start')) >= now; }) || cards[cards.length - 1];
+    var nextCard = cards.find(function (c) {
+      var start = new Date(c.getAttribute('data-start'));
+      var endOfStartDay = new Date(start.getFullYear(), start.getMonth(), start.getDate(), 23, 59, 59, 999);
+      return endOfStartDay >= now;
+    }) || cards[cards.length - 1];
     // .news-slider-track hat scroll-behavior:smooth per CSS -- eine direkte
     // scrollLeft-Zuweisung wuerde dadurch animiert statt sofort springen.
     // behavior:'instant' erzwingt den sofortigen Sprung beim ersten Rendern.

@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1789582151" />
+<link rel="stylesheet" href="/css/site.css?v=1789923276" />
 <link rel="stylesheet" href="/css/seat-picker.css?v=1787760512" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
@@ -80,9 +80,9 @@
         <div class="nav-item" data-nav-item>
           <button class="nav-link" data-page-group="saison">Saison &amp; Teams <i data-lucide="chevron-down" class="chev icon-14"></i></button>
           <div class="dropdown-panel">
-            <!-- Profis vorübergehend aus der Navigation ausgeblendet -->
+            <a href="/saison/profis.html">Profis</a>
             <!-- Damen vorübergehend aus der Navigation ausgeblendet -->
-            <!-- NBBL vorübergehend aus der Navigation ausgeblendet -->
+            <a href="/saison/nbbl.html">NBBL</a>
             <!-- Nachwuchs vorübergehend aus der Navigation ausgeblendet -->
             <a href="/saison/spielplan.html">Spielplan</a>
             <a href="/saison/tabelle.html">Tabellen</a>
@@ -185,9 +185,9 @@
     <li class="drawer-nav-item core-item">
       <button class="drawer-nav-link" data-drawer-toggle>Saison &amp; Teams <i data-lucide="chevron-down" class="chev icon-16"></i></button>
       <div class="drawer-sub-panel">
-        <!-- Profis vorübergehend aus der Navigation ausgeblendet -->
+        <a href="/saison/profis.html">Profis</a>
         <!-- Damen vorübergehend aus der Navigation ausgeblendet -->
-        <!-- NBBL vorübergehend aus der Navigation ausgeblendet -->
+        <a href="/saison/nbbl.html">NBBL</a>
         <!-- Nachwuchs vorübergehend aus der Navigation ausgeblendet -->
         <a href="/saison/spielplan.html">Spielplan</a>
         <a href="/saison/tabelle.html">Tabellen</a>
@@ -422,9 +422,14 @@
 
       <div class="footer-col">
         <h4>Kontakt</h4>
-        <p class="footer-address">Basketball Löwen e.V.<br>(XXL Baskets GmbH)<br><a href="https://www.google.com/maps/search/?api=1&query=Leipziger+Stra%C3%9Fe+71%2C+99085+Erfurt" target="_blank" rel="noopener">Leipziger Straße 71<br>99085 Erfurt</a></p>
+        <p class="footer-address">Basketball Löwen e.V.<br>(XXL Baskets GmbH)<br>99096 Erfurt</p>
         <a href="tel:+491756100411">+49 175 6100411</a>
         <a href="mailto:info@basketball-loewen.com">info@basketball-loewen.com</a>
+        <!-- Leerzeile: gleicht die kuerzere Kontakt-Spalte optisch an die
+             6-zeiligen Nachbarspalten "Basketball"/"Organisation" an, damit
+             "Kontaktformular" auf Desktop auf gleicher Hoehe steht (Marko,
+             18.09.2026). Hoehe/Abstand einer normalen Link-Zeile nachgebaut. -->
+        <span aria-hidden="true" style="display:block;height:14px;margin-bottom:10px"></span>
         <a href="/kontakt.html">Kontaktformular</a>
       </div>
     </div>

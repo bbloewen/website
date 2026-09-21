@@ -17,8 +17,9 @@ function partnerTileHTML(p) {
     '<div class="partner-tile-back">' + back + '</div>' +
   '</div>';
   var cls = 'partner-tile partner-tile-' + tier;
+  var level = p.level ? ' data-level="' + p.level + '"' : '';
   if (p.website) {
-    return '<a class="' + cls + '" data-tier="' + tier + '" href="' + p.website + '" target="_blank" rel="noopener">' + inner + '</a>';
+    return '<a class="' + cls + '" data-tier="' + tier + '"' + level + ' href="' + p.website + '" target="_blank" rel="noopener">' + inner + '</a>';
   }
-  return '<div class="' + cls + '" data-tier="' + tier + '">' + inner + '</div>';
+  return '<div class="' + cls + '" data-tier="' + tier + '"' + level + '>' + inner + '</div>';
 }

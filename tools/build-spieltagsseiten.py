@@ -27,6 +27,13 @@ zusammengesetzt (Phase kann sich geändert haben), aber der Inhalt des
 bestehenden Datei ausgelesen und unverändert wieder eingesetzt. Nur bei der
 allerersten Erzeugung einer Seite steht dort ein Platzhalter.
 
+Dasselbe gilt für Abschnitte mit `<section class="gameday-extra">` zwischen Hero
+und Heimspiel-Infos: wer an diesem Spieltag zu Gast ist, welche Aktion läuft.
+Sie werden von Hand gepflegt, nicht aus data/heimspiele.json erzeugt, und von
+extract_gameday_extra() gerettet. Wer hier einen weiteren handgepflegten
+Abschnitt ergänzt, muss ihn genauso in die Rettung aufnehmen — sonst löscht ihn
+der nächste Lauf.
+
 seiteSlug wird nur einmalig erzeugt, wenn er in data/heimspiele.json fehlt, und
 danach nie mehr angetastet (auch wenn sich die Schreibweise des Gegners später
 ändert) — s. Hinweis in der JSON-Datei selbst.
@@ -144,6 +151,32 @@ def extract_seo_block(pfad):
     return m.group(0) if m else LEER_SEO
 
 
+GAMEDAY_EXTRA_RE = re.compile(
+    r'\n  <section class="gameday-extra[^"]*">.*?\n  </section>\n', re.S)
+
+
+def extract_gameday_extra(pfad):
+    """Handgepflegte Spieltags-Abschnitte retten (Marko, 18.09.2026).
+
+    Auf einzelnen Spieltagsseiten steht zwischen Hero und Heimspiel-Infos ein
+    Abschnitt `<section class="gameday-extra">` -- wer an diesem Spieltag zu Gast
+    ist, welche Aktion laeuft. Beispiele: "Die Erfurt Crowd ist zu Gast" (SWE
+    Stadtwerke) und "Das Erfurter Handwerk ist zu Gast". Diese Abschnitte werden
+    von Hand gepflegt, nicht aus data/heimspiele.json erzeugt.
+
+    Ohne diese Funktion loescht sie jeder Lauf: das Skript baut die Seite
+    vollstaendig neu, und was es nicht kennt, ist weg. Genau das ist am
+    18.09.2026 passiert -- beide Abschnitte mussten aus dem Commit davor
+    zurueckgeholt werden.
+
+    Mehrere Abschnitte je Seite sind moeglich; sie werden in der gefundenen
+    Reihenfolge wieder eingesetzt, an derselben Stelle wie zuvor.
+    """
+    if not pfad.exists():
+        return ""
+    return "".join(GAMEDAY_EXTRA_RE.findall(pfad.read_text(encoding="utf-8")))
+
+
 def extract_platzhalter(pfad, name, leer):
     """Header/Footer-Platzhalter unveraendert aus der bestehenden Datei uebernehmen.
 
@@ -173,6 +206,24 @@ def heimspiel_infos_section(game, d, offen):
     "Vorverkauf läuft"/"angekündigt" (Marko, 27.08.2026): Der Text sagt
     schlicht, wo Tickets sind, statt eine Verkaufsphase zu benennen.
     """
+    # Link auf die Vereinsseite des Gegners, wenn data/heimspiele.json eine
+    # gegnerUrl fuehrt -- als Zeile unter dem Kachelraster, nicht als vierte
+    # Kachel: das Raster hat drei Spalten, eine vierte Kachel stuende allein in
+    # einer zweiten Reihe. Dasselbe Muster wie auf dem Gameday-Hub unter der
+    # Spieleliste. Der
+    # Gegnername steht sonst nur in H1 und Eyebrow, und dort wird nach
+    # Repo-Konvention nicht verlinkt -- die Seite des Gegners war damit von
+    # unserer Spieltagsseite aus nicht erreichbar (Markos Ansage, 19.09.2026:
+    # moeglichst viele Links auf externe Vereine).
+    gegner_link = ""
+    if game.get("gegnerUrl"):
+        gegner_link = (
+            '      <p class="mt-5"><a class="card-link" '
+            f'href="{html.escape(game["gegnerUrl"])}" target="_blank" rel="noopener">'
+            f'{html.escape(game["gegner"])} — zur Vereinsseite '
+            '<i data-lucide="arrow-right" class="icon-14"></i></a></p>\n'
+        )
+
     ticket_text = (
         'Tickets für dieses Spiel gibt es auf dem <a href="/saison/profis/gameday/">Gameday-Hub</a>.'
         if offen else
@@ -207,6 +258,7 @@ def heimspiel_infos_section(game, d, offen):
           <p class="t-body-sm">{ticket_text}</p>
         </div>
       </div>
+{gegner_link}
     </div>
   </section>
 """
@@ -256,7 +308,8 @@ def bericht_section(bericht_inhalt):
 """
 
 
-def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html=LEER_FOOTER, seo_block=LEER_SEO):
+def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html=LEER_FOOTER,
+               seo_block=LEER_SEO, gameday_extra=""):
     d = parse_dmy(game["datum"])
     gegner = html.escape(game["gegner"])
     url = f"https://basketball-loewen.com/saison/profis/gameday/{game['seiteSlug']}.html"
@@ -308,6 +361,11 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
         sections.append(bericht_section(bericht_inhalt))
 
     main_content = "\n".join(sections)
+    # Der gerettete gameday-extra-Abschnitt steht im Original zwischen Hero und
+    # Heimspiel-Infos; genau dort wird er wieder eingesetzt, mit demselben
+    # Zeilenumbruch-Muster, damit --check ohne Unterschied durchlaeuft.
+    if gameday_extra:
+        main_content = gameday_extra.strip("\n") + "\n\n" + main_content
 
     # Kein noindex mehr. Bis zum 27.08.2026 standen die Seiten in der Phase
     # "angekuendigt" auf noindex: sie trugen nur Gegner, Datum und den Hinweis
@@ -343,7 +401,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1787855243" />
+<link rel="stylesheet" href="/css/site.css?v=1789923276" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
@@ -404,8 +462,9 @@ def main():
         bericht = extract_bericht(pfad)
         header_html = extract_platzhalter(pfad, "header", LEER_HEADER)
         footer_html = extract_platzhalter(pfad, "footer", LEER_FOOTER)
+        gameday_extra = extract_gameday_extra(pfad)
         seo_block = extract_seo_block(pfad)
-        neu = build_page(game, phase, bericht, header_html, footer_html, seo_block)
+        neu = build_page(game, phase, bericht, header_html, footer_html, seo_block, gameday_extra)
         alt = pfad.read_text(encoding="utf-8") if pfad.exists() else None
         if neu == alt:
             unveraendert.append((game["seiteSlug"], phase))

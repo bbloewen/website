@@ -255,6 +255,35 @@ Zwei Fallen dabei, beide beim Bauen aufgelaufen:
    hat. Bei den Trainingszeiten wurde das Markup bewusst **nicht** gespiegelt —
    es hängt an zu vielen Nachschlagetabellen; dort steht eine schlichte Liste.
 
+## Verlinkung prüfen: `check-links.py`
+
+Kein Build-Skript — es schreibt nichts, es meldet nur. Gedacht als
+wiederkehrender Blick im SEO-Projekt (Markos Ansage, 19.09.2026: „von Zeit zu
+Zeit überprüfen, ob sowohl die internen Links korrekt gesetzt sind als auch die
+Links zu externen Seiten").
+
+```
+python3 tools/check-links.py            # intern + Konsistenz, ein paar Sekunden
+python3 tools/check-links.py --extern   # zusätzlich alle externen Adressen abrufen
+```
+
+Drei Prüfungen: **intern** (tote Links, verwaiste indexierbare Seiten),
+**Konsistenz** (Organisationen, die woanders verlinkt sind, hier aber nur als
+Text stehen) und **extern** (HTTP-Status).
+
+Der Konsistenz-Teil braucht keine gepflegte Namensliste: er zieht die Namen aus
+`data/sponsoren.json` und aus jedem Ankertext, der im Repo schon auf eine fremde
+Adresse zeigt. Wer einen neuen Partner irgendwo einmal verlinkt, bringt ihn
+damit automatisch in die Prüfung ein.
+
+Bewusst nicht gemeldet: `news/insta-archiv/` (gehört dem n8n-Workflow),
+Nennungen innerhalb eines Ankertexts, in JavaScript zusammengesetzte Adressen,
+und Namen mit eigener Unterseite, wenn intern dorthin verlinkt wird
+(`INTERNE_SEITE` im Skript — sonst wäre „SPORT VERNETZT" aus der Navigation ein
+Dauerfehlalarm).
+
+Rückgabewert 1, sobald etwas gefunden wurde.
+
 ## Reihenfolge der Baukette
 
 `tools/bauen.sh` fährt alle Skripte in der Reihenfolge, in der sie laufen müssen.

@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1789582151" />
+<link rel="stylesheet" href="/css/site.css?v=1789923276" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
@@ -39,7 +39,7 @@
 <meta name="twitter:title" content="Basketball Löwen Erfurt — Gemeinsam wachsen." />
 <meta name="twitter:description" content="Basketball Löwen Erfurt e.V. — Profis, Damen und Nachwuchs aus Thüringen. Trainingszeiten, Spielplan, Tickets, Probetraining und Mitgliedschaft." />
 <meta name="twitter:image" content="https://basketball-loewen.com/assets/img/share/og-default.jpg" />
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SportsOrganization","@id":"https://basketball-loewen.com/#organization","name":"Basketball Löwen Erfurt","alternateName":["Basketball Löwen e.V.","CATL Basketball Löwen","Basketball Löwinnen Erfurt"],"sport":"Basketball","foundingDate":"2018","url":"https://basketball-loewen.com/","logo":"https://basketball-loewen.com/assets/logo/android-chrome-512x512.png","image":"https://basketball-loewen.com/assets/img/share/og-default.jpg","email":"info@basketball-loewen.com","telephone":"+49 175 6100411","address":{"@type":"PostalAddress","streetAddress":"Leipziger Straße 71","postalCode":"99085","addressLocality":"Erfurt","addressRegion":"Thüringen","addressCountry":"DE"},"sameAs":["https://www.instagram.com/basketball.loewen/","https://www.facebook.com/basketball.loewen.erfurt/","https://www.youtube.com/channel/UCKV_um0lxsTkidR1Gaazlvw"]},{"@type":"WebSite","@id":"https://basketball-loewen.com/#website","url":"https://basketball-loewen.com/","name":"Basketball Löwen Erfurt","inLanguage":"de-DE","publisher":{"@id":"https://basketball-loewen.com/#organization"},"potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://basketball-loewen.com/suche.html?q={search_term_string}"},"query-input":"required name=search_term_string"}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SportsOrganization","@id":"https://basketball-loewen.com/#organization","name":"Basketball Löwen Erfurt","alternateName":["Basketball Löwen e.V.","Basketball Löwen","Basketball Löwinnen Erfurt"],"sport":"Basketball","foundingDate":"2018","url":"https://basketball-loewen.com/","logo":"https://basketball-loewen.com/assets/logo/android-chrome-512x512.png","image":"https://basketball-loewen.com/assets/img/share/og-default.jpg","email":"info@basketball-loewen.com","telephone":"+49 175 6100411","address":{"@type":"PostalAddress","streetAddress":"Friedrich-Ebert-Straße 58","postalCode":"99096","addressLocality":"Erfurt","addressRegion":"Thüringen","addressCountry":"DE"},"sameAs":["https://www.instagram.com/basketball.loewen/","https://www.facebook.com/basketball.loewen.erfurt/","https://www.youtube.com/channel/UCKV_um0lxsTkidR1Gaazlvw"]},{"@type":"WebSite","@id":"https://basketball-loewen.com/#website","url":"https://basketball-loewen.com/","name":"Basketball Löwen Erfurt","inLanguage":"de-DE","publisher":{"@id":"https://basketball-loewen.com/#organization"},"potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://basketball-loewen.com/suche.html?q={search_term_string}"},"query-input":"required name=search_term_string"}}]}</script>
 <!-- SEO:auto END -->
 </head>
 <body data-nav-group="">
@@ -79,9 +79,9 @@
         <div class="nav-item" data-nav-item>
           <button class="nav-link" data-page-group="saison">Saison &amp; Teams <i data-lucide="chevron-down" class="chev icon-14"></i></button>
           <div class="dropdown-panel">
-            <!-- Profis vorübergehend aus der Navigation ausgeblendet -->
+            <a href="/saison/profis.html">Profis</a>
             <!-- Damen vorübergehend aus der Navigation ausgeblendet -->
-            <!-- NBBL vorübergehend aus der Navigation ausgeblendet -->
+            <a href="/saison/nbbl.html">NBBL</a>
             <!-- Nachwuchs vorübergehend aus der Navigation ausgeblendet -->
             <a href="/saison/spielplan.html">Spielplan</a>
             <a href="/saison/tabelle.html">Tabellen</a>
@@ -184,9 +184,9 @@
     <li class="drawer-nav-item core-item">
       <button class="drawer-nav-link" data-drawer-toggle>Saison &amp; Teams <i data-lucide="chevron-down" class="chev icon-16"></i></button>
       <div class="drawer-sub-panel">
-        <!-- Profis vorübergehend aus der Navigation ausgeblendet -->
+        <a href="/saison/profis.html">Profis</a>
         <!-- Damen vorübergehend aus der Navigation ausgeblendet -->
-        <!-- NBBL vorübergehend aus der Navigation ausgeblendet -->
+        <a href="/saison/nbbl.html">NBBL</a>
         <!-- Nachwuchs vorübergehend aus der Navigation ausgeblendet -->
         <a href="/saison/spielplan.html">Spielplan</a>
         <a href="/saison/tabelle.html">Tabellen</a>
@@ -262,9 +262,7 @@
           <p class="lead">Mit sportlichen Vorbildern für Chancengerechtigkeit und Zusammenhalt in der Region.<br>Profi-Team, Damen, Nachwuchs aus Thüringen.</p>
         </div>
         <div class="hero-side-card" data-hero-widget-wrap>
-          <div data-hero-widget id="next-game-card">
-            <span class="eyebrow">1. Heimspiel</span>
-          </div>
+          <div data-hero-widget id="next-game-card"><!--NEXTGAME:next-game-card--><div class="next-game-slides"><div class="next-game-slide is-active"><span class="eyebrow">1. Heimspiel</span><h3 class="t-h4" style="margin:10px 0 6px">Basketball Löwen – Porsche BBA Ludwigsburg</h3><p class="t-body-sm" style="margin-bottom:16px;display:flex;flex-direction:column;gap:4px"><span style="display:inline-flex;align-items:center;gap:6px"><i data-lucide="calendar" style="width:14px;height:14px"></i>11. Oktober 2026, 17:00 Uhr</span><span style="display:inline-flex;align-items:center;gap:6px"><i data-lucide="map-pin" style="width:14px;height:14px"></i>Riethsporthalle</span></p><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn-primary btn-sm" style="color:#fff" href="/tickets/dauerkarte.html"><i data-lucide="ticket" style="width:14px;height:14px"></i> Dauerkarte kaufen</a><a class="btn btn-ghost btn-sm" href="/saison/spielplan.html">Zum Spielplan</a></div></div><div class="next-game-slide"><span class="eyebrow">2. Heimspiel</span><h3 class="t-h4" style="margin:10px 0 6px">Basketball Löwen – TSG Reutlingen Ravens</h3><p class="t-body-sm" style="margin-bottom:16px;display:flex;flex-direction:column;gap:4px"><span style="display:inline-flex;align-items:center;gap:6px"><i data-lucide="calendar" style="width:14px;height:14px"></i>18. Oktober 2026, 17:00 Uhr</span><span style="display:inline-flex;align-items:center;gap:6px"><i data-lucide="map-pin" style="width:14px;height:14px"></i>Riethsporthalle</span></p><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn-primary btn-sm" style="color:#fff" href="/tickets/dauerkarte.html"><i data-lucide="ticket" style="width:14px;height:14px"></i> Dauerkarte kaufen</a><a class="btn btn-ghost btn-sm" href="/saison/spielplan.html">Zum Spielplan</a></div></div><div class="next-game-slide"><span class="eyebrow">3. Heimspiel</span><h3 class="t-h4" style="margin:10px 0 6px">Basketball Löwen – Culture City Weimar</h3><p class="t-body-sm" style="margin-bottom:16px;display:flex;flex-direction:column;gap:4px"><span style="display:inline-flex;align-items:center;gap:6px"><i data-lucide="calendar" style="width:14px;height:14px"></i>8. November 2026, 17:00 Uhr</span><span style="display:inline-flex;align-items:center;gap:6px"><i data-lucide="map-pin" style="width:14px;height:14px"></i>Riethsporthalle</span></p><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn-primary btn-sm" style="color:#fff" href="/tickets/dauerkarte.html"><i data-lucide="ticket" style="width:14px;height:14px"></i> Dauerkarte kaufen</a><a class="btn btn-ghost btn-sm" href="/saison/spielplan.html">Zum Spielplan</a></div></div></div><div class="news-dots"><button class="news-dot is-active" data-slide-to="0" aria-label="Heimspiel 1 von 3: gegen Porsche BBA Ludwigsburg"></button><button class="news-dot" data-slide-to="1" aria-label="Heimspiel 2 von 3: gegen TSG Reutlingen Ravens"></button><button class="news-dot" data-slide-to="2" aria-label="Heimspiel 3 von 3: gegen Culture City Weimar"></button></div><!--/NEXTGAME:next-game-card--></div>
           <div data-hero-widget data-news-slider class="hidden">
             <span class="eyebrow">Top-News</span>
             <div class="news-slides"></div>
@@ -300,7 +298,7 @@
         <!-- DESKTOP: 2 Bento-Seiten -->
         <div class="news-slider-desktop">
           <div class="news-slider-track" id="news-slider-track-desktop"><!--NEWS:news-slider-track-desktop-->
-        <div class="news-bento"><a class="news-tile news-tile-featured" href="/news/artikel/2026-09-16_verein_baskidballtalk-berlin-schirmherrschaft.html"><img src="/assets/img/news/baskidballtalk-berlin-2026.webp" width="1800" height="771" alt="" onerror="this.onerror=null;this.src='/assets/img/share/og-default.jpg'" /><div class="news-tile-overlay"><h3 class="news-tile-headline">Neue Schirmherrschaft für BasKIDball: Dirk Nowitzki und Svenja Brunckhorst</h3><p class="news-tile-teaser">Beim BasKIDballtalk 2026 in Berlin wurde Svenja Brunckhorst offiziell als neue Schirmherrin begrüßt — mit dabei: rund 30 BasKIDs, auch aus Erfurt.</p><span class="news-tile-link">11.09.2026 · Weiterlesen <i data-lucide="arrow-right" style="width:14px;height:14px"></i></span></div></a><a class="news-tile news-tile-side" href="/news/artikel/2026-09-01_verein_catl-partnerschaft-neuausrichtung.html"><img src="/assets/img/hero-basketball.webp" width="2400" height="1600" alt="" onerror="this.onerror=null;this.src='/assets/img/share/og-default.jpg'" /><div class="news-tile-overlay"><h3 class="news-tile-headline">CATL und Basketball Löwen Erfurt richten Partnerschaft auf Nachwuchs, Frauenbasketball und den neuen LÖWENPARK aus</h3><p class="news-tile-teaser">Namenssponsoring künftig für Damenmannschaft, U19-Bundesligateam und die neue Trainings- und Begegnungsstätte am Erfurter Südpark.</p><span class="news-tile-link">01.09.2026 · Weiterlesen <i data-lucide="arrow-right" style="width:14px;height:14px"></i></span></div></a><a class="news-tile news-tile-small" href="/news/artikel/2026-08-13_verein_neuer-cheftrainer-ibrahim.html"><img src="/assets/img/news/neuer-cheftrainer-ibrahim.webp" width="1600" height="1955" alt="" onerror="this.onerror=null;this.src='/assets/img/share/og-default.jpg'" /><div class="news-tile-overlay"><h3 class="news-tile-headline">Neuer Mann auf der Bank: Leif Ibrahim wird Cheftrainer der Löwen</h3><p class="news-tile-teaser">Der 31-jährige Schwede unterschreibt für zwei Jahre — Florian Gut wechselt in die sportliche Leitung.</p><span class="news-tile-link">13.08.2026 · Weiterlesen <i data-lucide="arrow-right" style="width:14px;height:14px"></i></span></div></a></div>
+        <div class="news-bento"><a class="news-tile news-tile-featured" href="/news/artikel/2026-09-18_profis_testspiel-breitenguessbach.html"><img src="/assets/img/hero-basketball.webp" width="2400" height="1600" alt="" onerror="this.onerror=null;this.src='/assets/img/share/og-default.jpg'" /><div class="news-tile-overlay"><h3 class="news-tile-headline">Vorbereitung erfolgreich abgeschlossen: Löwen siegen in Breitengüßbach</h3><p class="news-tile-teaser">87:75-Auswärtssieg beim Regionalligisten TSV Tröster Breitengüßbach beschließt die Vorbereitung auf die neue Saison 2026/2027.</p><span class="news-tile-link">18.09.2026 · Weiterlesen <i data-lucide="arrow-right" style="width:14px;height:14px"></i></span></div></a><a class="news-tile news-tile-side" href="/news/artikel/2026-09-16_baskidball_baskidballtalk-berlin-schirmherrschaft.html"><img src="/assets/img/news/baskidballtalk-berlin-2026.webp" width="1800" height="771" alt="" onerror="this.onerror=null;this.src='/assets/img/share/og-default.jpg'" /><div class="news-tile-overlay"><h3 class="news-tile-headline">Neue Schirmherrschaft für BasKIDball: Dirk Nowitzki und Svenja Brunckhorst</h3><p class="news-tile-teaser">Beim BasKIDballtalk 2026 in Berlin wurde Svenja Brunckhorst offiziell als neue Schirmherrin begrüßt — mit dabei: rund 30 BasKIDs, auch aus Erfurt.</p><span class="news-tile-link">11.09.2026 · Weiterlesen <i data-lucide="arrow-right" style="width:14px;height:14px"></i></span></div></a><a class="news-tile news-tile-small" href="/news/artikel/2026-09-01_pressemitteilung_catl-partnerschaft-neuausrichtung.html"><img src="/assets/img/hero-basketball.webp" width="2400" height="1600" alt="" onerror="this.onerror=null;this.src='/assets/img/share/og-default.jpg'" /><div class="news-tile-overlay"><h3 class="news-tile-headline">CATL und Basketball Löwen Erfurt richten Partnerschaft auf Nachwuchs, Frauenbasketball und den neuen LÖWENPARK aus</h3><p class="news-tile-teaser">Namenssponsoring künftig für Damenmannschaft, U19-Bundesligateam und die neue Trainings- und Begegnungsstätte am Erfurter Südpark.</p><span class="news-tile-link">01.09.2026 · Weiterlesen <i data-lucide="arrow-right" style="width:14px;height:14px"></i></span></div></a></div>
 <!--/NEWS:news-slider-track-desktop--></div>
           <button type="button" class="news-slider-arrow prev" data-news-prev aria-label="Vorherige News" disabled><i data-lucide="chevron-left" class="icon-18"></i></button>
           <button type="button" class="news-slider-arrow next" data-news-next aria-label="Nächste News"><i data-lucide="chevron-right" class="icon-18"></i></button>
@@ -329,7 +327,7 @@
       <div class="grid-3">
         <div class="card hoverable">
           <div class="card-media" style="height:200px;padding:0">
-            <img loading="lazy" src="/assets/img/team-prob.webp" width="1920" height="1280" alt="Profimannschaft Basketball Löwen Erfurt" style="width:100%;height:100%;object-fit:cover;display:block"  />
+            <img loading="lazy" src="/assets/img/team-kader-collage.webp" width="1414" height="794" alt="Profimannschaft Basketball Löwen Erfurt" style="width:100%;height:100%;object-fit:cover;display:block"  />
           </div>
           <div class="card-body">
             <span class="card-label">Pro B</span>
@@ -340,7 +338,7 @@
         </div>
         <div class="card hoverable">
           <div class="card-media" style="height:200px;padding:0">
-            <img loading="lazy" src="/assets/img/team-damen.webp" width="1920" height="1280" alt="Damenteam Basketball Löwinnen Erfurt" style="width:100%;height:100%;object-fit:cover;display:block"  />
+            <img loading="lazy" src="/assets/img/team-damen.webp" width="1920" height="1280" alt="Damenteam Basketball Löwinnen Erfurt" style="width:100%;height:100%;object-fit:cover;display:block;filter:blur(5px);transform:scale(1.08)"  />
           </div>
           <div class="card-body">
             <span class="card-label">Regionalliga Südost</span>
@@ -351,7 +349,7 @@
         </div>
         <div class="card hoverable">
           <div class="card-media" style="height:200px;padding:0">
-            <img loading="lazy" src="/assets/img/team-nbbl.webp" width="1920" height="1280" alt="U19-Team Basketball Löwen Erfurt in der NBBL" style="width:100%;height:100%;object-fit:cover;display:block"  />
+            <img loading="lazy" src="/assets/img/team-nbbl-collage.webp" width="1414" height="794" alt="U19-Team Basketball Löwen Erfurt in der NBBL" style="width:100%;height:100%;object-fit:cover;display:block"  />
           </div>
           <div class="card-body">
             <span class="card-label">NBBL</span>
@@ -407,14 +405,14 @@
       <span class="eyebrow" style="display:block;text-align:center;margin-bottom:20px">Partner</span>
       <div class="grid-4" id="hauptpartner-grid"><!--PARTNER:hauptpartner-grid-->
         <a class="partner-tile partner-tile-top" data-tier="top" href="https://www.catl.com/en/enterpriseinfoGermany/" target="_blank" rel="noopener"><div class="partner-tile-inner"><div class="partner-tile-front"><img src="/assets/logos/Logo_CATL.webp" width="1024" height="216" alt="CATL" loading="lazy" /></div><div class="partner-tile-back"><span class="partner-desc">Weltmarktführer für Batteriezellen — die europäische Gigafactory von Contemporary Amperex Technology steht am Erfurter Kreuz.</span></div></div></a>
-        <a class="partner-tile partner-tile-performance" data-tier="performance" href="http://crestcomleadership.com/de/agent/fuehrungsschule-thueringen/" target="_blank" rel="noopener"><div class="partner-tile-inner"><div class="partner-tile-front"><img src="/assets/logos/Logo_Crestcom.webp" width="1200" height="167" alt="Crestcom" loading="lazy" /></div><div class="partner-tile-back"><span class="partner-desc">Internationales Trainingsunternehmen für Führungskräfteentwicklung, in Erfurt vor Ort vertreten.</span></div></div></a>
-        <a class="partner-tile partner-tile-basis" data-tier="basis" href="https://www.fluidsystems.org/" target="_blank" rel="noopener"><div class="partner-tile-inner"><div class="partner-tile-front"><img src="/assets/logos/Logo_FSE-Fluid-Systems.webp" width="2560" height="983" alt="FSE Fluid Systems Erfurt" loading="lazy" /></div><div class="partner-tile-back"><p>„…wenn die Pumpe ausfällt!“</p><span class="partner-desc">Erfurter Fachbetrieb für Reparatur, Wartung und Vertrieb von Industriepumpen.</span></div></div></a>
-        <a class="partner-tile partner-tile-partner" data-tier="partner" href="https://www.stb-kuehnst.de/" target="_blank" rel="noopener"><div class="partner-tile-inner"><div class="partner-tile-front"><img src="/assets/logos/Logo_Steuerkanzlei-Kuehnst.webp" width="1200" height="829" alt="Heiko Kühnst" loading="lazy" /></div><div class="partner-tile-back"><span class="partner-desc">Steuerkanzlei in Erfurt — Steuerliche Gestaltungsberatung, Jahresabschluss, Lohn- und Finanzbuchhaltung.</span></div></div></a>
-        <a class="partner-tile partner-tile-basis" data-tier="basis" href="https://www.hks-architekten.de/" target="_blank" rel="noopener"><div class="partner-tile-inner"><div class="partner-tile-front"><img src="/assets/logos/Logo_HKS-Architekten.webp" width="2560" height="283" alt="HKS Architekten" loading="lazy" /></div><div class="partner-tile-back"><span class="partner-desc">Erfurter Architekturbüro (BDA).</span></div></div></a>
+        <a class="partner-tile partner-tile-performance" data-tier="performance" data-level="gold" href="http://crestcomleadership.com/de/agent/fuehrungsschule-thueringen/" target="_blank" rel="noopener"><div class="partner-tile-inner"><div class="partner-tile-front"><img src="/assets/logos/Logo_Crestcom.webp" width="1200" height="167" alt="Crestcom" loading="lazy" /></div><div class="partner-tile-back"><span class="partner-desc">Internationales Trainingsunternehmen für Führungskräfteentwicklung, in Erfurt vor Ort vertreten.</span></div></div></a>
+        <a class="partner-tile partner-tile-performance" data-tier="performance" data-level="silber" href="https://www.fluidsystems.org/" target="_blank" rel="noopener"><div class="partner-tile-inner"><div class="partner-tile-front"><img src="/assets/logos/Logo_FSE-Fluid-Systems.webp" width="2560" height="983" alt="FSE Fluid Systems Erfurt" loading="lazy" /></div><div class="partner-tile-back"><p>„…wenn die Pumpe ausfällt!“</p><span class="partner-desc">Erfurter Fachbetrieb für Reparatur, Wartung und Vertrieb von Industriepumpen.</span></div></div></a>
+        <a class="partner-tile partner-tile-performance" data-tier="performance" data-level="gold" href="https://www.stb-kuehnst.de/" target="_blank" rel="noopener"><div class="partner-tile-inner"><div class="partner-tile-front"><img src="/assets/logos/Logo_Steuerkanzlei-Kuehnst.webp" width="1200" height="829" alt="Heiko Kühnst" loading="lazy" /></div><div class="partner-tile-back"><span class="partner-desc">Steuerkanzlei in Erfurt — Steuerliche Gestaltungsberatung, Jahresabschluss, Lohn- und Finanzbuchhaltung.</span></div></div></a>
+        <a class="partner-tile partner-tile-performance" data-tier="performance" data-level="silber" href="https://www.hks-architekten.de/" target="_blank" rel="noopener"><div class="partner-tile-inner"><div class="partner-tile-front"><img src="/assets/logos/Logo_HKS-Architekten.webp" width="2560" height="283" alt="HKS Architekten" loading="lazy" /></div><div class="partner-tile-back"><span class="partner-desc">Erfurter Architekturbüro (BDA).</span></div></div></a>
         <a class="partner-tile partner-tile-wirkungspartner" data-tier="wirkungspartner" href="https://www.kinnings.org/" target="_blank" rel="noopener"><div class="partner-tile-inner"><div class="partner-tile-front"><img src="/assets/logos/Logo_Kinnings-Foundation.webp" width="1893" height="749" alt="Kinnings Foundation" loading="lazy" /></div><div class="partner-tile-back"><span class="partner-tag">Wirkungspartner</span><span class="partner-desc">Gemeinnützige Förderstiftung, die engagierte Persönlichkeiten unterstützt, die Chancen für Kinder und Jugendliche in Ostdeutschland schaffen.</span></div></div></a>
         <a class="partner-tile partner-tile-wirkungspartner" data-tier="wirkungspartner" href="https://kowo.de/" target="_blank" rel="noopener"><div class="partner-tile-inner"><div class="partner-tile-front"><img src="/assets/logos/Logo_KoWo.webp" width="721" height="160" alt="KoWo" loading="lazy" /></div><div class="partner-tile-back"><span class="partner-tag">Wirkungspartner</span><p>„Wir.Leben.Erfurt.“</p><span class="partner-desc">Kommunale Wohnungsgesellschaft mbH Erfurt — einer der größten Vermieter der Stadt.</span></div></div></a>
         <a class="partner-tile partner-tile-wirkungspartner" data-tier="wirkungspartner" href="https://www.salus-bkk.de/" target="_blank" rel="noopener"><div class="partner-tile-inner"><div class="partner-tile-front"><img src="/assets/logos/Logo_Salus-BKK.webp" width="1200" height="340" alt="Salus BKK" loading="lazy" /></div><div class="partner-tile-back"><span class="partner-tag">Wirkungspartner</span><p>„Mit gutem Gefühl krankenversichert.“</p><span class="partner-desc">Bundesweite gesetzliche Krankenkasse mit Sitz in Thüringen.</span></div></div></a>
-        <a class="partner-tile partner-tile-partner" data-tier="partner" href="https://www.sparkasse-mittelthueringen.de/de/home.html" target="_blank" rel="noopener"><div class="partner-tile-inner"><div class="partner-tile-front"><img src="/assets/logos/Logo_Sparkasse-Mittelthueringen.webp" width="2489" height="841" alt="Sparkasse Mittelthüringen" loading="lazy" /></div><div class="partner-tile-back"><span class="partner-desc">Die beste Sparkasse in der Region.</span></div></div></a>
+        <a class="partner-tile partner-tile-performance" data-tier="performance" data-level="gold" href="https://www.sparkasse-mittelthueringen.de/de/home.html" target="_blank" rel="noopener"><div class="partner-tile-inner"><div class="partner-tile-front"><img src="/assets/logos/Logo_Sparkasse-Mittelthueringen.webp" width="2489" height="841" alt="Sparkasse Mittelthüringen" loading="lazy" /></div><div class="partner-tile-back"><span class="partner-desc">Die beste Sparkasse in der Region.</span></div></div></a>
         <a class="partner-tile partner-tile-top" data-tier="top" href="https://www.stadtwerke-erfurt.de/" target="_blank" rel="noopener"><div class="partner-tile-inner"><div class="partner-tile-front"><img src="/assets/logos/Logo_Stadtwerke-Erfurt.webp" width="430" height="113" alt="Stadtwerke Erfurt" loading="lazy" /></div><div class="partner-tile-back"><p>„SWE für Erfurt.“</p><span class="partner-desc">Die Stadtwerke Erfurt Gruppe versorgt die Stadt mit Energie, Nahverkehr und Freizeitangeboten — und ist Partner für Kultur, Sport und Soziales.</span></div></div></a>
 <!--/PARTNER:hauptpartner-grid--></div>
       <div style="display:flex;justify-content:center;margin-top:20px">
@@ -492,9 +490,14 @@
 
       <div class="footer-col">
         <h4>Kontakt</h4>
-        <p class="footer-address">Basketball Löwen e.V.<br>(XXL Baskets GmbH)<br><a href="https://www.google.com/maps/search/?api=1&query=Leipziger+Stra%C3%9Fe+71%2C+99085+Erfurt" target="_blank" rel="noopener">Leipziger Straße 71<br>99085 Erfurt</a></p>
+        <p class="footer-address">Basketball Löwen e.V.<br>(XXL Baskets GmbH)<br>99096 Erfurt</p>
         <a href="tel:+491756100411">+49 175 6100411</a>
         <a href="mailto:info@basketball-loewen.com">info@basketball-loewen.com</a>
+        <!-- Leerzeile: gleicht die kuerzere Kontakt-Spalte optisch an die
+             6-zeiligen Nachbarspalten "Basketball"/"Organisation" an, damit
+             "Kontaktformular" auf Desktop auf gleicher Hoehe steht (Marko,
+             18.09.2026). Hoehe/Abstand einer normalen Link-Zeile nachgebaut. -->
+        <span aria-hidden="true" style="display:block;height:14px;margin-bottom:10px"></span>
         <a href="/kontakt.html">Kontaktformular</a>
       </div>
     </div>
@@ -585,7 +588,7 @@
 <script src="/js/home-news-feed.js?v=1789585539"></script>
 <script src="/js/home-hero-widget-toggle.js?v=1785398309"></script>
 <script src="/js/home-hero-slider.js?v=1785398309"></script>
-<script src="/js/partner-tile.js?v=1785398309"></script>
+<script src="/js/partner-tile.js?v=1789837357"></script>
 <script src="/js/home-hauptpartner.js?v=1785487795"></script>
 </body>
 </html>

@@ -334,7 +334,7 @@ document.addEventListener('DOMContentLoaded', function () {
     );
   }
 
-  fetch('/data/trainingszeiten.json?v=1787394380')
+  fetch('/data/trainingszeiten.json?v=1789737851')
     .then(function (res) { return res.json(); })
     .then(function (data) {
       // Reihenfolge = Reihenfolge im JSON: juengster Jahrgang oben, Erwachsenenteams

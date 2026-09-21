@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1789582151" />
+<link rel="stylesheet" href="/css/site.css?v=1789923276" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
@@ -79,9 +79,9 @@
         <div class="nav-item" data-nav-item>
           <button class="nav-link" data-page-group="saison">Saison &amp; Teams <i data-lucide="chevron-down" class="chev icon-14"></i></button>
           <div class="dropdown-panel">
-            <!-- Profis vorübergehend aus der Navigation ausgeblendet -->
+            <a href="/saison/profis.html">Profis</a>
             <!-- Damen vorübergehend aus der Navigation ausgeblendet -->
-            <!-- NBBL vorübergehend aus der Navigation ausgeblendet -->
+            <a href="/saison/nbbl.html">NBBL</a>
             <!-- Nachwuchs vorübergehend aus der Navigation ausgeblendet -->
             <a href="/saison/spielplan.html">Spielplan</a>
             <a href="/saison/tabelle.html">Tabellen</a>
@@ -184,9 +184,9 @@
     <li class="drawer-nav-item core-item">
       <button class="drawer-nav-link" data-drawer-toggle>Saison &amp; Teams <i data-lucide="chevron-down" class="chev icon-16"></i></button>
       <div class="drawer-sub-panel">
-        <!-- Profis vorübergehend aus der Navigation ausgeblendet -->
+        <a href="/saison/profis.html">Profis</a>
         <!-- Damen vorübergehend aus der Navigation ausgeblendet -->
-        <!-- NBBL vorübergehend aus der Navigation ausgeblendet -->
+        <a href="/saison/nbbl.html">NBBL</a>
         <!-- Nachwuchs vorübergehend aus der Navigation ausgeblendet -->
         <a href="/saison/spielplan.html">Spielplan</a>
         <a href="/saison/tabelle.html">Tabellen</a>
@@ -255,35 +255,9 @@
   <section class="section">
     <div class="container">
       <div class="grid-2 kontakt-contact-grid">
-        <div>
-          <span class="eyebrow">Geschäftsstelle</span>
-          <h2 class="t-h2 mb-5">So erreichst du uns</h2>
-          <div class="info-tile">
-            <div class="info-tile-row-head">
-              <div class="tile-icon"><i data-lucide="map-pin"></i></div>
-              <div style="display:flex;gap:32px;flex-wrap:wrap">
-                <p class="t-body-sm">Basketball Löwen e.V.<br>Leipziger Straße 71<br>99085 Erfurt</p>
-                <p class="t-body-sm">XXL Baskets GmbH<br>Leipziger Straße 71<br>99085 Erfurt</p>
-              </div>
-            </div>
-          </div>
-          <div class="info-tile mt-4">
-            <div class="info-tile-row-head">
-              <div class="tile-icon"><i data-lucide="phone"></i></div>
-              <p class="t-body-sm" style="margin:0"><a href="tel:+491756100411">+49 175 6100411</a></p>
-            </div>
-          </div>
-          <div class="info-tile mt-4">
-            <div class="info-tile-row-head">
-              <div class="tile-icon"><i data-lucide="mail"></i></div>
-              <p class="t-body-sm" style="margin:0"><a href="mailto:info@basketball-loewen.com">info@basketball-loewen.com</a></p>
-            </div>
-          </div>
-        </div>
-
         <div class="card" style="padding:24px">
-          <span class="eyebrow">Nachricht senden</span>
-          <h3 class="t-h4" style="margin:6px 0 16px">Kontaktformular</h3>
+          <span class="eyebrow">Am schnellsten</span>
+          <h2 class="t-h2" style="margin:6px 0 16px;font-size:24px">Kontaktformular</h2>
           <form class="form-panel" id="contact-form">
             <div class="field">
               <label for="betreff">Betreff</label>
@@ -312,6 +286,52 @@
             <button type="submit" class="btn btn-primary btn-block">Nachricht senden</button>
             <div class="form-status" id="contact-status"></div>
           </form>
+        </div>
+
+        <div>
+          <span class="eyebrow">Alle Wege</span>
+          <h2 class="t-h2 mb-5">So erreichst du uns sonst</h2>
+
+          <div class="info-tile">
+            <div class="info-tile-row-head">
+              <div class="tile-icon"><i data-lucide="mail"></i></div>
+              <h3 class="t-h4">E-Mail</h3>
+            </div>
+            <p class="t-body-sm">Immer möglich: für allgemeine Anliegen an <a href="mailto:info@basketball-loewen.com">info@basketball-loewen.com</a>. Geht es um ein bestimmtes Thema — Tickets, Training, Camps, Ehrenamt und mehr — findest du auf der jeweiligen Seite die passende Adresse direkt dazu.</p>
+          </div>
+
+          <div class="info-tile mt-4">
+            <div class="info-tile-row-head">
+              <div class="tile-icon"><i data-lucide="phone"></i></div>
+              <h3 class="t-h4">Telefon</h3>
+            </div>
+            <p class="t-body-sm">Brauchst du schnell eine Auskunft? Ruf uns an: <a href="tel:+491756100411">+49 175 6100411</a>.</p>
+          </div>
+
+          <div class="info-tile mt-4">
+            <div class="info-tile-row-head">
+              <div class="tile-icon"><i data-lucide="map-pin"></i></div>
+              <h3 class="t-h4">Post</h3>
+            </div>
+            <p class="t-body-sm">Für Briefpost nutze bitte die Adresse des jeweiligen Rechtsträgers:</p>
+            <div style="display:flex;gap:32px;flex-wrap:wrap;margin-top:8px">
+              <p class="t-body-sm">Basketball Löwen e.V.<br>Scanbox 21866<br>Ehrenbergstraße 16a<br>10245 Berlin</p>
+              <p class="t-body-sm">XXL Baskets GmbH<br>Scanbox 21866<br>Ehrenbergstraße 16a<br>10245 Berlin</p>
+            </div>
+            <p class="t-body-sm mt-3">Nur wenn wirklich physische Anwesenheit nötig ist — zum Beispiel, um einen Teilhabegutschein persönlich vorbeizubringen — findest du uns:</p>
+            <div style="display:flex;gap:32px;flex-wrap:wrap;margin-top:8px">
+              <p class="t-body-sm">Bis Ende 2026<br>Leipziger Straße 71<br>99085 Erfurt</p>
+              <p class="t-body-sm">Ab Januar 2027<br>Löwenpark<br>99096 Erfurt</p>
+            </div>
+          </div>
+
+          <div class="info-tile mt-4">
+            <div class="info-tile-row-head">
+              <div class="tile-icon"><i data-lucide="door-open"></i></div>
+              <h3 class="t-h4">Mitgliedschaft kündigen</h3>
+            </div>
+            <p class="t-body-sm">Dafür brauchst du kein Einschreiben und keinen Brief — eine formlose E-Mail an <a href="mailto:mitgliederverwaltung@basketball-loewen.com">mitgliederverwaltung@basketball-loewen.com</a> reicht völlig. Die Bestätigung bekommst du spätestens nach ein paar Tagen; kommt keine, melde dich gern nochmal, dann ist etwas schiefgelaufen.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -365,9 +385,14 @@
 
       <div class="footer-col">
         <h4>Kontakt</h4>
-        <p class="footer-address">Basketball Löwen e.V.<br>(XXL Baskets GmbH)<br><a href="https://www.google.com/maps/search/?api=1&query=Leipziger+Stra%C3%9Fe+71%2C+99085+Erfurt" target="_blank" rel="noopener">Leipziger Straße 71<br>99085 Erfurt</a></p>
+        <p class="footer-address">Basketball Löwen e.V.<br>(XXL Baskets GmbH)<br>99096 Erfurt</p>
         <a href="tel:+491756100411">+49 175 6100411</a>
         <a href="mailto:info@basketball-loewen.com">info@basketball-loewen.com</a>
+        <!-- Leerzeile: gleicht die kuerzere Kontakt-Spalte optisch an die
+             6-zeiligen Nachbarspalten "Basketball"/"Organisation" an, damit
+             "Kontaktformular" auf Desktop auf gleicher Hoehe steht (Marko,
+             18.09.2026). Hoehe/Abstand einer normalen Link-Zeile nachgebaut. -->
+        <span aria-hidden="true" style="display:block;height:14px;margin-bottom:10px"></span>
         <a href="/kontakt.html">Kontaktformular</a>
       </div>
     </div>
