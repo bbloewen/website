@@ -65,6 +65,7 @@ DK_PREISE = [
     ("Kategorie 2", "dk-price-kat2"),
     ("Kategorie 2 (ermäßigt)", "dk-price-kat2-erm"),
     ("VIP", "dk-price-vip"),
+    ("VIP (ermäßigt)", "dk-price-vip-erm"),
 ]
 
 WOCHENTAGE = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
