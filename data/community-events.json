@@ -153,6 +153,18 @@
       "heroImage": "https://basketball-loewen.com/assets/img/zughafen-kinderfest-2026.webp"
     },
     {
+      "name": "Sparkassen-Unternehmerforum 2026",
+      "category": "Straßenfest",
+      "status": "Genehmigt",
+      "start": "2026-09-22T15:00:00.000+02:00",
+      "end": null,
+      "isDatetime": true,
+      "description": "Triff die Basketball Löwen beim Sparkassen-Unternehmerforum „Impulse, Perspektiven, Austausch\": Wenn Unternehmen, Kommunen und Betriebe aus Mittelthüringen im <a href=\"https://www.kulturquartier-erfurt.de/\" target=\"_blank\" rel=\"noopener\">KulturQuartier Schauspielhaus</a> über die Zukunft der Region sprechen, vertreten wir dort den Sport in Erfurt — ansprechbar für alle, die <a href=\"/partner/sponsoring.html\">Nachwuchs, Inklusion und Spitzenbasketball</a> in der Stadt mittragen wollen. Einlass ab 14:15 Uhr.",
+      "location": "KulturQuartier Schauspielhaus, Klostergang 4, 99084 Erfurt, Deutschland",
+      "heroImage": "https://basketball-loewen.com/assets/img/sparkassen-unternehmerforum-2026.webp",
+      "url": "https://events.sparkasse.de/s/spkmt-unternehmerforum"
+    },
+    {
       "name": "Saisoneröffnung 2026/2027",
       "category": "Vereinsfest",
       "status": "Genehmigt",
