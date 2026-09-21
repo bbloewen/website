@@ -20,6 +20,13 @@
 # Crawler ohne JS sah dort gar nichts (Website-Feedback MF, 18.09.2026).
 #
 # Die QR-Codes bleiben bewusst aussen vor: sie entstehen separat.
+#
+# Seit 21.09.2026 laeuft zusaetzlich build-bildmasse.py mit (braucht Pillow,
+# daher der pip-install-Schritt): build-freiplaetze.py/build-community-
+# events.py schreiben ihre Kacheln ohne width/height zurueck, das fehlte hier
+# bisher komplett -- jeder Lauf dieses Workflows strich die Bildmasse wieder
+# heraus, die zuvor jemand per Hand (tools/bauen.sh) ergaenzt hatte (Cumulative
+# Layout Shift, entdeckt an sparkassen-unternehmerforum-2026.webp).
 
 name: Freiplaetze nachbauen
 
@@ -57,8 +64,10 @@ jobs:
 
       - name: Statische Platzliste, Community-Events, Head-Meta und Sitemap neu bauen
         run: |
+          pip install --quiet --disable-pip-version-check pillow
           python3 tools/build-freiplaetze.py
           python3 tools/build-community-events.py
+          python3 tools/build-bildmasse.py
           python3 tools/build-head-meta.py
           python3 tools/build-sitemap.py
 
