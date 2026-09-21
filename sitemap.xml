@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://basketball-loewen.com/</loc>
-    <lastmod>2026-09-20</lastmod>
+    <lastmod>2026-09-21</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
@@ -87,12 +87,12 @@
   </url>
   <url>
     <loc>https://basketball-loewen.com/news/aktuelles.html</loc>
-    <lastmod>2026-09-20</lastmod>
+    <lastmod>2026-09-21</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://basketball-loewen.com/news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html</loc>
-    <lastmod>2026-09-20</lastmod>
+    <lastmod>2026-09-21</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -167,7 +167,12 @@
   </url>
   <url>
     <loc>https://basketball-loewen.com/news/artikel/2026-09-18_profis_testspiel-breitenguessbach.html</loc>
-    <lastmod>2026-09-20</lastmod>
+    <lastmod>2026-09-21</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://basketball-loewen.com/news/artikel/2026-09-21_profis_saisonstart-neunte-saison.html</loc>
+    <lastmod>2026-09-21</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -307,7 +312,7 @@
   </url>
   <url>
     <loc>https://basketball-loewen.com/saison/profis.html</loc>
-    <lastmod>2026-09-20</lastmod>
+    <lastmod>2026-09-21</lastmod>
     <priority>0.7</priority>
   </url>
   <url>

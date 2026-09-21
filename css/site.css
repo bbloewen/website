@@ -1754,6 +1754,14 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   font-weight: var(--weight-semibold); font-size: 19px; line-height: 1.5; color: var(--text-primary);
   border-left: 3px solid var(--color-brand-orange); padding-left: 20px; margin: 28px 0;
 }
+.article-player-photo {
+  float: left; width: 120px; margin: 4px 20px 10px 0; border-radius: var(--radius-md);
+  overflow: hidden; box-shadow: var(--shadow-sm);
+}
+.article-player-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+@media (max-width: 640px) {
+  .article-player-photo { float: none; width: 96px; margin: 0 0 10px; }
+}
 /* Feste Bausteine für interne News-Artikel: Zusammenfassung oben (statt fett
    gedruckter Pseudo-Zwischenüberschriften im Fließtext, die schlecht lesbar
    sind) und ein Zitat-Element (.pull-quote) für Highlights aus dem Text. */

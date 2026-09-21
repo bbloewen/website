@@ -2,6 +2,18 @@
   "hinweis": "Zentrale Liste aller News-Beiträge. Inhalte stammen von der bisherigen Vereinswebsite (basketball-loewen.com) und wurden hierher übernommen. 'datum' ist die Zeile, die auf der Kachel steht — bei einem Bericht über einen Termin darf dort der Termin stehen. Sortiert wird NICHT danach, sondern nach dem Veröffentlichungsdatum aus dem Datums-Präfix des Dateinamens (2026-09-16_club_....html) — derselbe Wert, den tools/build-head-meta.py als datePublished ins JSON-LD schreibt (seo_common.veroeffentlicht bzw. SiteUtils.publishDate in js/nav.js). 'topNews': true steuert, ob ein Beitrag im Top-News-Bereich der Startseite erscheint — Beiträge ohne dieses Flag (oder mit false) werden nur auf der Aktuelles-Seite gelistet, nicht im Startseiten-Slider. 'bild' wird für die Foto-Kacheln im Startseiten-Newsfeed verwendet. 'team' (optional: 'profis' | 'damen' | 'nbbl' | 'baskidball') ordnet einen Artikel einem Team oder Programmbereich zu, für die 'Aktuelles zu ...'-Sektionen auf den Teamseiten und die BasKIDball-Sidebar (js/team-news.js) — Artikel ohne 'team' gelten als allgemein und füllen bei Bedarf auf.",
   "artikel": [
     {
+      "datum": "21.09.2026",
+      "kategorie": "Profis",
+      "tint": "tint-orange",
+      "icon": "calendar",
+      "titel": "Die Basketball Löwen starten in die neunte Saison ihrer Vereinsgeschichte",
+      "kurztext": "Neuer Kader, neuer Cheftrainer Leif Ibrahim: Am 26. September geht es auswärts bei den Dragons Rhöndorf los.",
+      "url": "/news/artikel/2026-09-21_profis_saisonstart-neunte-saison.html",
+      "bild": "/assets/img/news/neuer-cheftrainer-ibrahim.webp",
+      "topNews": true,
+      "team": "profis"
+    },
+    {
       "datum": "18.09.2026",
       "kategorie": "Profis",
       "tint": "tint-blue",

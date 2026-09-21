@@ -54,8 +54,8 @@
       "lastmod": "2026-09-18"
     },
     "index.html": {
-      "hash": "6b2ecc550931cc2e50e38c0ecafc706f0f27cff3",
-      "lastmod": "2026-09-20"
+      "hash": "c3e0f4cee6d90086883b4fdf6e88fa9321d8947e",
+      "lastmod": "2026-09-21"
     },
     "kontakt.html": {
       "hash": "01033561eccfc4a2b4f1d577c86430b3bd5cd886",
@@ -70,12 +70,12 @@
       "lastmod": "2026-08-08"
     },
     "news/aktuelles.html": {
-      "hash": "acd003dffa1ef2bf9cdfdf9b1004f0875e9e46b0",
-      "lastmod": "2026-09-20"
+      "hash": "571a94fb35f927c209152e3c5401ab6aafe83e98",
+      "lastmod": "2026-09-21"
     },
     "news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html": {
-      "hash": "c2735ebfc9462a07384e6a94bff61364f691fae5",
-      "lastmod": "2026-09-20"
+      "hash": "3eb520e24e1b1fa7b44e65b1c12c37875fcad7d7",
+      "lastmod": "2026-09-21"
     },
     "news/artikel/2025-04-29_profis_achtelfinale-aus.html": {
       "hash": "cf749c3962fb38fb93f67ad9610c102508e69af3",
@@ -134,8 +134,12 @@
       "lastmod": "2026-09-20"
     },
     "news/artikel/2026-09-18_profis_testspiel-breitenguessbach.html": {
-      "hash": "970965cc92948e7f50665e9e0fcf9ea089260c62",
-      "lastmod": "2026-09-20"
+      "hash": "f1818364682f1fe78356a9cde24d1a9e2f86d293",
+      "lastmod": "2026-09-21"
+    },
+    "news/artikel/2026-09-21_profis_saisonstart-neunte-saison.html": {
+      "hash": "7d77d60ce4d6980fd976ab71480b4e8b86f6361d",
+      "lastmod": "2026-09-21"
     },
     "news/insta-archiv/loewen-17920245561201740.html": {
       "hash": "062fdb016b29c8b4ec569c7be76d5dd62d87efe3",
@@ -246,8 +250,8 @@
       "lastmod": "2026-09-20"
     },
     "saison/profis.html": {
-      "hash": "13da72015262e5a69b428bd20d3ef4b02c06b9af",
-      "lastmod": "2026-09-20"
+      "hash": "9b8a9fd2fb744897b2d38f662c6cf3eec308eaa3",
+      "lastmod": "2026-09-21"
     },
     "saison/profis/gameday/2026-10-11-bba-ludwigsburg.html": {
       "hash": "0dfb2d0f5388f0d4d0e9f7945cf2ef241cabf504",
