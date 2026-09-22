@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-20T16:00:42.924+02:00",
+  "generatedAt": "2026-09-22T16:00:43.562+02:00",
   "publishFrom": "2026-08-22",
   "events": [
     {
@@ -153,16 +153,16 @@
       "heroImage": "https://basketball-loewen.com/assets/img/zughafen-kinderfest-2026.webp"
     },
     {
+      "notionId": "3e2a2418-e2d7-81d5-bc9f-e2d8098cd69d",
       "name": "Sparkassen-Unternehmerforum 2026",
       "category": "Straßenfest",
       "status": "Genehmigt",
       "start": "2026-09-22T15:00:00.000+02:00",
       "end": null,
       "isDatetime": true,
-      "description": "Triff die Basketball Löwen beim Sparkassen-Unternehmerforum „Impulse, Perspektiven, Austausch\": Wenn Unternehmen, Kommunen und Betriebe aus Mittelthüringen im <a href=\"https://www.kulturquartier-erfurt.de/\" target=\"_blank\" rel=\"noopener\">KulturQuartier Schauspielhaus</a> über die Zukunft der Region sprechen, vertreten wir dort den Sport in Erfurt — ansprechbar für alle, die <a href=\"/partner/sponsoring.html\">Nachwuchs, Inklusion und Spitzenbasketball</a> in der Stadt mittragen wollen. Einlass ab 14:15 Uhr.",
-      "location": "KulturQuartier Schauspielhaus, Klostergang 4, 99084 Erfurt, Deutschland",
-      "heroImage": "https://basketball-loewen.com/assets/img/sparkassen-unternehmerforum-2026.webp",
-      "url": "https://events.sparkasse.de/s/spkmt-unternehmerforum"
+      "description": "Sparkassen-Unternehmerforum „Impulse, Perspektiven, Austausch\" der Sparkasse Mittelthüringen im KulturQuartier Schauspielhaus Erfurt. Die Basketball Löwen sind als Gast dabei und vertreten dort den Sport in Erfurt.",
+      "location": "",
+      "heroImage": ""
     },
     {
       "name": "Saisoneröffnung 2026/2027",
@@ -173,7 +173,8 @@
       "isDatetime": true,
       "description": "Es geht los: Zur Saisoneröffnung 2026/2027 in der Pro B stellen wir in der <a href=\"https://www.google.com/maps/search/?api=1&query=Essener+Stra%C3%9Fe+20%2C+99089+Erfurt\" target=\"_blank\" rel=\"noopener\">Riethsporthalle</a> nicht nur unser Profi-Team vor, sondern auch unser <a href=\"/saison/damen.html\">Damen-Team</a> und unser <a href=\"/saison/nbbl.html\">U19-Bundesliga-Team</a> — alle Teams der Basketball Löwen gemeinsam auf einer Bühne.",
       "location": "Riethsporthalle, Essener Straße 20, 99089 Erfurt, Deutschland",
-      "heroImage": "https://basketball-loewen.com/assets/img/saisoneroeffnung-2026.webp"
+      "heroImage": "https://basketball-loewen.com/assets/img/saisoneroeffnung-2026.webp",
+      "notionId": "3c8a2418-e2d7-808f-abee-f85395811444"
     }
   ]
 }

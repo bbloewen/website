@@ -552,6 +552,12 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 /* Team-Gruppenfoto Saisoneröffnung: Köpfe sitzen im oberen Bilddrittel,
    center-Crop (50%) hätte sie in der 180px-Kachel abgeschnitten. */
 .card-media-photo img[src*="saisoneroeffnung-2026"] { object-position: center 20%; }
+/* Jeremie-Kandidfoto (Nachwuchs-im-Fokus-Artikel): Kopf sitzt im oberen
+   Bilddrittel, zentrierter Zuschnitt schnitt ihn ab (Marko, 22.09.2026).
+   Gilt fuer beide Kachel-Kontexte (Startseite .news-tile, Aktuelles-Seite
+   .card-media-photo) -- gleiches Muster wie neuer-cheftrainer-ibrahim. */
+.news-tile img[src*="fotso-sighom"],
+.card-media-photo img[src*="fotso-sighom"] { object-position: center 15%; }
 /* QR-Code liegt seit 24.08.2026 als kleines Overlay unten rechts im Kachelbild
    statt als eigene Zeile in der Textspalte: als Block darunter wirkte er wie ein
    Fremdkörper und drängte sich vor die eigentliche Platzbeschreibung. */
@@ -1753,6 +1759,22 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .pull-quote {
   font-weight: var(--weight-semibold); font-size: 19px; line-height: 1.5; color: var(--text-primary);
   border-left: 3px solid var(--color-brand-orange); padding-left: 20px; margin: 28px 0;
+}
+.player-row {
+  display: flex; gap: 24px; align-items: flex-start; margin: 24px 0;
+}
+.player-row.player-row-reverse { flex-direction: row-reverse; }
+.player-row-photo {
+  flex: 0 0 140px; width: 140px; border-radius: var(--radius-md);
+  overflow: hidden; box-shadow: var(--shadow-sm);
+}
+.player-row-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.player-row-text { flex: 1 1 auto; min-width: 0; }
+.player-row-text > *:first-child { margin-top: 0; }
+.player-row-text .pull-quote { margin: 16px 0 0; }
+@media (max-width: 640px) {
+  .player-row, .player-row.player-row-reverse { flex-direction: column; }
+  .player-row-photo { width: 140px; }
 }
 /* Feste Bausteine für interne News-Artikel: Zusammenfassung oben (statt fett
    gedruckter Pseudo-Zwischenüberschriften im Fließtext, die schlecht lesbar

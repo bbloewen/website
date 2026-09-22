@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1789923276" />
+<link rel="stylesheet" href="/css/site.css?v=1790070902" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
@@ -41,6 +41,10 @@
 <meta name="twitter:image" content="https://basketball-loewen.com/assets/img/share/og-default.jpg" />
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Start","item":"https://basketball-loewen.com/"},{"@type":"ListItem","position":2,"name":"Club","item":"https://basketball-loewen.com/club/ueber-uns.html"},{"@type":"ListItem","position":3,"name":"Jobs","item":"https://basketball-loewen.com/club/jobs.html"}]}]}</script>
 <!-- SEO:auto END -->
+<!-- JobPosting-Schema fuer Google-Jobs-Indexierung. Nicht Teil des SEO:auto-Blocks
+     (der wird von build-head-meta.py ueberschrieben) -- bei Ablauf/neuer Stelle
+     von Hand pflegen. -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"JobPosting","title":"Hausmeister/Reinigungskraft (m/w/d)","description":"Platzpflege, Reinigung von Sanitär- und Büroräumen sowie kleinere Reparaturen im LÖWENPARK, unserem Trainingsstandort in Erfurt. Minijob oder Teilzeit, bis zu 20 Stunden pro Woche.","datePosted":"2026-09-21","employmentType":"PART_TIME","hiringOrganization":{"@type":"Organization","name":"Basketball Löwen Erfurt","sameAs":"https://basketball-loewen.com/","logo":"https://basketball-loewen.com/assets/logo/loewen-logo-4c.svg"},"jobLocation":{"@type":"Place","address":{"@type":"PostalAddress","streetAddress":"Friedrich-Ebert-Straße 58","addressLocality":"Erfurt","postalCode":"99096","addressRegion":"Thüringen","addressCountry":"DE"}},"baseSalary":{"@type":"MonetaryAmount","currency":"EUR","value":{"@type":"QuantitativeValue","value":15.00,"unitText":"HOUR"}},"directApply":true}</script>
 </head>
 <body data-nav-group="club">
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
@@ -73,7 +77,7 @@
             <a href="/club/kinderschutz.html">Kinderschutz</a>
             <a href="/club/soziales-engagement.html">Soziales Engagement</a>
             <a href="/mitglied-werden.html">Mitglied werden</a>
-            <!-- Jobs vorübergehend aus der Navigation ausgeblendet (offener Task #181) -->
+            <a href="/club/jobs.html">Jobs</a>
           </div>
         </div>
         <div class="nav-item" data-nav-item>
@@ -178,7 +182,7 @@
         <a href="/club/kinderschutz.html">Kinderschutz</a>
         <a href="/club/soziales-engagement.html">Soziales Engagement</a>
         <a href="/mitglied-werden.html">Mitglied werden</a>
-        <!-- Jobs vorübergehend aus der Navigation ausgeblendet (offener Task #181) -->
+        <a href="/club/jobs.html">Jobs</a>
       </div>
     </li>
     <li class="drawer-nav-item core-item">
@@ -250,22 +254,29 @@
     <p class="lead">Werde Teil unseres Teams. Hinter den Löwen unterstützt du unsere Mannschaften.</p>
     </div>
   </section>
-  <section class="section">
-    <div class="container grid-3">
-      <div class="info-tile">
-        <div class="tile-icon"><i data-lucide="briefcase"></i></div>
-        <h3 class="t-h4">Offene Stellen</h3>
-        <p class="t-body-sm">folgt in Kürze</p>
-      </div>
-      <div class="info-tile">
-        <div class="tile-icon"><i data-lucide="graduation-cap"></i></div>
-        <h3 class="t-h4">Duales Studium</h3>
-        <p class="t-body-sm">folgt in Kürze</p>
-      </div>
-      <div class="info-tile">
-        <div class="tile-icon"><i data-lucide="hand-heart"></i></div>
-        <h3 class="t-h4">Praktikum</h3>
-        <p class="t-body-sm">folgt in Kürze</p>
+  <section class="section" id="stellenausschreibungen">
+    <div class="container">
+      <span class="eyebrow">Stellenausschreibungen</span>
+      <h2 class="t-h2 mb-6">Aktuell offene Stellen</h2>
+
+      <h3 class="t-h3 mb-2">Hausmeister/Reinigungskraft (m/w/d) im LÖWENPARK</h3>
+      <p class="t-caption mb-4" style="color:var(--text-muted)">Minijob oder Teilzeit · 15,00 € pro Stunde · ab Januar 2027 · LÖWENPARK Erfurt</p>
+      <p class="t-body mb-4">Der <a href="/trainieren/loewenpark.html">LÖWENPARK</a> ist unser Trainingsstandort in Erfurt — hier laufen Training, Camps und Vereinsleben täglich zusammen. Damit das reibungslos funktioniert, suchen wir ab Januar 2027 jemanden, der sich zuverlässig um Halle und Gelände kümmert.</p>
+      <p class="t-body mb-4">Du sorgst dafür, dass unser Außengelände gepflegt und einladend bleibt, hältst Sanitär- und Büroräume sauber, achtest darauf, dass Seife, Handtücher und Co. nie ausgehen, und kümmerst dich um kleinere Reparaturen, bevor aus einer losen Schraube ein größeres Problem wird.</p>
+      <p class="t-body mb-4">Handwerkliches Geschick und ein Führerschein sind von Vorteil, aber kein Muss — wichtiger ist uns, dass wir uns auf dich verlassen können.</p>
+      <p class="t-body mb-6">Dafür bekommst du einen Minijob oder eine Teilzeitstelle mit bis zu 20 Stunden pro Woche zu 15,00 € pro Stunde, deren Zeiten sich flexibel nach deiner Verfügbarkeit richten, freien Zugang zu unseren Heimspielen und wirst Teil des Teams hinter unseren Mannschaften — mittendrin im Vereinsleben am LÖWENPARK.</p>
+      <a class="btn btn-primary" href="mailto:jobs@basketball-loewen.com?subject=Bewerbung%3A%20Hausmeister%2FReinigungskraft%20L%C3%96WENPARK">Jetzt bewerben</a>
+
+      <hr style="border:none;border-top:1px solid var(--border-subtle);margin:48px 0" />
+
+      <h3 class="t-h3 mb-3">Pädagogische Fachkraft (m/w/d) für unsere Sozialprojekte</h3>
+      <p class="t-body mb-4">Zur Begleitung und Weiterentwicklung unserer <a href="/club/soziales-engagement.html">sozialen Projekte</a> suchen wir eine pädagogische Fachkraft. Details zu Beschäftigungsumfang, Aufgaben und Starttermin folgen in Kürze.</p>
+      <p class="t-body-sm mb-6" style="color:var(--text-secondary)">Informationen folgen.</p>
+      <div class="info-tile" style="max-width:420px">
+        <p class="t-caption" style="color:var(--text-muted);margin-bottom:10px">Diese Stelle wird gefördert durch</p>
+        <a href="https://www.hks-architekten.de/" target="_blank" rel="noopener">
+          <img src="/assets/logos/Logo_HKS-Architekten.webp" width="2560" height="283" alt="HKS Architekten" loading="lazy" style="width:100%;height:auto;max-width:220px" />
+        </a>
       </div>
     </div>
   </section>
@@ -275,7 +286,7 @@
       <span class="eyebrow">Initiativbewerbung</span>
       <h2 class="t-h3" style="margin:8px 0 12px">Keine passende Stelle dabei?</h2>
       <p class="t-body-sm" style="max-width:56ch;margin:0 auto 20px;color:var(--text-secondary)">Schreib uns einfach eine Initiativbewerbung — wir freuen uns auf dich.</p>
-      <a class="btn btn-outline-orange" href="mailto:info@basketball-loewen.com?subject=Initiativbewerbung">Initiativbewerbung schreiben</a>
+      <a class="btn btn-outline-orange" href="mailto:jobs@basketball-loewen.com?subject=Initiativbewerbung">Initiativbewerbung schreiben</a>
     </div>
   </section>
 </main>

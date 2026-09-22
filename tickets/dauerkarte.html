@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1789923276" />
+<link rel="stylesheet" href="/css/site.css?v=1790070902" />
 <link rel="stylesheet" href="/css/seat-picker.css?v=1787760512" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
@@ -74,7 +74,7 @@
             <a href="/club/kinderschutz.html">Kinderschutz</a>
             <a href="/club/soziales-engagement.html">Soziales Engagement</a>
             <a href="/mitglied-werden.html">Mitglied werden</a>
-            <!-- Jobs vorübergehend aus der Navigation ausgeblendet (offener Task #181) -->
+            <a href="/club/jobs.html">Jobs</a>
           </div>
         </div>
         <div class="nav-item" data-nav-item>
@@ -179,7 +179,7 @@
         <a href="/club/kinderschutz.html">Kinderschutz</a>
         <a href="/club/soziales-engagement.html">Soziales Engagement</a>
         <a href="/mitglied-werden.html">Mitglied werden</a>
-        <!-- Jobs vorübergehend aus der Navigation ausgeblendet (offener Task #181) -->
+        <a href="/club/jobs.html">Jobs</a>
       </div>
     </li>
     <li class="drawer-nav-item core-item">
@@ -554,8 +554,13 @@
       // 404 ergibt (n8n-Bug, laut Support in 2.33.0 behoben, Ticket #35063).
       // Gültig ist immer nur .../webhook/<pfad> — analog einzelticket.html, mit
       // demselben Subevent, damit beide Kacheln synchron sind (s. Kommentar oben).
+      // context=dauerkarte (Marko, 21.09.2026, nach ET-YIYP39/ET-5ANPGV): ohne
+      // diesen Parameter zeigt der gemeinsame Endpunkt jede Einzelticket-Buchung
+      // (auch nur für EIN Spiel) fälschlich als für die ganze Saison belegt an —
+      // der Parameter lässt den n8n-Node zwischen Einzelticket-Kollisionsschutz
+      // (jede Zeile zählt) und echter Saison-Belegung (>1 Zeile je Sitz) unterscheiden.
       seatStatusUrl: game.subeventId
-        ? 'https://ticketing.basketball-loewen.com/webhook/einzelticket-sitzplatz-status?subevent=' + game.subeventId
+        ? 'https://ticketing.basketball-loewen.com/webhook/einzelticket-sitzplatz-status?subevent=' + game.subeventId + '&context=dauerkarte'
         : null,
       standingBookable: game.stehplatzBuchbar !== false,
       pretixEvent: 'saison2627',

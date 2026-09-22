@@ -10,8 +10,8 @@
       "lastmod": "2026-08-25"
     },
     "club/jobs.html": {
-      "hash": "262316c39569dc9a7b67be96e7634c1e45d6a064",
-      "lastmod": "2026-08-25"
+      "hash": "7973ccf9abeca3fd6b6df81a5fecaa03d450a6e3",
+      "lastmod": "2026-09-22"
     },
     "club/kinderschutz.html": {
       "hash": "fa86d507ff0a328870481048e28e82750d480a47",
@@ -34,16 +34,16 @@
       "lastmod": "2026-09-18"
     },
     "fans/community-events.html": {
-      "hash": "980d5e30debe96dffd5d67ac1b26b0b295923da5",
-      "lastmod": "2026-09-21"
+      "hash": "a2108e54c3bc3646ddb81d158e92f27f3ef291ae",
+      "lastmod": "2026-09-22"
     },
     "fans/ehrenamt.html": {
-      "hash": "2858b455075e4683b9aebdf530a36f1ce71c64df",
-      "lastmod": "2026-09-20"
+      "hash": "5a8ae3c8f4db3a1daedebaabe6ff377772946ae0",
+      "lastmod": "2026-09-21"
     },
     "fans/fanclub.html": {
-      "hash": "8cd5c777116649fba67dc0d15b57b693c19801dc",
-      "lastmod": "2026-09-20"
+      "hash": "4e64eed915316f34546f1a135b59a673a7b3f073",
+      "lastmod": "2026-09-21"
     },
     "fanshop.html": {
       "hash": "c0d1b989b5258eb7f81f30c48e356a381ad55177",
@@ -54,28 +54,28 @@
       "lastmod": "2026-09-18"
     },
     "index.html": {
-      "hash": "6b2ecc550931cc2e50e38c0ecafc706f0f27cff3",
-      "lastmod": "2026-09-20"
+      "hash": "a99271e6b4aebbd0271977831e4834420a771057",
+      "lastmod": "2026-09-22"
     },
     "kontakt.html": {
       "hash": "01033561eccfc4a2b4f1d577c86430b3bd5cd886",
       "lastmod": "2026-09-18"
     },
     "mitglied-werden.html": {
-      "hash": "1a25da23c343511e4e2fa5d106880e71884118d5",
-      "lastmod": "2026-09-19"
+      "hash": "6285ae6db3e94916dee952c098f1b1fe2096eaf7",
+      "lastmod": "2026-09-21"
     },
     "mitglied-werden/formular.html": {
       "hash": "5de2563501435f1d67a13e233f26580415955605",
       "lastmod": "2026-08-08"
     },
     "news/aktuelles.html": {
-      "hash": "acd003dffa1ef2bf9cdfdf9b1004f0875e9e46b0",
-      "lastmod": "2026-09-20"
+      "hash": "2cc55281c4421a21ebff79f71d69f98268b27af4",
+      "lastmod": "2026-09-22"
     },
     "news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html": {
-      "hash": "c2735ebfc9462a07384e6a94bff61364f691fae5",
-      "lastmod": "2026-09-20"
+      "hash": "006bf1b47001a81710784722ddf7163626eaaca0",
+      "lastmod": "2026-09-22"
     },
     "news/artikel/2025-04-29_profis_achtelfinale-aus.html": {
       "hash": "cf749c3962fb38fb93f67ad9610c102508e69af3",
@@ -134,8 +134,16 @@
       "lastmod": "2026-09-20"
     },
     "news/artikel/2026-09-18_profis_testspiel-breitenguessbach.html": {
-      "hash": "970965cc92948e7f50665e9e0fcf9ea089260c62",
-      "lastmod": "2026-09-20"
+      "hash": "f1818364682f1fe78356a9cde24d1a9e2f86d293",
+      "lastmod": "2026-09-21"
+    },
+    "news/artikel/2026-09-21_profis_saisonstart-neunte-saison.html": {
+      "hash": "a5ad961e9d973d37cb3e139baf696c154c23864a",
+      "lastmod": "2026-09-22"
+    },
+    "news/artikel/2026-09-22_profis_nachwuchs-nbbl-fokus.html": {
+      "hash": "05a1c177d804c8a59a45ce97a8ffe365d54394e8",
+      "lastmod": "2026-09-22"
     },
     "news/insta-archiv/loewen-17920245561201740.html": {
       "hash": "062fdb016b29c8b4ec569c7be76d5dd62d87efe3",
@@ -147,7 +155,11 @@
     },
     "news/insta-archiv/loewen-18059917688535291.html": {
       "hash": "f9c48c997155d6af3ebc2037c9c67381b0b0f7d7",
-      "lastmod": "2026-09-21"
+      "lastmod": "2026-09-22"
+    },
+    "news/insta-archiv/loewen-18091427246188007.html": {
+      "hash": "c27b2d101f800e0f69ad50bbd6aaabbe3d23f3dd",
+      "lastmod": "2026-09-22"
     },
     "news/insta-archiv/loewen-18107288966132528.html": {
       "hash": "ca9ecbefb46bc919651e18116f4ec5e3b87437a3",
@@ -158,8 +170,8 @@
       "lastmod": "2026-09-15"
     },
     "news/insta-archiv/loewen-18112264744852178.html": {
-      "hash": "bda0f999fa06c6144014ea95c6e3d02840fb767b",
-      "lastmod": "2026-09-21"
+      "hash": "7017b9cc0c4cce39e5fac16cd5f566c5d7f5948a",
+      "lastmod": "2026-09-22"
     },
     "news/insta-archiv/loewen-18138301552526087.html": {
       "hash": "beb1e364ae50dc2959a1f5da118f4c622d43303b",
@@ -175,11 +187,11 @@
     },
     "news/insta-archiv/loewenpark-18057577886788062.html": {
       "hash": "175b1733b0ec48fbcd5e5b529ca9615fe2c5bc12",
-      "lastmod": "2026-09-21"
+      "lastmod": "2026-09-22"
     },
     "news/insta-archiv/loewenpark-18082776263481467.html": {
       "hash": "7788d31ef10983ef0e0e9ae9ff33b20866be7474",
-      "lastmod": "2026-09-21"
+      "lastmod": "2026-09-22"
     },
     "news/insta-archiv/loewenpark-18120295273678542.html": {
       "hash": "ce84b0b84f2d8f436f4ccd7dd066121c0b5ccfa1",
@@ -187,7 +199,7 @@
     },
     "news/insta-archiv/loewenpark-18135245524583630.html": {
       "hash": "3f89a01d69c68b19c6b199dd471bf62af8b0963a",
-      "lastmod": "2026-09-21"
+      "lastmod": "2026-09-22"
     },
     "news/insta-archiv/loewenpark-18171405229416217.html": {
       "hash": "1d01773dae21d2492b175b96cb9cd5362582e5cc",
@@ -195,11 +207,11 @@
     },
     "news/insta-archiv/loewenpark-18359930035244735.html": {
       "hash": "00200184d6798e7b06baef70b4cfb4c4adf97904",
-      "lastmod": "2026-09-21"
+      "lastmod": "2026-09-22"
     },
     "news/instagram-archiv.html": {
-      "hash": "4e620368811b1de93076f3a4e39f1677ccf8f5ea",
-      "lastmod": "2026-09-15"
+      "hash": "ab750a28d77bd004b463a169bc30662532c0f84c",
+      "lastmod": "2026-09-22"
     },
     "news/newsletter/index.html": {
       "hash": "4caad0fb0b2a0fd640456d7f98fa89ad0d374cb4",
@@ -246,8 +258,8 @@
       "lastmod": "2026-09-20"
     },
     "saison/profis.html": {
-      "hash": "13da72015262e5a69b428bd20d3ef4b02c06b9af",
-      "lastmod": "2026-09-20"
+      "hash": "ac4e1a148017de26d071cad4240b4d2d01be9cd2",
+      "lastmod": "2026-09-22"
     },
     "saison/profis/gameday/2026-10-11-bba-ludwigsburg.html": {
       "hash": "0dfb2d0f5388f0d4d0e9f7945cf2ef241cabf504",
@@ -347,7 +359,7 @@
     },
     "trainieren/freiplaetze.html": {
       "hash": "d5d4fc90a46605c65fb9e8180602bf4d9b0f65c7",
-      "lastmod": "2026-09-20"
+      "lastmod": "2026-09-21"
     },
     "trainieren/freiplatz/loewenpark.html": {
       "hash": "06a4ce12eee8deb853d2f0ddc9a7b230c21cd466",
