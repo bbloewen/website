@@ -552,6 +552,10 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 /* Team-Gruppenfoto Saisoneröffnung: Köpfe sitzen im oberen Bilddrittel,
    center-Crop (50%) hätte sie in der 180px-Kachel abgeschnitten. */
 .card-media-photo img[src*="saisoneroeffnung-2026"] { object-position: center 20%; }
+/* Jeremie-Kandidfoto (Nachwuchs-im-Fokus-Artikel): Kopf sitzt im oberen
+   Bilddrittel, zentrierter Zuschnitt schnitt ihn in der 180px-Kachel ab
+   (Marko, 22.09.2026). */
+.card-media-photo img[src*="fotso-sighom"] { object-position: center 10%; }
 /* QR-Code liegt seit 24.08.2026 als kleines Overlay unten rechts im Kachelbild
    statt als eigene Zeile in der Textspalte: als Block darunter wirkte er wie ein
    Fremdkörper und drängte sich vor die eigentliche Platzbeschreibung. */
