@@ -420,3 +420,22 @@ Rechnungsstellung und Buchhaltung ein und gehört separat geplant.
 pretix Diagnose (temporaer)", `4b5L1MxytRjBtzTZ`) mit der bestehenden Credential
 „Pretix XXL - Ticketing", zuerst rein lesend zur Diagnose, dann mit dem PATCH und einem
 separaten Kontroll-GET. Der Workflow wurde danach archiviert.
+
+## Ticketing-Dashboard: Gesamtzahl-Kachel und Saisonziel (24.09.2026)
+
+Das Ticketing-Dashboard ist **kein Teil dieses Repos** — es entsteht vollständig als
+Template-String im Code-Node „Board-HTML bauen" des n8n-Workflows „Ticketing:
+Gutschein-Board (Formulardaten + Erstellen)" (`AA0f7oo7dH7TDkFu`), ausgeliefert über
+`https://ticketing.basketball-loewen.com/webhook/ticketing/board`. Änderungen an der
+Seite laufen ausschließlich über n8n (`updateNodeParameters` mit vollständigem
+jsCode, danach `publish_workflow`), s. Notion-Referenz „Ticketing-Board" in der
+IT-Landschaft.
+
+Auf Marko-Wunsch zeigt der erste Tab („Tickets") jetzt ganz oben eine **Gesamtzahl**-
+Kachel: verkaufte Tickets gegen die tatsächliche Saison-Gesamtkapazität (aus den
+pretix-Kontingenten, summiert über alle Heimspiele — eine Dauerkarte zählt bewusst in
+jedem Spiel einzeln mit), sowie der Gesamterlös gegen ein Saisonziel.
+
+**Saisonziel Ticketing-Einnahmen: 45.000 €.** Liegt als Konstante `zielUmsatz` direkt
+im Alpine-State des Boards (im Code-Node, keine Data Table) — zum Ändern also den
+Wert im Code-Node anpassen und den Workflow neu veröffentlichen.
