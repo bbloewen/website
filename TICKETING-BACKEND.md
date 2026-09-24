@@ -432,10 +432,35 @@ jsCode, danach `publish_workflow`), s. Notion-Referenz „Ticketing-Board" in de
 IT-Landschaft.
 
 Auf Marko-Wunsch zeigt der erste Tab („Tickets") jetzt ganz oben eine **Gesamtzahl**-
-Kachel: verkaufte Tickets gegen die tatsächliche Saison-Gesamtkapazität (aus den
+Kachel: verkaufte Plätze gegen die tatsächliche Saison-Gesamtkapazität (aus den
 pretix-Kontingenten, summiert über alle Heimspiele — eine Dauerkarte zählt bewusst in
 jedem Spiel einzeln mit), sowie der Gesamterlös gegen ein Saisonziel.
 
-**Saisonziel Ticketing-Einnahmen: 45.000 €.** Liegt als Konstante `zielUmsatz` direkt
+**Saisonziel Ticketing-Einnahmen: 50.000 €.** Liegt als Konstante `zielUmsatz` direkt
 im Alpine-State des Boards (im Code-Node, keine Data Table) — zum Ändern also den
 Wert im Code-Node anpassen und den Workflow neu veröffentlichen.
+
+### Nachtrag (24.09.2026): Plätze-vs-Tickets-Bug und Vergleich zur Saison 2025/26
+
+Eine Dauerkarte hat pro Heimspiel eine eigene pretix-Position, aber wegen des
+Flat-Preismodells (s. „Build pretix Order Payload") trägt nur die erste dieser
+Positionen den echten Saisonpreis — die übrigen 12–13 stehen auf `price: "0.00"`.
+Ein naives `price > 0`-Filtern pro Einzelposition zählt eine Dauerkarte deshalb in
+13 von 14 Spielen fälschlich als „unverkauft". Der Node „DK-Statistik aufbereiten"
+gruppiert Dauerkarten-Positionen deshalb über `(order code, seat_guid)` und wertet
+die ganze Gruppe als bezahlt, wenn irgendeine Position darin einen Preis > 0 hat.
+
+Daraus liefert der Endpunkt `/webhook/ticketing/dauerkarten-uebersicht` vier Zahlen
+für die Gesamtzahl-Kachel:
+- `gesamtKapazitaet` — Saison-Gesamtkapazität (ein Sitz × 14 Heimspiele)
+- `gesamtVerkauft` — belegte Plätze inkl. Freikarten (100 % Rabatt)
+- `gesamtWirklichVerkauft` — belegte Plätze, nur bezahlt (Haupt-Kennzahl der Kachel)
+- `gesamtWirklichVerkauftTickets` — Anzahl distinkter bezahlter Tickets/Käufe dahinter
+  (eine Dauerkarte über 14 Spiele zählt hier als 1 Ticket, nicht als 14 Plätze)
+
+Die Kachel vergleicht bewusst „verkauft vs. verkauft" mit der Saison 2025/26 (altes
+System, keine pretix-Daten): `gesamtWirklichVerkauft`/`gesamtWirklichVerkauftTickets`
+gegen die hartkodierten Werte 2.483 bezahlte Einzeltickets + 70 Dauerkarten. Die
+2025/26-Zuschauerzahl (11.149, 12 Heimspiele) enthält laut PPTX/Notion auch
+Freikarten und wird deshalb nur als separate Einordnungszeile gezeigt, nie als
+„verkauft" bezeichnet.
