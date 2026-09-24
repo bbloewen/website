@@ -333,16 +333,6 @@
           </div>
           <p class="t-body-sm">Alle Regelungen zu Kauf, Rücknahme und Verlust findest du in unseren <a href="/agb.html">AGB</a>.</p>
         </div>
-        <!-- Auslastung: Zahlen kommen live aus dem Sitzstatus (n8n-Proxy → pretix), gefüllt
-             von seat-picker.js über occupancyEl. Ohne erreichbaren Status bleibt bewusst
-             „Wird geladen …" stehen, statt alle Blöcke als komplett frei zu zeigen. -->
-        <div class="info-tile info-tile-row info-tile-row-divided">
-          <div class="info-tile-row-head">
-            <div class="tile-icon"><i data-lucide="chart-no-axes-column"></i></div>
-            <h3 class="t-h4">Auslastung</h3>
-          </div>
-          <div id="seatplan-occupancy"><p class="t-body-sm" style="color:var(--text-muted)">Wird geladen …</p></div>
-        </div>
       </div>
     </div>
   </section>
@@ -634,7 +624,6 @@
       ctaEl: document.getElementById('seatplan-cta'),
       detailBackdropEl: document.getElementById('seatplan-detail-backdrop'),
       detailRootEl: document.getElementById('seatplan-detail-root'),
-      occupancyEl: document.getElementById('seatplan-occupancy'),
       statusNoteEl: document.getElementById('seatplan-status-note')
     });
 
