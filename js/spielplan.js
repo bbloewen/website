@@ -68,11 +68,11 @@
         '<div class="fixture-result">' + (g.ergebnis || '– – : – –') + '</div>' +
         (g === naechstesHeimspiel ? '<a class="cal-link" href="/saison/profis/gameday/" title="Zum Gameday"><i data-lucide="ticket" style="width:16px;height:16px"></i></a>' : '') +
         (g.spielberichtUrl ? '<a class="cal-link" href="' + g.spielberichtUrl + '" title="Zum Spielbericht"><i data-lucide="file-text" style="width:16px;height:16px"></i></a>' : '') +
-        (g.livestream ? '<a class="cal-link" href="' + g.livestream + '" target="_blank" rel="noopener" title="Zum Livestream"><i data-lucide="video" style="width:16px;height:16px"></i></a>' : '') +
         '<a class="cal-link" href="' + meta.tableUrl + '" title="Zur Tabelle"><i data-lucide="list-ordered" style="width:16px;height:16px"></i></a>' +
         '<a class="cal-link" href="' + calendarLink(g) + '" target="_blank" rel="noopener" title="In Kalender eintragen"><i data-lucide="calendar-plus" style="width:16px;height:16px"></i></a>' +
       '</div>' +
       (g.heim && g.spielberichtUrl ? '<a class="btn btn-outline-orange btn-sm" href="' + g.spielberichtUrl + '">Zum Spiel <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>' : '') +
+      (g.livestream ? '<a class="btn btn-outline-orange btn-sm" href="' + g.livestream + '" target="_blank" rel="noopener">Zum Livestream <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>' : '') +
       '</div>';
     return '<div class="fixture-day-game' + (divider ? ' has-divider' : '') + '" data-team="' + g.team + '" data-heim="' + (g.heim ? '1' : '0') + '">' +
       '<div class="fixture-day-meta">' +
