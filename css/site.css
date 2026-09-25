@@ -2507,14 +2507,14 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .footer-leagues-logos-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .league-chip {
   display: inline-flex; align-items: center; justify-content: center;
-  height: 44px; padding: 6px 16px; border-radius: var(--radius-md);
+  height: 44px; padding: 4px 12px; border-radius: var(--radius-md);
   background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14);
   transition: background var(--dur-fast) var(--ease-out);
 }
 a.league-chip:hover { background: rgba(255,255,255,.16); text-decoration: none; }
 .league-chip-light { background: #fff; border-color: var(--border); }
 a.league-chip-light:hover { background: var(--bg-subtle); }
-.footer-leagues-logos-row img { height: 26px; width: auto; display: block; }
+.footer-leagues-logos-row img { height: 36px; width: auto; display: block; }
 .footer-social { display: flex; gap: 16px; margin-top: 21px; }
 .footer-social a {
   display: inline-flex; align-items: center; justify-content: center; color: #fff;
