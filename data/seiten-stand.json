@@ -54,8 +54,8 @@
       "lastmod": "2026-09-18"
     },
     "index.html": {
-      "hash": "a99271e6b4aebbd0271977831e4834420a771057",
-      "lastmod": "2026-09-22"
+      "hash": "ec9f5739aa365f4c0b56fc2642c90b1ede8d2057",
+      "lastmod": "2026-09-25"
     },
     "kontakt.html": {
       "hash": "01033561eccfc4a2b4f1d577c86430b3bd5cd886",
@@ -70,12 +70,12 @@
       "lastmod": "2026-08-08"
     },
     "news/aktuelles.html": {
-      "hash": "2cc55281c4421a21ebff79f71d69f98268b27af4",
-      "lastmod": "2026-09-22"
+      "hash": "2189d592e10ead06d7ff24c8f767835ff169f6a2",
+      "lastmod": "2026-09-25"
     },
     "news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html": {
-      "hash": "006bf1b47001a81710784722ddf7163626eaaca0",
-      "lastmod": "2026-09-22"
+      "hash": "a4cfe6f4f9f898254be96649dccf5afe11e6121d",
+      "lastmod": "2026-09-25"
     },
     "news/artikel/2025-04-29_profis_achtelfinale-aus.html": {
       "hash": "cf749c3962fb38fb93f67ad9610c102508e69af3",
@@ -142,8 +142,8 @@
       "lastmod": "2026-09-22"
     },
     "news/artikel/2026-09-22_profis_nachwuchs-nbbl-fokus.html": {
-      "hash": "05a1c177d804c8a59a45ce97a8ffe365d54394e8",
-      "lastmod": "2026-09-22"
+      "hash": "c86971a559bc2f89704bf60ecb2fa5f39b8afc3d",
+      "lastmod": "2026-09-25"
     },
     "news/insta-archiv/loewen-17884318188501699.html": {
       "hash": "124711fb6a4ac0b22a0447f17aca2ac6f966ba14",
@@ -266,8 +266,8 @@
       "lastmod": "2026-09-20"
     },
     "saison/profis.html": {
-      "hash": "ac4e1a148017de26d071cad4240b4d2d01be9cd2",
-      "lastmod": "2026-09-22"
+      "hash": "0611992840bb37103f0f15a09519089e071d7600",
+      "lastmod": "2026-09-25"
     },
     "saison/profis/gameday/2026-10-11-bba-ludwigsburg.html": {
       "hash": "0dfb2d0f5388f0d4d0e9f7945cf2ef241cabf504",
@@ -412,6 +412,10 @@
     "trainieren/trainingszeiten.html": {
       "hash": "63308bad9e43faeed21de9d42805918f39349a74",
       "lastmod": "2026-09-18"
+    },
+    "news/artikel/2026-09-23_profis_kapitaene-neuzugaenge-guards.html": {
+      "hash": "6dede3c2006bb9a5a5479cab16ad321ddde52ba6",
+      "lastmod": "2026-09-25"
     }
   }
 }
