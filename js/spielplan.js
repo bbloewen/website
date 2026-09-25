@@ -68,6 +68,7 @@
         '<div class="fixture-result">' + (g.ergebnis || '– – : – –') + '</div>' +
         (g === naechstesHeimspiel ? '<a class="cal-link" href="/saison/profis/gameday/" title="Zum Gameday"><i data-lucide="ticket" style="width:16px;height:16px"></i></a>' : '') +
         (g.spielberichtUrl ? '<a class="cal-link" href="' + g.spielberichtUrl + '" title="Zum Spielbericht"><i data-lucide="file-text" style="width:16px;height:16px"></i></a>' : '') +
+        (g.livestream ? '<a class="cal-link" href="' + g.livestream + '" target="_blank" rel="noopener" title="Zum Livestream"><i data-lucide="video" style="width:16px;height:16px"></i></a>' : '') +
         '<a class="cal-link" href="' + meta.tableUrl + '" title="Zur Tabelle"><i data-lucide="list-ordered" style="width:16px;height:16px"></i></a>' +
         '<a class="cal-link" href="' + calendarLink(g) + '" target="_blank" rel="noopener" title="In Kalender eintragen"><i data-lucide="calendar-plus" style="width:16px;height:16px"></i></a>' +
       '</div>' +
@@ -186,7 +187,7 @@
 
   Promise.all([
     fetch('/data/heimspiele.json?v=1786356737').then(function (r) { return r.json(); }),
-    fetch('/data/spielplan-saison.json?v=1789738545').then(function (r) { return r.json(); })
+    fetch('/data/spielplan-saison.json?v=1790365375').then(function (r) { return r.json(); })
   ]).then(function (results) {
     var heim = results[0], saison = results[1];
 
