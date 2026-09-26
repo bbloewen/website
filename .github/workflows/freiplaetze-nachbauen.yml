@@ -27,6 +27,12 @@
 # bisher komplett -- jeder Lauf dieses Workflows strich die Bildmasse wieder
 # heraus, die zuvor jemand per Hand (tools/bauen.sh) ergaenzt hatte (Cumulative
 # Layout Shift, entdeckt an sparkassen-unternehmerforum-2026.webp).
+#
+# Seit 27.09.2026 baut derselbe Lauf zusaetzlich den Spielplan-Slider auf
+# saison/nachwuchs.html statisch mit (build-nachwuchs-spielplan-liste.py):
+# data/nachwuchs-spielplan.json wird taeglich per n8n-Workflow "Website:
+# Nachwuchs-Spielplan abrufen" committet, die Kacheln standen vorher nur im
+# JavaScript-Rendering (gleicher SEO-Grund wie bei Community-Events).
 
 name: Freiplaetze nachbauen
 
@@ -36,6 +42,7 @@ on:
     paths:
       - data/freiplaetze.json
       - data/community-events.json
+      - data/nachwuchs-spielplan.json
   schedule:
     - cron: '15 4 * * *'
   workflow_dispatch:
@@ -67,6 +74,7 @@ jobs:
           pip install --quiet --disable-pip-version-check pillow
           python3 tools/build-freiplaetze.py
           python3 tools/build-community-events.py
+          python3 tools/build-nachwuchs-spielplan-liste.py
           python3 tools/build-bildmasse.py
           python3 tools/build-head-meta.py
           python3 tools/build-sitemap.py
@@ -79,6 +87,6 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add trainieren/freiplaetze.html fans/community-events.html sitemap.xml data/seiten-stand.json
-          git commit -m "Freiplaetze/Community-Events: statische Liste und Sitemap nachgezogen"
+          git add trainieren/freiplaetze.html fans/community-events.html saison/nachwuchs.html sitemap.xml data/seiten-stand.json
+          git commit -m "Freiplaetze/Community-Events/Nachwuchs-Spielplan: statische Liste und Sitemap nachgezogen"
           git push
