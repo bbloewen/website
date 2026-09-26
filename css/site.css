@@ -558,6 +558,7 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
    .card-media-photo) -- gleiches Muster wie neuer-cheftrainer-ibrahim. */
 .news-tile img[src*="fotso-sighom"],
 .card-media-photo img[src*="fotso-sighom"] { object-position: center 15%; }
+.card-media img[src*="team-nbbl.webp"] { object-position: center top; }
 /* CATL-Partnerschaft-Foto: zentrierter Zuschnitt schnitt den Basketball unten
    ab; weiter unten ausgerichtet zeigt ihn vollstaendig, ohne den Kopf oben
    abzuschneiden (Marko, 26.09.2026). */
