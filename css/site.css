@@ -2226,6 +2226,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .fixture-mid .matchup { font-size: 16px; font-weight: var(--weight-bold); margin: 4px 0; }
 .fixture-mid .venue { font-size: 13px; color: var(--text-secondary); }
 .fixture-result { font-size: 22px; font-weight: var(--weight-black); }
+#next-game-card .fixture-result { font-size: 34px; }
 
 /* Spielplan: nach Kalendertag gruppierte Karten (mehrere Teams pro Tag möglich) */
 .fixture-day {

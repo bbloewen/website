@@ -52,6 +52,13 @@
     return '<span class="cal-link" style="opacity:.4;cursor:default" title="' + label + '"><i data-lucide="file-text" style="width:16px;height:16px"></i></span>';
   }
 
+  function livescoreIcon(url) {
+    if (url) {
+      return '<a class="cal-link" href="' + url + '" target="_blank" rel="noopener" title="Spielstand"><i data-lucide="activity" style="width:16px;height:16px"></i></a>';
+    }
+    return '<span class="cal-link" style="opacity:.4;cursor:default" title="Spielstand"><i data-lucide="activity" style="width:16px;height:16px"></i></span>';
+  }
+
   function gameRowHTML(g, divider) {
     var meta = TEAM_META[g.team];
     var matchup = g.heim ? (g.teamLabel + ' – ' + g.gegner) : (g.gegner + ' – ' + g.teamLabel);
@@ -93,7 +100,10 @@
       var teilePro = (g.zeit || '00:00').split(':').map(Number);
       var anpfiffPro = new Date(g.date.getFullYear(), g.date.getMonth(), g.date.getDate(), teilePro[0], teilePro[1]);
       var vorAnpfiff = new Date() < anpfiffPro;
-      berichteHTML = berichtIcon('Vorbericht', vorberichtUrl, vorAnpfiff) +
+      /* Reihenfolge: Spielstand, Vorbericht, Tabelle, Spielbericht, Kalender
+         (Kalender wird weiter unten in actionsHTML angehaengt) (Marko, 26.09.2026). */
+      berichteHTML = livescoreIcon(g.livescore) +
+        berichtIcon('Vorbericht', vorberichtUrl, vorAnpfiff) +
         tabelleIcon +
         berichtIcon('Nachbericht', nachberichtUrl, !vorAnpfiff);
     } else {
