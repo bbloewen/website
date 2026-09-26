@@ -96,8 +96,14 @@
     if (status === 'bevorstehend') {
       /* Vor Anpfiff (auch waehrend des laufenden Spiels, solange der Anpfiff-
          Zeitpunkt in der Zukunft liegt): Vorbericht, Tabelle, Boxscore/
-         Fieberkurve (Livescore), Livestream (Marko, 26.09.2026). */
-      rowHTML = berichtIconHTML('Vorbericht', g.spielberichtUrl, false) + tabelleIcon(false) + livescoreIcon(false) + livestreamLink(true);
+         Fieberkurve (Livescore), Livestream (Marko, 26.09.2026). Vorbericht
+         nur bei Auswaertsspielen mit echtem Artikel verlinken -- bei
+         Heimspielen zeigt spielberichtUrl auf die eigene Spieltagsseite
+         (Ticket-Hub), das ist kein redaktioneller Vorbericht und wird schon
+         ueber den Tickets-CTA erreicht (Marko, 26.09.2026, gleiche Regel wie
+         im Spielplan js/spielplan.js). */
+      var vorberichtUrl = g.heim ? null : g.spielberichtUrl;
+      rowHTML = berichtIconHTML('Vorbericht', vorberichtUrl, false) + tabelleIcon(false) + livescoreIcon(false) + livestreamLink(true);
     } else {
       /* Ab Anpfiff bis zum Dienstag-Cutoff (danach verschwindet der Slide
          ohnehin): Ergebnis gross, Tabelle, Nachbericht -- kein Livestream

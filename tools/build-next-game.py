@@ -151,7 +151,12 @@ def slide_html(g, i, label, jetzt):
 
     status = spiel_status(g, jetzt)
     if status == "bevorstehend":
-        row_html = bericht_icon("Vorbericht", g.get("spielberichtUrl"), False) + tabelle_icon(False) + livescore_icon(False) + livestream_link(True)
+        # Vorbericht nur bei Auswaertsspielen mit echtem Artikel verlinken --
+        # bei Heimspielen zeigt spielberichtUrl auf die eigene Spieltagsseite
+        # (Ticket-Hub), das ist kein redaktioneller Vorbericht (Marko,
+        # 26.09.2026, gleiche Regel wie im Spielplan js/spielplan.js).
+        vorbericht_url = None if g["heim"] else g.get("spielberichtUrl")
+        row_html = bericht_icon("Vorbericht", vorbericht_url, False) + tabelle_icon(False) + livescore_icon(False) + livestream_link(True)
     else:
         # Bei Heimspielen zeigt spielberichtUrl immer auf die eigene Spieltagsseite
         # (gilt fuer Vor- und Nachbericht gleichermassen). Bei Auswaertsspielen
