@@ -3,18 +3,23 @@
    Spiel bleibt bis einschliesslich Montag nach dem Spieltag sichtbar und
    verschwindet am darauffolgenden Dienstag automatisch (Marko, 26.09.2026).
    Eyebrow: Auswärtsspiele immer "Auswärts mit Gebrüll", Heimspiele
-   durchnummeriert ("1. Heimspiel", "2. Heimspiel", ...) unter den gezeigten
-   Slides (Marko, 26.09.2026). Beim aktuellen Spiel ersetzt die Ergebnis-Zeile
-   (mit Tabelle- und Vor-/Nachbericht-Icon) die Ortszeile 1:1, damit alle
-   Slides dieselbe Anzahl Zeilen haben und das Widget nicht in der Höhe
-   springt. Quelle: /data/heimspiele.json (Heimspiele) + /data/spielplan-
-   saison.json (profisAuswaerts), wie js/spielplan.js. */
+   durchnummeriert ("1. Heimspiel", ...). Jeder Slide zeigt dieselben Zeilen
+   (Titel, Termin+Ort, Ergebnis, Livestream, Tabelle/Bericht) -- Ergebnis und
+   Livestream stehen bewusst auch bei noch nicht gespielten Partien (leerer
+   Platzhalter bzw. genereller Sender-Link), damit das Widget beim Wechseln
+   zwischen den Slides nicht in der Höhe springt (Marko, 26.09.2026).
+   Quelle: /data/heimspiele.json (Heimspiele) + /data/spielplan-saison.json
+   (profisAuswaerts), wie js/spielplan.js. */
 (function () {
-  var MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+  var WOCHENTAGE = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
   var RIETHSPORTHALLE_MAPS_URL = 'https://www.google.com/maps/search/?api=1&query=Essener+Stra%C3%9Fe+20%2C+99089+Erfurt';
   var TABELLE_URL = '/saison/tabelle.html#tabelle-profis';
+  /* Genereller Senderkanal, falls fuer ein Spiel kein eigener Livestream-Link
+     hinterlegt ist (Marko, 26.09.2026). */
+  var GENERISCHER_LIVESTREAM_URL = 'https://sporteurope.tv/catl-basketball-loewen';
 
   var parseDMY = SiteUtils.parseDMY;
+  var pad2 = SiteUtils.pad2;
   var gcalStamp = SiteUtils.gcalStamp;
 
   function cutoffDienstag(datum) {
@@ -45,55 +50,54 @@
     return q ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q) : null;
   }
 
-  function gameSlideHTML(g, i, label, istAktuell, heute) {
+  function gameSlideHTML(g, i, label, heute) {
     var matchup = g.heim ? ('Basketball Löwen – ' + g.gegner) : (g.gegner + ' – Basketball Löwen');
     var venue = g.heim ? 'Riethsporthalle' : (g.halle || g.ort || '');
     var venueLink = venueMapsLink(g);
-    var dateStr = g.date.getDate() + '. ' + MONATE[g.date.getMonth()] + ' ' + g.date.getFullYear();
+    var kurzDatum = WOCHENTAGE[g.date.getDay()] + ', ' + pad2(g.date.getDate()) + '.' + pad2(g.date.getMonth() + 1) + '.';
 
-    var zweiteZeile;
-    if (istAktuell) {
-      var tabelleIcon = '<a class="cal-link" href="' + TABELLE_URL + '" title="Zur Tabelle"><i data-lucide="list-ordered" style="width:14px;height:14px"></i></a>';
-      var berichtIcon = '';
-      if (g.spielberichtUrl) {
-        var berichtLabel = g.date >= heute ? 'Vorbericht' : 'Nachbericht';
-        berichtIcon = '<a class="cal-link" href="' + g.spielberichtUrl + '" title="Zum ' + berichtLabel + '"><i data-lucide="file-text" style="width:14px;height:14px"></i></a>';
-      }
-      zweiteZeile = '<div class="fixture-result-row" style="margin-bottom:12px">' +
-        '<div class="fixture-result">' + (g.ergebnis || '– – : – –') + '</div>' + tabelleIcon + berichtIcon +
-      '</div>';
-    } else {
-      zweiteZeile = '<p class="t-body-sm" style="margin-bottom:12px">' +
-        (venue ? '<span style="display:inline-flex;align-items:center;gap:6px">' +
-          (venueLink ? '<a href="' + venueLink + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;color:inherit;text-decoration:none">' : '') +
-          '<i data-lucide="map-pin" style="width:14px;height:14px"></i>' + venue +
-          (venueLink ? '</a>' : '') +
-        '</span>' : '') +
-      '</p>';
-    }
+    var terminHTML = '<a href="' + calendarLink(g) + '" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">' +
+      kurzDatum + ', <strong>' + g.zeit + ' Uhr</strong></a>' +
+      (venue ? ', <a href="' + venueLink + '" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">' + venue + '</a>' : '');
 
-    var ctaHTML;
-    if (g.heim) {
-      ctaHTML = '<a class="btn btn-primary btn-sm" style="color:#fff" href="/saison/profis/gameday/"><i data-lucide="ticket" style="width:14px;height:14px"></i> Tickets</a>' +
-        '<a class="btn btn-ghost btn-sm" href="/tickets/dauerkarte.html">Dauerkarte</a>';
-    } else {
-      ctaHTML = (g.livestream ? '<a class="btn btn-primary btn-sm" style="color:#fff" href="' + g.livestream + '" target="_blank" rel="noopener"><i data-lucide="video" style="width:14px;height:14px"></i> Zum Livestream</a>' : '') +
-        '<a class="btn ' + (g.livestream ? 'btn-ghost' : 'btn-primary') + ' btn-sm"' + (g.livestream ? '' : ' style="color:#fff"') + ' href="/tickets/dauerkarte.html">Dauerkarte kaufen</a>';
+    var berichtIcon = '';
+    if (g.spielberichtUrl) {
+      var berichtLabel = g.date >= heute ? 'Vorbericht' : 'Nachbericht';
+      berichtIcon = '<a class="cal-link" href="' + g.spielberichtUrl + '" title="Zum ' + berichtLabel + '"><i data-lucide="file-text" style="width:14px;height:14px"></i></a>';
     }
 
     return '<div class="next-game-slide' + (i === 0 ? ' is-active' : '') + '">' +
       '<span class="eyebrow">' + label + '</span>' +
-      '<h3 class="t-h4" style="margin:10px 0 6px">' + matchup + '</h3>' +
-      '<p class="t-body-sm" style="margin-bottom:12px">' +
-        '<span style="display:inline-flex;align-items:center;gap:6px">' +
-          '<a href="' + calendarLink(g) + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;color:inherit;text-decoration:none">' +
-            '<i data-lucide="calendar" style="width:14px;height:14px"></i>' + dateStr + ', ' + g.zeit + ' Uhr' +
-          '</a>' +
-        '</span>' +
+      '<h3 class="t-h4" style="margin:10px 0 6px;white-space:nowrap;overflow:hidden">' + matchup + '</h3>' +
+      '<p class="t-body-sm" style="margin-bottom:10px;display:flex;align-items:center;gap:6px">' +
+        '<i data-lucide="calendar" style="width:14px;height:14px;flex-shrink:0"></i>' +
+        '<span class="next-game-termin" style="white-space:nowrap;overflow:hidden">' + terminHTML + '</span>' +
       '</p>' +
-      zweiteZeile +
-      '<div style="display:flex;gap:10px;flex-wrap:wrap">' + ctaHTML + '</div>' +
+      '<div class="fixture-result-row" style="margin-bottom:10px"><div class="fixture-result">' + (g.ergebnis || '– – : – –') + '</div></div>' +
+      '<p style="margin-bottom:8px"><a class="card-link" href="' + (g.livestream || GENERISCHER_LIVESTREAM_URL) + '" target="_blank" rel="noopener"><i data-lucide="video" style="width:14px;height:14px"></i> Zum Livestream</a></p>' +
+      '<div style="display:flex;gap:10px;margin-top:10px">' +
+        '<a class="cal-link" href="' + TABELLE_URL + '" title="Zur Tabelle"><i data-lucide="list-ordered" style="width:14px;height:14px"></i></a>' +
+        berichtIcon +
+      '</div>' +
     '</div>';
+  }
+
+  /* Verkleinert ein Element schrittweise, bis sein Text in eine Zeile passt
+     (manche Gegnernamen/Ortsangaben sind sonst zu lang) -- muss auf dem
+     jeweils sichtbaren Slide laufen, da ausgeblendete Slides (display:none)
+     nicht messbar sind (Marko, 26.09.2026). */
+  function fitOneLine(el, startGroesse, minGroesse) {
+    var groesse = startGroesse;
+    el.style.fontSize = groesse + 'px';
+    while (el.scrollWidth > el.clientWidth && groesse > minGroesse) {
+      groesse -= 1;
+      el.style.fontSize = groesse + 'px';
+    }
+  }
+
+  function fitSlide(slideEl) {
+    fitOneLine(slideEl.querySelector('h3'), 20, 12);
+    fitOneLine(slideEl.querySelector('.next-game-termin'), 14, 11);
   }
 
   var card = document.getElementById('next-game-card');
@@ -128,7 +132,7 @@
     var heimZaehler = 0;
     var slidesHTML = slides.map(function (g, i) {
       var label = g.heim ? (++heimZaehler + '. Heimspiel') : 'Auswärts mit Gebrüll';
-      return gameSlideHTML(g, i, label, g === aktuell, heute);
+      return gameSlideHTML(g, i, label, heute);
     }).join('');
 
     var dotsHTML = slides.length > 1
@@ -141,19 +145,26 @@
 
     if (window.lucide) lucide.createIcons();
 
-    /* Widget-Höhe nach dem ersten Rendern fixieren, damit ein Wechsel zwischen
-       den Slides (unterschiedlich lange Gegnernamen, Ergebnis-Zeile nur beim
-       aktuellen Spiel) das Layout nicht springen lässt (Marko, 26.09.2026). */
-    requestAnimationFrame(function () {
-      card.style.minHeight = card.offsetHeight + 'px';
-    });
-
     var slideEls = card.querySelectorAll('.next-game-slide');
     var dots = card.querySelectorAll('.news-dot');
+
+    /* Erst nach document.fonts.ready messen: Lexend ist beim ersten Aufruf oft
+       noch nicht geladen, die Messung würde dann mit den (schmaleren)
+       Fallback-Metriken rechnen und zu groß ausfallen (Marko, 26.09.2026). */
+    (document.fonts ? document.fonts.ready : Promise.resolve()).then(function () {
+      fitSlide(slideEls[0]);
+      /* Widget-Höhe danach fixieren, damit ein Wechsel zwischen den Slides
+         (unterschiedlich lange Gegnernamen) das Layout nicht springen laesst. */
+      requestAnimationFrame(function () {
+        card.style.minHeight = card.offsetHeight + 'px';
+      });
+    });
+
     dots.forEach(function (dot, i) {
       dot.addEventListener('click', function () {
         slideEls.forEach(function (s, si) { s.classList.toggle('is-active', si === i); });
         dots.forEach(function (d, di) { d.classList.toggle('is-active', di === i); });
+        fitSlide(slideEls[i]);
       });
     });
   });
