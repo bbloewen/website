@@ -1,0 +1,435 @@
+{
+  "hinweis": "Quelle: basketball-bund.net REST-API (rest/competition/spielplan/id/<ligaId>), oeffentlich ohne Login abrufbar -- Details im Skriptkopf von tools/fetch-nachwuchs-spielplan.py. Manuell abgerufen, kein automatischer wiederkehrender Abruf eingerichtet; Stand kann veralten, bis das nachgeholt ist (siehe Skriptkopf).",
+  "teams": {
+    "U12m/1": {
+      "ligaId": 53255,
+      "liganame": "Mitteldeutsche Liga mU12 Vorrunde",
+      "spiele": [
+        {
+          "datum": "2026-09-20",
+          "zeit": "12:00",
+          "heim": true,
+          "gegner": "Science City Jena",
+          "ergebnis": "71:95",
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-09-27",
+          "zeit": "10:00",
+          "heim": false,
+          "gegner": "NINERS Chemnitz",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-11-01",
+          "zeit": "12:00",
+          "heim": true,
+          "gegner": "Team Halle",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-11-08",
+          "zeit": "10:00",
+          "heim": false,
+          "gegner": "Team Dresden",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-11-22",
+          "zeit": "09:00",
+          "heim": true,
+          "gegner": "BSW Sixers",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-12-06",
+          "zeit": "10:00",
+          "heim": false,
+          "gegner": "ChemCats Chemnitz",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-12-20",
+          "zeit": "12:30",
+          "heim": false,
+          "gegner": "Dresden Titans",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2027-01-10",
+          "zeit": "12:00",
+          "heim": true,
+          "gegner": "Team Leipzig",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2027-01-17",
+          "zeit": "10:00",
+          "heim": false,
+          "gegner": "Team Chemnitz",
+          "ergebnis": null,
+          "abgesagt": false
+        }
+      ]
+    },
+    "U13m": {
+      "ligaId": 53252,
+      "liganame": "Mitteldeutsche Liga mU13 Vorrunde",
+      "spiele": [
+        {
+          "datum": "2026-09-12",
+          "zeit": "10:00",
+          "heim": true,
+          "gegner": "Team Leipzig",
+          "ergebnis": "58:99",
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-10-03",
+          "zeit": "11:00",
+          "heim": false,
+          "gegner": "MBC Weißenfels",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-10-10",
+          "zeit": "11:00",
+          "heim": true,
+          "gegner": "Team Halle",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-10-31",
+          "zeit": "11:00",
+          "heim": false,
+          "gegner": "Humanas Rookie Academy",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-11-14",
+          "zeit": "12:00",
+          "heim": true,
+          "gegner": "Dresden Titans",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-11-28",
+          "zeit": "16:00",
+          "heim": false,
+          "gegner": "Science City Jena",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-12-12",
+          "zeit": "14:00",
+          "heim": true,
+          "gegner": "NINERS Chemnitz",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2027-01-16",
+          "zeit": "12:45",
+          "heim": false,
+          "gegner": "Team Dresden",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2027-01-23",
+          "zeit": "11:30",
+          "heim": true,
+          "gegner": "Culture City Weimar",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2027-01-30",
+          "zeit": "11:30",
+          "heim": true,
+          "gegner": "Team Chemnitz",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2027-02-07",
+          "zeit": "13:00",
+          "heim": false,
+          "gegner": "Young Panthers Harz",
+          "ergebnis": null,
+          "abgesagt": false
+        }
+      ]
+    },
+    "U14m": {
+      "ligaId": 53248,
+      "liganame": "Mitteldeutsche Liga mU14 Vorrunde",
+      "spiele": [
+        {
+          "datum": "2026-11-01",
+          "zeit": "09:00",
+          "heim": true,
+          "gegner": "SV Zörbig",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-11-08",
+          "zeit": "12:30",
+          "heim": false,
+          "gegner": "Team Leipzig",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-11-15",
+          "zeit": "11:30",
+          "heim": true,
+          "gegner": "Dresden Titans",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-11-22",
+          "zeit": "12:30",
+          "heim": false,
+          "gegner": "NINERS Chemnitz 2",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-11-29",
+          "zeit": "11:30",
+          "heim": true,
+          "gegner": "Humanas Rookie Academy",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-12-06",
+          "zeit": "10:00",
+          "heim": false,
+          "gegner": "BIG Gotha",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-12-13",
+          "zeit": "09:00",
+          "heim": true,
+          "gegner": "Science City Jena",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2027-01-17",
+          "zeit": "10:00",
+          "heim": false,
+          "gegner": "Team Halle",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2027-01-31",
+          "zeit": "14:00",
+          "heim": true,
+          "gegner": "NINERS Chemnitz 1",
+          "ergebnis": null,
+          "abgesagt": false
+        }
+      ]
+    },
+    "U15m": {
+      "ligaId": 53244,
+      "liganame": "Mitteldeutsche Liga mU15",
+      "spiele": [
+        {
+          "datum": "2026-10-17",
+          "zeit": "12:00",
+          "heim": false,
+          "gegner": "Dresden Titans",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-11-14",
+          "zeit": "15:00",
+          "heim": false,
+          "gegner": "Team Leipzig",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-11-21",
+          "zeit": "14:00",
+          "heim": true,
+          "gegner": "NINERS Chemnitz",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-11-28",
+          "zeit": "09:00",
+          "heim": true,
+          "gegner": "Science City Jena",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-12-12",
+          "zeit": "13:30",
+          "heim": false,
+          "gegner": "Humanas Rookie Academy",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-12-19",
+          "zeit": "14:00",
+          "heim": true,
+          "gegner": "Team Halle",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2027-01-09",
+          "zeit": "11:30",
+          "heim": true,
+          "gegner": "Dresden Titans",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2027-02-21",
+          "zeit": "15:00",
+          "heim": true,
+          "gegner": "Team Leipzig",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2027-03-20",
+          "zeit": "12:30",
+          "heim": false,
+          "gegner": "NINERS Chemnitz",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2027-04-10",
+          "zeit": "10:00",
+          "heim": false,
+          "gegner": "Science City Jena",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2027-04-24",
+          "zeit": "00:00",
+          "heim": true,
+          "gegner": "Humanas Rookie Academy",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2027-05-02",
+          "zeit": "12:00",
+          "heim": false,
+          "gegner": "Team Halle",
+          "ergebnis": null,
+          "abgesagt": false
+        }
+      ]
+    },
+    "U17m": {
+      "ligaId": 53240,
+      "liganame": "Mitteldeutsche Liga mU17 Vorrunde",
+      "spiele": [
+        {
+          "datum": "2026-09-05",
+          "zeit": "11:00",
+          "heim": false,
+          "gegner": "Humanas Rookie Academy",
+          "ergebnis": null,
+          "abgesagt": true
+        },
+        {
+          "datum": "2026-09-27",
+          "zeit": "12:30",
+          "heim": true,
+          "gegner": "Science City Jena",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-10-10",
+          "zeit": "10:00",
+          "heim": false,
+          "gegner": "Team Halle",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-10-31",
+          "zeit": "15:30",
+          "heim": true,
+          "gegner": "Anhalt Ballers",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-11-14",
+          "zeit": "11:30",
+          "heim": false,
+          "gegner": "Dresden Titans 2",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-11-28",
+          "zeit": "15:00",
+          "heim": true,
+          "gegner": "Team Leipzig",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-12-13",
+          "zeit": "15:00",
+          "heim": false,
+          "gegner": "Dresden Titans 1",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2027-01-09",
+          "zeit": "10:00",
+          "heim": false,
+          "gegner": "NINERS Chemnitz",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2027-01-23",
+          "zeit": "13:00",
+          "heim": true,
+          "gegner": "Young Panthers Harz",
+          "ergebnis": null,
+          "abgesagt": false
+        }
+      ]
+    }
+  }
+}
