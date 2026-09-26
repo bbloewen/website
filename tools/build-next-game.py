@@ -181,7 +181,7 @@ def slide_html(g, i, label, jetzt):
         f'<span class="eyebrow">{label}</span>'
         f'<h3 class="t-h4" style="margin:10px 0 6px;white-space:nowrap;overflow:hidden;font-size:15px">{matchup}</h3>'
         f'<p class="t-body-sm next-game-termin" style="margin-bottom:10px;white-space:nowrap;overflow:hidden">{termin_html}</p>'
-        f'<div class="fixture-result-row" style="margin-bottom:4px;flex-wrap:wrap">{row_html}</div>'
+        f'<div class="fixture-result-row" style="margin-bottom:8px;flex-wrap:wrap">{row_html}</div>'
         f'<div style="display:flex;gap:10px;flex-wrap:wrap">{cta_html}</div>'
         "</div>"
     )

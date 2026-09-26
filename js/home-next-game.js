@@ -121,7 +121,7 @@
       '<span class="eyebrow">' + label + '</span>' +
       '<h3 class="t-h4" style="margin:10px 0 6px;white-space:nowrap;overflow:hidden">' + matchup + '</h3>' +
       '<p class="t-body-sm next-game-termin" style="margin-bottom:10px;white-space:nowrap;overflow:hidden">' + terminHTML + '</p>' +
-      '<div class="fixture-result-row" style="margin-bottom:4px;flex-wrap:wrap">' + rowHTML + '</div>' +
+      '<div class="fixture-result-row" style="margin-bottom:8px;flex-wrap:wrap">' + rowHTML + '</div>' +
       '<div style="display:flex;gap:10px;flex-wrap:wrap">' + ctaHTML + '</div>' +
     '</div>';
   }
