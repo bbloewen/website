@@ -558,6 +558,11 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
    .card-media-photo) -- gleiches Muster wie neuer-cheftrainer-ibrahim. */
 .news-tile img[src*="fotso-sighom"],
 .card-media-photo img[src*="fotso-sighom"] { object-position: center 15%; }
+/* CATL-Partnerschaft-Foto: zentrierter Zuschnitt schnitt den Basketball unten
+   ab; weiter unten ausgerichtet zeigt ihn vollstaendig, ohne den Kopf oben
+   abzuschneiden (Marko, 26.09.2026). */
+.news-tile img[src*="catl-partnerschaft-neuausrichtung"],
+.card-media-photo img[src*="catl-partnerschaft-neuausrichtung"] { object-position: center 70%; }
 /* QR-Code liegt seit 24.08.2026 als kleines Overlay unten rechts im Kachelbild
    statt als eigene Zeile in der Textspalte: als Block darunter wirkte er wie ein
    Fremdkörper und drängte sich vor die eigentliche Platzbeschreibung. */
