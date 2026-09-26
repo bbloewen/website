@@ -80,7 +80,7 @@
       '<p class="t-body-sm next-game-termin" style="margin-bottom:10px;white-space:nowrap;overflow:hidden">' + terminHTML + '</p>' +
       '<div class="fixture-result-row" style="margin-bottom:12px;flex-wrap:wrap">' +
         '<div class="fixture-result">' + (g.ergebnis || '– – : – –') + '</div>' +
-        '<a class="cal-link" href="' + TABELLE_URL + '" title="Zur Tabelle"><i data-lucide="list-ordered" style="width:14px;height:14px"></i></a>' +
+        '<a class="cal-link" href="' + TABELLE_URL + '" title="Zur Tabelle" style="margin-left:8px"><i data-lucide="list-ordered" style="width:14px;height:14px"></i></a>' +
         berichtIcon +
         '<a class="card-link" href="' + (g.livestream || GENERISCHER_LIVESTREAM_URL) + '" target="_blank" rel="noopener" style="margin-left:4px"><i data-lucide="video" style="width:14px;height:14px"></i> Zum Livestream</a>' +
       '</div>' +

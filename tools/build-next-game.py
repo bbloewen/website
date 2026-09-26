@@ -147,7 +147,7 @@ def slide_html(g, i, label, heute):
         f'<p class="t-body-sm next-game-termin" style="margin-bottom:10px;white-space:nowrap;overflow:hidden">{termin_html}</p>'
         f'<div class="fixture-result-row" style="margin-bottom:12px;flex-wrap:wrap">'
         f'<div class="fixture-result">{esc(g.get("ergebnis") or "– – : – –")}</div>'
-        f'<a class="cal-link" href="{TABELLE_URL}" title="Zur Tabelle"><i data-lucide="list-ordered" style="width:14px;height:14px"></i></a>'
+        f'<a class="cal-link" href="{TABELLE_URL}" title="Zur Tabelle" style="margin-left:8px"><i data-lucide="list-ordered" style="width:14px;height:14px"></i></a>'
         f'{bericht_icon}'
         f'<a class="card-link" href="{livestream_url}" target="_blank" rel="noopener" style="margin-left:4px"><i data-lucide="video" style="width:14px;height:14px"></i> Zum Livestream</a>'
         "</div>"
