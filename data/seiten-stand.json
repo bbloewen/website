@@ -54,7 +54,7 @@
       "lastmod": "2026-09-18"
     },
     "index.html": {
-      "hash": "68644e745e0e624bea0bd075f335d0b279dd285c",
+      "hash": "7f9295f9dc727cd2f6d5a1c973c2e722ec98d5fa",
       "lastmod": "2026-09-26"
     },
     "kontakt.html": {
@@ -70,11 +70,11 @@
       "lastmod": "2026-08-08"
     },
     "news/aktuelles.html": {
-      "hash": "ca118bc4c9d5549e8971eab42b9e8dc9517fa7a7",
+      "hash": "0fc08a3d53bb9c0c969be24886b2502dfd2db1a5",
       "lastmod": "2026-09-26"
     },
     "news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html": {
-      "hash": "901fc28bb43c6673b6716a68789e4937ccb5d5bb",
+      "hash": "8f30e3a12b3b88f9c47d4012f5b4bcf7cfc18f22",
       "lastmod": "2026-09-26"
     },
     "news/artikel/2025-04-29_profis_achtelfinale-aus.html": {
@@ -154,11 +154,15 @@
       "lastmod": "2026-09-26"
     },
     "news/artikel/2026-09-25_profis_junge-loewen.html": {
-      "hash": "6d5fb6ceae587f8f8145cd1f2d2a927d45364082",
+      "hash": "f252869a36379ba2e7db709d4745e91deeb72da0",
+      "lastmod": "2026-09-26"
+    },
+    "news/artikel/2026-09-26_profis_vorbericht-dragons-rhoendorf.html": {
+      "hash": "3066ac24158b7f0645c76d3cf22edfed00ce0dea",
       "lastmod": "2026-09-26"
     },
     "news/insta-archiv/loewen-17884318188501699.html": {
-      "hash": "beb6b66459f51d6457e1f20e348d5ad0dd83002b",
+      "hash": "3daef03e3717a153c95489f09c2e3a25b9da1190",
       "lastmod": "2026-09-26"
     },
     "news/insta-archiv/loewen-17920245561201740.html": {
@@ -170,11 +174,11 @@
       "lastmod": "2026-08-26"
     },
     "news/insta-archiv/loewen-18059917688535291.html": {
-      "hash": "700b950d4c42f0d5e944d83729fefff094f959e5",
+      "hash": "3d0247805533afbd1209f6991e55f90611f596cf",
       "lastmod": "2026-09-26"
     },
     "news/insta-archiv/loewen-18091427246188007.html": {
-      "hash": "6f01883ce6d2ef3dfd33afc2c030b8a72b541154",
+      "hash": "d24bc2ec07663e30eb04c139088fb86f61bbda5b",
       "lastmod": "2026-09-26"
     },
     "news/insta-archiv/loewen-18107288966132528.html": {
@@ -186,15 +190,15 @@
       "lastmod": "2026-09-25"
     },
     "news/insta-archiv/loewen-18112264744852178.html": {
-      "hash": "db382f537ac969a9435d50730abddaccab8d0769",
+      "hash": "e242c9cfdda0d94e089f5d3e9e6f1b71a2dd300b",
       "lastmod": "2026-09-26"
     },
     "news/insta-archiv/loewen-18127276783758844.html": {
-      "hash": "947ee0af77adea60396e97fd53b6cde16100e840",
+      "hash": "315fefefd69a68d1a138369d035274c5fc6f13e4",
       "lastmod": "2026-09-26"
     },
     "news/insta-archiv/loewen-18134713843641981.html": {
-      "hash": "fa558dc656a932d809d8fb953f0297da5874eaa6",
+      "hash": "1d7420c52b0123aad48686a0d367ad244d61942f",
       "lastmod": "2026-09-26"
     },
     "news/insta-archiv/loewen-18138301552526087.html": {
@@ -210,11 +214,11 @@
       "lastmod": "2026-09-25"
     },
     "news/insta-archiv/loewenpark-18057577886788062.html": {
-      "hash": "7fc0a81b8405c38c2876e20e933d073a993db200",
+      "hash": "ffda45e5a77c58db968439e1e9b2769a850d6fcf",
       "lastmod": "2026-09-26"
     },
     "news/insta-archiv/loewenpark-18082776263481467.html": {
-      "hash": "5572495b5b629c82b396d8ee9f506939c8e48eab",
+      "hash": "3d8825fd211f0f83ff0231a3f0d777f1702adc8f",
       "lastmod": "2026-09-26"
     },
     "news/insta-archiv/loewenpark-18120295273678542.html": {
@@ -222,7 +226,7 @@
       "lastmod": "2026-09-25"
     },
     "news/insta-archiv/loewenpark-18135245524583630.html": {
-      "hash": "27b678eda138dbf19ad1b27217f46ab6ea06d44d",
+      "hash": "02036f42be139bae57310c15a0f847c4bc7ca2ae",
       "lastmod": "2026-09-26"
     },
     "news/insta-archiv/loewenpark-18171405229416217.html": {
@@ -230,11 +234,11 @@
       "lastmod": "2026-09-25"
     },
     "news/insta-archiv/loewenpark-18359930035244735.html": {
-      "hash": "adf7272ae26a3ab9dbed76abeee10dbd70cac45e",
+      "hash": "33c19bd782b3032966a807bc0da795e8aee24b28",
       "lastmod": "2026-09-26"
     },
     "news/instagram-archiv.html": {
-      "hash": "ab750a28d77bd004b463a169bc30662532c0f84c",
+      "hash": "8e30190c5b3a0bca749d0c2badb7ad135d9fc097",
       "lastmod": "2026-09-26"
     },
     "news/newsletter/index.html": {
@@ -282,7 +286,7 @@
       "lastmod": "2026-09-20"
     },
     "saison/profis.html": {
-      "hash": "ec1b3c9bf04d7eb3bfe95a71835113be6f92c4a3",
+      "hash": "eb5b3bd15a81a86cdcf5a9030e6d367754523a19",
       "lastmod": "2026-09-26"
     },
     "saison/profis/gameday/2026-10-11-bba-ludwigsburg.html": {
