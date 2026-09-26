@@ -2,14 +2,20 @@
    oder Auswärts) sowie die naechsten zwei anstehenden Spiele. Das "aktuelle"
    Spiel bleibt bis einschliesslich Montag nach dem Spieltag sichtbar und
    verschwindet am darauffolgenden Dienstag automatisch (Marko, 26.09.2026).
-   Quelle: /data/heimspiele.json (Heimspiele) + /data/spielplan-saison.json
-   (profisAuswaerts), wie js/spielplan.js. Ersetzt das fruehere Toggle
-   zwischen "Naechstes Heimspiel"- und "Top-News"-Widget -- beide entfernt,
-   nur noch dieses eine Widget. */
+   Eyebrow: Auswärtsspiele immer "Auswärts mit Gebrüll", Heimspiele
+   durchnummeriert ("1. Heimspiel", "2. Heimspiel", ...) unter den gezeigten
+   Slides (Marko, 26.09.2026). Beim aktuellen Spiel ersetzt die Ergebnis-Zeile
+   (mit Tabelle- und Vor-/Nachbericht-Icon) die Ortszeile 1:1, damit alle
+   Slides dieselbe Anzahl Zeilen haben und das Widget nicht in der Höhe
+   springt. Quelle: /data/heimspiele.json (Heimspiele) + /data/spielplan-
+   saison.json (profisAuswaerts), wie js/spielplan.js. */
 (function () {
   var MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+  var RIETHSPORTHALLE_MAPS_URL = 'https://www.google.com/maps/search/?api=1&query=Essener+Stra%C3%9Fe+20%2C+99089+Erfurt';
+  var TABELLE_URL = '/saison/tabelle.html#tabelle-profis';
 
   var parseDMY = SiteUtils.parseDMY;
+  var gcalStamp = SiteUtils.gcalStamp;
 
   function cutoffDienstag(datum) {
     var d = new Date(datum);
@@ -18,44 +24,75 @@
     return d;
   }
 
-  function gameSlideHTML(g, i, label, istAktuell, istNaechstesHeimspiel, heute) {
-    var badgeHTML = g.heim ? '<span class="venue-heim">Heimspiel</span>' : '<span class="venue-auswaerts">Auswärts</span>';
+  function calendarLink(g) {
+    var teile = (g.zeit || '00:00').split(':').map(Number);
+    var start = new Date(g.date.getFullYear(), g.date.getMonth(), g.date.getDate(), teile[0], teile[1]);
+    var ende = new Date(start.getTime() + 2 * 60 * 60 * 1000);
+    var text = g.heim ? ('Basketball Löwen – ' + g.gegner) : (g.gegner + ' – Basketball Löwen');
+    var params = {
+      action: 'TEMPLATE', text: text,
+      dates: gcalStamp(start) + '/' + gcalStamp(ende),
+      details: g.heim ? 'Heimspiel der Basketball Löwen Erfurt in der Riethsporthalle.' : 'Auswärtsspiel der Basketball Löwen Erfurt.',
+      ctz: 'Europe/Berlin'
+    };
+    if (g.heim) params.location = 'Essener Straße 20, 99089 Erfurt';
+    return 'https://calendar.google.com/calendar/render?' + new URLSearchParams(params).toString();
+  }
+
+  function venueMapsLink(g) {
+    if (g.heim) return RIETHSPORTHALLE_MAPS_URL;
+    var q = g.adresse || g.ort;
+    return q ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q) : null;
+  }
+
+  function gameSlideHTML(g, i, label, istAktuell, heute) {
     var matchup = g.heim ? ('Basketball Löwen – ' + g.gegner) : (g.gegner + ' – Basketball Löwen');
     var venue = g.heim ? 'Riethsporthalle' : (g.halle || g.ort || '');
+    var venueLink = venueMapsLink(g);
     var dateStr = g.date.getDate() + '. ' + MONATE[g.date.getMonth()] + ' ' + g.date.getFullYear();
 
-    var ctaPrimary;
-    if (!g.heim && g.livestream) {
-      ctaPrimary = '<a class="btn btn-primary btn-sm" style="color:#fff" href="' + g.livestream + '" target="_blank" rel="noopener"><i data-lucide="video" style="width:14px;height:14px"></i> Zum Livestream</a>';
-    } else if (istNaechstesHeimspiel) {
-      ctaPrimary = '<a class="btn btn-primary btn-sm" style="color:#fff" href="/saison/profis/gameday/"><i data-lucide="ticket" style="width:14px;height:14px"></i> Tickets &amp; Gameday</a>';
+    var zweiteZeile;
+    if (istAktuell) {
+      var tabelleIcon = '<a class="cal-link" href="' + TABELLE_URL + '" title="Zur Tabelle"><i data-lucide="list-ordered" style="width:14px;height:14px"></i></a>';
+      var berichtIcon = '';
+      if (g.spielberichtUrl) {
+        var berichtLabel = g.date >= heute ? 'Vorbericht' : 'Nachbericht';
+        berichtIcon = '<a class="cal-link" href="' + g.spielberichtUrl + '" title="Zum ' + berichtLabel + '"><i data-lucide="file-text" style="width:14px;height:14px"></i></a>';
+      }
+      zweiteZeile = '<div class="fixture-result-row" style="margin-bottom:12px">' +
+        '<div class="fixture-result">' + (g.ergebnis || '– – : – –') + '</div>' + tabelleIcon + berichtIcon +
+      '</div>';
     } else {
-      ctaPrimary = '<a class="btn btn-primary btn-sm" style="color:#fff" href="/tickets/dauerkarte.html"><i data-lucide="ticket" style="width:14px;height:14px"></i> Dauerkarte kaufen</a>';
+      zweiteZeile = '<p class="t-body-sm" style="margin-bottom:12px">' +
+        (venue ? '<span style="display:inline-flex;align-items:center;gap:6px">' +
+          (venueLink ? '<a href="' + venueLink + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;color:inherit;text-decoration:none">' : '') +
+          '<i data-lucide="map-pin" style="width:14px;height:14px"></i>' + venue +
+          (venueLink ? '</a>' : '') +
+        '</span>' : '') +
+      '</p>';
     }
 
-    var ergebnisHTML = '';
-    if (istAktuell) {
-      var berichtLink = '';
-      if (g.spielberichtUrl) {
-        var label2 = g.date >= heute ? 'Vorbericht' : 'Nachbericht';
-        berichtLink = '<a class="card-link" href="' + g.spielberichtUrl + '">' + label2 + ' <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>';
-      }
-      ergebnisHTML = '<div class="fixture-result-row" style="margin-bottom:12px">' +
-        '<div class="fixture-result">' + (g.ergebnis || '– – : – –') + '</div>' +
-        berichtLink +
-      '</div>';
+    var ctaHTML;
+    if (g.heim) {
+      ctaHTML = '<a class="btn btn-primary btn-sm" style="color:#fff" href="/saison/profis/gameday/"><i data-lucide="ticket" style="width:14px;height:14px"></i> Tickets</a>' +
+        '<a class="btn btn-ghost btn-sm" href="/tickets/dauerkarte.html">Dauerkarte</a>';
+    } else {
+      ctaHTML = (g.livestream ? '<a class="btn btn-primary btn-sm" style="color:#fff" href="' + g.livestream + '" target="_blank" rel="noopener"><i data-lucide="video" style="width:14px;height:14px"></i> Zum Livestream</a>' : '') +
+        '<a class="btn ' + (g.livestream ? 'btn-ghost' : 'btn-primary') + ' btn-sm"' + (g.livestream ? '' : ' style="color:#fff"') + ' href="/tickets/dauerkarte.html">Dauerkarte kaufen</a>';
     }
 
     return '<div class="next-game-slide' + (i === 0 ? ' is-active' : '') + '">' +
       '<span class="eyebrow">' + label + '</span>' +
       '<h3 class="t-h4" style="margin:10px 0 6px">' + matchup + '</h3>' +
-      '<p class="t-body-sm" style="margin-bottom:12px;display:flex;flex-direction:column;gap:4px">' +
-        badgeHTML +
-        '<span style="display:inline-flex;align-items:center;gap:6px"><i data-lucide="calendar" style="width:14px;height:14px"></i>' + dateStr + ', ' + g.zeit + ' Uhr</span>' +
-        (venue ? '<span style="display:inline-flex;align-items:center;gap:6px"><i data-lucide="map-pin" style="width:14px;height:14px"></i>' + venue + '</span>' : '') +
+      '<p class="t-body-sm" style="margin-bottom:12px">' +
+        '<span style="display:inline-flex;align-items:center;gap:6px">' +
+          '<a href="' + calendarLink(g) + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;color:inherit;text-decoration:none">' +
+            '<i data-lucide="calendar" style="width:14px;height:14px"></i>' + dateStr + ', ' + g.zeit + ' Uhr' +
+          '</a>' +
+        '</span>' +
       '</p>' +
-      ergebnisHTML +
-      '<div style="display:flex;gap:10px;flex-wrap:wrap">' + ctaPrimary + '<a class="btn btn-ghost btn-sm" href="/saison/spielplan.html">Zum Spielplan</a></div>' +
+      zweiteZeile +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap">' + ctaHTML + '</div>' +
     '</div>';
   }
 
@@ -88,16 +125,10 @@
     var slides = (aktuell ? [aktuell] : []).concat(kommende);
     if (!slides.length) { card.style.display = 'none'; return; }
 
-    var naechstesHeimspiel = null;
-    for (var ni = 0; ni < alle.length; ni++) {
-      if (alle[ni].heim && alle[ni].spielberichtUrl && alle[ni].date >= heute) { naechstesHeimspiel = alle[ni]; break; }
-    }
-
-    var labels = ['Nächstes Spiel', 'Übernächstes Spiel'];
+    var heimZaehler = 0;
     var slidesHTML = slides.map(function (g, i) {
-      var istAktuell = g === aktuell;
-      var label = istAktuell ? 'Aktuelles Spiel' : labels[kommende.indexOf(g)];
-      return gameSlideHTML(g, i, label, istAktuell, g === naechstesHeimspiel, heute);
+      var label = g.heim ? (++heimZaehler + '. Heimspiel') : 'Auswärts mit Gebrüll';
+      return gameSlideHTML(g, i, label, g === aktuell, heute);
     }).join('');
 
     var dotsHTML = slides.length > 1
@@ -109,6 +140,13 @@
     card.innerHTML = '<div class="next-game-slides">' + slidesHTML + '</div>' + dotsHTML;
 
     if (window.lucide) lucide.createIcons();
+
+    /* Widget-Höhe nach dem ersten Rendern fixieren, damit ein Wechsel zwischen
+       den Slides (unterschiedlich lange Gegnernamen, Ergebnis-Zeile nur beim
+       aktuellen Spiel) das Layout nicht springen lässt (Marko, 26.09.2026). */
+    requestAnimationFrame(function () {
+      card.style.minHeight = card.offsetHeight + 'px';
+    });
 
     var slideEls = card.querySelectorAll('.next-game-slide');
     var dots = card.querySelectorAll('.news-dot');

@@ -12,8 +12,9 @@ Wie der Fix funktioniert: Die Slides werden hier gebaut und zwischen
 Markern in die Seite geschrieben. js/home-next-game.js ersetzt den Inhalt
 beim Laden weiterhin per innerHTML -- fuer Besucher aendert sich nichts,
 Klick-Punkte arbeiten unveraendert auf dem JS-Ergebnis. Spiegelt die dortige
-Logik (aktuelles Spiel + naechste zwei, Heim/Auswaerts-CTAs); aendert sich
-das Skript, muss es hier mit -- deshalb der Ankerpruef beim Start.
+Logik (aktuelles Spiel + naechste zwei, Eyebrow/CTAs je Heim/Auswaerts);
+aendert sich das Skript, muss es hier mit -- deshalb der Ankerpruef beim
+Start.
 
 Aufruf:
   python3 tools/build-next-game.py
@@ -25,6 +26,7 @@ import json
 import re
 import sys
 from datetime import datetime, timedelta
+from urllib.parse import quote, urlencode
 
 from seo_common import REPO, esc
 
@@ -35,10 +37,12 @@ CONTAINER = "next-game-card"
 
 MONATE = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August",
           "September", "Oktober", "November", "Dezember"]
+RIETHSPORTHALLE_MAPS_URL = "https://www.google.com/maps/search/?api=1&query=Essener+Stra%C3%9Fe+20%2C+99089+Erfurt"
+TABELLE_URL = "/saison/tabelle.html#tabelle-profis"
 
 JS_ANKER = [
-    "'<span class=\"eyebrow\">' + label + '</span>' +",
-    "ctaPrimary = '<a class=\"btn btn-primary btn-sm\" style=\"color:#fff\" href=\"' + g.livestream + '\" target=\"_blank\" rel=\"noopener\"><i data-lucide=\"video\" style=\"width:14px;height:14px\"></i> Zum Livestream</a>';",
+    "var label = g.heim ? (++heimZaehler + '. Heimspiel') : 'Auswärts mit Gebrüll';",
+    "'<a class=\"cal-link\" href=\"' + TABELLE_URL + '\" title=\"Zur Tabelle\"><i data-lucide=\"list-ordered\" style=\"width:14px;height:14px\"></i></a>';",
 ]
 
 
@@ -71,58 +75,90 @@ def lade_spiele():
     return alle
 
 
-def badge_html(g):
-    return '<span class="venue-heim">Heimspiel</span>' if g["heim"] else '<span class="venue-auswaerts">Auswärts</span>'
+def gcal_stamp(d):
+    return d.strftime("%Y%m%dT%H%M%S")
 
 
-def slide_html(g, i, label, ist_aktuell, ist_naechstes_heimspiel, heute):
+def calendar_link(g):
+    stunde, minute = (int(x) for x in (g.get("zeit") or "00:00").split(":"))
+    start = datetime(g["date"].year, g["date"].month, g["date"].day, stunde, minute)
+    ende = start + timedelta(hours=2)
+    text = f'Basketball Löwen – {g["gegner"]}' if g["heim"] else f'{g["gegner"]} – Basketball Löwen'
+    params = {
+        "action": "TEMPLATE",
+        "text": text,
+        "dates": f"{gcal_stamp(start)}/{gcal_stamp(ende)}",
+        "details": "Heimspiel der Basketball Löwen Erfurt in der Riethsporthalle." if g["heim"] else "Auswärtsspiel der Basketball Löwen Erfurt.",
+        "ctz": "Europe/Berlin",
+    }
+    if g["heim"]:
+        params["location"] = "Essener Straße 20, 99089 Erfurt"
+    return "https://calendar.google.com/calendar/render?" + urlencode(params)
+
+
+def venue_maps_link(g):
+    if g["heim"]:
+        return RIETHSPORTHALLE_MAPS_URL
+    q = g.get("adresse") or g.get("ort")
+    return f"https://www.google.com/maps/search/?api=1&query={quote(q)}" if q else None
+
+
+def slide_html(g, i, label, ist_aktuell, heute):
     matchup = f'Basketball Löwen – {esc(g["gegner"])}' if g["heim"] else f'{esc(g["gegner"])} – Basketball Löwen'
     venue = "Riethsporthalle" if g["heim"] else esc(g.get("halle") or g.get("ort") or "")
+    venue_link = venue_maps_link(g)
     d = g["date"]
     date_str = f"{d.day}. {MONATE[d.month - 1]} {d.year}"
 
-    if not g["heim"] and g.get("livestream"):
-        cta_primary = (
-            f'<a class="btn btn-primary btn-sm" style="color:#fff" href="{esc(g["livestream"])}" target="_blank" rel="noopener">'
-            '<i data-lucide="video" style="width:14px;height:14px"></i> Zum Livestream</a>'
-        )
-    elif ist_naechstes_heimspiel:
-        cta_primary = (
-            '<a class="btn btn-primary btn-sm" style="color:#fff" href="/saison/profis/gameday/">'
-            '<i data-lucide="ticket" style="width:14px;height:14px"></i> Tickets &amp; Gameday</a>'
-        )
-    else:
-        cta_primary = (
-            '<a class="btn btn-primary btn-sm" style="color:#fff" href="/tickets/dauerkarte.html">'
-            '<i data-lucide="ticket" style="width:14px;height:14px"></i> Dauerkarte kaufen</a>'
-        )
-
-    ergebnis_html = ""
     if ist_aktuell:
-        bericht_link = ""
+        tabelle_icon = f'<a class="cal-link" href="{TABELLE_URL}" title="Zur Tabelle"><i data-lucide="list-ordered" style="width:14px;height:14px"></i></a>'
+        bericht_icon = ""
         if g.get("spielberichtUrl"):
             bericht_label = "Vorbericht" if g["date"] >= heute else "Nachbericht"
-            bericht_link = (
-                f'<a class="card-link" href="{esc(g["spielberichtUrl"])}">{bericht_label} '
-                '<i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>'
-            )
-        ergebnis_html = (
+            bericht_icon = f'<a class="cal-link" href="{esc(g["spielberichtUrl"])}" title="Zum {bericht_label}"><i data-lucide="file-text" style="width:14px;height:14px"></i></a>'
+        zweite_zeile = (
             '<div class="fixture-result-row" style="margin-bottom:12px">'
-            f'<div class="fixture-result">{esc(g.get("ergebnis") or "– – : – –")}</div>'
-            f"{bericht_link}</div>"
+            f'<div class="fixture-result">{esc(g.get("ergebnis") or "– – : – –")}</div>{tabelle_icon}{bericht_icon}</div>'
         )
+    else:
+        if venue:
+            venue_inner = f'<i data-lucide="map-pin" style="width:14px;height:14px"></i>{venue}'
+            venue_span = (
+                f'<a href="{esc(venue_link)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;color:inherit;text-decoration:none">{venue_inner}</a>'
+                if venue_link else venue_inner
+            )
+            venue_html = f'<span style="display:inline-flex;align-items:center;gap:6px">{venue_span}</span>'
+        else:
+            venue_html = ""
+        zweite_zeile = f'<p class="t-body-sm" style="margin-bottom:12px">{venue_html}</p>'
+
+    if g["heim"]:
+        cta_html = (
+            '<a class="btn btn-primary btn-sm" style="color:#fff" href="/saison/profis/gameday/">'
+            '<i data-lucide="ticket" style="width:14px;height:14px"></i> Tickets</a>'
+            '<a class="btn btn-ghost btn-sm" href="/tickets/dauerkarte.html">Dauerkarte</a>'
+        )
+    else:
+        livestream_cta = ""
+        if g.get("livestream"):
+            livestream_cta = (
+                f'<a class="btn btn-primary btn-sm" style="color:#fff" href="{esc(g["livestream"])}" target="_blank" rel="noopener">'
+                '<i data-lucide="video" style="width:14px;height:14px"></i> Zum Livestream</a>'
+            )
+        dauerkarte_style = ' style="color:#fff"' if not g.get("livestream") else ""
+        dauerkarte_class = "btn-primary" if not g.get("livestream") else "btn-ghost"
+        cta_html = livestream_cta + f'<a class="btn {dauerkarte_class} btn-sm"{dauerkarte_style} href="/tickets/dauerkarte.html">Dauerkarte kaufen</a>'
 
     return (
         f'<div class="next-game-slide{" is-active" if i == 0 else ""}">'
         f'<span class="eyebrow">{label}</span>'
         f'<h3 class="t-h4" style="margin:10px 0 6px">{matchup}</h3>'
-        '<p class="t-body-sm" style="margin-bottom:12px;display:flex;flex-direction:column;gap:4px">'
-        f"{badge_html(g)}"
-        f'<span style="display:inline-flex;align-items:center;gap:6px"><i data-lucide="calendar" style="width:14px;height:14px"></i>{date_str}, {esc(g["zeit"])} Uhr</span>'
-        + (f'<span style="display:inline-flex;align-items:center;gap:6px"><i data-lucide="map-pin" style="width:14px;height:14px"></i>{venue}</span>' if venue else "")
-        + "</p>"
-        + ergebnis_html
-        + f'<div style="display:flex;gap:10px;flex-wrap:wrap">{cta_primary}<a class="btn btn-ghost btn-sm" href="/saison/spielplan.html">Zum Spielplan</a></div>'
+        '<p class="t-body-sm" style="margin-bottom:12px">'
+        '<span style="display:inline-flex;align-items:center;gap:6px">'
+        f'<a href="{calendar_link(g)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;color:inherit;text-decoration:none">'
+        f'<i data-lucide="calendar" style="width:14px;height:14px"></i>{date_str}, {esc(g["zeit"])} Uhr</a></span></p>'
+        + zweite_zeile
+        + f'<div style="display:flex;gap:10px;flex-wrap:wrap">{cta_html}</div>'
         + "</div>"
     )
 
@@ -176,18 +212,15 @@ def main():
         print("  geschrieben: kein Spiel im Widget")
         return 0
 
-    naechstes_heimspiel = None
-    for g in alle:
-        if g["heim"] and g.get("spielberichtUrl") and g["date"] >= heute:
-            naechstes_heimspiel = g
-            break
-
-    labels_kommend = ["Nächstes Spiel", "Übernächstes Spiel"]
+    heim_zaehler = 0
     slides = []
     for i, g in enumerate(slides_daten):
-        ist_aktuell = g is aktuell
-        label = "Aktuelles Spiel" if ist_aktuell else labels_kommend[kommende.index(g)]
-        slides.append(slide_html(g, i, label, ist_aktuell, g is naechstes_heimspiel, heute))
+        if g["heim"]:
+            heim_zaehler += 1
+            label = f"{heim_zaehler}. Heimspiel"
+        else:
+            label = "Auswärts mit Gebrüll"
+        slides.append(slide_html(g, i, label, g is aktuell, heute))
 
     dots = ""
     if len(slides_daten) > 1:
