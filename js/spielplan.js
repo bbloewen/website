@@ -39,6 +39,19 @@
     return 'https://calendar.google.com/calendar/render?' + new URLSearchParams(params).toString();
   }
 
+  /* Vorbericht/Nachbericht-Icon fuer Pro-B-Spiele: dieselbe Idee wie im
+     Startseiten-Widget (js/home-next-game.js), aber hier immer BEIDE Icons
+     sichtbar (nicht nur je nach Anpfiff-Status), weil der Spielplan die ganze
+     Saison auf einmal zeigt -- ausgegraut, solange spielberichtUrl fehlt oder
+     der jeweilige Zeitpunkt (vor/nach Anpfiff) noch nicht erreicht ist
+     (Marko, 26.09.2026). */
+  function berichtIcon(label, url, aktiv) {
+    if (aktiv && url) {
+      return '<a class="cal-link" href="' + url + '" title="' + label + '"><i data-lucide="file-text" style="width:16px;height:16px"></i></a>';
+    }
+    return '<span class="cal-link" style="opacity:.4;cursor:default" title="' + label + '"><i data-lucide="file-text" style="width:16px;height:16px"></i></span>';
+  }
+
   function gameRowHTML(g, divider) {
     var meta = TEAM_META[g.team];
     var matchup = g.heim ? (g.teamLabel + ' – ' + g.gegner) : (g.gegner + ' – ' + g.teamLabel);
@@ -63,12 +76,23 @@
       venueHTML = '';
       statusHTML = '<span class="venue-auswaerts">Auswärts</span>';
     }
+    var tabelleIcon = '<a class="cal-link" href="' + meta.tableUrl + '" title="Zur Tabelle"><i data-lucide="list-ordered" style="width:16px;height:16px"></i></a>';
+    var berichteHTML;
+    if (g.team === 'profis') {
+      var teilePro = (g.zeit || '00:00').split(':').map(Number);
+      var anpfiffPro = new Date(g.date.getFullYear(), g.date.getMonth(), g.date.getDate(), teilePro[0], teilePro[1]);
+      var vorAnpfiff = new Date() < anpfiffPro;
+      berichteHTML = berichtIcon('Vorbericht', g.spielberichtUrl, vorAnpfiff) +
+        tabelleIcon +
+        berichtIcon('Nachbericht', g.spielberichtUrl, !vorAnpfiff);
+    } else {
+      berichteHTML = tabelleIcon;
+    }
     var actionsHTML = '<div class="fixture-day-actions">' +
       '<div class="fixture-result-row">' +
         '<div class="fixture-result">' + (g.ergebnis || '– – : – –') + '</div>' +
         (g === naechstesHeimspiel ? '<a class="cal-link" href="/saison/profis/gameday/" title="Zum Gameday"><i data-lucide="ticket" style="width:16px;height:16px"></i></a>' : '') +
-        (g.spielberichtUrl ? '<a class="cal-link" href="' + g.spielberichtUrl + '" title="Zum Spielbericht"><i data-lucide="file-text" style="width:16px;height:16px"></i></a>' : '') +
-        '<a class="cal-link" href="' + meta.tableUrl + '" title="Zur Tabelle"><i data-lucide="list-ordered" style="width:16px;height:16px"></i></a>' +
+        berichteHTML +
         '<a class="cal-link" href="' + calendarLink(g) + '" target="_blank" rel="noopener" title="In Kalender eintragen"><i data-lucide="calendar-plus" style="width:16px;height:16px"></i></a>' +
       '</div>' +
       (g.heim && g.spielberichtUrl ? '<a class="btn btn-outline-orange btn-sm" href="' + g.spielberichtUrl + '">Zum Spiel <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>' : '') +
