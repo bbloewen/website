@@ -130,10 +130,10 @@ def slide_html(g, i, label, jetzt):
         stil = ' style="margin-left:8px"' if extra_margin else ""
         return f'<a class="cal-link" href="{TABELLE_URL}" title="Zur Tabelle"{stil}><i data-lucide="list-ordered" style="width:14px;height:14px"></i></a>'
 
-    def bericht_icon(bericht_label, extra_margin):
+    def bericht_icon(bericht_label, url, extra_margin):
         stil = ' style="margin-left:4px"' if extra_margin else ""
-        if g.get("spielberichtUrl"):
-            return f'<a class="cal-link" href="{esc(g["spielberichtUrl"])}" title="{bericht_label}"{stil}><i data-lucide="file-text" style="width:14px;height:14px"></i></a>'
+        if url:
+            return f'<a class="cal-link" href="{esc(url)}" title="{bericht_label}"{stil}><i data-lucide="file-text" style="width:14px;height:14px"></i></a>'
         opazitaet = "opacity:.4;cursor:default" + (";margin-left:4px" if extra_margin else "")
         return f'<span class="cal-link" style="{opazitaet}" title="{bericht_label}"><i data-lucide="file-text" style="width:14px;height:14px"></i></span>'
 
@@ -151,11 +151,17 @@ def slide_html(g, i, label, jetzt):
 
     status = spiel_status(g, jetzt)
     if status == "bevorstehend":
-        row_html = bericht_icon("Vorbericht", False) + tabelle_icon(False) + livescore_icon(False) + livestream_link(True)
+        row_html = bericht_icon("Vorbericht", g.get("spielberichtUrl"), False) + tabelle_icon(False) + livescore_icon(False) + livestream_link(True)
     else:
+        # Bei Heimspielen zeigt spielberichtUrl immer auf die eigene Spieltagsseite
+        # (gilt fuer Vor- und Nachbericht gleichermassen). Bei Auswaertsspielen
+        # meint spielberichtUrl den Vorbericht -- das Nachbericht-Icon braucht ein
+        # eigenes Feld (nachberichtUrl), sonst zeigt es nach dem Spiel faelschlich
+        # weiter auf den alten Vorbericht (Marko, 26.09.2026).
+        nachbericht_url = g.get("spielberichtUrl") if g["heim"] else g.get("nachberichtUrl")
         row_html = (
             f'<div class="fixture-result">{esc(g.get("ergebnis") or "– – : – –")}</div>'
-            + tabelle_icon(True) + bericht_icon("Nachbericht", False)
+            + tabelle_icon(True) + bericht_icon("Nachbericht", nachbericht_url, False)
         )
 
     if g["heim"]:

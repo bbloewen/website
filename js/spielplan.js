@@ -83,15 +83,19 @@
          bestehende Spieltagsseite (s. Hinweis in data/heimspiele.json) -- kein
          echter Vor-/Nachbericht, dafuer gibt es dort schon den "Zum Spiel"-CTA.
          Vorbericht/Nachbericht-Icon sind deshalb nur bei Auswaertsspielen aktiv,
-         wo das Feld einen eigens verfassten Artikel meint (z.B. Dragons Rhoendorf)
+         wo spielberichtUrl den Vorbericht meint (z.B. Dragons Rhoendorf) und ein
+         eigenes Feld nachberichtUrl den spaeter verfassten Spielbericht -- die
+         beiden duerfen NICHT dasselbe Feld teilen, sonst zeigt das Nachbericht-
+         Icon nach dem Spiel faelschlich weiter auf den alten Vorbericht
          (Marko, 26.09.2026). */
-      var echterBerichtUrl = g.heim ? null : g.spielberichtUrl;
+      var vorberichtUrl = g.heim ? null : g.spielberichtUrl;
+      var nachberichtUrl = g.heim ? g.spielberichtUrl : g.nachberichtUrl;
       var teilePro = (g.zeit || '00:00').split(':').map(Number);
       var anpfiffPro = new Date(g.date.getFullYear(), g.date.getMonth(), g.date.getDate(), teilePro[0], teilePro[1]);
       var vorAnpfiff = new Date() < anpfiffPro;
-      berichteHTML = berichtIcon('Vorbericht', echterBerichtUrl, vorAnpfiff) +
+      berichteHTML = berichtIcon('Vorbericht', vorberichtUrl, vorAnpfiff) +
         tabelleIcon +
-        berichtIcon('Nachbericht', echterBerichtUrl, !vorAnpfiff);
+        berichtIcon('Nachbericht', nachberichtUrl, !vorAnpfiff);
     } else {
       berichteHTML = tabelleIcon;
     }

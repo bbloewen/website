@@ -73,10 +73,10 @@
     function tabelleIcon(extraMargin) {
       return '<a class="cal-link" href="' + TABELLE_URL + '" title="Zur Tabelle"' + (extraMargin ? ' style="margin-left:8px"' : '') + '><i data-lucide="list-ordered" style="width:14px;height:14px"></i></a>';
     }
-    function berichtIconHTML(label2, extraMargin) {
+    function berichtIconHTML(label2, url, extraMargin) {
       var stil = extraMargin ? ' style="margin-left:4px"' : '';
-      if (g.spielberichtUrl) {
-        return '<a class="cal-link" href="' + g.spielberichtUrl + '" title="' + label2 + '"' + stil + '><i data-lucide="file-text" style="width:14px;height:14px"></i></a>';
+      if (url) {
+        return '<a class="cal-link" href="' + url + '" title="' + label2 + '"' + stil + '><i data-lucide="file-text" style="width:14px;height:14px"></i></a>';
       }
       return '<span class="cal-link" style="opacity:.4;cursor:default' + (extraMargin ? ';margin-left:4px' : '') + '" title="' + label2 + '"><i data-lucide="file-text" style="width:14px;height:14px"></i></span>';
     }
@@ -97,13 +97,19 @@
       /* Vor Anpfiff (auch waehrend des laufenden Spiels, solange der Anpfiff-
          Zeitpunkt in der Zukunft liegt): Vorbericht, Tabelle, Boxscore/
          Fieberkurve (Livescore), Livestream (Marko, 26.09.2026). */
-      rowHTML = berichtIconHTML('Vorbericht', false) + tabelleIcon(false) + livescoreIcon(false) + livestreamLink(true);
+      rowHTML = berichtIconHTML('Vorbericht', g.spielberichtUrl, false) + tabelleIcon(false) + livescoreIcon(false) + livestreamLink(true);
     } else {
       /* Ab Anpfiff bis zum Dienstag-Cutoff (danach verschwindet der Slide
          ohnehin): Ergebnis gross, Tabelle, Nachbericht -- kein Livestream
-         und kein Livescore mehr. */
+         und kein Livescore mehr. Nachbericht-Icon nutzt bei Auswaertsspielen
+         ein eigenes Feld (nachberichtUrl), NICHT spielberichtUrl (das zeigt
+         auf den Vorbericht) -- sonst wuerde das Icon nach dem Spiel auf den
+         alten Vorbericht statt auf den echten Spielbericht zeigen. Bei
+         Heimspielen bleibt spielberichtUrl fuer beide Rollen gueltig (zeigt
+         auf die eigene Spieltagsseite) (Marko, 26.09.2026). */
+      var nachberichtUrl = g.heim ? g.spielberichtUrl : g.nachberichtUrl;
       rowHTML = '<div class="fixture-result">' + (g.ergebnis || '– – : – –') + '</div>' +
-        tabelleIcon(true) + berichtIconHTML('Nachbericht', false);
+        tabelleIcon(true) + berichtIconHTML('Nachbericht', nachberichtUrl, false);
     }
 
     var ctaHTML = g.heim
