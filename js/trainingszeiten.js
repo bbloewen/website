@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', function () {
     'U10w und jünger': 'U10w',
     'U11mix': 'U11mix',
     'U12mix': 'U12mix',
+    'U12m/1': 'U12m',
     'U12w': 'U12w',
     'U13mix': 'U13mix',
     'U13m': 'U13m',
@@ -57,12 +58,14 @@ document.addEventListener('DOMContentLoaded', function () {
   var vereinLabel = {
     'bc-erfurt': 'BC Erfurt',
     'usv-erfurt': 'USV Erfurt',
-    'loewinnen': 'Basketball Löwen'
+    'loewinnen': 'Basketball Löwen',
+    'loewen': 'Basketball Löwen'
   };
   var vereinBadgeClass = {
     'bc-erfurt': 'team-badge-bc-erfurt',
     'usv-erfurt': 'team-badge-usv-erfurt',
-    'loewinnen': 'team-badge-loewinnen'
+    'loewinnen': 'team-badge-loewinnen',
+    'loewen': 'team-badge-loewen'
   };
   /* Verlinkung der Vereins-Badges auf die jeweilige Trainingszeiten-Seite des
      Vereins — Basketball Löwen bleibt unverlinkt, das ist bereits diese Seite. */
@@ -245,7 +248,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var ortLine = modus === 'wochentag'
       ? '<div class="training-slot-ort"><i data-lucide="map-pin" class="icon-14"></i><a href="' + mapsLink(s.ort) + '" target="_blank" rel="noopener">' + ortDisplay(s.ort) + '</a></div>'
       : '';
-    var probLink = '<a class="training-row-probetraining" href="' + probetrainingLink(s.teamName, s.jahrgang, s.verein, s.termin) + '">Probetraining vereinbaren</a>';
+    var probLink = s.verein !== 'loewen' ? '<a class="training-row-probetraining" href="' + probetrainingLink(s.teamName, s.jahrgang, s.verein, s.termin) + '">Probetraining vereinbaren</a>' : '';
     return (
       '<div class="training-session-row" data-verein="' + s.verein + '" data-jahre="' + s.jahre.join(',') + '" data-team="' + s.teamKey + '">' +
         '<div>' +
@@ -304,16 +307,20 @@ document.addEventListener('DOMContentLoaded', function () {
     var jahrgang = jahrgangLabel(g);
     var titel = teamName + ' (' + jahrgang + ')';
     var unbestaetigt = g.bestaetigt === false;
+    // Leistungsteams (eigene MDL-Nachwuchsteams) nehmen nicht per offenem
+    // Probetraining-Kontaktformular auf, sondern über Sichtung/Trainer — daher
+    // hier kein "Probetraining vereinbaren"-Link.
+    var zeigeProbetraining = g.verein !== 'loewen';
     var zeitenHTML;
     if (g.termine && g.termine.length) {
       zeitenHTML = g.termine.map(function (t) {
         var zeitHTML = zeitLinkHTML(t.tag, t.zeit, t.vorbehaltlich, titel, t.ort, true, unbestaetigt);
         var ortHTML = '<div class="training-slot-ort"><i data-lucide="map-pin" class="icon-14"></i><a href="' + mapsLink(t.ort) + '" target="_blank" rel="noopener">' + ortDisplay(t.ort) + '</a></div>';
-        var probLink = '<a class="training-row-probetraining" href="' + probetrainingLink(teamName, jahrgang, g.verein, t) + '">Probetraining vereinbaren</a>';
+        var probLink = zeigeProbetraining ? '<a class="training-row-probetraining" href="' + probetrainingLink(teamName, jahrgang, g.verein, t) + '">Probetraining vereinbaren</a>' : '';
         return '<div class="training-slot">' + zeitHTML + ortHTML + probLink + '</div>';
       }).join('');
     } else {
-      var probLinkOhneTermin = '<a class="training-row-probetraining" href="' + probetrainingLink(teamName, jahrgang, g.verein, null) + '">Probetraining vereinbaren</a>';
+      var probLinkOhneTermin = zeigeProbetraining ? '<a class="training-row-probetraining" href="' + probetrainingLink(teamName, jahrgang, g.verein, null) + '">Probetraining vereinbaren</a>' : '';
       zeitenHTML = '<div class="training-slot"><em>' + (g.hinweis || 'Zeiten folgen in Kürze') + '</em>' + probLinkOhneTermin + '</div>';
     }
     var badgeHTML = vereinLink[g.verein]
@@ -396,8 +403,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
       function applyFilters() {
         var rows = grid.querySelectorAll('[data-verein]');
+        var vereinListe = currentVerein.split(',');
         rows.forEach(function (row) {
-          var vereinOk = currentVerein === 'alle' || row.getAttribute('data-verein') === currentVerein;
+          var vereinOk = currentVerein === 'alle' || vereinListe.indexOf(row.getAttribute('data-verein')) !== -1;
           var jahre = row.getAttribute('data-jahre').split(',');
           var jahrOk = currentJahr === 'alle' || jahre.indexOf(currentJahr) !== -1;
           var teamOk = currentTeam === 'alle' || row.getAttribute('data-team') === currentTeam;
@@ -410,9 +418,21 @@ document.addEventListener('DOMContentLoaded', function () {
         });
       }
 
+      // Deep-Link von den Team-Kacheln auf saison/nachwuchs.html, z.B.
+      // trainingszeiten.html?team=U14m springt direkt zur passenden Team-Auswahl.
+      var teamParam = new URLSearchParams(window.location.search).get('team');
+      if (teamParam && alleTeams.indexOf(teamParam) !== -1) {
+        currentTeam = teamParam;
+        teamSelect.value = teamParam;
+      }
+
       var sortSelect = document.getElementById('sort-select');
       sortSelect.addEventListener('change', function () { render(sortSelect.value); });
       render(sortSelect.value);
+
+      if (teamParam && currentTeam === teamParam) {
+        document.getElementById('zeiten').scrollIntoView({ block: 'start' });
+      }
 
       chips.forEach(function (chip) {
         chip.addEventListener('click', function () {

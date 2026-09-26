@@ -1,5 +1,5 @@
 {
-  "hinweis": "Quelle: internes Trainingszeiten-Sheet, Stand 20.08.2026, für BC Erfurt gegen bcerfurt.de/training verifiziert (deckt sich exakt). USV-Erfurt-Einträge am 01.09.2026 vollständig gegen usv-erfurt-basketball.de/training abgeglichen; die Seite gibt dort jetzt den Gültigkeitszeitraum 01.08.2026–03.07.2027 an, die Zeiten sind also der aktuelle Saisonstand und nicht mehr vorläufig — der Vermerk 'noch nicht bestätigt' ist bei diesen Teams deshalb entfallen. U13m hat bei USV erstmals echte Zeiten (dort 'U13 Jungen I'), der Platzhalter 'Zeiten folgen in Kürze' ist weg. U12m/1 heißt bei USV inzwischen 'U12 mix' und wurde entsprechend in U12mix umbenannt. U19m (USV) am 01.09.2026 auf Marko-Entscheidung gelöscht: USVs Liste enthält kein U19-Jungen-Team mehr (nur noch 'U16/U19 Mädchen'). Die Jahrgänge 2008–2010 bleiben über U19m (BC Erfurt) und U19w (Löwinnen) abgedeckt. Falls USV wieder eine U19 meldet, muss der Eintrag neu angelegt werden. Am 18.09.2026 auf Marko-Ansage wieder angelegt (Website-Feedback von einem Trainer aus USV/eigener Organisation, Mo 20:00–22:00 Uhr Ullrich-von-Hutten-Schule, Fr 19:30–21:30 Uhr Puschkinschule) — auf usv-erfurt-basketball.de/training zu diesem Zeitpunkt weiterhin nicht gelistet, laut Marko aber eine verlässliche interne Meldung; Trainer-Feld bewusst leer, da nicht mitgeteilt. Nicht übernommen, weil auf unserer Seite anderweitig abgebildet oder bewusst außen vor: USVs Mädchenteams (laufen bei uns als Löwinnen-Teams) sowie USVs Erwachsenenteams (Landesliga/Oberliga Herren, Ü40) und die Funkelcrew. Trainernamen durchgängig nur Vorname (auch bei USV, wo das Sheet bisher Nachnamen enthielt). Enthält Minibasketball, Jugendteams und weibliche Jugendteams (U12 und jünger bis U19) der Partnervereine BC Erfurt und USV Erfurt. Am 23.08.2026 die fünf BC-Erfurt-Erwachsenenteams (Oberliga Herren, Landesliga Herren 2, Landesliga Herren 3, Damen, Freizeit Mixed) auf Aaron-Hinweis ergänzt, Zeiten/Orte/Trainer live gegen bcerfurt.de/training verifiziert; Jahrgang einheitlich als '2007+' angegeben (älter als U19). BC Erfurts eigene interne Team-Nummerierung ('Herren 1/2/3', gehört uns nicht und könnte sich bei anderen Partnervereinen wie USV anders darstellen) bewusst nicht als Liga-Bezeichnung übernommen: Oberliga Herren steht ohne Nummer (nur ein Team), Landesliga Herren 2 und 3 behalten die Nummer nur zur Unterscheidung der beiden Kacheln — im Team-Filter-Dropdown werden beide unter der gemeinsamen Option 'Landesliga Herren' zusammengefasst (siehe TEAM_KEY in js/trainingszeiten.js). SPORT VERNETZT, BasKIDball und Waid-Löwen haben eigene Seiten und sind hier weiterhin bewusst nicht enthalten, ebenso Erwachsenenteams von USV Erfurt und Basketball Löwen.",
+  "hinweis": "Quelle: internes Trainingszeiten-Sheet, Stand 20.08.2026, für BC Erfurt gegen bcerfurt.de/training verifiziert (deckt sich exakt). USV-Erfurt-Einträge am 01.09.2026 vollständig gegen usv-erfurt-basketball.de/training abgeglichen; die Seite gibt dort jetzt den Gültigkeitszeitraum 01.08.2026–03.07.2027 an, die Zeiten sind also der aktuelle Saisonstand und nicht mehr vorläufig — der Vermerk 'noch nicht bestätigt' ist bei diesen Teams deshalb entfallen. U13m hat bei USV erstmals echte Zeiten (dort 'U13 Jungen I'), der Platzhalter 'Zeiten folgen in Kürze' ist weg. U12m/1 heißt bei USV inzwischen 'U12 mix' und wurde entsprechend in U12mix umbenannt. U19m (USV) am 01.09.2026 auf Marko-Entscheidung gelöscht: USVs Liste enthält kein U19-Jungen-Team mehr (nur noch 'U16/U19 Mädchen'). Die Jahrgänge 2008–2010 bleiben über U19m (BC Erfurt) und U19w (Löwinnen) abgedeckt. Falls USV wieder eine U19 meldet, muss der Eintrag neu angelegt werden. Am 18.09.2026 auf Marko-Ansage wieder angelegt (Website-Feedback von einem Trainer aus USV/eigener Organisation, Mo 20:00–22:00 Uhr Ullrich-von-Hutten-Schule, Fr 19:30–21:30 Uhr Puschkinschule) — auf usv-erfurt-basketball.de/training zu diesem Zeitpunkt weiterhin nicht gelistet, laut Marko aber eine verlässliche interne Meldung; Trainer-Feld bewusst leer, da nicht mitgeteilt. Nicht übernommen, weil auf unserer Seite anderweitig abgebildet oder bewusst außen vor: USVs Mädchenteams (laufen bei uns als Löwinnen-Teams) sowie USVs Erwachsenenteams (Landesliga/Oberliga Herren, Ü40) und die Funkelcrew. Trainernamen durchgängig nur Vorname (auch bei USV, wo das Sheet bisher Nachnamen enthielt). Enthält Minibasketball, Jugendteams und weibliche Jugendteams (U12 und jünger bis U19) der Partnervereine BC Erfurt und USV Erfurt. Am 23.08.2026 die fünf BC-Erfurt-Erwachsenenteams (Oberliga Herren, Landesliga Herren 2, Landesliga Herren 3, Damen, Freizeit Mixed) auf Aaron-Hinweis ergänzt, Zeiten/Orte/Trainer live gegen bcerfurt.de/training verifiziert; Jahrgang einheitlich als '2007+' angegeben (älter als U19). BC Erfurts eigene interne Team-Nummerierung ('Herren 1/2/3', gehört uns nicht und könnte sich bei anderen Partnervereinen wie USV anders darstellen) bewusst nicht als Liga-Bezeichnung übernommen: Oberliga Herren steht ohne Nummer (nur ein Team), Landesliga Herren 2 und 3 behalten die Nummer nur zur Unterscheidung der beiden Kacheln — im Team-Filter-Dropdown werden beide unter der gemeinsamen Option 'Landesliga Herren' zusammengefasst (siehe TEAM_KEY in js/trainingszeiten.js). SPORT VERNETZT, BasKIDball und Waid-Löwen haben eigene Seiten und sind hier weiterhin bewusst nicht enthalten, ebenso Erwachsenenteams von USV Erfurt und Basketball Löwen. Am 27.09.2026 die vier eigenen MDL-Nachwuchsteams (U12m/1, U13m, U14m, U15m, verein 'loewen') aus dem Trainingszeiten-Sheet (Tab 'Trainingszeiten 26-27', Abschnitt 'Leistungsteams') ergänzt, verlinkt von den neuen Team-Kacheln auf saison/nachwuchs.html. U17m MDL (Rockets & Löwen, Kooperation mit BIG Gotha) bewusst noch nicht aufgenommen: im Sheet ohne eigene Trainingszeiten-Zeile.",
   "gruppen": [
     {
       "team": "U8mix und jünger",
@@ -196,6 +196,27 @@
       ]
     },
     {
+      "team": "U12m/1",
+      "jahrgang": "2015",
+      "verein": "loewen",
+      "termine": [
+        {
+          "tag": "Mo",
+          "zeit": "16:30–18:00 Uhr",
+          "ort": "Bukarester Straße"
+        },
+        {
+          "tag": "Do",
+          "zeit": "16:30–18:00 Uhr",
+          "ort": "Muldenweg (Feld 2)"
+        }
+      ],
+      "trainer": "Matthias, Dexter",
+      "jahre": [
+        2015
+      ]
+    },
+    {
       "team": "U13mix",
       "jahrgang": "2014",
       "verein": "bc-erfurt",
@@ -233,6 +254,27 @@
         }
       ],
       "trainer": "Pirmin, Valentin",
+      "jahre": [
+        2014
+      ]
+    },
+    {
+      "team": "U13m",
+      "jahrgang": "2014",
+      "verein": "loewen",
+      "termine": [
+        {
+          "tag": "Mo",
+          "zeit": "16:30–18:00 Uhr",
+          "ort": "Bukarester Straße"
+        },
+        {
+          "tag": "Mi",
+          "zeit": "16:45–18:00 Uhr",
+          "ort": "Hertz-Gymnasium"
+        }
+      ],
+      "trainer": "Matthias, Dexter",
       "jahre": [
         2014
       ]
@@ -302,6 +344,32 @@
       ]
     },
     {
+      "team": "U14m",
+      "jahrgang": "2013",
+      "verein": "loewen",
+      "termine": [
+        {
+          "tag": "Mo",
+          "zeit": "18:30–20:00 Uhr",
+          "ort": "Domsporthalle 2"
+        },
+        {
+          "tag": "Mi",
+          "zeit": "17:00–20:00 Uhr",
+          "ort": "Eugen-Richter-Halle (Feld 2)"
+        },
+        {
+          "tag": "Fr",
+          "zeit": "19:00–20:00 Uhr",
+          "ort": "Domsporthalle 2"
+        }
+      ],
+      "trainer": "Aaron, Ilias",
+      "jahre": [
+        2013
+      ]
+    },
+    {
       "team": "U15m",
       "jahrgang": "2012",
       "verein": "bc-erfurt",
@@ -318,6 +386,37 @@
         }
       ],
       "trainer": "Alex",
+      "jahre": [
+        2012
+      ]
+    },
+    {
+      "team": "U15m",
+      "jahrgang": "2012",
+      "verein": "loewen",
+      "termine": [
+        {
+          "tag": "Mo",
+          "zeit": "17:30–19:15 Uhr",
+          "ort": "Südparkhalle (Feld 3)"
+        },
+        {
+          "tag": "Di",
+          "zeit": "17:00–20:00 Uhr",
+          "ort": "Kindleber"
+        },
+        {
+          "tag": "Do",
+          "zeit": "17:00–20:00 Uhr",
+          "ort": "Kindleber"
+        },
+        {
+          "tag": "Fr",
+          "zeit": "17:00–19:00 Uhr",
+          "ort": "KGS"
+        }
+      ],
+      "trainer": "Paul, Matthes",
       "jahre": [
         2012
       ]

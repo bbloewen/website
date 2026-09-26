@@ -2834,6 +2834,9 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
 .team-badge-usv-erfurt { background: #E7E5F5; color: #29216E; }
 .team-badge-usv-erfurt:hover { filter: brightness(0.95); }
 .team-badge-loewinnen { background: var(--color-orange-100); color: var(--color-orange-700); }
+.team-badge-loewen { background: var(--color-orange-100); color: var(--color-orange-700); }
+.team-badge-big-gotha { background: #E3F5E1; color: #1F7A3D; }
+.team-badge-big-gotha:hover { filter: brightness(0.95); }
 .training-row-zeiten { display: flex; flex-direction: column; gap: 14px; font-size: 14px; }
 .training-slot { display: flex; flex-direction: column; gap: 2px; }
 .training-slot-zeit, .training-slot-ort { display: flex; align-items: center; gap: 6px; }
