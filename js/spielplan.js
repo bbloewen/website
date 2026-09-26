@@ -54,9 +54,9 @@
 
   function livescoreIcon(url) {
     if (url) {
-      return '<a class="cal-link" href="' + url + '" target="_blank" rel="noopener" title="Spielstand"><i data-lucide="activity" style="width:16px;height:16px"></i></a>';
+      return '<a class="cal-link" href="' + url + '" target="_blank" rel="noopener" title="Boxscore"><i data-lucide="activity" style="width:16px;height:16px"></i></a>';
     }
-    return '<span class="cal-link" style="opacity:.4;cursor:default" title="Spielstand"><i data-lucide="activity" style="width:16px;height:16px"></i></span>';
+    return '<span class="cal-link" style="opacity:.4;cursor:default" title="Boxscore"><i data-lucide="activity" style="width:16px;height:16px"></i></span>';
   }
 
   function gameRowHTML(g, divider) {
@@ -97,15 +97,14 @@
          (Marko, 26.09.2026). */
       var vorberichtUrl = g.heim ? null : g.spielberichtUrl;
       var nachberichtUrl = g.heim ? g.spielberichtUrl : g.nachberichtUrl;
-      var teilePro = (g.zeit || '00:00').split(':').map(Number);
-      var anpfiffPro = new Date(g.date.getFullYear(), g.date.getMonth(), g.date.getDate(), teilePro[0], teilePro[1]);
-      var vorAnpfiff = new Date() < anpfiffPro;
-      /* Reihenfolge: Spielstand, Vorbericht, Tabelle, Spielbericht, Kalender
-         (Kalender wird weiter unten in actionsHTML angehaengt) (Marko, 26.09.2026). */
-      berichteHTML = livescoreIcon(g.livescore) +
-        berichtIcon('Vorbericht', vorberichtUrl, vorAnpfiff) +
+      /* Reihenfolge: Vorbericht, Boxscore, Tabelle, Spielbericht, Kalender
+         (Kalender wird weiter unten in actionsHTML angehaengt). Icons sind
+         aktiv, sobald ihre URL existiert -- KEINE Anpfiff-Zeitgating mehr:
+         der Vorbericht bleibt auch nach dem Spiel klickbar (Marko, 26.09.2026). */
+      berichteHTML = berichtIcon('Vorbericht', vorberichtUrl, true) +
+        livescoreIcon(g.livescore) +
         tabelleIcon +
-        berichtIcon('Nachbericht', nachberichtUrl, !vorAnpfiff);
+        berichtIcon('Nachbericht', nachberichtUrl, true);
     } else {
       berichteHTML = tabelleIcon;
     }
