@@ -69,6 +69,10 @@
       berichtIcon = '<span class="cal-link" style="opacity:.4;cursor:default" title="Spielbericht folgt"><i data-lucide="file-text" style="width:14px;height:14px"></i></span>';
     }
 
+    var livescoreIcon = g.livescore
+      ? '<a class="cal-link" href="' + g.livescore + '" target="_blank" rel="noopener" title="Livescore" style="margin-left:4px"><i data-lucide="activity" style="width:14px;height:14px"></i></a>'
+      : '<span class="cal-link" style="opacity:.4;cursor:default;margin-left:4px" title="Livescore"><i data-lucide="activity" style="width:14px;height:14px"></i></span>';
+
     var ctaHTML = g.heim
       ? '<a class="btn btn-primary btn-sm" style="color:#fff" href="/saison/profis/gameday/"><i data-lucide="ticket" style="width:14px;height:14px"></i> Tickets</a>' +
         '<a class="btn btn-ghost btn-sm" href="/tickets/dauerkarte.html">Dauerkarte</a>'
@@ -82,6 +86,7 @@
         '<div class="fixture-result">' + (g.ergebnis || '– – : – –') + '</div>' +
         '<a class="cal-link" href="' + TABELLE_URL + '" title="Zur Tabelle" style="margin-left:8px"><i data-lucide="list-ordered" style="width:14px;height:14px"></i></a>' +
         berichtIcon +
+        livescoreIcon +
         '<a class="card-link" href="' + (g.livestream || GENERISCHER_LIVESTREAM_URL) + '" target="_blank" rel="noopener" style="margin-left:4px"><i data-lucide="video" style="width:14px;height:14px"></i> Zum Livestream</a>' +
       '</div>' +
       '<div style="display:flex;gap:10px;flex-wrap:wrap">' + ctaHTML + '</div>' +
@@ -111,7 +116,7 @@
 
   Promise.all([
     fetch('/data/heimspiele.json?v=1786356737').then(function (r) { return r.json(); }),
-    fetch('/data/spielplan-saison.json?v=1790372798').then(function (r) { return r.json(); })
+    fetch('/data/spielplan-saison.json?v=1790418622').then(function (r) { return r.json(); })
   ]).then(function (results) {
     var heim = results[0], saison = results[1];
 

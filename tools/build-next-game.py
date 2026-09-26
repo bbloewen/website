@@ -126,6 +126,11 @@ def slide_html(g, i, label, heute):
     else:
         bericht_icon = '<span class="cal-link" style="opacity:.4;cursor:default" title="Spielbericht folgt"><i data-lucide="file-text" style="width:14px;height:14px"></i></span>'
 
+    if g.get("livescore"):
+        livescore_icon = f'<a class="cal-link" href="{esc(g["livescore"])}" target="_blank" rel="noopener" title="Livescore" style="margin-left:4px"><i data-lucide="activity" style="width:14px;height:14px"></i></a>'
+    else:
+        livescore_icon = '<span class="cal-link" style="opacity:.4;cursor:default;margin-left:4px" title="Livescore"><i data-lucide="activity" style="width:14px;height:14px"></i></span>'
+
     livestream_url = esc(g.get("livestream") or GENERISCHER_LIVESTREAM_URL)
 
     if g["heim"]:
@@ -149,6 +154,7 @@ def slide_html(g, i, label, heute):
         f'<div class="fixture-result">{esc(g.get("ergebnis") or "– – : – –")}</div>'
         f'<a class="cal-link" href="{TABELLE_URL}" title="Zur Tabelle" style="margin-left:8px"><i data-lucide="list-ordered" style="width:14px;height:14px"></i></a>'
         f'{bericht_icon}'
+        f'{livescore_icon}'
         f'<a class="card-link" href="{livestream_url}" target="_blank" rel="noopener" style="margin-left:4px"><i data-lucide="video" style="width:14px;height:14px"></i> Zum Livestream</a>'
         "</div>"
         f'<div style="display:flex;gap:10px;flex-wrap:wrap">{cta_html}</div>'
