@@ -84,6 +84,9 @@
       statusHTML = '<span class="venue-auswaerts">Auswärts</span>';
     }
     var tabelleIcon = '<a class="cal-link" href="' + meta.tableUrl + '" title="Zur Tabelle"><i data-lucide="list-ordered" style="width:16px;height:16px"></i></a>';
+    var teileAnpfiff = (g.zeit || '00:00').split(':').map(Number);
+    var anpfiff = new Date(g.date.getFullYear(), g.date.getMonth(), g.date.getDate(), teileAnpfiff[0], teileAnpfiff[1]);
+    var hatBegonnen = new Date() >= anpfiff;
     var berichteHTML;
     if (g.team === 'profis') {
       /* Bei Heimspielen zeigt spielberichtUrl immer auf die eigene, von Anfang an
@@ -116,7 +119,7 @@
         '<a class="cal-link" href="' + calendarLink(g) + '" target="_blank" rel="noopener" title="In Kalender eintragen"><i data-lucide="calendar-plus" style="width:16px;height:16px"></i></a>' +
       '</div>' +
       (g.heim && g.spielberichtUrl ? '<a class="btn btn-outline-orange btn-sm" href="' + g.spielberichtUrl + '">Zum Spiel <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>' : '') +
-      (g.livestream ? '<a class="btn btn-outline-orange btn-sm" href="' + g.livestream + '" target="_blank" rel="noopener">Zum Livestream <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>' : '') +
+      (g.livestream ? '<a class="btn btn-outline-orange btn-sm" href="' + g.livestream + '" target="_blank" rel="noopener">' + (hatBegonnen ? 'Zum Replay' : 'Zum Livestream') + ' <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>' : '') +
       '</div>';
     return '<div class="fixture-day-game' + (divider ? ' has-divider' : '') + '" data-team="' + g.team + '" data-heim="' + (g.heim ? '1' : '0') + '">' +
       '<div class="fixture-day-meta">' +
