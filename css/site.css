@@ -1997,11 +1997,21 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .hero-photo.hero-news-damen-regionalliga { --hero-photo-url: url('/assets/img/news/damen-regionalliga.webp'); background-position: center 25%; }
 .hero-photo.hero-news-achtelfinale { --hero-photo-url: url('/assets/img/news/achtelfinale.webp'); background-position: center 35%; }
 .hero-photo.hero-news-playoff-heimspiel { --hero-photo-url: url('/assets/img/news/playoff-heimspiel.webp'); background-position: center 35%; }
-.hero-photo.hero-news-neuer-cheftrainer-ibrahim { --hero-photo-url: url('/assets/img/news/neuer-cheftrainer-ibrahim.webp'); background-position: center 15%; }
+.hero-photo.hero-news-neuer-cheftrainer-ibrahim { --hero-photo-url: url('/assets/img/news/neuer-cheftrainer-ibrahim-kachel.webp'); background-position: center 15%; }
 .hero-photo.hero-news-baskidballtalk-berlin-2026 { --hero-photo-url: url('/assets/img/news/baskidballtalk-berlin-2026.webp'); background-position: center 70%; }
-.hero-photo.hero-news-kapitaene-neuzugaenge-guards { --hero-photo-url: url('/assets/img/news/kapitaene-neuzugaenge-guards.webp'); background-position: center 35%; }
+.hero-photo.hero-news-kapitaene-neuzugaenge-guards { --hero-photo-url: url('/assets/img/news/kapitaene-neuzugaenge-guards-kachel.webp'); background-position: center 15%; }
 .hero-photo.hero-news-junge-loewen { --hero-photo-url: url('/assets/img/news/junge-loewen.webp'); background-position: center 30%; }
 .hero-photo.hero-news-vorbericht-dragons-rhoendorf { --hero-photo-url: url('/assets/img/news/dragons-rhoendorf-vs-loewen.webp'); background-position: center center; }
+.hero-photo.hero-news-sommerinterview-teil3 { --hero-photo-url: url('/assets/img/news/sommerinterview-teil3.webp'); background-position: center center; }
+.hero-photo.hero-news-saisonrueckblick-2025-26 { --hero-photo-url: url('/assets/img/team-prob-callout.webp'); background-position: center 30%; }
+.hero-photo.hero-news-sommerinterview-teil1 { --hero-photo-url: url('/assets/img/team-kader-collage.webp'); background-position: center center; }
+.hero-photo.hero-news-kaderplanung-naechste-saison { --hero-photo-url: url('/assets/img/news/kaderplanung-naechste-saison.webp'); background-position: center center; }
+.hero-photo.hero-news-neuzugaenge-international { --hero-photo-url: url('/assets/img/news/neuzugaenge-international.webp'); background-position: center 30%; }
+.hero-photo.hero-news-saisonstart-neunte-saison { --hero-photo-url: url('/assets/img/news/saisonstart-neunte-saison.webp'); background-position: center 25%; }
+.hero-photo.hero-news-nachwuchs-nbbl-fokus { --hero-photo-url: url('/assets/img/spieler/fotso-sighom.webp'); background-position: center 15%; }
+.hero-photo.hero-news-testspiel-breitenguessbach { --hero-photo-url: url('/assets/img/news/testspiel-breitenguessbach.webp'); background-position: center 30%; }
+.hero-photo.hero-news-catl-partnerschaft-neuausrichtung { --hero-photo-url: url('/assets/img/news/catl-partnerschaft-neuausrichtung.webp'); background-position: center 70%; }
+.hero-photo.hero-news-catl-verlaengert { --hero-photo-url: url('/assets/img/news/catl-verlaengert.webp'); background-position: center center; }
 
 /* Hero-Variante für die Startseite — Platz für das Spieltags-Widget.
    Höhe kommt vom vereinheitlichten .hero-photo-Basiswert, hier nur noch Layout/Typo. */

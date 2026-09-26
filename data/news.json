@@ -150,7 +150,7 @@
       "titel": "Saisonrückblick 2025/2026: Platz 12, Bilanz 8:16",
       "kurztext": "Die Profis verpassen die Playoffs — Coach Florian Gut zieht Bilanz und blickt nach vorn.",
       "url": "/news/artikel/2026-03-31_profis_spielbericht-saisonrueckblick-2025-26.html",
-      "bild": "/assets/img/team-prob.webp",
+      "bild": "/assets/img/team-prob-callout.webp",
       "topNews": true,
       "team": "profis"
     },
@@ -198,7 +198,7 @@
       "titel": "Sommerinterview Teil 3: LÖWENPARK und Vorbereitung",
       "kurztext": "Florian Gut über Finanzierung und Zeitplan des LÖWENPARK sowie den Start in die Saisonvorbereitung.",
       "url": "/news/artikel/2025-08-08_club_sommerinterview-teil3.html",
-      "bild": "/assets/img/hero-basketball.webp",
+      "bild": "/assets/img/news/sommerinterview-teil3.webp",
       "topNews": false
     },
     {
@@ -221,7 +221,7 @@
       "titel": "Sommerinterview Teil 1: Kaderplanung",
       "kurztext": "Florian Gut über Abgänge, gesuchte Neuzugänge und einen starken Sommer für Musa Abra.",
       "url": "/news/artikel/2025-07-21_club_sommerinterview-teil1.html",
-      "bild": "/assets/img/team-prob.webp",
+      "bild": "/assets/img/team-kader-collage.webp",
       "topNews": false,
       "team": "profis"
     },
@@ -233,7 +233,7 @@
       "titel": "Löwen-Kaderplanung für die nächste Saison",
       "kurztext": "Vier langjährige Spieler verlassen den Verein — Florian Gut über die Hintergründe.",
       "url": "/news/artikel/2025-05-19_profis_kaderplanung-naechste-saison.html",
-      "bild": "/assets/img/team-prob.webp",
+      "bild": "/assets/img/news/kaderplanung-naechste-saison.webp",
       "topNews": false,
       "team": "profis"
     },
