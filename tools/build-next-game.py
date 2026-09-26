@@ -128,21 +128,21 @@ def slide_html(g, i, label, jetzt):
 
     def tabelle_icon(extra_margin):
         stil = ' style="margin-left:8px"' if extra_margin else ""
-        return f'<a class="cal-link" href="{TABELLE_URL}" title="Zur Tabelle"{stil}><i data-lucide="list-ordered" style="width:14px;height:14px"></i></a>'
+        return f'<a class="cal-link" href="{TABELLE_URL}" title="Zur Tabelle"{stil}><i data-lucide="list-ordered" style="width:18px;height:18px"></i></a>'
 
     def bericht_icon(bericht_label, url, extra_margin):
         stil = ' style="margin-left:4px"' if extra_margin else ""
         if url:
-            return f'<a class="cal-link" href="{esc(url)}" title="{bericht_label}"{stil}><i data-lucide="file-text" style="width:14px;height:14px"></i></a>'
+            return f'<a class="cal-link" href="{esc(url)}" title="{bericht_label}"{stil}><i data-lucide="file-text" style="width:18px;height:18px"></i></a>'
         opazitaet = "opacity:.4;cursor:default" + (";margin-left:4px" if extra_margin else "")
-        return f'<span class="cal-link" style="{opazitaet}" title="{bericht_label}"><i data-lucide="file-text" style="width:14px;height:14px"></i></span>'
+        return f'<span class="cal-link" style="{opazitaet}" title="{bericht_label}"><i data-lucide="file-text" style="width:18px;height:18px"></i></span>'
 
     def livescore_icon(extra_margin):
         stil = ' style="margin-left:4px"' if extra_margin else ""
         if g.get("livescore"):
-            return f'<a class="cal-link" href="{esc(g["livescore"])}" target="_blank" rel="noopener" title="Livescore"{stil}><i data-lucide="activity" style="width:14px;height:14px"></i></a>'
+            return f'<a class="cal-link" href="{esc(g["livescore"])}" target="_blank" rel="noopener" title="Livescore"{stil}><i data-lucide="activity" style="width:18px;height:18px"></i></a>'
         opazitaet = "opacity:.4;cursor:default" + (";margin-left:4px" if extra_margin else "")
-        return f'<span class="cal-link" style="{opazitaet}" title="Livescore"><i data-lucide="activity" style="width:14px;height:14px"></i></span>'
+        return f'<span class="cal-link" style="{opazitaet}" title="Livescore"><i data-lucide="activity" style="width:18px;height:18px"></i></span>'
 
     def livestream_link(extra_margin):
         stil = ' style="margin-left:4px"' if extra_margin else ""
@@ -181,7 +181,7 @@ def slide_html(g, i, label, jetzt):
         f'<span class="eyebrow">{label}</span>'
         f'<h3 class="t-h4" style="margin:10px 0 6px;white-space:nowrap;overflow:hidden;font-size:15px">{matchup}</h3>'
         f'<p class="t-body-sm next-game-termin" style="margin-bottom:10px;white-space:nowrap;overflow:hidden">{termin_html}</p>'
-        f'<div class="fixture-result-row" style="margin-bottom:12px;flex-wrap:wrap">{row_html}</div>'
+        f'<div class="fixture-result-row" style="margin-bottom:4px;flex-wrap:wrap">{row_html}</div>'
         f'<div style="display:flex;gap:10px;flex-wrap:wrap">{cta_html}</div>'
         "</div>"
     )

@@ -71,20 +71,20 @@
       (venue ? ', <a href="' + venueLink + '" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">' + venue + '</a>' : '');
 
     function tabelleIcon(extraMargin) {
-      return '<a class="cal-link" href="' + TABELLE_URL + '" title="Zur Tabelle"' + (extraMargin ? ' style="margin-left:8px"' : '') + '><i data-lucide="list-ordered" style="width:14px;height:14px"></i></a>';
+      return '<a class="cal-link" href="' + TABELLE_URL + '" title="Zur Tabelle"' + (extraMargin ? ' style="margin-left:8px"' : '') + '><i data-lucide="list-ordered" style="width:18px;height:18px"></i></a>';
     }
     function berichtIconHTML(label2, url, extraMargin) {
       var stil = extraMargin ? ' style="margin-left:4px"' : '';
       if (url) {
-        return '<a class="cal-link" href="' + url + '" title="' + label2 + '"' + stil + '><i data-lucide="file-text" style="width:14px;height:14px"></i></a>';
+        return '<a class="cal-link" href="' + url + '" title="' + label2 + '"' + stil + '><i data-lucide="file-text" style="width:18px;height:18px"></i></a>';
       }
-      return '<span class="cal-link" style="opacity:.4;cursor:default' + (extraMargin ? ';margin-left:4px' : '') + '" title="' + label2 + '"><i data-lucide="file-text" style="width:14px;height:14px"></i></span>';
+      return '<span class="cal-link" style="opacity:.4;cursor:default' + (extraMargin ? ';margin-left:4px' : '') + '" title="' + label2 + '"><i data-lucide="file-text" style="width:18px;height:18px"></i></span>';
     }
     function livescoreIcon(extraMargin) {
       var stil = extraMargin ? ' style="margin-left:4px"' : '';
       return g.livescore
-        ? '<a class="cal-link" href="' + g.livescore + '" target="_blank" rel="noopener" title="Livescore"' + stil + '><i data-lucide="activity" style="width:14px;height:14px"></i></a>'
-        : '<span class="cal-link" style="opacity:.4;cursor:default' + (extraMargin ? ';margin-left:4px' : '') + '" title="Livescore"><i data-lucide="activity" style="width:14px;height:14px"></i></span>';
+        ? '<a class="cal-link" href="' + g.livescore + '" target="_blank" rel="noopener" title="Livescore"' + stil + '><i data-lucide="activity" style="width:18px;height:18px"></i></a>'
+        : '<span class="cal-link" style="opacity:.4;cursor:default' + (extraMargin ? ';margin-left:4px' : '') + '" title="Livescore"><i data-lucide="activity" style="width:18px;height:18px"></i></span>';
     }
     function livestreamLink(extraMargin) {
       var stil = extraMargin ? ' style="margin-left:4px"' : '';
@@ -121,7 +121,7 @@
       '<span class="eyebrow">' + label + '</span>' +
       '<h3 class="t-h4" style="margin:10px 0 6px;white-space:nowrap;overflow:hidden">' + matchup + '</h3>' +
       '<p class="t-body-sm next-game-termin" style="margin-bottom:10px;white-space:nowrap;overflow:hidden">' + terminHTML + '</p>' +
-      '<div class="fixture-result-row" style="margin-bottom:12px;flex-wrap:wrap">' + rowHTML + '</div>' +
+      '<div class="fixture-result-row" style="margin-bottom:4px;flex-wrap:wrap">' + rowHTML + '</div>' +
       '<div style="display:flex;gap:10px;flex-wrap:wrap">' + ctaHTML + '</div>' +
     '</div>';
   }
