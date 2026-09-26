@@ -108,12 +108,7 @@ def venue_maps_link(g):
 def spiel_status(g, jetzt):
     stunde, minute = (int(x) for x in (g.get("zeit") or "00:00").split(":"))
     anpfiff = datetime(g["date"].year, g["date"].month, g["date"].day, stunde, minute)
-    ende = anpfiff + timedelta(hours=2)
-    if jetzt < anpfiff:
-        return "bevorstehend"
-    if jetzt <= ende:
-        return "live"
-    return "abgeschlossen"
+    return "bevorstehend" if jetzt < anpfiff else "stattgefunden"
 
 
 def slide_html(g, i, label, jetzt):
@@ -156,13 +151,11 @@ def slide_html(g, i, label, jetzt):
 
     status = spiel_status(g, jetzt)
     if status == "bevorstehend":
-        row_html = tabelle_icon(False) + bericht_icon("Vorbericht", False) + livestream_link(True)
-    elif status == "live":
-        row_html = livestream_link(False) + livescore_icon(True) + tabelle_icon(False) + bericht_icon("Vorbericht", False) + bericht_icon("Bericht", False)
+        row_html = bericht_icon("Vorbericht", False) + tabelle_icon(False) + livescore_icon(False) + livestream_link(True)
     else:
         row_html = (
             f'<div class="fixture-result">{esc(g.get("ergebnis") or "– – : – –")}</div>'
-            + tabelle_icon(True) + bericht_icon("Spielbericht", False) + livescore_icon(False)
+            + tabelle_icon(True) + bericht_icon("Nachbericht", False)
         )
 
     if g["heim"]:

@@ -4,10 +4,10 @@
    verschwindet am darauffolgenden Dienstag automatisch (Marko, 26.09.2026).
    Eyebrow: Auswärtsspiele immer "Auswärts mit Gebrüll", Heimspiele
    durchnummeriert ("1. Heimspiel", ...). Die Zeile zwischen Termin und CTAs
-   richtet sich nach spielStatus() (Anpfiff aus Datum+Uhrzeit, +2h Spieldauer):
-   "bevorstehend" -> Tabelle, Vorbericht, Livestream; "live" -> Livestream,
-   Livescore, Tabelle, Vorbericht, Bericht; "abgeschlossen" -> Ergebnis, Tabelle,
-   Spielbericht, Livescore (kein Livestream mehr) (Marko, 26.09.2026).
+   richtet sich nach spielStatus() (Anpfiff aus Datum+Uhrzeit): vor Anpfiff
+   -> Vorbericht, Tabelle, Livescore, Livestream; ab Anpfiff bis zum
+   Dienstag-Cutoff -> Ergebnis, Tabelle, Nachbericht (kein Livestream/
+   Livescore mehr) (Marko, 26.09.2026).
    Quelle: /data/heimspiele.json (Heimspiele) + /data/spielplan-saison.json
    (profisAuswaerts), wie js/spielplan.js. */
 (function () {
@@ -56,11 +56,7 @@
   function spielStatus(g) {
     var teile = (g.zeit || '00:00').split(':').map(Number);
     var anpfiff = new Date(g.date.getFullYear(), g.date.getMonth(), g.date.getDate(), teile[0], teile[1]);
-    var ende = new Date(anpfiff.getTime() + 2 * 60 * 60 * 1000);
-    var jetzt = new Date();
-    if (jetzt < anpfiff) return 'bevorstehend';
-    if (jetzt <= ende) return 'live';
-    return 'abgeschlossen';
+    return new Date() < anpfiff ? 'bevorstehend' : 'stattgefunden';
   }
 
   function gameSlideHTML(g, i, label) {
@@ -98,19 +94,16 @@
     var status = spielStatus(g);
     var rowHTML;
     if (status === 'bevorstehend') {
-      /* Vor Anpfiff: Tabelle, Vorbericht (ausgegraut ohne Link), Livestream --
-         noch kein Ergebnis, noch kein Livescore. */
-      rowHTML = tabelleIcon(false) + berichtIconHTML('Vorbericht', false) + livestreamLink(true);
-    } else if (status === 'live') {
-      /* Waehrend des Spiels: erst der Livestream, dann Livescore/Tabelle/
-         Vorbericht/Bericht -- kein statischer (moeglicherweise veralteter)
-         Ergebnis-Platzhalter. */
-      rowHTML = livestreamLink(false) + livescoreIcon(true) + tabelleIcon(false) + berichtIconHTML('Vorbericht', false) + berichtIconHTML('Bericht', false);
+      /* Vor Anpfiff (auch waehrend des laufenden Spiels, solange der Anpfiff-
+         Zeitpunkt in der Zukunft liegt): Vorbericht, Tabelle, Boxscore/
+         Fieberkurve (Livescore), Livestream (Marko, 26.09.2026). */
+      rowHTML = berichtIconHTML('Vorbericht', false) + tabelleIcon(false) + livescoreIcon(false) + livestreamLink(true);
     } else {
-      /* Nach Spielende: Ergebnis gross, dann Tabelle, Spielbericht (nicht mehr
-         Vorbericht) und Livescore -- kein Livestream mehr. */
+      /* Ab Anpfiff bis zum Dienstag-Cutoff (danach verschwindet der Slide
+         ohnehin): Ergebnis gross, Tabelle, Nachbericht -- kein Livestream
+         und kein Livescore mehr. */
       rowHTML = '<div class="fixture-result">' + (g.ergebnis || '– – : – –') + '</div>' +
-        tabelleIcon(true) + berichtIconHTML('Spielbericht', false) + livescoreIcon(false);
+        tabelleIcon(true) + berichtIconHTML('Nachbericht', false);
     }
 
     var ctaHTML = g.heim
