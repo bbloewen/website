@@ -124,7 +124,7 @@ def slide_html(g, i, label, heute):
         bericht_label = "Vorbericht" if g["date"] >= heute else "Nachbericht"
         bericht_icon = f'<a class="cal-link" href="{esc(g["spielberichtUrl"])}" title="Zum {bericht_label}"><i data-lucide="file-text" style="width:14px;height:14px"></i></a>'
     else:
-        bericht_icon = '<span class="cal-link" style="opacity:.4;cursor:default" title="Spielbericht folgt"><i data-lucide="file-text" style="width:14px;height:14px"></i></span>'
+        bericht_icon = '<span class="cal-link" style="opacity:.4;cursor:default" title="Spielbericht"><i data-lucide="file-text" style="width:14px;height:14px"></i></span>'
 
     if g.get("livescore"):
         livescore_icon = f'<a class="cal-link" href="{esc(g["livescore"])}" target="_blank" rel="noopener" title="Livescore" style="margin-left:4px"><i data-lucide="activity" style="width:14px;height:14px"></i></a>'

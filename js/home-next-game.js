@@ -66,7 +66,7 @@
       var berichtLabel = g.date >= heute ? 'Vorbericht' : 'Nachbericht';
       berichtIcon = '<a class="cal-link" href="' + g.spielberichtUrl + '" title="Zum ' + berichtLabel + '"><i data-lucide="file-text" style="width:14px;height:14px"></i></a>';
     } else {
-      berichtIcon = '<span class="cal-link" style="opacity:.4;cursor:default" title="Spielbericht folgt"><i data-lucide="file-text" style="width:14px;height:14px"></i></span>';
+      berichtIcon = '<span class="cal-link" style="opacity:.4;cursor:default" title="Spielbericht"><i data-lucide="file-text" style="width:14px;height:14px"></i></span>';
     }
 
     var livescoreIcon = g.livescore
