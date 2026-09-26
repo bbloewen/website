@@ -79,12 +79,19 @@
     var tabelleIcon = '<a class="cal-link" href="' + meta.tableUrl + '" title="Zur Tabelle"><i data-lucide="list-ordered" style="width:16px;height:16px"></i></a>';
     var berichteHTML;
     if (g.team === 'profis') {
+      /* Bei Heimspielen zeigt spielberichtUrl immer auf die eigene, von Anfang an
+         bestehende Spieltagsseite (s. Hinweis in data/heimspiele.json) -- kein
+         echter Vor-/Nachbericht, dafuer gibt es dort schon den "Zum Spiel"-CTA.
+         Vorbericht/Nachbericht-Icon sind deshalb nur bei Auswaertsspielen aktiv,
+         wo das Feld einen eigens verfassten Artikel meint (z.B. Dragons Rhoendorf)
+         (Marko, 26.09.2026). */
+      var echterBerichtUrl = g.heim ? null : g.spielberichtUrl;
       var teilePro = (g.zeit || '00:00').split(':').map(Number);
       var anpfiffPro = new Date(g.date.getFullYear(), g.date.getMonth(), g.date.getDate(), teilePro[0], teilePro[1]);
       var vorAnpfiff = new Date() < anpfiffPro;
-      berichteHTML = berichtIcon('Vorbericht', g.spielberichtUrl, vorAnpfiff) +
+      berichteHTML = berichtIcon('Vorbericht', echterBerichtUrl, vorAnpfiff) +
         tabelleIcon +
-        berichtIcon('Nachbericht', g.spielberichtUrl, !vorAnpfiff);
+        berichtIcon('Nachbericht', echterBerichtUrl, !vorAnpfiff);
     } else {
       berichteHTML = tabelleIcon;
     }
