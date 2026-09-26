@@ -137,7 +137,7 @@ def slide_html(g, i, label, heute):
     else:
         cta_html = (
             '<a class="btn btn-primary btn-sm" style="color:#fff" href="/tickets/dauerkarte.html">'
-            '<i data-lucide="ticket" style="width:14px;height:14px"></i> Dauerkarte</a>'
+            '<i data-lucide="ticket" style="width:14px;height:14px"></i> Heimspiel-Dauerkarte</a>'
         )
 
     return (

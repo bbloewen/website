@@ -72,7 +72,7 @@
     var ctaHTML = g.heim
       ? '<a class="btn btn-primary btn-sm" style="color:#fff" href="/saison/profis/gameday/"><i data-lucide="ticket" style="width:14px;height:14px"></i> Tickets</a>' +
         '<a class="btn btn-ghost btn-sm" href="/tickets/dauerkarte.html">Dauerkarte</a>'
-      : '<a class="btn btn-primary btn-sm" style="color:#fff" href="/tickets/dauerkarte.html"><i data-lucide="ticket" style="width:14px;height:14px"></i> Dauerkarte</a>';
+      : '<a class="btn btn-primary btn-sm" style="color:#fff" href="/tickets/dauerkarte.html"><i data-lucide="ticket" style="width:14px;height:14px"></i> Heimspiel-Dauerkarte</a>';
 
     return '<div class="next-game-slide' + (i === 0 ? ' is-active' : '') + '">' +
       '<span class="eyebrow">' + label + '</span>' +
