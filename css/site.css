@@ -1996,7 +1996,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .hero-photo.hero-news-baskidballtalk-berlin-2026 { --hero-photo-url: url('/assets/img/news/baskidballtalk-berlin-2026.webp'); background-position: center 70%; }
 .hero-photo.hero-news-kapitaene-neuzugaenge-guards { --hero-photo-url: url('/assets/img/news/kapitaene-neuzugaenge-guards.webp'); background-position: center 35%; }
 
-/* Hero-Variante für die Startseite — Platz für eine Seiten-Box (Top-News/Heimspiel).
+/* Hero-Variante für die Startseite — Platz für das Spieltags-Widget.
    Höhe kommt vom vereinheitlichten .hero-photo-Basiswert, hier nur noch Layout/Typo. */
 .hero-photo.hero-lg { --hero-photo-url: url('/assets/img/hero-startseite-alt.webp'); background-position: center 20%; }
 .hero-photo.hero-lg .container { padding-top: 56px; padding-bottom: 56px; }
@@ -2011,25 +2011,6 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .hero-side-card { position: relative; padding-right: 40px; }
 .hero-side-card h3 { margin: 8px 0 10px; }
 .hero-side-card .btn { margin-top: 14px; }
-/* Testhilfe: Umschalter zwischen den beiden Hero-Widget-Varianten (siehe
-   js/home-hero-widget-toggle.js) — vor der finalen Entscheidung wieder entfernen. */
-.hero-widget-toggle {
-  position: absolute; right: 10px; bottom: 10px; z-index: 3;
-  width: 26px; height: 26px; border-radius: 50%; padding: 0;
-  display: inline-flex; align-items: center; justify-content: center;
-  background: rgba(0,18,45,.08); border: 1px solid rgba(0,18,45,.14);
-  color: var(--text-secondary); cursor: pointer;
-  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
-}
-.hero-widget-toggle:hover { background: var(--color-brand-orange); color: #fff; border-color: var(--color-brand-orange); }
-.news-slides { display: grid; overflow: hidden; }
-.news-slide {
-  grid-area: 1 / 1; opacity: 0; transform: translateY(100%);
-  transition: transform var(--dur-slow) var(--ease-out), opacity var(--dur-slow) var(--ease-out);
-}
-.news-slide.is-active { opacity: 1; transform: translateY(0); }
-.news-slide.is-leaving { opacity: 0; transform: translateY(-100%); }
-.news-slide.no-anim { transition: none; }
 .news-dots {
   position: absolute; top: 24px; right: 16px; bottom: 24px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
@@ -2049,8 +2030,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 }
 .news-dot:hover::before { background: var(--color-orange-100); }
 .news-dot.is-active::before { background: var(--color-brand-orange); }
-/* Nächstes-Heimspiel-Widget: einfacher Klick-Umschalter (kein Auto-Wechsel), nutzt
-   dieselben Punkte (.news-dot) wie der Top-News-Slider. */
+/* Spieltags-Widget im Homepage-Hero: einfacher Klick-Umschalter (kein Auto-Wechsel). */
 .next-game-slide { display: none; }
 .next-game-slide.is-active { display: block; }
 @media (max-width: 1023px) {
