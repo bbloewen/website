@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
     'U14m': 'U14 männlich',
     'U14w': 'U14 weiblich',
     'U15m': 'U15 männlich',
+    'U17m': 'U17 männlich',
     'U16m': 'U16 männlich',
     'U16w': 'U16 weiblich',
     'U19m': 'U19 männlich',
@@ -63,10 +64,27 @@ document.addEventListener('DOMContentLoaded', function () {
   var FILTER_LABELS = {
     'U8mix': 'U8 mixed', 'U9mix': 'U9 mixed', 'U10mix': 'U10 mixed', 'U10w': 'U10 weiblich',
     'U11mix': 'U11 mixed', 'U12mix': 'U12 mixed', 'U12m': 'MDL U12 männlich', 'U12w': 'U12 weiblich',
-    'U13mix': 'U13 mixed', 'U13m': 'U13 männlich', 'U14mix': 'U14 mixed', 'U14m': 'U14 männlich',
-    'U14w': 'U14 weiblich', 'U15m': 'U15 männlich', 'U16m': 'U16 männlich', 'U16w': 'U16 weiblich',
+    'U13mix': 'U13 mixed', 'U13m': 'U13 männlich', 'U13m-mdl': 'MDL U13 männlich',
+    'U14mix': 'U14 mixed', 'U14m': 'U14 männlich', 'U14m-mdl': 'MDL U14 männlich',
+    'U14w': 'U14 weiblich', 'U15m': 'U15 männlich', 'U15m-mdl': 'MDL U15 männlich',
+    'U17m': 'MDL U17 männlich',
+    'U16m': 'U16 männlich', 'U16w': 'U16 weiblich',
     'U19m': 'U19 männlich', 'U19w': 'U19 weiblich'
   };
+
+  /* U13m/U14m/U15m sind Team-Schluessel, die sich unsere eigenen (verein
+     "loewen") Teams mit einem Partnerverein teilen (USV Erfurt bzw. BC
+     Erfurt) -- deren MDL-Zugehoerigkeit ist nicht bestaetigt (Marko,
+     27.09.2026). Damit "Nur unser Team" im Filter tatsaechlich nur unser
+     Team zeigt, bekommen unsere eigenen Eintraege dieser drei Kategorien
+     einen eigenen, unverwechselbaren Schluessel ("-mdl"-Suffix). U12m/1 und
+     U17m sind exklusiv unser Team, brauchen daher keinen Suffix. */
+  var GETEILTE_KEYS = ['U13m', 'U14m', 'U15m'];
+  function resolveTeamKey(g) {
+    var basis = TEAM_KEY[g.team] || g.team;
+    if (g.verein === 'loewen' && GETEILTE_KEYS.indexOf(basis) !== -1) return basis + '-mdl';
+    return basis;
+  }
 
   var vereinLabel = {
     'bc-erfurt': 'BC Erfurt',
@@ -226,7 +244,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!g.termine || !g.termine.length) return;
       var teamName = teamNameMitMdlPraefix(g);
       var jahrgang = jahrgangLabel(g);
-      var teamKey = TEAM_KEY[g.team] || g.team;
+      var teamKey = resolveTeamKey(g);
       g.termine.forEach(function (t) {
         sessions.push({
           teamName: teamName, jahrgang: jahrgang, teamKey: teamKey,
@@ -350,7 +368,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var badgeHTML = vereinLink[g.verein]
       ? '<a class="team-badge ' + vereinBadgeClass[g.verein] + '" href="' + vereinLink[g.verein] + '" target="_blank" rel="noopener">' + vereinLabel[g.verein] + '</a>'
       : '<span class="team-badge ' + vereinBadgeClass[g.verein] + '">' + vereinLabel[g.verein] + '</span>';
-    var teamKey = TEAM_KEY[g.team] || g.team;
+    var teamKey = resolveTeamKey(g);
     return (
       '<div class="card training-row" data-verein="' + g.verein + '" data-jahre="' + g.jahre.join(',') + '" data-team="' + teamKey + '">' +
         '<div>' +
@@ -365,7 +383,7 @@ document.addEventListener('DOMContentLoaded', function () {
     );
   }
 
-  fetch('/data/trainingszeiten.json?v=1789737851')
+  fetch('/data/trainingszeiten.json?v=1790464103')
     .then(function (res) { return res.json(); })
     .then(function (data) {
       // Reihenfolge = Reihenfolge im JSON: juengster Jahrgang oben, Erwachsenenteams
@@ -385,13 +403,12 @@ document.addEventListener('DOMContentLoaded', function () {
         jahrgangSelect.appendChild(opt);
       });
 
-      var alleTeams = Array.from(new Set(data.gruppen.map(function (g) { return TEAM_KEY[g.team] || g.team; })));
+      var alleTeams = Array.from(new Set(data.gruppen.map(resolveTeamKey)));
       // Kategorien mit einem eigenen (verein "loewen") Team stehen alphabetisch
-      // ganz oben im Filter -- auch wenn sich der Team-Schluessel z.B. bei U13m/
-      // U14m/U15m mit einem Partnerverein teilt (siehe teamNameMitMdlPraefix).
+      // ganz oben im Filter. U13m/U14m/U15m bekommen dafuer ueber resolveTeamKey()
+      // einen eigenen "-mdl"-Schluessel, getrennt vom geteilten Partnerverein-Team.
       var unsereTeamKeys = new Set(
-        data.gruppen.filter(function (g) { return g.verein === 'loewen'; })
-          .map(function (g) { return TEAM_KEY[g.team] || g.team; })
+        data.gruppen.filter(function (g) { return g.verein === 'loewen'; }).map(resolveTeamKey)
       );
       // Erwachsenenteams (aelter als U19) haben keine U-Nummer und stehen in einer
       // festen Reihenfolge ganz am Ende, statt ueber die U-Jahrgaenge sortiert zu werden.
