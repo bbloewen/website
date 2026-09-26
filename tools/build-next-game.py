@@ -114,30 +114,44 @@ def slide_html(g, i, label, heute):
     kurz_datum = f"{WOCHENTAGE[js_tag]}, {d.day:02d}.{d.month:02d}."
 
     termin_html = (
-        f'<a href="{calendar_link(g)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">'
+        f'<a href="{calendar_link(g)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;color:inherit;text-decoration:none">'
+        '<i data-lucide="calendar" style="width:14px;height:14px;flex-shrink:0"></i>'
         f'{kurz_datum}, <strong>{esc(g["zeit"])} Uhr</strong></a>'
         + (f', <a href="{esc(venue_link)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">{venue}</a>' if venue else "")
     )
 
-    bericht_icon = ""
     if g.get("spielberichtUrl"):
         bericht_label = "Vorbericht" if g["date"] >= heute else "Nachbericht"
         bericht_icon = f'<a class="cal-link" href="{esc(g["spielberichtUrl"])}" title="Zum {bericht_label}"><i data-lucide="file-text" style="width:14px;height:14px"></i></a>'
+    else:
+        bericht_icon = '<span class="cal-link" style="opacity:.4;cursor:default" title="Spielbericht folgt"><i data-lucide="file-text" style="width:14px;height:14px"></i></span>'
 
     livestream_url = esc(g.get("livestream") or GENERISCHER_LIVESTREAM_URL)
+
+    if g["heim"]:
+        cta_html = (
+            '<a class="btn btn-primary btn-sm" style="color:#fff" href="/saison/profis/gameday/">'
+            '<i data-lucide="ticket" style="width:14px;height:14px"></i> Tickets</a>'
+            '<a class="btn btn-ghost btn-sm" href="/tickets/dauerkarte.html">Dauerkarte</a>'
+        )
+    else:
+        cta_html = (
+            '<a class="btn btn-primary btn-sm" style="color:#fff" href="/tickets/dauerkarte.html">'
+            '<i data-lucide="ticket" style="width:14px;height:14px"></i> Dauerkarte</a>'
+        )
 
     return (
         f'<div class="next-game-slide{" is-active" if i == 0 else ""}">'
         f'<span class="eyebrow">{label}</span>'
         f'<h3 class="t-h4" style="margin:10px 0 6px;white-space:nowrap;overflow:hidden;font-size:15px">{matchup}</h3>'
-        '<p class="t-body-sm" style="margin-bottom:10px;display:flex;align-items:center;gap:6px">'
-        '<i data-lucide="calendar" style="width:14px;height:14px;flex-shrink:0"></i>'
-        f'<span class="next-game-termin" style="white-space:nowrap;overflow:hidden">{termin_html}</span></p>'
-        f'<div class="fixture-result-row" style="margin-bottom:10px"><div class="fixture-result">{esc(g.get("ergebnis") or "– – : – –")}</div></div>'
-        f'<p style="margin-bottom:8px"><a class="card-link" href="{livestream_url}" target="_blank" rel="noopener"><i data-lucide="video" style="width:14px;height:14px"></i> Zum Livestream</a></p>'
-        '<div style="display:flex;gap:10px;margin-top:10px">'
+        f'<p class="t-body-sm next-game-termin" style="margin-bottom:10px;white-space:nowrap;overflow:hidden">{termin_html}</p>'
+        f'<div class="fixture-result-row" style="margin-bottom:12px;flex-wrap:wrap">'
+        f'<div class="fixture-result">{esc(g.get("ergebnis") or "– – : – –")}</div>'
         f'<a class="cal-link" href="{TABELLE_URL}" title="Zur Tabelle"><i data-lucide="list-ordered" style="width:14px;height:14px"></i></a>'
-        f'{bericht_icon}</div>'
+        f'{bericht_icon}'
+        f'<a class="card-link" href="{livestream_url}" target="_blank" rel="noopener" style="margin-left:4px"><i data-lucide="video" style="width:14px;height:14px"></i> Zum Livestream</a>'
+        "</div>"
+        f'<div style="display:flex;gap:10px;flex-wrap:wrap">{cta_html}</div>'
         "</div>"
     )
 

@@ -56,29 +56,35 @@
     var venueLink = venueMapsLink(g);
     var kurzDatum = WOCHENTAGE[g.date.getDay()] + ', ' + pad2(g.date.getDate()) + '.' + pad2(g.date.getMonth() + 1) + '.';
 
-    var terminHTML = '<a href="' + calendarLink(g) + '" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">' +
+    var terminHTML = '<a href="' + calendarLink(g) + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;color:inherit;text-decoration:none">' +
+      '<i data-lucide="calendar" style="width:14px;height:14px;flex-shrink:0"></i>' +
       kurzDatum + ', <strong>' + g.zeit + ' Uhr</strong></a>' +
       (venue ? ', <a href="' + venueLink + '" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">' + venue + '</a>' : '');
 
-    var berichtIcon = '';
+    var berichtIcon;
     if (g.spielberichtUrl) {
       var berichtLabel = g.date >= heute ? 'Vorbericht' : 'Nachbericht';
       berichtIcon = '<a class="cal-link" href="' + g.spielberichtUrl + '" title="Zum ' + berichtLabel + '"><i data-lucide="file-text" style="width:14px;height:14px"></i></a>';
+    } else {
+      berichtIcon = '<span class="cal-link" style="opacity:.4;cursor:default" title="Spielbericht folgt"><i data-lucide="file-text" style="width:14px;height:14px"></i></span>';
     }
+
+    var ctaHTML = g.heim
+      ? '<a class="btn btn-primary btn-sm" style="color:#fff" href="/saison/profis/gameday/"><i data-lucide="ticket" style="width:14px;height:14px"></i> Tickets</a>' +
+        '<a class="btn btn-ghost btn-sm" href="/tickets/dauerkarte.html">Dauerkarte</a>'
+      : '<a class="btn btn-primary btn-sm" style="color:#fff" href="/tickets/dauerkarte.html"><i data-lucide="ticket" style="width:14px;height:14px"></i> Dauerkarte</a>';
 
     return '<div class="next-game-slide' + (i === 0 ? ' is-active' : '') + '">' +
       '<span class="eyebrow">' + label + '</span>' +
       '<h3 class="t-h4" style="margin:10px 0 6px;white-space:nowrap;overflow:hidden">' + matchup + '</h3>' +
-      '<p class="t-body-sm" style="margin-bottom:10px;display:flex;align-items:center;gap:6px">' +
-        '<i data-lucide="calendar" style="width:14px;height:14px;flex-shrink:0"></i>' +
-        '<span class="next-game-termin" style="white-space:nowrap;overflow:hidden">' + terminHTML + '</span>' +
-      '</p>' +
-      '<div class="fixture-result-row" style="margin-bottom:10px"><div class="fixture-result">' + (g.ergebnis || '– – : – –') + '</div></div>' +
-      '<p style="margin-bottom:8px"><a class="card-link" href="' + (g.livestream || GENERISCHER_LIVESTREAM_URL) + '" target="_blank" rel="noopener"><i data-lucide="video" style="width:14px;height:14px"></i> Zum Livestream</a></p>' +
-      '<div style="display:flex;gap:10px;margin-top:10px">' +
+      '<p class="t-body-sm next-game-termin" style="margin-bottom:10px;white-space:nowrap;overflow:hidden">' + terminHTML + '</p>' +
+      '<div class="fixture-result-row" style="margin-bottom:12px;flex-wrap:wrap">' +
+        '<div class="fixture-result">' + (g.ergebnis || '– – : – –') + '</div>' +
         '<a class="cal-link" href="' + TABELLE_URL + '" title="Zur Tabelle"><i data-lucide="list-ordered" style="width:14px;height:14px"></i></a>' +
         berichtIcon +
+        '<a class="card-link" href="' + (g.livestream || GENERISCHER_LIVESTREAM_URL) + '" target="_blank" rel="noopener" style="margin-left:4px"><i data-lucide="video" style="width:14px;height:14px"></i> Zum Livestream</a>' +
       '</div>' +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap">' + ctaHTML + '</div>' +
     '</div>';
   }
 
