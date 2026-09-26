@@ -1,5 +1,5 @@
 {
-  "hinweis": "Quelle: basketball-bund.net REST-API (rest/competition/spielplan/id/<ligaId>), oeffentlich ohne Login abrufbar -- Details im Skriptkopf von tools/fetch-nachwuchs-spielplan.py. Manuell abgerufen, kein automatischer wiederkehrender Abruf eingerichtet; Stand kann veralten, bis das nachgeholt ist (siehe Skriptkopf).",
+  "hinweis": "Quelle: basketball-bund.net REST-API (rest/competition/spielplan/id/<ligaId>), oeffentlich ohne Login abrufbar. Wird taeglich per n8n-Workflow Website: Nachwuchs-Spielplan abrufen aktualisiert.",
   "teams": {
     "U12m/1": {
       "ligaId": 53255,
