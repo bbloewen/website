@@ -3,11 +3,11 @@
    Spiel bleibt bis einschliesslich Montag nach dem Spieltag sichtbar und
    verschwindet am darauffolgenden Dienstag automatisch (Marko, 26.09.2026).
    Eyebrow: Auswärtsspiele immer "Auswärts mit Gebrüll", Heimspiele
-   durchnummeriert ("1. Heimspiel", ...). Jeder Slide zeigt dieselben Zeilen
-   (Titel, Termin+Ort, Ergebnis, Livestream, Tabelle/Bericht) -- Ergebnis und
-   Livestream stehen bewusst auch bei noch nicht gespielten Partien (leerer
-   Platzhalter bzw. genereller Sender-Link), damit das Widget beim Wechseln
-   zwischen den Slides nicht in der Höhe springt (Marko, 26.09.2026).
+   durchnummeriert ("1. Heimspiel", ...). Die Zeile zwischen Termin und CTAs
+   richtet sich nach spielStatus() (Anpfiff aus Datum+Uhrzeit, +2h Spieldauer):
+   "bevorstehend" -> Tabelle, Vorbericht, Livestream; "live" -> Livestream,
+   Livescore, Tabelle, Vorbericht, Bericht; "abgeschlossen" -> Ergebnis, Tabelle,
+   Spielbericht, Livescore (kein Livestream mehr) (Marko, 26.09.2026).
    Quelle: /data/heimspiele.json (Heimspiele) + /data/spielplan-saison.json
    (profisAuswaerts), wie js/spielplan.js. */
 (function () {
@@ -50,7 +50,20 @@
     return q ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q) : null;
   }
 
-  function gameSlideHTML(g, i, label, heute) {
+  /* Spielstatus anhand von Datum+Uhrzeit (nicht anhand des cutoffDienstag-Fensters,
+     das nur bestimmt, welcher Slide "aktuell" ist) -- ein Spiel gilt ab Anpfiff
+     bis Anpfiff+2h als "live", danach als "abgeschlossen" (Marko, 26.09.2026). */
+  function spielStatus(g) {
+    var teile = (g.zeit || '00:00').split(':').map(Number);
+    var anpfiff = new Date(g.date.getFullYear(), g.date.getMonth(), g.date.getDate(), teile[0], teile[1]);
+    var ende = new Date(anpfiff.getTime() + 2 * 60 * 60 * 1000);
+    var jetzt = new Date();
+    if (jetzt < anpfiff) return 'bevorstehend';
+    if (jetzt <= ende) return 'live';
+    return 'abgeschlossen';
+  }
+
+  function gameSlideHTML(g, i, label) {
     var matchup = g.heim ? ('Basketball Löwen – ' + g.gegner) : (g.gegner + ' – Basketball Löwen');
     var venue = g.heim ? 'Riethsporthalle' : (g.halle || g.ort || '');
     var venueLink = venueMapsLink(g);
@@ -61,17 +74,44 @@
       kurzDatum + ', <strong>' + g.zeit + ' Uhr</strong></a>' +
       (venue ? ', <a href="' + venueLink + '" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">' + venue + '</a>' : '');
 
-    var berichtIcon;
-    if (g.spielberichtUrl) {
-      var berichtLabel = g.date >= heute ? 'Vorbericht' : 'Nachbericht';
-      berichtIcon = '<a class="cal-link" href="' + g.spielberichtUrl + '" title="Zum ' + berichtLabel + '"><i data-lucide="file-text" style="width:14px;height:14px"></i></a>';
-    } else {
-      berichtIcon = '<span class="cal-link" style="opacity:.4;cursor:default" title="Spielbericht"><i data-lucide="file-text" style="width:14px;height:14px"></i></span>';
+    function tabelleIcon(extraMargin) {
+      return '<a class="cal-link" href="' + TABELLE_URL + '" title="Zur Tabelle"' + (extraMargin ? ' style="margin-left:8px"' : '') + '><i data-lucide="list-ordered" style="width:14px;height:14px"></i></a>';
+    }
+    function berichtIconHTML(label2, extraMargin) {
+      var stil = extraMargin ? ' style="margin-left:4px"' : '';
+      if (g.spielberichtUrl) {
+        return '<a class="cal-link" href="' + g.spielberichtUrl + '" title="' + label2 + '"' + stil + '><i data-lucide="file-text" style="width:14px;height:14px"></i></a>';
+      }
+      return '<span class="cal-link" style="opacity:.4;cursor:default' + (extraMargin ? ';margin-left:4px' : '') + '" title="' + label2 + '"><i data-lucide="file-text" style="width:14px;height:14px"></i></span>';
+    }
+    function livescoreIcon(extraMargin) {
+      var stil = extraMargin ? ' style="margin-left:4px"' : '';
+      return g.livescore
+        ? '<a class="cal-link" href="' + g.livescore + '" target="_blank" rel="noopener" title="Livescore"' + stil + '><i data-lucide="activity" style="width:14px;height:14px"></i></a>'
+        : '<span class="cal-link" style="opacity:.4;cursor:default' + (extraMargin ? ';margin-left:4px' : '') + '" title="Livescore"><i data-lucide="activity" style="width:14px;height:14px"></i></span>';
+    }
+    function livestreamLink(extraMargin) {
+      var stil = extraMargin ? ' style="margin-left:4px"' : '';
+      return '<a class="card-link" href="' + (g.livestream || GENERISCHER_LIVESTREAM_URL) + '" target="_blank" rel="noopener"' + stil + '><i data-lucide="video" style="width:14px;height:14px"></i> Zum Livestream</a>';
     }
 
-    var livescoreIcon = g.livescore
-      ? '<a class="cal-link" href="' + g.livescore + '" target="_blank" rel="noopener" title="Livescore" style="margin-left:4px"><i data-lucide="activity" style="width:14px;height:14px"></i></a>'
-      : '<span class="cal-link" style="opacity:.4;cursor:default;margin-left:4px" title="Livescore"><i data-lucide="activity" style="width:14px;height:14px"></i></span>';
+    var status = spielStatus(g);
+    var rowHTML;
+    if (status === 'bevorstehend') {
+      /* Vor Anpfiff: Tabelle, Vorbericht (ausgegraut ohne Link), Livestream --
+         noch kein Ergebnis, noch kein Livescore. */
+      rowHTML = tabelleIcon(false) + berichtIconHTML('Vorbericht', false) + livestreamLink(true);
+    } else if (status === 'live') {
+      /* Waehrend des Spiels: erst der Livestream, dann Livescore/Tabelle/
+         Vorbericht/Bericht -- kein statischer (moeglicherweise veralteter)
+         Ergebnis-Platzhalter. */
+      rowHTML = livestreamLink(false) + livescoreIcon(true) + tabelleIcon(false) + berichtIconHTML('Vorbericht', false) + berichtIconHTML('Bericht', false);
+    } else {
+      /* Nach Spielende: Ergebnis gross, dann Tabelle, Spielbericht (nicht mehr
+         Vorbericht) und Livescore -- kein Livestream mehr. */
+      rowHTML = '<div class="fixture-result">' + (g.ergebnis || '– – : – –') + '</div>' +
+        tabelleIcon(true) + berichtIconHTML('Spielbericht', false) + livescoreIcon(false);
+    }
 
     var ctaHTML = g.heim
       ? '<a class="btn btn-primary btn-sm" style="color:#fff" href="/saison/profis/gameday/"><i data-lucide="ticket" style="width:14px;height:14px"></i> Tickets</a>' +
@@ -82,13 +122,7 @@
       '<span class="eyebrow">' + label + '</span>' +
       '<h3 class="t-h4" style="margin:10px 0 6px;white-space:nowrap;overflow:hidden">' + matchup + '</h3>' +
       '<p class="t-body-sm next-game-termin" style="margin-bottom:10px;white-space:nowrap;overflow:hidden">' + terminHTML + '</p>' +
-      '<div class="fixture-result-row" style="margin-bottom:12px;flex-wrap:wrap">' +
-        '<div class="fixture-result">' + (g.ergebnis || '– – : – –') + '</div>' +
-        '<a class="cal-link" href="' + TABELLE_URL + '" title="Zur Tabelle" style="margin-left:8px"><i data-lucide="list-ordered" style="width:14px;height:14px"></i></a>' +
-        berichtIcon +
-        livescoreIcon +
-        '<a class="card-link" href="' + (g.livestream || GENERISCHER_LIVESTREAM_URL) + '" target="_blank" rel="noopener" style="margin-left:4px"><i data-lucide="video" style="width:14px;height:14px"></i> Zum Livestream</a>' +
-      '</div>' +
+      '<div class="fixture-result-row" style="margin-bottom:12px;flex-wrap:wrap">' + rowHTML + '</div>' +
       '<div style="display:flex;gap:10px;flex-wrap:wrap">' + ctaHTML + '</div>' +
     '</div>';
   }
@@ -143,7 +177,7 @@
     var heimZaehler = 0;
     var slidesHTML = slides.map(function (g, i) {
       var label = g.heim ? (++heimZaehler + '. Heimspiel') : 'Auswärts mit Gebrüll';
-      return gameSlideHTML(g, i, label, heute);
+      return gameSlideHTML(g, i, label);
     }).join('');
 
     var dotsHTML = slides.length > 1

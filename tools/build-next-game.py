@@ -105,7 +105,18 @@ def venue_maps_link(g):
     return f"https://www.google.com/maps/search/?api=1&query={quote(q)}" if q else None
 
 
-def slide_html(g, i, label, heute):
+def spiel_status(g, jetzt):
+    stunde, minute = (int(x) for x in (g.get("zeit") or "00:00").split(":"))
+    anpfiff = datetime(g["date"].year, g["date"].month, g["date"].day, stunde, minute)
+    ende = anpfiff + timedelta(hours=2)
+    if jetzt < anpfiff:
+        return "bevorstehend"
+    if jetzt <= ende:
+        return "live"
+    return "abgeschlossen"
+
+
+def slide_html(g, i, label, jetzt):
     matchup = f'Basketball Löwen – {esc(g["gegner"])}' if g["heim"] else f'{esc(g["gegner"])} – Basketball Löwen'
     venue = "Riethsporthalle" if g["heim"] else esc(g.get("halle") or g.get("ort") or "")
     venue_link = venue_maps_link(g)
@@ -120,18 +131,39 @@ def slide_html(g, i, label, heute):
         + (f', <a href="{esc(venue_link)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">{venue}</a>' if venue else "")
     )
 
-    if g.get("spielberichtUrl"):
-        bericht_label = "Vorbericht" if g["date"] >= heute else "Nachbericht"
-        bericht_icon = f'<a class="cal-link" href="{esc(g["spielberichtUrl"])}" title="Zum {bericht_label}"><i data-lucide="file-text" style="width:14px;height:14px"></i></a>'
-    else:
-        bericht_icon = '<span class="cal-link" style="opacity:.4;cursor:default" title="Spielbericht"><i data-lucide="file-text" style="width:14px;height:14px"></i></span>'
+    def tabelle_icon(extra_margin):
+        stil = ' style="margin-left:8px"' if extra_margin else ""
+        return f'<a class="cal-link" href="{TABELLE_URL}" title="Zur Tabelle"{stil}><i data-lucide="list-ordered" style="width:14px;height:14px"></i></a>'
 
-    if g.get("livescore"):
-        livescore_icon = f'<a class="cal-link" href="{esc(g["livescore"])}" target="_blank" rel="noopener" title="Livescore" style="margin-left:4px"><i data-lucide="activity" style="width:14px;height:14px"></i></a>'
-    else:
-        livescore_icon = '<span class="cal-link" style="opacity:.4;cursor:default;margin-left:4px" title="Livescore"><i data-lucide="activity" style="width:14px;height:14px"></i></span>'
+    def bericht_icon(bericht_label, extra_margin):
+        stil = ' style="margin-left:4px"' if extra_margin else ""
+        if g.get("spielberichtUrl"):
+            return f'<a class="cal-link" href="{esc(g["spielberichtUrl"])}" title="{bericht_label}"{stil}><i data-lucide="file-text" style="width:14px;height:14px"></i></a>'
+        opazitaet = "opacity:.4;cursor:default" + (";margin-left:4px" if extra_margin else "")
+        return f'<span class="cal-link" style="{opazitaet}" title="{bericht_label}"><i data-lucide="file-text" style="width:14px;height:14px"></i></span>'
 
-    livestream_url = esc(g.get("livestream") or GENERISCHER_LIVESTREAM_URL)
+    def livescore_icon(extra_margin):
+        stil = ' style="margin-left:4px"' if extra_margin else ""
+        if g.get("livescore"):
+            return f'<a class="cal-link" href="{esc(g["livescore"])}" target="_blank" rel="noopener" title="Livescore"{stil}><i data-lucide="activity" style="width:14px;height:14px"></i></a>'
+        opazitaet = "opacity:.4;cursor:default" + (";margin-left:4px" if extra_margin else "")
+        return f'<span class="cal-link" style="{opazitaet}" title="Livescore"><i data-lucide="activity" style="width:14px;height:14px"></i></span>'
+
+    def livestream_link(extra_margin):
+        stil = ' style="margin-left:4px"' if extra_margin else ""
+        livestream_url = esc(g.get("livestream") or GENERISCHER_LIVESTREAM_URL)
+        return f'<a class="card-link" href="{livestream_url}" target="_blank" rel="noopener"{stil}><i data-lucide="video" style="width:14px;height:14px"></i> Zum Livestream</a>'
+
+    status = spiel_status(g, jetzt)
+    if status == "bevorstehend":
+        row_html = tabelle_icon(False) + bericht_icon("Vorbericht", False) + livestream_link(True)
+    elif status == "live":
+        row_html = livestream_link(False) + livescore_icon(True) + tabelle_icon(False) + bericht_icon("Vorbericht", False) + bericht_icon("Bericht", False)
+    else:
+        row_html = (
+            f'<div class="fixture-result">{esc(g.get("ergebnis") or "– – : – –")}</div>'
+            + tabelle_icon(True) + bericht_icon("Spielbericht", False) + livescore_icon(False)
+        )
 
     if g["heim"]:
         cta_html = (
@@ -150,13 +182,7 @@ def slide_html(g, i, label, heute):
         f'<span class="eyebrow">{label}</span>'
         f'<h3 class="t-h4" style="margin:10px 0 6px;white-space:nowrap;overflow:hidden;font-size:15px">{matchup}</h3>'
         f'<p class="t-body-sm next-game-termin" style="margin-bottom:10px;white-space:nowrap;overflow:hidden">{termin_html}</p>'
-        f'<div class="fixture-result-row" style="margin-bottom:12px;flex-wrap:wrap">'
-        f'<div class="fixture-result">{esc(g.get("ergebnis") or "– – : – –")}</div>'
-        f'<a class="cal-link" href="{TABELLE_URL}" title="Zur Tabelle" style="margin-left:8px"><i data-lucide="list-ordered" style="width:14px;height:14px"></i></a>'
-        f'{bericht_icon}'
-        f'{livescore_icon}'
-        f'<a class="card-link" href="{livestream_url}" target="_blank" rel="noopener" style="margin-left:4px"><i data-lucide="video" style="width:14px;height:14px"></i> Zum Livestream</a>'
-        "</div>"
+        f'<div class="fixture-result-row" style="margin-bottom:12px;flex-wrap:wrap">{row_html}</div>'
         f'<div style="display:flex;gap:10px;flex-wrap:wrap">{cta_html}</div>'
         "</div>"
     )
@@ -192,7 +218,8 @@ def main():
             raise SystemExit("js/home-next-game.js hat sich geändert — dieses Skript "
                               "muss nachgezogen werden, bevor es wieder läuft.")
 
-    heute = datetime.now().date()
+    jetzt = datetime.now()
+    heute = jetzt.date()
     alle = lade_spiele()
 
     vergangene = [g for g in alle if g["date"] <= heute]
@@ -219,7 +246,7 @@ def main():
             label = f"{heim_zaehler}. Heimspiel"
         else:
             label = "Auswärts mit Gebrüll"
-        slides.append(slide_html(g, i, label, heute))
+        slides.append(slide_html(g, i, label, jetzt))
 
     dots = ""
     if len(slides_daten) > 1:
