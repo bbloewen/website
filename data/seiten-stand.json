@@ -54,7 +54,7 @@
       "lastmod": "2026-09-18"
     },
     "index.html": {
-      "hash": "3b56fe935cfa1007797f27a4363d5154384b233e",
+      "hash": "b9fd7add605c4d7f0c2e5c29dddfd5fe44739da6",
       "lastmod": "2026-09-26"
     },
     "kontakt.html": {
@@ -70,12 +70,12 @@
       "lastmod": "2026-08-08"
     },
     "news/aktuelles.html": {
-      "hash": "8cc86d953e9e4069e7f0a5c14555f11732a74aee",
-      "lastmod": "2026-09-25"
+      "hash": "ca118bc4c9d5549e8971eab42b9e8dc9517fa7a7",
+      "lastmod": "2026-09-26"
     },
     "news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html": {
-      "hash": "a4cfe6f4f9f898254be96649dccf5afe11e6121d",
-      "lastmod": "2026-09-25"
+      "hash": "901fc28bb43c6673b6716a68789e4937ccb5d5bb",
+      "lastmod": "2026-09-26"
     },
     "news/artikel/2025-04-29_profis_achtelfinale-aus.html": {
       "hash": "cf749c3962fb38fb93f67ad9610c102508e69af3",
@@ -146,8 +146,16 @@
       "lastmod": "2026-09-25"
     },
     "news/artikel/2026-09-23_profis_kapitaene-neuzugaenge-guards.html": {
-      "hash": "b877a27827947df4f205e6d0d31944cd8181ad1a",
-      "lastmod": "2026-09-25"
+      "hash": "824c757a2c60acfbfaf902839fba71adefbc4782",
+      "lastmod": "2026-09-26"
+    },
+    "news/artikel/2026-09-24_profis_neuzugaenge-international.html": {
+      "hash": "2c1b6d140e1cdd456d1d9b9d1d2fb4ef094b4d21",
+      "lastmod": "2026-09-26"
+    },
+    "news/artikel/2026-09-25_profis_junge-loewen.html": {
+      "hash": "6d5fb6ceae587f8f8145cd1f2d2a927d45364082",
+      "lastmod": "2026-09-26"
     },
     "news/insta-archiv/loewen-17884318188501699.html": {
       "hash": "beb6b66459f51d6457e1f20e348d5ad0dd83002b",
@@ -274,8 +282,8 @@
       "lastmod": "2026-09-20"
     },
     "saison/profis.html": {
-      "hash": "0611992840bb37103f0f15a09519089e071d7600",
-      "lastmod": "2026-09-25"
+      "hash": "ec1b3c9bf04d7eb3bfe95a71835113be6f92c4a3",
+      "lastmod": "2026-09-26"
     },
     "saison/profis/gameday/2026-10-11-bba-ludwigsburg.html": {
       "hash": "0dfb2d0f5388f0d4d0e9f7945cf2ef241cabf504",
