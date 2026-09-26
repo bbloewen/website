@@ -4,6 +4,18 @@
     {
       "datum": "26.09.2026",
       "kategorie": "Profis",
+      "tint": "tint-blue",
+      "icon": "trophy",
+      "titel": "Enger Auftakt, am Ende zu wenig: Löwen unterliegen bei den Dragons Rhöndorf",
+      "kurztext": "96:74-Niederlage zum Saisonauftakt bei den Dragons Rhöndorf — bis zum letzten Viertel ein enges Spiel, dann liefen die Gastgeber davon. Anthony Watkins mit starkem Debüt (27 Punkte).",
+      "url": "/news/artikel/2026-09-26_profis_spielbericht-dragons-rhoendorf.html",
+      "bild": "/assets/img/news/dragons-rhoendorf-vs-loewen.webp",
+      "topNews": true,
+      "team": "profis"
+    },
+    {
+      "datum": "26.09.2026",
+      "kategorie": "Profis",
       "tint": "tint-orange",
       "icon": "calendar",
       "titel": "Basketball Löwen reisen zum Saisonauftakt zu den Dragons Rhöndorf",

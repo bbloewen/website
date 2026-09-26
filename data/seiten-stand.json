@@ -54,7 +54,7 @@
       "lastmod": "2026-09-18"
     },
     "index.html": {
-      "hash": "3eee58ba8a99b62ec0aa6c9210e654066286fdfb",
+      "hash": "786e6f175e74f5b168e8bf14d741b63ceae3dde4",
       "lastmod": "2026-09-26"
     },
     "kontakt.html": {
@@ -70,11 +70,11 @@
       "lastmod": "2026-08-08"
     },
     "news/aktuelles.html": {
-      "hash": "092429ff89cb39276020b2cb1e1c25c22651313f",
+      "hash": "6ff586046b36c1d900086e5c60f5f16630e6d87c",
       "lastmod": "2026-09-26"
     },
     "news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html": {
-      "hash": "8a6d9a271d252a72d529e74c119d8dc76bc1d718",
+      "hash": "aedd7a8b563692b485777153de1d5b98bd11fa7c",
       "lastmod": "2026-09-26"
     },
     "news/artikel/2025-04-29_profis_achtelfinale-aus.html": {
@@ -138,27 +138,31 @@
       "lastmod": "2026-09-26"
     },
     "news/artikel/2026-09-21_profis_saisonstart-neunte-saison.html": {
-      "hash": "50c28646a73eedcecd521280f3b6e188f52433d9",
+      "hash": "08c25c2a2a699355009f84b64e273e9c0d328ba7",
       "lastmod": "2026-09-26"
     },
     "news/artikel/2026-09-22_profis_nachwuchs-nbbl-fokus.html": {
-      "hash": "6357f2f5a00c4a9743dfbbf8617153e24c5398d3",
+      "hash": "f1d11ca4bddff83bd3a84b79669f735f4e452e61",
       "lastmod": "2026-09-26"
     },
     "news/artikel/2026-09-23_profis_kapitaene-neuzugaenge-guards.html": {
-      "hash": "f9c0a2d5a81a2239d0846ae9b7b199c4f0834623",
+      "hash": "708f7ac70061a31a18961959c9f76347543b2761",
       "lastmod": "2026-09-26"
     },
     "news/artikel/2026-09-24_profis_neuzugaenge-international.html": {
-      "hash": "95684bf8018ed986af984b63d92d96f0caca499d",
+      "hash": "2f8bf0e20986deb0243838bc50bced81ca47bc32",
       "lastmod": "2026-09-26"
     },
     "news/artikel/2026-09-25_profis_junge-loewen.html": {
-      "hash": "67ff70c5220759aff67f90935aafa24b0ce9e1ce",
+      "hash": "5c98bbcfcba41a03758fc672b92ccfd2f2c9db7e",
+      "lastmod": "2026-09-26"
+    },
+    "news/artikel/2026-09-26_profis_spielbericht-dragons-rhoendorf.html": {
+      "hash": "a86a43da0c8a9f8c4312b4f928aedd5abb1b0a23",
       "lastmod": "2026-09-26"
     },
     "news/artikel/2026-09-26_profis_vorbericht-dragons-rhoendorf.html": {
-      "hash": "f440d4f5ce1a82ba0447df4d55749fced4e70362",
+      "hash": "9729711e6e9013477f249430cf115e11888c1925",
       "lastmod": "2026-09-26"
     },
     "news/insta-archiv/loewen-17884318188501699.html": {
@@ -286,7 +290,7 @@
       "lastmod": "2026-09-26"
     },
     "saison/profis.html": {
-      "hash": "c047720762a6b8c9f5f5cf8c7a7b07a686de447a",
+      "hash": "dcd20260f8d9f7e2ba19df9a1d36d6f470a42c49",
       "lastmod": "2026-09-26"
     },
     "saison/profis/gameday/2026-10-11-bba-ludwigsburg.html": {
