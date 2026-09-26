@@ -1995,6 +1995,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .hero-photo.hero-news-neuer-cheftrainer-ibrahim { --hero-photo-url: url('/assets/img/news/neuer-cheftrainer-ibrahim.webp'); background-position: center 15%; }
 .hero-photo.hero-news-baskidballtalk-berlin-2026 { --hero-photo-url: url('/assets/img/news/baskidballtalk-berlin-2026.webp'); background-position: center 70%; }
 .hero-photo.hero-news-kapitaene-neuzugaenge-guards { --hero-photo-url: url('/assets/img/news/kapitaene-neuzugaenge-guards.webp'); background-position: center 35%; }
+.hero-photo.hero-news-junge-loewen { --hero-photo-url: url('/assets/img/news/junge-loewen.webp'); background-position: center 30%; }
 
 /* Hero-Variante für die Startseite — Platz für das Spieltags-Widget.
    Höhe kommt vom vereinheitlichten .hero-photo-Basiswert, hier nur noch Layout/Typo. */
