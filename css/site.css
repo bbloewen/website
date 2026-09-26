@@ -498,6 +498,28 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .card-body p { font-size: 14px; color: var(--text-secondary); font-weight: var(--weight-light); line-height: 1.5; margin-bottom: 12px; }
 .card-link { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; font-size: 13px; font-weight: var(--weight-semibold); color: var(--color-brand-orange-text); }
 .card-link:hover { text-decoration: underline; }
+
+/* Mini-Spielplan-Slider auf den Nachwuchs-Team-Kacheln (saison/nachwuchs.html):
+   ein Streifen aus Spiel-Chips, anfangs auf das naechste anstehende Spiel
+   gescrollt -- vergangene Spiele (mit Ergebnis) bleiben links erhalten und
+   sind ueber den Pfeil erreichbar, statt geloescht zu werden. */
+.game-slider { display: flex; align-items: center; gap: 4px; margin-top: 10px; }
+.game-slider[hidden] { display: none; }
+.game-slider-track { display: flex; gap: 6px; overflow-x: auto; scroll-behavior: smooth; flex: 1; scrollbar-width: none; }
+.game-slider-track::-webkit-scrollbar { display: none; }
+.game-chip { flex: 0 0 auto; width: 84px; padding: 6px 7px; border-radius: 10px; background: var(--bg-subtle); text-align: center; }
+.game-chip-heim { font-size: 9px; font-weight: var(--weight-extrabold); text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--text-muted); }
+.game-chip-gegner { font-size: 11px; font-weight: var(--weight-semibold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.game-chip-datum { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+.game-chip-ergebnis { font-size: 13px; font-weight: var(--weight-extrabold); margin-top: 2px; }
+.game-chip.is-next { background: var(--color-orange-50); }
+.game-chip.is-next .game-chip-heim { color: var(--color-orange-700); }
+.game-slider-arrow {
+  flex: 0 0 auto; width: 22px; height: 22px; border-radius: var(--radius-full); border: 1px solid var(--border);
+  background: #fff; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); cursor: pointer;
+}
+.game-slider-arrow:hover { background: var(--bg-subtle); }
+.game-slider-arrow[disabled] { opacity: .3; cursor: default; pointer-events: none; }
 /* Foto-Variante von .card-media für echte Pressefotos (statt Icon+Farbverlauf),
    z.B. auf der News-Übersichtsseite. */
 .card-media-photo { height: 180px; padding: 0; }
