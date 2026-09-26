@@ -147,7 +147,7 @@ def slide_html(g, i, label, jetzt):
     def livestream_link(extra_margin):
         stil = ' style="margin-left:4px"' if extra_margin else ""
         livestream_url = esc(g.get("livestream") or GENERISCHER_LIVESTREAM_URL)
-        return f'<a class="card-link" href="{livestream_url}" target="_blank" rel="noopener"{stil}><i data-lucide="video" style="width:14px;height:14px"></i> Zum Livestream</a>'
+        return f'<a class="card-link" href="{livestream_url}" target="_blank" rel="noopener" title="Livestream"{stil}><i data-lucide="video" style="width:14px;height:14px"></i> Zum Livestream</a>'
 
     status = spiel_status(g, jetzt)
     if status == "bevorstehend":

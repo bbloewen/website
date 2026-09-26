@@ -88,7 +88,7 @@
     }
     function livestreamLink(extraMargin) {
       var stil = extraMargin ? ' style="margin-left:4px"' : '';
-      return '<a class="card-link" href="' + (g.livestream || GENERISCHER_LIVESTREAM_URL) + '" target="_blank" rel="noopener"' + stil + '><i data-lucide="video" style="width:14px;height:14px"></i> Zum Livestream</a>';
+      return '<a class="card-link" href="' + (g.livestream || GENERISCHER_LIVESTREAM_URL) + '" target="_blank" rel="noopener" title="Livestream"' + stil + '><i data-lucide="video" style="width:14px;height:14px"></i> Zum Livestream</a>';
     }
 
     var status = spielStatus(g);
