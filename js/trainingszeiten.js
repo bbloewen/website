@@ -13,11 +13,11 @@ document.addEventListener('DOMContentLoaded', function () {
     'U12m/1': 'MDL U12 männlich',
     'U12w': 'U12 weiblich',
     'U13mix': 'U13 mixed',
-    'U13m': 'MDL U13 männlich',
+    'U13m': 'U13 männlich',
     'U14mix': 'U14 mixed',
-    'U14m': 'MDL U14 männlich',
+    'U14m': 'U14 männlich',
     'U14w': 'U14 weiblich',
-    'U15m': 'MDL U15 männlich',
+    'U15m': 'U15 männlich',
     'U16m': 'U16 männlich',
     'U16w': 'U16 weiblich',
     'U19m': 'U19 männlich',
@@ -63,8 +63,8 @@ document.addEventListener('DOMContentLoaded', function () {
   var FILTER_LABELS = {
     'U8mix': 'U8 mixed', 'U9mix': 'U9 mixed', 'U10mix': 'U10 mixed', 'U10w': 'U10 weiblich',
     'U11mix': 'U11 mixed', 'U12mix': 'U12 mixed', 'U12m': 'MDL U12 männlich', 'U12w': 'U12 weiblich',
-    'U13mix': 'U13 mixed', 'U13m': 'MDL U13 männlich', 'U14mix': 'U14 mixed', 'U14m': 'MDL U14 männlich',
-    'U14w': 'U14 weiblich', 'U15m': 'MDL U15 männlich', 'U16m': 'U16 männlich', 'U16w': 'U16 weiblich',
+    'U13mix': 'U13 mixed', 'U13m': 'U13 männlich', 'U14mix': 'U14 mixed', 'U14m': 'U14 männlich',
+    'U14w': 'U14 weiblich', 'U15m': 'U15 männlich', 'U16m': 'U16 männlich', 'U16w': 'U16 weiblich',
     'U19m': 'U19 männlich', 'U19w': 'U19 weiblich'
   };
 
@@ -205,6 +205,17 @@ document.addEventListener('DOMContentLoaded', function () {
     return '/kontakt.html?' + params.toString();
   }
 
+  /* "MDL" nur vor unseren EIGENEN Teams (verein "loewen") -- der Team-Schluessel
+     ist teils mit Partnervereinen geteilt (z.B. "U13m" auch bei USV Erfurt),
+     deren MDL-Zugehoerigkeit nicht bestaetigt ist. Ausnahme U12m/1: dieser
+     Schluessel gehoert exklusiv uns, das Praefix steckt daher schon fest in
+     TEAM_LABELS und wird hier nicht doppelt vorangestellt. */
+  function teamNameMitMdlPraefix(g) {
+    var basis = TEAM_LABELS[g.team] || g.team;
+    if (g.verein === 'loewen' && basis.indexOf('MDL') !== 0) return 'MDL ' + basis;
+    return basis;
+  }
+
   /* Flache Liste aller einzelnen Trainingstermine (ein Eintrag pro Team+Tag),
      Grundlage für die Wochentag-/Halle-Gruppierung. Teams ohne Termine
      ("Zeiten folgen in Kürze") haben keinen Tag/keine Halle, zum Gruppieren
@@ -213,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var sessions = [];
     gruppen.forEach(function (g) {
       if (!g.termine || !g.termine.length) return;
-      var teamName = TEAM_LABELS[g.team] || g.team;
+      var teamName = teamNameMitMdlPraefix(g);
       var jahrgang = jahrgangLabel(g);
       var teamKey = TEAM_KEY[g.team] || g.team;
       g.termine.forEach(function (t) {
@@ -316,7 +327,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function cardHTML(g) {
-    var teamName = TEAM_LABELS[g.team] || g.team;
+    var teamName = teamNameMitMdlPraefix(g);
     var jahrgang = jahrgangLabel(g);
     var titel = teamName + ' (' + jahrgang + ')';
     var unbestaetigt = g.bestaetigt === false;
@@ -375,9 +386,20 @@ document.addEventListener('DOMContentLoaded', function () {
       });
 
       var alleTeams = Array.from(new Set(data.gruppen.map(function (g) { return TEAM_KEY[g.team] || g.team; })));
+      // Kategorien mit einem eigenen (verein "loewen") Team stehen alphabetisch
+      // ganz oben im Filter -- auch wenn sich der Team-Schluessel z.B. bei U13m/
+      // U14m/U15m mit einem Partnerverein teilt (siehe teamNameMitMdlPraefix).
+      var unsereTeamKeys = new Set(
+        data.gruppen.filter(function (g) { return g.verein === 'loewen'; })
+          .map(function (g) { return TEAM_KEY[g.team] || g.team; })
+      );
       // Erwachsenenteams (aelter als U19) haben keine U-Nummer und stehen in einer
       // festen Reihenfolge ganz am Ende, statt ueber die U-Jahrgaenge sortiert zu werden.
       alleTeams.sort(function (a, b) {
+        var eigenA = unsereTeamKeys.has(a);
+        var eigenB = unsereTeamKeys.has(b);
+        if (eigenA !== eigenB) return eigenA ? -1 : 1;
+        if (eigenA && eigenB) return a.localeCompare(b);
         var ia = ERWACHSENEN_TEAM_REIHENFOLGE.indexOf(a);
         var ib = ERWACHSENEN_TEAM_REIHENFOLGE.indexOf(b);
         if (ia !== -1 || ib !== -1) {
