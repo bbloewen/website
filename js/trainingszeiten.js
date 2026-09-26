@@ -10,14 +10,14 @@ document.addEventListener('DOMContentLoaded', function () {
     'U10w und jünger': 'U10 weiblich',
     'U11mix': 'U11 mixed',
     'U12mix': 'U12 mixed',
-    'U12m/1': 'U12 männlich',
+    'U12m/1': 'MDL U12 männlich',
     'U12w': 'U12 weiblich',
     'U13mix': 'U13 mixed',
-    'U13m': 'U13 männlich',
+    'U13m': 'MDL U13 männlich',
     'U14mix': 'U14 mixed',
-    'U14m': 'U14 männlich',
+    'U14m': 'MDL U14 männlich',
     'U14w': 'U14 weiblich',
-    'U15m': 'U15 männlich',
+    'U15m': 'MDL U15 männlich',
     'U16m': 'U16 männlich',
     'U16w': 'U16 weiblich',
     'U19m': 'U19 männlich',
@@ -53,6 +53,19 @@ document.addEventListener('DOMContentLoaded', function () {
     // gemeinsame Option "Landesliga Herren" -- Auswahl zeigt dann beide Kacheln.
     'Landesliga Herren 2': 'Landesliga Herren',
     'Landesliga Herren 3': 'Landesliga Herren'
+  };
+
+  /* Beschriftung im Team-Filter-Dropdown -- anders als TEAM_LABELS (Schluessel
+     = rohes team-Feld, z.B. "U12m/1") ist das hier nach TEAM_KEY-Werten
+     beschriftet (dem, was tatsaechlich im Dropdown als value/alleTeams landet,
+     z.B. "U12m"), damit auch zusammengefasste Kategorien (Landesliga Herren)
+     eine Beschriftung haben. */
+  var FILTER_LABELS = {
+    'U8mix': 'U8 mixed', 'U9mix': 'U9 mixed', 'U10mix': 'U10 mixed', 'U10w': 'U10 weiblich',
+    'U11mix': 'U11 mixed', 'U12mix': 'U12 mixed', 'U12m': 'MDL U12 männlich', 'U12w': 'U12 weiblich',
+    'U13mix': 'U13 mixed', 'U13m': 'MDL U13 männlich', 'U14mix': 'U14 mixed', 'U14m': 'MDL U14 männlich',
+    'U14w': 'U14 weiblich', 'U15m': 'MDL U15 männlich', 'U16m': 'U16 männlich', 'U16w': 'U16 weiblich',
+    'U19m': 'U19 männlich', 'U19w': 'U19 weiblich'
   };
 
   var vereinLabel = {
@@ -380,7 +393,7 @@ document.addEventListener('DOMContentLoaded', function () {
       alleTeams.forEach(function (team) {
         var opt = document.createElement('option');
         opt.value = team;
-        opt.textContent = team;
+        opt.textContent = FILTER_LABELS[team] || team;
         teamSelect.appendChild(opt);
       });
 
