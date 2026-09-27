@@ -1,0 +1,27 @@
+{
+  "hinweis": "Pressefotos für presse.html, gebaut von tools/build-pressefotos.py. Pro Eintrag: 'datei' = Originalbild zum Herunterladen (assets/presse/fotos/), 'vorschau' = kleine Fassung für die Anzeige, 'titel', 'alt' und 'fotograf'. Bei Personenfotos gilt die Vornamen-Regel.",
+  "nutzung": "Die Fotos dürfen für die redaktionelle Berichterstattung über die Basketball Löwen Erfurt kostenfrei verwendet werden. Bitte nennen Sie den angegebenen Bildnachweis.",
+  "fotos": [
+    {
+      "datei": "loewenpark-halle.jpg",
+      "vorschau": "loewenpark-halle-vorschau.webp",
+      "titel": "CATL LÖWENPARK — Außenansicht",
+      "alt": "Die sanierte Sporthalle am Erfurter Südpark von außen",
+      "fotograf": "Basketball Löwen Erfurt"
+    },
+    {
+      "datei": "loewenpark-innenraum.jpg",
+      "vorschau": "loewenpark-innenraum-vorschau.webp",
+      "titel": "CATL LÖWENPARK — Innenraum",
+      "alt": "Blick in die Halle des CATL LÖWENPARK",
+      "fotograf": "Basketball Löwen Erfurt"
+    },
+    {
+      "datei": "loewenpark-baufortschritt.jpg",
+      "vorschau": "loewenpark-baufortschritt-vorschau.webp",
+      "titel": "CATL LÖWENPARK — Baufortschritt",
+      "alt": "Die Halle am Südpark während der Sanierungsarbeiten",
+      "fotograf": "Basketball Löwen Erfurt"
+    }
+  ]
+}
