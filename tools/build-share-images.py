@@ -30,6 +30,11 @@ QUALITY = 82
 DEFAULT_SOURCE = REPO / "assets" / "img" / "hero-startseite-alt.webp"
 DEFAULT_NAME = "og-default.jpg"
 
+# Einzelne Unterseiten mit eigenem Hero-Bild, aber ohne News-Artikel-Struktur
+STATIC_PAGE_SOURCES = {
+    "mediakit": REPO / "assets" / "img" / "hero-mediakit.webp",
+}
+
 # Vertikaler Anker beim Beschneiden: 0.0 = oberer Rand, 0.5 = Mitte, 1.0 = unterer Rand.
 # Ein reiner Mittelschnitt köpft Hochformat-Motive (beim ersten Lauf war aus dem
 # Cheftrainer-Porträt ein Rumpf ohne Kopf geworden). Gesichter liegen im obereren
@@ -88,6 +93,8 @@ def main():
     jobs = [(DEFAULT_SOURCE, OUT_DIR / DEFAULT_NAME)]
     for stem, src in news_sources().items():
         jobs.append((src, OUT_DIR / f"news-{stem}.jpg"))
+    for name, src in STATIC_PAGE_SOURCES.items():
+        jobs.append((src, OUT_DIR / f"{name}.jpg"))
 
     missing_src = [s for s, _ in jobs if not s.exists()]
     if missing_src:
