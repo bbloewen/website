@@ -2738,6 +2738,12 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
 #responsible-grid .panini-card-info { border-top-color: var(--color-brand-orange); }
 .panini-card-name { font-weight: var(--weight-extrabold); font-size: 13px; line-height: 1.2; color: var(--color-brand-navy); }
 .panini-card-meta { font-size: 11px; line-height: 1.3; color: var(--text-muted); margin-top: 2px; min-height: 2.6em; }
+/* Nachwuchstrainer-Kacheln (saison/nachwuchs.html): Namen sind unterschiedlich
+   lang (z.B. "Yaqub Mohammad" bricht in der schmalen 8er-Reihe eher um als
+   "Paul Bude") -- ohne feste Mindesthoehe hier variiert dadurch der Info-
+   Block und damit (wegen aspect-ratio auf .panini-card) die Fotohoehe
+   zwischen den Kacheln (Marko, 27.09.2026: "sieht unruhig aus"). */
+#nachwuchstrainer-grid .panini-card-name { min-height: 2.4em; display: flex; align-items: center; justify-content: center; }
 .panini-card.is-empty .panini-card-name { color: var(--text-muted); font-weight: var(--weight-semibold); }
 .panini-wrap { position: relative; cursor: pointer; }
 .panini-wrap:focus-visible .panini-card { outline: 2px solid var(--color-brand-orange); outline-offset: 2px; }
