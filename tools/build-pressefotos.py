@@ -17,14 +17,19 @@ Pflege ausschliesslich ueber data/pressefotos.json.
 """
 import json
 import re
+import unicodedata
+import zipfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 DATEN = REPO / "data" / "pressefotos.json"
 SEITE = REPO / "presse.html"
 FOTO_DIR = REPO / "assets" / "presse" / "fotos"
+ZIP_DIR = REPO / "assets" / "presse" / "pakete"
 START = "<!--PRESSEFOTOS:start-->"
 ENDE = "<!--PRESSEFOTOS:ende-->"
+PAKETE_START = "<!--PRESSEPAKETE:start-->"
+PAKETE_ENDE = "<!--PRESSEPAKETE:ende-->"
 
 
 def esc(s):
@@ -56,10 +61,47 @@ def bild_masse(pfad):
         return ""
 
 
+def dateiname(bereich):
+    """Bereichsname als Dateiname: Umlaute aufloesen, Rest zu Kleinbuchstaben."""
+    roh = bereich.replace("Ö", "Oe").replace("Ä", "Ae").replace("Ü", "Ue").replace("ß", "ss")
+    roh = unicodedata.normalize("NFKD", roh).encode("ascii", "ignore").decode()
+    return re.sub(r"[^a-z0-9]+", "-", roh.lower()).strip("-")
+
+
+def pakete_bauen(fotos):
+    """Pro Bereich ein ZIP mit den Originalen. Wird bei jedem Lauf neu erzeugt,
+    damit geloeschte Motive auch aus dem Paket verschwinden."""
+    nach_bereich = {}
+    for f in fotos:
+        pfad = FOTO_DIR / f["datei"]
+        if pfad.exists():
+            nach_bereich.setdefault(f.get("bereich") or "Weitere", []).append((f, pfad))
+    ZIP_DIR.mkdir(parents=True, exist_ok=True)
+    gewollt, ergebnis = set(), []
+    # Reihenfolge wie im Raster, nicht alphabetisch -- dict behaelt die Einfuegereihenfolge.
+    for bereich, eintraege in nach_bereich.items():
+        name = "pressefotos-" + dateiname(bereich) + ".zip"
+        ziel = ZIP_DIR / name
+        gewollt.add(name)
+        with zipfile.ZipFile(ziel, "w", zipfile.ZIP_STORED) as z:
+            for f, pfad in eintraege:
+                z.write(pfad, arcname=pfad.name)
+        ergebnis.append({"bereich": bereich, "datei": name,
+                         "anzahl": len(eintraege),
+                         "groesse": round(ziel.stat().st_size / 1024)})
+    # Pakete zu entfernten Bereichen aufraeumen
+    for alt in ZIP_DIR.glob("pressefotos-*.zip"):
+        if alt.name not in gewollt:
+            alt.unlink()
+            print(f"  entfernt: {alt.name}")
+    return ergebnis
+
+
 def main():
     daten = json.loads(DATEN.read_text(encoding="utf-8"))
     fotos = daten.get("fotos") or []
     text = SEITE.read_text(encoding="utf-8")
+    original = text
 
     if START not in text or ENDE not in text:
         print("  Marker fehlen in presse.html — nichts geschrieben")
@@ -98,11 +140,25 @@ def main():
                   + (f'        <p class="t-body-sm mt-3" style="color:var(--text-muted)">{esc(hinweis)}</p>\n' if hinweis else "")
                   + "      ")
 
+    pakete = pakete_bauen(fotos)
+    if pakete:
+        zeilen = [
+            f'<a class="card-link" href="/assets/presse/pakete/{esc(p["datei"])}">'
+            f'{esc(p["bereich"])} ({p["anzahl"]} {"Foto" if p["anzahl"] == 1 else "Fotos"}, {p["groesse"]} KB) '
+            f'<i data-lucide="arrow-down" class="icon-14"></i></a>'
+            for p in pakete
+        ]
+        paket_inhalt = '\n            <div class="presse-pakete">' + "".join(zeilen) + "</div>\n          "
+    else:
+        paket_inhalt = ""
+    text = re.sub(re.escape(PAKETE_START) + r".*?" + re.escape(PAKETE_ENDE),
+                  PAKETE_START + paket_inhalt + PAKETE_ENDE, text, flags=re.S)
+
     neu = re.sub(re.escape(START) + r".*?" + re.escape(ENDE),
                  START + inhalt + ENDE, text, flags=re.S)
-    if neu != text:
+    if neu != original:
         SEITE.write_text(neu, encoding="utf-8")
-        print(f"  geschrieben: {len(fotos)} Pressefoto(s)")
+        print(f"  geschrieben: {len(fotos)} Pressefoto(s), {len(pakete)} Paket(e)")
     else:
         print(f"  unverändert, {len(fotos)} Pressefoto(s)")
 
