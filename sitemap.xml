@@ -76,11 +76,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://basketball-loewen.com/mediakit.html</loc>
-    <lastmod>2026-09-27</lastmod>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://basketball-loewen.com/mitglied-werden.html</loc>
     <lastmod>2026-09-21</lastmod>
     <priority>0.7</priority>
@@ -343,6 +338,11 @@
   <url>
     <loc>https://basketball-loewen.com/partner/sponsoring.html</loc>
     <lastmod>2026-09-26</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://basketball-loewen.com/presse.html</loc>
+    <lastmod>2026-09-27</lastmod>
     <priority>0.7</priority>
   </url>
   <url>

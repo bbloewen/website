@@ -61,10 +61,6 @@
       "hash": "01033561eccfc4a2b4f1d577c86430b3bd5cd886",
       "lastmod": "2026-09-18"
     },
-    "mediakit.html": {
-      "hash": "3802f2242e142c63c8fe67f94873e96103f5b961",
-      "lastmod": "2026-09-27"
-    },
     "mitglied-werden.html": {
       "hash": "6285ae6db3e94916dee952c098f1b1fe2096eaf7",
       "lastmod": "2026-09-21"
@@ -276,6 +272,10 @@
     "partner/sponsoring.html": {
       "hash": "1704a87acfd15c3e069b4f7c58bb0142b9f46fd8",
       "lastmod": "2026-09-26"
+    },
+    "presse.html": {
+      "hash": "1b9c77d8e99c61b14597316d8238b9df210b29c6",
+      "lastmod": "2026-09-27"
     },
     "saison/damen.html": {
       "hash": "ac7257c585034f8adf25dbe1d927171b16941097",
