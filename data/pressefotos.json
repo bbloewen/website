@@ -1,12 +1,40 @@
 {
-  "hinweis": "Pressefotos für presse.html, gebaut von tools/build-pressefotos.py. Pro Eintrag: 'datei' = Originalbild zum Herunterladen (assets/presse/fotos/), 'vorschau' = kleine Fassung für die Anzeige, 'titel', 'alt' und 'fotograf'. Bei Personenfotos gilt die Vornamen-Regel.",
+  "hinweis": "Pressefotos für presse.html, gebaut von tools/build-pressefotos.py. Pro Eintrag: 'datei' = Originalbild zum Herunterladen (assets/presse/fotos/), 'vorschau' = kleine Fassung für die Anzeige, dazu 'titel', 'alt' und 'fotograf'. Bei Personenfotos gilt die Vornamen-Regel. Die Reihenfolge hier ist die Reihenfolge auf der Seite.",
   "nutzung": "Die Fotos dürfen für die redaktionelle Berichterstattung über die Basketball Löwen Erfurt kostenfrei verwendet werden. Bitte nennen Sie den angegebenen Bildnachweis.",
   "fotos": [
     {
+      "datei": "profi-team.jpg",
+      "vorschau": "profi-team-vorschau.webp",
+      "titel": "Profimannschaft",
+      "alt": "Die Profimannschaft der Basketball Löwen Erfurt",
+      "fotograf": "Basketball Löwen Erfurt"
+    },
+    {
+      "datei": "frauen-basketball.jpg",
+      "vorschau": "frauen-basketball-vorschau.webp",
+      "titel": "CATL Basketball Löwinnen",
+      "alt": "Das Damenteam der Basketball Löwen Erfurt",
+      "fotograf": "Basketball Löwen Erfurt"
+    },
+    {
+      "datei": "nbbl-team.jpg",
+      "vorschau": "nbbl-team-vorschau.webp",
+      "titel": "CATL Basketball Löwen U19 (NBBL)",
+      "alt": "Das U19-Bundesligateam der Basketball Löwen Erfurt",
+      "fotograf": "Basketball Löwen Erfurt"
+    },
+    {
+      "datei": "soziale-projekte.jpg",
+      "vorschau": "soziale-projekte-vorschau.webp",
+      "titel": "Soziale Projekte",
+      "alt": "Kinder und Jugendliche bei einem Sportangebot der Basketball Löwen Erfurt",
+      "fotograf": "Basketball Löwen Erfurt"
+    },
+    {
       "datei": "loewenpark-halle.jpg",
       "vorschau": "loewenpark-halle-vorschau.webp",
-      "titel": "CATL LÖWENPARK — Außenansicht",
-      "alt": "Die sanierte Sporthalle am Erfurter Südpark von außen",
+      "titel": "CATL LÖWENPARK",
+      "alt": "Die sanierte Sporthalle am Erfurter Südpark mit der Wandgestaltung",
       "fotograf": "Basketball Löwen Erfurt"
     }
   ]
