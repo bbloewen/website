@@ -183,7 +183,7 @@ HERO_NEWS_RE = re.compile(r"hero-news-([a-z0-9-]+)")
 # Einzelne Unterseiten mit eigenem Hero-Bild, aber ohne News-Artikel-Struktur
 # (Quellbild + Zuschnitt: tools/build-share-images.py, STATIC_PAGE_SOURCES)
 STATIC_PAGE_IMAGES = {
-    "news/presse.html": "mediakit.jpg",
+    "mediakit.html": "mediakit.jpg",
 }
 
 
