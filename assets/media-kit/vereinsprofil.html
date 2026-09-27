@@ -45,9 +45,12 @@
   p.body:last-child { margin-bottom: 0; }
   p.body strong { color: var(--text-primary); font-weight: var(--weight-semibold); }
 
-  .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 20px; }
-  .fact dt { font-size: 10.5px; font-weight: var(--weight-semibold); letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 2px; }
-  .fact dd { font-size: 13.5px; color: var(--text-primary); margin: 0; line-height: 1.4; }
+  .facts-table { display: grid; grid-template-columns: 170px 1fr; row-gap: 0; column-gap: 20px; }
+  .facts-table .fact-row { display: contents; }
+  .facts-table dt, .facts-table dd { padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .facts-table dt { font-size: 10.5px; font-weight: var(--weight-semibold); letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); }
+  .facts-table dd { font-size: 13.5px; color: var(--text-primary); margin: 0; line-height: 1.5; }
+  .facts-table .fact-row:last-child dt, .facts-table .fact-row:last-child dd { border-bottom: none; }
 
   .pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
   .pillar { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; }
@@ -80,13 +83,11 @@
 
   <section class="block">
     <h2 class="h">Auf einen Blick</h2>
-    <dl class="facts">
-      <div class="fact"><dt>Gegründet</dt><dd>Sommer 2018 als Profi-Club; seit März 2020 Basketball Löwen e.V. als gemeinsames Dach aller Partnerorganisationen</dd></div>
-      <div class="fact"><dt>Sitz</dt><dd>Erfurt (LÖWENPARK), Thüringen</dd></div>
-      <div class="fact"><dt>Geschäftsführung</dt><dd>Florian Gut, Marko Fliege</dd></div>
-      <div class="fact"><dt>Rechtsform</dt><dd>Basketball Löwen e.V. (gemeinnützig), Profisport getragen durch XXL Baskets GmbH</dd></div>
-      <div class="fact"><dt>Heimspielstätte</dt><dd>Riethsporthalle Erfurt</dd></div>
-      <div class="fact"><dt>Teams</dt><dd>Herren (ProB), Damen, U19, Nachwuchs U12–U17</dd></div>
+    <dl class="facts-table">
+      <div class="fact-row"><dt>Gegründet</dt><dd>Sommer 2018 als Profi-Club; seit März 2020 Basketball Löwen e.V. als gemeinsames Dach aller Partnerorganisationen</dd></div>
+      <div class="fact-row"><dt>Sitz</dt><dd>Erfurt (LÖWENPARK), Thüringen</dd></div>
+      <div class="fact-row"><dt>Rechtsform</dt><dd>Basketball Löwen e.V. (gemeinnütziger Verein) und XXL Baskets GmbH (wirtschaftlicher Träger des Profisports)</dd></div>
+      <div class="fact-row"><dt>Geschäftsführung / Vorstand</dt><dd>Florian Gut, Marko Fliege (Geschäftsführung XXL Baskets GmbH); Constanze Sakriß, Marc Reimschüssel, Dr. Wolfgang Weisskopf (Vorstand Basketball Löwen e.V.)</dd></div>
     </dl>
   </section>
 
@@ -102,10 +103,10 @@
   <section class="block">
     <h2 class="h">Team</h2>
     <ul class="list">
-      <li><strong>Basketball Löwen</strong> (Herren) — CATL als Premiumsponsor</li>
+      <li><strong>Basketball Löwen</strong> (Herren) — BARMER 2. Basketball Bundesliga ProB, Südstaffel</li>
       <li><strong>CATL Basketball Löwinnen</strong> (Damen) — CATL als Namenssponsor seit September 2026</li>
       <li><strong>CATL Basketball Löwen</strong> (U19-Bundesliga) — CATL als Namenssponsor seit September 2026</li>
-      <li><strong>Nachwuchsteams U12–U17</strong> — eigene MDL-Teams, zertifizierter Nachwuchsstandort seit 2022, Ziel JBBL</li>
+      <li><strong>Nachwuchsteams U12–U17</strong> — eigene MDL-Teams, zertifizierter Nachwuchsstandort seit 2022</li>
     </ul>
   </section>
 
@@ -132,7 +133,7 @@
     <h2 class="h">Vision</h2>
     <p class="body">Im Mittelpunkt der langfristigen Vision der Basketball Löwen steht das Zusammenspiel von Spitzensport, regionaler Nachwuchsförderung und dem ganzheitlichen Engagement als Sozialakteur:</p>
     <ul class="list">
-      <li>Als Botschafter der Thüringer Landeshauptstadt Erfurt perspektivisch in die 1. Liga aufsteigen</li>
+      <li>Als Botschafter der Thüringer Landeshauptstadt Erfurt perspektivisch in die 2. Basketball Bundesliga ProA aufsteigen</li>
       <li>Ein hervorragendes, international anerkanntes Basketball-Nachwuchsprogramm werden</li>
       <li>Sich als Sozialakteur nachhaltig in der Region engagieren und gesellschaftliche Verantwortung wirksam wahrnehmen</li>
     </ul>
