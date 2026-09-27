@@ -71,20 +71,20 @@
       (venue ? ', <a href="' + venueLink + '" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">' + venue + '</a>' : '');
 
     function tabelleIcon(extraMargin) {
-      return '<a class="cal-link" href="' + TABELLE_URL + '" title="Zur Tabelle"' + (extraMargin ? ' style="margin-left:8px"' : '') + '><i data-lucide="list-ordered" style="width:18px;height:18px"></i></a>';
+      return '<a class="cal-link" href="' + TABELLE_URL + '" title="Zur Tabelle"' + (extraMargin ? ' style="margin-left:8px"' : '') + '><i data-lucide="list-ordered" style="width:22px;height:22px"></i></a>';
     }
     function berichtIconHTML(label2, url, extraMargin) {
       var stil = extraMargin ? ' style="margin-left:4px"' : '';
       if (url) {
-        return '<a class="cal-link" href="' + url + '" title="' + label2 + '"' + stil + '><i data-lucide="file-text" style="width:18px;height:18px"></i></a>';
+        return '<a class="cal-link" href="' + url + '" title="' + label2 + '"' + stil + '><i data-lucide="file-text" style="width:22px;height:22px"></i></a>';
       }
-      return '<span class="cal-link" style="opacity:.4;cursor:default' + (extraMargin ? ';margin-left:4px' : '') + '" title="' + label2 + '"><i data-lucide="file-text" style="width:18px;height:18px"></i></span>';
+      return '<span class="cal-link" style="opacity:.4;cursor:default' + (extraMargin ? ';margin-left:4px' : '') + '" title="' + label2 + '"><i data-lucide="file-text" style="width:22px;height:22px"></i></span>';
     }
     function livescoreIcon(extraMargin) {
       var stil = extraMargin ? ' style="margin-left:4px"' : '';
       return g.livescore
-        ? '<a class="cal-link" href="' + g.livescore + '" target="_blank" rel="noopener" title="Livescore"' + stil + '><i data-lucide="activity" style="width:18px;height:18px"></i></a>'
-        : '<span class="cal-link" style="opacity:.4;cursor:default' + (extraMargin ? ';margin-left:4px' : '') + '" title="Livescore"><i data-lucide="activity" style="width:18px;height:18px"></i></span>';
+        ? '<a class="cal-link" href="' + g.livescore + '" target="_blank" rel="noopener" title="Livescore"' + stil + '><i data-lucide="activity" style="width:22px;height:22px"></i></a>'
+        : '<span class="cal-link" style="opacity:.4;cursor:default' + (extraMargin ? ';margin-left:4px' : '') + '" title="Livescore"><i data-lucide="activity" style="width:22px;height:22px"></i></span>';
     }
     function livestreamLink(extraMargin) {
       var stil = extraMargin ? ' style="margin-left:4px"' : '';
