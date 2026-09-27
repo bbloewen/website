@@ -1915,8 +1915,8 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 
 /* Hero-Variante für die Media-Kit-Seite — gestaltete Grafik "Medienportal"
    mit Download-Icons für Pressematerial/Vereinsprofile/Fotos. */
-.hero-photo.hero-mediakit { --hero-photo-url: url('/assets/img/hero-mediakit.webp'); background-position: center; }
-.hero-photo.hero-mediakit h1 { white-space: normal; max-width: 28ch; }
+.hero-photo.hero-presse { --hero-photo-url: url('/assets/img/hero-presse.webp'); background-position: center; }
+.hero-photo.hero-presse h1 { white-space: normal; max-width: 28ch; }
 
 /* Hero-Variante für die Mitgliedschafts-Seiten (Übersicht + Fan-Formular) —
    jubelnde Fangruppe mit "Wir brüllen euch zum Sieg"-Banner auf dem Petersberg
@@ -2944,3 +2944,16 @@ a.training-group-header:hover { color: var(--color-brand-orange); }
 .flip-card-back .card-body p { color: rgba(255,255,255,.85); margin: 2px 0 0; }
 .flip-card-back .card-label { color: rgba(255,255,255,.6); }
 .flip-card[hidden] { display: none; }
+
+
+/* Faktenliste im Pressebereich: Begriff und Angabe nebeneinander, damit die
+   Zahlen ueberflogen werden koennen. Unter 600px untereinander, sonst wird
+   die rechte Spalte zu schmal fuer Namenslisten. */
+.fakten-liste { display: grid; grid-template-columns: minmax(150px, 30%) 1fr; gap: 10px 20px; margin: 0; }
+.fakten-liste dt { font-weight: 600; color: var(--text-secondary); font-size: 14px; line-height: 1.5; }
+.fakten-liste dd { margin: 0; font-size: 15px; line-height: 1.55; }
+.fakten-liste dt + dd { border-bottom: 0; }
+@media (max-width: 599px) {
+  .fakten-liste { grid-template-columns: 1fr; gap: 2px 0; }
+  .fakten-liste dd { margin-bottom: 12px; }
+}

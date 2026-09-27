@@ -32,7 +32,7 @@ DEFAULT_NAME = "og-default.jpg"
 
 # Einzelne Unterseiten mit eigenem Hero-Bild, aber ohne News-Artikel-Struktur
 STATIC_PAGE_SOURCES = {
-    "mediakit": REPO / "assets" / "img" / "hero-mediakit.webp",
+    "presse": REPO / "assets" / "img" / "hero-presse.webp",
 }
 
 # Vertikaler Anker beim Beschneiden: 0.0 = oberer Rand, 0.5 = Mitte, 1.0 = unterer Rand.
