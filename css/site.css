@@ -410,6 +410,10 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .btn-ghost-dark { border-color: rgba(255,255,255,.5); color: #fff; background: transparent; }
 .btn-outline-orange { border-color: var(--color-brand-orange-text); color: var(--color-brand-orange-text); background: transparent; }
 .btn-outline-orange:hover { background: var(--color-orange-50); }
+/* Fuer Kacheln/Heros mit dunklem Foto-Hintergrund: das dunklere
+   --color-brand-orange-text (AA-Kontrast auf Weiss) wirkt dort zu blass. */
+.btn-outline-orange-dark { border-color: var(--color-brand-orange); color: var(--color-brand-orange); background: transparent; }
+.btn-outline-orange-dark:hover { background: rgba(229, 113, 11, .15); }
 .btn-ghost-dark:hover { background: rgba(255,255,255,.12); }
 .btn-link { background: none; border: none; color: var(--link); padding: 8px 0; }
 .btn-link:hover { text-decoration: underline; }

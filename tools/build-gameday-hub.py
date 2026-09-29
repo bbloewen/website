@@ -121,11 +121,13 @@ def hero(s, heute):
     zeit = s.get("zeit")
     zeile = lang_datum(s) + (f" · {zeit} Uhr" if zeit else "")
     # Dauerkarte-CTA nur bis DAUERKARTE_CTA_STICHTAG sichtbar (Marko,
-    # 27.08.2026), Beschriftung/Markup wortgleich zu den anderen Dauerkarte-CTAs
-    # der Seite (saison/profis.html, saison/tabelle.html, saison/spielplan.html)
-    # -- "Bis Weihnachten" ist nur die Sichtbarkeits-Regel, nicht Teil des Texts.
-    knopf = ('<a class="btn btn-primary" style="color:#fff" href="/tickets/dauerkarte.html">'
+    # 27.08.2026). Bewusst zurueckhaltender als ein gefuellter Button (Marko,
+    # 29.09.2026): Wer über diese Seite kommt, will fast immer ein Einzelticket
+    # fuer genau dieses Spiel -- die Dauerkarte ist hier nur ein Hinweis am
+    # Rande, kein Wettbewerb um die Hauptaufmerksamkeit.
+    knopf = ('<a class="btn btn-outline-orange-dark" href="/tickets/dauerkarte.html">'
              '<i data-lucide="ticket" class="icon-16"></i> Dauerkarte kaufen</a>'
+             '<h3 style="color:#fff;font-family:var(--font-base);font-weight:var(--weight-semibold);font-size:16px;margin:4px 0 0">Einzelticket kaufen</h3>'
              if heute <= DAUERKARTE_CTA_STICHTAG else "")
     # Zeit- und Ort-Zeile getrennt, Kalenderlink vorn in der Zeit-Zeile (Marko,
     # 27.08.2026) -- wie auf den Spieltagsseiten, hier aber mit ausgeschriebenem
@@ -565,7 +567,7 @@ def seite(liste, heute):
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1790503843" />
+<link rel="stylesheet" href="/css/site.css?v=1790704266" />
 <link rel="stylesheet" href="/css/seat-picker.css?v=1787760512" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
