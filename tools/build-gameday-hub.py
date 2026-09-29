@@ -127,7 +127,6 @@ def hero(s, heute):
     # Rande, kein Wettbewerb um die Hauptaufmerksamkeit.
     knopf = ('<a class="btn btn-outline-orange-dark" href="/tickets/dauerkarte.html">'
              '<i data-lucide="ticket" class="icon-16"></i> Dauerkarte kaufen</a>'
-             '<h3 style="color:#fff;font-family:var(--font-base);font-weight:var(--weight-semibold);font-size:16px;margin:4px 0 0">Einzelticket kaufen</h3>'
              if heute <= DAUERKARTE_CTA_STICHTAG else "")
     # Zeit- und Ort-Zeile getrennt, Kalenderlink vorn in der Zeit-Zeile (Marko,
     # 27.08.2026) -- wie auf den Spieltagsseiten, hier aber mit ausgeschriebenem
@@ -349,7 +348,7 @@ def kauf_bereich(aktuell, kommt, heute):
       <div class="section-head">
         <div class="head-text" style="max-width:none">
           <span class="eyebrow">Game Day</span>
-          <h2 class="t-h2">Ticket kaufen</h2>
+          <h2 class="t-h2">Einzelticket kaufen</h2>
         </div>
       </div>
       <div class="buy-grid mt-5">
