@@ -642,14 +642,14 @@
     var voucherBtn = document.getElementById('voucher-apply');
 
     function findVoucherLineIndex() {
-      return cart.lines.findIndex(function (l) { return l.label.indexOf('Gutschein ') === 0; });
+      return cart.lines.findIndex(function (l) { return l.label.indexOf('Gutschein') === 0; });
     }
 
     function formatMoney(n) { return n.toFixed(2).replace('.', ',') + ' €'; }
 
     function renderSummary() {
       var html = cart.lines.map(function (l) {
-        var isVoucher = l.label.indexOf('Gutschein ') === 0;
+        var isVoucher = l.label.indexOf('Gutschein') === 0;
         /* Ein Wertgutschein ist ab dem Einlösen-Klick real abgebucht — die Zeile lässt
            sich danach nicht mehr entfernen (das Guthaben käme dadurch nicht zurück).
            Ein Gutschein-Code ist bis zur Bestellabgabe folgenlos, "entfernen" bleibt hier. */
@@ -748,7 +748,7 @@
             }
           }
 
-          var amount = formatMoney(result.discountAmount) + ' €';
+          var amount = formatMoney(result.discountAmount);
           var label = result.source === 'giftcard'
             ? ('Guthaben ' + amount)
             : (function () {

@@ -517,7 +517,7 @@
     if (window.lucide) window.lucide.createIcons();
 
     document.getElementById('confirmation-lines').innerHTML = cart.lines.map(function (l) {
-      var isVoucher = l.label.indexOf('Gutschein ') === 0;
+      var isVoucher = l.label.indexOf('Gutschein') === 0;
       return '<div class="seatplan-cart-item' + (isVoucher ? ' discount' : '') + '">' +
         '<div>' + (!isVoucher && l.qty > 1 ? l.qty + '× ' : '') + l.label + '</div>' +
         '<div class="seatplan-cart-item-right"><span>' + (l.lineTotal < 0 ? '−' + formatMoney(Math.abs(l.lineTotal)) : formatMoney(l.lineTotal)) + '</span></div>' +
