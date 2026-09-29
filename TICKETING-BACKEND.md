@@ -464,3 +464,42 @@ gegen die hartkodierten Werte 2.483 bezahlte Einzeltickets + 70 Dauerkarten. Die
 2025/26-Zuschauerzahl (11.149, 12 Heimspiele) enthält laut PPTX/Notion auch
 Freikarten und wird deshalb nur als separate Einordnungszeile gezeigt, nie als
 „verkauft" bezeichnet.
+
+## Gutschein bei Bestellung mit mehreren Plätzen (29.09.2026)
+
+**Vorfall:** Sponsorin Salus BKK bestellte zwei VIP-Dauerkarten (Bestellung `7PAEE`,
+Mandatsreferenz `DK-4VJWVB`). Es waren zwei Einzelgutscheine (je 100 %, 1× einlösbar)
+angelegt worden. Die Bestätigungsmail zeigte zwei Gutschein-Zeilen, der Gesamtbetrag
+stand aber bei 1.290 €.
+
+**Ursache:** Pro Bestellung wird serverseitig nur **ein** Code verrechnet
+(`cart.voucher` / `voucherCode` sind einfach, nicht Listen). Ist dieser Code nur
+1× einlösbar, wird nur ein Platz rabattiert. Auf der Website blieb das Gutscheinfeld
+nach dem Einlösen auf der Sitzplatzwahl aber sichtbar, weil `findVoucherLineIndex()`
+in `tickets/checkout.html` auf `'Gutschein '` (mit Leerzeichen) prüfte, die Zeilen aber
+`'Gutschein: …'` heißen. So konnte der Code im Checkout ein zweites Mal abgezogen
+werden: Anzeige 0 €, serverseitig aber 1.290 €. Dazu kam ein doppeltes „€" in der
+Rabattzeile (`formatMoney()` hängt das € schon an).
+
+**Fix im Repo:** Prüfung auf `'Gutschein'` in `checkout.html`, `confirmation.html`,
+`payment.html`; doppeltes „€" entfernt (Commit `58194d4e`).
+
+**Regel für Sponsoren/Ehrenamt mit mehreren Plätzen:** Einen einzigen Gutschein
+anlegen und bei „Anzahl Nutzungen" die Zahl der Plätze eintragen („Anzahl Gutscheine"
+bleibt 1), nicht mehrere Einzelgutscheine.
+
+**Manuelle Korrektur der Bestellung (über temporäre n8n-Workflows, danach archiviert):**
+- pretix: `POST …/orders/7PAEE/change/` mit `patch_positions` (Preis der Ankerposition
+  von Platz 14 auf `0.00`), `notify: false`, `reissue_invoice: false`; danach ist die
+  Bestellung von pretix selbst auf `p` gesetzt worden. Interne Notiz am Order-Kommentar.
+- Data Table „Lastschriften-Tickets" (`2vyxXBxm5m4IGGuq`), Zeile `DK-4VJWVB`:
+  `total` 0, `status` `bezahlt`, `voucherLineDiscounts` `[1290,1290]`,
+  `voucherDiscount` 2580, wie bei den anderen Nullbetrag-Bestellungen. Die
+  SEPA-Sammellastschrift holt nur Zeilen mit Status `angelegt` und überspringt
+  Nullbeträge, es kann also keine Abbuchung entstehen.
+- Zweiter Gutschein `SALUS-BKK-T2SYNQ` gesperrt: `valid_until` auf 29.09.2026 gesetzt
+  statt gelöscht, Grund im Kommentar.
+- Ticketmail: Die automatische Mail (Workflow `zNGWzRFz3ebzsDkD`) war beim
+  `order.paid`-Webhook an einem 409 „not ready" des PDF-Abrufs gescheitert. Nachgeholt
+  per POST an `…/webhook/pretix-order-event` mit `{organizer, event, code, action:
+  "pretix.event.order.paid"}`.
