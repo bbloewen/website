@@ -503,3 +503,62 @@ bleibt 1), nicht mehrere Einzelgutscheine.
   `order.paid`-Webhook an einem 409 „not ready" des PDF-Abrufs gescheitert. Nachgeholt
   per POST an `…/webhook/pretix-order-event` mit `{organizer, event, code, action:
   "pretix.event.order.paid"}`.
+
+## Einzelticket-Bestellung und Ticket-Mail repariert (29.–30.09.2026)
+
+**Auslöser:** Fehlgeschlagene VIP-Sponsorenbestellung `ET-6TARLH` (André Grenzdörffer für
+Arthur Grund, Gutschein `GRUND-B6YLH5`, 4 Plätze) und danach Fehler-Mails im
+Ticket-Mail-Workflow. Beide Workflows laufen nur in n8n, hier steht der Stand.
+
+**1. Workflow „Einzelticketbestellung verarbeiten" (`BmpBkKdzzSZaBnZE`), Node „Sitze zuordnen"**
+(Version `3bbbeec4`, 29.09. 20:27):
+- `resolveBlockKey` entscheidet jetzt bei VIP, Fanblock, „C unten", Rollstuhlplatz und
+  Stehplatz zuerst nach `category`, erst danach nach `zoneId`. Der Warenkorb liefert in
+  `zoneId` die physische Zone („B"), in `category` das Produkt („VIP"). Vorher wurde eine
+  VIP-Zeile zu „Block B" (Item 35, Reihe 6–12) statt zu VIP-Einzel (Item 40, Reihe 1–5),
+  und pretix lehnte den Item-40-Gutschein mit HTTP 400 ab.
+- Im Kostenlos-Zweig wird der Gutschein an jede gedeckte Position gehängt, bis zu den
+  Restnutzungen (Preis nach Rabatt, bei 100 % also 0,00), nicht nur an die erste. Wirft
+  einen Fehler, wenn das Item nicht zum Gutschein passt oder der Gesamtbetrag 0 ist, die
+  Positionspreise aber nicht 0 ergeben.
+- Offen: Im PayPal-Capture-Zweig bleibt das alte Verhalten (nur erste Position, keine
+  Item-Prüfung), dort fehlt der Gutschein-Kontext. Rollstuhlplatz-Bestellungen scheitern
+  weiter mit „Kein freier Sitzplatz", weil pretix nur die Zonen Block A–F kennt.
+- Alarmmail „Zahlung ohne Ticket": bei Gesamtbetrag 0 steht kein PayPal/Erstattungs-Text mehr.
+- Dauerkarten-Workflow (`HyUXW4kbhaQVbG0A`, „Build pretix Order Payload") hat dasselbe
+  `voucherAttached`-Muster (Gutschein nur an der ersten Position, bei Mehrfach-Gutschein
+  und mehreren Plätzen bleibt er wiederverwendbar). Noch nicht geändert.
+
+**2. Workflow „Reservierungen synchronisieren" (`zNGWzRFz3ebzsDkD`), sendet die Ticket-Mail**
+(Version `d7934b08`, 27 → 37 Nodes; Einzelticket-Workflow `59c34d4c`):
+- **Doppelversand:** pretix und der Einzelticket-Workflow (Node „Ticket-Mail ausloesen
+  (sofort bezahlt)") melden `order.paid` im Abstand von 0,06–0,15 s. Der zweite Aufruf
+  trägt jetzt `source: "direct"` und wartet im Ticket-Mail-Workflow 25 s
+  („Direkt-Trigger?" → „Vorrang fuer pretix-Event (25 s)"). Vor dem Senden wird die
+  Bestellung im Order-Kommentar per `[ticket-mail-laeuft:<Zeitstempel>]` reserviert
+  („Mail-Marker beanspruchen"), danach durch `[ticket-mail-versendet]` ersetzt. Eine
+  Reservierung älter als 20 Minuten gilt als verwaist. Bei Sendefehler wird sie
+  freigegeben. Der manuelle Retrigger (POST ohne `source`) wartet nicht.
+- **Fehlende Dateien:** pretix erzeugt Ticket-Dateien beim ersten Abruf und antwortet mit
+  HTTP 409 „not ready" (auch 500 und Abbrüche kamen vor). Die alten Wiederholungs-
+  Einstellungen griffen nicht, weil der Fehler als Ausgangs-Item ankam. Jetzt gibt es
+  echte Schleifen: PDF bis zu 12 Versuche, Passbook bis zu 6 (optional), je 5 s Pause,
+  409/429/5xx/Timeouts zählen als Wiederholung.
+- **Keine Teil-Mails mehr:** „Anhänge zusammenführen" vergleicht die PDFs mit den
+  Positionen. Fehlt eines, geht keine Kundenmail raus, sondern „Ticket-Mail
+  unvollstaendig: <Code>" an marko.fliege@ und die Reservierung wird entfernt. Fehlen nur
+  Passbooks, geht die Mail mit den PDFs raus.
+- **Getestet** an einer Kopie, die nur an Marko mailte (Race, 409-Wiederholung, dauerhafter
+  Ausfall, fehlende Passbooks, Dauerkarte), danach in Produktion bei Bestellung MC377
+  (Ausführung 79456, 3 von 3 PDFs). Zwei pretix-Ereignisse derselben Quelle innerhalb von
+  ca. 100 ms wären weiterhin theoretisch racy.
+
+**3. Betroffene Kunden (Stand 30.09.):** Doppelt, aber identisch: DSFZB, DQZLF, ZKYEU.
+Unvollständig: UHJPU (8 Plätze, Platz 2292 fehlte) und MC377 (Platz 2300 fehlte), für beide
+wurde die Mail nachgesendet (MC377 erledigt). `KMTVH` (Tickets für Arthur Grund, 4 VIP) erhielt
+vier Tickets in einer nachträglich gesendeten Mail.
+
+**4. Gutscheine der Einladung:** Die vier unbenutzten Einzelgutscheine `GRUND-V5RTKT`,
+`-3UEPBR`, `-UG9VW7`, `-VQBY7L` wurden gesperrt (`valid_until` 29.09.2026). Die
+Eintragszeile `ET-6TARLH` in „PayPal-Zahlungen" (`pABu2vTPT1WY4uNh`, Zeile 33) steht auf dem
+neuen Status `manuell_erledigt`; kein Workflow reagiert auf diesen Wert.
