@@ -19,8 +19,6 @@
   .ak-wrap { max-width: 640px; margin: 0 auto; padding: 16px 16px 48px; }
   .ak-head { text-align: center; margin-bottom: 16px; }
   .ak-head h1 { font-size: 1.6rem; margin: 0 0 4px; }
-  .ak-spiel-select { width: 100%; font-size: 1.15rem; padding: 14px 12px; border-radius: 10px;
-    border: 2px solid var(--border-strong, #999); margin-bottom: 18px; background: #fff; }
 
   /* Auslastungsliste unter dem Plan komplett weg (Marko, 01.10.2026, Punkt 1). */
   #seatplan-occupancy { display: none !important; }
@@ -48,8 +46,6 @@
   #seatplan-cart { display: none; }
 
   #ak-blockwahl.ak-hidden { display: none; }
-  #ak-weiterer-block { display: none; width: 100%; font-size: 1.2rem; padding: 16px; margin-bottom: 18px; }
-  #ak-weiterer-block.ak-zeigen { display: block; }
 
   #ak-tarif-panels { margin-bottom: 8px; }
   .ak-tarif-panel { margin-bottom: 14px; }
@@ -80,10 +76,6 @@
     <h1>Abendkasse</h1>
     <p class="t-body-sm" id="ak-spiel-info" style="color:var(--text-muted)">Spiel wird geladen …</p>
   </div>
-
-  <select id="ak-spiel-select" class="ak-spiel-select" hidden></select>
-
-  <button type="button" id="ak-weiterer-block" class="btn btn-outline-orange">+ weiteren Block wählen</button>
 
   <div id="ak-blockwahl">
     <div id="seatplan-root"></div>
@@ -196,9 +188,12 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function syncSichtbarkeit() {
-    var hatTickets = cartHatTickets();
-    document.getElementById('ak-blockwahl').classList.toggle('ak-hidden', hatTickets);
-    document.getElementById('ak-weiterer-block').classList.toggle('ak-zeigen', hatTickets);
+    // Genau ein Block pro Abendkassen-Verkauf (Marko, 01.10.2026: "unrealistisch, dass
+    // jemand Sitzplaetze in zwei verschiedenen Bloecken bestellen will") - ist einmal ein
+    // Ticket im Warenkorb, bleibt die Blockauswahl verborgen; ein neuer Verkauf faengt
+    // ueber "Naechster Verkauf" (initPicker) wieder bei null an, nicht ueber eine
+    // Zurueck-Funktion hier.
+    document.getElementById('ak-blockwahl').classList.toggle('ak-hidden', cartHatTickets());
     renderTarifPanels();
   }
 
@@ -256,7 +251,6 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('ak-naechster').style.display = 'none';
     document.getElementById('ak-tarif-panels').innerHTML = '';
     document.getElementById('ak-blockwahl').classList.remove('ak-hidden');
-    document.getElementById('ak-weiterer-block').classList.remove('ak-zeigen');
 
     picker = new SeatPicker(document.getElementById('seatplan-root'), {
       mode: 'blocks',
@@ -289,38 +283,23 @@ document.addEventListener('DOMContentLoaded', function () {
     syncOverview();
   }
 
+  // Keine Auswahlbox (Marko, 01.10.2026: "je nach Datum direkt das entsprechende
+  // Heimspiel ausgewaehlt" - keine Moeglichkeit, manuell ein anderes Spiel zu waehlen).
+  // Exakter Datumstreffer zaehlt, sonst das naechste noch bevorstehende Spiel.
   fetch('/data/heimspiele.json').then(function (r) { return r.json(); }).then(function (data) {
     var spiele = (data.spiele || []).slice().sort(function (a, b) {
       return parseDatumZeit(a.datum, a.zeit) - parseDatumZeit(b.datum, b.zeit);
     });
-    var sel = document.getElementById('ak-spiel-select');
     var heute = new Date();
     var heuteStr = ('0' + heute.getDate()).slice(-2) + '.' + ('0' + (heute.getMonth() + 1)).slice(-2) + '.' + heute.getFullYear();
-    var defaultIdx = spiele.findIndex(function (g) { return g.datum === heuteStr; });
-    if (defaultIdx === -1) {
-      defaultIdx = spiele.findIndex(function (g) { return parseDatumZeit(g.datum, g.zeit) >= heute; });
-    }
-    if (defaultIdx === -1) defaultIdx = spiele.length - 1;
+    var spiel = spiele.filter(function (g) { return g.datum === heuteStr; })[0]
+      || spiele.filter(function (g) { return parseDatumZeit(g.datum, g.zeit) >= heute; })[0]
+      || spiele[spiele.length - 1];
 
-    spiele.forEach(function (g, i) {
-      var opt = document.createElement('option');
-      opt.value = i;
-      opt.textContent = g.datum + ', ' + g.zeit + ' Uhr – Löwen gegen ' + g.gegner;
-      sel.appendChild(opt);
-    });
-    sel.value = defaultIdx;
-    sel.hidden = spiele.length <= 1;
-    sel.addEventListener('change', function () { initPicker(spiele[sel.value]); });
-
-    if (spiele.length) initPicker(spiele[defaultIdx]);
+    if (spiel) initPicker(spiel);
     else document.getElementById('ak-spiel-info').textContent = 'Kein Heimspiel gefunden.';
   }).catch(function () {
     document.getElementById('ak-spiel-info').textContent = 'Spielplan konnte nicht geladen werden.';
-  });
-
-  document.getElementById('ak-weiterer-block').addEventListener('click', function () {
-    document.getElementById('ak-blockwahl').classList.remove('ak-hidden');
-    this.classList.remove('ak-zeigen');
   });
 
   var bestellLaeuft = false;
