@@ -839,3 +839,13 @@ Keine Aufgaben, sondern Dinge, die bei der nächsten passenden echten Bestellung
 - **Rollstuhl-Bestellung mit Begleitperson:** "Gutschein-Rabatt berechnen" setzt die Begleitperson zum vollen Preis an. Beim ersten echten Fall Preis der Begleitung prüfen. Außerdem: Nachwuchs-Zusatzprodukt an Produkt 34 und die fest hinterlegte Rollstuhlplatz-Liste im Knoten "Sitze zuordnen" (Einzelticket-Workflow) bei Änderungen am Sitzplan mitpflegen.
 - **Dauerkarte mit Mehrfach-Gutschein:** Bei der nächsten solchen Bestellung prüfen, ob der Gutschein an jedem rabattierten Sitz hängt und pretix die richtige Zahl Einlösungen zählt (Reparatur vom 01.10.2026, Knoten "Build pretix Order Payload").
 - **pretix-Upgrade auf 2026.8.0:** Erst Web-Dienst, dann Worker, dann die Pins im Dockerfile anheben (s. Abschnitt Versions-Drift).
+
+## Löwen-Dashboard Tickets-Tab: Orders/Tickets, stornierte Bestellungen (01.10.2026)
+
+Workflow `AA0f7oo7dH7TDkFu` (Version 1a010dc3), Nodes "DK-Statistik aufbereiten" (Tickets-Tab, Webhook `dauerkarten-uebersicht`) und "Statistik aufbereiten" (Auslastung/Gutschein-Statistik, Webhook `gutschein-statistik`).
+
+- **Ursache der Abendkasse-Testbestellungen im Board:** pretix setzt beim Stornieren einer Bestellung (Status `c`) `canceled` an den Positionen NICHT. Die Knoten prüften nur `p.canceled`. Beide Knoten zählen jetzt nur Positionen aus Bestellungen mit Status `n` oder `p` (Bestellstatus aus der Order-Liste; unbekannte Bestellung wird behalten). Für "Statistik aufbereiten" kam dafür der Knoten "Pretix: Orders holen (Statistik)" hinzu (Merge auf 5 Eingänge). Nebenwirkung: Die Auslastung war um die Sitze der stornierten Bestellung HHTWS (185 Positionen) zu hoch, je Spiel 14–15 Plätze; jetzt 92 pro Spiel.
+- **Spalten:** Dauerkarten-Tabelle "Nach Kategorie" und "Einzeltickets pro Spiel" haben jetzt `Orders` (Anzahl Bestellungen) und `Tickets` (Anzahl Tickets). Summenzeile = Zahl verschiedener Bestellungen im Spiel (nicht die Summe der Zeilen, eine Bestellung kann mehrere Kategorien haben). Neue Felder in der API: `byCategory[].orders/tickets`, `totalOrders`, `ticketSales[].rows[].orders/tickets`, `ticketSales[].ordersTotal/ticketsTotal`; `count` bleibt gleich `tickets`.
+- **Wirkung:** Gesamt verkauft 1.541 → 1.348 Plätze, Erlös 7.280,50 € → 7.186,00 €.
+- **Rest:** Die Abendkasse-Bestellung JZZ9A (18,00 € Block E + 10,00 € Rollstuhl, bezahlt, E-Mail tickets@basketball-loewen.com, 11:58 Uhr) ist nicht storniert und steht deshalb noch im Board.
+- Quelle der Seite: `Projects/loewen-os/dashboard/src/dashboard.html` (Repo bbloewen/loewen-os, Commit 8f0572f); der Stand der Seite im Workflow war vorher nicht eingecheckt.
