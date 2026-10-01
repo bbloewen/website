@@ -47,9 +47,9 @@
     border-top: 2px solid var(--border-strong, #ccc); padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
     box-shadow: 0 -4px 14px rgba(0,0,0,0.08); }
   .au-bar-inner { max-width: 720px; margin: 0 auto; display: flex; align-items: center;
-    justify-content: space-between; gap: 16px; }
+    justify-content: space-between; flex-wrap: wrap; gap: 10px 16px; }
   .au-total-label { font-size: 1rem; color: var(--text-muted); }
-  .au-total { font-size: 2rem; font-weight: 800; }
+  .au-total { font-size: 2rem; font-weight: 800; white-space: nowrap; }
   .au-fertig { font-size: 1.2rem; padding: 16px 24px; white-space: nowrap; }
   .au-fertig:disabled { opacity: 0.4; }
 </style>

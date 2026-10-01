@@ -28,8 +28,8 @@
   .ak-fehler[hidden] { display: none !important; }
 
   .ak-court-info { position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
-    max-width: 92%; font-size: 0.85rem; font-weight: 700; color: var(--text-muted);
-    text-align: center; line-height: 1.3; z-index: 1; pointer-events: none; }
+    max-width: 92%; font-size: 1rem; font-weight: 700; color: var(--text-muted);
+    text-align: center; line-height: 1.35; z-index: 1; pointer-events: none; }
 
   /* Auslastungsliste unter dem Plan komplett weg (Marko, 01.10.2026, Punkt 1). */
   #seatplan-occupancy { display: none !important; }
@@ -331,7 +331,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!court) return;
     var info = document.createElement('div');
     info.className = 'ak-court-info';
-    info.textContent = currentGame.datum + ' · ' + currentGame.zeit + ' Uhr · Löwen – ' + currentGame.gegner;
+    info.appendChild(document.createTextNode(currentGame.datum + ' · ' + currentGame.zeit + ' Uhr'));
+    info.appendChild(document.createElement('br'));
+    info.appendChild(document.createTextNode('Löwen gegen ' + currentGame.gegner));
     court.appendChild(info);
   }
 
