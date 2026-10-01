@@ -755,7 +755,7 @@ Sitz-Tabelle "Belegte-Sitze": Eine Änderung per API löst keinen Webhook aus, d
 
 Neuer, additiver Webhook-Zweig im Workflow `BmpBkKdzzSZaBnZE` (22 neue Nodes, Präfix
 "Abendkasse: ", nichts am bestehenden PayPal/Einzelticket-Flow verändert):
-`POST /webhook/abendkasse-bestellung` ← `tickets/abendkasse.html` (Tablet/Laptop-Seite
+`POST /webhook/abendkasse-bestellung` ← `saison/profis/gameday/abendkasse.html` (Tablet/Laptop-Seite
 für den Verkauf an der Abendkasse, kein Teil des öffentlichen Shops). Ablauf: Normalize
 Input → Spam-Check → Rate-Limit (eigener `endpoint: 'abendkasse'` in derselben Data
 Table `Webhook-RateLimit`, 60/h statt der 8/h des öffentlichen Einzelticket-Checkouts)
