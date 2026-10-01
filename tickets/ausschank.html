@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Ausschank — Basketball Löwen Erfurt</title>
+<link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
+<link rel="stylesheet" href="/css/colors_and_type.css" />
+<link rel="stylesheet" href="/css/site.css" />
+<style>
+  /* Eigenstaendiges Kassentool fuer den Ausschank (Marko, 01.10.2026): kein Lagerbestand,
+     keine Bestellhistorie, kein Backend - reine Client-Rechenlogik. Tagesumsatz/
+     Kassenschnitt laufen ueber die Sparkassen-POS-App, nicht ueber dieses Tool. Oberste
+     Prioritaet: schnell und zuverlaessig am Stand, deshalb ein einziger Bildschirm ohne
+     Zwischenschritte - Mengen stehen direkt als Zaehler auf der Kachel, kein separater
+     Warenkorb-Bereich zum Gegenchecken noetig. */
+  body { background: var(--surface-page, #fff); }
+  .au-wrap { max-width: 720px; margin: 0 auto; padding: 16px 16px 140px; }
+  .au-head { text-align: center; margin-bottom: 16px; }
+  .au-head h1 { font-size: 1.6rem; margin: 0; }
+
+  .au-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px; }
+  .au-tile { position: relative; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 6px; min-height: 120px; padding: 14px 10px;
+    background: var(--surface-1, #f3f3f1); border: 2px solid var(--border-strong, #ccc);
+    border-radius: 14px; cursor: pointer; text-align: center; -webkit-user-select: none;
+    user-select: none; -webkit-tap-highlight-color: transparent; }
+  .au-tile:active { background: var(--surface-2, #e9e9e6); }
+  .au-tile.au-active { border-color: var(--brand-orange, #d9802e); }
+  .au-tile-name { font-size: 1.05rem; font-weight: 700; line-height: 1.25; }
+  .au-tile-price { font-size: 0.95rem; color: var(--text-muted); }
+  .au-tile.au-pfand-zurueck .au-tile-price { color: var(--text-muted); }
+
+  .au-badge { position: absolute; top: -10px; right: -10px; min-width: 32px; height: 32px;
+    padding: 0 6px; border-radius: 50%; background: var(--brand-orange, #d9802e); color: #fff;
+    font-size: 1.05rem; font-weight: 700; display: flex; align-items: center;
+    justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.25); }
+
+  .au-minus { position: absolute; bottom: -10px; left: -10px; width: 36px; height: 36px;
+    border-radius: 50%; border: 2px solid var(--border-strong, #999); background: #fff;
+    font-size: 1.3rem; line-height: 1; display: none; align-items: center; justify-content: center; }
+  .au-tile.au-active .au-minus { display: flex; }
+
+  .au-bar { position: fixed; left: 0; right: 0; bottom: 0; background: var(--surface-page, #fff);
+    border-top: 2px solid var(--border-strong, #ccc); padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+    box-shadow: 0 -4px 14px rgba(0,0,0,0.08); }
+  .au-bar-inner { max-width: 720px; margin: 0 auto; display: flex; align-items: center;
+    justify-content: space-between; gap: 16px; }
+  .au-total-label { font-size: 1rem; color: var(--text-muted); }
+  .au-total { font-size: 2rem; font-weight: 800; }
+  .au-fertig { font-size: 1.2rem; padding: 16px 24px; white-space: nowrap; }
+  .au-fertig:disabled { opacity: 0.4; }
+</style>
+</head>
+<body>
+<div class="au-wrap">
+  <div class="au-head">
+    <h1>Ausschank</h1>
+  </div>
+
+  <div class="au-grid" id="au-grid"></div>
+</div>
+
+<div class="au-bar">
+  <div class="au-bar-inner">
+    <div>
+      <div class="au-total-label">Gesamt</div>
+      <div class="au-total" id="au-total">0,00 €</div>
+    </div>
+    <button type="button" class="btn btn-primary au-fertig" id="au-fertig" disabled>Fertig / Neuer Verkauf</button>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  // Pfand bewusst als eigene, manuell antippbare Position statt automatisch an einzelne
+  // Getraenke gekoppelt (Marko-Preisliste nennt "Pfand: 1 €" nur einmal, nicht pro Produkt -
+  // welcher Becher/welches Glas im Einzelfall Pfand bekommt, entscheidet das Personal direkt
+  // am Stand). "Pfand zurueck" negativ, fuer Kunden, die nur ihr Pfand abgeben.
+  var PRODUCTS = [
+    { key: 'bier', name: 'Hasseröder Pils vom Fass', price: 3.50 },
+    { key: 'radler', name: 'Radler', price: 3.50 },
+    { key: 'cola', name: 'Vita Cola Original', price: 2.50 },
+    { key: 'orange', name: 'Vita Orangenlimonade', price: 2.50 },
+    { key: 'zitrone', name: 'Vita Zitronenlimonade', price: 2.50 },
+    { key: 'apfelschorle', name: 'Apfelschorle', price: 2.50 },
+    { key: 'wasser_pur', name: 'Thüringer Waldquell Pur', price: 2.50 },
+    { key: 'wasser_medium', name: 'Thüringer Waldquell Medium', price: 2.50 },
+    { key: 'kaffee', name: 'Kaffee Becher', price: 2.00 },
+    { key: 'prosecco', name: 'Prosecco 0,1 l', price: 3.00 },
+    { key: 'wein', name: 'Weißwein 0,2 l', price: 3.00 },
+    { key: 'pfand', name: 'Pfand', price: 1.00 },
+    { key: 'pfand_rueckgabe', name: 'Pfand zurück', price: -1.00 }
+  ];
+
+  var counts = {};
+
+  function fmtEUR(n) {
+    var sign = n < 0 ? '-' : '';
+    return sign + Math.abs(n).toFixed(2).replace('.', ',') + ' €';
+  }
+
+  function total() {
+    return PRODUCTS.reduce(function (sum, p) { return sum + (counts[p.key] || 0) * p.price; }, 0);
+  }
+
+  function hasItems() {
+    return Object.keys(counts).some(function (k) { return counts[k] > 0; });
+  }
+
+  function render() {
+    PRODUCTS.forEach(function (p) {
+      var tile = document.getElementById('au-tile-' + p.key);
+      var qty = counts[p.key] || 0;
+      tile.classList.toggle('au-active', qty > 0);
+      var badge = tile.querySelector('.au-badge');
+      if (qty > 0) {
+        badge.style.display = 'flex';
+        badge.textContent = qty;
+      } else {
+        badge.style.display = 'none';
+      }
+    });
+    var t = total();
+    document.getElementById('au-total').textContent = fmtEUR(t);
+    document.getElementById('au-fertig').disabled = !hasItems();
+  }
+
+  function add(key) {
+    counts[key] = (counts[key] || 0) + 1;
+    render();
+  }
+
+  function remove(key) {
+    if (!counts[key]) return;
+    counts[key] -= 1;
+    render();
+  }
+
+  var grid = document.getElementById('au-grid');
+  PRODUCTS.forEach(function (p) {
+    var tile = document.createElement('div');
+    tile.className = 'au-tile' + (p.key === 'pfand_rueckgabe' ? ' au-pfand-zurueck' : '');
+    tile.id = 'au-tile-' + p.key;
+    tile.innerHTML =
+      '<span class="au-tile-name">' + p.name + '</span>' +
+      '<span class="au-tile-price">' + fmtEUR(p.price) + '</span>' +
+      '<span class="au-badge"></span>' +
+      '<button type="button" class="au-minus" aria-label="weniger">−</button>';
+    tile.addEventListener('click', function (e) {
+      if (e.target.closest('.au-minus')) return;
+      add(p.key);
+    });
+    tile.querySelector('.au-minus').addEventListener('click', function (e) {
+      e.stopPropagation();
+      remove(p.key);
+    });
+    grid.appendChild(tile);
+  });
+
+  // Protokollierung ist reiner Kassennachweis fuer den spaeteren Kassenschnitt (Marko,
+  // 01.10.2026) - das Geld fliesst unabhaengig davon ueber das Kartenterminal. Deshalb
+  // bewusst "fire and forget": kein await, kein Retry, kein Fehlerdialog. Der Knopf setzt
+  // den Warenkorb sofort zurueck, egal ob/wie schnell der Log-Call durchkommt - die Kasse
+  // darf dadurch nie ins Stocken geraten.
+  document.getElementById('au-fertig').addEventListener('click', function () {
+    var items = PRODUCTS
+      .filter(function (p) { return counts[p.key] > 0; })
+      .map(function (p) { return { name: p.name, qty: counts[p.key], price: p.price }; });
+    if (items.length) {
+      fetch('https://ticketing.basketball-loewen.com/webhook/ausschank-verkauf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: items, total: total() })
+      }).catch(function () {});
+    }
+    counts = {};
+    render();
+  });
+
+  render();
+});
+</script>
+</body>
+</html>
