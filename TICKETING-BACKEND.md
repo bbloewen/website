@@ -712,18 +712,27 @@ brach mit „Kein freier Sitzplatz mehr in Rollstuhlplatz" ab. Die Begleitperson
 - Offen und beschlossen: Block, Reihe und Platz des zugeteilten Rollstuhlplatzes sollen in der Ticket-Mail und im Ticket-PDF
   stehen (eigene Vorlage für Produkt 34); noch nicht umgesetzt. UHJPU (E6/1–8) soll auf normale Plätze in Block E verschoben werden.
 
-## pretix-Worker: Versions-Drift stoppt die Ticket-Erzeugung (01.10.2026, Stand 11:30)
+## pretix-Worker: Versions-Drift stoppt die Ticket-Erzeugung (01.10.2026, behoben 11:40)
 
 **Befund:** Das Speichern der Mail-Variablen im Railway-Dienst Pretix-Worker (10:33) löste einen Neubau „via GitHub" aus. Das
-Dockerfile (`FROM pretix/standalone:stable`, Repo `pretix-docker`) zieht dabei die jeweils aktuelle Version. Der Web-Dienst
-läuft seit 24 Tagen auf einer älteren Version, die Datenbank hat die Migration der neuen Version nie erhalten. Folge: Jede Ticket-
-Erzeugung im Worker bricht ab (`ProgrammingError: column pretixbase_question.container_type does not exist`, Task
-`pretix.base.services.tickets.generate`), neue Bestellungen bleiben bei HTTP 409 „not ready" hängen (Fall XZTKG, ab ca. 10:55). Die
-Ticket-Mail-Workflow-Alarmmail „Ticket-Mail unvollstaendig" hat das korrekt gemeldet und keine Teil-Mail verschickt. Die Ticket-
-Vorlage (Layouts 5/8) ist intakt (je 263.101 Byte). Mails und Bestätigungscodes laufen über den neuen Worker.
+Dockerfile (`FROM pretix/standalone:stable`, Repo `pretix-docker`) zog dabei die aktuelle Version 2026.8.x. Der Web-Dienst lief
+seit 24 Tagen auf 2026.7.0, die Datenbank hatte die Migration der neuen Version nie erhalten. Folge: Jede Ticket-Erzeugung im
+Worker brach ab (`ProgrammingError: column pretixbase_question.container_type does not exist`, Task
+`pretix.base.services.tickets.generate`), neue Bestellungen blieben bei HTTP 409 „not ready" hängen (Fall XZTKG, ab ca. 10:55).
+Die Alarmmail „Ticket-Mail unvollstaendig" meldete das korrekt und verschickte keine Teil-Mail. Die Ticket-Vorlage (Layouts 5/8)
+war intakt.
 
-**Maßnahme:** Worker auf das vorherige Deployment (25.09., passt zur Datenbank) zurücksetzen (Railway: Deployments → Rollback), die
-neuen Mail-Variablen bleiben erhalten, weil sie am Dienst hängen. Danach XZTKG prüfen und die Ticket-Mail einmal auslösen.
+**Behebung:** Dockerfile festgeschrieben (Commit `ead4655` im Repo `pretix-docker`): `FROM pretix/standalone:2026.7.0`,
+`pretix-sepadebit==2.7.0`, `pretix-passbook==1.14.1` (Stand des laufenden Web-Dienstes, gelesen aus `/api/v1/version` und
+`/control/global/update/`). Railway baute Web (11:36) und Worker (11:35) neu, beide auf demselben Stand, keine Migration nötig.
+Danach wurde XZTKG fertig (Dateien 22 Sekunden nach der ersten Anfrage) und die Ticket-Mail ging einmal raus. Die Mail-Variablen
+(Relay) blieben beim Neubau erhalten.
 
-**Dauerhaft:** Die pretix-Version im Dockerfile festschreiben (kein `stable`) und Web und Worker nur zusammen upgraden
-(Web zuerst, damit die Migration läuft). Jede Variablenänderung am Worker oder Web baut neu und kann so die Version wechseln.
+**Lehren:**
+- Jede Variablenänderung an Web oder Worker baut neu und nimmt sich bei einem unfesten Tag die neueste Version.
+- Railway-„Rollback" stellt Build UND Variablen des alten Deployments wieder her (Dialogtext), er ist hier also kein
+  Weg, nur den Build zurückzudrehen.
+- Das lokale Klon-Verzeichnis `Projects/pretix-docker` war hinter GitHub (S3-Medien, Saison-Pass-Plugin, `production_settings.py`).
+  Vor Änderungen immer `git fetch` und prüfen.
+- Upgrade nur bewusst: erst Web (führt die Migrationen aus), dann Worker, danach die Pins im Dockerfile anheben. Aktuell
+  ist 2026.8.0 verfügbar.
