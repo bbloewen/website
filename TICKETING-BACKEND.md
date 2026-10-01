@@ -742,3 +742,11 @@ Danach wurde XZTKG fertig (Dateien 22 Sekunden nach der ersten Anfrage) und die 
 Anlass: Eine Kundin (SWE, Order ET-RG9W5M) fragte nach, weil die Bestätigungsmail "Dein Ticket … separat per E-Mail von pretix" ankündigte, das Ticket aber von rechnung@basketball-loewen.com (n8n) kommt. Entscheidung (Marko): Der Absender wird in den Mails nicht genannt. Die Bestätigung sagt nur "in einer separaten E-Mail. Das dauert in der Regel nur wenige Minuten." Alle Kundenmails (Ticket-Mail `zNGWzRFz3ebzsDkD`, Einzelticket-Bestätigung `BmpBkKdzzSZaBnZE`, Dauerkarten-Bestätigung `HyUXW4kbhaQVbG0A`) haben `replyTo` = tickets@basketball-loewen.com (Absender bleibt technisch rechnung@). Ticket-Mail und Einzelticket-Bestätigung enden mit "Falls du Fragen hast, wende dich bitte an tickets@basketball-loewen.com." Weitere kundensichtbare Texte mit "pretix" gibt es nicht (Ticket-Mail, Dauerkarten-Mail, Website geprüft); die übrigen Treffer sind interne Alarm-Mails an Marko.
 
 Entscheidung: Für Rollstuhl-Tickets (Produkt 34) wird keine eigene Ticketvorlage gebaut.
+
+## UHJPU von Rollstuhlplätzen verschoben (01.10.2026)
+
+Order UHJPU (8 Einzeltickets Kat. I, Spiel 26, Gutschein 198, 0 €) war bei der Sitzvergabe auf den Rollstuhlplätzen Block E, Reihe 6, Platz 1–8 gelandet. Verschoben auf Block E, Reihe 7, Platz 1–8 (vorher per Sitzstatus des Subevents als frei geprüft). Status `p`, Summe 0,00 €, Preise und Gutschein unverändert, keine Mail an den Kunden (`notify:false`, `reissue_invoice:false`).
+
+Vorgehen per API über einen kurzen Hilfs-Workflow mit dem pretix-Credential (danach archiviert): `POST …/orders/UHJPU/change/` mit `{"patch_positions":[{"position":<id>,"body":{"seat":"<seat_guid>"}}, …], "notify":false, "reissue_invoice":false}`. Das Feld heißt `body`, nicht `seat` direkt (sonst HTTP 400 "This field is required", nichts geändert).
+
+Sitz-Tabelle "Belegte-Sitze": Eine Änderung per API löst keinen Webhook aus, die Tabelle zeigte danach weiter die alten Sitze. Nachziehen ohne Ticket-Mail: `POST /webhook/pretix-order-event` mit `{"organizer":"xxl","event":"saison2627","code":"<CODE>","action":"pretix.event.order.changed.seat"}` (alles außer `pretix.event.order.paid` löst nur den Sitz-Abgleich aus, die Mail nicht). Danach die Zeilen der Order in der Data Table prüfen.
