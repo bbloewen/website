@@ -751,6 +751,85 @@ Vorgehen per API über einen kurzen Hilfs-Workflow mit dem pretix-Credential (da
 
 Sitz-Tabelle "Belegte-Sitze": Eine Änderung per API löst keinen Webhook aus, die Tabelle zeigte danach weiter die alten Sitze. Nachziehen ohne Ticket-Mail: `POST /webhook/pretix-order-event` mit `{"organizer":"xxl","event":"saison2627","code":"<CODE>","action":"pretix.event.order.changed.seat"}` (alles außer `pretix.event.order.paid` löst nur den Sitz-Abgleich aus, die Mail nicht). Danach die Zeilen der Order in der Data Table prüfen.
 
+## Abendkasse-Backend gebaut (01.10.2026)
+
+Neuer, additiver Webhook-Zweig im Workflow `BmpBkKdzzSZaBnZE` (22 neue Nodes, Präfix
+"Abendkasse: ", nichts am bestehenden PayPal/Einzelticket-Flow verändert):
+`POST /webhook/abendkasse-bestellung` ← `tickets/abendkasse.html` (Tablet/Laptop-Seite
+für den Verkauf an der Abendkasse, kein Teil des öffentlichen Shops). Ablauf: Normalize
+Input → Spam-Check → Rate-Limit (eigener `endpoint: 'abendkasse'` in derselben Data
+Table `Webhook-RateLimit`, 60/h statt der 8/h des öffentlichen Einzelticket-Checkouts)
+→ Sitze zuordnen → Create pretix Order → sofort mark_paid → parallel (a) Ticket-Mail-
+Pipeline der öffentlichen Seite auslösen (`source:"direct"`, für Archivierung/Platzhalter-
+Postfach `abendkasse@basketball-loewen.com`) und (b) Ticket-PDF per Retry-Schleife
+(identisches Muster wie im Ticket-Mail-Workflow, bis zu 12 Versuche à 5 s) abrufen und
+**direkt als PDF-Binary** an die Kasse zurückgeben (keine Mail, kein Umweg über eine URL).
+
+**Wichtiger Unterschied zum Einzelticket-Backend:** Die "- Abend"-Items erlauben gar
+keine Sitzwahl — ein mitgeschickter `seat` wird von pretix mit HTTP 400 "This product
+does not allow to choose a seat" abgelehnt (per echter Testbestellung entdeckt). Der
+Node "Abendkasse: Sitze zuordnen" bucht deshalb ohne jeden Sitzplan-Abgleich, rein über
+pretix-Kontingent — der Node "Freie Sitze pruefen" wurde dafür komplett entfernt
+(Kontingent-Prüfung übernimmt pretix selbst beim Anlegen der Order). Das betrifft auch
+Rollstuhlplatz-Abend (Produkt 57): keine `WHEELCHAIR_SEATS`-Liste nötig, einfach Produkt
+57 ohne Sitz bestellen.
+
+**Kontingent-Sorge geprüft und verworfen:** Es bestand der Verdacht, die "- Abend"-Items
+könnten ein eigenes, von Dauerkarte/Einzelticket unabhängiges Kontingent haben (echtes
+Überbuchungsrisiko). Per `GET .../quotas/` verifiziert: Jedes Block-Kontingent listet alle
+drei Produkt-Varianten gemeinsam in `items` (z. B. "Block D" eines Spiels: `[Dauer-Item,
+Einzel-Item, Abend-Item]`, Rollstuhlplatz-Kontingent `[39,34,57]` mit Größe 21) — die
+Abendkasse zieht aus demselben Topf wie die Online-Verkäufe, kein separates Kontingent.
+
+**Preise serverseitig autoritativ:** `PRICES`-Konstante im Node (Einzelpreis + 2,00 €
+Zuschlag, identisch zur Preisliste des öffentlichen Shops) ist die alleinige Preisquelle
+— `l.unitPrice` aus dem Warenkorb wird nie übernommen, anders als beim öffentlichen
+Einzelticket-Checkout (dort serverseitig nur bei Gutschein/Begleitperson überschrieben).
+Grund: An der Abendkasse wird sofort bar kassiert, es gibt keine zweite Prüfinstanz wie
+bei PayPal.
+
+**Rollstuhlplatz + Begleitperson:** Rollstuhlplatz ist ein eigenes Produkt (Item 57,
+kein Block), Begleitperson (Tarif `begleitung`, 0 €) hängt — wie beim Einzelticket-
+Workflow — an einer normalen Ticketzeile eines echten Blocks, nie an der
+Rollstuhlplatz-Zeile selbst (harter `throw`, falls doch). UI (`abendkasse.html`): Nach
+Wahl eines beliebigen Blocks erscheint auf dem Tarif-Bildschirm ein
+"+ weitere Kategorie"-Dropdown (Eintrag "Rollstuhlplatz"); ist mindestens ein
+Rollstuhlplatz-Ticket im Warenkorb, erscheint auf dem Block-Panel zusätzlich eine
+Begleitperson-Kachel (Obergrenze über `_companionSlotsRemaining` aus `js/seat-picker.js`,
+ungeändert). Erste UI-Version hatte die Begleitperson fälschlich direkt im
+Rollstuhlplatz-Panel, das hätte die Order-Anlage zum Scheitern gebracht — vor dem Live-
+Gang korrigiert.
+
+**Bug beim ersten Testlauf gefunden:** "Rate-Limit lesen" (Data-Table-`get`) lieferte bei
+der ersten Anfrage einer IP 0 Zeilen zurück — ohne `alwaysOutputData:true` lief der
+gesamte restliche Zweig dadurch gar nicht erst an (0 Items = kein Folge-Node-Aufruf),
+die Kasse wäre beim ersten Verkauf jedes Tages stillschweigend hängen geblieben. Fix:
+`alwaysOutputData:true` gesetzt (identischer Fix-Typ wie beim `deleteRows`-Bug vom
+11.08., s. oben).
+
+**Getestet (sechs echte Testbestellungen, alle über `abendkasse@basketball-loewen.com`
+identifizierbar, danach alle per `mark_canceled` storniert):** Block-Kategorien, Block
+mit zwei Tarifen in einer Order, sowie Rollstuhlplatz + Begleitperson (Order ZCECS:
+Item 57 10,00 €, Item 48/Variation "normal" 0,00 €) — komplette Kette inkl. PDF-Abruf
+und Ticket-Mail-Auslösung lief bei allen sechs fehlerfrei durch.
+
+**Frontend-Zusatz:** Der Erfolgsfall öffnet das PDF in einem neuen Tab und ruft dort
+automatisch `window.print()` auf (Timeout-Fallback falls `load` nicht zuverlässig
+feuert) — auf dem iPad bestätigt (Safari und Chrome identisch, da beide auf iOS
+WebKit nutzen, kein eigenes Chrome-Engine erlaubt). Ein komplett dialogloser Druck
+ist aus einer normalen Webseite heraus nicht möglich; auf einem Desktop/Laptop ginge das
+nur über Chrome mit `--kiosk-printing`-Flag beim Start, nicht über die Seite selbst.
+
+**pretix-API-Stolperfalle:** Der Endpunkt zum Stornieren heißt `mark_canceled`, nicht
+`cancel` (alle sechs Testbestellungen scheiterten beim ersten Versuch mit HTTP 404, bis
+die korrekte pretix-API-Doku geprüft wurde). Komplette Liste der Order-Aktions-Endpunkte:
+`mark_paid`, `mark_canceled`, `mark_pending`, `mark_expired`, `reactivate`, `extend`,
+`approve`, `deny` — eine echte "Löschen"-Funktion für Orders gibt es über die API nicht,
+Stornieren ist der einzige Weg, Kontingent/Sitzplatz freizugeben.
+
+**Offen:** Das Ausschank-Kassensystem (zweiter Teil der ursprünglichen Anfrage, 10
+Produkte ohne Lagerbestand, eigenes Terminal) ist noch nicht begonnen.
+
 ## Beobachtungspunkte (Stand 01.10.2026)
 
 Keine Aufgaben, sondern Dinge, die bei der nächsten passenden echten Bestellung geprüft werden:
