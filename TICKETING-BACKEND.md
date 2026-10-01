@@ -562,3 +562,59 @@ vier Tickets in einer nachträglich gesendeten Mail.
 `-3UEPBR`, `-UG9VW7`, `-VQBY7L` wurden gesperrt (`valid_until` 29.09.2026). Die
 Eintragszeile `ET-6TARLH` in „PayPal-Zahlungen" (`pABu2vTPT1WY4uNh`, Zeile 33) steht auf dem
 neuen Status `manuell_erledigt`; kein Workflow reagiert auf diesen Wert.
+
+## Ticket-PDFs von 2,4 MB auf 0,3 MB verkleinert (30.09./01.10.2026)
+
+**Ursache:** Der Hintergrund der pretix-Ticketlayouts war ein PDF (ReportLab) mit 50 Bildern,
+97 % der Ticketgröße: Sponsorenlogos mit bis zu 4.568 dpi, ASCII85-kodiert, und 16 von 29
+Bildern lagen komplett unter weißen Flächen (alter Ballast). pretix bettet den Hintergrund
+in jedes Ticket neu ein, daher 2,42 MB je Ticket. Eine Mail mit 8 Tickets war damit über
+Gmails 25-MB-Grenze (7 Tickets passten gerade noch).
+
+**Fix:** Hintergrund neu geschrieben (Bilder auf 250 dpi, verdeckte Bilder durch 1×1-Platzhalter
+ersetzt, Flate statt ASCII85, Seiteninhalt byte-gleich): 263.101 statt 2.364.945 Byte,
+Ticket jetzt ca. 320 KB (je Passbook ca. 23 KB). Layout 5 „Ticket_Dauerkarte_Gebrandet" und
+Layout 8 „Ticket_Einzelticket_Freiwahl" nutzen dieselbe Datei. Layout 4 „Ticket_Basis" blieb
+unberührt. Der QR-Bereich ist pixelgleich. Das Original liegt lokal unter
+`Projects/ticket-hintergrund-backup/` (nicht im Repo), Rückweg = dieselben Schritte mit dem Original.
+
+**pretix-API für den Hintergrund:** Es gibt keinen Endpunkt `…/ticketlayouts/<id>/background/`
+(404). Der Upload läuft zweistufig: `POST /api/v1/upload` (Body = PDF, Header
+`Content-Disposition: attachment; filename="background.pdf"` und `Content-Type:
+application/pdf`) liefert `{"id":"file:<uuid>"}`, danach `PATCH
+/api/v1/organizers/xxl/events/saison2627/ticketlayouts/<id>/` mit `{"background":"file:<uuid>"}`.
+
+**Zwischenspeicher:** pretix liefert bereits erzeugte Tickets weiter aus dem Cache (auch nach
+dem Layout-Wechsel). Neu erzeugt werden sie nach einer Bestellungsänderung, z. B. ein
+Preis-neutraler `POST …/orders/<code>/change/` mit `patch_positions` (Preis unverändert),
+`notify: false`, `reissue_invoice: false`. Der erste Abruf danach liefert HTTP 409, die
+Datei ist erst beim zweiten Abruf da. Bereits versendete Tickets bleiben unverändert groß.
+
+## Dauerkarten-Workflow: Gutschein an jeden rabattierten Sitz (01.10.2026)
+
+Workflow `HyUXW4kbhaQVbG0A`, Node „Build pretix Order Payload" (Version `e4936d67`):
+Der Gutschein hängt jetzt an der Ankerposition (erstes Spiel, einzige Position mit Saisonpreis)
+**jedes** rabattierten Sitzes, bis zu den Restnutzungen (`remainingUses` aus der
+Shared-Rabattberechnung, sonst `max_usages − redeemed` aus „Gutschein in pretix suchen"),
+statt nur an der des ersten Sitzes. Vorher zählte pretix bei einem Mehrfach-Gutschein nur
+eine Einlösung, der Gutschein blieb wiederverwendbar (Fälle QGA9P und 7PAEE). Neu:
+Abbruch vor dem Anlegen der Order, wenn mehr Sitze rabattiert wurden, als Einlösungen übrig
+sind, oder wenn Artikel, Variation, Sitz oder Spiel nicht zum Gutschein passen. Folgepositionen
+der anderen Spiele bekommen nie einen Gutschein. Getestet nur offline gegen echte Altbestellungen
+(Einzelsitz, ohne Gutschein, 2 Sitze, 24 Sitze), identische Ausgabe außer bei Mehrfach-Gutscheinen.
+Noch nicht live beobachtet: ob pretix den Gutschein an den später per `/orderpositions/`
+angelegten Positionen annimmt. Die erste echte Bestellung mit Mehrfach-Gutschein beobachten.
+
+**Regel für Mehrfach-Gutscheine:** Pro Bestellung wird im Shop nur ein Code verrechnet. Für mehrere
+Plätze deshalb einen Gutschein mit „Anzahl Nutzungen" = Zahl der Plätze anlegen, nicht mehrere
+Einzelgutscheine.
+
+## Ticket-Mail erneut senden (Ablauf)
+
+1. Bestellung muss `p` sein, alle Positions-PDFs müssen abrufbar sein (409 = noch in Arbeit, nach 30 s wieder).
+2. Marker im Order-Kommentar entfernen: `PATCH …/orders/<code>/` mit `{"comment": ""}`. In einem
+   n8n-HTTP-Node muss `sendBody` ein echter Boolean sein, sonst wird der Body nicht gesendet und
+   die Änderung passiert still nicht.
+3. Genau einmal `POST /webhook/pretix-order-event` mit `{"organizer":"xxl","event":"saison2627","code":"<Code>","action":"pretix.event.order.paid"}` (ohne `source`).
+4. Die Ausführung von `zNGWzRFz3ebzsDkD` prüfen: `pdfCount` gleich `expectedCount`, Marker wieder `[ticket-mail-versendet]`.
+Nachgesendet am 30.09./01.10.: KMTVH, MC377 (3 Tickets), UHJPU (8 Tickets, zusammen 2,5 MB).
