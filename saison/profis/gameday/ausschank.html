@@ -16,10 +16,34 @@
      Zwischenschritte - Mengen stehen direkt als Zaehler auf der Kachel, kein separater
      Warenkorb-Bereich zum Gegenchecken noetig. */
   body { background: var(--surface-page, #fff); }
-  .au-wrap { max-width: 720px; margin: 0 auto; padding: 16px 16px 140px; }
+  .au-wrap { max-width: 980px; margin: 0 auto; padding: 16px 16px 140px;
+    display: flex; align-items: flex-start; gap: 20px; }
+  .au-main { flex: 1; min-width: 0; }
 
   .au-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 12px; }
+
+  /* Kassenzettel-Aufschluesselung rechts (Marko, 01.10.2026: "nachvollziehen, wie sich
+     der Gesamtpreis zusammensetzt") - bewusst klein/unauffaellig, keine Bedienelemente,
+     nur Lesehilfe. Bricht unter die Kacheln um, wenn der Platz (schmales Tablet-Hochformat)
+     nicht fuer beides nebeneinander reicht. */
+  .au-receipt { width: 220px; flex-shrink: 0; font-size: 0.78rem; color: var(--text-muted);
+    background: var(--surface-1, #f3f3f1); border: 1px solid var(--border-strong, #ccc);
+    border-radius: 10px; padding: 10px 12px; }
+  .au-receipt-title { font-weight: 700; font-size: 0.85rem; color: var(--color-brand-navy, #00122d);
+    margin-bottom: 6px; }
+  .au-receipt-empty { font-style: italic; opacity: .75; }
+  .au-receipt-line { padding: 3px 0; border-bottom: 1px solid rgba(0,0,0,.06); }
+  .au-receipt-line:last-child { border-bottom: none; }
+  .au-receipt-row { display: flex; justify-content: space-between; gap: 6px; }
+  .au-receipt-unit { opacity: .75; }
+  .au-receipt-total { display: flex; justify-content: space-between; margin-top: 8px;
+    padding-top: 6px; border-top: 1px solid var(--border-strong, #ccc); font-weight: 700;
+    color: var(--color-brand-navy, #00122d); }
+  @media (max-width: 640px) {
+    .au-wrap { flex-direction: column; }
+    .au-receipt { width: 100%; }
+  }
   /* Hintergrundfarbe kommt je Produkt per Inline-Style (s. PRODUCTS/bg) - sticht die
      Klassen-Regel unten dank hoeherer Spezifitaet automatisch aus, :active arbeitet
      deshalb bewusst per Skalierung statt Hintergrundwechsel (Marko, 01.10.2026:
@@ -69,7 +93,16 @@
 </head>
 <body>
 <div class="au-wrap">
-  <div class="au-grid" id="au-grid"></div>
+  <div class="au-main">
+    <div class="au-grid" id="au-grid"></div>
+  </div>
+  <div class="au-receipt">
+    <div class="au-receipt-title">Kassenzettel</div>
+    <div id="au-receipt-lines"><div class="au-receipt-empty">Noch keine Artikel</div></div>
+    <div class="au-receipt-total" id="au-receipt-total" hidden>
+      <span>Gesamt</span><span id="au-receipt-total-amount">0,00 €</span>
+    </div>
+  </div>
 </div>
 
 <div class="au-bar">
@@ -149,6 +182,32 @@ document.addEventListener('DOMContentLoaded', function () {
     var t = total();
     document.getElementById('au-total').textContent = fmtEUR(t);
     document.getElementById('au-fertig').disabled = !hasItems();
+    renderReceipt(t);
+  }
+
+  // Kassenzettel-Aufschluesselung (Marko, 01.10.2026): Produkt, Anzahl und Preis je
+  // Produkt (inkl. Pfand, derselbe Effektivpreis wie auf der Kachel/im Gesamtbetrag),
+  // damit nachvollziehbar bleibt, wie sich die Summe zusammensetzt. Nur Lesehilfe,
+  // keine eigenen Bedienelemente.
+  function renderReceipt(t) {
+    var linesEl = document.getElementById('au-receipt-lines');
+    var totalEl = document.getElementById('au-receipt-total');
+    var zeilen = PRODUCTS.filter(function (p) { return counts[p.key] > 0; });
+    if (!zeilen.length) {
+      linesEl.innerHTML = '<div class="au-receipt-empty">Noch keine Artikel</div>';
+      totalEl.hidden = true;
+      return;
+    }
+    linesEl.innerHTML = zeilen.map(function (p) {
+      var qty = counts[p.key];
+      var unit = p.price + (p.pfand || 0);
+      return '<div class="au-receipt-line">' +
+        '<div class="au-receipt-row"><span>' + qty + '× ' + p.name + '</span><span>' + fmtEUR(qty * unit) + '</span></div>' +
+        '<div class="au-receipt-unit">à ' + fmtEUR(unit) + '</div>' +
+      '</div>';
+    }).join('');
+    totalEl.hidden = false;
+    document.getElementById('au-receipt-total-amount').textContent = fmtEUR(t);
   }
 
   function add(key) {
