@@ -618,3 +618,34 @@ Einzelgutscheine.
 3. Genau einmal `POST /webhook/pretix-order-event` mit `{"organizer":"xxl","event":"saison2627","code":"<Code>","action":"pretix.event.order.paid"}` (ohne `source`).
 4. Die Ausführung von `zNGWzRFz3ebzsDkD` prüfen: `pdfCount` gleich `expectedCount`, Marker wieder `[ticket-mail-versendet]`.
 Nachgesendet am 30.09./01.10.: KMTVH, MC377 (3 Tickets), UHJPU (8 Tickets, zusammen 2,5 MB).
+
+## PayPal-Pfad: Teilrabatt-Gutscheine und Toleranz (01.10.2026)
+
+Workflow `BmpBkKdzzSZaBnZE`, Node „Sitze zuordnen" (Version `f4c86d84`). Bezahlte Bestellungen laufen
+über den Capture-Webhook in einer eigenen Ausführung, dort fehlte bisher der Gutschein-Kontext.
+Neu im Capture-Zweig:
+- IF „Gutschein im Capture nachladen?" und HTTP „Gutschein in pretix suchen (Capture)" nach „Freie Sitze
+  pruefen". Der Lookup läuft nur bei gespeichertem Gutscheincode, ist read-only und kann den Capture
+  nicht stören (neverError, 2 Versuche, 15 s). Kategorien und Tarif-Einschränkung werden wie in
+  „Gutschein-Rabatt berechnen" aus Item/Quota abgeleitet (`ITEM_TO_CATEGORY` und `QUOTA_TARIF` stehen jetzt in
+  beiden Nodes und müssen synchron bleiben).
+- Der Gutschein hängt an jeder gedeckten Position bis zu den Restnutzungen, die Positionspreise folgen dem
+  Rabatt. Vorher legte der Capture-Zweig pretix-Orders zu Listenpreisen an (Altfall 75393: 12,50 € in pretix bei
+  6,25 € bezahlt).
+- **Toleranz statt Alarm:** Weicht die Summe der Positionspreise (inkl. Nachwuchs) vom bezahlten Betrag
+  ab, wird die Bestellung trotzdem angelegt. Die Differenz geht auf die letzte Ticketposition mit Preis > 0
+  (reicht das nicht, auf die vorherige, Preise nie unter 0,00; Nachwuchs zuletzt). Bei Abweichung über 1 Cent
+  steht im Order-Kommentar `Preis-Anpassung Capture: Differenz … EUR auf Position … verteilt (bezahlt …,
+  berechnet …), Gutschein …`. Nur im kostenlosen Zweig (Betrag 0, aber ungedeckte Position) bleibt
+  der Alarm, weil dort kein Geld geflossen ist. Gift-Card-, Festbetrags- und Ohne-Gutschein-Pfad
+  unverändert. Offline getestet (50 Fälle), der Capture-Pfad selbst ist ohne echte PayPal-Zahlung nicht live testbar.
+
+## pretix auf Railway: Auslastung (01.10.2026)
+
+Web-Dienst: 24 vCPU, Limit 8 GB, Verbrauch die Woche über ca. 1,1 GB, CPU ≈ 0; Worker ohne praktische Grenze
+(ca. 0,4–1,0 GB), Postgres ca. 100 MB, Redis ca. 10 MB. Keine SIGKILL-/OOM-Meldungen in 7 Tagen, 10 Gunicorn-Neustarts.
+**Mehr RAM wird nicht gebraucht.** Die gelegentlichen HTTP-500 beim Abruf frischer Ticket-/Passbook-Dateien
+sind `botocore NoSuchKey` im Medien-Bucket (S3): pretix hält die Datei für fertig, sie liegt aber noch nicht im
+Bucket. Der Ticket-Mail-Workflow wiederholt deshalb auch bei 5xx. Offen: SMTP-Verbindungsabbrüche
+(`SMTPServerDisconnected`) im Worker beim pretix-eigenen Mailversand und die Frage, ob das Erzeugen der
+Ticketdateien im Worker oder im Web-Dienst läuft.
