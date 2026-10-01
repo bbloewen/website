@@ -323,6 +323,40 @@
     return Math.min(Math.round(d * 100) / 100, base);
   };
 
+  /* Hinweis zum nicht genutzten Teil eines produktgebundenen Gutscheins, gleiche Texte wie
+     im Checkout (tickets/checkout.html voucherHintText): Teilbetrag-Gutschein ("subtract")
+     mit höherem Wert als der Rabatt auf die passenden Tickets -> Rest verfällt;
+     Mehrfach-Gutschein mit noch freien Einlösungen -> "danach noch n× einlösbar".
+     Wertgutscheine, Prozent-Gutscheine und Gutscheine ohne Produktbindung bekommen keinen
+     Hinweis (letztere wirken hier pauschal, die Anzahl abgedeckter Tickets ist unbekannt). */
+  SeatPicker.prototype._voucherHint = function () {
+    var info = this.voucherInfo;
+    if (!info || info.source === 'giftcard' || !info.categories || !info.categories.length) return '';
+    var remaining = (info.remainingUses == null) ? Infinity : info.remainingUses;
+    var covered = 0;
+    var used = 0;
+    this._voucherMatchingUnits().forEach(function (u) {
+      if (remaining <= 0) return;
+      var applyQty = Math.min(u.qty, remaining);
+      if (applyQty <= 0) return;
+      if (info.priceMode === 'subtract') used += Math.min(info.value, u.unitPrice) * applyQty;
+      covered += applyQty;
+      remaining -= applyQty;
+    });
+    if (covered <= 0) return '';
+    var parts = [];
+    if (info.priceMode === 'subtract') {
+      var total = Math.round(info.value * covered * 100) / 100;
+      used = Math.round(used * 100) / 100;
+      var unused = Math.round((total - used) * 100) / 100;
+      if (unused > 0) parts.push('Von ' + fmtEUR(total) + ' € werden ' + fmtEUR(used) + ' € genutzt, ' + fmtEUR(unused) + ' € verfallen.');
+    }
+    if (info.remainingUses != null && info.remainingUses - covered > 0) {
+      parts.push('Dein Gutschein ist danach noch ' + (info.remainingUses - covered) + '× einlösbar.');
+    }
+    return parts.join(' ');
+  };
+
   /* Ein 100%-Gutschein (z.B. Sponsoren-Freikarte) übernimmt auch den sonst separat
      berechneten Nachwuchsbeitrag — bei einer vollständig kostenlosen Eintrittskarte
      soll kein Rest-Betrag stehen bleiben. Andere Gutscheine/Wertgutscheine lassen
@@ -2458,6 +2492,14 @@
           '<button type="button" data-voucher-remove>entfernen</button>' +
         '</div>' +
         (hasMatch ? '' : '<p class="seatplan-voucher-error">Dieser Gutschein gilt nicht für deine aktuelle Auswahl.</p>');
+      var voucherHint = hasMatch ? this._voucherHint() : '';
+      if (voucherHint) {
+        var hintEl = document.createElement('p');
+        hintEl.className = 'seatplan-voucher-hint';
+        hintEl.setAttribute('aria-live', 'polite');
+        hintEl.textContent = voucherHint;
+        wrap.appendChild(hintEl);
+      }
       this.cartEl.appendChild(wrap);
       if (window.lucide) window.lucide.createIcons();
       wrap.querySelector('[data-voucher-remove]').addEventListener('click', function () {

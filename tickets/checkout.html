@@ -14,7 +14,7 @@
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
 <link rel="stylesheet" href="/css/site.css?v=1790704266" />
-<link rel="stylesheet" href="/css/seat-picker.css?v=1787760512" />
+<link rel="stylesheet" href="/css/seat-picker.css?v=1790840855" />
 <style>
   .checkout-grid { display: grid; grid-template-columns: 380px 1fr; gap: 32px; align-items: start; }
   .checkout-grid.hidden { display: none; }
@@ -73,6 +73,8 @@
   .voucher-message { font-size: 12px; margin: 6px 0 0; }
   .voucher-message.success { color: #1B8A3D; }
   .voucher-message.error { color: #b3392c; }
+  .voucher-message.voucher-hint { color: var(--text-muted); margin: 8px 0 14px; }
+  .voucher-message.voucher-hint:empty { display: none; }
   .seatplan-cart-item.discount { color: #1B8A3D; }
 </style>
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
@@ -323,8 +325,9 @@
               <input type="text" id="voucher-input" placeholder="Gutschein-Code">
               <button type="button" class="btn btn-ghost btn-sm" id="voucher-apply">Einlösen</button>
             </div>
-            <p class="voucher-message" id="voucher-message"></p>
+            <p class="voucher-message" id="voucher-message" aria-live="polite"></p>
           </div>
+          <p class="voucher-message voucher-hint" id="voucher-hint" aria-live="polite"></p>
 
           <div class="seatplan-cart-total"><span>Gesamt</span><span><span id="checkout-total">0,00 €</span> <span id="checkout-vat-note" style="font-weight:400;font-size:12px;color:var(--text-muted);display:none"></span></span></div>
         </div>
@@ -639,6 +642,7 @@
     var voucherBoxEl = document.querySelector('.voucher-box');
     var voucherInput = document.getElementById('voucher-input');
     var voucherMsg = document.getElementById('voucher-message');
+    var voucherHint = document.getElementById('voucher-hint');
     var voucherBtn = document.getElementById('voucher-apply');
 
     function findVoucherLineIndex() {
@@ -646,6 +650,29 @@
     }
 
     function formatMoney(n) { return n.toFixed(2).replace('.', ',') + ' €'; }
+
+    /* Hinweis zum nicht genutzten Teil eines Gutscheins (Felder aus dem Einlösen-Webhook):
+       Teilbetrag-Gutschein ("subtract"), dessen Wert höher ist als der Rabatt auf die
+       abgedeckten Tickets -> der Rest verfällt; Mehrfach-Gutschein mit noch freien
+       Einlösungen -> wie oft er danach noch einlösbar ist. Wertgutscheine (Restguthaben
+       steht schon in der Erfolgsmeldung), Prozent-Gutscheine und ausgeschöpfte Gutscheine
+       bekommen keinen zusätzlichen Hinweis. */
+    function voucherHintText(result) {
+      if (!result || result.source !== 'voucher') return '';
+      var parts = [];
+      var value = Number(result.voucherValue);
+      var covered = Number(result.coveredUses);
+      var used = Number(result.usedAmount);
+      var unused = Number(result.unusedAmount);
+      if (result.voucherMode === 'subtract' && isFinite(value) && isFinite(covered) && isFinite(used) && isFinite(unused) && unused > 0) {
+        parts.push('Von ' + formatMoney(Math.round(value * covered * 100) / 100) + ' werden ' + formatMoney(used) + ' genutzt, ' + formatMoney(unused) + ' verfallen.');
+      }
+      var after = Number(result.remainingUsesAfter);
+      if (isFinite(after) && after > 0) {
+        parts.push('Dein Gutschein ist danach noch ' + after + '× einlösbar.');
+      }
+      return parts.join(' ');
+    }
 
     function renderSummary() {
       var html = cart.lines.map(function (l) {
@@ -693,6 +720,7 @@
           voucherInput.value = '';
           voucherMsg.textContent = '';
           voucherMsg.className = 'voucher-message';
+          voucherHint.textContent = '';
           renderSummary();
         });
       }
@@ -704,6 +732,7 @@
       if (!code || voucherBtn.disabled) return;
       voucherMsg.textContent = '';
       voucherMsg.className = 'voucher-message';
+      voucherHint.textContent = '';
       voucherBtn.disabled = true;
       voucherBtn.textContent = 'Wird eingelöst …';
       var event = cart.pretixEventSlug || '';
@@ -763,6 +792,7 @@
             ? ('Wertgutschein eingelöst. Restguthaben: ' + formatMoney(result.remainingBalance || 0) + '.')
             : 'Gutschein eingelöst.';
           voucherMsg.className = 'voucher-message success';
+          voucherHint.textContent = voucherHintText(result);
         })
         .catch(function () {
           voucherBtn.disabled = false;
