@@ -40,20 +40,17 @@
   .ak-tile-info { display: block; font-size: 0.78rem; font-weight: 600; margin-top: 4px;
     line-height: 1.25; opacity: 0.85; }
 
-  /* Rollstuhlplatz: eigenes, blockunabhaengiges Produkt (Marko, 01.10.2026) - auf der
-     oeffentlichen Seite nur ueber die native Direktwahl-Dropdown erreichbar, hier als
-     eigene grosse Kachel unter dem Spielfeld, analog zu den Block-Kacheln. */
-  .ak-rollstuhl-tile { display: block; width: 100%; margin-top: 12px; padding: 16px 18px;
-    font-size: 1.15rem; font-weight: 700; font-family: inherit; color: inherit; text-align: left;
-    background: var(--surface-1, #f3f3f1); border: 2px solid var(--border-strong, #ccc);
-    border-radius: 12px; cursor: pointer; }
-  .ak-rollstuhl-tile:disabled { opacity: 0.5; cursor: default; }
-  .ak-rollstuhl-tile .ak-tile-info { opacity: 1; color: var(--text-muted); font-weight: 400; }
-
   /* Ermaessigungsbedingungen direkt unter dem Tarif, statt dass die Kassiererin bei
      jeder Nachfrage raten muss (Marko, 01.10.2026: "kommt immer als Nachfrage"). */
   .ak-tarif-hint { display: block; font-size: 0.78rem; font-weight: 400; color: var(--text-muted);
     margin: 2px 0; line-height: 1.3; }
+
+  /* "+ weitere Kategorie"-Dropdown fuer Rollstuhlplatz (Marko, 01.10.2026: gehoert auf die
+     zweite Seite, NACHDEM ein Block gewaehlt wurde, nicht als eigene Kachel auf Seite 1). */
+  .ak-add-select { display: block; width: 100%; margin: 4px 0 14px; padding: 14px 16px;
+    font-size: 1.05rem; font-family: inherit; color: inherit;
+    background: var(--surface-1, #f3f3f1); border: 2px solid var(--border-strong, #ccc);
+    border-radius: 12px; }
 
   /* Natives Warenkorb-Markup (Einzelzeilen, Gutschein, Notiz, Direktwahl-Dropdown) bleibt
      fachlich aktiv (haengt an denselben totalEl/ctaEl), wird hier aber nicht gezeigt -
@@ -99,9 +96,6 @@
 
   <div id="ak-blockwahl">
     <div id="seatplan-root"></div>
-    <button type="button" class="ak-rollstuhl-tile" id="ak-rollstuhl-tile" style="display:none">Rollstuhlplatz
-      <span class="ak-tile-info">Plätze in Block A, D, E, F</span>
-    </button>
   </div>
 
   <div id="ak-tarif-panels"></div>
@@ -206,43 +200,58 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         panel.appendChild(tile);
       });
-      // Begleitperson NICHT hier: das Einzelticket-Backend (Node "Sitze zuordnen",
-      // Stand 01.10.2026) verlangt den Tarif "begleitung" zwingend auf einer NORMALEN
-      // Ticketzeile eines echten Blocks, nie auf der Rollstuhlplatz-Zeile selbst (sonst
-      // Fehler bei der Order-Anlage) - ein frueherer Versuch, die Begleitperson direkt
-      // im Rollstuhlplatz-Panel zu stepsen, wurde deshalb wieder entfernt. Offene Frage
-      // an Marko: wie die Begleitperson an der Abendkasse (ein Block pro Verkauf) erfasst
-      // werden soll, s. Chat 01.10.2026.
+      // Begleitperson: das Einzelticket-Backend (Node "Sitze zuordnen", Stand 01.10.2026)
+      // verlangt den Tarif "begleitung" zwingend auf einer NORMALEN Ticketzeile eines
+      // echten Blocks, nie auf der Rollstuhlplatz-Zeile selbst. Deshalb hier (nicht im
+      // Rollstuhlplatz-Panel): Kachel erscheint nur auf einem echten Block-Panel, und nur
+      // solange noch ein ungedeckter Rollstuhlplatz im Warenkorb liegt (oder schon eine
+      // Begleitperson auf dieser Zeile steht, damit sie wieder auf 0 gesetzt werden kann).
+      // _companionSlotsRemaining ist dieselbe, bereits geprueft Methode wie im nativen
+      // Warenkorb der oeffentlichen Seite.
+      if (c.category !== 'Rollstuhlplatz') {
+        var begleitFrei = picker._companionSlotsRemaining(blockKey) + (c.begleitung || 0);
+        if (begleitFrei > 0) {
+          var begleitTile = document.createElement('div');
+          begleitTile.className = 'ak-tarif-tile';
+          begleitTile.innerHTML =
+            '<span class="ak-tarif-label">Begleitperson<br><span class="ak-tarif-price">kostenlos, für Rollstuhlfahrer*in</span></span>' +
+            '<div class="ak-stepper">' +
+              '<button type="button" data-step="-1" aria-label="weniger">−</button>' +
+              '<span class="ak-step-count">' + (c.begleitung || 0) + '</span>' +
+              '<button type="button" data-step="1" aria-label="mehr">+</button>' +
+            '</div>';
+          begleitTile.querySelectorAll('[data-step]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              var delta = parseInt(btn.dataset.step, 10);
+              var free = picker._blockFreeCount(zoneId, c.category);
+              picker._stepBlock(blockKey, c.zoneLabel, c.category, c.priceInfo, 'begleitung', delta, free);
+            });
+          });
+          panel.appendChild(begleitTile);
+        }
+      }
       host.appendChild(panel);
     });
+    if (Object.keys(picker.blockCounts).length) renderAddKategorie(host);
   }
 
-  // Eigene Kachel fuer Rollstuhlplatz (Marko, 01.10.2026) - auf der oeffentlichen Seite
-  // nur ueber die native Direktwahl-Dropdown erreichbar (kein Platz auf der Grafik, s.
-  // seat-picker.js _quickAddBlock-Kommentar), hier als eigenstaendige grosse Kachel direkt
-  // unter dem Spielfeld. _quickAddBlock(null, 1, 'Rollstuhlplatz') ignoriert zoneId fuer
-  // diese Kategorie und bucht aus dem sitzplanweiten Rollstuhlplatz-Kontingent (Pseudo-Zone
-  // "ROLLSTUHL") - dieselbe, bereits kapazitaetsgeprueft Methode wie die Block-Kacheln.
-  function updateRollstuhlTile() {
-    var btn = document.getElementById('ak-rollstuhl-tile');
-    // picker.blocks laedt asynchron (planUrl-Fetch in SeatPicker selbst) - syncOverview()
-    // laeuft einmal sofort nach "new SeatPicker(...)", also VOR dieser Antwort, und dann
-    // erneut ueber den rootObserver, sobald SeatPicker fertig gerendert hat. _blockFreeCount
-    // faellt ohne picker.blocks auf _zoneById zurueck und wirft - also einfach warten bis
-    // zum naechsten, observer-ausgeloesten Aufruf.
-    if (!picker || !picker.blocks || !picker.prices['Rollstuhlplatz']) { btn.style.display = 'none'; return; }
-    var frei = picker._blockFreeCount('ROLLSTUHL', 'Rollstuhlplatz');
-    var preis = picker.prices['Rollstuhlplatz'].normal;
-    btn.style.display = '';
-    btn.disabled = frei <= 0;
-    btn.innerHTML = 'Rollstuhlplatz' +
-      '<span class="ak-tile-info">Plätze in Block A, D, E, F<br>noch ' + frei + ' frei · ab ' + fmtEUR(preis) + ' €</span>';
+  // "+ weitere Kategorie"-Dropdown (Marko, 01.10.2026: Rollstuhlplatz gehoert auf die
+  // zweite Seite, nachdem ein Block gewaehlt wurde, nicht als eigene Kachel auf Seite 1).
+  // Bisher nur der Eintrag "Rollstuhlplatz", analog zur nativen Direktwahl-Dropdown in
+  // seat-picker.js (_renderDirectAddRow) - hier als eigenes, grossflaechiges Element statt
+  // des kleinen nativen Markups (das in #seatplan-cart ausgeblendet ist, s. oben).
+  function renderAddKategorie(host) {
+    var sel = document.createElement('select');
+    sel.className = 'ak-add-select';
+    sel.innerHTML =
+      '<option value="" selected>+ weitere Kategorie</option>' +
+      '<option value="Rollstuhlplatz">Rollstuhlplatz</option>';
+    sel.addEventListener('change', function () {
+      if (sel.value === 'Rollstuhlplatz') picker._quickAddBlock(null, 1, 'Rollstuhlplatz');
+      sel.value = '';
+    });
+    host.appendChild(sel);
   }
-
-  document.getElementById('ak-rollstuhl-tile').addEventListener('click', function () {
-    if (!picker) return;
-    picker._quickAddBlock(null, 1, 'Rollstuhlplatz');
-  });
 
   function cartHatTickets() {
     return !!document.querySelector('#seatplan-cart .seatplan-cart-item');
@@ -306,7 +315,6 @@ document.addEventListener('DOMContentLoaded', function () {
   function syncOverview() {
     rootObserver.disconnect();
     annotateTiles();
-    updateRollstuhlTile();
     rootObserver.observe(document.getElementById('seatplan-root'), { childList: true, subtree: true });
   }
 
