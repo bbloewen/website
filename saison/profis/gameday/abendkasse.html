@@ -441,7 +441,10 @@ document.addEventListener('DOMContentLoaded', function () {
       zahlungPausiert: false
     };
     var buyer = {
-      email: 'abendkasse@basketball-loewen.com',
+      // Echte Mailbox statt eines nicht existierenden Platzhalters (Marko, 01.10.2026:
+      // "bekomme Maildelivery-Emails") - tickets@ existiert bereits und wird auch sonst
+      // als Antwort-Adresse fuer Ticketing-Mails verwendet.
+      email: 'tickets@basketball-loewen.com',
       vorname: '', nachname: '', notiz: '', firma: '', strasse: '', plz: '', ort: '',
       newsletter: false, webseite: ''
     };

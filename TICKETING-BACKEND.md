@@ -761,7 +761,9 @@ Input → Spam-Check → Rate-Limit (eigener `endpoint: 'abendkasse'` in derselb
 Table `Webhook-RateLimit`, 60/h statt der 8/h des öffentlichen Einzelticket-Checkouts)
 → Sitze zuordnen → Create pretix Order → sofort mark_paid → parallel (a) Ticket-Mail-
 Pipeline der öffentlichen Seite auslösen (`source:"direct"`, für Archivierung/Platzhalter-
-Postfach `abendkasse@basketball-loewen.com`) und (b) Ticket-PDF per Retry-Schleife
+Postfach `tickets@basketball-loewen.com` — ursprünglich `abendkasse@`, das aber keine
+echte Mailbox ist und Mail-Delivery-Bounces an Marko auslöste, 01.10.2026 geändert)
+und (b) Ticket-PDF per Retry-Schleife
 (identisches Muster wie im Ticket-Mail-Workflow, bis zu 12 Versuche à 5 s) abrufen und
 **direkt als PDF-Binary** an die Kasse zurückgeben (keine Mail, kein Umweg über eine URL).
 
@@ -807,7 +809,7 @@ die Kasse wäre beim ersten Verkauf jedes Tages stillschweigend hängen gebliebe
 `alwaysOutputData:true` gesetzt (identischer Fix-Typ wie beim `deleteRows`-Bug vom
 11.08., s. oben).
 
-**Getestet (sechs echte Testbestellungen, alle über `abendkasse@basketball-loewen.com`
+**Getestet (sechs echte Testbestellungen, damals noch über `abendkasse@basketball-loewen.com`
 identifizierbar, danach alle per `mark_canceled` storniert):** Block-Kategorien, Block
 mit zwei Tarifen in einer Order, sowie Rollstuhlplatz + Begleitperson (Order ZCECS:
 Item 57 10,00 €, Item 48/Variation "normal" 0,00 €) — komplette Kette inkl. PDF-Abruf
