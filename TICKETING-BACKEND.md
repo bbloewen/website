@@ -668,3 +668,17 @@ Hinweis bei Prozent-, ausgeschöpften und Wertgutscheinen. Der ältere Pfad auf 
 Nebenwirkung der Erkennungs-Korrektur vom 29.09. (Gutschein-Zeilen heißen „Gutschein: …"): Die Gutschein-Box wird nach
 dem Einlösen ausgeblendet, damit ging die Meldung („Restguthaben …", Fehlertexte) mit unter. Die Meldung steht jetzt
 außerhalb der Box (Commit `7b378b0c`).
+
+## pretix-Mailversand: Worker auf Relay umgestellt (01.10.2026)
+
+Den Mailversand von pretix übernimmt der **Worker** (Celery-Queue `mail`). Er hatte seit August noch die alte
+SendGrid-Konfiguration (`PRETIX_MAIL_HOST=smtp.sendgrid.net`, Benutzer `apikey`, SendGrid-Passwort, Absender
+`tickets@example.com`), nur der Web-Dienst nutzte das Google-Relay. Folge: pretix-eigene Mails (Benachrichtigungen an
+Teammitglieder, Storno-Mails) scheiterten mit `SMTPServerDisconnected` beim Anmelden (Beispiel: Ausgehende Mail #49,
+„Bestellung storniert: HHTWS", 23.09.); die Ticket-Mails über n8n/Gmail waren nie betroffen. Behoben am 01.10.2026:
+Worker-Variablen `PRETIX_MAIL_HOST=smtp-relay.gmail.com`, `PRETIX_MAIL_USER` und `PRETIX_MAIL_PASSWORD` leer,
+`PRETIX_MAIL_FROM=tickets@basketball-loewen.com`. Das Relay prüft per IP; Railway-Ausgangsadressen sind je Dienst
+vergeben (Worker 208.77.244.241 / 152.55.184.241 / 152.55.185.190, Web 208.77.244.240 / 152.55.184.241 /
+152.55.185.189), alle sechs sind im Google-Admin (Gmail → Routing → SMTP-Relay-Dienst „Railway") freigegeben.
+Bei Änderungen an der Mail-Konfiguration immer Web und Worker prüfen. Eine erste echte Mail nach der Reparatur ist noch
+nicht beobachtet.
