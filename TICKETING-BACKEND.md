@@ -680,5 +680,6 @@ Worker-Variablen `PRETIX_MAIL_HOST=smtp-relay.gmail.com`, `PRETIX_MAIL_USER` und
 `PRETIX_MAIL_FROM=tickets@basketball-loewen.com`. Das Relay prüft per IP; Railway-Ausgangsadressen sind je Dienst
 vergeben (Worker 208.77.244.241 / 152.55.184.241 / 152.55.185.190, Web 208.77.244.240 / 152.55.184.241 /
 152.55.185.189), alle sechs sind im Google-Admin (Gmail → Routing → SMTP-Relay-Dienst „Railway") freigegeben.
-Bei Änderungen an der Mail-Konfiguration immer Web und Worker prüfen. Eine erste echte Mail nach der Reparatur ist noch
-nicht beobachtet.
+Bei Änderungen an der Mail-Konfiguration immer Web und Worker prüfen. Verifiziert am 01.10.2026: Die
+Bestätigungsmail (Code) für das pretix-Konto `rechnung@` kam über den neuen Worker an und der Code wurde eingegeben.
+Der alte SendGrid-Schlüssel steht noch in SendGrid, ist aber nirgends mehr konfiguriert.
