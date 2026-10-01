@@ -338,13 +338,6 @@
           </div>
           <p class="t-body-sm">Alle Regelungen zu Kauf, Rücknahme und Verlust findest du in unseren <a href="/agb.html">AGB</a>.</p>
         </div>
-        <div class="info-tile info-tile-row info-tile-row-divided">
-          <div class="info-tile-row-head">
-            <div class="tile-icon"><i data-lucide="chart-no-axes-column"></i></div>
-            <h3 class="t-h4">Auslastung</h3>
-          </div>
-          <div id="seatplan-occupancy"><p class="t-body-sm" style="color:var(--text-muted)">Wird geladen …</p></div>
-        </div>
       </div>
     </div>
   </section>
@@ -396,8 +389,7 @@
         standingBookable: game.stehplatzBuchbar !== false,
         cartEl: document.getElementById('seatplan-cart'),
         totalEl: document.getElementById('seatplan-total'),
-        ctaEl: document.getElementById('seatplan-cta'),
-        occupancyEl: document.getElementById('seatplan-occupancy')
+        ctaEl: document.getElementById('seatplan-cta')
       });
 
       document.getElementById('seatplan-cta').addEventListener('click', function () {
