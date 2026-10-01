@@ -649,3 +649,22 @@ sind `botocore NoSuchKey` im Medien-Bucket (S3): pretix hält die Datei für fer
 Bucket. Der Ticket-Mail-Workflow wiederholt deshalb auch bei 5xx. Offen: SMTP-Verbindungsabbrüche
 (`SMTPServerDisconnected`) im Worker beim pretix-eigenen Mailversand und die Frage, ob das Erzeugen der
 Ticketdateien im Worker oder im Web-Dienst läuft.
+
+## Gutschein-Hinweis „Rest verfällt" im Checkout (01.10.2026)
+
+Der Workflow `5Bi15oYpyehxjhXK` („Subprozess Gutschein/Wertgutschein einlösen", bedient
+`/webhook/gutschein-einloesen`, Version `db595b8e`) liefert zusätzlich zu den bisherigen Feldern (nur additiv):
+`voucherMode` (pretix `price_mode`), `voucherValue` (Wert je Einlösung), `coveredUses` (gedeckte Einheiten, gleiche
+Zuordnung wie im geteilten Rabatt-Workflow `QxPE1ikMJWL0fyB7`, den die Dauerkarten-Bestellung ebenfalls nutzt),
+`usedAmount` (= `discountAmount`), `unusedAmount` (nur bei `subtract`: Wert × coveredUses − genutzt) und
+`remainingUsesAfter`. Für Wertgutscheine bleibt alles unverändert (Restguthaben steht in der Meldung).
+`tickets/checkout.html` zeigt unter der Meldung `#voucher-hint`: bei Festbetrags-Gutscheinen „Von 20,00 € werden
+12,00 € genutzt, 8,00 € verfallen.", bei Mehrfach-Gutscheinen „Dein Gutschein ist danach noch 2× einlösbar."; keinen
+Hinweis bei Prozent-, ausgeschöpften und Wertgutscheinen. Der ältere Pfad auf der Sitzplatzwahl (`js/seat-picker.js`,
+`_voucherHint()`) rechnet die Texte clientseitig; ohne Produktbindung des Gutscheins gibt es dort keinen Hinweis.
+`coveredUses` ist eine Nachbildung der Shared-Logik und muss bei deren Änderung im Node
+„Einloesen: Hinweisfelder ergaenzen" nachgezogen werden. Der echte Round-Trip mit einem Live-Gutschein ist nicht getestet.
+
+Nebenwirkung der Erkennungs-Korrektur vom 29.09. (Gutschein-Zeilen heißen „Gutschein: …"): Die Gutschein-Box wird nach
+dem Einlösen ausgeblendet, damit ging die Meldung („Restguthaben …", Fehlertexte) mit unter. Die Meldung steht jetzt
+außerhalb der Box (Commit `7b378b0c`).
