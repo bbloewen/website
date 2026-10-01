@@ -736,3 +736,9 @@ Danach wurde XZTKG fertig (Dateien 22 Sekunden nach der ersten Anfrage) und die 
   Vor Änderungen immer `git fetch` und prüfen.
 - Upgrade nur bewusst: erst Web (führt die Migrationen aus), dann Worker, danach die Pins im Dockerfile anheben. Aktuell
   ist 2026.8.0 verfügbar.
+
+## Bestätigungsmail Einzelticket: Absender des Tickets (01.10.2026)
+
+Anlass: Eine Kundin (SWE, Order ET-RG9W5M) fragte nach, weil die Bestätigungsmail "Dein Ticket … separat per E-Mail von pretix" ankündigte, das Ticket aber von rechnung@basketball-loewen.com (n8n) kommt. Im Einzelticket-Workflow `BmpBkKdzzSZaBnZE` (Knoten "E-Mail: Ticket bestaetigt", Version 1130d3ed) steht jetzt: "in einer separaten E-Mail von rechnung@basketball-loewen.com. Das dauert in der Regel nur wenige Minuten." Weitere kundensichtbare Texte mit "pretix" gibt es nicht (Ticket-Mail, Dauerkarten-Mail, Website geprüft); die übrigen Treffer sind interne Alarm-Mails an Marko.
+
+Entscheidung: Für Rollstuhl-Tickets (Produkt 34) wird keine eigene Ticketvorlage gebaut.
