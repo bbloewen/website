@@ -741,7 +741,7 @@ Danach wurde XZTKG fertig (Dateien 22 Sekunden nach der ersten Anfrage) und die 
 
 Anlass: Eine Kundin (SWE, Order ET-RG9W5M) fragte nach, weil die Bestätigungsmail "Dein Ticket … separat per E-Mail von pretix" ankündigte, das Ticket aber von rechnung@basketball-loewen.com (n8n) kommt. Entscheidung (Marko): Der Absender wird in den Mails nicht genannt. Die Bestätigung sagt nur "in einer separaten E-Mail. Das dauert in der Regel nur wenige Minuten." Alle Kundenmails (Ticket-Mail `zNGWzRFz3ebzsDkD`, Einzelticket-Bestätigung `BmpBkKdzzSZaBnZE`, Dauerkarten-Bestätigung `HyUXW4kbhaQVbG0A`) haben `replyTo` = tickets@basketball-loewen.com (Absender bleibt technisch rechnung@). Ticket-Mail und Einzelticket-Bestätigung enden mit "Falls du Fragen hast, wende dich bitte an tickets@basketball-loewen.com." Weitere kundensichtbare Texte mit "pretix" gibt es nicht (Ticket-Mail, Dauerkarten-Mail, Website geprüft); die übrigen Treffer sind interne Alarm-Mails an Marko.
 
-Entscheidung: Für Rollstuhl-Tickets (Produkt 34) wird keine eigene Ticketvorlage gebaut.
+Entscheidung (Marko, 01.10.2026): Für Rollstuhl-Tickets (Produkt 34) wird keine eigene Ticketvorlage gebaut, und der Block wird in Ticket und Ticket-Mail nicht genannt.
 
 ## UHJPU von Rollstuhlplätzen verschoben (01.10.2026)
 
