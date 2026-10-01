@@ -15,21 +15,29 @@
      Prioritaet: schnell und zuverlaessig am Stand, deshalb ein einziger Bildschirm ohne
      Zwischenschritte - Mengen stehen direkt als Zaehler auf der Kachel, kein separater
      Warenkorb-Bereich zum Gegenchecken noetig. */
-  body { background: var(--surface-page, #fff); }
-  .au-wrap { max-width: 980px; margin: 0 auto; padding: 16px 16px 140px;
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  /* 4 Spalten, Hoehe fuellt den Bildschirm (Marko, 01.10.2026: "iPad-Formfaktor komplett
+     ausnutzen") - au-wrap bekommt die volle Viewport-Hoehe minus der fixen Gesamt-Leiste
+     unten (padding-bottom = deren reservierter Platz), au-main/au-grid reichen das ueber
+     height:100% weiter. grid-template-rows wird in JS aus der Produktanzahl berechnet
+     (Math.ceil(PRODUCTS.length / 4)), damit es automatisch mitwaechst, falls Produkte
+     dazukommen. Nur im schmalen Stapel-Fallback (Telefon-Hochformat) wieder normale
+     Fliesshoehe - da ist Scrollen ok, erzwungene Zeilenhoehen wuerden nur verzerren. */
+  .au-wrap { max-width: 1100px; height: 100vh; margin: 0 auto; padding: 16px 16px 140px;
     display: flex; align-items: flex-start; gap: 20px; }
-  .au-main { flex: 1; min-width: 0; }
+  .au-main { flex: 1; min-width: 0; height: 100%; display: flex; flex-direction: column; }
 
-  .au-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 12px; }
+  .au-grid { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 
   /* Kassenzettel-Aufschluesselung rechts (Marko, 01.10.2026: "nachvollziehen, wie sich
-     der Gesamtpreis zusammensetzt") - bewusst klein/unauffaellig, keine Bedienelemente,
-     nur Lesehilfe. Bricht unter die Kacheln um, wenn der Platz (schmales Tablet-Hochformat)
-     nicht fuer beides nebeneinander reicht. */
+     der Gesamtpreis zusammensetzt") - bewusst klein/unauffaellig, keine Bedienelemente
+     ausser dem Ein/Aus-Toggle, nur Lesehilfe. Bricht unter die Kacheln um, wenn der Platz
+     (schmales Tablet-Hochformat) nicht fuer beides nebeneinander reicht. */
   .au-receipt { width: 220px; flex-shrink: 0; font-size: 0.78rem; color: var(--text-muted);
     background: var(--surface-1, #f3f3f1); border: 1px solid var(--border-strong, #ccc);
     border-radius: 10px; padding: 10px 12px; }
+  .au-receipt[hidden] { display: none !important; }
   .au-receipt-title { font-weight: 700; font-size: 0.85rem; color: var(--color-brand-navy, #00122d);
     margin-bottom: 6px; }
   .au-receipt-empty { font-style: italic; opacity: .75; }
@@ -40,8 +48,22 @@
   .au-receipt-total { display: flex; justify-content: space-between; margin-top: 8px;
     padding-top: 6px; border-top: 1px solid var(--border-strong, #ccc); font-weight: 700;
     color: var(--color-brand-navy, #00122d); }
+  /* Wie schon bei #seatplan-cta in der Abendkasse: eine Klassen-Regel mit explizitem
+     display sticht die browsereigene [hidden]-Vorgabe sonst aus. */
+  .au-receipt-total[hidden] { display: none !important; }
+
+  /* Kleiner, immer erreichbarer Schalter (auch wenn der Zettel gerade ausgeblendet ist,
+     muss er wieder anschaltbar bleiben - deshalb ausserhalb von .au-receipt platziert). */
+  .au-zettel-toggle { position: fixed; top: 10px; right: 10px; z-index: 10; font-size: 0.75rem;
+    padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-strong, #ccc);
+    background: var(--surface-1, #f3f3f1); color: var(--text-muted); }
+
   @media (max-width: 640px) {
-    .au-wrap { flex-direction: column; }
+    .au-wrap { flex-direction: column; height: auto; }
+    .au-main { height: auto; }
+    /* 2 statt 4 Spalten - sonst liefe die vierte Kachel auf Telefonbreite aus dem
+       Bildschirm raus (horizontales Scrollen). iPad-Breiten liegen weit darueber. */
+    .au-grid { grid-template-columns: repeat(2, 1fr) !important; grid-template-rows: none !important; }
     .au-receipt { width: 100%; }
   }
   /* Hintergrundfarbe kommt je Produkt per Inline-Style (s. PRODUCTS/bg) - sticht die
@@ -78,25 +100,29 @@
   .au-fertig { font-size: 1.2rem; padding: 16px 24px; white-space: nowrap; }
   .au-fertig:disabled { opacity: 0.4; }
 
-  /* Vollflaechiges Overlay nach "Jetzt bestellen" (Marko, 01.10.2026): das Personal
-     tippt den Betrag ins Terminal, waehrend die Kasse im Hintergrund schon zurueckgesetzt
-     ist. Dauer ist bewusst eine einzelne Konstante (s. FERTIG_OVERLAY_MS) - Marko will die
-     3 Sekunden noch live testen und ggf. verkuerzen. Antippen schliesst sofort, falls das
-     Personal schneller fertig ist. */
-  .au-overlay { position: fixed; inset: 0; z-index: 50; background: var(--color-brand-navy, #00122d);
-    color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 10px; cursor: pointer; }
-  .au-overlay[hidden] { display: none !important; }
-  .au-overlay-label { font-size: 1.3rem; opacity: .8; }
-  .au-overlay-total { font-size: 4.5rem; font-weight: 800; }
+  /* Betrags-Einblendung nach "Jetzt bestellen" (Marko, 01.10.2026): kein voller
+     Bildschirm, kein Begleittext - nur der grosse Betrag selbst, ueber den Kacheln und
+     dem Kassenzettel schwebend, blendet ueber FERTIG_OVERLAY_MS (Konstante, Marko testet
+     die Dauer noch live) wieder aus. Deckt per pointer-events nur waehrend des Sichtbar-
+     Seins Taps ab ("danach kann wieder bestellt werden") - per Opacity-Transition statt
+     hidden/display, weil sich display nicht weich ausblenden laesst. Eigener weisser
+     Hintergrund nur um die Zahl selbst (nicht bildschirmfuellend), damit die Zahl auf
+     JEDER Kachelfarbe darunter lesbar bleibt. */
+  .au-overlay { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center;
+    justify-content: center; opacity: 0; pointer-events: none; transition: opacity .5s ease; }
+  .au-overlay.au-overlay-visible { opacity: 1; pointer-events: auto; }
+  .au-overlay-total { font-size: 5rem; font-weight: 800; color: var(--color-brand-navy, #00122d);
+    background: rgba(255,255,255,.95); padding: 20px 44px; border-radius: 24px;
+    box-shadow: 0 10px 40px rgba(0,0,0,.3); }
 </style>
 </head>
 <body>
-<div class="au-wrap">
+<button type="button" class="au-zettel-toggle" id="au-zettel-toggle">Kassenzettel ausblenden</button>
+<div class="au-wrap" id="au-wrap">
   <div class="au-main">
     <div class="au-grid" id="au-grid"></div>
   </div>
-  <div class="au-receipt">
+  <div class="au-receipt" id="au-receipt">
     <div class="au-receipt-title">Kassenzettel</div>
     <div id="au-receipt-lines"><div class="au-receipt-empty">Noch keine Artikel</div></div>
     <div class="au-receipt-total" id="au-receipt-total" hidden>
@@ -115,8 +141,7 @@
   </div>
 </div>
 
-<div class="au-overlay" id="au-overlay" hidden>
-  <div class="au-overlay-label">Betrag am Terminal eintippen</div>
+<div class="au-overlay" id="au-overlay">
   <div class="au-overlay-total" id="au-overlay-total">0,00 €</div>
 </div>
 
@@ -222,6 +247,9 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   var grid = document.getElementById('au-grid');
+  // 4 Spalten fest (s. CSS) - Zeilenzahl ergibt sich aus der Produktanzahl, damit die
+  // Kacheln die volle Bildschirmhoehe ausfuellen, egal wie viele Produkte es gerade sind.
+  grid.style.gridTemplateRows = 'repeat(' + Math.ceil(PRODUCTS.length / 4) + ', 1fr)';
   PRODUCTS.forEach(function (p) {
     var tile = document.createElement('div');
     tile.className = 'au-tile' + (p.key === 'pfand_rueckgabe' ? ' au-pfand-zurueck' : '');
@@ -258,11 +286,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function hideOverlay() {
     if (overlayTimer) { clearTimeout(overlayTimer); overlayTimer = null; }
-    overlay.hidden = true;
+    overlay.classList.remove('au-overlay-visible');
   }
 
   // Antippen schliesst das Overlay sofort (falls das Personal schneller fertig ist als
-  // FERTIG_OVERLAY_MS) - der Timer unten schliesst es sonst von selbst.
+  // FERTIG_OVERLAY_MS) - der Timer unten schliesst es sonst von selbst per Fade-out.
   overlay.addEventListener('click', hideOverlay);
 
   document.getElementById('au-fertig').addEventListener('click', function () {
@@ -277,11 +305,39 @@ document.addEventListener('DOMContentLoaded', function () {
       }).catch(function () {});
     }
     document.getElementById('au-overlay-total').textContent = fmtEUR(total());
-    overlay.hidden = false;
-    overlayTimer = setTimeout(hideOverlay, FERTIG_OVERLAY_MS);
+    if (overlayTimer) clearTimeout(overlayTimer);
+    overlay.classList.add('au-overlay-visible');
+    // Fade-out beginnt so rechtzeitig vor FERTIG_OVERLAY_MS, dass die Opacity-Transition
+    // (s. CSS, .5s) genau zum Gesamt-Zeitpunkt fertig ausgeblendet ist.
+    overlayTimer = setTimeout(hideOverlay, Math.max(0, FERTIG_OVERLAY_MS - 500));
     counts = {};
     render();
   });
+
+  // Zettel-Toggle (Marko, 01.10.2026: "ausblenden, damit die Kacheln noch groesser
+  // werden") - Zustand pro Geraet in localStorage gemerkt (reine Anzeige-Bequemlichkeit,
+  // nicht sicherheitsrelevant), try/catch da localStorage in manchen Kontexten (privates
+  // Fenster o.ae.) werfen kann.
+  (function () {
+    var STORAGE_KEY = 'ausschank-zettel-sichtbar';
+    var toggle = document.getElementById('au-zettel-toggle');
+    var receipt = document.getElementById('au-receipt');
+    var sichtbar = true;
+    try {
+      var gespeichert = localStorage.getItem(STORAGE_KEY);
+      if (gespeichert !== null) sichtbar = gespeichert === '1';
+    } catch (e) {}
+    function anwenden() {
+      receipt.hidden = !sichtbar;
+      toggle.textContent = sichtbar ? 'Kassenzettel ausblenden' : 'Kassenzettel einblenden';
+    }
+    anwenden();
+    toggle.addEventListener('click', function () {
+      sichtbar = !sichtbar;
+      anwenden();
+      try { localStorage.setItem(STORAGE_KEY, sichtbar ? '1' : '0'); } catch (e) {}
+    });
+  })();
 
   render();
 });
