@@ -11,19 +11,62 @@
 <link rel="stylesheet" href="/css/seat-picker.css" />
 <style>
   /* Nur auf dieser Seite: grossflaechige Bedienung ohne Gefummel, lesbar ohne Brille
-     (Marko, 30.09.2026/01.10.2026) - seat-picker.css selbst bleibt unangetastet, damit
-     die oeffentliche Einzelticket-Seite ihr normales Mass behaelt. */
+     (Marko, 30.09.-01.10.2026) - seat-picker.css/js selbst bleiben unangetastet, damit
+     die oeffentliche Einzelticket-Seite ihr normales Mass behaelt. Die Darstellung hier
+     steuert ausschliesslich CSS + eigene Panels, die auf denselben SeatPicker-Zustand
+     (blockCounts/_setBlockCount) zugreifen - keine Kopie der Kapazitaets-/Preislogik. */
   body { background: var(--surface-page, #fff); }
   .ak-wrap { max-width: 640px; margin: 0 auto; padding: 16px 16px 48px; }
   .ak-head { text-align: center; margin-bottom: 16px; }
   .ak-head h1 { font-size: 1.6rem; margin: 0 0 4px; }
   .ak-spiel-select { width: 100%; font-size: 1.15rem; padding: 14px 12px; border-radius: 10px;
     border: 2px solid var(--border-strong, #999); margin-bottom: 18px; background: #fff; }
-  #seatplan-root { font-size: 1.1rem; }
-  .seatplan-mobile-tile, .seatplan-mobile-standing { min-height: 64px; font-size: 1.05rem !important; }
-  #seatplan-cart .seatplan-cart-item { font-size: 1.15rem; padding: 10px 0; }
-  #seatplan-cart button[data-cart-step] { font-size: 1.1rem; padding: 10px 16px; min-width: 52px; }
-  .seatplan-tarif-select { font-size: 1.1rem; padding: 8px; }
+
+  /* Auslastungsliste unter dem Plan komplett weg (Marko, 01.10.2026, Punkt 1). */
+  #seatplan-occupancy { display: none !important; }
+
+  /* "Uebernehmen" riesig, ueberlagert die ganze Spielfeld-Flaeche (Punkt 2). Die
+     Original-Kachel zentriert sich per top:50%/left:50% + transform:translate(-50%,-50%)
+     (fuer die kleine Originalgroesse) - ohne "transform:none" verschiebt dieselbe
+     Transformation unsere viel groessere Box um die Haelfte IHRER eigenen (jetzt
+     grossen) Breite/Hoehe aus der Flaeche heraus. */
+  .seatplan-mobile-court-confirm { position: absolute !important; inset: 6% 4% !important;
+    top: auto !important; left: auto !important; transform: none !important;
+    width: auto; height: auto; font-size: 1.5rem !important; line-height: 1.25;
+    padding: 12px !important; display: flex !important; align-items: center;
+    justify-content: center; text-align: center; z-index: 5; white-space: normal !important; }
+  .seatplan-mobile-court { position: relative; }
+
+  /* Freie Plaetze + Normalpreis direkt auf jeder Kachel, dauerhaft sichtbar, nicht erst
+     nach Auswahl (Marko, 01.10.2026: "genau: Anzahl der freien Plaetze und Preis des
+     Normaltickets"). Ersetzt damit auch den vorherigen Hinweis NUR beim ausgewaehlten
+     Block - die Info steht jetzt ueberall gleich, kein Sonderfall mehr noetig. */
+  .ak-tile-info { display: block; font-size: 0.78rem; font-weight: 600; margin-top: 4px;
+    line-height: 1.25; opacity: 0.85; }
+
+  /* Natives Warenkorb-Markup (Einzelzeilen, Gutschein, Notiz, Direktwahl-Dropdown) bleibt
+     fachlich aktiv (haengt an denselben totalEl/ctaEl), wird hier aber nicht gezeigt -
+     ersetzt durch die grossen Tarif-Kacheln in #ak-tarif-panels (Punkt 4). */
+  #seatplan-cart { display: none; }
+
+  #ak-blockwahl.ak-hidden { display: none; }
+  #ak-weiterer-block { display: none; width: 100%; font-size: 1.2rem; padding: 16px; margin-bottom: 18px; }
+  #ak-weiterer-block.ak-zeigen { display: block; }
+
+  #ak-tarif-panels { margin-bottom: 8px; }
+  .ak-tarif-panel { margin-bottom: 14px; }
+  .ak-tarif-panel-title { font-weight: 700; font-size: 1.2rem; margin-bottom: 8px; }
+  .ak-tarif-tile { display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface-1, #f3f3f1); border: 2px solid var(--border-strong, #ccc);
+    border-radius: 12px; padding: 16px 18px; margin-bottom: 10px; min-height: 72px; }
+  .ak-tarif-label { font-size: 1.2rem; font-weight: 600; line-height: 1.3; }
+  .ak-tarif-price { font-size: 1rem; font-weight: 400; color: var(--text-muted); }
+  .ak-stepper { display: flex; align-items: center; gap: 14px; }
+  .ak-stepper button { font-size: 1.6rem; width: 52px; height: 52px; border-radius: 50%;
+    border: 2px solid var(--border-strong, #999); background: #fff; line-height: 1; }
+  .ak-stepper button:active { background: var(--surface-1, #eee); }
+  .ak-step-count { font-size: 1.4rem; font-weight: 700; min-width: 28px; text-align: center; }
+
   .seatplan-cart-total { font-size: 1.4rem; font-weight: 700; padding: 10px 0; }
   #seatplan-cta { font-size: 1.3rem; padding: 20px; min-height: 64px; }
   .ak-status { margin-top: 16px; padding: 16px; border-radius: 10px; font-size: 1.2rem; text-align: center; display: none; }
@@ -42,7 +85,14 @@
 
   <select id="ak-spiel-select" class="ak-spiel-select" hidden></select>
 
-  <div id="seatplan-root"></div>
+  <button type="button" id="ak-weiterer-block" class="btn btn-outline-orange">+ weiteren Block wählen</button>
+
+  <div id="ak-blockwahl">
+    <div id="seatplan-root"></div>
+  </div>
+
+  <div id="ak-tarif-panels"></div>
+
   <div id="seatplan-cart"></div>
   <div class="seatplan-cart-total"><span>Gesamt</span><span id="seatplan-total">0,00 €</span></div>
   <button class="btn btn-primary" id="seatplan-cta" style="width:100%;justify-content:center" disabled>Jetzt bestellen</button>
@@ -57,12 +107,11 @@
 document.addEventListener('DOMContentLoaded', function () {
 
   // Dieselben Kategorie-Preise wie auf den oeffentlichen Spieltagsseiten (dort je Spiel
-  // als Vorverkaufs-Einzelpreis fest in die generierte HTML eingebettet, s.
-  // tools/build-spieltagsseiten.py). Die Abendkasse braucht keine eigene zweite Tabelle:
-  // "- Abend" ist in pretix durchgaengig Einzelpreis + 2,00 EUR Zuschlag (verifiziert
-  // 01.10.2026 gegen die live pretix-API fuer alle 11 Abend-Items/Kategorien) - deshalb
-  // wird hier EINMAL addiert statt eine zweite, pflegebeduerftige Preisliste parallel zu
-  // fuehren, die bei der naechsten Preisanpassung garantiert auseinanderlaeuft.
+  // fest in die generierte HTML eingebettet, s. tools/build-spieltagsseiten.py). Die
+  // Abendkasse braucht keine eigene zweite Tabelle: "- Abend" ist in pretix durchgaengig
+  // Einzelpreis + 2,00 EUR Zuschlag (verifiziert 01.10.2026 gegen die live pretix-API fuer
+  // alle 11 Abend-Items) - deshalb hier einmal addiert statt einer zweiten,
+  // pflegebeduerftigen Preisliste parallel zur bestehenden.
   var EINZEL_PRICES = {
     'Kategorie I': { normal: 16, ermaessigt: 14 },
     'Kategorie II': { normal: 12, ermaessigt: 8.5 },
@@ -74,6 +123,10 @@ document.addEventListener('DOMContentLoaded', function () {
   };
   var EINZEL_STEHPLATZ = 8;
   var ABEND_ZUSCHLAG = 2;
+  var TARIF_LABEL = { normal: 'Normalpreis', ermaessigt: 'Ermäßigt', kind: 'Kinder 7–14' };
+  var TARIF_ORDER = ['normal', 'ermaessigt', 'kind'];
+
+  function fmtEUR(n) { return Number(n).toFixed(2).replace('.', ','); }
 
   function abendPrices() {
     var out = {};
@@ -86,7 +139,6 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function parseDatumZeit(datum, zeit) {
-    // "11.10.2026" + "17:00" -> Date (lokale Zeit)
     var teile = datum.split('.');
     var zt = (zeit || '00:00').split(':');
     return new Date(Number(teile[2]), Number(teile[1]) - 1, Number(teile[0]), Number(zt[0]), Number(zt[1]));
@@ -95,16 +147,118 @@ document.addEventListener('DOMContentLoaded', function () {
   var picker = null;
   var currentGame = null;
 
+  // Grosse Tarif-Kacheln je bereits gewaehltem Block, statt der kleinen Dropdown-Zeilen
+  // im nativen Warenkorb (Marko, 01.10.2026, Punkt 4: "in der Groesse, wie vorher 'Block
+  // waehlen' angezeigt wurde"). Steuert denselben Zustand (picker.blockCounts) ueber die
+  // bestehenden, bereits kapazitaets-/begleitpersonen-geprueften Methoden _setBlockCount/
+  // _stepBlock - keine eigene Mengen-/Grenzwert-Logik.
+  function renderTarifPanels() {
+    var host = document.getElementById('ak-tarif-panels');
+    host.innerHTML = '';
+    if (!picker) return;
+    Object.keys(picker.blockCounts).forEach(function (blockKey) {
+      var c = picker.blockCounts[blockKey];
+      var zoneId = blockKey.split('::')[0];
+      var panel = document.createElement('div');
+      panel.className = 'ak-tarif-panel';
+      var title = document.createElement('div');
+      title.className = 'ak-tarif-panel-title';
+      title.textContent = c.zoneLabel;
+      panel.appendChild(title);
+      TARIF_ORDER.forEach(function (tarif) {
+        if (c.priceInfo[tarif] === undefined) return;
+        var freeCount = picker._blockFreeCount(zoneId, c.category);
+        var tile = document.createElement('div');
+        tile.className = 'ak-tarif-tile';
+        tile.innerHTML =
+          '<span class="ak-tarif-label">' + TARIF_LABEL[tarif] +
+            '<br><span class="ak-tarif-price">' + fmtEUR(c.priceInfo[tarif]) + ' € je Ticket</span></span>' +
+          '<div class="ak-stepper">' +
+            '<button type="button" data-step="-1" aria-label="weniger">−</button>' +
+            '<span class="ak-step-count">' + (c[tarif] || 0) + '</span>' +
+            '<button type="button" data-step="1" aria-label="mehr">+</button>' +
+          '</div>';
+        tile.querySelectorAll('[data-step]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var delta = parseInt(btn.dataset.step, 10);
+            var free = picker._blockFreeCount(zoneId, c.category);
+            picker._stepBlock(blockKey, c.zoneLabel, c.category, c.priceInfo, tarif, delta, free);
+            // _stepBlock ruft bereits _renderCart() auf, was unseren Cart-Observer ausloest
+            // (s. unten) - der zieht renderTarifPanels() automatisch nach.
+          });
+        });
+        panel.appendChild(tile);
+      });
+      host.appendChild(panel);
+    });
+  }
+
+  function cartHatTickets() {
+    return !!document.querySelector('#seatplan-cart .seatplan-cart-item');
+  }
+
+  function syncSichtbarkeit() {
+    var hatTickets = cartHatTickets();
+    document.getElementById('ak-blockwahl').classList.toggle('ak-hidden', hatTickets);
+    document.getElementById('ak-weiterer-block').classList.toggle('ak-zeigen', hatTickets);
+    renderTarifPanels();
+  }
+
+  // Freie Plaetze + Normalpreis direkt auf jeder Kachel der Blockauswahl, dauerhaft
+  // sichtbar (Marko, 01.10.2026) - ersetzt die entfernte Auslastungsliste unten UND den
+  // vorherigen Nur-bei-Auswahl-Hinweis. _purchasableCategories/_blockFreeCount sind
+  // dieselben Methoden, die auch die (jetzt ausgeblendete) Liste gespeist haben.
+  //
+  // WICHTIG: haengt am selben #seatplan-root, den der rootObserver unten beobachtet -
+  // wuerde hier ungeschuetzt in den DOM geschrieben, loest das denselben Observer
+  // sofort wieder aus (Endlosschleife). Aufruf deshalb NUR aus syncOverview(), das den
+  // Observer waehrend der eigenen Schreibzugriffe kurz abhaengt (disconnect/observe).
+  function annotateTiles() {
+    if (!picker) return;
+    picker.root.querySelectorAll('.seatplan-mobile-tile[data-zone], .seatplan-mobile-standing[data-zone]').forEach(function (btn) {
+      var key = btn.dataset.zone;
+      var sep = key.indexOf('::');
+      var zoneId = sep === -1 ? key : key.slice(0, sep);
+      var category = sep === -1 ? null : key.slice(sep + 2);
+      var frei, preis;
+      if (zoneId === 'STEHPLATZ') {
+        frei = picker._blockFreeCount('STEHPLATZ', 'Stehplatz');
+        preis = picker.standingPrice;
+      } else {
+        var purchasable = picker._purchasableCategories(zoneId);
+        var match = category ? purchasable.filter(function (p) { return p.category === category; })[0]
+          : (purchasable.length === 1 ? purchasable[0] : null);
+        if (!match) return;
+        frei = picker._blockFreeCount(zoneId, match.category);
+        preis = (picker.prices[match.category] || {}).normal;
+      }
+      if (preis === undefined) return;
+      var info = document.createElement('span');
+      info.className = 'ak-tile-info';
+      info.innerHTML = 'noch ' + frei + ' frei<br>ab ' + fmtEUR(preis) + ' €';
+      btn.appendChild(info);
+    });
+  }
+
+  var rootObserver = new MutationObserver(function () { syncOverview(); });
+  function syncOverview() {
+    rootObserver.disconnect();
+    annotateTiles();
+    rootObserver.observe(document.getElementById('seatplan-root'), { childList: true, subtree: true });
+  }
+
   function initPicker(game) {
     currentGame = game;
     document.getElementById('ak-spiel-info').textContent =
       game.datum + ' · ' + game.zeit + ' Uhr · Löwen – ' + game.gegner;
     document.getElementById('seatplan-cart').innerHTML = '';
     document.getElementById('seatplan-total').textContent = '0,00 €';
-    document.getElementById('seatplan-occupancy').innerHTML = '';
     document.getElementById('seatplan-cta').disabled = true;
     document.getElementById('ak-status').className = 'ak-status';
     document.getElementById('ak-naechster').style.display = 'none';
+    document.getElementById('ak-tarif-panels').innerHTML = '';
+    document.getElementById('ak-blockwahl').classList.remove('ak-hidden');
+    document.getElementById('ak-weiterer-block').classList.remove('ak-zeigen');
 
     picker = new SeatPicker(document.getElementById('seatplan-root'), {
       mode: 'blocks',
@@ -126,15 +280,17 @@ document.addEventListener('DOMContentLoaded', function () {
       standingBookable: game.stehplatzBuchbar !== false,
       cartEl: document.getElementById('seatplan-cart'),
       totalEl: document.getElementById('seatplan-total'),
-      ctaEl: document.getElementById('seatplan-cta'),
-      occupancyEl: document.getElementById('seatplan-occupancy')
+      ctaEl: document.getElementById('seatplan-cta')
     });
+
+    // Beobachtet den (unsichtbaren) nativen Warenkorb: dort schreibt SeatPicker bei JEDER
+    // Mengenaenderung hinein (auch ueber unsere eigenen Stepper, da die am selben
+    // picker-Zustand haengen) - daraus leiten wir Sichtbarkeit + die grossen Kacheln ab,
+    // ohne seat-picker.js selbst zu aendern.
+    new MutationObserver(syncSichtbarkeit).observe(document.getElementById('seatplan-cart'), { childList: true, subtree: true });
+    syncOverview();
   }
 
-  // Heimspiele laden, "heutiges Spiel" vorauswaehlen (exakte Datumsuebereinstimmung,
-  // sonst das naechste noch bevorstehende) - Auswahl bleibt trotzdem sichtbar und
-  // aenderbar, falls z.B. vor einem Spieltag schon getestet wird oder zwei Spiele an
-  // einem Wochenende stattfinden.
   fetch('/data/heimspiele.json').then(function (r) { return r.json(); }).then(function (data) {
     var spiele = (data.spiele || []).slice().sort(function (a, b) {
       return parseDatumZeit(a.datum, a.zeit) - parseDatumZeit(b.datum, b.zeit);
@@ -164,13 +320,14 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('ak-spiel-info').textContent = 'Spielplan konnte nicht geladen werden.';
   });
 
+  document.getElementById('ak-weiterer-block').addEventListener('click', function () {
+    document.getElementById('ak-blockwahl').classList.remove('ak-hidden');
+    this.classList.remove('ak-zeigen');
+  });
+
   var bestellLaeuft = false;
 
   document.getElementById('seatplan-cta').addEventListener('click', function () {
-    // Sperre gegen Doppelklick (z.B. weil der Drucker ruckelt und jemand ein zweites
-    // Mal tippt) - sonst entsteht eine zweite Order fuer denselben Verkauf
-    // (Marko, 01.10.2026: Ablauf soll "wirklich schnell" sein, aber nicht auf Kosten
-    // einer doppelten Buchung).
     if (bestellLaeuft) return;
     var summary = picker.getSummary();
     if (!summary.lines.length) return;
@@ -194,10 +351,6 @@ document.addEventListener('DOMContentLoaded', function () {
       notiz: '',
       zahlungPausiert: false
     };
-    // Kein Kaeuferformular an der Abendkasse (Marko, 01.10.2026: "ohne Email") - feste
-    // interne Adresse, damit die pretix-Order gueltig bleibt. webseite (Honeypot) leer,
-    // elapsedMs bewusst WEGGELASSEN (nicht 0) - sonst greift die Spam-Timing-Pruefung
-    // der Bridge, die fuer echte Kaeufer-Formulare gedacht ist, hier aber nie zutrifft.
     var buyer = {
       email: 'abendkasse@basketball-loewen.com',
       vorname: '', nachname: '', notiz: '', firma: '', strasse: '', plz: '', ort: '',
@@ -216,8 +369,7 @@ document.addEventListener('DOMContentLoaded', function () {
       window.open(result.pdfUrl, '_blank');
       statusEl.className = 'ak-status ak-status-ok';
       statusEl.textContent = 'Ticket wird gedruckt. Betrag am Terminal eintippen: ' +
-        summary.total.toLocaleString('de-DE', { minimumFractionDigits: 2 }) + ' € – ' +
-        'erst nach bestätigter Zahlung aushändigen.';
+        fmtEUR(summary.total) + ' € – erst nach bestätigter Zahlung aushändigen.';
       document.getElementById('ak-naechster').style.display = 'block';
     }).catch(function (err) {
       statusEl.className = 'ak-status ak-status-error';
