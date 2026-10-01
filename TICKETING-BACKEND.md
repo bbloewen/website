@@ -683,3 +683,31 @@ vergeben (Worker 208.77.244.241 / 152.55.184.241 / 152.55.185.190, Web 208.77.24
 Bei Änderungen an der Mail-Konfiguration immer Web und Worker prüfen. Verifiziert am 01.10.2026: Die
 Bestätigungsmail (Code) für das pretix-Konto `rechnung@` kam über den neuen Worker an und der Code wurde eingegeben.
 Der alte SendGrid-Schlüssel steht noch in SendGrid, ist aber nirgends mehr konfiguriert.
+
+## Rollstuhlplätze im Einzelticket (01.10.2026)
+
+**Plätze:** 21 Rollstuhlplätze laut Sitzplan (`assets/seating/riethsporthalle-seatingplan.json`, Feld `wheelchair`): Block A Reihe 1
+Platz 20 (1), Block D Reihe 6 Plätze 11/13/15/17/19 (5), Block E Reihe 6 Plätze 1–10 (10), Block F Reihe 6 Plätze 11–15 (5).
+Block B und C haben keine (bestätigt 01.10.2026). Das Rollstuhl-Produkt je Spiel hat ein Kontingent „HSxx: Rollstuhlplatz" mit
+Größe 21 (Produkte 34 Einzel, 39 Dauer, 57 Abend). Die Block-Kontingente sind netto ohne diese Plätze gerechnet.
+
+**pretix-Verhalten (per `simulate=true` geprüft):** Produkt 34 verlangt einen Sitz („requires to choose a seat"), nimmt aber
+jeden freien Sitz an. pretix vergleicht weder Sitz-Kategorie noch das Rollstuhl-Kennzeichen mit dem Produkt, `seat.product`
+ist überall leer. Ein normales Ticket kann deshalb einen Rollstuhlplatz bekommen, wenn der Ablauf es nicht verhindert.
+
+**Fehler vor dem Fix:** Die automatische Platzvergabe nahm Plätze nach Reihe und Nummer, Reihe 6 ist in D/E/F die vorderste
+(UHJPU bekam E6/1–8 als normale Plätze). Eine Rollstuhl-Zeile suchte eine pretix-Zone „Rollstuhlplatz", die es nicht gibt, und
+brach mit „Kein freier Sitzplatz mehr in Rollstuhlplatz" ab. Die Begleitperson (Tarif `begleitung`) hatte keine Variante.
+
+**Fix (Weg A, Workflow `BmpBkKdzzSZaBnZE`, Node „Sitze zuordnen", Version `b3777b01`):**
+- `WHEELCHAIR_SEATS` (21 `seat_guid`, fest im Code) wird aus dem normalen Pool aller anderen Zeilen herausgenommen.
+- Eine Rollstuhl-Zeile bekommt Produkt 34 (ohne Variante, Preis laut Warenkorb 8,00 €) und einen freien Rollstuhlplatz in der
+  Reihenfolge Block D, F, E, zuletzt A, aufsteigend je Block. Ist keiner frei: Fehler „Kein freier Rollstuhlplatz mehr fuer
+  dieses Spiel." (Alarmpfad), nie ein Ersatz mit einem normalen Platz.
+- Begleitperson: `normal`-Variante des Block-Produkts, Preis 0,00, normaler Sitz im Block der Zeile (wie bei der Dauerkarte).
+- Offline mit 102 Prüfungen getestet. **Offene Risiken:** „Gutschein-Rabatt berechnen" setzt eine Begleitperson mit vollem
+  Blockpreis an (Rollstuhl + Begleitung + eingeschränkter Gutschein ergibt Alarmmail), der Nachwuchs-Zusatzbeitrag kann an ein
+  Rollstuhl-Ticket gehängt werden (pretix-Verhalten ungeprüft), `Preis serverseitig berechnen` zählt jede Zeile der Kategorie
+  Rollstuhlplatz als Rollstuhl, und die Platzliste muss bei Sitzplan-Änderungen von Hand nachgezogen werden.
+- Offen und beschlossen: Block, Reihe und Platz des zugeteilten Rollstuhlplatzes sollen in der Ticket-Mail und im Ticket-PDF
+  stehen (eigene Vorlage für Produkt 34); noch nicht umgesetzt. UHJPU (E6/1–8) soll auf normale Plätze in Block E verschoben werden.
