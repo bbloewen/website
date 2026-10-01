@@ -25,16 +25,14 @@
   /* Auslastungsliste unter dem Plan komplett weg (Marko, 01.10.2026, Punkt 1). */
   #seatplan-occupancy { display: none !important; }
 
-  /* "Uebernehmen" riesig, ueberlagert die ganze Spielfeld-Flaeche (Punkt 2). Die
-     Original-Kachel zentriert sich per top:50%/left:50% + transform:translate(-50%,-50%)
-     (fuer die kleine Originalgroesse) - ohne "transform:none" verschiebt dieselbe
-     Transformation unsere viel groessere Box um die Haelfte IHRER eigenen (jetzt
-     grossen) Breite/Hoehe aus der Flaeche heraus. */
-  .seatplan-mobile-court-confirm { position: absolute !important; inset: 6% 4% !important;
-    top: auto !important; left: auto !important; transform: none !important;
-    width: auto; height: auto; font-size: 1.5rem !important; line-height: 1.25;
-    padding: 12px !important; display: flex !important; align-items: center;
-    justify-content: center; text-align: center; z-index: 5; white-space: normal !important; }
+  /* "Uebernehmen" gross, aber zentriert auf dem Spielfeld statt es randlos zu fuellen
+     (Marko, 01.10.2026: erst "ganze Flaeche ueberlagern", dann korrigiert zu "zentriert
+     auf dem Spielfeld liegen"). Die Original-Kachel zentriert sich bereits per
+     top:50%/left:50% + transform:translate(-50%,-50%) - diese bewaehrte Zentrierung
+     bleibt, nur Schriftgroesse/Platz werden vergroessert. */
+  .seatplan-mobile-court-confirm { font-size: 1.4rem !important; line-height: 1.25;
+    padding: 20px 24px !important; max-width: 90%; width: max-content;
+    white-space: normal !important; text-align: center; z-index: 5; }
   .seatplan-mobile-court { position: relative; }
 
   /* Freie Plaetze + Normalpreis direkt auf jeder Kachel, dauerhaft sichtbar, nicht erst
