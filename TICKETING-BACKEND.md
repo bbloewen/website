@@ -849,3 +849,21 @@ Workflow `AA0f7oo7dH7TDkFu` (Version 1a010dc3), Nodes "DK-Statistik aufbereiten"
 - **Wirkung:** Gesamt verkauft 1.541 → 1.348 Plätze, Erlös 7.280,50 € → 7.186,00 €.
 - **Abendkasse-Tests:** Alle Abendkasse-Bestellungen bis 01.10.2026 waren Testbestellungen und sind storniert (zuletzt JZZ9A, 18,00 € Block E + 10,00 € Rollstuhl, am Abend per `mark_canceled` ohne Mail). Danach: Gesamt verkauft 1.346 Plätze, Erlös 7.158,00 €, keine Abendkasse-Zeile mehr im Board. Echte Abendkasse-Verkäufe zählen normal mit.
 - Quelle der Seite: `Projects/loewen-os/dashboard/src/dashboard.html` (Repo bbloewen/loewen-os, Commit 8f0572f); der Stand der Seite im Workflow war vorher nicht eingecheckt.
+
+## Ticket-Hintergrund verschwunden: Ticket-Erzeugung stand still (01.10.2026, behoben 23:40)
+
+**Vorfall:** Bestellung DUTTK (Einzelticket, 4 Tickets) bekam keine Ticket-Mail ("Ticket-Mail unvollstaendig", HTTP 409 nach 12 Versuchen). Worker-Log: `FileNotFoundError: cachedfiles/…pdf` beim Rendern des Hintergrunds. Alle neuen Einzelticket-Bestellungen ab ca. 22:45 Uhr waren betroffen.
+
+**Ursache:** Der verkleinerte Ticket-Hintergrund wurde am 30.09. per API hochgeladen (`POST /upload` + `PATCH background=file:<id>`). Dabei verweist das Layout auf die temporäre Datei unter `cachedfiles/`, die pretix nach ca. 24 h löscht. Die Vorlagen 5 (Dauerkarte) und 8 (Einzelticket) zeigten beide darauf.
+
+**Behebung:**
+- Verkleinerte Datei (263 KB) gesichert: `Projects/ticket-hintergrund-backup/ticket_background_slim_263KB.pdf`, dazu `layouts_snapshot_2026-10-01.json` (Layout-JSON aller Vorlagen).
+- Die API hat keinen Endpunkt, der den Hintergrund dauerhaft ablegt (`…/ticketlayouts/<id>/background` liefert 404), und der Layout-Editor in der Control-Oberfläche kann den Hintergrund wegen des S3-Speichers nicht laden ("Failed to fetch"). Deshalb wurden die Vorlagen in der Control-Oberfläche **kopiert** ("Kopieren" in der Layout-Liste): die Kopie legt die Datei dauerhaft unter `pub/…/ticketoutputpdf/` ab. Das Layout-JSON der Kopien ist identisch zum Original.
+- Neu: Layout 9 `Ticket_Einzelticket_Freiwahl_v2` (jetzt Standard) und Layout 10 `Ticket_Dauerkarte_Gebrandet_v2`. Die 10 Dauerkarten-Produkte (37, 44, 42, 46, 43, 41, 45, 38, 39, 47) sind in der Produktseite (Tab "Tickets & Badges", PDF-Ticketlayout) auf Layout 10 umgestellt.
+- Test: Je ein Ticket neu erzeugt (Dauerkarte JBCKH Position 1156, Einzelticket UHJPU Position 2286): HTTP 200, 319 bzw. 320 KB. Ticket-Mail für DUTTK einmal nachgesendet.
+- Die alten Layouts 5 und 8 sind nicht mehr zugeordnet und zeigen noch auf `cachedfiles/`; sie können gelöscht werden.
+
+**Regeln:**
+- Layout-Hintergründe nie per API-Upload setzen (hält nur 24 h). Hintergrund ändern = Layout in der Control-Oberfläche kopieren/neu anlegen; der Editor-Upload funktioniert nicht, solange der S3-Bucket keine CORS-Freigabe für den Editor hat.
+- Die API kann Layout-Zuordnungen (`ticketlayoutitems`) nicht ändern (nur lesen), und `default` lässt sich per API nicht umsetzen. Beides in der Control-Oberfläche.
+- Diagnose: `GET …/ticketlayouts/` — enthält die `background`-URL `cachedfiles`, ist die Vorlage in 24 h kaputt.
