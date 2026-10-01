@@ -2891,6 +2891,7 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
 .training-row-trainer .team-badge { margin-bottom: 10px; }
 .training-row-trainer-label { font-weight: var(--weight-semibold); color: var(--text-primary); margin-bottom: 2px; }
 .training-row-probetraining { display: inline-block; margin-top: 4px; font-size: 13px; font-weight: var(--weight-semibold); }
+.training-row-probetraining-stop { display: inline-block; margin-top: 4px; font-size: 13px; font-weight: var(--weight-semibold); color: var(--color-error); }
 @media (max-width: 700px) {
   .training-row { grid-template-columns: 1fr; text-align: left; gap: 12px; }
   .training-row-trainer { align-items: flex-start; }

@@ -17,7 +17,8 @@
         2019,
         2020,
         2021
-      ]
+      ],
+      "aufnahmestopp": true
     },
     {
       "team": "U9mix",
@@ -88,7 +89,8 @@
         2017,
         2018,
         2019
-      ]
+      ],
+      "aufnahmestopp": true
     },
     {
       "team": "U10w und jünger",

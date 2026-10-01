@@ -358,7 +358,9 @@ document.addEventListener('DOMContentLoaded', function () {
       zeitenHTML = g.termine.map(function (t) {
         var zeitHTML = zeitLinkHTML(t.tag, t.zeit, t.vorbehaltlich, titel, t.ort, true, unbestaetigt);
         var ortHTML = '<div class="training-slot-ort"><i data-lucide="map-pin" class="icon-14"></i><a href="' + mapsLink(t.ort) + '" target="_blank" rel="noopener">' + ortDisplay(t.ort) + '</a></div>';
-        var probLink = zeigeProbetraining ? '<a class="training-row-probetraining" href="' + probetrainingLink(teamName, jahrgang, g.verein, t) + '">Probetraining vereinbaren</a>' : '';
+        var probLink = g.aufnahmestopp
+          ? '<span class="training-row-probetraining-stop">Temporärer Aufnahmestopp</span>'
+          : (zeigeProbetraining ? '<a class="training-row-probetraining" href="' + probetrainingLink(teamName, jahrgang, g.verein, t) + '">Probetraining vereinbaren</a>' : '');
         return '<div class="training-slot">' + zeitHTML + ortHTML + probLink + '</div>';
       }).join('');
     } else {
@@ -383,7 +385,7 @@ document.addEventListener('DOMContentLoaded', function () {
     );
   }
 
-  fetch('/data/trainingszeiten.json?v=1790464103')
+  fetch('/data/trainingszeiten.json?v=1790863058')
     .then(function (res) { return res.json(); })
     .then(function (data) {
       // Reihenfolge = Reihenfolge im JSON: juengster Jahrgang oben, Erwachsenenteams
