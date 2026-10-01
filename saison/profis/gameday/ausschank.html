@@ -20,16 +20,19 @@
 
   .au-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 12px; }
+  /* Hintergrundfarbe kommt je Produkt per Inline-Style (s. PRODUCTS/bg) - sticht die
+     Klassen-Regel unten dank hoeherer Spezifitaet automatisch aus, :active arbeitet
+     deshalb bewusst per Skalierung statt Hintergrundwechsel (Marko, 01.10.2026:
+     "Kacheln andersfarbig, damit man sie besser unterscheiden kann"). */
   .au-tile { position: relative; display: flex; flex-direction: column; align-items: center;
     justify-content: center; gap: 6px; min-height: 120px; padding: 14px 10px;
     background: var(--surface-1, #f3f3f1); border: 2px solid var(--border-strong, #ccc);
     border-radius: 14px; cursor: pointer; text-align: center; -webkit-user-select: none;
-    user-select: none; -webkit-tap-highlight-color: transparent; }
-  .au-tile:active { background: var(--surface-2, #e9e9e6); }
-  .au-tile.au-active { border-color: var(--brand-orange, #d9802e); }
-  .au-tile-name { font-size: 1.05rem; font-weight: 700; line-height: 1.25; }
-  .au-tile-price { font-size: 0.95rem; color: var(--text-muted); }
-  .au-tile.au-pfand-zurueck .au-tile-price { color: var(--text-muted); }
+    user-select: none; -webkit-tap-highlight-color: transparent; transition: transform .08s; }
+  .au-tile:active { transform: scale(.96); }
+  .au-tile.au-active { border-color: var(--color-brand-navy, #00122d); border-width: 3px; }
+  .au-tile-name { font-size: 1.05rem; font-weight: 700; line-height: 1.25; color: var(--color-brand-navy, #00122d); }
+  .au-tile-price { font-size: 0.95rem; color: var(--color-brand-navy, #00122d); opacity: .72; }
 
   .au-badge { position: absolute; top: -10px; right: -10px; min-width: 32px; height: 32px;
     padding: 0 6px; border-radius: 50%; background: var(--brand-orange, #d9802e); color: #fff;
@@ -50,6 +53,18 @@
   .au-total { font-size: 2rem; font-weight: 800; white-space: nowrap; }
   .au-fertig { font-size: 1.2rem; padding: 16px 24px; white-space: nowrap; }
   .au-fertig:disabled { opacity: 0.4; }
+
+  /* Vollflaechiges Overlay nach "Jetzt bestellen" (Marko, 01.10.2026): das Personal
+     tippt den Betrag ins Terminal, waehrend die Kasse im Hintergrund schon zurueckgesetzt
+     ist. Dauer ist bewusst eine einzelne Konstante (s. FERTIG_OVERLAY_MS) - Marko will die
+     3 Sekunden noch live testen und ggf. verkuerzen. Antippen schliesst sofort, falls das
+     Personal schneller fertig ist. */
+  .au-overlay { position: fixed; inset: 0; z-index: 50; background: var(--color-brand-navy, #00122d);
+    color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 10px; cursor: pointer; }
+  .au-overlay[hidden] { display: none !important; }
+  .au-overlay-label { font-size: 1.3rem; opacity: .8; }
+  .au-overlay-total { font-size: 4.5rem; font-weight: 800; }
 </style>
 </head>
 <body>
@@ -67,6 +82,11 @@
   </div>
 </div>
 
+<div class="au-overlay" id="au-overlay" hidden>
+  <div class="au-overlay-label">Betrag am Terminal eintippen</div>
+  <div class="au-overlay-total" id="au-overlay-total">0,00 €</div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -80,19 +100,23 @@ document.addEventListener('DOMContentLoaded', function () {
   // wird. Preis+Pfand stehen zusammen auf der Kachel ("3,50 € plus 1,00 €") und werden als
   // EIN Tap/EINE Zeile gebucht; "Pfand zurueck" bleibt eigenstaendig fuer die Rueckgabe.
   var PRODUCTS = [
-    { key: 'bier', name: 'Hasseröder Pils vom Fass', price: 3.50, pfand: 1.00 },
-    { key: 'radler', name: 'Radler', price: 3.50, pfand: 1.00 },
-    { key: 'cola', name: 'Vita Cola Original', price: 2.50, pfand: 1.00 },
-    { key: 'orange', name: 'Vita Orangenlimonade', price: 2.50, pfand: 1.00 },
-    { key: 'zitrone', name: 'Vita Zitronenlimonade', price: 2.50, pfand: 1.00 },
-    { key: 'apfelschorle', name: 'Apfelschorle', price: 2.50, pfand: 1.00 },
-    { key: 'wasser_pur', name: 'Thüringer Waldquell Pur', price: 2.50, pfand: 1.00 },
-    { key: 'wasser_medium', name: 'Thüringer Waldquell Medium', price: 2.50, pfand: 1.00 },
-    { key: 'kaffee', name: 'Kaffee Becher', price: 2.00, pfand: 0 },
-    { key: 'prosecco', name: 'Prosecco 0,1 l', price: 3.00, pfand: 1.00 },
-    { key: 'wein', name: 'Weißwein 0,2 l', price: 3.00, pfand: 1.00 },
-    { key: 'pfand_rueckgabe', name: 'Pfand zurück', price: -1.00, pfand: 0 }
+    { key: 'bier', name: 'Hasseröder Pils vom Fass', price: 3.50, pfand: 1.00, bg: 'hsl(42,65%,72%)' },
+    { key: 'radler', name: 'Radler', price: 3.50, pfand: 1.00, bg: 'hsl(78,50%,75%)' },
+    { key: 'cola', name: 'Vita Cola Original', price: 2.50, pfand: 1.00, bg: 'hsl(15,45%,72%)' },
+    { key: 'orange', name: 'Vita Orangenlimonade', price: 2.50, pfand: 1.00, bg: 'hsl(28,70%,75%)' },
+    { key: 'zitrone', name: 'Vita Zitronenlimonade', price: 2.50, pfand: 1.00, bg: 'hsl(54,65%,78%)' },
+    { key: 'apfelschorle', name: 'Apfelschorle', price: 2.50, pfand: 1.00, bg: 'hsl(100,40%,75%)' },
+    { key: 'wasser_pur', name: 'Thüringer Waldquell Pur', price: 2.50, pfand: 1.00, bg: 'hsl(200,55%,80%)' },
+    { key: 'wasser_medium', name: 'Thüringer Waldquell Medium', price: 2.50, pfand: 1.00, bg: 'hsl(195,45%,72%)' },
+    { key: 'kaffee', name: 'Kaffee Becher', price: 2.00, pfand: 0, bg: 'hsl(25,35%,62%)' },
+    { key: 'prosecco', name: 'Prosecco 0,1 l', price: 3.00, pfand: 1.00, bg: 'hsl(340,55%,83%)' },
+    { key: 'wein', name: 'Weißwein 0,2 l', price: 3.00, pfand: 1.00, bg: 'hsl(50,40%,80%)' },
+    { key: 'pfand_rueckgabe', name: 'Pfand zurück', price: -1.00, pfand: 0, bg: 'hsl(0,0%,88%)' }
   ];
+
+  // Testwert (Marko, 01.10.2026: "ob die 3 Sekunden noetig sind, moechte ich noch testen") -
+  // einfach diese eine Zahl aendern, um die Overlay-Dauer anzupassen.
+  var FERTIG_OVERLAY_MS = 3000;
 
   var counts = {};
 
@@ -143,6 +167,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var tile = document.createElement('div');
     tile.className = 'au-tile' + (p.key === 'pfand_rueckgabe' ? ' au-pfand-zurueck' : '');
     tile.id = 'au-tile-' + p.key;
+    tile.style.background = p.bg;
     var priceText = fmtEUR(p.price) + (p.pfand ? ' plus ' + fmtEUR(p.pfand) : '');
     tile.innerHTML =
       '<span class="au-tile-name">' + p.name + '</span>' +
@@ -169,6 +194,18 @@ document.addEventListener('DOMContentLoaded', function () {
   // "fire and forget": kein await, kein Retry, kein Fehlerdialog. Der Knopf setzt den
   // Warenkorb sofort zurueck, egal ob/wie schnell der Log-Call durchkommt - die Kasse darf
   // dadurch nie ins Stocken geraten.
+  var overlay = document.getElementById('au-overlay');
+  var overlayTimer = null;
+
+  function hideOverlay() {
+    if (overlayTimer) { clearTimeout(overlayTimer); overlayTimer = null; }
+    overlay.hidden = true;
+  }
+
+  // Antippen schliesst das Overlay sofort (falls das Personal schneller fertig ist als
+  // FERTIG_OVERLAY_MS) - der Timer unten schliesst es sonst von selbst.
+  overlay.addEventListener('click', hideOverlay);
+
   document.getElementById('au-fertig').addEventListener('click', function () {
     var items = PRODUCTS
       .filter(function (p) { return counts[p.key] > 0; })
@@ -180,6 +217,9 @@ document.addEventListener('DOMContentLoaded', function () {
         body: JSON.stringify({ items: items, total: total() })
       }).catch(function () {});
     }
+    document.getElementById('au-overlay-total').textContent = fmtEUR(total());
+    overlay.hidden = false;
+    overlayTimer = setTimeout(hideOverlay, FERTIG_OVERLAY_MS);
     counts = {};
     render();
   });
