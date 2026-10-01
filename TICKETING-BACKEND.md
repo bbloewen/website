@@ -750,3 +750,11 @@ Order UHJPU (8 Einzeltickets Kat. I, Spiel 26, Gutschein 198, 0 €) war bei der
 Vorgehen per API über einen kurzen Hilfs-Workflow mit dem pretix-Credential (danach archiviert): `POST …/orders/UHJPU/change/` mit `{"patch_positions":[{"position":<id>,"body":{"seat":"<seat_guid>"}}, …], "notify":false, "reissue_invoice":false}`. Das Feld heißt `body`, nicht `seat` direkt (sonst HTTP 400 "This field is required", nichts geändert).
 
 Sitz-Tabelle "Belegte-Sitze": Eine Änderung per API löst keinen Webhook aus, die Tabelle zeigte danach weiter die alten Sitze. Nachziehen ohne Ticket-Mail: `POST /webhook/pretix-order-event` mit `{"organizer":"xxl","event":"saison2627","code":"<CODE>","action":"pretix.event.order.changed.seat"}` (alles außer `pretix.event.order.paid` löst nur den Sitz-Abgleich aus, die Mail nicht). Danach die Zeilen der Order in der Data Table prüfen.
+
+## Beobachtungspunkte (Stand 01.10.2026)
+
+Keine Aufgaben, sondern Dinge, die bei der nächsten passenden echten Bestellung geprüft werden:
+
+- **Rollstuhl-Bestellung mit Begleitperson:** "Gutschein-Rabatt berechnen" setzt die Begleitperson zum vollen Preis an. Beim ersten echten Fall Preis der Begleitung prüfen. Außerdem: Nachwuchs-Zusatzprodukt an Produkt 34 und die fest hinterlegte Rollstuhlplatz-Liste im Knoten "Sitze zuordnen" (Einzelticket-Workflow) bei Änderungen am Sitzplan mitpflegen.
+- **Dauerkarte mit Mehrfach-Gutschein:** Bei der nächsten solchen Bestellung prüfen, ob der Gutschein an jedem rabattierten Sitz hängt und pretix die richtige Zahl Einlösungen zählt (Reparatur vom 01.10.2026, Knoten "Build pretix Order Payload").
+- **pretix-Upgrade auf 2026.8.0:** Erst Web-Dienst, dann Worker, dann die Pins im Dockerfile anheben (s. Abschnitt Versions-Drift).
