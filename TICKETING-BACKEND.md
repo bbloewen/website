@@ -861,7 +861,7 @@ Workflow `AA0f7oo7dH7TDkFu` (Version 1a010dc3), Nodes "DK-Statistik aufbereiten"
 - Die API hat keinen Endpunkt, der den Hintergrund dauerhaft ablegt (`…/ticketlayouts/<id>/background` liefert 404), und der Layout-Editor in der Control-Oberfläche kann den Hintergrund wegen des S3-Speichers nicht laden ("Failed to fetch"). Deshalb wurden die Vorlagen in der Control-Oberfläche **kopiert** ("Kopieren" in der Layout-Liste): die Kopie legt die Datei dauerhaft unter `pub/…/ticketoutputpdf/` ab. Das Layout-JSON der Kopien ist identisch zum Original.
 - Neu: Layout 9 `Ticket_Einzelticket_Freiwahl_v2` (jetzt Standard) und Layout 10 `Ticket_Dauerkarte_Gebrandet_v2`. Die 10 Dauerkarten-Produkte (37, 44, 42, 46, 43, 41, 45, 38, 39, 47) sind in der Produktseite (Tab "Tickets & Badges", PDF-Ticketlayout) auf Layout 10 umgestellt.
 - Test: Je ein Ticket neu erzeugt (Dauerkarte JBCKH Position 1156, Einzelticket UHJPU Position 2286): HTTP 200, 319 bzw. 320 KB. Ticket-Mail für DUTTK einmal nachgesendet.
-- Die alten Layouts 5 und 8 sind nicht mehr zugeordnet und zeigen noch auf `cachedfiles/`; sie können gelöscht werden.
+- Die alten Layouts 5 und 8 (zeigten auf `cachedfiles/`) waren nicht mehr zugeordnet und sind am 01.10.2026 per API gelöscht (`DELETE …/ticketlayouts/<id>/`, HTTP 204). Es bleiben Layout 4 `Ticket_Basis` (ungenutzt), 9 (Standard) und 10. Layout-JSON der gelöschten Vorlagen: `Projects/ticket-hintergrund-backup/layouts_snapshot_2026-10-01.json`.
 
 **Regeln:**
 - Layout-Hintergründe nie per API-Upload setzen (hält nur 24 h). Hintergrund ändern = Layout in der Control-Oberfläche kopieren/neu anlegen; der Editor-Upload funktioniert nicht, solange der S3-Bucket keine CORS-Freigabe für den Editor hat.
