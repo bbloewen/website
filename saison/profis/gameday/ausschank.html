@@ -17,8 +17,6 @@
      Warenkorb-Bereich zum Gegenchecken noetig. */
   body { background: var(--surface-page, #fff); }
   .au-wrap { max-width: 720px; margin: 0 auto; padding: 16px 16px 140px; }
-  .au-head { text-align: center; margin-bottom: 16px; }
-  .au-head h1 { font-size: 1.6rem; margin: 0; }
 
   .au-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 12px; }
@@ -56,10 +54,6 @@
 </head>
 <body>
 <div class="au-wrap">
-  <div class="au-head">
-    <h1>Ausschank</h1>
-  </div>
-
   <div class="au-grid" id="au-grid"></div>
 </div>
 
@@ -69,7 +63,7 @@
       <div class="au-total-label">Gesamt</div>
       <div class="au-total" id="au-total">0,00 €</div>
     </div>
-    <button type="button" class="btn btn-primary au-fertig" id="au-fertig" disabled>Fertig / Neuer Verkauf</button>
+    <button type="button" class="btn btn-primary au-fertig" id="au-fertig" disabled>Jetzt bestellen</button>
   </div>
 </div>
 
@@ -80,20 +74,24 @@ document.addEventListener('DOMContentLoaded', function () {
   // Getraenke gekoppelt (Marko-Preisliste nennt "Pfand: 1 €" nur einmal, nicht pro Produkt -
   // welcher Becher/welches Glas im Einzelfall Pfand bekommt, entscheidet das Personal direkt
   // am Stand). "Pfand zurueck" negativ, fuer Kunden, die nur ihr Pfand abgeben.
+  //
+  // Pfand (1 €) haengt jetzt automatisch an jedem Produkt ausser Kaffee (Marko, 01.10.2026:
+  // "nur der Kaffee ist pfandfrei") - nicht mehr separat antippbar, damit es nie vergessen
+  // wird. Preis+Pfand stehen zusammen auf der Kachel ("3,50 € plus 1,00 €") und werden als
+  // EIN Tap/EINE Zeile gebucht; "Pfand zurueck" bleibt eigenstaendig fuer die Rueckgabe.
   var PRODUCTS = [
-    { key: 'bier', name: 'Hasseröder Pils vom Fass', price: 3.50 },
-    { key: 'radler', name: 'Radler', price: 3.50 },
-    { key: 'cola', name: 'Vita Cola Original', price: 2.50 },
-    { key: 'orange', name: 'Vita Orangenlimonade', price: 2.50 },
-    { key: 'zitrone', name: 'Vita Zitronenlimonade', price: 2.50 },
-    { key: 'apfelschorle', name: 'Apfelschorle', price: 2.50 },
-    { key: 'wasser_pur', name: 'Thüringer Waldquell Pur', price: 2.50 },
-    { key: 'wasser_medium', name: 'Thüringer Waldquell Medium', price: 2.50 },
-    { key: 'kaffee', name: 'Kaffee Becher', price: 2.00 },
-    { key: 'prosecco', name: 'Prosecco 0,1 l', price: 3.00 },
-    { key: 'wein', name: 'Weißwein 0,2 l', price: 3.00 },
-    { key: 'pfand', name: 'Pfand', price: 1.00 },
-    { key: 'pfand_rueckgabe', name: 'Pfand zurück', price: -1.00 }
+    { key: 'bier', name: 'Hasseröder Pils vom Fass', price: 3.50, pfand: 1.00 },
+    { key: 'radler', name: 'Radler', price: 3.50, pfand: 1.00 },
+    { key: 'cola', name: 'Vita Cola Original', price: 2.50, pfand: 1.00 },
+    { key: 'orange', name: 'Vita Orangenlimonade', price: 2.50, pfand: 1.00 },
+    { key: 'zitrone', name: 'Vita Zitronenlimonade', price: 2.50, pfand: 1.00 },
+    { key: 'apfelschorle', name: 'Apfelschorle', price: 2.50, pfand: 1.00 },
+    { key: 'wasser_pur', name: 'Thüringer Waldquell Pur', price: 2.50, pfand: 1.00 },
+    { key: 'wasser_medium', name: 'Thüringer Waldquell Medium', price: 2.50, pfand: 1.00 },
+    { key: 'kaffee', name: 'Kaffee Becher', price: 2.00, pfand: 0 },
+    { key: 'prosecco', name: 'Prosecco 0,1 l', price: 3.00, pfand: 1.00 },
+    { key: 'wein', name: 'Weißwein 0,2 l', price: 3.00, pfand: 1.00 },
+    { key: 'pfand_rueckgabe', name: 'Pfand zurück', price: -1.00, pfand: 0 }
   ];
 
   var counts = {};
@@ -104,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function total() {
-    return PRODUCTS.reduce(function (sum, p) { return sum + (counts[p.key] || 0) * p.price; }, 0);
+    return PRODUCTS.reduce(function (sum, p) { return sum + (counts[p.key] || 0) * (p.price + (p.pfand || 0)); }, 0);
   }
 
   function hasItems() {
@@ -145,9 +143,10 @@ document.addEventListener('DOMContentLoaded', function () {
     var tile = document.createElement('div');
     tile.className = 'au-tile' + (p.key === 'pfand_rueckgabe' ? ' au-pfand-zurueck' : '');
     tile.id = 'au-tile-' + p.key;
+    var priceText = fmtEUR(p.price) + (p.pfand ? ' plus ' + fmtEUR(p.pfand) : '');
     tile.innerHTML =
       '<span class="au-tile-name">' + p.name + '</span>' +
-      '<span class="au-tile-price">' + fmtEUR(p.price) + '</span>' +
+      '<span class="au-tile-price">' + priceText + '</span>' +
       '<span class="au-badge"></span>' +
       '<button type="button" class="au-minus" aria-label="weniger">−</button>';
     tile.addEventListener('click', function (e) {
@@ -161,15 +160,19 @@ document.addEventListener('DOMContentLoaded', function () {
     grid.appendChild(tile);
   });
 
-  // Protokollierung ist reiner Kassennachweis fuer den spaeteren Kassenschnitt (Marko,
-  // 01.10.2026) - das Geld fliesst unabhaengig davon ueber das Kartenterminal. Deshalb
-  // bewusst "fire and forget": kein await, kein Retry, kein Fehlerdialog. Der Knopf setzt
-  // den Warenkorb sofort zurueck, egal ob/wie schnell der Log-Call durchkommt - die Kasse
-  // darf dadurch nie ins Stocken geraten.
+  // "Jetzt bestellen" statt "Fertig/Neuer Verkauf" (Marko, 01.10.2026): Das Personal liest
+  // den Betrag vor und fragt den Kunden, ob er passt - erst NACH dieser muendlichen
+  // Bestaetigung wird der Knopf getippt. Technisch bleibt es ein einziger Tap: Protokollierung
+  // ist reiner Kassennachweis fuer den spaeteren Kassenschnitt - das Geld fliesst unabhaengig
+  // davon ueber das Kartenterminal (manuell eingetippt, bis die Sparkassen-API verfuegbar ist -
+  // danach koennte dieser Call den Terminal-Betrag direkt mit ausloesen). Deshalb bewusst
+  // "fire and forget": kein await, kein Retry, kein Fehlerdialog. Der Knopf setzt den
+  // Warenkorb sofort zurueck, egal ob/wie schnell der Log-Call durchkommt - die Kasse darf
+  // dadurch nie ins Stocken geraten.
   document.getElementById('au-fertig').addEventListener('click', function () {
     var items = PRODUCTS
       .filter(function (p) { return counts[p.key] > 0; })
-      .map(function (p) { return { name: p.name, qty: counts[p.key], price: p.price }; });
+      .map(function (p) { return { name: p.name, qty: counts[p.key], price: p.price, pfand: p.pfand || 0 }; });
     if (items.length) {
       fetch('https://ticketing.basketball-loewen.com/webhook/ausschank-verkauf', {
         method: 'POST',
