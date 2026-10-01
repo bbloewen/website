@@ -426,7 +426,24 @@ document.addEventListener('DOMContentLoaded', function () {
     }).then(function (r) {
       if (r.ok) {
         return r.blob().then(function (blob) {
-          window.open(URL.createObjectURL(blob), '_blank');
+          // Eigener Tab, der den Druckdialog automatisch oeffnet, statt dass die
+          // Kassiererin das PDF erst anschauen und selbst "Drucken" suchen muss
+          // (Marko, 01.10.2026: "soll nicht verwirrt werden, Ticket direkt an den
+          // Drucker"). Ein voellig dialogloser Druck ist aus einer normalen Webseite
+          // heraus nicht moeglich (Browser-Sicherheitsbeschraenkung) - das kommt dem
+          // am naechsten: Tab oeffnet sich, Chrome-PDF-Viewer rendert, Druckdialog
+          // poppt von selbst auf, ein Klick/Enter genuegt.
+          var pdfWindow = window.open(URL.createObjectURL(blob), '_blank');
+          if (pdfWindow) {
+            var printed = false;
+            var doPrint = function () {
+              if (printed) return;
+              printed = true;
+              try { pdfWindow.focus(); pdfWindow.print(); } catch (e) {}
+            };
+            pdfWindow.addEventListener('load', doPrint);
+            setTimeout(doPrint, 1000);
+          }
           statusEl.className = 'ak-status ak-status-ok';
           statusEl.textContent = 'Ticket wird gedruckt. Betrag am Terminal eintippen: ' +
             fmtEUR(summary.total) + ' € – erst nach bestätigter Zahlung aushändigen.';
