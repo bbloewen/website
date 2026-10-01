@@ -27,8 +27,10 @@
   .ak-fehler { text-align: center; color: var(--text-muted); margin: 0 0 12px; }
   .ak-fehler[hidden] { display: none !important; }
 
+  /* white-space:nowrap gilt pro Zeile (der <br> selbst erzwingt den Umbruch trotzdem) -
+     Marko, 01.10.2026: "genug Platz", die Gegner-Zeile soll nie selbst umbrechen. */
   .ak-court-info { position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
-    max-width: 92%; font-size: 1rem; font-weight: 700; color: var(--text-muted);
+    font-size: 1rem; font-weight: 700; color: var(--text-muted); white-space: nowrap;
     text-align: center; line-height: 1.35; z-index: 1; pointer-events: none; }
 
   /* Auslastungsliste unter dem Plan komplett weg (Marko, 01.10.2026, Punkt 1). */
@@ -333,7 +335,7 @@ document.addEventListener('DOMContentLoaded', function () {
     info.className = 'ak-court-info';
     info.appendChild(document.createTextNode(currentGame.datum + ' · ' + currentGame.zeit + ' Uhr'));
     info.appendChild(document.createElement('br'));
-    info.appendChild(document.createTextNode('Löwen gegen ' + currentGame.gegner));
+    info.appendChild(document.createTextNode(currentGame.gegner));
     court.appendChild(info);
   }
 
