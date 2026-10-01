@@ -16,25 +16,27 @@
      Zwischenschritte - Mengen stehen direkt als Zaehler auf der Kachel, kein separater
      Warenkorb-Bereich zum Gegenchecken noetig. */
   * { box-sizing: border-box; }
-  html, body { height: 100%; }
-  /* 4 Spalten, Hoehe fuellt den Bildschirm (Marko, 01.10.2026: "iPad-Formfaktor komplett
-     ausnutzen") - au-wrap bekommt die volle Viewport-Hoehe minus der fixen Gesamt-Leiste
-     unten (padding-bottom = deren reservierter Platz), au-main/au-grid reichen das ueber
-     height:100% weiter. grid-template-rows wird in JS aus der Produktanzahl berechnet
-     (Math.ceil(PRODUCTS.length / 4)), damit es automatisch mitwaechst, falls Produkte
-     dazukommen. Nur im schmalen Stapel-Fallback (Telefon-Hochformat) wieder normale
-     Fliesshoehe - da ist Scrollen ok, erzwungene Zeilenhoehen wuerden nur verzerren. */
-  .au-wrap { max-width: 1100px; height: 100vh; margin: 0 auto; padding: 16px 16px 140px;
-    display: flex; align-items: flex-start; gap: 20px; }
-  .au-main { flex: 1; min-width: 0; height: 100%; display: flex; flex-direction: column; }
+  html, body { height: 100%; margin: 0; }
+  /* Eigene Flex-Spalte ueber die GANZE Seite (au-page) statt einer fixen Gesamt-Leiste mit
+     geratenem padding-bottom (Marko, 01.10.2026: "Bereich mit Gesamtbetrag/Jetzt bestellen
+     liegt ueber den unteren Kacheln drueber" - die fruehere 140px-Reserve passte nicht zur
+     tatsaechlichen Leisten-Hoehe). So reserviert der Browser selbst exakt den Platz, den
+     au-bar als normales Flex-Kind wirklich braucht; au-content bekommt den Rest. min-height:0
+     an jeder Flex-/Grid-Stufe ist Pflicht, sonst wuerden die Kacheln (min-height) den
+     verfuegbaren Platz sprengen statt sich einzupassen - derselbe Mangel liess die Kacheln
+     zuletzt zu gross werden. grid-template-rows kommt aus JS (Math.ceil(PRODUCTS.length/4)). */
+  .au-page { max-width: 1100px; height: 100vh; margin: 0 auto; display: flex; flex-direction: column; }
+  .au-content { flex: 1; min-height: 0; display: flex; align-items: stretch; gap: 10px; padding: 16px 16px 10px; }
+  .au-main { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
 
-  .au-grid { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .au-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 
   /* Kassenzettel-Aufschluesselung rechts (Marko, 01.10.2026: "nachvollziehen, wie sich
      der Gesamtpreis zusammensetzt") - bewusst klein/unauffaellig, keine Bedienelemente
-     ausser dem Ein/Aus-Toggle, nur Lesehilfe. Bricht unter die Kacheln um, wenn der Platz
-     (schmales Tablet-Hochformat) nicht fuer beides nebeneinander reicht. */
-  .au-receipt { width: 220px; flex-shrink: 0; font-size: 0.78rem; color: var(--text-muted);
+     ausser dem Ein/Aus-Griff daneben, nur Lesehilfe. overflow-y:auto als Sicherheitsnetz,
+     falls ein langer Warenkorb mal mehr Platz braucht als die Spalte hoch ist. Bricht unter
+     die Kacheln um, wenn der Platz (schmales Tablet-Hochformat) nicht fuer beides reicht. */
+  .au-receipt { width: 220px; flex-shrink: 0; overflow-y: auto; font-size: 0.78rem; color: var(--text-muted);
     background: var(--surface-1, #f3f3f1); border: 1px solid var(--border-strong, #ccc);
     border-radius: 10px; padding: 10px 12px; }
   .au-receipt[hidden] { display: none !important; }
@@ -52,15 +54,22 @@
      display sticht die browsereigene [hidden]-Vorgabe sonst aus. */
   .au-receipt-total[hidden] { display: none !important; }
 
-  /* Kleiner, immer erreichbarer Schalter (auch wenn der Zettel gerade ausgeblendet ist,
-     muss er wieder anschaltbar bleiben - deshalb ausserhalb von .au-receipt platziert). */
-  .au-zettel-toggle { position: fixed; top: 10px; right: 10px; z-index: 10; font-size: 0.75rem;
-    padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-strong, #ccc);
-    background: var(--surface-1, #f3f3f1); color: var(--text-muted); }
+  /* Griff am Rand statt Knopf oben drueber (Marko, 01.10.2026: "liegt als Overlay ueber
+     dem Kassenzettel drueber, sieht unschoen aus" - wie der Ein-/Ausblenden-Pfeil fuer den
+     Browser-Bereich in diesem Interface). Eigenes Flex-Kind direkt zwischen au-main und
+     au-receipt, keine Ueberlappung. Immer erreichbar (auch wenn der Zettel gerade
+     ausgeblendet ist), daher ausserhalb von .au-receipt platziert. */
+  .au-zettel-handle { flex-shrink: 0; width: 22px; align-self: stretch; display: flex;
+    align-items: center; justify-content: center; border: 1px solid var(--border-strong, #ccc);
+    background: var(--surface-1, #f3f3f1); border-radius: 8px; color: var(--text-muted);
+    font-size: 1rem; cursor: pointer; }
+  .au-zettel-handle:active { background: var(--surface-2, #e9e9e6); }
 
   @media (max-width: 640px) {
-    .au-wrap { flex-direction: column; height: auto; }
-    .au-main { height: auto; }
+    .au-page { height: auto; }
+    .au-content { flex-direction: column; }
+    .au-main { min-height: 0; }
+    .au-zettel-handle { display: none; }
     /* 2 statt 4 Spalten - sonst liefe die vierte Kachel auf Telefonbreite aus dem
        Bildschirm raus (horizontales Scrollen). iPad-Breiten liegen weit darueber. */
     .au-grid { grid-template-columns: repeat(2, 1fr) !important; grid-template-rows: none !important; }
@@ -90,10 +99,12 @@
     font-size: 1.3rem; line-height: 1; display: none; align-items: center; justify-content: center; }
   .au-tile.au-active .au-minus { display: flex; }
 
-  .au-bar { position: fixed; left: 0; right: 0; bottom: 0; background: var(--surface-page, #fff);
+  /* Normales Flex-Kind von au-page statt position:fixed (s. Kommentar oben bei au-page) -
+     der Browser reserviert dadurch automatisch die exakt richtige Hoehe. */
+  .au-bar { flex-shrink: 0; background: var(--surface-page, #fff);
     border-top: 2px solid var(--border-strong, #ccc); padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
     box-shadow: 0 -4px 14px rgba(0,0,0,0.08); }
-  .au-bar-inner { max-width: 720px; margin: 0 auto; display: flex; align-items: center;
+  .au-bar-inner { display: flex; align-items: center;
     justify-content: space-between; flex-wrap: wrap; gap: 10px 16px; }
   .au-total-label { font-size: 1rem; color: var(--text-muted); }
   .au-total { font-size: 2rem; font-weight: 800; white-space: nowrap; }
@@ -117,27 +128,29 @@
 </style>
 </head>
 <body>
-<button type="button" class="au-zettel-toggle" id="au-zettel-toggle">Kassenzettel ausblenden</button>
-<div class="au-wrap" id="au-wrap">
-  <div class="au-main">
-    <div class="au-grid" id="au-grid"></div>
-  </div>
-  <div class="au-receipt" id="au-receipt">
-    <div class="au-receipt-title">Kassenzettel</div>
-    <div id="au-receipt-lines"><div class="au-receipt-empty">Noch keine Artikel</div></div>
-    <div class="au-receipt-total" id="au-receipt-total" hidden>
-      <span>Gesamt</span><span id="au-receipt-total-amount">0,00 €</span>
+<div class="au-page">
+  <div class="au-content">
+    <div class="au-main">
+      <div class="au-grid" id="au-grid"></div>
+    </div>
+    <button type="button" class="au-zettel-handle" id="au-zettel-toggle" aria-label="Kassenzettel ein-/ausblenden">»</button>
+    <div class="au-receipt" id="au-receipt">
+      <div class="au-receipt-title">Kassenzettel</div>
+      <div id="au-receipt-lines"><div class="au-receipt-empty">Noch keine Artikel</div></div>
+      <div class="au-receipt-total" id="au-receipt-total" hidden>
+        <span>Gesamt</span><span id="au-receipt-total-amount">0,00 €</span>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="au-bar">
-  <div class="au-bar-inner">
-    <div>
-      <div class="au-total-label">Gesamt</div>
-      <div class="au-total" id="au-total">0,00 €</div>
+  <div class="au-bar">
+    <div class="au-bar-inner">
+      <div>
+        <div class="au-total-label">Gesamt</div>
+        <div class="au-total" id="au-total">0,00 €</div>
+      </div>
+      <button type="button" class="btn btn-primary au-fertig" id="au-fertig" disabled>Jetzt bestellen</button>
     </div>
-    <button type="button" class="btn btn-primary au-fertig" id="au-fertig" disabled>Jetzt bestellen</button>
   </div>
 </div>
 
@@ -329,7 +342,9 @@ document.addEventListener('DOMContentLoaded', function () {
     } catch (e) {}
     function anwenden() {
       receipt.hidden = !sichtbar;
-      toggle.textContent = sichtbar ? 'Kassenzettel ausblenden' : 'Kassenzettel einblenden';
+      // » = Zettel ist da, Klick schiebt ihn weg; « = Zettel ist weg, Klick holt ihn zurueck.
+      toggle.textContent = sichtbar ? '»' : '«';
+      toggle.title = sichtbar ? 'Kassenzettel ausblenden' : 'Kassenzettel einblenden';
     }
     anwenden();
     toggle.addEventListener('click', function () {
