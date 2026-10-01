@@ -63,6 +63,10 @@
 
   .seatplan-cart-total { font-size: 1.4rem; font-weight: 700; padding: 10px 0; }
   #seatplan-cta { font-size: 1.3rem; padding: 20px; min-height: 64px; }
+  /* Die ".btn"-Klasse aus site.css setzt display explizit (inline-flex o.ae.) - das
+     sticht die Browser-Vorgabe fuer [hidden] (sehr niedrige Spezifitaet), der Knopf
+     bliebe sonst trotz hidden sichtbar. */
+  #seatplan-cta[hidden] { display: none !important; }
   .ak-status { margin-top: 16px; padding: 16px; border-radius: 10px; font-size: 1.2rem; text-align: center; display: none; }
   .ak-status.ak-status-ok { display: block; background: #e3f3ea; color: #1f6a43; }
   .ak-status.ak-status-error { display: block; background: #fbeaea; color: #a32d2d; }
@@ -85,7 +89,7 @@
 
   <div id="seatplan-cart"></div>
   <div class="seatplan-cart-total"><span>Gesamt</span><span id="seatplan-total">0,00 €</span></div>
-  <button class="btn btn-primary" id="seatplan-cta" style="width:100%;justify-content:center" disabled>Jetzt bestellen</button>
+  <button class="btn btn-primary" id="seatplan-cta" style="width:100%;justify-content:center" disabled hidden>Jetzt bestellen</button>
   <div id="seatplan-occupancy"></div>
 
   <div class="ak-status" id="ak-status"></div>
@@ -193,7 +197,12 @@ document.addEventListener('DOMContentLoaded', function () {
     // Ticket im Warenkorb, bleibt die Blockauswahl verborgen; ein neuer Verkauf faengt
     // ueber "Naechster Verkauf" (initPicker) wieder bei null an, nicht ueber eine
     // Zurueck-Funktion hier.
-    document.getElementById('ak-blockwahl').classList.toggle('ak-hidden', cartHatTickets());
+    var hatTickets = cartHatTickets();
+    document.getElementById('ak-blockwahl').classList.toggle('ak-hidden', hatTickets);
+    // Der ausgegraute Knopf auf der ersten Seite war nur Verwirrung (Marko, 01.10.2026:
+    // "dann ist eindeutig: ich muss auf 'Jetzt uebernehmen' klicken") - er erscheint erst,
+    // sobald wirklich etwas im Warenkorb liegt.
+    document.getElementById('seatplan-cta').hidden = !hatTickets;
     renderTarifPanels();
   }
 
@@ -247,6 +256,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('seatplan-cart').innerHTML = '';
     document.getElementById('seatplan-total').textContent = '0,00 €';
     document.getElementById('seatplan-cta').disabled = true;
+    document.getElementById('seatplan-cta').hidden = true;
     document.getElementById('ak-status').className = 'ak-status';
     document.getElementById('ak-naechster').style.display = 'none';
     document.getElementById('ak-tarif-panels').innerHTML = '';
