@@ -17,8 +17,19 @@
      (blockCounts/_setBlockCount) zugreifen - keine Kopie der Kapazitaets-/Preislogik. */
   body { background: var(--surface-page, #fff); }
   .ak-wrap { max-width: 640px; margin: 0 auto; padding: 16px 16px 48px; }
-  .ak-head { text-align: center; margin-bottom: 16px; }
-  .ak-head h1 { font-size: 1.6rem; margin: 0 0 4px; }
+
+  /* Ueberschrift "Abendkasse", natives "Block waehlen" und die Spiel-Info-Zeile raus,
+     um Platz zu gewinnen (Marko, 01.10.2026) - die Spiel-Info wandert stattdessen als
+     Overlay auf das Spielfeld (s. renderSpielInfo()), solange kein Block gewaehlt ist.
+     Fehlermeldungen (kein Spiel gefunden/Spielplan nicht ladbar) behalten eine eigene,
+     normalerweise unsichtbare Zeile - die braucht es weiterhin, auch ohne Kopfbereich. */
+  #seatplan-root > h3.t-h4 { display: none !important; }
+  .ak-fehler { text-align: center; color: var(--text-muted); margin: 0 0 12px; }
+  .ak-fehler[hidden] { display: none !important; }
+
+  .ak-court-info { position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+    max-width: 92%; font-size: 0.85rem; font-weight: 700; color: var(--text-muted);
+    text-align: center; line-height: 1.3; z-index: 1; pointer-events: none; }
 
   /* Auslastungsliste unter dem Plan komplett weg (Marko, 01.10.2026, Punkt 1). */
   #seatplan-occupancy { display: none !important; }
@@ -89,10 +100,7 @@
 </head>
 <body>
 <div class="ak-wrap">
-  <div class="ak-head">
-    <h1>Abendkasse</h1>
-    <p class="t-body-sm" id="ak-spiel-info" style="color:var(--text-muted)">Spiel wird geladen …</p>
-  </div>
+  <p class="t-body-sm ak-fehler" id="ak-fehler" hidden></p>
 
   <div id="ak-blockwahl">
     <div id="seatplan-root"></div>
@@ -311,17 +319,33 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // Spiel-Info als Overlay auf dem Spielfeld statt einer eigenen Kopfzeile (Marko,
+  // 01.10.2026: "Ueberschrift/Label/Spiel-Info raus, Platz gewinnen") - erscheint nur,
+  // solange #ak-blockwahl sichtbar ist (also kein Block gewaehlt wurde), weil die ganze
+  // Grafik inkl. dieses Overlays dann ausgeblendet wird. Muss wie annotateTiles() bei
+  // jedem Re-Render neu eingefuegt werden (this.root.innerHTML wird von SeatPicker komplett
+  // ersetzt), deshalb ebenfalls nur ueber syncOverview() aufgerufen.
+  function renderCourtInfo() {
+    if (!picker || !currentGame) return;
+    var court = picker.root.querySelector('.seatplan-mobile-court');
+    if (!court) return;
+    var info = document.createElement('div');
+    info.className = 'ak-court-info';
+    info.textContent = currentGame.datum + ' · ' + currentGame.zeit + ' Uhr · Löwen – ' + currentGame.gegner;
+    court.appendChild(info);
+  }
+
   var rootObserver = new MutationObserver(function () { syncOverview(); });
   function syncOverview() {
     rootObserver.disconnect();
     annotateTiles();
+    renderCourtInfo();
     rootObserver.observe(document.getElementById('seatplan-root'), { childList: true, subtree: true });
   }
 
   function initPicker(game) {
     currentGame = game;
-    document.getElementById('ak-spiel-info').textContent =
-      game.datum + ' · ' + game.zeit + ' Uhr · Löwen – ' + game.gegner;
+    document.getElementById('ak-fehler').hidden = true;
     document.getElementById('seatplan-cart').innerHTML = '';
     document.getElementById('seatplan-total').textContent = '0,00 €';
     document.getElementById('seatplan-cta').disabled = true;
@@ -377,9 +401,15 @@ document.addEventListener('DOMContentLoaded', function () {
       || spiele[spiele.length - 1];
 
     if (spiel) initPicker(spiel);
-    else document.getElementById('ak-spiel-info').textContent = 'Kein Heimspiel gefunden.';
+    else {
+      var elNichtGefunden = document.getElementById('ak-fehler');
+      elNichtGefunden.textContent = 'Kein Heimspiel gefunden.';
+      elNichtGefunden.hidden = false;
+    }
   }).catch(function () {
-    document.getElementById('ak-spiel-info').textContent = 'Spielplan konnte nicht geladen werden.';
+    var elFehler = document.getElementById('ak-fehler');
+    elFehler.textContent = 'Spielplan konnte nicht geladen werden.';
+    elFehler.hidden = false;
   });
 
   var bestellLaeuft = false;
