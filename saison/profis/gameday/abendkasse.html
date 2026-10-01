@@ -120,6 +120,7 @@
 </div>
 
 <script src="/js/seat-picker.js"></script>
+<script src="opi-bridge.js?v=1"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -456,52 +457,80 @@ document.addEventListener('DOMContentLoaded', function () {
     // bezahlt markiert), nur der PDF-Abruf ist gescheitert. In diesem Fall NICHT den
     // "Jetzt bestellen"-Knopf fuer denselben Warenkorb wieder freigeben (sonst zweite
     // Zahlung fuer dieselbe Bestellung) - stattdessen direkt "Naechster Verkauf".
-    fetch('https://ticketing.basketball-loewen.com/webhook/abendkasse-bestellung', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cart: cart, buyer: buyer })
-    }).then(function (r) {
-      if (r.ok) {
-        return r.blob().then(function (blob) {
-          // Eigener Tab, der den Druckdialog automatisch oeffnet, statt dass die
-          // Kassiererin das PDF erst anschauen und selbst "Drucken" suchen muss
-          // (Marko, 01.10.2026: "soll nicht verwirrt werden, Ticket direkt an den
-          // Drucker"). Ein voellig dialogloser Druck ist aus einer normalen Webseite
-          // heraus nicht moeglich (Browser-Sicherheitsbeschraenkung) - das kommt dem
-          // am naechsten: Tab oeffnet sich, Chrome-PDF-Viewer rendert, Druckdialog
-          // poppt von selbst auf, ein Klick/Enter genuegt.
-          var pdfWindow = window.open(URL.createObjectURL(blob), '_blank');
-          if (pdfWindow) {
-            var printed = false;
-            var doPrint = function () {
-              if (printed) return;
-              printed = true;
-              try { pdfWindow.focus(); pdfWindow.print(); } catch (e) {}
-            };
-            pdfWindow.addEventListener('load', doPrint);
-            setTimeout(doPrint, 1000);
-          }
-          statusEl.className = 'ak-status ak-status-ok';
-          statusEl.textContent = 'Ticket wird gedruckt. Betrag am Terminal eintippen: ' +
-            fmtEUR(summary.total) + ' € – erst nach bestätigter Zahlung aushändigen.';
-          document.getElementById('ak-naechster').style.display = 'block';
+    function bestellungAnlegen() {
+      fetch('https://ticketing.basketball-loewen.com/webhook/abendkasse-bestellung', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cart: cart, buyer: buyer })
+      }).then(function (r) {
+        if (r.ok) {
+          return r.blob().then(function (blob) {
+            // Eigener Tab, der den Druckdialog automatisch oeffnet, statt dass die
+            // Kassiererin das PDF erst anschauen und selbst "Drucken" suchen muss
+            // (Marko, 01.10.2026: "soll nicht verwirrt werden, Ticket direkt an den
+            // Drucker"). Ein voellig dialogloser Druck ist aus einer normalen Webseite
+            // heraus nicht moeglich (Browser-Sicherheitsbeschraenkung) - das kommt dem
+            // am naechsten: Tab oeffnet sich, Chrome-PDF-Viewer rendert, Druckdialog
+            // poppt von selbst auf, ein Klick/Enter genuegt.
+            var pdfWindow = window.open(URL.createObjectURL(blob), '_blank');
+            if (pdfWindow) {
+              var printed = false;
+              var doPrint = function () {
+                if (printed) return;
+                printed = true;
+                try { pdfWindow.focus(); pdfWindow.print(); } catch (e) {}
+              };
+              pdfWindow.addEventListener('load', doPrint);
+              setTimeout(doPrint, 1000);
+            }
+            statusEl.className = 'ak-status ak-status-ok';
+            statusEl.textContent = cart.terminal
+              ? 'Zahlung bestätigt, Ticket wird gedruckt.'
+              : 'Ticket wird gedruckt. Betrag am Terminal eintippen: ' +
+                fmtEUR(summary.total) + ' € – erst nach bestätigter Zahlung aushändigen.';
+            document.getElementById('ak-naechster').style.display = 'block';
+          });
+        }
+        return r.json().then(function (result) {
+          var err = new Error(result.error || ('Serverfehler (' + r.status + ')'));
+          err.paid = !!result.paid;
+          throw err;
         });
-      }
-      return r.json().then(function (result) {
-        var err = new Error(result.error || ('Serverfehler (' + r.status + ')'));
-        err.paid = !!result.paid;
-        throw err;
+      }).catch(function (err) {
+        statusEl.className = 'ak-status ak-status-error';
+        statusEl.textContent = 'Fehlgeschlagen: ' + err.message + (err.paid ? '' : ' — bitte erneut versuchen.');
+        if (err.paid) {
+          document.getElementById('ak-naechster').style.display = 'block';
+        } else {
+          document.getElementById('seatplan-cta').disabled = false;
+          bestellLaeuft = false;
+        }
       });
-    }).catch(function (err) {
-      statusEl.className = 'ak-status ak-status-error';
-      statusEl.textContent = 'Fehlgeschlagen: ' + err.message + (err.paid ? '' : ' — bitte erneut versuchen.');
-      if (err.paid) {
-        document.getElementById('ak-naechster').style.display = 'block';
-      } else {
+    }
+
+    // Laeuft die Seite in der nativen Kassen-Bridge-App, wird die Kartenzahlung ZUERST
+    // am Terminal ausgeloest - erst nach Freigabe wird ueberhaupt eine Bestellung
+    // angelegt (statt wie bisher: Bestellung sofort anlegen, Betrag erst danach manuell
+    // eintippen). Ohne die App (normaler Browser) bleibt der bisherige Ablauf
+    // unveraendert.
+    if (window.OpiBridge && window.OpiBridge.isAvailable()) {
+      statusEl.textContent = 'Zahlung am Terminal …';
+      window.OpiBridge.charge(summary.total).then(function (result) {
+        cart.terminal = {
+          approvalCode: result.approvalCode,
+          cardCircuit: result.cardCircuit,
+          receiptNumber: result.receiptNumber
+        };
+        bestellungAnlegen();
+      }).catch(function (err) {
+        statusEl.className = 'ak-status ak-status-error';
+        statusEl.textContent = 'Zahlung fehlgeschlagen: ' + err.message + ' — bitte erneut versuchen.';
         document.getElementById('seatplan-cta').disabled = false;
         bestellLaeuft = false;
-      }
-    });
+      });
+    } else {
+      bestellungAnlegen();
+    }
   });
 
   document.getElementById('ak-naechster').addEventListener('click', function () {

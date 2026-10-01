@@ -163,6 +163,7 @@
   <div class="au-overlay-total" id="au-overlay-total">0,00 €</div>
 </div>
 
+<script src="opi-bridge.js?v=1"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -311,7 +312,9 @@ document.addEventListener('DOMContentLoaded', function () {
   // FERTIG_OVERLAY_MS) - der Timer unten schliesst es sonst von selbst per Fade-out.
   overlay.addEventListener('click', hideOverlay);
 
-  document.getElementById('au-fertig').addEventListener('click', function () {
+  var zahlungLaeuft = false;
+
+  function verkaufAbschliessen(terminalInfo) {
     var items = PRODUCTS
       .filter(function (p) { return counts[p.key] > 0; })
       .map(function (p) { return { name: p.name, qty: counts[p.key], price: p.price, pfand: p.pfand || 0 }; });
@@ -319,7 +322,7 @@ document.addEventListener('DOMContentLoaded', function () {
       fetch('https://ticketing.basketball-loewen.com/webhook/ausschank-verkauf', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: items, total: total() })
+        body: JSON.stringify({ items: items, total: total(), terminal: terminalInfo || null })
       }).catch(function () {});
     }
     document.getElementById('au-overlay-total').textContent = fmtEUR(total());
@@ -330,6 +333,33 @@ document.addEventListener('DOMContentLoaded', function () {
     overlayTimer = setTimeout(hideOverlay, Math.max(0, FERTIG_OVERLAY_MS - 500));
     counts = {};
     render();
+  }
+
+  document.getElementById('au-fertig').addEventListener('click', function () {
+    if (zahlungLaeuft || !hasItems()) return;
+
+    // Laeuft die Seite in der nativen Kassen-Bridge-App, wird die Kartenzahlung ZUERST
+    // am Terminal ausgeloest - erst nach Freigabe wird der Verkauf protokolliert und
+    // der Warenkorb geleert. Ohne die App (normaler Browser) bleibt der bisherige
+    // Ablauf (sofort protokollieren) unveraendert.
+    if (window.OpiBridge && window.OpiBridge.isAvailable()) {
+      zahlungLaeuft = true;
+      document.getElementById('au-fertig').disabled = true;
+      window.OpiBridge.charge(total()).then(function (result) {
+        zahlungLaeuft = false;
+        verkaufAbschliessen({
+          approvalCode: result.approvalCode,
+          cardCircuit: result.cardCircuit,
+          receiptNumber: result.receiptNumber
+        });
+      }).catch(function (err) {
+        zahlungLaeuft = false;
+        document.getElementById('au-fertig').disabled = !hasItems();
+        window.alert('Zahlung fehlgeschlagen: ' + err.message + ' — bitte erneut versuchen.');
+      });
+    } else {
+      verkaufAbschliessen(null);
+    }
   });
 
   // Zettel-Toggle (Marko, 01.10.2026: "ausblenden, damit die Kacheln noch groesser
