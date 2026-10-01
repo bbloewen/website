@@ -414,25 +414,39 @@ document.addEventListener('DOMContentLoaded', function () {
       newsletter: false, webseite: ''
     };
 
+    // Antwort ist entweder ein rohes PDF (Erfolg) oder JSON {ok:false, error, paid?}
+    // (Fehler) - paid:true bedeutet, die Zahlung ist bereits erfasst (Order angelegt +
+    // bezahlt markiert), nur der PDF-Abruf ist gescheitert. In diesem Fall NICHT den
+    // "Jetzt bestellen"-Knopf fuer denselben Warenkorb wieder freigeben (sonst zweite
+    // Zahlung fuer dieselbe Bestellung) - stattdessen direkt "Naechster Verkauf".
     fetch('https://ticketing.basketball-loewen.com/webhook/abendkasse-bestellung', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ cart: cart, buyer: buyer })
     }).then(function (r) {
-      if (!r.ok) throw new Error('Serverfehler (' + r.status + ')');
-      return r.json();
-    }).then(function (result) {
-      if (!result.pdfUrl) throw new Error('Keine Ticket-PDF erhalten');
-      window.open(result.pdfUrl, '_blank');
-      statusEl.className = 'ak-status ak-status-ok';
-      statusEl.textContent = 'Ticket wird gedruckt. Betrag am Terminal eintippen: ' +
-        fmtEUR(summary.total) + ' € – erst nach bestätigter Zahlung aushändigen.';
-      document.getElementById('ak-naechster').style.display = 'block';
+      if (r.ok) {
+        return r.blob().then(function (blob) {
+          window.open(URL.createObjectURL(blob), '_blank');
+          statusEl.className = 'ak-status ak-status-ok';
+          statusEl.textContent = 'Ticket wird gedruckt. Betrag am Terminal eintippen: ' +
+            fmtEUR(summary.total) + ' € – erst nach bestätigter Zahlung aushändigen.';
+          document.getElementById('ak-naechster').style.display = 'block';
+        });
+      }
+      return r.json().then(function (result) {
+        var err = new Error(result.error || ('Serverfehler (' + r.status + ')'));
+        err.paid = !!result.paid;
+        throw err;
+      });
     }).catch(function (err) {
       statusEl.className = 'ak-status ak-status-error';
-      statusEl.textContent = 'Fehlgeschlagen: ' + err.message + ' — bitte erneut versuchen.';
-      document.getElementById('seatplan-cta').disabled = false;
-      bestellLaeuft = false;
+      statusEl.textContent = 'Fehlgeschlagen: ' + err.message + (err.paid ? '' : ' — bitte erneut versuchen.');
+      if (err.paid) {
+        document.getElementById('ak-naechster').style.display = 'block';
+      } else {
+        document.getElementById('seatplan-cta').disabled = false;
+        bestellLaeuft = false;
+      }
     });
   });
 
