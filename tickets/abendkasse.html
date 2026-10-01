@@ -206,31 +206,13 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         panel.appendChild(tile);
       });
-      // Begleitperson eines Rollstuhlplatzes (Marko, 01.10.2026: "auf eine pro gebuchtem
-      // Rollstuhlplatz begrenzt") - dieselbe Begrenzung wie im nativen Warenkorb
-      // (_companionSlotsRemaining), hier nur als eigene Kachel im selben Panel statt als
-      // Tarif-Umschaltung einer fremden Zeile, weil die Abendkasse genau EIN Produkt pro
-      // Verkauf kennt. Erscheint erst, sobald mindestens ein bezahltes Rollstuhlticket
-      // im Warenkorb liegt.
-      if (c.category === 'Rollstuhlplatz' && (c.normal || 0) > 0) {
-        var begleitTile = document.createElement('div');
-        begleitTile.className = 'ak-tarif-tile';
-        begleitTile.innerHTML =
-          '<span class="ak-tarif-label">Begleitperson<br><span class="ak-tarif-price">kostenlos</span></span>' +
-          '<div class="ak-stepper">' +
-            '<button type="button" data-step="-1" aria-label="weniger">−</button>' +
-            '<span class="ak-step-count">' + (c.begleitung || 0) + '</span>' +
-            '<button type="button" data-step="1" aria-label="mehr">+</button>' +
-          '</div>';
-        begleitTile.querySelectorAll('[data-step]').forEach(function (btn) {
-          btn.addEventListener('click', function () {
-            var delta = parseInt(btn.dataset.step, 10);
-            var free = picker._blockFreeCount(zoneId, c.category);
-            picker._stepBlock(blockKey, c.zoneLabel, c.category, c.priceInfo, 'begleitung', delta, free);
-          });
-        });
-        panel.appendChild(begleitTile);
-      }
+      // Begleitperson NICHT hier: das Einzelticket-Backend (Node "Sitze zuordnen",
+      // Stand 01.10.2026) verlangt den Tarif "begleitung" zwingend auf einer NORMALEN
+      // Ticketzeile eines echten Blocks, nie auf der Rollstuhlplatz-Zeile selbst (sonst
+      // Fehler bei der Order-Anlage) - ein frueherer Versuch, die Begleitperson direkt
+      // im Rollstuhlplatz-Panel zu stepsen, wurde deshalb wieder entfernt. Offene Frage
+      // an Marko: wie die Begleitperson an der Abendkasse (ein Block pro Verkauf) erfasst
+      // werden soll, s. Chat 01.10.2026.
       host.appendChild(panel);
     });
   }
