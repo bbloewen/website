@@ -456,11 +456,65 @@ document.addEventListener('DOMContentLoaded', function () {
       newsletter: false, webseite: ''
     };
 
+    // Zahlung und Bestellung/Druck laufen parallel (Marko, 02.10.2026): das Ticket wird
+    // angelegt und gedruckt, ohne auf das Terminal zu warten - auch wenn die Zahlung
+    // scheitert. Deshalb hier zwei getrennte Zustaende und eine gemeinsame Anzeige.
+    var inApp = !!(window.OpiBridge && window.OpiBridge.isAvailable());
+    var pay = { state: inApp ? 'offen' : 'keine', message: '', unklar: false };   // offen | ok | fehler | keine
+    var order = { state: 'offen', message: '', paid: false };                     // offen | ok | fehler
+
+    function zeigeStatus() {
+      var payOffen = pay.state === 'offen';
+      var orderOffen = order.state === 'offen';
+      var cls = 'ak-status ak-status-error';
+      var text;
+      if (pay.state === 'fehler') {
+        text = 'Zahlung fehlgeschlagen: ' + pay.message + ' — Ticket NICHT aushändigen!' +
+          (order.state === 'ok' ? ' (Das Ticket wurde trotzdem angelegt und gedruckt.)'
+            : orderOffen ? ' Ticket wird noch angelegt …'
+            : ' Es wurde kein Ticket angelegt.');
+      } else if (order.state === 'fehler') {
+        if (pay.state === 'ok') {
+          text = 'Zahlung erfolgt, aber das Ticket konnte nicht angelegt werden: ' + order.message +
+            ' — NICHT erneut kassieren, Ticket manuell anlegen.';
+        } else if (payOffen) {
+          text = 'Ticket konnte nicht angelegt werden: ' + order.message + ' — Zahlung am Terminal läuft noch …';
+        } else {
+          text = 'Fehlgeschlagen: ' + order.message + (order.paid ? '' : ' — bitte erneut versuchen.');
+        }
+      } else if (payOffen || orderOffen) {
+        cls = 'ak-status ak-status-busy';
+        text = (payOffen ? 'Zahlung am Terminal …' : 'Zahlung bestätigt.') + ' ' +
+          (orderOffen ? 'Ticket wird angelegt …' : 'Ticket wird gedruckt.');
+      } else {
+        cls = 'ak-status ak-status-ok';
+        text = inApp
+          ? 'Zahlung bestätigt, Ticket wird gedruckt.'
+          : 'Ticket wird gedruckt. Betrag am Terminal eintippen: ' + fmtEUR(summary.total) +
+            ' € – erst nach bestätigter Zahlung aushändigen.';
+      }
+      statusEl.className = cls;
+      statusEl.textContent = text;
+      if (payOffen || orderOffen) return;
+
+      // Beides abgeschlossen. Nur wenn weder bezahlt noch bestellt wurde (oder der
+      // Zahlungsstatus geklaert ist), darf dieselbe Bestellung erneut versucht werden.
+      var nichtPassiert = order.state === 'fehler' && !order.paid &&
+        (pay.state === 'keine' || (pay.state === 'fehler' && !pay.unklar));
+      if (nichtPassiert) {
+        document.getElementById('seatplan-cta').disabled = false;
+        bestellLaeuft = false;
+        naechsterEl.textContent = 'Abbrechen – neuer Verkauf';
+      } else {
+        naechsterEl.textContent = 'Nächster Verkauf';
+      }
+      naechsterEl.style.display = 'block';
+    }
+
     // Antwort ist entweder ein rohes PDF (Erfolg) oder JSON {ok:false, error, paid?}
-    // (Fehler) - paid:true bedeutet, die Zahlung ist bereits erfasst (Order angelegt +
+    // (Fehler) - paid:true bedeutet, die Bestellung ist bereits erfasst (Order angelegt +
     // bezahlt markiert), nur der PDF-Abruf ist gescheitert. In diesem Fall NICHT den
-    // "Jetzt bestellen"-Knopf fuer denselben Warenkorb wieder freigeben (sonst zweite
-    // Zahlung fuer dieselbe Bestellung) - stattdessen direkt "Naechster Verkauf".
+    // "Jetzt bestellen"-Knopf fuer denselben Warenkorb wieder freigeben.
     function bestellungAnlegen() {
       fetch('https://ticketing.basketball-loewen.com/webhook/abendkasse-bestellung', {
         method: 'POST',
@@ -469,17 +523,11 @@ document.addEventListener('DOMContentLoaded', function () {
       }).then(function (r) {
         if (r.ok) {
           return r.blob().then(function (blob) {
-            // Eigener Tab, der den Druckdialog automatisch oeffnet, statt dass die
-            // Kassiererin das PDF erst anschauen und selbst "Drucken" suchen muss
-            // (Marko, 01.10.2026: "soll nicht verwirrt werden, Ticket direkt an den
-            // Drucker"). Ein voellig dialogloser Druck ist aus einer normalen Webseite
-            // heraus nicht moeglich (Browser-Sicherheitsbeschraenkung) - das kommt dem
-            // am naechsten: Tab oeffnet sich, Chrome-PDF-Viewer rendert, Druckdialog
-            // poppt von selbst auf, ein Klick/Enter genuegt.
-            if (window.OpiBridge && window.OpiBridge.isAvailable()) {
+            if (inApp) {
               // In der Kassen-App druckt die native Huelle (AirPrint) - window.open geht dort nicht.
               window.OpiBridge.printPdf(blob).catch(function () {});
             } else {
+              // Eigener Tab, der den Druckdialog automatisch oeffnet (Marko, 01.10.2026).
               var pdfWindow = window.open(URL.createObjectURL(blob), '_blank');
               if (pdfWindow) {
                 var printed = false;
@@ -492,12 +540,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 setTimeout(doPrint, 1000);
               }
             }
-            statusEl.className = 'ak-status ak-status-ok';
-            statusEl.textContent = cart.terminal
-              ? 'Zahlung bestätigt, Ticket wird gedruckt.'
-              : 'Ticket wird gedruckt. Betrag am Terminal eintippen: ' +
-                fmtEUR(summary.total) + ' € – erst nach bestätigter Zahlung aushändigen.';
-            document.getElementById('ak-naechster').style.display = 'block';
+            order.state = 'ok';
+            zeigeStatus();
           });
         }
         return r.json().then(function (result) {
@@ -506,44 +550,25 @@ document.addEventListener('DOMContentLoaded', function () {
           throw err;
         });
       }).catch(function (err) {
-        statusEl.className = 'ak-status ak-status-error';
-        statusEl.textContent = 'Fehlgeschlagen: ' + err.message + (err.paid ? '' : ' — bitte erneut versuchen.');
-        if (err.paid) {
-          document.getElementById('ak-naechster').style.display = 'block';
-        } else {
-          document.getElementById('seatplan-cta').disabled = false;
-          bestellLaeuft = false;
-        }
+        order.state = 'fehler';
+        order.message = err.message;
+        order.paid = !!err.paid;
+        zeigeStatus();
       });
     }
 
-    // Laeuft die Seite in der nativen Kassen-Bridge-App, wird die Kartenzahlung ZUERST
-    // am Terminal ausgeloest - erst nach Freigabe wird ueberhaupt eine Bestellung
-    // angelegt (statt wie bisher: Bestellung sofort anlegen, Betrag erst danach manuell
-    // eintippen). Ohne die App (normaler Browser) bleibt der bisherige Ablauf
-    // unveraendert.
-    if (window.OpiBridge && window.OpiBridge.isAvailable()) {
-      statusEl.textContent = 'Zahlung am Terminal …';
+    zeigeStatus();
+    bestellungAnlegen();
+    if (inApp) {
       window.OpiBridge.charge(summary.total).then(function (result) {
-        cart.terminal = {
-          approvalCode: result.approvalCode,
-          cardCircuit: result.cardCircuit,
-          receiptNumber: result.receiptNumber
-        };
-        bestellungAnlegen();
+        pay.state = 'ok';
+        zeigeStatus();
       }).catch(function (err) {
-        statusEl.className = 'ak-status ak-status-error';
-        var unklar = err.terminal && err.terminal.unknown;
-        statusEl.textContent = 'Zahlung fehlgeschlagen: ' + err.message + (unklar ? '' : ' — bitte erneut versuchen.');
-        document.getElementById('seatplan-cta').disabled = false;
-        bestellLaeuft = false;
-        // Zurueck zur Bestellung ohne App-Neustart: erneut versuchen (Knopf oben) oder
-        // den Warenkorb verwerfen und neu beginnen.
-        naechsterEl.textContent = 'Abbrechen – neuer Verkauf';
-        naechsterEl.style.display = 'block';
+        pay.state = 'fehler';
+        pay.message = err.message;
+        pay.unklar = !!(err.terminal && err.terminal.unknown);
+        zeigeStatus();
       });
-    } else {
-      bestellungAnlegen();
     }
   });
 
