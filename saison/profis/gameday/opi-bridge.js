@@ -55,6 +55,12 @@
     onLongPress: function (el, ms, callback) {
       if (!el) return;
       var timer = null, x0 = 0, y0 = 0;
+      // Wie beim funktionierenden Ausschank: Textmarkierung/Lupe von iOS gar nicht erst zulassen,
+      // sonst markiert ein langer Druck die Zahl und der Timer laeuft ins Leere.
+      el.style.webkitUserSelect = 'none';
+      el.style.userSelect = 'none';
+      el.style.webkitTouchCallout = 'none';
+      el.addEventListener('selectstart', function (e) { e.preventDefault(); });
       function cancel() { if (timer) { clearTimeout(timer); timer = null; } }
       el.addEventListener('pointerdown', function (e) {
         cancel();
