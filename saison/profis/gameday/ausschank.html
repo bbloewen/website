@@ -354,9 +354,12 @@ document.addEventListener('DOMContentLoaded', function () {
         });
       }).catch(function (err) {
         zahlungLaeuft = false;
-        document.getElementById('au-fertig').disabled = !hasItems();
+        // Abgebrochene/abgelehnte Zahlung: Warenkorb leeren, damit sofort die naechste
+        // Bestellung moeglich ist (Marko, 02.10.2026) - es wird nichts protokolliert.
+        counts = {};
+        render();
         var unklar = err.terminal && err.terminal.unknown;
-        window.alert('Zahlung fehlgeschlagen: ' + err.message + (unklar ? '' : ' — bitte erneut versuchen.'));
+        window.alert('Zahlung fehlgeschlagen: ' + err.message + (unklar ? '' : ' — der Warenkorb wurde geleert, bitte neu eingeben.'));
       });
     } else {
       verkaufAbschliessen(null);
