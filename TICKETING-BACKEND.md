@@ -867,3 +867,9 @@ Workflow `AA0f7oo7dH7TDkFu` (Version 1a010dc3), Nodes "DK-Statistik aufbereiten"
 - Layout-Hintergründe nie per API-Upload setzen (hält nur 24 h). Hintergrund ändern = Layout in der Control-Oberfläche kopieren/neu anlegen; der Editor-Upload funktioniert nicht, solange der S3-Bucket keine CORS-Freigabe für den Editor hat.
 - Die API kann Layout-Zuordnungen (`ticketlayoutitems`) nicht ändern (nur lesen), und `default` lässt sich per API nicht umsetzen. Beides in der Control-Oberfläche.
 - Diagnose: `GET …/ticketlayouts/` — enthält die `background`-URL `cachedfiles`, ist die Vorlage in 24 h kaputt.
+
+## Löwen-Dashboard: Platzkarten für Dauerkarten drucken (02.10.2026)
+
+Im Tab Ticketing → Tickets hat die Tabelle "Nach Kategorie" oben rechts den Button **Platzkarten drucken**. Er öffnet ein eigenes Fenster mit einer Karte je Dauerkarten-Platz (aktuell 82): Kopfzeile "Basketball Löwen Erfurt / Dauerkarte 2026/2027", groß der Block, darunter Reihe und Platz, Fußzeile Kategorie und Riethsporthalle. Druckansicht A4, 8 Karten je Seite (2 × 4, gestrichelte Schnittkante), je Block eine neue Seite, sortiert nach Reihe und Platz. In der Leiste oben (nicht gedruckt) lässt sich auf einen Block filtern und per Knopf drucken. Keine Namen auf den Karten.
+
+Daten: Der Webhook `dauerkarten-uebersicht` liefert jetzt zusätzlich `seats` (je Dauerkarten-Platz `block`, `row`, `seat`, `category`), nur aus offenen oder bezahlten Bestellungen (Node "DK-Statistik aufbereiten", Workflow `AA0f7oo7dH7TDkFu`, Version ac081d91). Quelle der Seite: `Projects/loewen-os/dashboard/src/dashboard.html`, Funktion `platzkartenDrucken()`. Der Fanblock liegt in Block A und erscheint dort als Block A mit der Kategorie Fanblock.
