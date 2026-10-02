@@ -358,6 +358,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('ak-gesamt').hidden = true;
     document.getElementById('ak-status').className = 'ak-status';
     document.getElementById('ak-naechster').style.display = 'none';
+    document.getElementById('ak-naechster').textContent = 'Nächster Verkauf';
     document.getElementById('ak-tarif-panels').innerHTML = '';
     document.getElementById('ak-blockwahl').classList.remove('ak-hidden');
 
@@ -418,6 +419,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   var bestellLaeuft = false;
+  var naechsterEl = document.getElementById('ak-naechster');
 
   document.getElementById('seatplan-cta').addEventListener('click', function () {
     if (bestellLaeuft) return;
@@ -429,6 +431,8 @@ document.addEventListener('DOMContentLoaded', function () {
     statusEl.className = 'ak-status ak-status-busy';
     statusEl.textContent = 'Ticket wird angelegt …';
     document.getElementById('seatplan-cta').disabled = true;
+    naechsterEl.style.display = 'none';
+    naechsterEl.textContent = 'Nächster Verkauf';
 
     var cart = {
       productType: 'abendkasse',
@@ -533,6 +537,10 @@ document.addEventListener('DOMContentLoaded', function () {
         statusEl.textContent = 'Zahlung fehlgeschlagen: ' + err.message + (unklar ? '' : ' — bitte erneut versuchen.');
         document.getElementById('seatplan-cta').disabled = false;
         bestellLaeuft = false;
+        // Zurueck zur Bestellung ohne App-Neustart: erneut versuchen (Knopf oben) oder
+        // den Warenkorb verwerfen und neu beginnen.
+        naechsterEl.textContent = 'Abbrechen – neuer Verkauf';
+        naechsterEl.style.display = 'block';
       });
     } else {
       bestellungAnlegen();
