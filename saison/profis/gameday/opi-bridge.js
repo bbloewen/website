@@ -31,6 +31,21 @@
     }
   };
 
+  function send(action, amount) {
+    if (!available) {
+      return Promise.reject(new Error('Keine Terminal-Anbindung in dieser Ansicht.'));
+    }
+    var requestId = 'c' + Date.now() + Math.floor(Math.random() * 1000);
+    return new Promise(function (resolve, reject) {
+      pending[requestId] = { resolve: resolve, reject: reject };
+      global.webkit.messageHandlers.opiBridge.postMessage({
+        action: action,
+        requestId: requestId,
+        amount: amount
+      });
+    });
+  }
+
   global.OpiBridge = {
     isAvailable: function () {
       return available;
@@ -60,18 +75,12 @@
     // Terminal-Feldern (approvalCode, cardCircuit, receiptNumber, ...) aufgeloest
     // wird, oder mit einem Error (err.terminal enthaelt Details) verworfen wird.
     charge: function (amount) {
-      if (!available) {
-        return Promise.reject(new Error('Keine Terminal-Anbindung in dieser Ansicht.'));
-      }
-      var requestId = 'c' + Date.now() + Math.floor(Math.random() * 1000);
-      return new Promise(function (resolve, reject) {
-        pending[requestId] = { resolve: resolve, reject: reject };
-        global.webkit.messageHandlers.opiBridge.postMessage({
-          action: 'charge',
-          requestId: requestId,
-          amount: amount
-        });
-      });
+      return send('charge', amount);
+    },
+    // Gutschrift auf die Karte (z. B. Pfand-Rueckgabe): amount als positive Zahl, die Karte
+    // wird am Terminal vorgehalten. Gleiches Promise-Verhalten wie charge().
+    refund: function (amount) {
+      return send('refund', amount);
     }
   };
 })(window);
