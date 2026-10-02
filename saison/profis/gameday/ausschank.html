@@ -355,7 +355,8 @@ document.addEventListener('DOMContentLoaded', function () {
       }).catch(function (err) {
         zahlungLaeuft = false;
         document.getElementById('au-fertig').disabled = !hasItems();
-        window.alert('Zahlung fehlgeschlagen: ' + err.message + ' — bitte erneut versuchen.');
+        var unklar = err.terminal && err.terminal.unknown;
+        window.alert('Zahlung fehlgeschlagen: ' + err.message + (unklar ? '' : ' — bitte erneut versuchen.'));
       });
     } else {
       verkaufAbschliessen(null);

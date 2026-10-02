@@ -524,7 +524,8 @@ document.addEventListener('DOMContentLoaded', function () {
         bestellungAnlegen();
       }).catch(function (err) {
         statusEl.className = 'ak-status ak-status-error';
-        statusEl.textContent = 'Zahlung fehlgeschlagen: ' + err.message + ' — bitte erneut versuchen.';
+        var unklar = err.terminal && err.terminal.unknown;
+        statusEl.textContent = 'Zahlung fehlgeschlagen: ' + err.message + (unklar ? '' : ' — bitte erneut versuchen.');
         document.getElementById('seatplan-cta').disabled = false;
         bestellLaeuft = false;
       });
