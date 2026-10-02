@@ -50,6 +50,11 @@
     isAvailable: function () {
       return available;
     },
+    // Kennwort fuer die n8n-Webhooks (abendkasse-bestellung, ausschank-verkauf). Die native App
+    // setzt es beim Laden der Seite; im normalen Browser ist es leer, die Server lehnen dann ab.
+    token: function () {
+      return global.__kassenToken || '';
+    },
     // Oeffnet in der nativen App die Diagnose-/Einstellungsansicht (Terminal-IP, Drucker).
     openDiagnose: function () {
       if (available) global.webkit.messageHandlers.opiBridge.postMessage({ action: 'diagnose' });

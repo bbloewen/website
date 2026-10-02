@@ -174,7 +174,7 @@
   <div class="au-overlay-total" id="au-overlay-total">0,00 €</div>
 </div>
 
-<script src="opi-bridge.js?v=4"></script>
+<script src="opi-bridge.js?v=5"></script>
 <script>
   (function () {
     var b = document.getElementById('au-diag');
@@ -350,7 +350,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (items.length) {
       fetch('https://ticketing.basketball-loewen.com/webhook/ausschank-verkauf', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Kassen-Token': (window.OpiBridge && window.OpiBridge.token()) || '' },
         body: JSON.stringify({ items: items, total: total(), terminal: terminalInfo || null })
       }).catch(function () {});
     }

@@ -125,7 +125,7 @@
 </div>
 
 <script src="/js/seat-picker.js"></script>
-<script src="opi-bridge.js?v=4"></script>
+<script src="opi-bridge.js?v=5"></script>
 <script>
   (function () {
     var b = document.getElementById('ak-diag');
@@ -532,7 +532,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function bestellungAnlegen() {
       fetch('https://ticketing.basketball-loewen.com/webhook/abendkasse-bestellung', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Kassen-Token': (window.OpiBridge && window.OpiBridge.token()) || '' },
         body: JSON.stringify({ cart: cart, buyer: buyer })
       }).then(function (r) {
         if (r.ok) {
