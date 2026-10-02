@@ -176,19 +176,27 @@ document.addEventListener('DOMContentLoaded', function () {
   // "nur der Kaffee ist pfandfrei") - nicht mehr separat antippbar, damit es nie vergessen
   // wird. Preis+Pfand stehen zusammen auf der Kachel ("3,50 € plus 1,00 €") und werden als
   // EIN Tap/EINE Zeile gebucht; "Pfand zurueck" bleibt eigenstaendig fuer die Rueckgabe.
+  // Preisliste 26/27 (Marko, 02.10.2026, "Preisliste 26_27.pdf"): Pfand ist jetzt 2,00 EUR und
+  // haengt an den orange gedruckten Positionen (Bier, Radler, alkoholfreies Bier, Softdrinks,
+  // Wasser). Weisswein, Prosecco, Kaffee, Tee, Brezel und Schokoriegel sind pfandfrei.
   var PRODUCTS = [
-    { key: 'bier', name: 'Hasseröder Pils vom Fass', price: 3.50, pfand: 1.00, bg: 'hsl(42,65%,72%)' },
-    { key: 'radler', name: 'Radler', price: 3.50, pfand: 1.00, bg: 'hsl(78,50%,75%)' },
-    { key: 'cola', name: 'Vita Cola Original', price: 2.50, pfand: 1.00, bg: 'hsl(15,45%,72%)' },
-    { key: 'orange', name: 'Vita Orangenlimonade', price: 2.50, pfand: 1.00, bg: 'hsl(28,70%,75%)' },
-    { key: 'zitrone', name: 'Vita Zitronenlimonade', price: 2.50, pfand: 1.00, bg: 'hsl(54,65%,78%)' },
-    { key: 'apfelschorle', name: 'Apfelschorle', price: 2.50, pfand: 1.00, bg: 'hsl(100,40%,75%)' },
-    { key: 'wasser_pur', name: 'Thüringer Waldquell Pur', price: 2.50, pfand: 1.00, bg: 'hsl(200,55%,80%)' },
-    { key: 'wasser_medium', name: 'Thüringer Waldquell Medium', price: 2.50, pfand: 1.00, bg: 'hsl(195,45%,72%)' },
-    { key: 'kaffee', name: 'Kaffee Becher', price: 2.00, pfand: 0, bg: 'hsl(25,35%,62%)' },
-    { key: 'prosecco', name: 'Prosecco 0,1 l', price: 3.00, pfand: 1.00, bg: 'hsl(340,55%,83%)' },
-    { key: 'wein', name: 'Weißwein 0,2 l', price: 3.00, pfand: 1.00, bg: 'hsl(50,40%,80%)' },
-    { key: 'pfand_rueckgabe', name: 'Pfand zurück', price: -1.00, pfand: 0, bg: 'hsl(0,0%,88%)' }
+    { key: 'helles', name: 'Löwenbräu Helles vom Fass 0,4 l', price: 5.00, pfand: 2.00, bg: 'hsl(42,65%,72%)' },
+    { key: 'radler', name: 'Radler 0,4 l', price: 5.00, pfand: 2.00, bg: 'hsl(78,50%,75%)' },
+    { key: 'afbier', name: 'Alkoholfreies Bier 0,33 l', price: 5.00, pfand: 2.00, bg: 'hsl(48,45%,78%)' },
+    { key: 'cola', name: 'Vita Cola Original', price: 4.00, pfand: 2.00, bg: 'hsl(15,45%,72%)' },
+    { key: 'cola_pur', name: 'Vita Cola Pur', price: 4.00, pfand: 2.00, bg: 'hsl(8,30%,68%)' },
+    { key: 'orange', name: 'Vita Orange', price: 4.00, pfand: 2.00, bg: 'hsl(28,70%,75%)' },
+    { key: 'zitrone', name: 'Vita Zitrone', price: 4.00, pfand: 2.00, bg: 'hsl(54,65%,78%)' },
+    { key: 'apfelschorle', name: 'Apfelschorle', price: 4.00, pfand: 2.00, bg: 'hsl(100,40%,75%)' },
+    { key: 'wasser_still', name: 'TWQ Still', price: 3.00, pfand: 2.00, bg: 'hsl(200,55%,80%)' },
+    { key: 'wasser_medium', name: 'TWQ Medium', price: 3.00, pfand: 2.00, bg: 'hsl(195,45%,72%)' },
+    { key: 'wein', name: 'Weißwein 0,2 l', price: 4.00, pfand: 0, bg: 'hsl(50,40%,80%)' },
+    { key: 'prosecco', name: 'Prosecco 0,1 l', price: 4.00, pfand: 0, bg: 'hsl(340,55%,83%)' },
+    { key: 'kaffee', name: 'Kaffee 0,25 l', price: 2.00, pfand: 0, bg: 'hsl(25,35%,62%)' },
+    { key: 'tee', name: 'Tee 0,25 l', price: 2.00, pfand: 0, bg: 'hsl(140,30%,72%)' },
+    { key: 'brezel', name: 'Butterbrezel', price: 3.50, pfand: 0, bg: 'hsl(35,55%,70%)' },
+    { key: 'riegel', name: 'Schokoriegel', price: 2.00, pfand: 0, bg: 'hsl(20,40%,66%)' },
+    { key: 'pfand_rueckgabe', name: 'Pfand zurück', price: -2.00, pfand: 0, bg: 'hsl(0,0%,88%)' }
   ];
 
   // Testwert (Marko, 01.10.2026: "ob die 3 Sekunden noetig sind, moechte ich noch testen") -
