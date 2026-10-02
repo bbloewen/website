@@ -358,14 +358,6 @@
       "liganame": "Mitteldeutsche Liga mU17 Vorrunde",
       "spiele": [
         {
-          "datum": "2026-09-05",
-          "zeit": "11:00",
-          "heim": false,
-          "gegner": "Humanas Rookie Academy",
-          "ergebnis": null,
-          "abgesagt": true
-        },
-        {
           "datum": "2026-09-27",
           "zeit": "12:30",
           "heim": true,
@@ -378,6 +370,14 @@
           "zeit": "10:00",
           "heim": false,
           "gegner": "Team Halle",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-10-17",
+          "zeit": "15:30",
+          "heim": false,
+          "gegner": "Humanas Rookie Academy",
           "ergebnis": null,
           "abgesagt": false
         },
