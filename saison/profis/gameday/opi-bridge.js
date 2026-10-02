@@ -35,6 +35,10 @@
     isAvailable: function () {
       return available;
     },
+    // Oeffnet in der nativen App die Diagnose-/Einstellungsansicht (Terminal-IP, Drucker).
+    openDiagnose: function () {
+      if (available) global.webkit.messageHandlers.opiBridge.postMessage({ action: 'diagnose' });
+    },
     // Ticket-PDF an die native App zum Drucken geben (AirPrint, vorher einmal ein Drucker
     // gewaehlt). In einer WKWebView funktioniert window.open + print() nicht, deshalb der Umweg.
     printPdf: function (blob) {

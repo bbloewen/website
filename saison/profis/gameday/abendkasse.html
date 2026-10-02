@@ -97,6 +97,10 @@
   .ak-status.ak-status-ok { display: block; background: #e3f3ea; color: #1f6a43; }
   .ak-status.ak-status-error { display: block; background: #fbeaea; color: #a32d2d; }
   .ak-status.ak-status-busy { display: block; background: #ececec; color: #333; }
+  .ak-diag-row { display: flex; justify-content: flex-end; margin-top: 8px; }
+  .ak-diag { display: none; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 8px;
+    background: transparent; color: #666; opacity: .5; cursor: pointer; align-items: center; justify-content: center; }
+  .ak-diag.ak-diag-visible { display: flex; }
   .ak-naechster { margin-top: 12px; width: 100%; font-size: 1.2rem; padding: 16px; display: none; }
 </style>
 </head>
@@ -117,10 +121,20 @@
 
   <div class="ak-status" id="ak-status"></div>
   <button class="btn btn-outline-orange ak-naechster" id="ak-naechster">Nächster Verkauf</button>
+  <div class="ak-diag-row"><button type="button" class="ak-diag" id="ak-diag" aria-label="Kassen-Einstellungen"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="7" x2="21" y2="7"/><circle cx="9" cy="7" r="2.2" fill="var(--bg-page,#fff)"/><line x1="3" y1="17" x2="21" y2="17"/><circle cx="15" cy="17" r="2.2" fill="var(--bg-page,#fff)"/></svg></button></div>
 </div>
 
 <script src="/js/seat-picker.js"></script>
-<script src="opi-bridge.js?v=2"></script>
+<script src="opi-bridge.js?v=3"></script>
+<script>
+  (function () {
+    var b = document.getElementById('ak-diag');
+    if (b && window.OpiBridge && window.OpiBridge.isAvailable()) {
+      b.classList.add('ak-diag-visible');
+      b.addEventListener('click', function () { window.OpiBridge.openDiagnose(); });
+    }
+  })();
+</script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 

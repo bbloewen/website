@@ -45,6 +45,11 @@
     background: var(--surface-1, #f3f3f1); border: 1px solid var(--border-strong, #ccc);
     border-radius: 10px; padding: 10px 12px; }
   .au-receipt[hidden] { display: none !important; }
+  .au-receipt { display: flex; flex-direction: column; }
+  .au-diag { display: none; margin-top: auto; position: sticky; bottom: 0; align-self: flex-end;
+    width: 32px; height: 32px; padding: 0; border: 0; border-radius: 8px; background: transparent;
+    color: var(--text-muted, #666); opacity: .5; cursor: pointer; align-items: center; justify-content: center; }
+  .au-diag.au-diag-visible { display: flex; }
   .au-receipt-title { font-weight: 700; font-size: 0.85rem; color: var(--color-brand-navy, #00122d);
     margin-bottom: 6px; }
   .au-receipt-empty { font-style: italic; opacity: .75; }
@@ -145,6 +150,7 @@
       <div class="au-receipt-total" id="au-receipt-total" hidden>
         <span>Gesamt</span><span id="au-receipt-total-amount">0,00 €</span>
       </div>
+      <button type="button" class="au-diag" id="au-diag" aria-label="Kassen-Einstellungen"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="7" x2="21" y2="7"/><circle cx="9" cy="7" r="2.2" fill="var(--bg-page,#fff)"/><line x1="3" y1="17" x2="21" y2="17"/><circle cx="15" cy="17" r="2.2" fill="var(--bg-page,#fff)"/></svg></button>
     </div>
   </div>
 
@@ -163,7 +169,16 @@
   <div class="au-overlay-total" id="au-overlay-total">0,00 €</div>
 </div>
 
-<script src="opi-bridge.js?v=2"></script>
+<script src="opi-bridge.js?v=3"></script>
+<script>
+  (function () {
+    var b = document.getElementById('au-diag');
+    if (b && window.OpiBridge && window.OpiBridge.isAvailable()) {
+      b.classList.add('au-diag-visible');
+      b.addEventListener('click', function () { window.OpiBridge.openDiagnose(); });
+    }
+  })();
+</script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
