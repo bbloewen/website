@@ -50,6 +50,23 @@
     isAvailable: function () {
       return available;
     },
+    // Langer Druck (Standard 2 s) auf ein Element - fuer versteckte Funktionen wie Barzahlung.
+    // Bricht ab, sobald der Finger loslaesst, den Bereich verlaesst oder sich merklich bewegt.
+    onLongPress: function (el, ms, callback) {
+      if (!el) return;
+      var timer = null, x0 = 0, y0 = 0;
+      function cancel() { if (timer) { clearTimeout(timer); timer = null; } }
+      el.addEventListener('pointerdown', function (e) {
+        cancel();
+        x0 = e.clientX; y0 = e.clientY;
+        timer = setTimeout(function () { timer = null; callback(); }, ms || 2000);
+      });
+      el.addEventListener('pointermove', function (e) {
+        if (timer && (Math.abs(e.clientX - x0) > 12 || Math.abs(e.clientY - y0) > 12)) cancel();
+      });
+      ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (t) { el.addEventListener(t, cancel); });
+      el.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+    },
     // Kennwort fuer die n8n-Webhooks (abendkasse-bestellung, ausschank-verkauf). Die native App
     // setzt es beim Laden der Seite; im normalen Browser ist es leer, die Server lehnen dann ab.
     token: function () {

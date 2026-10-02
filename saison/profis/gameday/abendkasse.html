@@ -97,6 +97,7 @@
   .ak-status.ak-status-ok { display: block; background: #e3f3ea; color: #1f6a43; }
   .ak-status.ak-status-error { display: block; background: #fbeaea; color: #a32d2d; }
   .ak-status.ak-status-busy { display: block; background: #ececec; color: #333; }
+  #ak-gesamt { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
   .ak-diag-row { display: flex; justify-content: flex-end; margin-top: 8px; }
   .ak-diag { display: none; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 8px;
     background: transparent; color: #666; opacity: .5; cursor: pointer; align-items: center; justify-content: center; }
@@ -125,7 +126,7 @@
 </div>
 
 <script src="/js/seat-picker.js"></script>
-<script src="opi-bridge.js?v=5"></script>
+<script src="opi-bridge.js?v=6"></script>
 <script>
   (function () {
     var b = document.getElementById('ak-diag');
@@ -435,7 +436,9 @@ document.addEventListener('DOMContentLoaded', function () {
   var bestellLaeuft = false;
   var naechsterEl = document.getElementById('ak-naechster');
 
-  document.getElementById('seatplan-cta').addEventListener('click', function () {
+  // bar = Barzahlung (langer Druck auf die Gesamtsumme, nur in der Kassen-App): kein Terminalvorgang,
+  // Ticket wird sofort angelegt und gedruckt, die Order bekommt den Kommentar BARZAHLUNG.
+  function startVerkauf(bar) {
     if (bestellLaeuft) return;
     var summary = picker.getSummary();
     if (!summary.lines.length) return;
@@ -457,6 +460,7 @@ document.addEventListener('DOMContentLoaded', function () {
       gegner: currentGame.gegner,
       lines: summary.lines,
       total: summary.total,
+      zahlart: bar ? 'bar' : 'karte',
       voucher: null,
       notiz: '',
       zahlungPausiert: false
@@ -474,7 +478,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // angelegt und gedruckt, ohne auf das Terminal zu warten - auch wenn die Zahlung
     // scheitert. Deshalb hier zwei getrennte Zustaende und eine gemeinsame Anzeige.
     var inApp = !!(window.OpiBridge && window.OpiBridge.isAvailable());
-    var pay = { state: inApp ? 'offen' : 'keine', message: '', unklar: false };   // offen | ok | fehler | keine
+    var pay = { state: bar ? 'bar' : (inApp ? 'offen' : 'keine'), message: '', unklar: false };   // offen | ok | fehler | keine | bar
     var order = { state: 'offen', message: '', paid: false };                     // offen | ok | fehler
 
     function zeigeStatus() {
@@ -498,11 +502,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       } else if (payOffen || orderOffen) {
         cls = 'ak-status ak-status-busy';
-        text = (payOffen ? 'Zahlung am Terminal …' : 'Zahlung bestätigt.') + ' ' +
+        text = (payOffen ? 'Zahlung am Terminal …' : (bar ? 'Barzahlung.' : 'Zahlung bestätigt.')) + ' ' +
           (orderOffen ? 'Ticket wird angelegt …' : 'Ticket wird gedruckt.');
       } else {
         cls = 'ak-status ak-status-ok';
-        text = inApp
+        text = bar
+          ? 'Barzahlung vermerkt, Ticket wird gedruckt.'
+          : inApp
           ? 'Zahlung bestätigt, Ticket wird gedruckt.'
           : 'Ticket wird gedruckt. Betrag am Terminal eintippen: ' + fmtEUR(summary.total) +
             ' € – erst nach bestätigter Zahlung aushändigen.';
@@ -514,7 +520,7 @@ document.addEventListener('DOMContentLoaded', function () {
       // Beides abgeschlossen. Nur wenn weder bezahlt noch bestellt wurde (oder der
       // Zahlungsstatus geklaert ist), darf dieselbe Bestellung erneut versucht werden.
       var nichtPassiert = order.state === 'fehler' && !order.paid &&
-        (pay.state === 'keine' || (pay.state === 'fehler' && !pay.unklar));
+        (pay.state === 'keine' || pay.state === 'bar' || (pay.state === 'fehler' && !pay.unklar));
       if (nichtPassiert) {
         document.getElementById('seatplan-cta').disabled = false;
         bestellLaeuft = false;
@@ -573,7 +579,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     zeigeStatus();
     bestellungAnlegen();
-    if (inApp) {
+    if (inApp && !bar) {
       window.OpiBridge.charge(summary.total).then(function (result) {
         pay.state = 'ok';
         zeigeStatus();
@@ -584,7 +590,19 @@ document.addEventListener('DOMContentLoaded', function () {
         zeigeStatus();
       });
     }
-  });
+  }
+
+  document.getElementById('seatplan-cta').addEventListener('click', function () { startVerkauf(false); });
+
+  // Verstecktes Barzahlen: 2 s auf die Gesamtsumme druecken (nur in der Kassen-App).
+  if (window.OpiBridge && window.OpiBridge.isAvailable()) {
+    window.OpiBridge.onLongPress(document.getElementById('ak-gesamt'), 2000, function () {
+      if (bestellLaeuft || !picker) return;
+      var summary = picker.getSummary();
+      if (!summary.lines.length) return;
+      if (window.confirm('Barzahlung: ' + fmtEUR(summary.total) + ' €\n\nBar kassiert? Das Ticket wird angelegt und gedruckt.')) startVerkauf(true);
+    });
+  }
 
   document.getElementById('ak-naechster').addEventListener('click', function () {
     bestellLaeuft = false;

@@ -174,7 +174,7 @@
   <div class="au-overlay-total" id="au-overlay-total">0,00 €</div>
 </div>
 
-<script src="opi-bridge.js?v=5"></script>
+<script src="opi-bridge.js?v=6"></script>
 <script>
   (function () {
     var b = document.getElementById('au-diag');
@@ -362,6 +362,24 @@ document.addEventListener('DOMContentLoaded', function () {
     overlayTimer = setTimeout(hideOverlay, Math.max(0, FERTIG_OVERLAY_MS - 500));
     counts = {};
     render();
+  }
+
+  // Verstecktes Barzahlen: 2 s auf die Gesamtsumme druecken (nur in der Kassen-App). Wird wie ein
+  // Terminalvorgang protokolliert, aber als "bar" markiert (Kassenabgleich).
+  if (window.OpiBridge && window.OpiBridge.isAvailable()) {
+    var summenBlock = document.getElementById('au-total').parentNode;
+    summenBlock.style.webkitUserSelect = 'none';
+    summenBlock.style.userSelect = 'none';
+    summenBlock.style.webkitTouchCallout = 'none';
+    window.OpiBridge.onLongPress(summenBlock, 2000, function () {
+      if (zahlungLaeuft || !hasItems()) return;
+      var betrag = total();
+      if (Math.abs(betrag) < 0.005) return;
+      var frage = betrag < 0
+        ? 'Barauszahlung: ' + fmtEUR(-betrag) + '\n\nBar ausgezahlt?'
+        : 'Barzahlung: ' + fmtEUR(betrag) + '\n\nBar kassiert?';
+      if (window.confirm(frage)) verkaufAbschliessen({ bar: true, refund: betrag < 0 });
+    });
   }
 
   // Schnellster Weg bei Vertippern: alles verwerfen (Marko, 02.10.2026).
