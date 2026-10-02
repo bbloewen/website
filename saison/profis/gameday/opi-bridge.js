@@ -35,6 +35,23 @@
     isAvailable: function () {
       return available;
     },
+    // Ticket-PDF an die native App zum Drucken geben (AirPrint, vorher einmal ein Drucker
+    // gewaehlt). In einer WKWebView funktioniert window.open + print() nicht, deshalb der Umweg.
+    printPdf: function (blob) {
+      if (!available) {
+        return Promise.reject(new Error('Kein nativer Druck in dieser Ansicht.'));
+      }
+      return new Promise(function (resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function () {
+          var base64 = String(reader.result).split(',')[1] || '';
+          global.webkit.messageHandlers.opiBridge.postMessage({ action: 'printPdf', data: base64 });
+          resolve(true);
+        };
+        reader.onerror = function () { reject(new Error('PDF konnte nicht gelesen werden.')); };
+        reader.readAsDataURL(blob);
+      });
+    },
     // amount als Zahl (Euro, z. B. 12.5). Liefert ein Promise, das mit den
     // Terminal-Feldern (approvalCode, cardCircuit, receiptNumber, ...) aufgeloest
     // wird, oder mit einem Error (err.terminal enthaelt Details) verworfen wird.

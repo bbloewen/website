@@ -120,7 +120,7 @@
 </div>
 
 <script src="/js/seat-picker.js"></script>
-<script src="opi-bridge.js?v=1"></script>
+<script src="opi-bridge.js?v=2"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -472,16 +472,21 @@ document.addEventListener('DOMContentLoaded', function () {
             // heraus nicht moeglich (Browser-Sicherheitsbeschraenkung) - das kommt dem
             // am naechsten: Tab oeffnet sich, Chrome-PDF-Viewer rendert, Druckdialog
             // poppt von selbst auf, ein Klick/Enter genuegt.
-            var pdfWindow = window.open(URL.createObjectURL(blob), '_blank');
-            if (pdfWindow) {
-              var printed = false;
-              var doPrint = function () {
-                if (printed) return;
-                printed = true;
-                try { pdfWindow.focus(); pdfWindow.print(); } catch (e) {}
-              };
-              pdfWindow.addEventListener('load', doPrint);
-              setTimeout(doPrint, 1000);
+            if (window.OpiBridge && window.OpiBridge.isAvailable()) {
+              // In der Kassen-App druckt die native Huelle (AirPrint) - window.open geht dort nicht.
+              window.OpiBridge.printPdf(blob).catch(function () {});
+            } else {
+              var pdfWindow = window.open(URL.createObjectURL(blob), '_blank');
+              if (pdfWindow) {
+                var printed = false;
+                var doPrint = function () {
+                  if (printed) return;
+                  printed = true;
+                  try { pdfWindow.focus(); pdfWindow.print(); } catch (e) {}
+                };
+                pdfWindow.addEventListener('load', doPrint);
+                setTimeout(doPrint, 1000);
+              }
             }
             statusEl.className = 'ak-status ak-status-ok';
             statusEl.textContent = cart.terminal
