@@ -870,7 +870,9 @@ Workflow `AA0f7oo7dH7TDkFu` (Version 1a010dc3), Nodes "DK-Statistik aufbereiten"
 
 ## Löwen-Dashboard: Platzkarten für Dauerkarten drucken (02.10.2026)
 
-Im Tab Ticketing → Tickets hat die Tabelle "Nach Kategorie" oben rechts den Button **Platzkarten drucken**. Er öffnet eine Vollbild-Ansicht in derselben Seite (kein Popup, siehe unten) mit einer Karte je Dauerkarten-Platz (aktuell 82): Kopfzeile "Basketball Löwen Erfurt / Dauerkarte 2026/2027", groß der Block, darunter Reihe und Platz, Fußzeile Kategorie und Riethsporthalle. Druckansicht A4, 8 Karten je Seite (2 × 4, gestrichelte Schnittkante), je Block eine neue Seite, sortiert nach Reihe und Platz. In der Leiste oben (nicht gedruckt) lässt sich auf einen Block filtern, drucken und die Ansicht schließen. Beim Drucken wird der Rest des Dashboards ausgeblendet. Keine Namen auf den Karten.
+Im Tab Ticketing → Tickets hat die Tabelle "Nach Kategorie" oben rechts den Button **Platzliste**. Er öffnet eine Vollbild-Ansicht in derselben Seite (kein Popup, siehe unten) mit allen Dauerkarten-Plätzen (aktuell 82). Oben in der Leiste: Umschalter **Liste** (Standard) und **Druckansicht**, Filter nach Block, **Drucken** (druckt die gerade gezeigte Ansicht) und **Schließen**. Beim Drucken wird der Rest des Dashboards ausgeblendet.
+- **Liste:** Tabelle Block, Reihe, Platz, Kategorie, sortiert nach Block, Reihe, Platz; druckbar als normale A4-Liste.
+- **Druckansicht:** Platzkarten, eine Karte je Platz (Kopfzeile "Basketball Löwen Erfurt / Dauerkarte 2026/2027", groß der Block, Reihe und Platz, Fußzeile Kategorie und Riethsporthalle), A4, 8 Karten je Seite (2 × 4, gestrichelte Schnittkante), je Block eine neue Seite. Keine Namen.
 
 Daten: Der Webhook `dauerkarten-uebersicht` liefert jetzt zusätzlich `seats` (je Dauerkarten-Platz `block`, `row`, `seat`, `category`), nur aus offenen oder bezahlten Bestellungen (Node "DK-Statistik aufbereiten", Workflow `AA0f7oo7dH7TDkFu`, Version ac081d91). Quelle der Seite: `Projects/loewen-os/dashboard/src/dashboard.html`, Funktion `platzkartenDrucken()`. Der Fanblock liegt in Block A und erscheint dort als Block A mit der Kategorie Fanblock.
 
