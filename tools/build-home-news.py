@@ -69,7 +69,11 @@ def kachel(a, rolle):
     label = f'{esc(a["datum"])} · Weiterlesen' if a.get("datum") else "Weiterlesen"
     return (
         f'<a class="{klasse}" href="{esc(a["url"])}">'
-        f'<img src="{esc(a.get("bild") or "")}"{bild_masse(a.get("bild") or "")} alt="" '
+        # loading/decoding: die Kacheln stehen unterhalb des Sichtbereichs, wurden
+        # aber sofort geladen und haben sich die Leitung mit dem Hero geteilt
+        # (Marko, 04.10.2026). width/height stehen dank bild_masse() dabei, der
+        # Platz bleibt also reserviert -- kein Nachrutschen beim Scrollen.
+        f'<img src="{esc(a.get("bild") or "")}"{bild_masse(a.get("bild") or "")} loading="lazy" decoding="async" alt="" '
         "onerror=\"this.onerror=null;this.src='/assets/img/share/og-default.jpg'\" />"
         '<div class="news-tile-overlay">'
         f'<h3 class="news-tile-headline">{esc(a["titel"])}</h3>'
