@@ -6,6 +6,16 @@
 #
 # Anlass (25.08.2026, Marko): "Jedes Heimspiel bekommt eine Adresse -- und
 # behaelt sie sein ganzes Leben." s. tools/build-spieltagsseiten.py fuer Details.
+#
+# Seit 04.10.2026 laeuft build-next-game.py mit. Das Spieltags-Widget im
+# Startseiten-Hero haengt genauso am Kalender wie die Spieltagsseiten: welches
+# Spiel "aktuell" ist, endet am Dienstag nach dem Spieltag. Die statische
+# Fassung in index.html wurde aber nur nachgezogen, wenn jemand von Hand
+# tools/bauen.sh laufen liess -- deshalb stand dort tagelang ein veralteter
+# Stand (am 04.10.2026 zwei Spiele statt drei, weil der letzte Lauf in das
+# Fenster ohne aktuelles Spiel fiel). Das JavaScript korrigiert das im Browser
+# sofort, aber beim ersten Rendern und fuer Crawler ohne JS war der falsche
+# Stand sichtbar (Marko, 04.10.2026).
 
 name: Spieltagsseiten nachbauen
 
@@ -44,9 +54,10 @@ jobs:
       # baut jede Seite komplett neu und uebernimmt Header/Footer/SEO-Block nur
       # unveraendert aus der bestehenden Datei -- andersherum wuerde jeder Lauf
       # die von build-partials.py gerade eingefuegten Header/Footer wieder leeren.
-      - name: Spieltagsseiten, Partials, Head-Meta und Sitemap neu bauen
+      - name: Spieltagsseiten, Startseiten-Widget, Partials, Head-Meta und Sitemap neu bauen
         run: |
           python3 tools/build-spieltagsseiten.py
+          python3 tools/build-next-game.py
           python3 tools/build-partials.py
           python3 tools/build-head-meta.py
           python3 tools/build-sitemap.py
@@ -61,7 +72,7 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add saison/profis/gameday/ data/heimspiele.json saison/spielplan.html sitemap.xml data/seiten-stand.json
+          git add saison/profis/gameday/ data/heimspiele.json saison/spielplan.html index.html sitemap.xml data/seiten-stand.json
           git diff --cached --quiet && { echo "Nichts nachzuziehen."; exit 0; }
-          git commit -m "Spieltagsseiten: Phase/Sitemap nachgezogen"
+          git commit -m "Spieltagsseiten und Startseiten-Widget: Phase/Sitemap nachgezogen"
           git push
