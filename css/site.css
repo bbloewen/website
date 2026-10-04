@@ -2026,6 +2026,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .hero-photo.hero-u19 { --hero-photo-url: url('/assets/img/team-nbbl-hero.webp'); background-position: center 55%; }
 
 /* Hero-Varianten für einzelne News-Artikel mit echtem Pressefoto */
+.hero-photo.hero-news-tip-off-podcast-basketball-loewen { --hero-photo-url: url('/assets/img/news/tip-off-podcast-basketball-loewen.webp'); background-position: center center; }
 .hero-photo.hero-news-saisonstart-2025 { --hero-photo-url: url('/assets/img/news/saisonstart-2025.webp'); background-position: center 30%; }
 .hero-photo.hero-news-mitchell-abgang { --hero-photo-url: url('/assets/img/news/mitchell-abgang.webp'); background-position: center 25%; }
 .hero-photo.hero-news-loewenpark-dach { --hero-photo-url: url('/assets/img/news/loewenpark-dach.webp'); background-position: center 55%; }
