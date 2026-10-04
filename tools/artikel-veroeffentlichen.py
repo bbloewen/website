@@ -77,6 +77,15 @@ INDEX = REPO / "index.html"
 STATUS = ("pruefung", "freigegeben")
 TEAMS = ("profis", "damen", "nachwuchs", "club", "partner")
 
+# "team" im Auftrag ist das Schlagwort im DATEINAMEN (2026-10-07_club_...). In
+# data/news.json bedeutet "team" etwas anderes: der Feed, in dem der Artikel
+# erscheint. js/team-news.js und tools/build-team-news.py zeigen dort Artikel
+# mit team == <Seite> UND alle Artikel OHNE team ("allgemein"). Ein Artikel mit
+# team "club" stuende deshalb auf keiner Teamseite -- ein Vereinsartikel muss
+# das Feld weglassen. So machen es die vier bestehenden Vereinsartikel
+# (04.10.2026 am Podcast-Artikel aufgefallen, bevor er live ging).
+NEWS_TEAM = ("profis", "damen", "baskidball")
+
 PFLICHT = ("status", "datum", "team", "slug", "titel", "lead",
            "beschreibung", "kategorie", "bild", "markdown")
 
@@ -284,8 +293,9 @@ def news_json_pflegen(a, url, schreiben):
             "url": url,
             "bild": f"/assets/img/news/{a['bild']}",
             "topNews": bool(a.get("topNews", False)),
-            "team": a["team"],
         })
+        if a["team"] in NEWS_TEAM:
+            d["artikel"][0]["team"] = a["team"]
 
     if json.dumps(d["artikel"], ensure_ascii=False) == vorher:
         return False
