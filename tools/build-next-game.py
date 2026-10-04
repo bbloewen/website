@@ -233,7 +233,10 @@ def main():
         if heute < cutoff_dienstag(letztes["date"]):
             aktuell = letztes
 
-    kommende = [g for g in alle if g["date"] > heute][:2]
+    # Immer drei Slides: aktuelles Spiel plus die naechsten zwei. Faellt das
+    # aktuelle Spiel am Dienstag-Cutoff weg, rueckt ein drittes kommendes Spiel
+    # nach (Marko, 04.10.2026) -- gleiche Regel wie in js/home-next-game.js.
+    kommende = [g for g in alle if g["date"] > heute][: 2 if aktuell else 3]
     slides_daten = ([aktuell] if aktuell else []) + kommende
 
     if not slides_daten:

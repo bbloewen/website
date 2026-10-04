@@ -175,7 +175,10 @@
       if (heute < cutoffDienstag(letztes.date)) aktuell = letztes;
     }
 
-    var kommende = alle.filter(function (g) { return g.date > heute; }).slice(0, 2);
+    /* Immer drei Punkte: aktuelles Spiel plus die naechsten zwei. Faellt das
+       aktuelle Spiel am Dienstag-Cutoff weg, rueckt ein drittes kommendes Spiel
+       nach, statt dass die Karte auf zwei Punkte schrumpft (Marko, 04.10.2026). */
+    var kommende = alle.filter(function (g) { return g.date > heute; }).slice(0, aktuell ? 2 : 3);
     var slides = (aktuell ? [aktuell] : []).concat(kommende);
     if (!slides.length) { card.style.display = 'none'; return; }
 
