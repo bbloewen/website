@@ -92,14 +92,21 @@ NOINDEX = '<meta name="robots" content="noindex, follow" />\n'
 # Bindestrich-Woerter zu greifen.
 
 def typografie(text):
-    # "..." -> „..."  (nur paarweise, damit ein einzelnes Zoll-Zeichen bleibt)
-    text = re.sub(r'"([^"\n]+)"', "„\\1“", text)
-    # 'x' -> ‚x'
-    text = re.sub(r"(?<![\w])'([^'\n]+)'(?![\w])", "‚\\1‘", text)
-    # " - " und " -- " zwischen Woertern -> Geviertstrich
-    text = re.sub(r" -{1,2} ", " — ", text)
-    # "..." -> …
-    text = text.replace("...", "…")
+    # Reihenfolge ist wichtig. Notion schliesst deutsche Anfuehrungszeichen mit
+    # einem GERADEN Zeichen: „Mike". Wuerde zuerst paarweise nach geraden
+    # Zeichen gesucht, paarte die Regel zwei Schlusszeichen miteinander und
+    # machte aus  „Tip-Off", ... „Loewen"  den Unsinn  „Tip-Off„, ... „Loewen“
+    # (am Leverkusen-Vorbericht aufgefallen, 04.10.2026).
+    # 1. „x" mit geradem Schlusszeichen -> „x“
+    text = re.sub(r'\u201e([^\u201e\u201c"\n]+)"', "\u201e\\1\u201c", text)
+    # 2. "x" -> „x“  (nur paarweise, damit ein einzelnes Zoll-Zeichen bleibt)
+    text = re.sub(r'"([^"\n]+)"', "\u201e\\1\u201c", text)
+    # 3. 'x' -> ‚x'
+    text = re.sub(r"(?<![\w])'([^'\n]+)'(?![\w])", "\u201a\\1\u2018", text)
+    # 4. Gedankenstrich: Notion tippt " - " und " – ", die Seite fuehrt " — "
+    text = re.sub(r" (?:-{1,2}|\u2013) ", " \u2014 ", text)
+    # 5. "..." -> …
+    text = text.replace("...", "\u2026")
     return text
 
 
@@ -317,12 +324,25 @@ def spielplan_pflegen(a, url, schreiben):
 
     t = SPIELPLAN.read_text(encoding="utf-8")
     zeilen = t.split("\n")
-    treffer = [i for i, z in enumerate(zeilen) if f'"datum": "{spiel["datum"]}"' in z]
-    if len(treffer) != 1:
+    # Nur im Block "profisAuswaerts" suchen. Die Datei fuehrt auch Damen und
+    # NBBL, und die spielen oft am selben Tag -- ein Treffer ueber die ganze
+    # Datei waere dann nicht eindeutig gewesen.
+    von = next((i for i, z in enumerate(zeilen) if '"profisAuswaerts"' in z), None)
+    if von is None:
+        print("  WARNUNG: kein Block profisAuswaerts in data/spielplan-saison.json.", file=sys.stderr)
+        return False
+    bis = next((i for i in range(von + 1, len(zeilen)) if zeilen[i].strip() in ("]", "],")), len(zeilen))
+    treffer = [i for i in range(von + 1, bis) if f'"datum": "{spiel["datum"]}"' in zeilen[i]]
+    if not treffer:
+        # Heimspiele stehen in data/heimspiele.json und haben eine eigene
+        # Spieltagsseite; ein Vorbericht zu einem anderen Termin findet ebenfalls
+        # keine Zeile. Beides ist kein Grund, den ganzen Lauf scheitern zu lassen.
+        print(f'  Hinweis: kein Auswaertsspiel am {spiel["datum"]} -- keine Verlinkung im Spielplan.')
+        return False
+    if len(treffer) > 1:
         raise SystemExit(
-            f'  FEHLER: {len(treffer)} Zeilen fuer das Datum {spiel["datum"]} in '
-            "data/spielplan-saison.json (erwartet: genau eine). Heimspiele stehen in "
-            "data/heimspiele.json und werden hier nicht angefasst."
+            f'  FEHLER: {len(treffer)} Auswaertsspiele am {spiel["datum"]} in '
+            "data/spielplan-saison.json (erwartet: hoechstens eines)."
         )
     i = treffer[0]
     alt = zeilen[i]
@@ -339,6 +359,45 @@ def spielplan_pflegen(a, url, schreiben):
     return True
 
 
+HERO_MAX_BREITE = 2400
+HERO_QUALITAET = 82
+
+
+def bild_bereitstellen(a, schreiben):
+    """Hero-Bild aus dem Eingang in assets/img/news/ ablegen -- als WebP.
+
+    n8n legt das Original unter a["quellbild"] ab (data/artikel-eingang/bilder/),
+    so wie es in Drive liegt: JPG, PNG oder WebP. Die Seite verwendet fuer alle
+    Bilder ausser den Share-Bildern ausschliesslich WebP; die Umwandlung gehoert
+    hierher und nicht nach n8n, weil hier Pillow ohnehin installiert ist.
+
+    Nach dem Umwandeln wird das Original geloescht. Das macht den Schritt
+    idempotent: beim naechsten Lauf (z. B. bei der Freigabe) gibt es keine Quelle
+    mehr, und das fertige WebP bleibt unangetastet.
+    """
+    quelle = a.get("quellbild")
+    if not quelle:
+        return False
+    q = REPO / quelle
+    if not q.is_file():
+        return False
+    ziel = BILD_DIR / a["bild"]
+    if schreiben:
+        ziel.parent.mkdir(parents=True, exist_ok=True)
+        if q.suffix.lower() == ".webp":
+            ziel.write_bytes(q.read_bytes())          # schon WebP: nicht neu kodieren
+        else:
+            from PIL import Image                     # nur hier noetig
+            with Image.open(q) as im:
+                im = im.convert("RGBA" if im.mode in ("RGBA", "LA", "P") else "RGB")
+                if im.width > HERO_MAX_BREITE:
+                    hoehe = round(im.height * HERO_MAX_BREITE / im.width)
+                    im = im.resize((HERO_MAX_BREITE, hoehe), Image.LANCZOS)
+                im.save(ziel, "WEBP", quality=HERO_QUALITAET, method=6)
+        q.unlink()
+    return True
+
+
 def pruefe(a):
     fehlt = [f for f in PFLICHT if not a.get(f)]
     if fehlt:
@@ -351,8 +410,12 @@ def pruefe(a):
         raise SystemExit("  FEHLER: datum muss JJJJ-MM-TT sein.")
     if not re.fullmatch(r"[a-z0-9-]+", a["slug"]):
         raise SystemExit("  FEHLER: slug darf nur a-z, 0-9 und Bindestriche enthalten.")
-    if not (BILD_DIR / a["bild"]).is_file():
-        raise SystemExit(f"  FEHLER: Hero-Bild fehlt: assets/img/news/{a['bild']}")
+    quelle = a.get("quellbild")
+    if not (BILD_DIR / a["bild"]).is_file() and not (quelle and (REPO / quelle).is_file()):
+        raise SystemExit(
+            f"  FEHLER: Hero-Bild fehlt: weder assets/img/news/{a['bild']} noch das Original "
+            f"{quelle or '(kein quellbild im Auftrag)'}"
+        )
 
 
 def main():
@@ -369,6 +432,7 @@ def main():
     url = f"/news/artikel/{name}"
     schreiben = not args.check
 
+    bild_neu = bild_bereitstellen(a, schreiben)
     seite = seite_bauen(a)
     seite_neu = not ziel.is_file() or ziel.read_text(encoding="utf-8") != seite
     if seite_neu and schreiben:
@@ -382,11 +446,12 @@ def main():
     print(f"  {name}: {'Seite ' + wort if seite_neu else 'Seite unverändert'}"
           f"{', CSS-Hero-Klasse ' + wort if css_neu else ''}"
           f"{', news.json ' + wort if news_neu else ''}"
-          f"{', Spielplan-Verlinkung ' + wort if spiel_neu else ''}")
+          f"{', Spielplan-Verlinkung ' + wort if spiel_neu else ''}"
+          f"{', Hero-Bild nach WebP ' + wort if bild_neu else ''}")
     print(f"  Status: {a['status']}"
           + (" (noindex, nicht verlinkt)" if a["status"] == "pruefung" else " (verlinkt, indexierbar)"))
     print(f"  URL: https://basketball-loewen.com{url}")
-    return 1 if (args.check and (seite_neu or css_neu or news_neu or spiel_neu)) else 0
+    return 1 if (args.check and (seite_neu or css_neu or news_neu or spiel_neu or bild_neu)) else 0
 
 
 if __name__ == "__main__":
