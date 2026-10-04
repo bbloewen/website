@@ -22,6 +22,7 @@ Canonical dürfen nie auseinanderlaufen.
 | Neues Artikel-Hero in `assets/img/news/` | `build-share-images.py`, dann `build-head-meta.py` |
 | `data/heimspiele.json` (Spieltermine, neues Spiel, Vorverkauf gestartet) | `build-spieltagsseiten.py`, `build-gameday-hub.py`, `build-spielplan-liste.py`, dann `build-head-meta.py` |
 | `data/freiplaetze.json` (Platz ergänzt, Koordinaten geändert) | `build-freiplatz-qr.py` |
+| Neuer News-Artikel aus der Notion-Mediaplanung | `artikel-veroeffentlichen.py`, dann `git add`, dann `build-share-images.py` und die ganze Kette |
 
 Alles auf einmal, in dieser Reihenfolge:
 
@@ -66,6 +67,21 @@ Ersetzt die frühere Handpflege, die um 8 Seiten hinterherhing.
 ein. Notwendig, weil sie vorher nur per `js/include.js` im Browser nachgeladen
 wurden: im ausgelieferten HTML stand dann kein einziger Navigationslink.
 `include.js` lädt weiterhin nach, aber nur wenn der Platzhalter leer ist.
+
+**`artikel-veroeffentlichen.py`** — baut aus einem Auftrag unter
+`data/artikel-eingang/` eine fertige News-Artikelseite. Kein Generator im
+engeren Sinn (läuft nicht in `bauen.sh` mit), sondern der Übersetzer zwischen
+der Notion-Mediaplanung und dem Repo: n8n legt den Auftrag ab, der
+GitHub-Workflow `news-veroeffentlichen.yml` ruft dieses Skript auf und lässt
+danach die Kette laufen. Zwei Stufen über das Feld `status`: `pruefung` schreibt
+die Seite mit `noindex` und ohne jede Verlinkung (erreichbar, wer die Adresse
+hat — die schreibt n8n nach Notion zurück), `freigegeben` nimmt `noindex`
+heraus und trägt den Artikel in `data/news.json` und, falls es um ein Spiel
+geht, in `data/spielplan-saison.json` ein. Felder: siehe
+`data/artikel-eingang/README.md`. Die Seitenvorlage liegt unter
+`tools/vorlagen/news-artikel.html.vorlage` — bewusst **ohne** `.html`-Endung,
+sonst würden `build-partials.py` sie vollschreiben und `build-sitemap.py` sie
+in die Sitemap aufnehmen.
 
 **`build-news-list.py`** — schreibt die Artikelliste statisch in
 `news/aktuelles.html`. Das JavaScript rendert sie beim Laden weiterhin selbst und
