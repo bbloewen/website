@@ -28,6 +28,13 @@ gibt es die Prüfstufe.
 
 Dateiname: `<notionId>.json`
 
+## Redaktionsregeln
+
+Schreiben, Ändern und Freigeben läuft über den Skill `.claude/skills/news-artikel/SKILL.md`.
+Dort stehen auch die Regeln: immer „Basketball Löwen Erfurt“ in Titel/Lead, Meta-Description
+und erster Nennung; Partner und Organisationen mit gesicherter Adresse verlinken
+(Partner aus `data/sponsoren.json`); keine neuen Fakten; „Veröffentlicht“ setzt nur der Workflow.
+
 ## Felder
 
 | Feld | Pflicht | Bedeutung |
