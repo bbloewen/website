@@ -2,6 +2,66 @@
   "hinweis": "Zentrale Liste aller News-Beiträge. Inhalte stammen von der bisherigen Vereinswebsite (basketball-loewen.com) und wurden hierher übernommen. 'datum' ist die Zeile, die auf der Kachel steht — bei einem Bericht über einen Termin darf dort der Termin stehen. Sortiert wird NICHT danach, sondern nach dem Veröffentlichungsdatum aus dem Datums-Präfix des Dateinamens (2026-09-16_club_....html) — derselbe Wert, den tools/build-head-meta.py als datePublished ins JSON-LD schreibt (seo_common.veroeffentlicht bzw. SiteUtils.publishDate in js/nav.js). 'topNews': true steuert, ob ein Beitrag im Top-News-Bereich der Startseite erscheint — Beiträge ohne dieses Flag (oder mit false) werden nur auf der Aktuelles-Seite gelistet, nicht im Startseiten-Slider. 'bild' wird für die Foto-Kacheln im Startseiten-Newsfeed verwendet. 'team' (optional: 'profis' | 'damen' | 'nbbl' | 'baskidball') ordnet einen Artikel einem Team oder Programmbereich zu, für die 'Aktuelles zu ...'-Sektionen auf den Teamseiten und die BasKIDball-Sidebar (js/team-news.js) — Artikel ohne 'team' gelten als allgemein und füllen bei Bedarf auf.",
   "artikel": [
     {
+      "datum": "26.09.2026",
+      "kategorie": "Profis",
+      "tint": "tint-blue",
+      "icon": "trophy",
+      "titel": "Enger Auftakt, am Ende zu wenig: Löwen unterliegen bei den Dragons Rhöndorf",
+      "kurztext": "96:74-Niederlage zum Saisonauftakt bei den Dragons Rhöndorf — bis zum letzten Viertel ein enges Spiel, dann liefen die Gastgeber davon. Anthony Watkins mit starkem Debüt (27 Punkte).",
+      "url": "/news/artikel/2026-09-26_profis_spielbericht-dragons-rhoendorf.html",
+      "bild": "/assets/img/news/spielbericht-dragons-rhoendorf-kachel.webp",
+      "topNews": true,
+      "team": "profis"
+    },
+    {
+      "datum": "26.09.2026",
+      "kategorie": "Profis",
+      "tint": "tint-orange",
+      "icon": "calendar",
+      "titel": "Basketball Löwen reisen zum Saisonauftakt zu den Dragons Rhöndorf",
+      "kurztext": "Saisonauftakt heute um 19 Uhr bei den Dragons Rhöndorf, einem der stärksten Gegner der Südstaffel — für Co-Kapitän Samuel Nellessen ein besonderes Spiel.",
+      "url": "/news/artikel/2026-09-26_profis_vorbericht-dragons-rhoendorf.html",
+      "bild": "/assets/img/news/dragons-rhoendorf-vs-loewen.webp",
+      "topNews": true,
+      "team": "profis"
+    },
+    {
+      "datum": "25.09.2026",
+      "kategorie": "Profis",
+      "tint": "tint-blue",
+      "icon": "users",
+      "titel": "Die jungen Löwen: Jasper Brand, Friedrich Radefeld, Luca Förster, Luke Kiraly und Léonar Fliege",
+      "kurztext": "Fünf Eigengewächse aus den Partnervereinen übernehmen mehr Verantwortung im ProB-Kader — Léonar Fliege war im Sommer im erweiterten U20-Nationalkader.",
+      "url": "/news/artikel/2026-09-25_profis_junge-loewen.html",
+      "bild": "/assets/img/news/junge-loewen.webp",
+      "topNews": true,
+      "team": "profis"
+    },
+    {
+      "datum": "24.09.2026",
+      "kategorie": "Profis",
+      "tint": "tint-blue",
+      "icon": "users",
+      "titel": "Internationales Flair und bewährte Löwen-DNA: Derek Emelifeonwu, Jacob Hadi, Anthony Watkins und Jordan Zimmermann",
+      "kurztext": "Zwei internationale Neuzugänge aus Australien und Schweden sowie zwei Rückkehrer mit Löwen-Vergangenheit verstärken den Kader für die neue Saison.",
+      "url": "/news/artikel/2026-09-24_profis_neuzugaenge-international.html",
+      "bild": "/assets/img/news/neuzugaenge-international.webp",
+      "topNews": true,
+      "team": "profis"
+    },
+    {
+      "datum": "23.09.2026",
+      "kategorie": "Profis",
+      "tint": "tint-blue",
+      "icon": "users",
+      "titel": "Erfahrung und Energie: Die Kapitäne Marko Bacak und Samuel Nellessen sowie die Neuzugänge Ilias Amin und Tim Claßen",
+      "kurztext": "Marko Bacak und Samuel Nellessen führen als Kapitäne, Ilias Amin und Tim Claßen verstärken auf den Guard-Positionen — die Basketball Löwen stellen sich vor.",
+      "url": "/news/artikel/2026-09-23_profis_kapitaene-neuzugaenge-guards.html",
+      "bild": "/assets/img/news/kapitaene-neuzugaenge-guards-kachel.webp",
+      "topNews": true,
+      "team": "profis"
+    },
+    {
       "datum": "22.09.2026",
       "kategorie": "Profis",
       "tint": "tint-blue",
@@ -21,7 +81,7 @@
       "titel": "Die Basketball Löwen starten in die neunte Saison ihrer Vereinsgeschichte",
       "kurztext": "Neuer Kader, neuer Cheftrainer Leif Ibrahim: Am 26. September geht es auswärts bei den Dragons Rhöndorf los.",
       "url": "/news/artikel/2026-09-21_profis_saisonstart-neunte-saison.html",
-      "bild": "/assets/img/news/neuer-cheftrainer-ibrahim.webp",
+      "bild": "/assets/img/news/saisonstart-neunte-saison.webp",
       "topNews": true,
       "team": "profis"
     },
@@ -33,7 +93,7 @@
       "titel": "Vorbereitung erfolgreich abgeschlossen: Löwen siegen in Breitengüßbach",
       "kurztext": "87:75-Auswärtssieg beim Regionalligisten TSV Tröster Breitengüßbach beschließt die Vorbereitung auf die neue Saison 2026/2027.",
       "url": "/news/artikel/2026-09-18_profis_testspiel-breitenguessbach.html",
-      "bild": "/assets/img/hero-basketball.webp",
+      "bild": "/assets/img/news/testspiel-breitenguessbach.webp",
       "topNews": true,
       "team": "profis"
     },
@@ -57,7 +117,7 @@
       "titel": "CATL und Basketball Löwen Erfurt richten Partnerschaft auf Nachwuchs, Frauenbasketball und den neuen LÖWENPARK aus",
       "kurztext": "Namenssponsoring künftig für Damenmannschaft, U19-Bundesligateam und die neue Trainings- und Begegnungsstätte am Erfurter Südpark.",
       "url": "/news/artikel/2026-09-01_pressemitteilung_catl-partnerschaft-neuausrichtung.html",
-      "bild": "/assets/img/hero-basketball.webp",
+      "bild": "/assets/img/news/catl-partnerschaft-neuausrichtung.webp",
       "topNews": true
     },
     {
@@ -68,7 +128,7 @@
       "titel": "Neuer Mann auf der Bank: Leif Ibrahim wird Cheftrainer der Löwen",
       "kurztext": "Der 31-jährige Schwede unterschreibt für zwei Jahre — Florian Gut wechselt in die sportliche Leitung.",
       "url": "/news/artikel/2026-08-13_profis_neuer-cheftrainer-ibrahim.html",
-      "bild": "/assets/img/news/neuer-cheftrainer-ibrahim.webp",
+      "bild": "/assets/img/news/neuer-cheftrainer-ibrahim-kachel.webp",
       "topNews": true,
       "team": "profis"
     },
@@ -102,7 +162,7 @@
       "titel": "Saisonrückblick 2025/2026: Platz 12, Bilanz 8:16",
       "kurztext": "Die Profis verpassen die Playoffs — Coach Florian Gut zieht Bilanz und blickt nach vorn.",
       "url": "/news/artikel/2026-03-31_profis_spielbericht-saisonrueckblick-2025-26.html",
-      "bild": "/assets/img/team-prob.webp",
+      "bild": "/assets/img/news/saisonrueckblick-2025-26.webp",
       "topNews": true,
       "team": "profis"
     },
@@ -138,7 +198,7 @@
       "titel": "CATL verlängert Partnerschaft",
       "kurztext": "Der Batteriezellen-Hersteller bleibt Namenssponsor der Profimannschaft — schon die vierte gemeinsame Saison.",
       "url": "/news/artikel/2025-08-26_partner_catl-verlaengert.html",
-      "bild": "/assets/img/hero-basketball.webp",
+      "bild": "/assets/img/news/catl-verlaengert.webp",
       "topNews": false,
       "team": "profis"
     },
@@ -150,7 +210,7 @@
       "titel": "Sommerinterview Teil 3: LÖWENPARK und Vorbereitung",
       "kurztext": "Florian Gut über Finanzierung und Zeitplan des LÖWENPARK sowie den Start in die Saisonvorbereitung.",
       "url": "/news/artikel/2025-08-08_club_sommerinterview-teil3.html",
-      "bild": "/assets/img/hero-basketball.webp",
+      "bild": "/assets/img/news/sommerinterview-teil3.webp",
       "topNews": false
     },
     {
@@ -173,7 +233,7 @@
       "titel": "Sommerinterview Teil 1: Kaderplanung",
       "kurztext": "Florian Gut über Abgänge, gesuchte Neuzugänge und einen starken Sommer für Musa Abra.",
       "url": "/news/artikel/2025-07-21_club_sommerinterview-teil1.html",
-      "bild": "/assets/img/team-prob.webp",
+      "bild": "/assets/img/news/sommerinterview-teil1.webp",
       "topNews": false,
       "team": "profis"
     },
@@ -185,7 +245,7 @@
       "titel": "Löwen-Kaderplanung für die nächste Saison",
       "kurztext": "Vier langjährige Spieler verlassen den Verein — Florian Gut über die Hintergründe.",
       "url": "/news/artikel/2025-05-19_profis_kaderplanung-naechste-saison.html",
-      "bild": "/assets/img/team-prob.webp",
+      "bild": "/assets/img/news/kaderplanung-naechste-saison.webp",
       "topNews": false,
       "team": "profis"
     },

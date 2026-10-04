@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
     'U10w und jünger': 'U10 weiblich',
     'U11mix': 'U11 mixed',
     'U12mix': 'U12 mixed',
-    'U12m/1': 'U12 männlich',
+    'U12m/1': 'MDL U12 männlich',
     'U12w': 'U12 weiblich',
     'U13mix': 'U13 mixed',
     'U13m': 'U13 männlich',
@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
     'U14m': 'U14 männlich',
     'U14w': 'U14 weiblich',
     'U15m': 'U15 männlich',
+    'U17m': 'U17 männlich',
     'U16m': 'U16 männlich',
     'U16w': 'U16 weiblich',
     'U19m': 'U19 männlich',
@@ -36,6 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
     'U10w und jünger': 'U10w',
     'U11mix': 'U11mix',
     'U12mix': 'U12mix',
+    'U12m/1': 'U12m',
     'U12w': 'U12w',
     'U13mix': 'U13mix',
     'U13m': 'U13m',
@@ -54,15 +56,47 @@ document.addEventListener('DOMContentLoaded', function () {
     'Landesliga Herren 3': 'Landesliga Herren'
   };
 
+  /* Beschriftung im Team-Filter-Dropdown -- anders als TEAM_LABELS (Schluessel
+     = rohes team-Feld, z.B. "U12m/1") ist das hier nach TEAM_KEY-Werten
+     beschriftet (dem, was tatsaechlich im Dropdown als value/alleTeams landet,
+     z.B. "U12m"), damit auch zusammengefasste Kategorien (Landesliga Herren)
+     eine Beschriftung haben. */
+  var FILTER_LABELS = {
+    'U8mix': 'U8 mixed', 'U9mix': 'U9 mixed', 'U10mix': 'U10 mixed', 'U10w': 'U10 weiblich',
+    'U11mix': 'U11 mixed', 'U12mix': 'U12 mixed', 'U12m': 'MDL U12 männlich', 'U12w': 'U12 weiblich',
+    'U13mix': 'U13 mixed', 'U13m': 'U13 männlich', 'U13m-mdl': 'MDL U13 männlich',
+    'U14mix': 'U14 mixed', 'U14m': 'U14 männlich', 'U14m-mdl': 'MDL U14 männlich',
+    'U14w': 'U14 weiblich', 'U15m': 'U15 männlich', 'U15m-mdl': 'MDL U15 männlich',
+    'U17m': 'MDL U17 männlich',
+    'U16m': 'U16 männlich', 'U16w': 'U16 weiblich',
+    'U19m': 'U19 männlich', 'U19w': 'U19 weiblich'
+  };
+
+  /* U13m/U14m/U15m sind Team-Schluessel, die sich unsere eigenen (verein
+     "loewen") Teams mit einem Partnerverein teilen (USV Erfurt bzw. BC
+     Erfurt) -- deren MDL-Zugehoerigkeit ist nicht bestaetigt (Marko,
+     27.09.2026). Damit "Nur unser Team" im Filter tatsaechlich nur unser
+     Team zeigt, bekommen unsere eigenen Eintraege dieser drei Kategorien
+     einen eigenen, unverwechselbaren Schluessel ("-mdl"-Suffix). U12m/1 und
+     U17m sind exklusiv unser Team, brauchen daher keinen Suffix. */
+  var GETEILTE_KEYS = ['U13m', 'U14m', 'U15m'];
+  function resolveTeamKey(g) {
+    var basis = TEAM_KEY[g.team] || g.team;
+    if (g.verein === 'loewen' && GETEILTE_KEYS.indexOf(basis) !== -1) return basis + '-mdl';
+    return basis;
+  }
+
   var vereinLabel = {
     'bc-erfurt': 'BC Erfurt',
     'usv-erfurt': 'USV Erfurt',
-    'loewinnen': 'Basketball Löwen'
+    'loewinnen': 'Basketball Löwen',
+    'loewen': 'Basketball Löwen'
   };
   var vereinBadgeClass = {
     'bc-erfurt': 'team-badge-bc-erfurt',
     'usv-erfurt': 'team-badge-usv-erfurt',
-    'loewinnen': 'team-badge-loewinnen'
+    'loewinnen': 'team-badge-loewinnen',
+    'loewen': 'team-badge-loewen'
   };
   /* Verlinkung der Vereins-Badges auf die jeweilige Trainingszeiten-Seite des
      Vereins — Basketball Löwen bleibt unverlinkt, das ist bereits diese Seite. */
@@ -189,6 +223,17 @@ document.addEventListener('DOMContentLoaded', function () {
     return '/kontakt.html?' + params.toString();
   }
 
+  /* "MDL" nur vor unseren EIGENEN Teams (verein "loewen") -- der Team-Schluessel
+     ist teils mit Partnervereinen geteilt (z.B. "U13m" auch bei USV Erfurt),
+     deren MDL-Zugehoerigkeit nicht bestaetigt ist. Ausnahme U12m/1: dieser
+     Schluessel gehoert exklusiv uns, das Praefix steckt daher schon fest in
+     TEAM_LABELS und wird hier nicht doppelt vorangestellt. */
+  function teamNameMitMdlPraefix(g) {
+    var basis = TEAM_LABELS[g.team] || g.team;
+    if (g.verein === 'loewen' && basis.indexOf('MDL') !== 0) return 'MDL ' + basis;
+    return basis;
+  }
+
   /* Flache Liste aller einzelnen Trainingstermine (ein Eintrag pro Team+Tag),
      Grundlage für die Wochentag-/Halle-Gruppierung. Teams ohne Termine
      ("Zeiten folgen in Kürze") haben keinen Tag/keine Halle, zum Gruppieren
@@ -197,9 +242,9 @@ document.addEventListener('DOMContentLoaded', function () {
     var sessions = [];
     gruppen.forEach(function (g) {
       if (!g.termine || !g.termine.length) return;
-      var teamName = TEAM_LABELS[g.team] || g.team;
+      var teamName = teamNameMitMdlPraefix(g);
       var jahrgang = jahrgangLabel(g);
-      var teamKey = TEAM_KEY[g.team] || g.team;
+      var teamKey = resolveTeamKey(g);
       g.termine.forEach(function (t) {
         sessions.push({
           teamName: teamName, jahrgang: jahrgang, teamKey: teamKey,
@@ -245,7 +290,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var ortLine = modus === 'wochentag'
       ? '<div class="training-slot-ort"><i data-lucide="map-pin" class="icon-14"></i><a href="' + mapsLink(s.ort) + '" target="_blank" rel="noopener">' + ortDisplay(s.ort) + '</a></div>'
       : '';
-    var probLink = '<a class="training-row-probetraining" href="' + probetrainingLink(s.teamName, s.jahrgang, s.verein, s.termin) + '">Probetraining vereinbaren</a>';
+    var probLink = s.verein !== 'loewen' ? '<a class="training-row-probetraining" href="' + probetrainingLink(s.teamName, s.jahrgang, s.verein, s.termin) + '">Probetraining vereinbaren</a>' : '';
     return (
       '<div class="training-session-row" data-verein="' + s.verein + '" data-jahre="' + s.jahre.join(',') + '" data-team="' + s.teamKey + '">' +
         '<div>' +
@@ -300,26 +345,32 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function cardHTML(g) {
-    var teamName = TEAM_LABELS[g.team] || g.team;
+    var teamName = teamNameMitMdlPraefix(g);
     var jahrgang = jahrgangLabel(g);
     var titel = teamName + ' (' + jahrgang + ')';
     var unbestaetigt = g.bestaetigt === false;
+    // Leistungsteams (eigene MDL-Nachwuchsteams) nehmen nicht per offenem
+    // Probetraining-Kontaktformular auf, sondern über Sichtung/Trainer — daher
+    // hier kein "Probetraining vereinbaren"-Link.
+    var zeigeProbetraining = g.verein !== 'loewen';
     var zeitenHTML;
     if (g.termine && g.termine.length) {
       zeitenHTML = g.termine.map(function (t) {
         var zeitHTML = zeitLinkHTML(t.tag, t.zeit, t.vorbehaltlich, titel, t.ort, true, unbestaetigt);
         var ortHTML = '<div class="training-slot-ort"><i data-lucide="map-pin" class="icon-14"></i><a href="' + mapsLink(t.ort) + '" target="_blank" rel="noopener">' + ortDisplay(t.ort) + '</a></div>';
-        var probLink = '<a class="training-row-probetraining" href="' + probetrainingLink(teamName, jahrgang, g.verein, t) + '">Probetraining vereinbaren</a>';
+        var probLink = g.aufnahmestopp
+          ? '<span class="training-row-probetraining-stop">Temporärer Aufnahmestopp</span>'
+          : (zeigeProbetraining ? '<a class="training-row-probetraining" href="' + probetrainingLink(teamName, jahrgang, g.verein, t) + '">Probetraining vereinbaren</a>' : '');
         return '<div class="training-slot">' + zeitHTML + ortHTML + probLink + '</div>';
       }).join('');
     } else {
-      var probLinkOhneTermin = '<a class="training-row-probetraining" href="' + probetrainingLink(teamName, jahrgang, g.verein, null) + '">Probetraining vereinbaren</a>';
+      var probLinkOhneTermin = zeigeProbetraining ? '<a class="training-row-probetraining" href="' + probetrainingLink(teamName, jahrgang, g.verein, null) + '">Probetraining vereinbaren</a>' : '';
       zeitenHTML = '<div class="training-slot"><em>' + (g.hinweis || 'Zeiten folgen in Kürze') + '</em>' + probLinkOhneTermin + '</div>';
     }
     var badgeHTML = vereinLink[g.verein]
       ? '<a class="team-badge ' + vereinBadgeClass[g.verein] + '" href="' + vereinLink[g.verein] + '" target="_blank" rel="noopener">' + vereinLabel[g.verein] + '</a>'
       : '<span class="team-badge ' + vereinBadgeClass[g.verein] + '">' + vereinLabel[g.verein] + '</span>';
-    var teamKey = TEAM_KEY[g.team] || g.team;
+    var teamKey = resolveTeamKey(g);
     return (
       '<div class="card training-row" data-verein="' + g.verein + '" data-jahre="' + g.jahre.join(',') + '" data-team="' + teamKey + '">' +
         '<div>' +
@@ -334,7 +385,7 @@ document.addEventListener('DOMContentLoaded', function () {
     );
   }
 
-  fetch('/data/trainingszeiten.json?v=1789737851')
+  fetch('/data/trainingszeiten.json?v=1790863058')
     .then(function (res) { return res.json(); })
     .then(function (data) {
       // Reihenfolge = Reihenfolge im JSON: juengster Jahrgang oben, Erwachsenenteams
@@ -354,10 +405,20 @@ document.addEventListener('DOMContentLoaded', function () {
         jahrgangSelect.appendChild(opt);
       });
 
-      var alleTeams = Array.from(new Set(data.gruppen.map(function (g) { return TEAM_KEY[g.team] || g.team; })));
+      var alleTeams = Array.from(new Set(data.gruppen.map(resolveTeamKey)));
+      // Kategorien mit einem eigenen (verein "loewen") Team stehen alphabetisch
+      // ganz oben im Filter. U13m/U14m/U15m bekommen dafuer ueber resolveTeamKey()
+      // einen eigenen "-mdl"-Schluessel, getrennt vom geteilten Partnerverein-Team.
+      var unsereTeamKeys = new Set(
+        data.gruppen.filter(function (g) { return g.verein === 'loewen'; }).map(resolveTeamKey)
+      );
       // Erwachsenenteams (aelter als U19) haben keine U-Nummer und stehen in einer
       // festen Reihenfolge ganz am Ende, statt ueber die U-Jahrgaenge sortiert zu werden.
       alleTeams.sort(function (a, b) {
+        var eigenA = unsereTeamKeys.has(a);
+        var eigenB = unsereTeamKeys.has(b);
+        if (eigenA !== eigenB) return eigenA ? -1 : 1;
+        if (eigenA && eigenB) return a.localeCompare(b);
         var ia = ERWACHSENEN_TEAM_REIHENFOLGE.indexOf(a);
         var ib = ERWACHSENEN_TEAM_REIHENFOLGE.indexOf(b);
         if (ia !== -1 || ib !== -1) {
@@ -373,7 +434,7 @@ document.addEventListener('DOMContentLoaded', function () {
       alleTeams.forEach(function (team) {
         var opt = document.createElement('option');
         opt.value = team;
-        opt.textContent = team;
+        opt.textContent = FILTER_LABELS[team] || team;
         teamSelect.appendChild(opt);
       });
 
@@ -396,8 +457,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
       function applyFilters() {
         var rows = grid.querySelectorAll('[data-verein]');
+        var vereinListe = currentVerein.split(',');
         rows.forEach(function (row) {
-          var vereinOk = currentVerein === 'alle' || row.getAttribute('data-verein') === currentVerein;
+          var vereinOk = currentVerein === 'alle' || vereinListe.indexOf(row.getAttribute('data-verein')) !== -1;
           var jahre = row.getAttribute('data-jahre').split(',');
           var jahrOk = currentJahr === 'alle' || jahre.indexOf(currentJahr) !== -1;
           var teamOk = currentTeam === 'alle' || row.getAttribute('data-team') === currentTeam;
@@ -410,9 +472,21 @@ document.addEventListener('DOMContentLoaded', function () {
         });
       }
 
+      // Deep-Link von den Team-Kacheln auf saison/nachwuchs.html, z.B.
+      // trainingszeiten.html?team=U14m springt direkt zur passenden Team-Auswahl.
+      var teamParam = new URLSearchParams(window.location.search).get('team');
+      if (teamParam && alleTeams.indexOf(teamParam) !== -1) {
+        currentTeam = teamParam;
+        teamSelect.value = teamParam;
+      }
+
       var sortSelect = document.getElementById('sort-select');
       sortSelect.addEventListener('change', function () { render(sortSelect.value); });
       render(sortSelect.value);
+
+      if (teamParam && currentTeam === teamParam) {
+        document.getElementById('zeiten').scrollIntoView({ block: 'start' });
+      }
 
       chips.forEach(function (chip) {
         chip.addEventListener('click', function () {

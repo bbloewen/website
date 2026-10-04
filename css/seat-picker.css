@@ -208,6 +208,7 @@
 }
 .seatplan-voucher-input-wrap button:hover { background: var(--color-brand-navy); color: var(--color-white); }
 .seatplan-voucher-error { color: var(--color-error); font-size: 12px; margin: 6px 0 0; }
+.seatplan-voucher-hint { color: var(--text-muted); font-size: 12px; margin: 6px 0 0; }
 .seatplan-voucher-applied {
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
   font-size: 13px; color: var(--color-heart-green); font-weight: 600;

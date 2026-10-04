@@ -410,6 +410,10 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .btn-ghost-dark { border-color: rgba(255,255,255,.5); color: #fff; background: transparent; }
 .btn-outline-orange { border-color: var(--color-brand-orange-text); color: var(--color-brand-orange-text); background: transparent; }
 .btn-outline-orange:hover { background: var(--color-orange-50); }
+/* Fuer Kacheln/Heros mit dunklem Foto-Hintergrund: das dunklere
+   --color-brand-orange-text (AA-Kontrast auf Weiss) wirkt dort zu blass. */
+.btn-outline-orange-dark { border-color: var(--color-brand-orange); color: var(--color-brand-orange); background: transparent; }
+.btn-outline-orange-dark:hover { background: rgba(229, 113, 11, .15); }
 .btn-ghost-dark:hover { background: rgba(255,255,255,.12); }
 .btn-link { background: none; border: none; color: var(--link); padding: 8px 0; }
 .btn-link:hover { text-decoration: underline; }
@@ -498,6 +502,28 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
 .card-body p { font-size: 14px; color: var(--text-secondary); font-weight: var(--weight-light); line-height: 1.5; margin-bottom: 12px; }
 .card-link { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; font-size: 13px; font-weight: var(--weight-semibold); color: var(--color-brand-orange-text); }
 .card-link:hover { text-decoration: underline; }
+
+/* Mini-Spielplan-Slider auf den Nachwuchs-Team-Kacheln (saison/nachwuchs.html):
+   ein Streifen aus Spiel-Chips, anfangs auf das naechste anstehende Spiel
+   gescrollt -- vergangene Spiele (mit Ergebnis) bleiben links erhalten und
+   sind ueber den Pfeil erreichbar, statt geloescht zu werden. */
+.game-slider { display: flex; align-items: center; gap: 4px; margin-top: 10px; }
+.game-slider[hidden] { display: none; }
+.game-slider-track { display: flex; gap: 6px; overflow-x: auto; scroll-behavior: smooth; flex: 1; scrollbar-width: none; }
+.game-slider-track::-webkit-scrollbar { display: none; }
+.game-chip { flex: 0 0 auto; width: 84px; padding: 6px 7px; border-radius: 10px; background: var(--bg-subtle); text-align: center; }
+.game-chip-heim { font-size: 9px; font-weight: var(--weight-extrabold); text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--text-muted); }
+.game-chip-gegner { font-size: 11px; font-weight: var(--weight-semibold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.game-chip-datum { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+.game-chip-ergebnis { font-size: 13px; font-weight: var(--weight-extrabold); margin-top: 2px; }
+.game-chip.is-next { background: var(--color-orange-50); }
+.game-chip.is-next .game-chip-heim { color: var(--color-orange-700); }
+.game-slider-arrow {
+  flex: 0 0 auto; width: 22px; height: 22px; border-radius: var(--radius-full); border: 1px solid var(--border);
+  background: #fff; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); cursor: pointer;
+}
+.game-slider-arrow:hover { background: var(--bg-subtle); }
+.game-slider-arrow[disabled] { opacity: .3; cursor: default; pointer-events: none; }
 /* Foto-Variante von .card-media für echte Pressefotos (statt Icon+Farbverlauf),
    z.B. auf der News-Übersichtsseite. */
 .card-media-photo { height: 180px; padding: 0; }
@@ -558,6 +584,12 @@ body.hide-mobile-cta .nav-actions .mobile-cta { display: none; }
    .card-media-photo) -- gleiches Muster wie neuer-cheftrainer-ibrahim. */
 .news-tile img[src*="fotso-sighom"],
 .card-media-photo img[src*="fotso-sighom"] { object-position: center 15%; }
+.card-media img[src*="team-nbbl.webp"] { object-position: center top; }
+/* CATL-Partnerschaft-Foto: zentrierter Zuschnitt schnitt den Basketball unten
+   ab; weiter unten ausgerichtet zeigt ihn vollstaendig, ohne den Kopf oben
+   abzuschneiden (Marko, 26.09.2026). */
+.news-tile img[src*="catl-partnerschaft-neuausrichtung"],
+.card-media-photo img[src*="catl-partnerschaft-neuausrichtung"] { object-position: center 70%; }
 /* QR-Code liegt seit 24.08.2026 als kleines Overlay unten rechts im Kachelbild
    statt als eigene Zeile in der Textspalte: als Block darunter wirkte er wie ein
    Fremdkörper und drängte sich vor die eigentliche Platzbeschreibung. */
@@ -1887,8 +1919,8 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 
 /* Hero-Variante für die Media-Kit-Seite — gestaltete Grafik "Medienportal"
    mit Download-Icons für Pressematerial/Vereinsprofile/Fotos. */
-.hero-photo.hero-mediakit { --hero-photo-url: url('/assets/img/hero-mediakit.webp'); background-position: center; }
-.hero-photo.hero-mediakit h1 { white-space: normal; max-width: 28ch; }
+.hero-photo.hero-presse { --hero-photo-url: url('/assets/img/hero-presse.webp'); background-position: center; }
+.hero-photo.hero-presse h1 { white-space: normal; max-width: 28ch; }
 
 /* Hero-Variante für die Mitgliedschafts-Seiten (Übersicht + Fan-Formular) —
    jubelnde Fangruppe mit "Wir brüllen euch zum Sieg"-Banner auf dem Petersberg
@@ -1992,10 +2024,24 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .hero-photo.hero-news-damen-regionalliga { --hero-photo-url: url('/assets/img/news/damen-regionalliga.webp'); background-position: center 25%; }
 .hero-photo.hero-news-achtelfinale { --hero-photo-url: url('/assets/img/news/achtelfinale.webp'); background-position: center 35%; }
 .hero-photo.hero-news-playoff-heimspiel { --hero-photo-url: url('/assets/img/news/playoff-heimspiel.webp'); background-position: center 35%; }
-.hero-photo.hero-news-neuer-cheftrainer-ibrahim { --hero-photo-url: url('/assets/img/news/neuer-cheftrainer-ibrahim.webp'); background-position: center 15%; }
+.hero-photo.hero-news-neuer-cheftrainer-ibrahim { --hero-photo-url: url('/assets/img/news/neuer-cheftrainer-ibrahim-kachel.webp'); background-position: center 15%; }
 .hero-photo.hero-news-baskidballtalk-berlin-2026 { --hero-photo-url: url('/assets/img/news/baskidballtalk-berlin-2026.webp'); background-position: center 70%; }
+.hero-photo.hero-news-kapitaene-neuzugaenge-guards { --hero-photo-url: url('/assets/img/news/kapitaene-neuzugaenge-guards-kachel.webp'); background-position: center 15%; }
+.hero-photo.hero-news-junge-loewen { --hero-photo-url: url('/assets/img/news/junge-loewen.webp'); background-position: center 30%; }
+.hero-photo.hero-news-vorbericht-dragons-rhoendorf { --hero-photo-url: url('/assets/img/news/dragons-rhoendorf-vs-loewen.webp'); background-position: center center; }
+.hero-photo.hero-news-spielbericht-dragons-rhoendorf { --hero-photo-url: url('/assets/img/news/spielbericht-dragons-rhoendorf.webp'); background-position: center 52%; }
+.hero-photo.hero-news-sommerinterview-teil3 { --hero-photo-url: url('/assets/img/news/sommerinterview-teil3.webp'); background-position: center center; }
+.hero-photo.hero-news-saisonrueckblick-2025-26 { --hero-photo-url: url('/assets/img/news/saisonrueckblick-2025-26.webp'); background-position: center 30%; }
+.hero-photo.hero-news-sommerinterview-teil1 { --hero-photo-url: url('/assets/img/news/sommerinterview-teil1.webp'); background-position: center 30%; }
+.hero-photo.hero-news-kaderplanung-naechste-saison { --hero-photo-url: url('/assets/img/news/kaderplanung-naechste-saison.webp'); background-position: center center; }
+.hero-photo.hero-news-neuzugaenge-international { --hero-photo-url: url('/assets/img/news/neuzugaenge-international.webp'); background-position: center 30%; }
+.hero-photo.hero-news-saisonstart-neunte-saison { --hero-photo-url: url('/assets/img/news/saisonstart-neunte-saison.webp'); background-position: center 25%; }
+.hero-photo.hero-news-nachwuchs-nbbl-fokus { --hero-photo-url: url('/assets/img/spieler/fotso-sighom.webp'); background-position: center 15%; }
+.hero-photo.hero-news-testspiel-breitenguessbach { --hero-photo-url: url('/assets/img/news/testspiel-breitenguessbach.webp'); background-position: center 30%; }
+.hero-photo.hero-news-catl-partnerschaft-neuausrichtung { --hero-photo-url: url('/assets/img/news/catl-partnerschaft-neuausrichtung.webp'); background-position: center 70%; }
+.hero-photo.hero-news-catl-verlaengert { --hero-photo-url: url('/assets/img/news/catl-verlaengert.webp'); background-position: center center; }
 
-/* Hero-Variante für die Startseite — Platz für eine Seiten-Box (Top-News/Heimspiel).
+/* Hero-Variante für die Startseite — Platz für das Spieltags-Widget.
    Höhe kommt vom vereinheitlichten .hero-photo-Basiswert, hier nur noch Layout/Typo. */
 .hero-photo.hero-lg { --hero-photo-url: url('/assets/img/hero-startseite-alt.webp'); background-position: center 20%; }
 .hero-photo.hero-lg .container { padding-top: 56px; padding-bottom: 56px; }
@@ -2010,25 +2056,6 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .hero-side-card { position: relative; padding-right: 40px; }
 .hero-side-card h3 { margin: 8px 0 10px; }
 .hero-side-card .btn { margin-top: 14px; }
-/* Testhilfe: Umschalter zwischen den beiden Hero-Widget-Varianten (siehe
-   js/home-hero-widget-toggle.js) — vor der finalen Entscheidung wieder entfernen. */
-.hero-widget-toggle {
-  position: absolute; right: 10px; bottom: 10px; z-index: 3;
-  width: 26px; height: 26px; border-radius: 50%; padding: 0;
-  display: inline-flex; align-items: center; justify-content: center;
-  background: rgba(0,18,45,.08); border: 1px solid rgba(0,18,45,.14);
-  color: var(--text-secondary); cursor: pointer;
-  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
-}
-.hero-widget-toggle:hover { background: var(--color-brand-orange); color: #fff; border-color: var(--color-brand-orange); }
-.news-slides { display: grid; overflow: hidden; }
-.news-slide {
-  grid-area: 1 / 1; opacity: 0; transform: translateY(100%);
-  transition: transform var(--dur-slow) var(--ease-out), opacity var(--dur-slow) var(--ease-out);
-}
-.news-slide.is-active { opacity: 1; transform: translateY(0); }
-.news-slide.is-leaving { opacity: 0; transform: translateY(-100%); }
-.news-slide.no-anim { transition: none; }
 .news-dots {
   position: absolute; top: 24px; right: 16px; bottom: 24px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
@@ -2048,8 +2075,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 }
 .news-dot:hover::before { background: var(--color-orange-100); }
 .news-dot.is-active::before { background: var(--color-brand-orange); }
-/* Nächstes-Heimspiel-Widget: einfacher Klick-Umschalter (kein Auto-Wechsel), nutzt
-   dieselben Punkte (.news-dot) wie der Top-News-Slider. */
+/* Spieltags-Widget im Homepage-Hero: einfacher Klick-Umschalter (kein Auto-Wechsel). */
 .next-game-slide { display: none; }
 .next-game-slide.is-active { display: block; }
 @media (max-width: 1023px) {
@@ -2228,6 +2254,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .fixture-mid .matchup { font-size: 16px; font-weight: var(--weight-bold); margin: 4px 0; }
 .fixture-mid .venue { font-size: 13px; color: var(--text-secondary); }
 .fixture-result { font-size: 22px; font-weight: var(--weight-black); }
+#next-game-card .fixture-result { font-size: 34px; }
 
 /* Spielplan: nach Kalendertag gruppierte Karten (mehrere Teams pro Tag möglich) */
 .fixture-day {
@@ -2270,7 +2297,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .team-badge-damen { background: var(--color-orange-50); color: var(--color-orange-700); }
 .team-badge-nbbl { background: var(--color-blue-100); color: var(--color-blue-700); }
 .fixture-day-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-.fixture-result-row { display: flex; align-items: center; gap: 8px; }
+.fixture-result-row { display: flex; align-items: center; gap: 8px; min-height: 26px; }
 @media (max-width: 599px) {
   .fixture-day-game { grid-template-columns: 1fr; text-align: left; }
   .fixture-day-actions { align-items: flex-start; margin-top: 4px; }
@@ -2306,7 +2333,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .ticket-row-meta a { color: inherit; }
 .ticket-row-meta a:hover { color: var(--color-brand-orange); text-decoration: underline; }
 .ticket-row-vvk { margin-top: 10px; }
-.cal-link { display: inline-flex; align-items: center; color: var(--text-secondary); transition: color var(--dur-fast) var(--ease-out); }
+.cal-link { display: inline-flex; align-items: center; justify-content: center; color: var(--text-secondary); transition: color var(--dur-fast) var(--ease-out); padding: 6px; margin: -6px; border-radius: 8px; }
 .cal-link:hover { color: var(--color-brand-orange); }
 .ticket-sidebar {
   position: sticky; top: 96px; background: #fff; border: 1px solid var(--border);
@@ -2507,14 +2534,14 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .footer-leagues-logos-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .league-chip {
   display: inline-flex; align-items: center; justify-content: center;
-  height: 44px; padding: 6px 16px; border-radius: var(--radius-md);
+  height: 44px; padding: 4px 12px; border-radius: var(--radius-md);
   background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14);
   transition: background var(--dur-fast) var(--ease-out);
 }
 a.league-chip:hover { background: rgba(255,255,255,.16); text-decoration: none; }
 .league-chip-light { background: #fff; border-color: var(--border); }
 a.league-chip-light:hover { background: var(--bg-subtle); }
-.footer-leagues-logos-row img { height: 26px; width: auto; display: block; }
+.footer-leagues-logos-row img { height: 36px; width: auto; display: block; }
 .footer-social { display: flex; gap: 16px; margin-top: 21px; }
 .footer-social a {
   display: inline-flex; align-items: center; justify-content: center; color: #fff;
@@ -2715,6 +2742,12 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
 #responsible-grid .panini-card-info { border-top-color: var(--color-brand-orange); }
 .panini-card-name { font-weight: var(--weight-extrabold); font-size: 13px; line-height: 1.2; color: var(--color-brand-navy); }
 .panini-card-meta { font-size: 11px; line-height: 1.3; color: var(--text-muted); margin-top: 2px; min-height: 2.6em; }
+/* Nachwuchstrainer-Kacheln (saison/nachwuchs.html): Namen sind unterschiedlich
+   lang (z.B. "Yaqub Mohammad" bricht in der schmalen 8er-Reihe eher um als
+   "Paul Bude") -- ohne feste Mindesthoehe hier variiert dadurch der Info-
+   Block und damit (wegen aspect-ratio auf .panini-card) die Fotohoehe
+   zwischen den Kacheln (Marko, 27.09.2026: "sieht unruhig aus"). */
+#nachwuchstrainer-grid .panini-card-name { min-height: 2.4em; display: flex; align-items: center; justify-content: center; }
 .panini-card.is-empty .panini-card-name { color: var(--text-muted); font-weight: var(--weight-semibold); }
 .panini-wrap { position: relative; cursor: pointer; }
 .panini-wrap:focus-visible .panini-card { outline: 2px solid var(--color-brand-orange); outline-offset: 2px; }
@@ -2764,7 +2797,7 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
 /* Profis-Kader-Collage ist ein echtes, zusammengesetztes Bild (16 eigene
    Spielerportraits), kein unkenntlich gemachtes Alt-Foto -- Weichzeichner
    und Zoom der generischen Regel oben gelten hier nicht (Marko, 18.09.2026). */
-.teamfoto-placeholder.is-collage img { filter: none; transform: none; }
+.teamfoto-placeholder.is-real img { filter: none; transform: none; }
 .teamfoto-placeholder-note {
   position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 4px; background: rgba(0,18,45,.35); color: #fff; font-size: 12px; font-weight: var(--weight-semibold);
@@ -2833,6 +2866,9 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
 .team-badge-usv-erfurt { background: #E7E5F5; color: #29216E; }
 .team-badge-usv-erfurt:hover { filter: brightness(0.95); }
 .team-badge-loewinnen { background: var(--color-orange-100); color: var(--color-orange-700); }
+.team-badge-loewen { background: var(--color-orange-100); color: var(--color-orange-700); }
+.team-badge-big-gotha { background: #E3F5E1; color: #1F7A3D; }
+.team-badge-big-gotha:hover { filter: brightness(0.95); }
 .training-row-zeiten { display: flex; flex-direction: column; gap: 14px; font-size: 14px; }
 .training-slot { display: flex; flex-direction: column; gap: 2px; }
 .training-slot-zeit, .training-slot-ort { display: flex; align-items: center; gap: 6px; }
@@ -2855,6 +2891,7 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
 .training-row-trainer .team-badge { margin-bottom: 10px; }
 .training-row-trainer-label { font-weight: var(--weight-semibold); color: var(--text-primary); margin-bottom: 2px; }
 .training-row-probetraining { display: inline-block; margin-top: 4px; font-size: 13px; font-weight: var(--weight-semibold); }
+.training-row-probetraining-stop { display: inline-block; margin-top: 4px; font-size: 13px; font-weight: var(--weight-semibold); color: var(--color-error); }
 @media (max-width: 700px) {
   .training-row { grid-template-columns: 1fr; text-align: left; gap: 12px; }
   .training-row-trainer { align-items: flex-start; }
@@ -2912,3 +2949,36 @@ a.training-group-header:hover { color: var(--color-brand-orange); }
 .flip-card-back .card-body p { color: rgba(255,255,255,.85); margin: 2px 0 0; }
 .flip-card-back .card-label { color: rgba(255,255,255,.6); }
 .flip-card[hidden] { display: none; }
+
+
+/* Faktenliste im Pressebereich: Begriff und Angabe nebeneinander, damit die
+   Zahlen ueberflogen werden koennen. Unter 600px untereinander, sonst wird
+   die rechte Spalte zu schmal fuer Namenslisten. */
+.fakten-liste { display: grid; grid-template-columns: minmax(150px, 30%) 1fr; gap: 10px 20px; margin: 0; }
+.fakten-liste dt { font-weight: 600; color: var(--text-secondary); font-size: 14px; line-height: 1.5; }
+.fakten-liste dd { margin: 0; font-size: 15px; line-height: 1.55; }
+.fakten-liste dt + dd { border-bottom: 0; }
+@media (max-width: 599px) {
+  .fakten-liste { grid-template-columns: 1fr; gap: 2px 0; }
+  .fakten-liste dd { margin-bottom: 12px; }
+}
+
+
+/* Pressefoto-Raster: Vorschau gross genug zum Erkennen des Motivs, darunter
+   Titel, Bildnachweis und der Download des Originals. Kein Slider -- wer ein
+   Foto fuer einen Artikel sucht, will alle auf einmal sehen. */
+.pressefoto-raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; margin-top: 8px; }
+.pressefoto { margin: 0; background: var(--surface, #fff); border: 1px solid var(--border, #e2e8f0); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
+.pressefoto > a { display: block; line-height: 0; }
+.pressefoto img { width: 100%; height: 170px; object-fit: cover; transition: transform .25s ease; }
+.pressefoto > a:hover img, .pressefoto > a:focus-visible img { transform: scale(1.03); }
+.pressefoto figcaption { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 3px; }
+.pressefoto-titel { font-weight: 600; font-size: 14px; line-height: 1.4; }
+.pressefoto-quelle { font-size: 12px; color: var(--text-muted, #64748b); margin-bottom: 4px; }
+@media (prefers-reduced-motion: reduce) { .pressefoto img { transition: none; } .pressefoto > a:hover img { transform: none; } }
+
+
+/* Paketliste in der Pressefoto-Kachel: je Bereich eine Zeile, damit man den
+   passenden Ausschnitt laedt statt aller Fotos. */
+.presse-pakete { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+.presse-pakete .card-link { font-size: 13px; }

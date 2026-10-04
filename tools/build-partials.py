@@ -37,6 +37,18 @@ PARTIALS = {
     "footer": REPO / "partials" / "footer.html",
 }
 
+# news/insta-archiv/ gehört dem n8n-Workflow "Website: News - Social Instagram
+# abrufen" und wird von build-head-meta.py deshalb schon ausgenommen. Dieses
+# Skript lief bisher ungefiltert über tracked_html() und schrieb Header/Footer
+# auch in frisch archivierte Insta-Seiten - genau die Luecke, an der
+# build-bildmasse.py den "Freiplaetze nachbauen"-Lauf am 28.09.2026 scheitern
+# liess (dort committet der Workflow nur seine eigene Dateiliste, die
+# insta-archiv-Aenderung blieb ungestaged, `git commit` fand nichts und
+# schlug fehl). spieltagsseiten-nachbauen.yml, das dieses Skript aufruft, hat
+# zwar eine zweite `git diff --cached --quiet`-Bremse und ist deshalb nicht
+# abgestuerzt - unnoetig angefasst wurden die Insta-Seiten trotzdem.
+SKIP_PREFIXES = ("news/insta-archiv/",)
+
 
 def block(name, inhalt):
     """Selbstbegrenzender Block, damit ein zweiter Lauf ihn eindeutig wiederfindet."""
@@ -72,6 +84,8 @@ def main():
     geaendert, unveraendert, probleme = [], [], []
 
     for rel in tracked_html():
+        if rel.startswith(SKIP_PREFIXES):
+            continue
         pfad = REPO / rel
         alt = pfad.read_text(encoding="utf-8")
         neu = alt

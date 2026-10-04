@@ -121,10 +121,11 @@ def hero(s, heute):
     zeit = s.get("zeit")
     zeile = lang_datum(s) + (f" · {zeit} Uhr" if zeit else "")
     # Dauerkarte-CTA nur bis DAUERKARTE_CTA_STICHTAG sichtbar (Marko,
-    # 27.08.2026), Beschriftung/Markup wortgleich zu den anderen Dauerkarte-CTAs
-    # der Seite (saison/profis.html, saison/tabelle.html, saison/spielplan.html)
-    # -- "Bis Weihnachten" ist nur die Sichtbarkeits-Regel, nicht Teil des Texts.
-    knopf = ('<a class="btn btn-primary" style="color:#fff" href="/tickets/dauerkarte.html">'
+    # 27.08.2026). Bewusst zurueckhaltender als ein gefuellter Button (Marko,
+    # 29.09.2026): Wer über diese Seite kommt, will fast immer ein Einzelticket
+    # fuer genau dieses Spiel -- die Dauerkarte ist hier nur ein Hinweis am
+    # Rande, kein Wettbewerb um die Hauptaufmerksamkeit.
+    knopf = ('<a class="btn btn-outline-orange-dark" href="/tickets/dauerkarte.html">'
              '<i data-lucide="ticket" class="icon-16"></i> Dauerkarte kaufen</a>'
              if heute <= DAUERKARTE_CTA_STICHTAG else "")
     # Zeit- und Ort-Zeile getrennt, Kalenderlink vorn in der Zeit-Zeile (Marko,
@@ -260,13 +261,6 @@ WISSENSWERTES_HTML = """      <span class="eyebrow" style="display:block;margin-
           </div>
           <p class="t-body-sm">Alle Regelungen zu Kauf, Rücknahme und Verlust findest du in unseren <a href="/agb.html">AGB</a>.</p>
         </div>
-        <div class="info-tile info-tile-row info-tile-row-divided">
-          <div class="info-tile-row-head">
-            <div class="tile-icon"><i data-lucide="chart-no-axes-column"></i></div>
-            <h3 class="t-h4">Auslastung</h3>
-          </div>
-          <div id="seatplan-occupancy"><p class="t-body-sm" style="color:var(--text-muted)">Wird geladen …</p></div>
-        </div>
       </div>"""
 
 
@@ -347,7 +341,7 @@ def kauf_bereich(aktuell, kommt, heute):
       <div class="section-head">
         <div class="head-text" style="max-width:none">
           <span class="eyebrow">Game Day</span>
-          <h2 class="t-h2">Ticket kaufen</h2>
+          <h2 class="t-h2">Einzelticket kaufen</h2>
         </div>
       </div>
       <div class="buy-grid mt-5">
@@ -382,7 +376,7 @@ def kauf_bereich(aktuell, kommt, heute):
   </section>
 
   <script src="/js/voucher-utils.js?v=1786873000"></script>
-  <script src="/js/seat-picker.js?v=1789506036"></script>
+  <script src="/js/seat-picker.js?v=1790840855"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {{
       var game = {game_json};
@@ -416,8 +410,7 @@ def kauf_bereich(aktuell, kommt, heute):
         standingBookable: game.stehplatzBuchbar !== false,
         cartEl: document.getElementById('seatplan-cart'),
         totalEl: document.getElementById('seatplan-total'),
-        ctaEl: document.getElementById('seatplan-cta'),
-        occupancyEl: document.getElementById('seatplan-occupancy')
+        ctaEl: document.getElementById('seatplan-cta')
       }});
 
       document.getElementById('seatplan-cta').addEventListener('click', function () {{
@@ -565,8 +558,8 @@ def seite(liste, heute):
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1789923276" />
-<link rel="stylesheet" href="/css/seat-picker.css?v=1787760512" />
+<link rel="stylesheet" href="/css/site.css?v=1790863058" />
+<link rel="stylesheet" href="/css/seat-picker.css?v=1790840855" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.

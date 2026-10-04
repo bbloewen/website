@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Ausschank — Basketball Löwen Erfurt</title>
+<link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
+<link rel="stylesheet" href="/css/colors_and_type.css" />
+<link rel="stylesheet" href="/css/site.css" />
+<style>
+  /* Eigenstaendiges Kassentool fuer den Ausschank (Marko, 01.10.2026): kein Lagerbestand,
+     keine Bestellhistorie, kein Backend - reine Client-Rechenlogik. Tagesumsatz/
+     Kassenschnitt laufen ueber die Sparkassen-POS-App, nicht ueber dieses Tool. Oberste
+     Prioritaet: schnell und zuverlaessig am Stand, deshalb ein einziger Bildschirm ohne
+     Zwischenschritte - Mengen stehen direkt als Zaehler auf der Kachel, kein separater
+     Warenkorb-Bereich zum Gegenchecken noetig. */
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  /* Eigene Flex-Spalte ueber die GANZE Seite (au-page) statt einer fixen Gesamt-Leiste mit
+     geratenem padding-bottom (Marko, 01.10.2026: "Bereich mit Gesamtbetrag/Jetzt bestellen
+     liegt ueber den unteren Kacheln drueber" - die fruehere 140px-Reserve passte nicht zur
+     tatsaechlichen Leisten-Hoehe). So reserviert der Browser selbst exakt den Platz, den
+     au-bar als normales Flex-Kind wirklich braucht; au-content bekommt den Rest. min-height:0
+     an jeder Flex-/Grid-Stufe ist Pflicht, sonst wuerden die Kacheln (min-height) den
+     verfuegbaren Platz sprengen statt sich einzupassen - derselbe Mangel liess die Kacheln
+     zuletzt zu gross werden. grid-template-rows kommt aus JS (Math.ceil(PRODUCTS.length/4)). */
+  /* 100vh zaehlt auf dem iPad/iOS Safari die (einblendbare) Symbolleiste mit ein, obwohl
+     die den sichtbaren Bereich verkleinert - die Seite wurde dadurch hoeher gerendert als
+     tatsaechlich sichtbar, die Gesamt-Leiste rutschte unten raus (Marko, 01.10.2026, Live-
+     Test auf dem iPad). 100dvh (dynamische Viewport-Hoehe) passt sich dem echten sichtbaren
+     Bereich an; 100vh bleibt als Fallback fuer Browser ohne dvh-Unterstuetzung stehen. */
+  .au-page { max-width: 1100px; height: 100vh; height: 100dvh; margin: 0 auto; display: flex; flex-direction: column; }
+  .au-content { flex: 1; min-height: 0; display: flex; align-items: stretch; gap: 10px; padding: 16px 16px 10px; }
+  .au-main { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+
+  .au-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+  /* Kassenzettel-Aufschluesselung rechts (Marko, 01.10.2026: "nachvollziehen, wie sich
+     der Gesamtpreis zusammensetzt") - bewusst klein/unauffaellig, keine Bedienelemente
+     ausser dem Ein/Aus-Griff daneben, nur Lesehilfe. overflow-y:auto als Sicherheitsnetz,
+     falls ein langer Warenkorb mal mehr Platz braucht als die Spalte hoch ist. Bricht unter
+     die Kacheln um, wenn der Platz (schmales Tablet-Hochformat) nicht fuer beides reicht. */
+  .au-receipt { width: 220px; flex-shrink: 0; overflow-y: auto; font-size: 0.78rem; color: var(--text-muted);
+    background: var(--surface-1, #f3f3f1); border: 1px solid var(--border-strong, #ccc);
+    border-radius: 10px; padding: 10px 12px; }
+  .au-receipt[hidden] { display: none !important; }
+  .au-receipt { display: flex; flex-direction: column; }
+  .au-reset { margin: 10px 0 6px; padding: 8px 10px; border: 1px solid var(--border-strong, #ccc);
+    border-radius: 8px; background: transparent; color: var(--color-brand-navy, #00122d);
+    font-size: 0.78rem; font-weight: 600; cursor: pointer; width: 100%; }
+  .au-reset:disabled { opacity: .35; cursor: default; }
+  .au-diag { display: none; margin-top: auto; position: sticky; bottom: 0; align-self: flex-end;
+    width: 32px; height: 32px; padding: 0; border: 0; border-radius: 8px; background: transparent;
+    color: var(--text-muted, #666); opacity: .5; cursor: pointer; align-items: center; justify-content: center; }
+  .au-diag.au-diag-visible { display: flex; }
+  .au-receipt-title { font-weight: 700; font-size: 0.85rem; color: var(--color-brand-navy, #00122d);
+    margin-bottom: 6px; }
+  .au-receipt-empty { font-style: italic; opacity: .75; }
+  .au-receipt-line { padding: 3px 0; border-bottom: 1px solid rgba(0,0,0,.06); }
+  .au-receipt-line:last-child { border-bottom: none; }
+  .au-receipt-row { display: flex; justify-content: space-between; gap: 6px; }
+  .au-receipt-unit { opacity: .75; }
+  .au-receipt-total { display: flex; justify-content: space-between; margin-top: 8px;
+    padding-top: 6px; border-top: 1px solid var(--border-strong, #ccc); font-weight: 700;
+    color: var(--color-brand-navy, #00122d); }
+  /* Wie schon bei #seatplan-cta in der Abendkasse: eine Klassen-Regel mit explizitem
+     display sticht die browsereigene [hidden]-Vorgabe sonst aus. */
+  .au-receipt-total[hidden] { display: none !important; }
+
+  /* Griff am Rand statt Knopf oben drueber (Marko, 01.10.2026: "liegt als Overlay ueber
+     dem Kassenzettel drueber, sieht unschoen aus" - wie der Ein-/Ausblenden-Pfeil fuer den
+     Browser-Bereich in diesem Interface). Eigenes Flex-Kind direkt zwischen au-main und
+     au-receipt, keine Ueberlappung. Immer erreichbar (auch wenn der Zettel gerade
+     ausgeblendet ist), daher ausserhalb von .au-receipt platziert. */
+  .au-zettel-handle { flex-shrink: 0; width: 22px; align-self: stretch; display: flex;
+    align-items: center; justify-content: center; border: 1px solid var(--border-strong, #ccc);
+    background: var(--surface-1, #f3f3f1); border-radius: 8px; color: var(--text-muted);
+    font-size: 1rem; cursor: pointer; }
+  .au-zettel-handle:active { background: var(--surface-2, #e9e9e6); }
+
+  @media (max-width: 640px) {
+    .au-page { height: auto; }
+    .au-content { flex-direction: column; }
+    .au-main { min-height: 0; }
+    .au-zettel-handle { display: none; }
+    /* 2 statt 4 Spalten - sonst liefe die vierte Kachel auf Telefonbreite aus dem
+       Bildschirm raus (horizontales Scrollen). iPad-Breiten liegen weit darueber. */
+    .au-grid { grid-template-columns: repeat(2, 1fr) !important; grid-template-rows: none !important; }
+    .au-receipt { width: 100%; }
+  }
+  /* Hintergrundfarbe kommt je Produkt per Inline-Style (s. PRODUCTS/bg) - sticht die
+     Klassen-Regel unten dank hoeherer Spezifitaet automatisch aus, :active arbeitet
+     deshalb bewusst per Skalierung statt Hintergrundwechsel (Marko, 01.10.2026:
+     "Kacheln andersfarbig, damit man sie besser unterscheiden kann"). */
+  .au-tile { position: relative; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 4px; min-height: 0; padding: 8px 10px;
+    background: var(--surface-1, #f3f3f1); border: 2px solid var(--border-strong, #ccc);
+    border-radius: 14px; cursor: pointer; text-align: center; -webkit-user-select: none;
+    user-select: none; -webkit-tap-highlight-color: transparent; transition: transform .08s; }
+  .au-tile:active { transform: scale(.96); }
+  .au-tile.au-active { border-color: var(--color-brand-navy, #00122d); border-width: 3px; }
+  .au-tile-name { font-size: 1.05rem; font-weight: 700; line-height: 1.25; color: var(--color-brand-navy, #00122d); }
+  .au-tile-price { font-size: 0.95rem; color: var(--color-brand-navy, #00122d); opacity: .72; }
+
+  .au-badge { position: absolute; top: -10px; right: -10px; min-width: 32px; height: 32px;
+    padding: 0 6px; border-radius: 50%; background: var(--brand-orange, #d9802e); color: #fff;
+    font-size: 1.05rem; font-weight: 700; display: flex; align-items: center;
+    justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.25); }
+
+  .au-minus { position: absolute; bottom: -10px; left: -10px; width: 36px; height: 36px;
+    border-radius: 50%; border: 2px solid var(--border-strong, #999); background: #fff;
+    font-size: 1.3rem; line-height: 1; display: none; align-items: center; justify-content: center; }
+  .au-tile.au-active .au-minus { display: flex; }
+
+  /* Normales Flex-Kind von au-page statt position:fixed (s. Kommentar oben bei au-page) -
+     der Browser reserviert dadurch automatisch die exakt richtige Hoehe. */
+  .au-bar { flex-shrink: 0; background: var(--surface-page, #fff);
+    border-top: 2px solid var(--border-strong, #ccc); padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+    box-shadow: 0 -4px 14px rgba(0,0,0,0.08); }
+  .au-bar-inner { display: flex; align-items: center;
+    justify-content: space-between; flex-wrap: wrap; gap: 10px 16px; }
+  .au-total-label { font-size: 1rem; color: var(--text-muted); }
+  .au-total { font-size: 2rem; font-weight: 800; white-space: nowrap; }
+  .au-fertig { font-size: 1.2rem; padding: 16px 24px; white-space: nowrap; }
+  .au-fertig:disabled { opacity: 0.4; }
+
+  /* Betrags-Einblendung nach "Jetzt bestellen" (Marko, 01.10.2026): kein voller
+     Bildschirm, kein Begleittext - nur der grosse Betrag selbst, ueber den Kacheln und
+     dem Kassenzettel schwebend, blendet ueber FERTIG_OVERLAY_MS (Konstante, Marko testet
+     die Dauer noch live) wieder aus. Deckt per pointer-events nur waehrend des Sichtbar-
+     Seins Taps ab ("danach kann wieder bestellt werden") - per Opacity-Transition statt
+     hidden/display, weil sich display nicht weich ausblenden laesst. Eigener weisser
+     Hintergrund nur um die Zahl selbst (nicht bildschirmfuellend), damit die Zahl auf
+     JEDER Kachelfarbe darunter lesbar bleibt. */
+  .au-overlay { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center;
+    justify-content: center; opacity: 0; pointer-events: none; transition: opacity .5s ease; }
+  .au-overlay.au-overlay-visible { opacity: 1; pointer-events: auto; }
+  .au-overlay-total { font-size: 5rem; font-weight: 800; color: var(--color-brand-navy, #00122d);
+    background: rgba(255,255,255,.95); padding: 20px 44px; border-radius: 24px;
+    box-shadow: 0 10px 40px rgba(0,0,0,.3); }
+</style>
+</head>
+<body>
+<div class="au-page">
+  <div class="au-content">
+    <div class="au-main">
+      <div class="au-grid" id="au-grid"></div>
+    </div>
+    <button type="button" class="au-zettel-handle" id="au-zettel-toggle" aria-label="Kassenzettel ein-/ausblenden">»</button>
+    <div class="au-receipt" id="au-receipt">
+      <div class="au-receipt-title">Kassenzettel</div>
+      <div id="au-receipt-lines"><div class="au-receipt-empty">Noch keine Artikel</div></div>
+      <div class="au-receipt-total" id="au-receipt-total" hidden>
+        <span>Gesamt</span><span id="au-receipt-total-amount">0,00 €</span>
+      </div>
+      <button type="button" class="au-reset" id="au-reset" disabled>Warenkorb zurücksetzen</button>
+      <button type="button" class="au-diag" id="au-diag" aria-label="Kassen-Einstellungen"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="7" x2="21" y2="7"/><circle cx="9" cy="7" r="2.2" fill="var(--bg-page,#fff)"/><line x1="3" y1="17" x2="21" y2="17"/><circle cx="15" cy="17" r="2.2" fill="var(--bg-page,#fff)"/></svg></button>
+    </div>
+  </div>
+
+  <div class="au-bar">
+    <div class="au-bar-inner">
+      <div>
+        <div class="au-total-label">Gesamt</div>
+        <div class="au-total" id="au-total">0,00 €</div>
+      </div>
+      <button type="button" class="btn btn-primary au-fertig" id="au-fertig" disabled>Jetzt bestellen</button>
+    </div>
+  </div>
+</div>
+
+<div class="au-overlay" id="au-overlay">
+  <div class="au-overlay-total" id="au-overlay-total">0,00 €</div>
+</div>
+
+<script src="opi-bridge.js?v=7"></script>
+<script>
+  (function () {
+    var b = document.getElementById('au-diag');
+    if (b && window.OpiBridge && window.OpiBridge.isAvailable()) {
+      b.classList.add('au-diag-visible');
+      b.addEventListener('click', function () { window.OpiBridge.openDiagnose(); });
+    }
+  })();
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  // Pfand bewusst als eigene, manuell antippbare Position statt automatisch an einzelne
+  // Getraenke gekoppelt (Marko-Preisliste nennt "Pfand: 1 €" nur einmal, nicht pro Produkt -
+  // welcher Becher/welches Glas im Einzelfall Pfand bekommt, entscheidet das Personal direkt
+  // am Stand). "Pfand zurueck" negativ, fuer Kunden, die nur ihr Pfand abgeben.
+  //
+  // Pfand (1 €) haengt jetzt automatisch an jedem Produkt ausser Kaffee (Marko, 01.10.2026:
+  // "nur der Kaffee ist pfandfrei") - nicht mehr separat antippbar, damit es nie vergessen
+  // wird. Preis+Pfand stehen zusammen auf der Kachel ("3,50 € plus 1,00 €") und werden als
+  // EIN Tap/EINE Zeile gebucht; "Pfand zurueck" bleibt eigenstaendig fuer die Rueckgabe.
+  // Preisliste 26/27 (Marko, 02.10.2026, "Preisliste 26_27.pdf"): Pfand ist jetzt 2,00 EUR und
+  // haengt an den orange gedruckten Positionen (Bier, Radler, alkoholfreies Bier, Softdrinks,
+  // Wasser). Weisswein, Prosecco, Kaffee, Tee, Brezel und Schokoriegel sind pfandfrei.
+  var PRODUCTS = [
+    { key: 'helles', name: 'Löwenbräu Helles vom Fass 0,4 l', price: 5.00, pfand: 2.00, bg: 'hsl(42,65%,72%)' },
+    { key: 'radler', name: 'Radler 0,4 l', price: 5.00, pfand: 2.00, bg: 'hsl(78,50%,75%)' },
+    { key: 'afbier', name: 'Alkoholfreies Bier 0,33 l', price: 5.00, pfand: 2.00, bg: 'hsl(48,45%,78%)' },
+    { key: 'cola', name: 'Vita Cola Original', price: 4.00, pfand: 2.00, bg: 'hsl(15,45%,72%)' },
+    { key: 'cola_pur', name: 'Vita Cola Pur', price: 4.00, pfand: 2.00, bg: 'hsl(8,30%,68%)' },
+    { key: 'orange', name: 'Vita Orange', price: 4.00, pfand: 2.00, bg: 'hsl(28,70%,75%)' },
+    { key: 'zitrone', name: 'Vita Zitrone', price: 4.00, pfand: 2.00, bg: 'hsl(54,65%,78%)' },
+    { key: 'apfelschorle', name: 'Apfelschorle', price: 4.00, pfand: 2.00, bg: 'hsl(100,40%,75%)' },
+    { key: 'wasser_still', name: 'TWQ Still', price: 3.00, pfand: 2.00, bg: 'hsl(200,55%,80%)' },
+    { key: 'wasser_medium', name: 'TWQ Medium', price: 3.00, pfand: 2.00, bg: 'hsl(195,45%,72%)' },
+    { key: 'wein', name: 'Weißwein 0,2 l', price: 4.00, pfand: 0, bg: 'hsl(50,40%,80%)' },
+    { key: 'prosecco', name: 'Prosecco 0,1 l', price: 4.00, pfand: 0, bg: 'hsl(340,55%,83%)' },
+    { key: 'kaffee', name: 'Kaffee 0,25 l', price: 2.00, pfand: 0, bg: 'hsl(25,35%,62%)' },
+    { key: 'tee', name: 'Tee 0,25 l', price: 2.00, pfand: 0, bg: 'hsl(140,30%,72%)' },
+    { key: 'brezel', name: 'Butterbrezel', price: 3.50, pfand: 0, bg: 'hsl(35,55%,70%)' },
+    { key: 'riegel', name: 'Schokoriegel', price: 2.00, pfand: 0, bg: 'hsl(20,40%,66%)' },
+    { key: 'pfand_rueckgabe', name: 'Pfand zurück', price: -2.00, pfand: 0, bg: 'hsl(0,0%,88%)' }
+  ];
+
+  // Testwert (Marko, 01.10.2026: "ob die 3 Sekunden noetig sind, moechte ich noch testen") -
+  // einfach diese eine Zahl aendern, um die Overlay-Dauer anzupassen.
+  var FERTIG_OVERLAY_MS = 3000;
+
+  var counts = {};
+
+  function fmtEUR(n) {
+    var sign = n < 0 ? '-' : '';
+    return sign + Math.abs(n).toFixed(2).replace('.', ',') + ' €';
+  }
+
+  function total() {
+    return PRODUCTS.reduce(function (sum, p) { return sum + (counts[p.key] || 0) * (p.price + (p.pfand || 0)); }, 0);
+  }
+
+  function hasItems() {
+    return Object.keys(counts).some(function (k) { return counts[k] > 0; });
+  }
+
+  function render() {
+    PRODUCTS.forEach(function (p) {
+      var tile = document.getElementById('au-tile-' + p.key);
+      var qty = counts[p.key] || 0;
+      tile.classList.toggle('au-active', qty > 0);
+      var badge = tile.querySelector('.au-badge');
+      if (qty > 0) {
+        badge.style.display = 'flex';
+        badge.textContent = qty;
+      } else {
+        badge.style.display = 'none';
+      }
+    });
+    var t = total();
+    document.getElementById('au-total').textContent = fmtEUR(t);
+    document.getElementById('au-fertig').disabled = !hasItems();
+    document.getElementById('au-reset').disabled = !hasItems();
+    renderReceipt(t);
+  }
+
+  // Kassenzettel-Aufschluesselung (Marko, 01.10.2026): Produkt, Anzahl und Preis je
+  // Produkt (inkl. Pfand, derselbe Effektivpreis wie auf der Kachel/im Gesamtbetrag),
+  // damit nachvollziehbar bleibt, wie sich die Summe zusammensetzt. Nur Lesehilfe,
+  // keine eigenen Bedienelemente.
+  function renderReceipt(t) {
+    var linesEl = document.getElementById('au-receipt-lines');
+    var totalEl = document.getElementById('au-receipt-total');
+    var zeilen = PRODUCTS.filter(function (p) { return counts[p.key] > 0; });
+    if (!zeilen.length) {
+      linesEl.innerHTML = '<div class="au-receipt-empty">Noch keine Artikel</div>';
+      totalEl.hidden = true;
+      return;
+    }
+    linesEl.innerHTML = zeilen.map(function (p) {
+      var qty = counts[p.key];
+      var unit = p.price + (p.pfand || 0);
+      return '<div class="au-receipt-line">' +
+        '<div class="au-receipt-row"><span>' + qty + '× ' + p.name + '</span><span>' + fmtEUR(qty * unit) + '</span></div>' +
+        '<div class="au-receipt-unit">à ' + fmtEUR(unit) + '</div>' +
+      '</div>';
+    }).join('');
+    totalEl.hidden = false;
+    document.getElementById('au-receipt-total-amount').textContent = fmtEUR(t);
+  }
+
+  function add(key) {
+    counts[key] = (counts[key] || 0) + 1;
+    render();
+  }
+
+  function remove(key) {
+    if (!counts[key]) return;
+    counts[key] -= 1;
+    render();
+  }
+
+  var grid = document.getElementById('au-grid');
+  // 4 Spalten fest (s. CSS) - Zeilenzahl ergibt sich aus der Produktanzahl, damit die
+  // Kacheln die volle Bildschirmhoehe ausfuellen, egal wie viele Produkte es gerade sind.
+  grid.style.gridTemplateRows = 'repeat(' + Math.ceil(PRODUCTS.length / 4) + ', minmax(0, 1fr))';
+  PRODUCTS.forEach(function (p) {
+    var tile = document.createElement('div');
+    tile.className = 'au-tile' + (p.key === 'pfand_rueckgabe' ? ' au-pfand-zurueck' : '');
+    tile.id = 'au-tile-' + p.key;
+    tile.style.background = p.bg;
+    var priceText = fmtEUR(p.price) + (p.pfand ? ' plus ' + fmtEUR(p.pfand) : '');
+    tile.innerHTML =
+      '<span class="au-tile-name">' + p.name + '</span>' +
+      '<span class="au-tile-price">' + priceText + '</span>' +
+      '<span class="au-badge"></span>' +
+      '<button type="button" class="au-minus" aria-label="weniger">−</button>';
+    tile.addEventListener('click', function (e) {
+      if (e.target.closest('.au-minus')) return;
+      add(p.key);
+    });
+    tile.querySelector('.au-minus').addEventListener('click', function (e) {
+      e.stopPropagation();
+      remove(p.key);
+    });
+    grid.appendChild(tile);
+  });
+
+  // "Jetzt bestellen" statt "Fertig/Neuer Verkauf" (Marko, 01.10.2026): Das Personal liest
+  // den Betrag vor und fragt den Kunden, ob er passt - erst NACH dieser muendlichen
+  // Bestaetigung wird der Knopf getippt. Technisch bleibt es ein einziger Tap: Protokollierung
+  // ist reiner Kassennachweis fuer den spaeteren Kassenschnitt - das Geld fliesst unabhaengig
+  // davon ueber das Kartenterminal (manuell eingetippt, bis die Sparkassen-API verfuegbar ist -
+  // danach koennte dieser Call den Terminal-Betrag direkt mit ausloesen). Deshalb bewusst
+  // "fire and forget": kein await, kein Retry, kein Fehlerdialog. Der Knopf setzt den
+  // Warenkorb sofort zurueck, egal ob/wie schnell der Log-Call durchkommt - die Kasse darf
+  // dadurch nie ins Stocken geraten.
+  var overlay = document.getElementById('au-overlay');
+  var overlayTimer = null;
+
+  function hideOverlay() {
+    if (overlayTimer) { clearTimeout(overlayTimer); overlayTimer = null; }
+    overlay.classList.remove('au-overlay-visible');
+  }
+
+  // Antippen schliesst das Overlay sofort (falls das Personal schneller fertig ist als
+  // FERTIG_OVERLAY_MS) - der Timer unten schliesst es sonst von selbst per Fade-out.
+  overlay.addEventListener('click', hideOverlay);
+
+  var zahlungLaeuft = false;
+
+  function verkaufAbschliessen(terminalInfo) {
+    var items = PRODUCTS
+      .filter(function (p) { return counts[p.key] > 0; })
+      .map(function (p) { return { name: p.name, qty: counts[p.key], price: p.price, pfand: p.pfand || 0 }; });
+    if (items.length) {
+      fetch('https://ticketing.basketball-loewen.com/webhook/ausschank-verkauf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Kassen-Token': (window.OpiBridge && window.OpiBridge.token()) || '' },
+        body: JSON.stringify({ items: items, total: total(), terminal: terminalInfo || null })
+      }).catch(function () {});
+    }
+    document.getElementById('au-overlay-total').textContent = fmtEUR(total());
+    if (overlayTimer) clearTimeout(overlayTimer);
+    overlay.classList.add('au-overlay-visible');
+    // Fade-out beginnt so rechtzeitig vor FERTIG_OVERLAY_MS, dass die Opacity-Transition
+    // (s. CSS, .5s) genau zum Gesamt-Zeitpunkt fertig ausgeblendet ist.
+    overlayTimer = setTimeout(hideOverlay, Math.max(0, FERTIG_OVERLAY_MS - 500));
+    counts = {};
+    render();
+  }
+
+  // Verstecktes Barzahlen: 2 s auf die Gesamtsumme druecken (nur in der Kassen-App). Wird wie ein
+  // Terminalvorgang protokolliert, aber als "bar" markiert (Kassenabgleich).
+  if (window.OpiBridge && window.OpiBridge.isAvailable()) {
+    var summenBlock = document.getElementById('au-total').parentNode;
+    summenBlock.style.webkitUserSelect = 'none';
+    summenBlock.style.userSelect = 'none';
+    summenBlock.style.webkitTouchCallout = 'none';
+    window.OpiBridge.onLongPress(summenBlock, 2000, function () {
+      if (zahlungLaeuft || !hasItems()) return;
+      var betrag = total();
+      if (Math.abs(betrag) < 0.005) return;
+      var frage = betrag < 0
+        ? 'Barauszahlung: ' + fmtEUR(-betrag) + '\n\nBar ausgezahlt?'
+        : 'Barzahlung: ' + fmtEUR(betrag) + '\n\nBar kassiert?';
+      if (window.confirm(frage)) verkaufAbschliessen({ bar: true, refund: betrag < 0 });
+    });
+  }
+
+  // Schnellster Weg bei Vertippern: alles verwerfen (Marko, 02.10.2026).
+  document.getElementById('au-reset').addEventListener('click', function () {
+    if (zahlungLaeuft) return;
+    counts = {};
+    render();
+  });
+
+  document.getElementById('au-fertig').addEventListener('click', function () {
+    if (zahlungLaeuft || !hasItems()) return;
+
+    // Laeuft die Seite in der nativen Kassen-Bridge-App, wird die Kartenzahlung ZUERST
+    // am Terminal ausgeloest - erst nach Freigabe wird der Verkauf protokolliert und
+    // der Warenkorb geleert. Ohne die App (normaler Browser) bleibt der bisherige
+    // Ablauf (sofort protokollieren) unveraendert.
+    if (window.OpiBridge && window.OpiBridge.isAvailable()) {
+      zahlungLaeuft = true;
+      document.getElementById('au-fertig').disabled = true;
+      // Negativer Gesamtbetrag (nur Pfand zurueck): Gutschrift auf die Karte statt Zahlung.
+      // Gesamtbetrag 0 (z. B. Pfand genau gegen Getraenk): kein Terminalvorgang noetig.
+      var betrag = total();
+      if (Math.abs(betrag) < 0.005) {
+        zahlungLaeuft = false;
+        verkaufAbschliessen(null);
+        return;
+      }
+      var istGutschrift = betrag < 0;
+      var vorgang = istGutschrift ? window.OpiBridge.refund(-betrag) : window.OpiBridge.charge(betrag);
+      vorgang.then(function (result) {
+        zahlungLaeuft = false;
+        verkaufAbschliessen({
+          approvalCode: result.approvalCode,
+          cardCircuit: result.cardCircuit,
+          receiptNumber: result.receiptNumber,
+          refund: istGutschrift
+        });
+      }).catch(function (err) {
+        zahlungLaeuft = false;
+        // Abgebrochene/abgelehnte Zahlung: Warenkorb leeren, damit sofort die naechste
+        // Bestellung moeglich ist (Marko, 02.10.2026) - es wird nichts protokolliert.
+        counts = {};
+        render();
+        var unklar = err.terminal && err.terminal.unknown;
+        window.alert((istGutschrift ? 'Gutschrift fehlgeschlagen: ' : 'Zahlung fehlgeschlagen: ') + err.message + (unklar ? '' : ' — der Warenkorb wurde geleert, bitte neu eingeben.'));
+      });
+    } else {
+      verkaufAbschliessen(null);
+    }
+  });
+
+  // Zettel-Toggle (Marko, 01.10.2026: "ausblenden, damit die Kacheln noch groesser
+  // werden") - Zustand pro Geraet in localStorage gemerkt (reine Anzeige-Bequemlichkeit,
+  // nicht sicherheitsrelevant), try/catch da localStorage in manchen Kontexten (privates
+  // Fenster o.ae.) werfen kann.
+  (function () {
+    var STORAGE_KEY = 'ausschank-zettel-sichtbar';
+    var toggle = document.getElementById('au-zettel-toggle');
+    var receipt = document.getElementById('au-receipt');
+    var sichtbar = true;
+    try {
+      var gespeichert = localStorage.getItem(STORAGE_KEY);
+      if (gespeichert !== null) sichtbar = gespeichert === '1';
+    } catch (e) {}
+    function anwenden() {
+      receipt.hidden = !sichtbar;
+      // » = Zettel ist da, Klick schiebt ihn weg; « = Zettel ist weg, Klick holt ihn zurueck.
+      toggle.textContent = sichtbar ? '»' : '«';
+      toggle.title = sichtbar ? 'Kassenzettel ausblenden' : 'Kassenzettel einblenden';
+    }
+    anwenden();
+    toggle.addEventListener('click', function () {
+      sichtbar = !sichtbar;
+      anwenden();
+      try { localStorage.setItem(STORAGE_KEY, sichtbar ? '1' : '0'); } catch (e) {}
+    });
+  })();
+
+  render();
+});
+</script>
+</body>
+</html>

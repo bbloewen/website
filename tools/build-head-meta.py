@@ -180,6 +180,11 @@ DESC_RE = re.compile(r'<meta\s+name=["\']description["\']\s+content=["\'](.*?)["
 H1_RE = re.compile(r"<h1[^>]*>(.*?)</h1>", re.S)
 HERO_NEWS_RE = re.compile(r"hero-news-([a-z0-9-]+)")
 
+# Einzelne Unterseiten mit eigenem Hero-Bild, aber ohne News-Artikel-Struktur
+# (Quellbild + Zuschnitt: tools/build-share-images.py, STATIC_PAGE_SOURCES)
+STATIC_PAGE_IMAGES = {
+    "presse.html": "presse.jpg",
+}
 
 
 def jsonld(nodes):
@@ -193,6 +198,8 @@ def jsonld(nodes):
 
 def share_image(rel, text):
     """Seitenspezifisches Share-Bild, sonst das Standardbild."""
+    if rel in STATIC_PAGE_IMAGES:
+        return f"{BASE}assets/img/share/{STATIC_PAGE_IMAGES[rel]}"
     m = HERO_NEWS_RE.search(text)
     if m and (REPO / "assets" / "img" / "share" / f"news-{m.group(1)}.jpg").exists():
         return f"{BASE}assets/img/share/news-{m.group(1)}.jpg"

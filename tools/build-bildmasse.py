@@ -43,6 +43,15 @@ from seo_common import BASE, REPO, tracked_html
 # deshalb mitbehandelt werden, sonst kommen Bilder ohne Maße zurück.
 EXTRA = ["partials/header.html", "partials/footer.html"]
 
+# news/insta-archiv/ gehört dem n8n-Workflow "Website: News - Social Instagram
+# abrufen" (GpAS0ONrenHrcTwS), genau wie in build-head-meta.py ausgenommen.
+# Ohne diese Ausnahme schrieb dieses Skript hier Maße in frisch archivierte
+# Insta-Seiten, bevor der "Freiplaetze nachbauen"-Lauf sie committen konnte -
+# git add listet dort nur die eigenen generierten Dateien, also blieb die
+# Aenderung ungestaged liegen und `git commit` scheiterte mit "no changes
+# added to commit" (Fund 28.09.2026, Lauf 36412278780).
+SKIP_PREFIXES = ("news/insta-archiv/",)
+
 IMG = re.compile(r"<img\b[^>]*>", re.I)
 SRC = re.compile(r'\bsrc="([^"]+)"')
 HAT_MASS = re.compile(r"\b(width|height)\s*=", re.I)
@@ -112,7 +121,7 @@ def main():
     ap.add_argument("--check", action="store_true", help="nur berichten, nichts schreiben")
     args = ap.parse_args()
 
-    dateien = [f for f in tracked_html()] + EXTRA
+    dateien = [f for f in tracked_html() if not f.startswith(SKIP_PREFIXES)] + EXTRA
     geschrieben = offen = summe = rest = 0
     for rel in dateien:
         pfad = REPO / rel

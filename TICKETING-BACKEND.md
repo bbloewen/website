@@ -420,3 +420,470 @@ Rechnungsstellung und Buchhaltung ein und gehört separat geplant.
 pretix Diagnose (temporaer)", `4b5L1MxytRjBtzTZ`) mit der bestehenden Credential
 „Pretix XXL - Ticketing", zuerst rein lesend zur Diagnose, dann mit dem PATCH und einem
 separaten Kontroll-GET. Der Workflow wurde danach archiviert.
+
+## Ticketing-Dashboard: Gesamtzahl-Kachel und Saisonziel (24.09.2026)
+
+Das Ticketing-Dashboard ist **kein Teil dieses Repos** — es entsteht vollständig als
+Template-String im Code-Node „Board-HTML bauen" des n8n-Workflows „Ticketing:
+Gutschein-Board (Formulardaten + Erstellen)" (`AA0f7oo7dH7TDkFu`), ausgeliefert über
+`https://ticketing.basketball-loewen.com/webhook/ticketing/board`. Änderungen an der
+Seite laufen ausschließlich über n8n (`updateNodeParameters` mit vollständigem
+jsCode, danach `publish_workflow`), s. Notion-Referenz „Ticketing-Board" in der
+IT-Landschaft.
+
+Auf Marko-Wunsch zeigt der erste Tab („Tickets") jetzt ganz oben eine **Gesamtzahl**-
+Kachel: verkaufte Plätze gegen die tatsächliche Saison-Gesamtkapazität (aus den
+pretix-Kontingenten, summiert über alle Heimspiele — eine Dauerkarte zählt bewusst in
+jedem Spiel einzeln mit), sowie der Gesamterlös gegen ein Saisonziel.
+
+**Saisonziel Ticketing-Einnahmen: 50.000 €.** Liegt als Konstante `zielUmsatz` direkt
+im Alpine-State des Boards (im Code-Node, keine Data Table) — zum Ändern also den
+Wert im Code-Node anpassen und den Workflow neu veröffentlichen.
+
+### Nachtrag (24.09.2026): Plätze-vs-Tickets-Bug und Vergleich zur Saison 2025/26
+
+Eine Dauerkarte hat pro Heimspiel eine eigene pretix-Position, aber wegen des
+Flat-Preismodells (s. „Build pretix Order Payload") trägt nur die erste dieser
+Positionen den echten Saisonpreis — die übrigen 12–13 stehen auf `price: "0.00"`.
+Ein naives `price > 0`-Filtern pro Einzelposition zählt eine Dauerkarte deshalb in
+13 von 14 Spielen fälschlich als „unverkauft". Der Node „DK-Statistik aufbereiten"
+gruppiert Dauerkarten-Positionen deshalb über `(order code, seat_guid)` und wertet
+die ganze Gruppe als bezahlt, wenn irgendeine Position darin einen Preis > 0 hat.
+
+Daraus liefert der Endpunkt `/webhook/ticketing/dauerkarten-uebersicht` vier Zahlen
+für die Gesamtzahl-Kachel:
+- `gesamtKapazitaet` — Saison-Gesamtkapazität (ein Sitz × 14 Heimspiele)
+- `gesamtVerkauft` — belegte Plätze inkl. Freikarten (100 % Rabatt)
+- `gesamtWirklichVerkauft` — belegte Plätze, nur bezahlt (Haupt-Kennzahl der Kachel)
+- `gesamtWirklichVerkauftTickets` — Anzahl distinkter bezahlter Tickets/Käufe dahinter
+  (eine Dauerkarte über 14 Spiele zählt hier als 1 Ticket, nicht als 14 Plätze)
+
+Die Kachel vergleicht bewusst „verkauft vs. verkauft" mit der Saison 2025/26 (altes
+System, keine pretix-Daten): `gesamtWirklichVerkauft`/`gesamtWirklichVerkauftTickets`
+gegen die hartkodierten Werte 2.483 bezahlte Einzeltickets + 70 Dauerkarten. Die
+2025/26-Zuschauerzahl (11.149, 12 Heimspiele) enthält laut PPTX/Notion auch
+Freikarten und wird deshalb nur als separate Einordnungszeile gezeigt, nie als
+„verkauft" bezeichnet.
+
+## Gutschein bei Bestellung mit mehreren Plätzen (29.09.2026)
+
+**Vorfall:** Sponsorin Salus BKK bestellte zwei VIP-Dauerkarten (Bestellung `7PAEE`,
+Mandatsreferenz `DK-4VJWVB`). Es waren zwei Einzelgutscheine (je 100 %, 1× einlösbar)
+angelegt worden. Die Bestätigungsmail zeigte zwei Gutschein-Zeilen, der Gesamtbetrag
+stand aber bei 1.290 €.
+
+**Ursache:** Pro Bestellung wird serverseitig nur **ein** Code verrechnet
+(`cart.voucher` / `voucherCode` sind einfach, nicht Listen). Ist dieser Code nur
+1× einlösbar, wird nur ein Platz rabattiert. Auf der Website blieb das Gutscheinfeld
+nach dem Einlösen auf der Sitzplatzwahl aber sichtbar, weil `findVoucherLineIndex()`
+in `tickets/checkout.html` auf `'Gutschein '` (mit Leerzeichen) prüfte, die Zeilen aber
+`'Gutschein: …'` heißen. So konnte der Code im Checkout ein zweites Mal abgezogen
+werden: Anzeige 0 €, serverseitig aber 1.290 €. Dazu kam ein doppeltes „€" in der
+Rabattzeile (`formatMoney()` hängt das € schon an).
+
+**Fix im Repo:** Prüfung auf `'Gutschein'` in `checkout.html`, `confirmation.html`,
+`payment.html`; doppeltes „€" entfernt (Commit `58194d4e`).
+
+**Regel für Sponsoren/Ehrenamt mit mehreren Plätzen:** Einen einzigen Gutschein
+anlegen und bei „Anzahl Nutzungen" die Zahl der Plätze eintragen („Anzahl Gutscheine"
+bleibt 1), nicht mehrere Einzelgutscheine.
+
+**Manuelle Korrektur der Bestellung (über temporäre n8n-Workflows, danach archiviert):**
+- pretix: `POST …/orders/7PAEE/change/` mit `patch_positions` (Preis der Ankerposition
+  von Platz 14 auf `0.00`), `notify: false`, `reissue_invoice: false`; danach ist die
+  Bestellung von pretix selbst auf `p` gesetzt worden. Interne Notiz am Order-Kommentar.
+- Data Table „Lastschriften-Tickets" (`2vyxXBxm5m4IGGuq`), Zeile `DK-4VJWVB`:
+  `total` 0, `status` `bezahlt`, `voucherLineDiscounts` `[1290,1290]`,
+  `voucherDiscount` 2580, wie bei den anderen Nullbetrag-Bestellungen. Die
+  SEPA-Sammellastschrift holt nur Zeilen mit Status `angelegt` und überspringt
+  Nullbeträge, es kann also keine Abbuchung entstehen.
+- Zweiter Gutschein `SALUS-BKK-T2SYNQ` gesperrt: `valid_until` auf 29.09.2026 gesetzt
+  statt gelöscht, Grund im Kommentar.
+- Ticketmail: Die automatische Mail (Workflow `zNGWzRFz3ebzsDkD`) war beim
+  `order.paid`-Webhook an einem 409 „not ready" des PDF-Abrufs gescheitert. Nachgeholt
+  per POST an `…/webhook/pretix-order-event` mit `{organizer, event, code, action:
+  "pretix.event.order.paid"}`.
+
+## Einzelticket-Bestellung und Ticket-Mail repariert (29.–30.09.2026)
+
+**Auslöser:** Fehlgeschlagene VIP-Sponsorenbestellung `ET-6TARLH` (André Grenzdörffer für
+Arthur Grund, Gutschein `GRUND-B6YLH5`, 4 Plätze) und danach Fehler-Mails im
+Ticket-Mail-Workflow. Beide Workflows laufen nur in n8n, hier steht der Stand.
+
+**1. Workflow „Einzelticketbestellung verarbeiten" (`BmpBkKdzzSZaBnZE`), Node „Sitze zuordnen"**
+(Version `3bbbeec4`, 29.09. 20:27):
+- `resolveBlockKey` entscheidet jetzt bei VIP, Fanblock, „C unten", Rollstuhlplatz und
+  Stehplatz zuerst nach `category`, erst danach nach `zoneId`. Der Warenkorb liefert in
+  `zoneId` die physische Zone („B"), in `category` das Produkt („VIP"). Vorher wurde eine
+  VIP-Zeile zu „Block B" (Item 35, Reihe 6–12) statt zu VIP-Einzel (Item 40, Reihe 1–5),
+  und pretix lehnte den Item-40-Gutschein mit HTTP 400 ab.
+- Im Kostenlos-Zweig wird der Gutschein an jede gedeckte Position gehängt, bis zu den
+  Restnutzungen (Preis nach Rabatt, bei 100 % also 0,00), nicht nur an die erste. Wirft
+  einen Fehler, wenn das Item nicht zum Gutschein passt oder der Gesamtbetrag 0 ist, die
+  Positionspreise aber nicht 0 ergeben.
+- Offen: Im PayPal-Capture-Zweig bleibt das alte Verhalten (nur erste Position, keine
+  Item-Prüfung), dort fehlt der Gutschein-Kontext. Rollstuhlplatz-Bestellungen scheitern
+  weiter mit „Kein freier Sitzplatz", weil pretix nur die Zonen Block A–F kennt.
+- Alarmmail „Zahlung ohne Ticket": bei Gesamtbetrag 0 steht kein PayPal/Erstattungs-Text mehr.
+- Dauerkarten-Workflow (`HyUXW4kbhaQVbG0A`, „Build pretix Order Payload") hat dasselbe
+  `voucherAttached`-Muster (Gutschein nur an der ersten Position, bei Mehrfach-Gutschein
+  und mehreren Plätzen bleibt er wiederverwendbar). Noch nicht geändert.
+
+**2. Workflow „Reservierungen synchronisieren" (`zNGWzRFz3ebzsDkD`), sendet die Ticket-Mail**
+(Version `d7934b08`, 27 → 37 Nodes; Einzelticket-Workflow `59c34d4c`):
+- **Doppelversand:** pretix und der Einzelticket-Workflow (Node „Ticket-Mail ausloesen
+  (sofort bezahlt)") melden `order.paid` im Abstand von 0,06–0,15 s. Der zweite Aufruf
+  trägt jetzt `source: "direct"` und wartet im Ticket-Mail-Workflow 25 s
+  („Direkt-Trigger?" → „Vorrang fuer pretix-Event (25 s)"). Vor dem Senden wird die
+  Bestellung im Order-Kommentar per `[ticket-mail-laeuft:<Zeitstempel>]` reserviert
+  („Mail-Marker beanspruchen"), danach durch `[ticket-mail-versendet]` ersetzt. Eine
+  Reservierung älter als 20 Minuten gilt als verwaist. Bei Sendefehler wird sie
+  freigegeben. Der manuelle Retrigger (POST ohne `source`) wartet nicht.
+- **Fehlende Dateien:** pretix erzeugt Ticket-Dateien beim ersten Abruf und antwortet mit
+  HTTP 409 „not ready" (auch 500 und Abbrüche kamen vor). Die alten Wiederholungs-
+  Einstellungen griffen nicht, weil der Fehler als Ausgangs-Item ankam. Jetzt gibt es
+  echte Schleifen: PDF bis zu 12 Versuche, Passbook bis zu 6 (optional), je 5 s Pause,
+  409/429/5xx/Timeouts zählen als Wiederholung.
+- **Keine Teil-Mails mehr:** „Anhänge zusammenführen" vergleicht die PDFs mit den
+  Positionen. Fehlt eines, geht keine Kundenmail raus, sondern „Ticket-Mail
+  unvollstaendig: <Code>" an marko.fliege@ und die Reservierung wird entfernt. Fehlen nur
+  Passbooks, geht die Mail mit den PDFs raus.
+- **Getestet** an einer Kopie, die nur an Marko mailte (Race, 409-Wiederholung, dauerhafter
+  Ausfall, fehlende Passbooks, Dauerkarte), danach in Produktion bei Bestellung MC377
+  (Ausführung 79456, 3 von 3 PDFs). Zwei pretix-Ereignisse derselben Quelle innerhalb von
+  ca. 100 ms wären weiterhin theoretisch racy.
+
+**3. Betroffene Kunden (Stand 30.09.):** Doppelt, aber identisch: DSFZB, DQZLF, ZKYEU.
+Unvollständig: UHJPU (8 Plätze, Platz 2292 fehlte) und MC377 (Platz 2300 fehlte), für beide
+wurde die Mail nachgesendet (MC377 erledigt). `KMTVH` (Tickets für Arthur Grund, 4 VIP) erhielt
+vier Tickets in einer nachträglich gesendeten Mail.
+
+**4. Gutscheine der Einladung:** Die vier unbenutzten Einzelgutscheine `GRUND-V5RTKT`,
+`-3UEPBR`, `-UG9VW7`, `-VQBY7L` wurden gesperrt (`valid_until` 29.09.2026). Die
+Eintragszeile `ET-6TARLH` in „PayPal-Zahlungen" (`pABu2vTPT1WY4uNh`, Zeile 33) steht auf dem
+neuen Status `manuell_erledigt`; kein Workflow reagiert auf diesen Wert.
+
+## Ticket-PDFs von 2,4 MB auf 0,3 MB verkleinert (30.09./01.10.2026)
+
+**Ursache:** Der Hintergrund der pretix-Ticketlayouts war ein PDF (ReportLab) mit 50 Bildern,
+97 % der Ticketgröße: Sponsorenlogos mit bis zu 4.568 dpi, ASCII85-kodiert, und 16 von 29
+Bildern lagen komplett unter weißen Flächen (alter Ballast). pretix bettet den Hintergrund
+in jedes Ticket neu ein, daher 2,42 MB je Ticket. Eine Mail mit 8 Tickets war damit über
+Gmails 25-MB-Grenze (7 Tickets passten gerade noch).
+
+**Fix:** Hintergrund neu geschrieben (Bilder auf 250 dpi, verdeckte Bilder durch 1×1-Platzhalter
+ersetzt, Flate statt ASCII85, Seiteninhalt byte-gleich): 263.101 statt 2.364.945 Byte,
+Ticket jetzt ca. 320 KB (je Passbook ca. 23 KB). Layout 5 „Ticket_Dauerkarte_Gebrandet" und
+Layout 8 „Ticket_Einzelticket_Freiwahl" nutzen dieselbe Datei. Layout 4 „Ticket_Basis" blieb
+unberührt. Der QR-Bereich ist pixelgleich. Das Original liegt lokal unter
+`Projects/ticket-hintergrund-backup/` (nicht im Repo), Rückweg = dieselben Schritte mit dem Original.
+
+**pretix-API für den Hintergrund:** Es gibt keinen Endpunkt `…/ticketlayouts/<id>/background/`
+(404). Der Upload läuft zweistufig: `POST /api/v1/upload` (Body = PDF, Header
+`Content-Disposition: attachment; filename="background.pdf"` und `Content-Type:
+application/pdf`) liefert `{"id":"file:<uuid>"}`, danach `PATCH
+/api/v1/organizers/xxl/events/saison2627/ticketlayouts/<id>/` mit `{"background":"file:<uuid>"}`.
+
+**Zwischenspeicher:** pretix liefert bereits erzeugte Tickets weiter aus dem Cache (auch nach
+dem Layout-Wechsel). Neu erzeugt werden sie nach einer Bestellungsänderung, z. B. ein
+Preis-neutraler `POST …/orders/<code>/change/` mit `patch_positions` (Preis unverändert),
+`notify: false`, `reissue_invoice: false`. Der erste Abruf danach liefert HTTP 409, die
+Datei ist erst beim zweiten Abruf da. Bereits versendete Tickets bleiben unverändert groß.
+
+## Dauerkarten-Workflow: Gutschein an jeden rabattierten Sitz (01.10.2026)
+
+Workflow `HyUXW4kbhaQVbG0A`, Node „Build pretix Order Payload" (Version `e4936d67`):
+Der Gutschein hängt jetzt an der Ankerposition (erstes Spiel, einzige Position mit Saisonpreis)
+**jedes** rabattierten Sitzes, bis zu den Restnutzungen (`remainingUses` aus der
+Shared-Rabattberechnung, sonst `max_usages − redeemed` aus „Gutschein in pretix suchen"),
+statt nur an der des ersten Sitzes. Vorher zählte pretix bei einem Mehrfach-Gutschein nur
+eine Einlösung, der Gutschein blieb wiederverwendbar (Fälle QGA9P und 7PAEE). Neu:
+Abbruch vor dem Anlegen der Order, wenn mehr Sitze rabattiert wurden, als Einlösungen übrig
+sind, oder wenn Artikel, Variation, Sitz oder Spiel nicht zum Gutschein passen. Folgepositionen
+der anderen Spiele bekommen nie einen Gutschein. Getestet nur offline gegen echte Altbestellungen
+(Einzelsitz, ohne Gutschein, 2 Sitze, 24 Sitze), identische Ausgabe außer bei Mehrfach-Gutscheinen.
+Noch nicht live beobachtet: ob pretix den Gutschein an den später per `/orderpositions/`
+angelegten Positionen annimmt. Die erste echte Bestellung mit Mehrfach-Gutschein beobachten.
+
+**Regel für Mehrfach-Gutscheine:** Pro Bestellung wird im Shop nur ein Code verrechnet. Für mehrere
+Plätze deshalb einen Gutschein mit „Anzahl Nutzungen" = Zahl der Plätze anlegen, nicht mehrere
+Einzelgutscheine.
+
+## Ticket-Mail erneut senden (Ablauf)
+
+1. Bestellung muss `p` sein, alle Positions-PDFs müssen abrufbar sein (409 = noch in Arbeit, nach 30 s wieder).
+2. Marker im Order-Kommentar entfernen: `PATCH …/orders/<code>/` mit `{"comment": ""}`. In einem
+   n8n-HTTP-Node muss `sendBody` ein echter Boolean sein, sonst wird der Body nicht gesendet und
+   die Änderung passiert still nicht.
+3. Genau einmal `POST /webhook/pretix-order-event` mit `{"organizer":"xxl","event":"saison2627","code":"<Code>","action":"pretix.event.order.paid"}` (ohne `source`).
+4. Die Ausführung von `zNGWzRFz3ebzsDkD` prüfen: `pdfCount` gleich `expectedCount`, Marker wieder `[ticket-mail-versendet]`.
+Nachgesendet am 30.09./01.10.: KMTVH, MC377 (3 Tickets), UHJPU (8 Tickets, zusammen 2,5 MB).
+
+## PayPal-Pfad: Teilrabatt-Gutscheine und Toleranz (01.10.2026)
+
+Workflow `BmpBkKdzzSZaBnZE`, Node „Sitze zuordnen" (Version `f4c86d84`). Bezahlte Bestellungen laufen
+über den Capture-Webhook in einer eigenen Ausführung, dort fehlte bisher der Gutschein-Kontext.
+Neu im Capture-Zweig:
+- IF „Gutschein im Capture nachladen?" und HTTP „Gutschein in pretix suchen (Capture)" nach „Freie Sitze
+  pruefen". Der Lookup läuft nur bei gespeichertem Gutscheincode, ist read-only und kann den Capture
+  nicht stören (neverError, 2 Versuche, 15 s). Kategorien und Tarif-Einschränkung werden wie in
+  „Gutschein-Rabatt berechnen" aus Item/Quota abgeleitet (`ITEM_TO_CATEGORY` und `QUOTA_TARIF` stehen jetzt in
+  beiden Nodes und müssen synchron bleiben).
+- Der Gutschein hängt an jeder gedeckten Position bis zu den Restnutzungen, die Positionspreise folgen dem
+  Rabatt. Vorher legte der Capture-Zweig pretix-Orders zu Listenpreisen an (Altfall 75393: 12,50 € in pretix bei
+  6,25 € bezahlt).
+- **Toleranz statt Alarm:** Weicht die Summe der Positionspreise (inkl. Nachwuchs) vom bezahlten Betrag
+  ab, wird die Bestellung trotzdem angelegt. Die Differenz geht auf die letzte Ticketposition mit Preis > 0
+  (reicht das nicht, auf die vorherige, Preise nie unter 0,00; Nachwuchs zuletzt). Bei Abweichung über 1 Cent
+  steht im Order-Kommentar `Preis-Anpassung Capture: Differenz … EUR auf Position … verteilt (bezahlt …,
+  berechnet …), Gutschein …`. Nur im kostenlosen Zweig (Betrag 0, aber ungedeckte Position) bleibt
+  der Alarm, weil dort kein Geld geflossen ist. Gift-Card-, Festbetrags- und Ohne-Gutschein-Pfad
+  unverändert. Offline getestet (50 Fälle), der Capture-Pfad selbst ist ohne echte PayPal-Zahlung nicht live testbar.
+
+## pretix auf Railway: Auslastung (01.10.2026)
+
+Web-Dienst: 24 vCPU, Limit 8 GB, Verbrauch die Woche über ca. 1,1 GB, CPU ≈ 0; Worker ohne praktische Grenze
+(ca. 0,4–1,0 GB), Postgres ca. 100 MB, Redis ca. 10 MB. Keine SIGKILL-/OOM-Meldungen in 7 Tagen, 10 Gunicorn-Neustarts.
+**Mehr RAM wird nicht gebraucht.** Die gelegentlichen HTTP-500 beim Abruf frischer Ticket-/Passbook-Dateien
+sind `botocore NoSuchKey` im Medien-Bucket (S3): pretix hält die Datei für fertig, sie liegt aber noch nicht im
+Bucket. Der Ticket-Mail-Workflow wiederholt deshalb auch bei 5xx. Offen: SMTP-Verbindungsabbrüche
+(`SMTPServerDisconnected`) im Worker beim pretix-eigenen Mailversand und die Frage, ob das Erzeugen der
+Ticketdateien im Worker oder im Web-Dienst läuft.
+
+## Gutschein-Hinweis „Rest verfällt" im Checkout (01.10.2026)
+
+Der Workflow `5Bi15oYpyehxjhXK` („Subprozess Gutschein/Wertgutschein einlösen", bedient
+`/webhook/gutschein-einloesen`, Version `db595b8e`) liefert zusätzlich zu den bisherigen Feldern (nur additiv):
+`voucherMode` (pretix `price_mode`), `voucherValue` (Wert je Einlösung), `coveredUses` (gedeckte Einheiten, gleiche
+Zuordnung wie im geteilten Rabatt-Workflow `QxPE1ikMJWL0fyB7`, den die Dauerkarten-Bestellung ebenfalls nutzt),
+`usedAmount` (= `discountAmount`), `unusedAmount` (nur bei `subtract`: Wert × coveredUses − genutzt) und
+`remainingUsesAfter`. Für Wertgutscheine bleibt alles unverändert (Restguthaben steht in der Meldung).
+`tickets/checkout.html` zeigt unter der Meldung `#voucher-hint`: bei Festbetrags-Gutscheinen „Von 20,00 € werden
+12,00 € genutzt, 8,00 € verfallen.", bei Mehrfach-Gutscheinen „Dein Gutschein ist danach noch 2× einlösbar."; keinen
+Hinweis bei Prozent-, ausgeschöpften und Wertgutscheinen. Der ältere Pfad auf der Sitzplatzwahl (`js/seat-picker.js`,
+`_voucherHint()`) rechnet die Texte clientseitig; ohne Produktbindung des Gutscheins gibt es dort keinen Hinweis.
+`coveredUses` ist eine Nachbildung der Shared-Logik und muss bei deren Änderung im Node
+„Einloesen: Hinweisfelder ergaenzen" nachgezogen werden. Der echte Round-Trip mit einem Live-Gutschein ist nicht getestet.
+
+Nebenwirkung der Erkennungs-Korrektur vom 29.09. (Gutschein-Zeilen heißen „Gutschein: …"): Die Gutschein-Box wird nach
+dem Einlösen ausgeblendet, damit ging die Meldung („Restguthaben …", Fehlertexte) mit unter. Die Meldung steht jetzt
+außerhalb der Box (Commit `7b378b0c`).
+
+## pretix-Mailversand: Worker auf Relay umgestellt (01.10.2026)
+
+Den Mailversand von pretix übernimmt der **Worker** (Celery-Queue `mail`). Er hatte seit August noch die alte
+SendGrid-Konfiguration (`PRETIX_MAIL_HOST=smtp.sendgrid.net`, Benutzer `apikey`, SendGrid-Passwort, Absender
+`tickets@example.com`), nur der Web-Dienst nutzte das Google-Relay. Folge: pretix-eigene Mails (Benachrichtigungen an
+Teammitglieder, Storno-Mails) scheiterten mit `SMTPServerDisconnected` beim Anmelden (Beispiel: Ausgehende Mail #49,
+„Bestellung storniert: HHTWS", 23.09.); die Ticket-Mails über n8n/Gmail waren nie betroffen. Behoben am 01.10.2026:
+Worker-Variablen `PRETIX_MAIL_HOST=smtp-relay.gmail.com`, `PRETIX_MAIL_USER` und `PRETIX_MAIL_PASSWORD` leer,
+`PRETIX_MAIL_FROM=tickets@basketball-loewen.com`. Das Relay prüft per IP; Railway-Ausgangsadressen sind je Dienst
+vergeben (Worker 208.77.244.241 / 152.55.184.241 / 152.55.185.190, Web 208.77.244.240 / 152.55.184.241 /
+152.55.185.189), alle sechs sind im Google-Admin (Gmail → Routing → SMTP-Relay-Dienst „Railway") freigegeben.
+Bei Änderungen an der Mail-Konfiguration immer Web und Worker prüfen. Verifiziert am 01.10.2026: Die
+Bestätigungsmail (Code) für das pretix-Konto `rechnung@` kam über den neuen Worker an und der Code wurde eingegeben.
+Der alte SendGrid-Schlüssel steht noch in SendGrid, ist aber nirgends mehr konfiguriert.
+
+## Rollstuhlplätze im Einzelticket (01.10.2026)
+
+**Plätze:** 21 Rollstuhlplätze laut Sitzplan (`assets/seating/riethsporthalle-seatingplan.json`, Feld `wheelchair`): Block A Reihe 1
+Platz 20 (1), Block D Reihe 6 Plätze 11/13/15/17/19 (5), Block E Reihe 6 Plätze 1–10 (10), Block F Reihe 6 Plätze 11–15 (5).
+Block B und C haben keine (bestätigt 01.10.2026). Das Rollstuhl-Produkt je Spiel hat ein Kontingent „HSxx: Rollstuhlplatz" mit
+Größe 21 (Produkte 34 Einzel, 39 Dauer, 57 Abend). Die Block-Kontingente sind netto ohne diese Plätze gerechnet.
+
+**pretix-Verhalten (per `simulate=true` geprüft):** Produkt 34 verlangt einen Sitz („requires to choose a seat"), nimmt aber
+jeden freien Sitz an. pretix vergleicht weder Sitz-Kategorie noch das Rollstuhl-Kennzeichen mit dem Produkt, `seat.product`
+ist überall leer. Ein normales Ticket kann deshalb einen Rollstuhlplatz bekommen, wenn der Ablauf es nicht verhindert.
+
+**Fehler vor dem Fix:** Die automatische Platzvergabe nahm Plätze nach Reihe und Nummer, Reihe 6 ist in D/E/F die vorderste
+(UHJPU bekam E6/1–8 als normale Plätze). Eine Rollstuhl-Zeile suchte eine pretix-Zone „Rollstuhlplatz", die es nicht gibt, und
+brach mit „Kein freier Sitzplatz mehr in Rollstuhlplatz" ab. Die Begleitperson (Tarif `begleitung`) hatte keine Variante.
+
+**Fix (Weg A, Workflow `BmpBkKdzzSZaBnZE`, Node „Sitze zuordnen", Version `b3777b01`):**
+- `WHEELCHAIR_SEATS` (21 `seat_guid`, fest im Code) wird aus dem normalen Pool aller anderen Zeilen herausgenommen.
+- Eine Rollstuhl-Zeile bekommt Produkt 34 (ohne Variante, Preis laut Warenkorb 8,00 €) und einen freien Rollstuhlplatz in der
+  Reihenfolge Block D, F, E, zuletzt A, aufsteigend je Block. Ist keiner frei: Fehler „Kein freier Rollstuhlplatz mehr fuer
+  dieses Spiel." (Alarmpfad), nie ein Ersatz mit einem normalen Platz.
+- Begleitperson: `normal`-Variante des Block-Produkts, Preis 0,00, normaler Sitz im Block der Zeile (wie bei der Dauerkarte).
+- Offline mit 102 Prüfungen getestet. **Offene Risiken:** „Gutschein-Rabatt berechnen" setzt eine Begleitperson mit vollem
+  Blockpreis an (Rollstuhl + Begleitung + eingeschränkter Gutschein ergibt Alarmmail), der Nachwuchs-Zusatzbeitrag kann an ein
+  Rollstuhl-Ticket gehängt werden (pretix-Verhalten ungeprüft), `Preis serverseitig berechnen` zählt jede Zeile der Kategorie
+  Rollstuhlplatz als Rollstuhl, und die Platzliste muss bei Sitzplan-Änderungen von Hand nachgezogen werden.
+- Offen und beschlossen: Block, Reihe und Platz des zugeteilten Rollstuhlplatzes sollen in der Ticket-Mail und im Ticket-PDF
+  stehen (eigene Vorlage für Produkt 34); noch nicht umgesetzt. UHJPU (E6/1–8) soll auf normale Plätze in Block E verschoben werden.
+
+## pretix-Worker: Versions-Drift stoppt die Ticket-Erzeugung (01.10.2026, behoben 11:40)
+
+**Befund:** Das Speichern der Mail-Variablen im Railway-Dienst Pretix-Worker (10:33) löste einen Neubau „via GitHub" aus. Das
+Dockerfile (`FROM pretix/standalone:stable`, Repo `pretix-docker`) zog dabei die aktuelle Version 2026.8.x. Der Web-Dienst lief
+seit 24 Tagen auf 2026.7.0, die Datenbank hatte die Migration der neuen Version nie erhalten. Folge: Jede Ticket-Erzeugung im
+Worker brach ab (`ProgrammingError: column pretixbase_question.container_type does not exist`, Task
+`pretix.base.services.tickets.generate`), neue Bestellungen blieben bei HTTP 409 „not ready" hängen (Fall XZTKG, ab ca. 10:55).
+Die Alarmmail „Ticket-Mail unvollstaendig" meldete das korrekt und verschickte keine Teil-Mail. Die Ticket-Vorlage (Layouts 5/8)
+war intakt.
+
+**Behebung:** Dockerfile festgeschrieben (Commit `ead4655` im Repo `pretix-docker`): `FROM pretix/standalone:2026.7.0`,
+`pretix-sepadebit==2.7.0`, `pretix-passbook==1.14.1` (Stand des laufenden Web-Dienstes, gelesen aus `/api/v1/version` und
+`/control/global/update/`). Railway baute Web (11:36) und Worker (11:35) neu, beide auf demselben Stand, keine Migration nötig.
+Danach wurde XZTKG fertig (Dateien 22 Sekunden nach der ersten Anfrage) und die Ticket-Mail ging einmal raus. Die Mail-Variablen
+(Relay) blieben beim Neubau erhalten.
+
+**Lehren:**
+- Jede Variablenänderung an Web oder Worker baut neu und nimmt sich bei einem unfesten Tag die neueste Version.
+- Railway-„Rollback" stellt Build UND Variablen des alten Deployments wieder her (Dialogtext), er ist hier also kein
+  Weg, nur den Build zurückzudrehen.
+- Das lokale Klon-Verzeichnis `Projects/pretix-docker` war hinter GitHub (S3-Medien, Saison-Pass-Plugin, `production_settings.py`).
+  Vor Änderungen immer `git fetch` und prüfen.
+- Upgrade nur bewusst: erst Web (führt die Migrationen aus), dann Worker, danach die Pins im Dockerfile anheben. Aktuell
+  ist 2026.8.0 verfügbar.
+
+## Bestätigungsmail Einzelticket: Absender des Tickets (01.10.2026)
+
+Anlass: Eine Kundin (SWE, Order ET-RG9W5M) fragte nach, weil die Bestätigungsmail "Dein Ticket … separat per E-Mail von pretix" ankündigte, das Ticket aber von rechnung@basketball-loewen.com (n8n) kommt. Entscheidung (Marko): Der Absender wird in den Mails nicht genannt. Die Bestätigung sagt nur "in einer separaten E-Mail. Das dauert in der Regel nur wenige Minuten." Alle Kundenmails (Ticket-Mail `zNGWzRFz3ebzsDkD`, Einzelticket-Bestätigung `BmpBkKdzzSZaBnZE`, Dauerkarten-Bestätigung `HyUXW4kbhaQVbG0A`) haben `replyTo` = tickets@basketball-loewen.com (Absender bleibt technisch rechnung@). Ticket-Mail und Einzelticket-Bestätigung enden mit "Falls du Fragen hast, wende dich bitte an tickets@basketball-loewen.com." Format der Ticket-Mail (Version 4f8942a3): nach "…am Einlass bereithalten." folgt eine Leerzeile, die Block-Liste steht nach "Freie Platzwahl in deinem gewählten Block:" in einer neuen Zeile (z. B. "1× VIP."); bei Dauerkarten steht "Dein Platz: …" ebenfalls nach einer Leerzeile. Weitere kundensichtbare Texte mit "pretix" gibt es nicht (Ticket-Mail, Dauerkarten-Mail, Website geprüft); die übrigen Treffer sind interne Alarm-Mails an Marko.
+
+Entscheidung (Marko, 01.10.2026): Für Rollstuhl-Tickets (Produkt 34) wird keine eigene Ticketvorlage gebaut, und der Block wird in Ticket und Ticket-Mail nicht genannt.
+
+## UHJPU von Rollstuhlplätzen verschoben (01.10.2026)
+
+Order UHJPU (8 Einzeltickets Kat. I, Spiel 26, Gutschein 198, 0 €) war bei der Sitzvergabe auf den Rollstuhlplätzen Block E, Reihe 6, Platz 1–8 gelandet. Verschoben auf Block E, Reihe 7, Platz 1–8 (vorher per Sitzstatus des Subevents als frei geprüft). Status `p`, Summe 0,00 €, Preise und Gutschein unverändert, keine Mail an den Kunden (`notify:false`, `reissue_invoice:false`).
+
+Vorgehen per API über einen kurzen Hilfs-Workflow mit dem pretix-Credential (danach archiviert): `POST …/orders/UHJPU/change/` mit `{"patch_positions":[{"position":<id>,"body":{"seat":"<seat_guid>"}}, …], "notify":false, "reissue_invoice":false}`. Das Feld heißt `body`, nicht `seat` direkt (sonst HTTP 400 "This field is required", nichts geändert).
+
+Sitz-Tabelle "Belegte-Sitze": Eine Änderung per API löst keinen Webhook aus, die Tabelle zeigte danach weiter die alten Sitze. Nachziehen ohne Ticket-Mail: `POST /webhook/pretix-order-event` mit `{"organizer":"xxl","event":"saison2627","code":"<CODE>","action":"pretix.event.order.changed.seat"}` (alles außer `pretix.event.order.paid` löst nur den Sitz-Abgleich aus, die Mail nicht). Danach die Zeilen der Order in der Data Table prüfen.
+
+## Abendkasse-Backend gebaut (01.10.2026)
+
+Neuer, additiver Webhook-Zweig im Workflow `BmpBkKdzzSZaBnZE` (22 neue Nodes, Präfix
+"Abendkasse: ", nichts am bestehenden PayPal/Einzelticket-Flow verändert):
+`POST /webhook/abendkasse-bestellung` ← `saison/profis/gameday/abendkasse.html` (Tablet/Laptop-Seite
+für den Verkauf an der Abendkasse, kein Teil des öffentlichen Shops). Ablauf: Normalize
+Input → Spam-Check → Rate-Limit (eigener `endpoint: 'abendkasse'` in derselben Data
+Table `Webhook-RateLimit`, 60/h statt der 8/h des öffentlichen Einzelticket-Checkouts)
+→ Sitze zuordnen → Create pretix Order → sofort mark_paid → parallel (a) Ticket-Mail-
+Pipeline der öffentlichen Seite auslösen (`source:"direct"`, für Archivierung/Platzhalter-
+Postfach `tickets@basketball-loewen.com` — ursprünglich `abendkasse@`, das aber keine
+echte Mailbox ist und Mail-Delivery-Bounces an Marko auslöste, 01.10.2026 geändert)
+und (b) Ticket-PDF per Retry-Schleife
+(identisches Muster wie im Ticket-Mail-Workflow, bis zu 12 Versuche à 5 s) abrufen und
+**direkt als PDF-Binary** an die Kasse zurückgeben (keine Mail, kein Umweg über eine URL).
+
+**Wichtiger Unterschied zum Einzelticket-Backend:** Die "- Abend"-Items erlauben gar
+keine Sitzwahl — ein mitgeschickter `seat` wird von pretix mit HTTP 400 "This product
+does not allow to choose a seat" abgelehnt (per echter Testbestellung entdeckt). Der
+Node "Abendkasse: Sitze zuordnen" bucht deshalb ohne jeden Sitzplan-Abgleich, rein über
+pretix-Kontingent — der Node "Freie Sitze pruefen" wurde dafür komplett entfernt
+(Kontingent-Prüfung übernimmt pretix selbst beim Anlegen der Order). Das betrifft auch
+Rollstuhlplatz-Abend (Produkt 57): keine `WHEELCHAIR_SEATS`-Liste nötig, einfach Produkt
+57 ohne Sitz bestellen.
+
+**Kontingent-Sorge geprüft und verworfen:** Es bestand der Verdacht, die "- Abend"-Items
+könnten ein eigenes, von Dauerkarte/Einzelticket unabhängiges Kontingent haben (echtes
+Überbuchungsrisiko). Per `GET .../quotas/` verifiziert: Jedes Block-Kontingent listet alle
+drei Produkt-Varianten gemeinsam in `items` (z. B. "Block D" eines Spiels: `[Dauer-Item,
+Einzel-Item, Abend-Item]`, Rollstuhlplatz-Kontingent `[39,34,57]` mit Größe 21) — die
+Abendkasse zieht aus demselben Topf wie die Online-Verkäufe, kein separates Kontingent.
+
+**Preise serverseitig autoritativ:** `PRICES`-Konstante im Node (Einzelpreis + 2,00 €
+Zuschlag, identisch zur Preisliste des öffentlichen Shops) ist die alleinige Preisquelle
+— `l.unitPrice` aus dem Warenkorb wird nie übernommen, anders als beim öffentlichen
+Einzelticket-Checkout (dort serverseitig nur bei Gutschein/Begleitperson überschrieben).
+Grund: An der Abendkasse wird sofort bar kassiert, es gibt keine zweite Prüfinstanz wie
+bei PayPal.
+
+**Rollstuhlplatz + Begleitperson:** Rollstuhlplatz ist ein eigenes Produkt (Item 57,
+kein Block), Begleitperson (Tarif `begleitung`, 0 €) hängt — wie beim Einzelticket-
+Workflow — an einer normalen Ticketzeile eines echten Blocks, nie an der
+Rollstuhlplatz-Zeile selbst (harter `throw`, falls doch). UI (`abendkasse.html`): Nach
+Wahl eines beliebigen Blocks erscheint auf dem Tarif-Bildschirm ein
+"+ weitere Kategorie"-Dropdown (Eintrag "Rollstuhlplatz"); ist mindestens ein
+Rollstuhlplatz-Ticket im Warenkorb, erscheint auf dem Block-Panel zusätzlich eine
+Begleitperson-Kachel (Obergrenze über `_companionSlotsRemaining` aus `js/seat-picker.js`,
+ungeändert). Erste UI-Version hatte die Begleitperson fälschlich direkt im
+Rollstuhlplatz-Panel, das hätte die Order-Anlage zum Scheitern gebracht — vor dem Live-
+Gang korrigiert.
+
+**Bug beim ersten Testlauf gefunden:** "Rate-Limit lesen" (Data-Table-`get`) lieferte bei
+der ersten Anfrage einer IP 0 Zeilen zurück — ohne `alwaysOutputData:true` lief der
+gesamte restliche Zweig dadurch gar nicht erst an (0 Items = kein Folge-Node-Aufruf),
+die Kasse wäre beim ersten Verkauf jedes Tages stillschweigend hängen geblieben. Fix:
+`alwaysOutputData:true` gesetzt (identischer Fix-Typ wie beim `deleteRows`-Bug vom
+11.08., s. oben).
+
+**Getestet (sechs echte Testbestellungen, damals noch über `abendkasse@basketball-loewen.com`
+identifizierbar, danach alle per `mark_canceled` storniert):** Block-Kategorien, Block
+mit zwei Tarifen in einer Order, sowie Rollstuhlplatz + Begleitperson (Order ZCECS:
+Item 57 10,00 €, Item 48/Variation "normal" 0,00 €) — komplette Kette inkl. PDF-Abruf
+und Ticket-Mail-Auslösung lief bei allen sechs fehlerfrei durch.
+
+**Frontend-Zusatz:** Der Erfolgsfall öffnet das PDF in einem neuen Tab und ruft dort
+automatisch `window.print()` auf (Timeout-Fallback falls `load` nicht zuverlässig
+feuert) — auf dem iPad bestätigt (Safari und Chrome identisch, da beide auf iOS
+WebKit nutzen, kein eigenes Chrome-Engine erlaubt). Ein komplett dialogloser Druck
+ist aus einer normalen Webseite heraus nicht möglich; auf einem Desktop/Laptop ginge das
+nur über Chrome mit `--kiosk-printing`-Flag beim Start, nicht über die Seite selbst.
+
+**pretix-API-Stolperfalle:** Der Endpunkt zum Stornieren heißt `mark_canceled`, nicht
+`cancel` (alle sechs Testbestellungen scheiterten beim ersten Versuch mit HTTP 404, bis
+die korrekte pretix-API-Doku geprüft wurde). Komplette Liste der Order-Aktions-Endpunkte:
+`mark_paid`, `mark_canceled`, `mark_pending`, `mark_expired`, `reactivate`, `extend`,
+`approve`, `deny` — eine echte "Löschen"-Funktion für Orders gibt es über die API nicht,
+Stornieren ist der einzige Weg, Kontingent/Sitzplatz freizugeben.
+
+**Offen:** Das Ausschank-Kassensystem (zweiter Teil der ursprünglichen Anfrage, 10
+Produkte ohne Lagerbestand, eigenes Terminal) ist noch nicht begonnen.
+
+## Beobachtungspunkte (Stand 01.10.2026)
+
+Keine Aufgaben, sondern Dinge, die bei der nächsten passenden echten Bestellung geprüft werden:
+
+- **Rollstuhl-Bestellung mit Begleitperson:** "Gutschein-Rabatt berechnen" setzt die Begleitperson zum vollen Preis an. Beim ersten echten Fall Preis der Begleitung prüfen. Außerdem: Nachwuchs-Zusatzprodukt an Produkt 34 und die fest hinterlegte Rollstuhlplatz-Liste im Knoten "Sitze zuordnen" (Einzelticket-Workflow) bei Änderungen am Sitzplan mitpflegen.
+- **Dauerkarte mit Mehrfach-Gutschein:** Bei der nächsten solchen Bestellung prüfen, ob der Gutschein an jedem rabattierten Sitz hängt und pretix die richtige Zahl Einlösungen zählt (Reparatur vom 01.10.2026, Knoten "Build pretix Order Payload").
+- **pretix-Upgrade auf 2026.8.0:** Erst Web-Dienst, dann Worker, dann die Pins im Dockerfile anheben (s. Abschnitt Versions-Drift).
+
+## Löwen-Dashboard Tickets-Tab: Orders/Tickets, stornierte Bestellungen (01.10.2026)
+
+Workflow `AA0f7oo7dH7TDkFu` (Version 1a010dc3), Nodes "DK-Statistik aufbereiten" (Tickets-Tab, Webhook `dauerkarten-uebersicht`) und "Statistik aufbereiten" (Auslastung/Gutschein-Statistik, Webhook `gutschein-statistik`).
+
+- **Ursache der Abendkasse-Testbestellungen im Board:** pretix setzt beim Stornieren einer Bestellung (Status `c`) `canceled` an den Positionen NICHT. Die Knoten prüften nur `p.canceled`. Beide Knoten zählen jetzt nur Positionen aus Bestellungen mit Status `n` oder `p` (Bestellstatus aus der Order-Liste; unbekannte Bestellung wird behalten). Für "Statistik aufbereiten" kam dafür der Knoten "Pretix: Orders holen (Statistik)" hinzu (Merge auf 5 Eingänge). Nebenwirkung: Die Auslastung war um die Sitze der stornierten Bestellung HHTWS (185 Positionen) zu hoch, je Spiel 14–15 Plätze; jetzt 92 pro Spiel.
+- **Spalten:** Dauerkarten-Tabelle "Nach Kategorie" und "Einzeltickets pro Spiel" haben jetzt `Orders` (Anzahl Bestellungen) und `Tickets` (Anzahl Tickets). Summenzeile = Zahl verschiedener Bestellungen im Spiel (nicht die Summe der Zeilen, eine Bestellung kann mehrere Kategorien haben). Neue Felder in der API: `byCategory[].orders/tickets`, `totalOrders`, `ticketSales[].rows[].orders/tickets`, `ticketSales[].ordersTotal/ticketsTotal`; `count` bleibt gleich `tickets`.
+- **Wirkung:** Gesamt verkauft 1.541 → 1.348 Plätze, Erlös 7.280,50 € → 7.186,00 €.
+- **Abendkasse-Tests:** Alle Abendkasse-Bestellungen bis 01.10.2026 waren Testbestellungen und sind storniert (zuletzt JZZ9A, 18,00 € Block E + 10,00 € Rollstuhl, am Abend per `mark_canceled` ohne Mail). Danach: Gesamt verkauft 1.346 Plätze, Erlös 7.158,00 €, keine Abendkasse-Zeile mehr im Board. Echte Abendkasse-Verkäufe zählen normal mit.
+- Quelle der Seite: `Projects/loewen-os/dashboard/src/dashboard.html` (Repo bbloewen/loewen-os, Commit 8f0572f); der Stand der Seite im Workflow war vorher nicht eingecheckt.
+
+## Ticket-Hintergrund verschwunden: Ticket-Erzeugung stand still (01.10.2026, behoben 23:40)
+
+**Vorfall:** Bestellung DUTTK (Einzelticket, 4 Tickets) bekam keine Ticket-Mail ("Ticket-Mail unvollstaendig", HTTP 409 nach 12 Versuchen). Worker-Log: `FileNotFoundError: cachedfiles/…pdf` beim Rendern des Hintergrunds. Alle neuen Einzelticket-Bestellungen ab ca. 22:45 Uhr waren betroffen.
+
+**Ursache:** Der verkleinerte Ticket-Hintergrund wurde am 30.09. per API hochgeladen (`POST /upload` + `PATCH background=file:<id>`). Dabei verweist das Layout auf die temporäre Datei unter `cachedfiles/`, die pretix nach ca. 24 h löscht. Die Vorlagen 5 (Dauerkarte) und 8 (Einzelticket) zeigten beide darauf.
+
+**Behebung:**
+- Verkleinerte Datei (263 KB) gesichert: `Projects/ticket-hintergrund-backup/ticket_background_slim_263KB.pdf`, dazu `layouts_snapshot_2026-10-01.json` (Layout-JSON aller Vorlagen).
+- Die API hat keinen Endpunkt, der den Hintergrund dauerhaft ablegt (`…/ticketlayouts/<id>/background` liefert 404), und der Layout-Editor in der Control-Oberfläche kann den Hintergrund wegen des S3-Speichers nicht laden ("Failed to fetch"). Deshalb wurden die Vorlagen in der Control-Oberfläche **kopiert** ("Kopieren" in der Layout-Liste): die Kopie legt die Datei dauerhaft unter `pub/…/ticketoutputpdf/` ab. Das Layout-JSON der Kopien ist identisch zum Original.
+- Neu: Layout 9 `Ticket_Einzelticket_Freiwahl_v2` (jetzt Standard) und Layout 10 `Ticket_Dauerkarte_Gebrandet_v2`. Die 10 Dauerkarten-Produkte (37, 44, 42, 46, 43, 41, 45, 38, 39, 47) sind in der Produktseite (Tab "Tickets & Badges", PDF-Ticketlayout) auf Layout 10 umgestellt.
+- Test: Je ein Ticket neu erzeugt (Dauerkarte JBCKH Position 1156, Einzelticket UHJPU Position 2286): HTTP 200, 319 bzw. 320 KB. Ticket-Mail für DUTTK einmal nachgesendet.
+- Die alten Layouts 5 und 8 (zeigten auf `cachedfiles/`) waren nicht mehr zugeordnet und sind am 01.10.2026 per API gelöscht (`DELETE …/ticketlayouts/<id>/`, HTTP 204). Es bleiben Layout 4 `Ticket_Basis` (ungenutzt), 9 (Standard) und 10. Layout-JSON der gelöschten Vorlagen: `Projects/ticket-hintergrund-backup/layouts_snapshot_2026-10-01.json`.
+
+**Regeln:**
+- Layout-Hintergründe nie per API-Upload setzen (hält nur 24 h). Hintergrund ändern = Layout in der Control-Oberfläche kopieren/neu anlegen; der Editor-Upload funktioniert nicht, solange der S3-Bucket keine CORS-Freigabe für den Editor hat.
+- Die API kann Layout-Zuordnungen (`ticketlayoutitems`) nicht ändern (nur lesen), und `default` lässt sich per API nicht umsetzen. Beides in der Control-Oberfläche.
+- Diagnose: `GET …/ticketlayouts/` — enthält die `background`-URL `cachedfiles`, ist die Vorlage in 24 h kaputt.
+
+## Löwen-Dashboard: Platzkarten für Dauerkarten drucken (02.10.2026)
+
+Im Tab Ticketing → Tickets hat die Tabelle "Nach Kategorie" oben rechts den Button **Platzliste**. Er öffnet eine Vollbild-Ansicht in derselben Seite (kein Popup, siehe unten) mit allen Dauerkarten-Plätzen (aktuell 82). Oben in der Leiste: Umschalter **Liste** (Standard) und **Druckansicht**, Filter nach Block, **Drucken** (druckt die gerade gezeigte Ansicht) und **Schließen**. Beim Drucken wird der Rest des Dashboards ausgeblendet.
+- **Liste:** Tabelle Block, Reihe, Platz, Kategorie, sortiert nach Block, Reihe, Platz; druckbar als normale A4-Liste.
+- **Druckansicht:** Platzkarten, eine Karte je Platz (Kopfzeile "Basketball Löwen Erfurt / Dauerkarte 2026/2027", groß der Block, Reihe und Platz, Fußzeile Kategorie und Riethsporthalle), A4, 8 Karten je Seite (2 × 4, gestrichelte Schnittkante), je Block eine neue Seite. Keine Namen.
+
+Daten: Der Webhook `dauerkarten-uebersicht` liefert jetzt zusätzlich `seats` (je Dauerkarten-Platz `block`, `row`, `seat`, `category`), nur aus offenen oder bezahlten Bestellungen (Node "DK-Statistik aufbereiten", Workflow `AA0f7oo7dH7TDkFu`, Version ac081d91). Quelle der Seite: `Projects/loewen-os/dashboard/src/dashboard.html`, Funktion `platzkartenDrucken()`. Der Fanblock liegt in Block A und erscheint dort als Block A mit der Kategorie Fanblock.
+
+**Fehler der ersten Fassung (02.10., behoben):** Die erste Fassung öffnete ein Popup-Fenster und schrieb die Karten hinein. Das Fenster blieb leer, weil n8n die Dashboard-Seite mit `Content-Security-Policy: sandbox …` (ohne `allow-same-origin`) ausliefert: die Seite hat den Ursprung `null`, ein Popup lässt sich von ihr nicht beschreiben. Ebenso gelten in dieser Seite keine `localStorage`/Cookie-Zugriffe. Regel für alle Dashboard-Funktionen: kein `window.open` mit `document.write`, stattdessen Ansicht in der Seite; `window.print()` funktioniert (`allow-modals`). Commit `loewen-os` siehe Verlauf (Platzkarten: Vollbild-Ansicht).
+
+## Kassen-Apps (Abendkasse/Ausschank) — Stand 02.10.2026
+
+Die Seiten `saison/profis/gameday/abendkasse.html` und `ausschank.html` laufen in zwei nativen iPad-Apps (Repo-Ordner `Projects/kassen-terminal-bridge`, README dort), die das Sparkassen-Terminal per OPI ansteuern. Ausführlich in Notion: „Kassen-Apps: Abendkasse und Ausschank mit Sparkassen-Terminal (OPI)".
+
+- **Zugriffsschutz:** `abendkasse-bestellung` (Workflow `BmpBkKdzzSZaBnZE`, IF „Abendkasse: Token ok?") und `ausschank-verkauf` (`GbkUoR5DI4n5QYo6`, IF „Token ok?") verlangen den Header `X-Kassen-Token` und antworten sonst 401. Der Token steht nur in diesen Knoten und in der App (`Shared/KassenSecret.swift`, nicht im Git); die App setzt `window.__kassenToken`, die Seiten lesen `OpiBridge.token()`. Die Kassen-Seiten funktionieren deshalb nur in den Apps.
+- **Abendkasse:** Zahlung (OpiBridge.charge) und Bestellung/Druck laufen parallel. Schlägt die Zahlung fehl, bleibt die Bestellung bestehen und wird später über die Bestellnummer storniert (Nummer steht als `{order}` klein unter dem Barmer-Logo im pretix-Ticketlayout 9). Barzahlung (langer Druck auf die Gesamtsumme) sendet `cart.zahlart = "bar"`; „Abendkasse: Normalize Input" übernimmt es, „Abendkasse: Sitze zuordnen" schreibt den pretix-Bestellkommentar „Abendkasse - BARZAHLUNG" bzw. „Abendkasse - Kartenzahlung (Terminal)" (der Ticket-Mail-Workflow erhält diesen Kommentar als `baseComment`).
+- **Ausschank-Log:** Data Table „Ausschank-Verkaeufe" (`qeFKgWBRf8PgvsZW`) hat zusätzlich `zahlart` (`bar`/`karte`/`karte-gutschrift`/`ohne-terminal`) und `beleg` (Terminal-Belegnummer).
+- **Abend-Preise** = Einzelticket + 2,00 € (Kat. 1 18/16, Kat. 2 14/10,50, Kat. 3 12,50/10/7, Fanblock 12,50/10, Rollstuhl 10); maßgeblich im Knoten „Abendkasse: Sitze zuordnen" (`PRICES`), Anzeige in `abendkasse.html`.
+- **Test-Bestellungen** der Abendkasse erkennt man an den „- Abend"-Items (48–58); Storno über `POST …/orders/<code>/mark_canceled/` mit `{"send_email": false}`.

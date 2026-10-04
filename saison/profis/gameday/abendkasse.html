@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Abendkasse — Basketball Löwen Erfurt</title>
+<link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
+<link rel="stylesheet" href="/css/colors_and_type.css" />
+<link rel="stylesheet" href="/css/site.css" />
+<link rel="stylesheet" href="/css/seat-picker.css" />
+<style>
+  /* Nur auf dieser Seite: grossflaechige Bedienung ohne Gefummel, lesbar ohne Brille
+     (Marko, 30.09.-01.10.2026) - seat-picker.css/js selbst bleiben unangetastet, damit
+     die oeffentliche Einzelticket-Seite ihr normales Mass behaelt. Die Darstellung hier
+     steuert ausschliesslich CSS + eigene Panels, die auf denselben SeatPicker-Zustand
+     (blockCounts/_setBlockCount) zugreifen - keine Kopie der Kapazitaets-/Preislogik. */
+  body { background: var(--surface-page, #fff); }
+  .ak-wrap { max-width: 640px; margin: 0 auto; padding: 16px 16px 48px; }
+
+  /* Ueberschrift "Abendkasse", natives "Block waehlen" und die Spiel-Info-Zeile raus,
+     um Platz zu gewinnen (Marko, 01.10.2026) - die Spiel-Info wandert stattdessen als
+     Overlay auf das Spielfeld (s. renderSpielInfo()), solange kein Block gewaehlt ist.
+     Fehlermeldungen (kein Spiel gefunden/Spielplan nicht ladbar) behalten eine eigene,
+     normalerweise unsichtbare Zeile - die braucht es weiterhin, auch ohne Kopfbereich. */
+  #seatplan-root > h3.t-h4 { display: none !important; }
+  .ak-fehler { text-align: center; color: var(--text-muted); margin: 0 0 12px; }
+  .ak-fehler[hidden] { display: none !important; }
+
+  /* white-space:nowrap gilt pro Zeile (der <br> selbst erzwingt den Umbruch trotzdem) -
+     Marko, 01.10.2026: "genug Platz", die Gegner-Zeile soll nie selbst umbrechen. */
+  .ak-court-info { position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+    font-size: 1rem; font-weight: 700; color: var(--text-muted); white-space: nowrap;
+    text-align: center; line-height: 1.35; z-index: 1; pointer-events: none; }
+
+  /* Auslastungsliste unter dem Plan komplett weg (Marko, 01.10.2026, Punkt 1). */
+  #seatplan-occupancy { display: none !important; }
+
+  /* "Uebernehmen" gross, aber zentriert auf dem Spielfeld statt es randlos zu fuellen
+     (Marko, 01.10.2026: erst "ganze Flaeche ueberlagern", dann korrigiert zu "zentriert
+     auf dem Spielfeld liegen"). Die Original-Kachel zentriert sich bereits per
+     top:50%/left:50% + transform:translate(-50%,-50%) - diese bewaehrte Zentrierung
+     bleibt, nur Schriftgroesse/Platz werden vergroessert. */
+  .seatplan-mobile-court-confirm { font-size: 1.4rem !important; line-height: 1.25;
+    padding: 20px 24px !important; max-width: 90%; width: max-content;
+    white-space: normal !important; text-align: center; z-index: 5; }
+  .seatplan-mobile-court { position: relative; }
+
+  /* Freie Plaetze + Normalpreis direkt auf jeder Kachel, dauerhaft sichtbar, nicht erst
+     nach Auswahl (Marko, 01.10.2026: "genau: Anzahl der freien Plaetze und Preis des
+     Normaltickets"). Ersetzt damit auch den vorherigen Hinweis NUR beim ausgewaehlten
+     Block - die Info steht jetzt ueberall gleich, kein Sonderfall mehr noetig. */
+  .ak-tile-info { display: block; font-size: 0.78rem; font-weight: 600; margin-top: 4px;
+    line-height: 1.25; opacity: 0.85; }
+
+  /* Ermaessigungsbedingungen direkt unter dem Tarif, statt dass die Kassiererin bei
+     jeder Nachfrage raten muss (Marko, 01.10.2026: "kommt immer als Nachfrage"). */
+  .ak-tarif-hint { display: block; font-size: 0.78rem; font-weight: 400; color: var(--text-muted);
+    margin: 2px 0; line-height: 1.3; }
+
+  /* "+ weitere Kategorie"-Dropdown fuer Rollstuhlplatz (Marko, 01.10.2026: gehoert auf die
+     zweite Seite, NACHDEM ein Block gewaehlt wurde, nicht als eigene Kachel auf Seite 1). */
+  .ak-add-select { display: block; width: 100%; margin: 4px 0 14px; padding: 14px 16px;
+    font-size: 1.05rem; font-family: inherit; color: inherit;
+    background: var(--surface-1, #f3f3f1); border: 2px solid var(--border-strong, #ccc);
+    border-radius: 12px; }
+
+  /* Natives Warenkorb-Markup (Einzelzeilen, Gutschein, Notiz, Direktwahl-Dropdown) bleibt
+     fachlich aktiv (haengt an denselben totalEl/ctaEl), wird hier aber nicht gezeigt -
+     ersetzt durch die grossen Tarif-Kacheln in #ak-tarif-panels (Punkt 4). */
+  #seatplan-cart { display: none; }
+
+  #ak-blockwahl.ak-hidden { display: none; }
+
+  #ak-tarif-panels { margin-bottom: 8px; }
+  .ak-tarif-panel { margin-bottom: 14px; }
+  .ak-tarif-panel-title { font-weight: 700; font-size: 1.2rem; margin-bottom: 8px; }
+  .ak-tarif-tile { display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface-1, #f3f3f1); border: 2px solid var(--border-strong, #ccc);
+    border-radius: 12px; padding: 16px 18px; margin-bottom: 10px; min-height: 72px; }
+  .ak-tarif-label { font-size: 1.2rem; font-weight: 600; line-height: 1.3; }
+  .ak-tarif-price { font-size: 1rem; font-weight: 400; color: var(--text-muted); }
+  .ak-stepper { display: flex; align-items: center; gap: 14px; }
+  .ak-stepper button { font-size: 1.6rem; width: 52px; height: 52px; border-radius: 50%;
+    border: 2px solid var(--border-strong, #999); background: #fff; line-height: 1; }
+  .ak-stepper button:active { background: var(--surface-1, #eee); }
+  .ak-step-count { font-size: 1.4rem; font-weight: 700; min-width: 28px; text-align: center; }
+
+  .seatplan-cart-total { font-size: 1.4rem; font-weight: 700; padding: 10px 0; }
+  #seatplan-cta { font-size: 1.3rem; padding: 20px; min-height: 64px; }
+  /* Die ".btn"-Klasse aus site.css setzt display explizit (inline-flex o.ae.) - das
+     sticht die Browser-Vorgabe fuer [hidden] (sehr niedrige Spezifitaet), der Knopf
+     bliebe sonst trotz hidden sichtbar. */
+  #seatplan-cta[hidden] { display: none !important; }
+  #ak-gesamt[hidden] { display: none !important; }
+  .ak-status { margin-top: 16px; padding: 16px; border-radius: 10px; font-size: 1.2rem; text-align: center; display: none; }
+  .ak-status.ak-status-ok { display: block; background: #e3f3ea; color: #1f6a43; }
+  .ak-status.ak-status-error { display: block; background: #fbeaea; color: #a32d2d; }
+  .ak-status.ak-status-busy { display: block; background: #ececec; color: #333; }
+  #ak-gesamt { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  .ak-diag-row { display: flex; justify-content: flex-end; margin-top: 8px; }
+  .ak-diag { display: none; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 8px;
+    background: transparent; color: #666; opacity: .5; cursor: pointer; align-items: center; justify-content: center; }
+  .ak-diag.ak-diag-visible { display: flex; }
+  .ak-naechster { margin-top: 12px; width: 100%; font-size: 1.2rem; padding: 16px; display: none; }
+</style>
+</head>
+<body>
+<div class="ak-wrap">
+  <p class="t-body-sm ak-fehler" id="ak-fehler" hidden></p>
+
+  <div id="ak-blockwahl">
+    <div id="seatplan-root"></div>
+  </div>
+
+  <div id="ak-tarif-panels"></div>
+
+  <div id="seatplan-cart"></div>
+  <div class="seatplan-cart-total" id="ak-gesamt" hidden><span>Gesamt</span><span id="seatplan-total">0,00 €</span></div>
+  <button class="btn btn-primary" id="seatplan-cta" style="width:100%;justify-content:center" disabled hidden>Jetzt bestellen</button>
+  <div id="seatplan-occupancy"></div>
+
+  <div class="ak-status" id="ak-status"></div>
+  <button class="btn btn-outline-orange ak-naechster" id="ak-naechster">Nächster Verkauf</button>
+  <div class="ak-diag-row"><button type="button" class="ak-diag" id="ak-diag" aria-label="Kassen-Einstellungen"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="7" x2="21" y2="7"/><circle cx="9" cy="7" r="2.2" fill="var(--bg-page,#fff)"/><line x1="3" y1="17" x2="21" y2="17"/><circle cx="15" cy="17" r="2.2" fill="var(--bg-page,#fff)"/></svg></button></div>
+</div>
+
+<script src="/js/seat-picker.js"></script>
+<script src="opi-bridge.js?v=7"></script>
+<script>
+  (function () {
+    var b = document.getElementById('ak-diag');
+    if (b && window.OpiBridge && window.OpiBridge.isAvailable()) {
+      b.classList.add('ak-diag-visible');
+      b.addEventListener('click', function () { window.OpiBridge.openDiagnose(); });
+    }
+  })();
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  // Dieselben Kategorie-Preise wie auf den oeffentlichen Spieltagsseiten (dort je Spiel
+  // fest in die generierte HTML eingebettet, s. tools/build-spieltagsseiten.py). Die
+  // Abendkasse braucht keine eigene zweite Tabelle: "- Abend" ist in pretix durchgaengig
+  // Einzelpreis + 2,00 EUR Zuschlag (verifiziert 01.10.2026 gegen die live pretix-API fuer
+  // alle 11 Abend-Items) - deshalb hier einmal addiert statt einer zweiten,
+  // pflegebeduerftigen Preisliste parallel zur bestehenden.
+  var EINZEL_PRICES = {
+    'Kategorie I': { normal: 16, ermaessigt: 14 },
+    'Kategorie II': { normal: 12, ermaessigt: 8.5 },
+    'Kategorie III': { normal: 10.5, ermaessigt: 8, kind: 5 },
+    'Fanblock': { normal: 10.5, ermaessigt: 8 },
+    'C unten': { normal: 12, ermaessigt: 8.5 },
+    'Rollstuhlplatz': { normal: 8 },
+    'VIP': { normal: 119 }
+  };
+  var EINZEL_STEHPLATZ = 8;
+  var ABEND_ZUSCHLAG = 2;
+  var TARIF_LABEL = { normal: 'Normalpreis', ermaessigt: 'Ermäßigt', kind: 'Kinder 7–14' };
+  var TARIF_ORDER = ['normal', 'ermaessigt', 'kind'];
+  // Kommt an der Abendkasse staendig als Nachfrage (Marko, 01.10.2026) - dieselben
+  // Bedingungen wie auf der oeffentlichen Einzelticket-Seite (saison/profis/gameday).
+  var ERMAESSIGT_HINWEIS = 'Studierende, Azubis, FSJ, Menschen mit Behinderung ab 50 %, Rentner*innen – jeweils mit Nachweis beim Einlass.';
+
+  function fmtEUR(n) { return Number(n).toFixed(2).replace('.', ','); }
+
+  function abendPrices() {
+    var out = {};
+    Object.keys(EINZEL_PRICES).forEach(function (cat) {
+      var p = EINZEL_PRICES[cat], o = {};
+      Object.keys(p).forEach(function (tarif) { o[tarif] = p[tarif] + ABEND_ZUSCHLAG; });
+      out[cat] = o;
+    });
+    return out;
+  }
+
+  function parseDatumZeit(datum, zeit) {
+    var teile = datum.split('.');
+    var zt = (zeit || '00:00').split(':');
+    return new Date(Number(teile[2]), Number(teile[1]) - 1, Number(teile[0]), Number(zt[0]), Number(zt[1]));
+  }
+
+  var picker = null;
+  var currentGame = null;
+
+  // Grosse Tarif-Kacheln je bereits gewaehltem Block, statt der kleinen Dropdown-Zeilen
+  // im nativen Warenkorb (Marko, 01.10.2026, Punkt 4: "in der Groesse, wie vorher 'Block
+  // waehlen' angezeigt wurde"). Steuert denselben Zustand (picker.blockCounts) ueber die
+  // bestehenden, bereits kapazitaets-/begleitpersonen-geprueften Methoden _setBlockCount/
+  // _stepBlock - keine eigene Mengen-/Grenzwert-Logik.
+  function renderTarifPanels() {
+    var host = document.getElementById('ak-tarif-panels');
+    host.innerHTML = '';
+    if (!picker) return;
+    Object.keys(picker.blockCounts).forEach(function (blockKey) {
+      var c = picker.blockCounts[blockKey];
+      var zoneId = blockKey.split('::')[0];
+      var panel = document.createElement('div');
+      panel.className = 'ak-tarif-panel';
+      var title = document.createElement('div');
+      title.className = 'ak-tarif-panel-title';
+      title.textContent = c.zoneLabel;
+      panel.appendChild(title);
+      TARIF_ORDER.forEach(function (tarif) {
+        if (c.priceInfo[tarif] === undefined) return;
+        var freeCount = picker._blockFreeCount(zoneId, c.category);
+        var tile = document.createElement('div');
+        tile.className = 'ak-tarif-tile';
+        tile.innerHTML =
+          '<span class="ak-tarif-label">' + TARIF_LABEL[tarif] +
+            (tarif === 'ermaessigt' ? '<br><span class="ak-tarif-hint">' + ERMAESSIGT_HINWEIS + '</span>' : '') +
+            '<br><span class="ak-tarif-price">' + fmtEUR(c.priceInfo[tarif]) + ' € je Ticket</span></span>' +
+          '<div class="ak-stepper">' +
+            '<button type="button" data-step="-1" aria-label="weniger">−</button>' +
+            '<span class="ak-step-count">' + (c[tarif] || 0) + '</span>' +
+            '<button type="button" data-step="1" aria-label="mehr">+</button>' +
+          '</div>';
+        tile.querySelectorAll('[data-step]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var delta = parseInt(btn.dataset.step, 10);
+            var free = picker._blockFreeCount(zoneId, c.category);
+            picker._stepBlock(blockKey, c.zoneLabel, c.category, c.priceInfo, tarif, delta, free);
+            // _stepBlock ruft bereits _renderCart() auf, was unseren Cart-Observer ausloest
+            // (s. unten) - der zieht renderTarifPanels() automatisch nach.
+          });
+        });
+        panel.appendChild(tile);
+      });
+      // Begleitperson: das Einzelticket-Backend (Node "Sitze zuordnen", Stand 01.10.2026)
+      // verlangt den Tarif "begleitung" zwingend auf einer NORMALEN Ticketzeile eines
+      // echten Blocks, nie auf der Rollstuhlplatz-Zeile selbst. Deshalb hier (nicht im
+      // Rollstuhlplatz-Panel): Kachel erscheint nur auf einem echten Block-Panel, und nur
+      // solange noch ein ungedeckter Rollstuhlplatz im Warenkorb liegt (oder schon eine
+      // Begleitperson auf dieser Zeile steht, damit sie wieder auf 0 gesetzt werden kann).
+      // _companionSlotsRemaining ist dieselbe, bereits geprueft Methode wie im nativen
+      // Warenkorb der oeffentlichen Seite.
+      if (c.category !== 'Rollstuhlplatz') {
+        var begleitFrei = picker._companionSlotsRemaining(blockKey) + (c.begleitung || 0);
+        if (begleitFrei > 0) {
+          var begleitTile = document.createElement('div');
+          begleitTile.className = 'ak-tarif-tile';
+          begleitTile.innerHTML =
+            '<span class="ak-tarif-label">Begleitperson<br><span class="ak-tarif-price">kostenlos, für Rollstuhlfahrer*in</span></span>' +
+            '<div class="ak-stepper">' +
+              '<button type="button" data-step="-1" aria-label="weniger">−</button>' +
+              '<span class="ak-step-count">' + (c.begleitung || 0) + '</span>' +
+              '<button type="button" data-step="1" aria-label="mehr">+</button>' +
+            '</div>';
+          begleitTile.querySelectorAll('[data-step]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              var delta = parseInt(btn.dataset.step, 10);
+              var free = picker._blockFreeCount(zoneId, c.category);
+              picker._stepBlock(blockKey, c.zoneLabel, c.category, c.priceInfo, 'begleitung', delta, free);
+            });
+          });
+          panel.appendChild(begleitTile);
+        }
+      }
+      host.appendChild(panel);
+    });
+    if (Object.keys(picker.blockCounts).length) renderAddKategorie(host);
+  }
+
+  // "+ weitere Kategorie"-Dropdown (Marko, 01.10.2026: Rollstuhlplatz gehoert auf die
+  // zweite Seite, nachdem ein Block gewaehlt wurde, nicht als eigene Kachel auf Seite 1).
+  // Bisher nur der Eintrag "Rollstuhlplatz", analog zur nativen Direktwahl-Dropdown in
+  // seat-picker.js (_renderDirectAddRow) - hier als eigenes, grossflaechiges Element statt
+  // des kleinen nativen Markups (das in #seatplan-cart ausgeblendet ist, s. oben).
+  function renderAddKategorie(host) {
+    var sel = document.createElement('select');
+    sel.className = 'ak-add-select';
+    sel.innerHTML =
+      '<option value="" selected>+ weitere Kategorie</option>' +
+      '<option value="Rollstuhlplatz">Rollstuhlplatz</option>';
+    sel.addEventListener('change', function () {
+      if (sel.value === 'Rollstuhlplatz') picker._quickAddBlock(null, 1, 'Rollstuhlplatz');
+      sel.value = '';
+    });
+    host.appendChild(sel);
+  }
+
+  function cartHatTickets() {
+    return !!document.querySelector('#seatplan-cart .seatplan-cart-item');
+  }
+
+  function syncSichtbarkeit() {
+    // Genau ein Block pro Abendkassen-Verkauf (Marko, 01.10.2026: "unrealistisch, dass
+    // jemand Sitzplaetze in zwei verschiedenen Bloecken bestellen will") - ist einmal ein
+    // Ticket im Warenkorb, bleibt die Blockauswahl verborgen; ein neuer Verkauf faengt
+    // ueber "Naechster Verkauf" (initPicker) wieder bei null an, nicht ueber eine
+    // Zurueck-Funktion hier.
+    var hatTickets = cartHatTickets();
+    document.getElementById('ak-blockwahl').classList.toggle('ak-hidden', hatTickets);
+    // Der ausgegraute Knopf auf der ersten Seite war nur Verwirrung (Marko, 01.10.2026:
+    // "dann ist eindeutig: ich muss auf 'Jetzt uebernehmen' klicken") - er erscheint erst,
+    // sobald wirklich etwas im Warenkorb liegt.
+    document.getElementById('seatplan-cta').hidden = !hatTickets;
+    // Auf der ersten Seite ist noch nicht klar, wie viele Tickets im Block bestellt werden -
+    // die Gesamtzeile erscheint wie der Knopf erst mit dem ersten Ticket (Marko, 01.10.2026).
+    document.getElementById('ak-gesamt').hidden = !hatTickets;
+    renderTarifPanels();
+  }
+
+  // Freie Plaetze + Normalpreis direkt auf jeder Kachel der Blockauswahl, dauerhaft
+  // sichtbar (Marko, 01.10.2026) - ersetzt die entfernte Auslastungsliste unten UND den
+  // vorherigen Nur-bei-Auswahl-Hinweis. _purchasableCategories/_blockFreeCount sind
+  // dieselben Methoden, die auch die (jetzt ausgeblendete) Liste gespeist haben.
+  //
+  // WICHTIG: haengt am selben #seatplan-root, den der rootObserver unten beobachtet -
+  // wuerde hier ungeschuetzt in den DOM geschrieben, loest das denselben Observer
+  // sofort wieder aus (Endlosschleife). Aufruf deshalb NUR aus syncOverview(), das den
+  // Observer waehrend der eigenen Schreibzugriffe kurz abhaengt (disconnect/observe).
+  function annotateTiles() {
+    if (!picker) return;
+    picker.root.querySelectorAll('.seatplan-mobile-tile[data-zone], .seatplan-mobile-standing[data-zone]').forEach(function (btn) {
+      var key = btn.dataset.zone;
+      var sep = key.indexOf('::');
+      var zoneId = sep === -1 ? key : key.slice(0, sep);
+      var category = sep === -1 ? null : key.slice(sep + 2);
+      var frei, preis;
+      if (zoneId === 'STEHPLATZ') {
+        frei = picker._blockFreeCount('STEHPLATZ', 'Stehplatz');
+        preis = picker.standingPrice;
+      } else {
+        var purchasable = picker._purchasableCategories(zoneId);
+        var match = category ? purchasable.filter(function (p) { return p.category === category; })[0]
+          : (purchasable.length === 1 ? purchasable[0] : null);
+        if (!match) return;
+        frei = picker._blockFreeCount(zoneId, match.category);
+        preis = (picker.prices[match.category] || {}).normal;
+      }
+      if (preis === undefined) return;
+      var info = document.createElement('span');
+      info.className = 'ak-tile-info';
+      info.innerHTML = 'noch ' + frei + ' frei<br>ab ' + fmtEUR(preis) + ' €';
+      btn.appendChild(info);
+    });
+  }
+
+  // Spiel-Info als Overlay auf dem Spielfeld statt einer eigenen Kopfzeile (Marko,
+  // 01.10.2026: "Ueberschrift/Label/Spiel-Info raus, Platz gewinnen") - erscheint nur,
+  // solange #ak-blockwahl sichtbar ist (also kein Block gewaehlt wurde), weil die ganze
+  // Grafik inkl. dieses Overlays dann ausgeblendet wird. Muss wie annotateTiles() bei
+  // jedem Re-Render neu eingefuegt werden (this.root.innerHTML wird von SeatPicker komplett
+  // ersetzt), deshalb ebenfalls nur ueber syncOverview() aufgerufen.
+  function renderCourtInfo() {
+    if (!picker || !currentGame) return;
+    var court = picker.root.querySelector('.seatplan-mobile-court');
+    if (!court) return;
+    var info = document.createElement('div');
+    info.className = 'ak-court-info';
+    info.appendChild(document.createTextNode(currentGame.datum + ' · ' + currentGame.zeit + ' Uhr'));
+    info.appendChild(document.createElement('br'));
+    info.appendChild(document.createTextNode(currentGame.gegner));
+    court.appendChild(info);
+  }
+
+  var rootObserver = new MutationObserver(function () { syncOverview(); });
+  function syncOverview() {
+    rootObserver.disconnect();
+    annotateTiles();
+    renderCourtInfo();
+    rootObserver.observe(document.getElementById('seatplan-root'), { childList: true, subtree: true });
+  }
+
+  function initPicker(game) {
+    currentGame = game;
+    document.getElementById('ak-fehler').hidden = true;
+    document.getElementById('seatplan-cart').innerHTML = '';
+    document.getElementById('seatplan-total').textContent = '0,00 €';
+    document.getElementById('seatplan-cta').disabled = true;
+    document.getElementById('seatplan-cta').hidden = true;
+    document.getElementById('ak-gesamt').hidden = true;
+    document.getElementById('ak-status').className = 'ak-status';
+    document.getElementById('ak-naechster').style.display = 'none';
+    document.getElementById('ak-naechster').textContent = 'Nächster Verkauf';
+    document.getElementById('ak-tarif-panels').innerHTML = '';
+    document.getElementById('ak-blockwahl').classList.remove('ak-hidden');
+
+    picker = new SeatPicker(document.getElementById('seatplan-root'), {
+      mode: 'blocks',
+      headline: 'Block wählen',
+      nachwuchsBeitrag: false,
+      planUrl: '/assets/seating/riethsporthalle-seatingplan.json',
+      seatStatusUrl: 'https://ticketing.basketball-loewen.com/webhook/einzelticket-sitzplatz-status?subevent=' + game.subeventId,
+      pretixEvent: 'saison2627',
+      reservedSeats: [
+        { zone: 'A', rows: ['1'], excludeSeatNumbers: ['1', '2', '3', '4', '5', '6', '7', '16', '17', '18', '19', '20'] }
+      ],
+      nvSeats: [
+        { zone: 'A', rows: ['1', '2', '3'], maxSeatNumber: 7 }
+      ],
+      northZones: ['D', 'E', 'F'],
+      southZones: ['A', 'B', 'C'],
+      prices: abendPrices(),
+      standingPrice: EINZEL_STEHPLATZ + ABEND_ZUSCHLAG,
+      standingBookable: game.stehplatzBuchbar !== false,
+      cartEl: document.getElementById('seatplan-cart'),
+      totalEl: document.getElementById('seatplan-total'),
+      ctaEl: document.getElementById('seatplan-cta')
+    });
+
+    // Beobachtet den (unsichtbaren) nativen Warenkorb: dort schreibt SeatPicker bei JEDER
+    // Mengenaenderung hinein (auch ueber unsere eigenen Stepper, da die am selben
+    // picker-Zustand haengen) - daraus leiten wir Sichtbarkeit + die grossen Kacheln ab,
+    // ohne seat-picker.js selbst zu aendern.
+    new MutationObserver(syncSichtbarkeit).observe(document.getElementById('seatplan-cart'), { childList: true, subtree: true });
+    syncOverview();
+  }
+
+  // Keine Auswahlbox (Marko, 01.10.2026: "je nach Datum direkt das entsprechende
+  // Heimspiel ausgewaehlt" - keine Moeglichkeit, manuell ein anderes Spiel zu waehlen).
+  // Exakter Datumstreffer zaehlt, sonst das naechste noch bevorstehende Spiel.
+  fetch('/data/heimspiele.json').then(function (r) { return r.json(); }).then(function (data) {
+    var spiele = (data.spiele || []).slice().sort(function (a, b) {
+      return parseDatumZeit(a.datum, a.zeit) - parseDatumZeit(b.datum, b.zeit);
+    });
+    var heute = new Date();
+    var heuteStr = ('0' + heute.getDate()).slice(-2) + '.' + ('0' + (heute.getMonth() + 1)).slice(-2) + '.' + heute.getFullYear();
+    var spiel = spiele.filter(function (g) { return g.datum === heuteStr; })[0]
+      || spiele.filter(function (g) { return parseDatumZeit(g.datum, g.zeit) >= heute; })[0]
+      || spiele[spiele.length - 1];
+
+    if (spiel) initPicker(spiel);
+    else {
+      var elNichtGefunden = document.getElementById('ak-fehler');
+      elNichtGefunden.textContent = 'Kein Heimspiel gefunden.';
+      elNichtGefunden.hidden = false;
+    }
+  }).catch(function () {
+    var elFehler = document.getElementById('ak-fehler');
+    elFehler.textContent = 'Spielplan konnte nicht geladen werden.';
+    elFehler.hidden = false;
+  });
+
+  var bestellLaeuft = false;
+  var naechsterEl = document.getElementById('ak-naechster');
+
+  // bar = Barzahlung (langer Druck auf die Gesamtsumme, nur in der Kassen-App): kein Terminalvorgang,
+  // Ticket wird sofort angelegt und gedruckt, die Order bekommt den Kommentar BARZAHLUNG.
+  function startVerkauf(bar) {
+    if (bestellLaeuft) return;
+    var summary = picker.getSummary();
+    if (!summary.lines.length) return;
+    bestellLaeuft = true;
+
+    var statusEl = document.getElementById('ak-status');
+    statusEl.className = 'ak-status ak-status-busy';
+    statusEl.textContent = 'Ticket wird angelegt …';
+    document.getElementById('seatplan-cta').disabled = true;
+    naechsterEl.style.display = 'none';
+    naechsterEl.textContent = 'Nächster Verkauf';
+
+    var cart = {
+      productType: 'abendkasse',
+      eventLabel: 'Basketball Löwen Erfurt – ' + currentGame.gegner,
+      pretixEventSlug: 'saison2627',
+      pretixSubeventId: currentGame.subeventId,
+      spielDatum: currentGame.datum,
+      gegner: currentGame.gegner,
+      lines: summary.lines,
+      total: summary.total,
+      zahlart: bar ? 'bar' : 'karte',
+      voucher: null,
+      notiz: '',
+      zahlungPausiert: false
+    };
+    var buyer = {
+      // Echte Mailbox statt eines nicht existierenden Platzhalters (Marko, 01.10.2026:
+      // "bekomme Maildelivery-Emails") - tickets@ existiert bereits und wird auch sonst
+      // als Antwort-Adresse fuer Ticketing-Mails verwendet.
+      email: 'tickets@basketball-loewen.com',
+      vorname: '', nachname: '', notiz: '', firma: '', strasse: '', plz: '', ort: '',
+      newsletter: false, webseite: ''
+    };
+
+    // Zahlung und Bestellung/Druck laufen parallel (Marko, 02.10.2026): das Ticket wird
+    // angelegt und gedruckt, ohne auf das Terminal zu warten - auch wenn die Zahlung
+    // scheitert. Deshalb hier zwei getrennte Zustaende und eine gemeinsame Anzeige.
+    var inApp = !!(window.OpiBridge && window.OpiBridge.isAvailable());
+    var pay = { state: bar ? 'bar' : (inApp ? 'offen' : 'keine'), message: '', unklar: false };   // offen | ok | fehler | keine | bar
+    var order = { state: 'offen', message: '', paid: false };                     // offen | ok | fehler
+
+    function zeigeStatus() {
+      var payOffen = pay.state === 'offen';
+      var orderOffen = order.state === 'offen';
+      var cls = 'ak-status ak-status-error';
+      var text;
+      if (pay.state === 'fehler') {
+        text = 'Zahlung fehlgeschlagen: ' + pay.message + ' — Ticket NICHT aushändigen!' +
+          (order.state === 'ok' ? ' (Das Ticket wurde trotzdem angelegt und gedruckt.)'
+            : orderOffen ? ' Ticket wird noch angelegt …'
+            : ' Es wurde kein Ticket angelegt.');
+      } else if (order.state === 'fehler') {
+        if (pay.state === 'ok') {
+          text = 'Zahlung erfolgt, aber das Ticket konnte nicht angelegt werden: ' + order.message +
+            ' — NICHT erneut kassieren, Ticket manuell anlegen.';
+        } else if (payOffen) {
+          text = 'Ticket konnte nicht angelegt werden: ' + order.message + ' — Zahlung am Terminal läuft noch …';
+        } else {
+          text = 'Fehlgeschlagen: ' + order.message + (order.paid ? '' : ' — bitte erneut versuchen.');
+        }
+      } else if (payOffen || orderOffen) {
+        cls = 'ak-status ak-status-busy';
+        text = (payOffen ? 'Zahlung am Terminal …' : (bar ? 'Barzahlung.' : 'Zahlung bestätigt.')) + ' ' +
+          (orderOffen ? 'Ticket wird angelegt …' : 'Ticket wird gedruckt.');
+      } else {
+        cls = 'ak-status ak-status-ok';
+        text = bar
+          ? 'Barzahlung vermerkt, Ticket wird gedruckt.'
+          : inApp
+          ? 'Zahlung bestätigt, Ticket wird gedruckt.'
+          : 'Ticket wird gedruckt. Betrag am Terminal eintippen: ' + fmtEUR(summary.total) +
+            ' € – erst nach bestätigter Zahlung aushändigen.';
+      }
+      statusEl.className = cls;
+      statusEl.textContent = text;
+      if (payOffen || orderOffen) return;
+
+      // Beides abgeschlossen. Nur wenn weder bezahlt noch bestellt wurde (oder der
+      // Zahlungsstatus geklaert ist), darf dieselbe Bestellung erneut versucht werden.
+      var nichtPassiert = order.state === 'fehler' && !order.paid &&
+        (pay.state === 'keine' || pay.state === 'bar' || (pay.state === 'fehler' && !pay.unklar));
+      if (nichtPassiert) {
+        document.getElementById('seatplan-cta').disabled = false;
+        bestellLaeuft = false;
+        naechsterEl.textContent = 'Abbrechen – neuer Verkauf';
+      } else {
+        naechsterEl.textContent = 'Nächster Verkauf';
+      }
+      naechsterEl.style.display = 'block';
+    }
+
+    // Antwort ist entweder ein rohes PDF (Erfolg) oder JSON {ok:false, error, paid?}
+    // (Fehler) - paid:true bedeutet, die Bestellung ist bereits erfasst (Order angelegt +
+    // bezahlt markiert), nur der PDF-Abruf ist gescheitert. In diesem Fall NICHT den
+    // "Jetzt bestellen"-Knopf fuer denselben Warenkorb wieder freigeben.
+    function bestellungAnlegen() {
+      fetch('https://ticketing.basketball-loewen.com/webhook/abendkasse-bestellung', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Kassen-Token': (window.OpiBridge && window.OpiBridge.token()) || '' },
+        body: JSON.stringify({ cart: cart, buyer: buyer })
+      }).then(function (r) {
+        if (r.ok) {
+          return r.blob().then(function (blob) {
+            if (inApp) {
+              // In der Kassen-App druckt die native Huelle (AirPrint) - window.open geht dort nicht.
+              window.OpiBridge.printPdf(blob).catch(function () {});
+            } else {
+              // Eigener Tab, der den Druckdialog automatisch oeffnet (Marko, 01.10.2026).
+              var pdfWindow = window.open(URL.createObjectURL(blob), '_blank');
+              if (pdfWindow) {
+                var printed = false;
+                var doPrint = function () {
+                  if (printed) return;
+                  printed = true;
+                  try { pdfWindow.focus(); pdfWindow.print(); } catch (e) {}
+                };
+                pdfWindow.addEventListener('load', doPrint);
+                setTimeout(doPrint, 1000);
+              }
+            }
+            order.state = 'ok';
+            zeigeStatus();
+          });
+        }
+        return r.json().then(function (result) {
+          var err = new Error(result.error || ('Serverfehler (' + r.status + ')'));
+          err.paid = !!result.paid;
+          throw err;
+        });
+      }).catch(function (err) {
+        order.state = 'fehler';
+        order.message = err.message;
+        order.paid = !!err.paid;
+        zeigeStatus();
+      });
+    }
+
+    zeigeStatus();
+    bestellungAnlegen();
+    if (inApp && !bar) {
+      window.OpiBridge.charge(summary.total).then(function (result) {
+        pay.state = 'ok';
+        zeigeStatus();
+      }).catch(function (err) {
+        pay.state = 'fehler';
+        pay.message = err.message;
+        pay.unklar = !!(err.terminal && err.terminal.unknown);
+        zeigeStatus();
+      });
+    }
+  }
+
+  document.getElementById('seatplan-cta').addEventListener('click', function () { startVerkauf(false); });
+
+  // Verstecktes Barzahlen: 2 s auf die Gesamtsumme druecken (nur in der Kassen-App).
+  if (window.OpiBridge && window.OpiBridge.isAvailable()) {
+    window.OpiBridge.onLongPress(document.getElementById('ak-gesamt'), 2000, function () {
+      if (bestellLaeuft || !picker) return;
+      var summary = picker.getSummary();
+      if (!summary.lines.length) return;
+      if (window.confirm('Barzahlung: ' + fmtEUR(summary.total) + ' €\n\nBar kassiert? Das Ticket wird angelegt und gedruckt.')) startVerkauf(true);
+    });
+  }
+
+  document.getElementById('ak-naechster').addEventListener('click', function () {
+    bestellLaeuft = false;
+    initPicker(currentGame);
+  });
+});
+</script>
+</body>
+</html>
