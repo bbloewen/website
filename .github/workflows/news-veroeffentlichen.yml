@@ -1,0 +1,95 @@
+# Baut News-Artikel aus der Notion-Mediaplanung, sobald n8n einen Auftrag ablegt.
+#
+# Ablauf (Stand 04.10.2026, Marko):
+#
+#   Notion "Inhalte-Kalender" (Kanal = News-Artikel)
+#     Status "Bereit zur Prüfung"  -> n8n legt data/artikel-eingang/<id>.json ab
+#                                     ("status": "pruefung") und committet das
+#                                     Hero-Bild nach assets/img/news/
+#     dieser Lauf                  -> baut die Seite mit noindex, ohne jede
+#                                     Verlinkung, und committet sie
+#     n8n                          -> schreibt die URL ins Notion-Feld "Link",
+#                                     damit der Mensch, der pruefen soll, direkt
+#                                     auf die fertige Seite springen kann
+#     Status "Freigegeben"         -> n8n setzt im Auftrag "freigegeben"
+#     dieser Lauf                  -> noindex faellt weg, Eintrag in news.json,
+#                                     Verlinkung im Spielplan, Sitemap
+#     n8n                          -> Status auf "Veröffentlicht"
+#
+# Warum die Arbeit hier und nicht in n8n: die Artikel sollen gleich aussehen,
+# und das Wissen darueber, wie eine Artikelseite aufgebaut ist, steht schon in
+# tools/ -- in Python, neben den uebrigen Generatoren. Eine zweite Fassung in
+# einem n8n-Code-Node wuerde davon unbemerkt abweichen, sobald sich eine Klasse
+# oder ein Cache-Buster aendert. Genau das ist bei der Insta-Archiv-Vorlage
+# passiert, die ihren nav.js-Cache-Buster bis heute hartcodiert mitschreibt.
+#
+# Alle Auftraege im Ordner werden bei jedem Lauf verarbeitet, nicht nur die
+# gerade geaenderten: tools/artikel-veroeffentlichen.py ist idempotent, und so
+# faellt auch auf, wenn ein aelterer Auftrag nicht mehr zur Seite passt.
+
+name: News-Artikel veroeffentlichen
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - data/artikel-eingang/*.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: news-veroeffentlichen
+  cancel-in-progress: false
+
+jobs:
+  veroeffentlichen:
+    # Ohne diese Grenze wuerde der eigene Commit den Lauf erneut ausloesen.
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # build-sitemap.py liest lastmod aus der Commit-Historie.
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Artikel bauen
+        run: |
+          pip install --quiet --disable-pip-version-check pillow
+          shopt -s nullglob
+          auftraege=(data/artikel-eingang/*.json)
+          if [ ${#auftraege[@]} -eq 0 ]; then
+            echo "Kein Auftrag im Eingang."
+            exit 0
+          fi
+          for a in "${auftraege[@]}"; do
+            echo "== $a"
+            python3 tools/artikel-veroeffentlichen.py "$a"
+          done
+          # Die Generatoren lesen nur git-getrackte Dateien -- eine frisch
+          # angelegte Artikeldatei bekaeme sonst weder SEO-Block noch
+          # Sitemap-Eintrag.
+          git add -A
+          python3 tools/build-share-images.py
+          sh tools/bauen.sh
+          # build-pressefotos.py packt die ZIPs bei jedem Lauf neu; der Inhalt
+          # ist derselbe, nur die Zeitstempel im Archiv aendern sich. Ohne das
+          # hier stuenden fuenf geaenderte Binaerdateien in jedem Commit.
+          git checkout -- assets/presse/pakete/ 2>/dev/null || true
+
+      - name: Aenderungen committen
+        run: |
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nichts zu veroeffentlichen."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "News-Artikel aus der Mediaplanung gebaut"
+          git push

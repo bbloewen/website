@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="format-detection" content="telephone=no" />
+<title>__TITLE__</title>
+<meta name="description" content="__DESCRIPTION__" />
+<link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/logo/favicon-16.png" />
+<link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+<link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
+<link rel="stylesheet" href="/css/site.css?v=1790863058" />
+<script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
+        async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
+<script src="https://analytics.ahrefs.com/analytics.js" data-key="5TVH543YAI/GzTMbTLbbbg" async></script>
+</head>
+<body data-nav-group="news">
+<a class="skip-link" href="#main">Zum Inhalt springen</a>
+<div id="site-header-placeholder"><!--PARTIAL:header--><!--/PARTIAL:header--></div>
+__MAIN__
+<div id="site-footer-placeholder"><!--PARTIAL:footer--><!--/PARTIAL:footer--></div>
+<script src="/js/vendor/lucide-icons.js?v=1787766492"></script>
+<script src="/js/nav.js?v=1789585539"></script>
+<script src="/js/include.js?v=1787854261"></script>
+<script src="/js/article-nav.js?v=1789585539"></script>
+</body>
+</html>
