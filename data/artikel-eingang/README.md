@@ -9,6 +9,20 @@ je Artikel eine Auftragsdatei ab. Der GitHub-Workflow
 unter 🗓️ Mediaplanung. Was hier liegt, wird bei jedem Lauf erneut verarbeitet;
 das Skript ist idempotent.
 
+## Die Status-Kette in Notion
+
+| Status | wer setzt ihn | was passiert |
+|---|---|---|
+| Geplant / In Arbeit / Entwurf | Mensch | nichts, die Automatik schaut weg |
+| **Bereit zur Prüfung** | Mensch | n8n überarbeitet den Text und legt hier einen Auftrag mit `"status": "pruefung"` ab |
+| **Bereit zur Veröffentlichung** | Automatik | der Entwurf steht im Web (noindex, unverlinkt), die URL steht im Feld `Link` |
+| **Freigegeben** | Mensch | n8n setzt `"status": "freigegeben"`, der Artikel wird verlinkt und indexierbar |
+| **Veröffentlicht** | Automatik | fertig |
+
+Die Überarbeitung in Schritt 2 betrifft Form und Aufbau — Zwischenüberschriften,
+Absatzlängen, Kurzfassung, Typografie. Sie darf keine Fakten hinzufügen; dafür
+gibt es die Prüfstufe.
+
 Dateiname: `<notionId>.json`
 
 ## Felder
