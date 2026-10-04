@@ -40,10 +40,10 @@ CONTAINER = "next-game-card"
 WOCHENTAGE = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"]  # Index = Python weekday()+1 % 7 (So=0)
 RIETHSPORTHALLE_MAPS_URL = "https://www.google.com/maps/search/?api=1&query=Essener+Stra%C3%9Fe+20%2C+99089+Erfurt"
 TABELLE_URL = "/saison/tabelle.html#tabelle-profis"
-GENERISCHER_LIVESTREAM_URL = "https://sporteurope.tv/catl-basketball-loewen"
+GENERISCHER_LIVESTREAM_URL = "https://sporteurope.tv/basketball-loewen-erfurt"
 
 JS_ANKER = [
-    "var GENERISCHER_LIVESTREAM_URL = 'https://sporteurope.tv/catl-basketball-loewen';",
+    "var GENERISCHER_LIVESTREAM_URL = 'https://sporteurope.tv/basketball-loewen-erfurt';",
     "var label = g.heim ? (++heimZaehler + '. Heimspiel') : 'Auswärts mit Gebrüll';",
 ]
 

@@ -15,8 +15,12 @@
   var RIETHSPORTHALLE_MAPS_URL = 'https://www.google.com/maps/search/?api=1&query=Essener+Stra%C3%9Fe+20%2C+99089+Erfurt';
   var TABELLE_URL = '/saison/tabelle.html#tabelle-profis';
   /* Genereller Senderkanal, falls fuer ein Spiel kein eigener Livestream-Link
-     hinterlegt ist (Marko, 26.09.2026). */
-  var GENERISCHER_LIVESTREAM_URL = 'https://sporteurope.tv/catl-basketball-loewen';
+     hinterlegt ist (Marko, 26.09.2026). Der Kanal heisst dort
+     'basketball-loewen-erfurt'; 'catl-basketball-loewen' ist nur der Name im
+     EVENT-Teil der Spiel-URLs, kein Kanalpfad -- stand hier bis 04.10.2026
+     faelschlich als Kanal (nachgesehen in sporteurope.tv/r/sitemap_assets*.xml,
+     wo alle 14 Heimspiele unter /basketball-loewen-erfurt/ stehen). */
+  var GENERISCHER_LIVESTREAM_URL = 'https://sporteurope.tv/basketball-loewen-erfurt';
 
   var parseDMY = SiteUtils.parseDMY;
   var pad2 = SiteUtils.pad2;
