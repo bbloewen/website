@@ -3,6 +3,18 @@
   "artikel": [
     {
       "datum": "04.10.2026",
+      "kategorie": "Spielbericht",
+      "tint": "tint-blue",
+      "icon": "trophy",
+      "titel": "Nach 65:88 in Leverkusen: Löwen richten den Blick auf das erste Heimspiel",
+      "kurztext": "Basketball Löwen Erfurt unterliegen in Leverkusen 65:88. Anthony Watkins: aus den Ballverlusten lernen. Nächstes Spiel: Heimspiel am 11.10.2026.",
+      "url": "/news/artikel/2026-10-04_profis_spielbericht-giants-leverkusen.html",
+      "bild": "/assets/img/news/spielbericht-giants-leverkusen.webp",
+      "topNews": false,
+      "team": "profis"
+    },
+    {
+      "datum": "04.10.2026",
       "kategorie": "Profis",
       "tint": "tint-orange",
       "icon": "calendar",
