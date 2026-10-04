@@ -34,7 +34,7 @@ Das würde auf der Webseite nichts bewirken.
 2. **Zeile im Inhalte-Kalender** (Datenbank `f0795b29f1b540cb9fc04002f1ea6afd`,
    Datenquelle `f8e3777f-4d5b-4f8f-95e1-edb083cc02f2`) mit diesen Eigenschaften:
    `Titel`, `Termin`, `Team` (Profis, Damen, Nachwuchs, Club oder Partner),
-   `Kanal` = News-Artikel, `Top-News` (nur wenn Marko es will), `Status` = Entwurf.
+   `Kanal` = News-Artikel (für Spiele: **Spielbericht**), `Top-News` (nur wenn Marko es will), `Status` = Entwurf.
 3. **Seitentext** in genau diesem Aufbau (der Parser rät nichts):
 
    ```
@@ -51,9 +51,8 @@ Das würde auf der Webseite nichts bewirken.
    und die **Quelle der Fakten**. Alles, was vor `## Artikel` steht, bleibt unveröffentlicht.
 4. **Hero-Bild** in Drive, Ordner „Bilder, Webseite, Newsartikel“, Dateiname
    `News_<JJJJ-MM-TT>_<Kurzname>.<jpg|png|webp>` mit **demselben Datum wie `Termin`**.
-   Nur ein Bild je Datum. Bei Vor- und Spielberichten beginnt der Kurzname mit
-   `Vorbericht-` bzw. `Spielbericht-`, dann wird der Artikel auch im Spielplan verlinkt
-   (nur Profis, Auswärtsspiele).
+   Nur ein Bild je Datum. Bei Vor- und Spielberichten siehe den eigenen Abschnitt unten
+   (Kanal „Spielbericht“, Kurzname beginnt mit `Vorbericht-` bzw. `Spielbericht-`).
 5. **Status auf „Text fertig“ setzen**, erst wenn Text, Eigenschaften und Bild stimmen.
    Dann kommt innerhalb von etwa 10 bis 20 Minuten Markos Review-Mail.
 
@@ -79,6 +78,37 @@ sichtbar ist (am Termin, bei vergangenem Termin sofort). Den Rest erledigt der W
 Steht der Status noch auf „Text fertig“ (kein Entwurf gebaut), erst abwarten bzw. nach
 dem Entwurf fragen. Der Workflow meldet in dem Fall selbst per Mail „kein Entwurf“.
 
+## Vor- und Spielberichte (Kanal „Spielbericht“)
+
+Für jedes Spiel der Profis gibt es in der Mediaplanung **zwei Zeilen**, die schon angelegt
+sind (Status *Geplant*, Kanal **Spielbericht**, Team Profis). Der Skill schreibt in diese
+Zeilen, er legt sie nicht neu an.
+
+| Zeile | Termin | Titel (Arbeitstitel) |
+|---|---|---|
+| **Vorbericht** | der **Freitag vor dem Spiel**, nur Datum (bei Freitagsspielen der Spieltag selbst) | „Vorbericht: Basketball Löwen Erfurt gegen/bei Gegner“ |
+| **Spielbericht** | der Spieltag, **Spielbeginn plus 4 Stunden**, mit Uhrzeit | „Spielbericht: Basketball Löwen Erfurt gegen/bei Gegner“ |
+
+- **Der Termin mit Uhrzeit gilt auf die Minute.** Ein freigegebener Spielbericht geht um
+  diese Uhrzeit raus (der Workflow prüft alle 10 Minuten), nicht früher. Ein Vorbericht
+  ohne Uhrzeit geht ab Mitternacht des Tages online.
+- **Das Feld Anlass nicht ändern.** Es beginnt mit „Vorbericht:“ bzw. „Spielbericht:“,
+  nennt Gegner, Datum, Uhrzeit und Halle (Muster: „Vorbericht: Auswärtsspiel bei X am Sa
+  24.10.2026, 17:30 Uhr (Halle, Ort)“). Daraus liest der Workflow die Art, den Gegner und
+  den Spieltag. Das Spieldatum braucht er, weil der Vorbericht am Freitag erscheint und
+  trotzdem beim richtigen Spiel im Spielplan und im Startseiten-Widget verlinkt wird.
+- **Der Titel darf ersetzt werden** (z. B. „Basketball Löwen gastieren beim Rekordmeister
+  in Leverkusen“), „Anlass“ bleibt.
+- **Hero-Bild:** `News_<Datum des Termins>_Vorbericht-<Gegner>.<jpg|png|webp>` bzw.
+  `News_<Datum>_Spielbericht-<Gegner>.<…>`. Es dürfen mehrere Bilder am selben Datum liegen
+  (zwei Vorberichte am selben Freitag, Vor- und Spielbericht eines Freitagsspiels); der
+  Workflow wählt über „Vorbericht/Spielbericht“ im Dateinamen und den Gegner im Anlass.
+  Der Gegnername (ein Wort mit mindestens 4 Buchstaben) muss also im Dateinamen stehen.
+- Verlinkung beim Spiel im Spielplan und im Widget macht die Automatik von selbst, nur bei
+  Auswärtsspielen. Heimspiele haben ihre eigene Spieltagsseite.
+- **Zeitplan:** Vorbericht am besten bis Donnerstag fertig und geprüft (Status *Text fertig*,
+  Review, *Freigegeben*), der Spielbericht spätestens bis zur Uhrzeit des Termins.
+
 ## Redaktionsregeln
 
 ### Inhalt
@@ -89,7 +119,7 @@ dem Entwurf fragen. Der Workflow meldet in dem Fall selbst per Mail „kein Entw
 
 ### Kategorie und Eyebrow: kommt aus dem Team, nie aus freier Wahl
 Die Zeile über der Überschrift („Aktuelles · Club“) und das Label in den Kacheln
-(„07.10.2026 · Club“) setzt der Workflow aus dem Feld **Team**. Wer den Artikel
+(„07.10.2026 · Club“) setzt der Workflow aus den Feldern **Kanal** und **Team**. Wer den Artikel
 schreibt, muss darüber nicht nachdenken und trägt nichts dergleichen in den Text ein.
 
 | Team in Notion | Eyebrow / Kachel-Label |
@@ -99,6 +129,7 @@ schreibt, muss darüber nicht nachdenken und trägt nichts dergleichen in den Te
 | Nachwuchs | Nachwuchs |
 | Club | **Club** (nicht „Verein“: so heißt es auch in der Navigation) |
 | Partner | Partner |
+| *egal, wenn Kanal = **Spielbericht*** | **Spielbericht** (für Vor- und Spielberichte, schlägt das Team) |
 
 Deshalb gilt beim Anlegen: das richtige **Team** wählen, mehr nicht. Themen des Vereins
 allgemein (Podcast, Sommercamp, Interviews) sind Team **Club**. Ein Artikel zu einem
@@ -146,7 +177,7 @@ geplant: TT.MM.JJJJ“), `Meta-Description:`, Bildname, Zielkeywords, Quelle der
 
 ## Vor „Text fertig“ kurz abhaken
 - [ ] Datum und Wochentag bestätigt, `Termin` gesetzt
-- [ ] `Team`, `Titel`, `Kanal` = News-Artikel gesetzt (Team bestimmt Eyebrow und Kachel-Label, siehe Tabelle)
+- [ ] `Team`, `Titel`, `Kanal` (News-Artikel oder Spielbericht) gesetzt; Kanal und Team bestimmen Eyebrow und Kachel-Label, siehe Tabelle
 - [ ] `**Überschrift:**` und `**Lead:**` vorhanden
 - [ ] Meta-Description höchstens 155 Zeichen, mit „Basketball Löwen Erfurt“
 - [ ] Erste Nennung im Fließtext mit vollem Namen

@@ -35,6 +35,17 @@ Dort stehen auch die Regeln: immer „Basketball Löwen Erfurt“ in Titel/Lead,
 und erster Nennung; Partner und Organisationen mit gesicherter Adresse verlinken
 (Partner aus `data/sponsoren.json`); keine neuen Fakten; „Veröffentlicht“ setzt nur der Workflow.
 
+## Vor- und Spielberichte
+
+Kanal **Spielbericht** in der Mediaplanung. Eyebrow und Kachel-Label heißen dann
+„Spielbericht“, auch bei Team Profis. Zu jedem Spiel gibt es zwei Zeilen: Vorbericht
+(Freitag vor dem Spiel, bei Freitagsspielen der Spieltag, nur Datum) und Spielbericht
+(Spieltag, Spielbeginn plus 4 Stunden, mit Uhrzeit). Ein Termin mit Uhrzeit gilt auf die
+Minute: erst dann wird ein freigegebener Artikel verlinkt. Das Feld `Anlass` („Vorbericht:
+Heimspiel gegen X am So 11.10.2026, 17:00 Uhr (Halle)“) liefert Art, Gegner und Spieldatum
+(`spiel.datum`), und bei mehreren Hero-Bildern am selben Datum die Zuordnung. Details im
+Skill `news-artikel`.
+
 ## Felder
 
 | Feld | Pflicht | Bedeutung |
