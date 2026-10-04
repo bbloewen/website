@@ -112,6 +112,12 @@ einzelnen Team gehört diesem Team zugeordnet.
   gestopft. Ein bis zwei weitere volle Nennungen im Text (z. B. Schlusszeile oder
   Zwischenüberschrift) genügen.
 - Eigennamen und Zitate bleiben, wie sie sind („Tip-Off, der Podcast der Basketball Löwen“).
+- **Eigene Zwischenüberschriften sind kein Eigenname.** „Folge 1: Wie die Löwen entstanden
+  sind“ wird zu „… Wie die Basketball Löwen Erfurt entstanden sind“. Nur wörtliche Titel
+  Dritter in Anführungszeichen (z. B. der Titel einer Podcast-Folge) bleiben unverändert.
+- Nach dem Schreiben **einmal alle Vorkommen von „Löwen“ durchgehen**: Überschriften,
+  Kurzfassung, Lead, Absatzanfänge. Dort, wo „Löwen“ allein steht und kein Eigenname ist,
+  entscheiden nach den Regeln oben.
 
 ### Verlinken: Organisationen und Personen
 Im Fließtext wird **die erste Nennung** jedes Ziels verlinkt, nicht jede. Nicht in
