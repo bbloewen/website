@@ -87,6 +87,23 @@ dem Entwurf fragen. Der Workflow meldet in dem Fall selbst per Mail „kein Entw
 - **Keine wörtlichen Zitate** von Personen, wenn sie nicht freigegeben vorliegen.
 - Ton, Ansprache und Absatzlänge wie in den bestehenden Artikeln unter `news/artikel/`; im Zweifel dort einen ähnlichen Artikel als Vorbild lesen.
 
+### Kategorie und Eyebrow: kommt aus dem Team, nie aus freier Wahl
+Die Zeile über der Überschrift („Aktuelles · Club“) und das Label in den Kacheln
+(„07.10.2026 · Club“) setzt der Workflow aus dem Feld **Team**. Wer den Artikel
+schreibt, muss darüber nicht nachdenken und trägt nichts dergleichen in den Text ein.
+
+| Team in Notion | Eyebrow / Kachel-Label |
+|---|---|
+| Profis | Profis |
+| Damen | Damen |
+| Nachwuchs | Nachwuchs |
+| Club | **Club** (nicht „Verein“: so heißt es auch in der Navigation) |
+| Partner | Partner |
+
+Deshalb gilt beim Anlegen: das richtige **Team** wählen, mehr nicht. Themen des Vereins
+allgemein (Podcast, Sommercamp, Interviews) sind Team **Club**. Ein Artikel zu einem
+einzelnen Team gehört diesem Team zugeordnet.
+
 ### Name: immer „Basketball Löwen Erfurt“ (SEO)
 „Löwen“ allein ist als Suchbegriff zu unspezifisch, „Erfurt“ liefert das Ortssignal.
 - **Pflicht:** Titel *oder* Lead, die Meta-Description und die erste Erwähnung im
@@ -123,7 +140,7 @@ geplant: TT.MM.JJJJ“), `Meta-Description:`, Bildname, Zielkeywords, Quelle der
 
 ## Vor „Text fertig“ kurz abhaken
 - [ ] Datum und Wochentag bestätigt, `Termin` gesetzt
-- [ ] `Team`, `Titel`, `Kanal` = News-Artikel gesetzt
+- [ ] `Team`, `Titel`, `Kanal` = News-Artikel gesetzt (Team bestimmt Eyebrow und Kachel-Label, siehe Tabelle)
 - [ ] `**Überschrift:**` und `**Lead:**` vorhanden
 - [ ] Meta-Description höchstens 155 Zeichen, mit „Basketball Löwen Erfurt“
 - [ ] Erste Nennung im Fließtext mit vollem Namen
