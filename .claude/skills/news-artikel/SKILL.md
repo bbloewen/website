@@ -98,8 +98,11 @@ dem Entwurf fragen. Der Workflow meldet in dem Fall selbst per Mail „kein Entw
 
 ### Verlinken: Organisationen und Personen
 Im Fließtext wird **die erste Nennung** jedes Ziels verlinkt, nicht jede. Nicht in
-Überschriften und nicht im Lead. Markdown: `[Text](URL)`. Eigene Adressen relativ
-(`/saison/spielplan.html`), fremde bekommen automatisch einen neuen Tab.
+Überschriften und nicht im Lead. Markdown: `[Text](URL)`. Eigene Adressen **immer
+voll** schreiben (`https://basketball-loewen.com/saison/spielplan.html`): Notion macht aus
+relativen Pfaden kaputte `app.notion.com/…`-Adressen. Die Automatik macht eigene
+Adressen auf der Seite wieder relativ, fremde bekommen einen neuen Tab.
+Nach dem Schreiben die Seite abrufen und die Links kontrollieren.
 
 1. **Partner und Sponsoren** (immer, auch dotflow): Adresse aus `data/sponsoren.json`,
    Feld `website`. Beispiel: `[dotflow](https://dotflow.com/)`.
