@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://basketball-loewen.com/</loc>
-    <lastmod>2026-10-01</lastmod>
+    <lastmod>2026-10-04</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
@@ -87,12 +87,12 @@
   </url>
   <url>
     <loc>https://basketball-loewen.com/news/aktuelles.html</loc>
-    <lastmod>2026-09-26</lastmod>
+    <lastmod>2026-10-04</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://basketball-loewen.com/news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html</loc>
-    <lastmod>2026-09-26</lastmod>
+    <lastmod>2026-10-04</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -203,6 +203,11 @@
   <url>
     <loc>https://basketball-loewen.com/news/artikel/2026-09-26_profis_vorbericht-dragons-rhoendorf.html</loc>
     <lastmod>2026-09-26</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://basketball-loewen.com/news/artikel/2026-10-04_profis_vorbericht-giants-leverkusen.html</loc>
+    <lastmod>2026-10-04</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -322,7 +327,7 @@
   </url>
   <url>
     <loc>https://basketball-loewen.com/news/instagram-archiv.html</loc>
-    <lastmod>2026-10-01</lastmod>
+    <lastmod>2026-10-04</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -382,7 +387,7 @@
   </url>
   <url>
     <loc>https://basketball-loewen.com/saison/profis.html</loc>
-    <lastmod>2026-10-01</lastmod>
+    <lastmod>2026-10-04</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
