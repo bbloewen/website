@@ -1,28 +1,28 @@
 #!/usr/bin/env python3
-"""Schreibt die Top-News-Kacheln statisch in die Startseite.
+"""Schreibt die News-Kacheln statisch in die Startseite.
 
 Warum:
 
-Das News-Bento auf `index.html` entsteht komplett per JavaScript
-(`js/home-news-feed.js`) aus drei Quellen: unseren Artikeln (`data/news.json`,
-nur `topNews`) und den beiden Instagram-Feeds. Im ausgelieferten HTML stand
-deshalb **keine einzige Schlagzeile und kein Link auf einen News-Artikel** — die
-stärkste Seite der Website verlinkte die Artikel nicht. Jeder Artikel hatte
-genau einen internen Link, den von `news/aktuelles.html`.
+Das News-Bento auf `index.html` entsteht per JavaScript
+(`js/home-news-feed.js`) aus `data/news.json` und, unter strengen Regeln, ein
+bis zwei Instagram-Kacheln. Im ausgelieferten HTML stand deshalb **keine
+einzige Schlagzeile und kein Link auf einen News-Artikel** — die stärkste Seite
+der Website verlinkte die Artikel nicht. Jeder Artikel hatte genau einen
+internen Link, den von `news/aktuelles.html`.
 
 Was hier geschrieben wird und was nicht:
 
-Nur die eigenen Artikel mit `topNews: true`. Die Instagram-Kacheln bleiben
-absichtlich JS-only: ihre Inhalte wechseln täglich über n8n/Behold, ein
-statischer Abzug wäre nach einem Tag falsch, und ihre Zielseiten
-(`news/insta-archiv/`) sind über `news/instagram-archiv.html` ohnehin verlinkt
-und in der Sitemap.
+Die neuesten eigenen Artikel (NEWS_MAX, aktuell 10, als zwei Bento-Seiten à 5),
+nach Veröffentlichungsdatum, ohne Artikel mit zukünftigem Datum. Die
+Instagram-Kacheln bleiben absichtlich JS-only: ob heute ein Beitrag erschienen
+ist, ändert sich täglich über n8n/Behold, ein statischer Abzug wäre nach einem
+Tag falsch. Die Kacheln, die das JS wegen Instagram weglässt, sind die
+letzten Artikel der Liste.
 
-Geschrieben wird in den Desktop-Track. Beim Laden ersetzt `home-news-feed.js`
-dessen `innerHTML` komplett und mischt dann alle drei Quellen — für Besucher
-ändert sich nichts. Der Mobile-Track bleibt leer: dieselben Links ein zweites
-Mal im HTML brächten für Suchmaschinen keinen Gewinn, und ohne JavaScript
-genügt eine Fassung.
+Beim Laden ersetzt `home-news-feed.js` den `innerHTML` des Desktop-Tracks
+komplett — für Besucher ändert sich nichts. Der Mobile-Track bleibt leer:
+dieselben Links ein zweites Mal im HTML brächten für Suchmaschinen keinen
+Gewinn, und ohne JavaScript genügt eine Fassung.
 
 Das Kachel-Markup spiegelt `tileHtml()` aus js/home-news-feed.js; ändert sich
 dort etwas, muss es hier mit. Das Skript prüft das beim Start.
@@ -36,6 +36,7 @@ import argparse
 import json
 import re
 import sys
+from datetime import date
 from pathlib import Path
 
 from seo_common import bild_masse, esc, veroeffentlicht
@@ -48,8 +49,9 @@ CONTAINER = "news-slider-track-desktop"
 START = f"<!--NEWS:{CONTAINER}-->"
 ENDE = f"<!--/NEWS:{CONTAINER}-->"
 
-# Wie viele Artikel das JS fest für News reserviert (takeMax(newsItems, 3)).
-ANZAHL = 3
+# Wie viele Kacheln das JS höchstens zeigt (NEWS_MAX in home-news-feed.js).
+ANZAHL = 10
+SEITE = 5
 # Rollen-Klassen der Desktop-Kacheln, aus desktopRoles in home-news-feed.js.
 ROLLEN = ["news-tile-featured", "news-tile-side", "news-tile-small",
           "news-tile-small", "news-tile-small"]
@@ -57,7 +59,7 @@ ROLLEN = ["news-tile-featured", "news-tile-side", "news-tile-small",
 JS_ANKER = [
     "var desktopRoles = ['news-tile-featured', 'news-tile-side', 'news-tile-small'",
     "'<div class=\"news-tile-overlay\">' +",
-    "takeMax(newsItems, 3)",
+    "var NEWS_MAX = 10;",
     # Sortierschluessel: hier wie dort das Veroeffentlichungsdatum, nicht "datum".
     "date: publishDate(a),",
 ]
@@ -85,9 +87,12 @@ def kachel(a, rolle):
 
 
 def block(artikel):
-    kacheln = "".join(kachel(a, ROLLEN[i] if i < len(ROLLEN) else None)
-                      for i, a in enumerate(artikel))
-    return f'        <div class="news-bento">{kacheln}</div>'
+    seiten = []
+    for start in range(0, len(artikel), SEITE):
+        kacheln = "".join(kachel(a, ROLLEN[i] if i < len(ROLLEN) else None)
+                          for i, a in enumerate(artikel[start:start + SEITE]))
+        seiten.append(f'        <div class="news-bento">{kacheln}</div>')
+    return "\n".join(seiten)
 
 
 def einbauen(text, inhalt):
@@ -114,12 +119,13 @@ def main():
             raise SystemExit("js/home-news-feed.js hat sich geändert — kachel() in "
                              "diesem Skript muss nachgezogen werden.")
 
+    heute = date.today()
     artikel = [a for a in json.loads(DATEN.read_text(encoding="utf-8"))["artikel"]
-               if a.get("topNews")]
+               if veroeffentlicht(a) <= heute]
     artikel.sort(key=veroeffentlicht, reverse=True)
     artikel = artikel[:ANZAHL]
     if not artikel:
-        raise SystemExit("data/news.json: kein Artikel mit topNews")
+        raise SystemExit("data/news.json: kein Artikel")
 
     alt = ZIEL.read_text(encoding="utf-8")
     neu = einbauen(alt, block(artikel))

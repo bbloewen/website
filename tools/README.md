@@ -252,7 +252,7 @@ und im ausgelieferten HTML gar nicht vorkam:
 | `partner/sponsoring.html` | 0 von 23 Partnernamen im HTML | `build-partner-wall.py` |
 | `index.html` (Hauptpartner) | 0 von 10 Logos | `build-partner-wall.py` |
 | `trainieren/trainingszeiten.html` | 1 von 26 Gruppen, 604 Zeichen Text | `build-trainingszeiten-liste.py` |
-| `index.html` (News-Bento) | kein Link auf einen News-Artikel | `build-home-news.py` |
+| `index.html` (News-Bento) | kein Link auf einen News-Artikel (jetzt: die 10 neuesten) | `build-home-news.py` |
 
 Immer dasselbe Vorgehen: statischer Block zwischen Markern, den das vorhandene
 JavaScript beim Laden per `innerHTML` ersetzt. Für Besucher ändert sich nichts,
