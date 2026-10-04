@@ -97,7 +97,10 @@ document.addEventListener('DOMContentLoaded', function () {
       // gerade ausgeschlossen wurde und die Feed-Datei noch nicht neu
       // ausgeliefert ist), zeigt der Browser sonst ein kaputtes Bildsymbol.
       return '<a class="news-tile' + extraClass + '" href="' + item.url + '">' +
-        '<img src="' + item.image + '" alt="" onerror="this.onerror=null;this.src=\'/assets/img/share/og-default.jpg\'" />' +
+        /* loading/decoding wie in tools/build-home-news.py: die Kacheln stehen
+           unterhalb des Sichtbereichs und sollen dem Hero nicht die Leitung
+           wegnehmen (Marko, 04.10.2026). */
+        '<img src="' + item.image + '" loading="lazy" decoding="async" alt="" onerror="this.onerror=null;this.src=\'/assets/img/share/og-default.jpg\'" />' +
         '<div class="news-tile-overlay">' +
           '<h3 class="news-tile-headline">' + item.headline + '</h3>' +
           '<p class="news-tile-teaser">' + item.teaser + '</p>' +

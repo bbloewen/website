@@ -47,16 +47,16 @@
      (Marko, 26.09.2026). */
   function berichtIcon(label, url, aktiv) {
     if (aktiv && url) {
-      return '<a class="cal-link" href="' + url + '" title="' + label + '"><i data-lucide="file-text" style="width:16px;height:16px"></i></a>';
+      return '<a class="cal-link" href="' + url + '" title="' + label + '"><i data-lucide="file-text" style="width:20px;height:20px"></i></a>';
     }
-    return '<span class="cal-link" style="opacity:.4;cursor:default" title="' + label + '"><i data-lucide="file-text" style="width:16px;height:16px"></i></span>';
+    return '<span class="cal-link" style="opacity:.4;cursor:default" title="' + label + '"><i data-lucide="file-text" style="width:20px;height:20px"></i></span>';
   }
 
   function livescoreIcon(url) {
     if (url) {
-      return '<a class="cal-link" href="' + url + '" target="_blank" rel="noopener" title="Boxscore"><i data-lucide="activity" style="width:16px;height:16px"></i></a>';
+      return '<a class="cal-link" href="' + url + '" target="_blank" rel="noopener" title="Boxscore"><i data-lucide="activity" style="width:20px;height:20px"></i></a>';
     }
-    return '<span class="cal-link" style="opacity:.4;cursor:default" title="Boxscore"><i data-lucide="activity" style="width:16px;height:16px"></i></span>';
+    return '<span class="cal-link" style="opacity:.4;cursor:default" title="Boxscore"><i data-lucide="activity" style="width:20px;height:20px"></i></span>';
   }
 
   function gameRowHTML(g, divider) {
@@ -83,7 +83,7 @@
       venueHTML = '';
       statusHTML = '<span class="venue-auswaerts">Auswärts</span>';
     }
-    var tabelleIcon = '<a class="cal-link" href="' + meta.tableUrl + '" title="Zur Tabelle"><i data-lucide="list-ordered" style="width:16px;height:16px"></i></a>';
+    var tabelleIcon = '<a class="cal-link" href="' + meta.tableUrl + '" title="Zur Tabelle"><i data-lucide="list-ordered" style="width:20px;height:20px"></i></a>';
     var teileAnpfiff = (g.zeit || '00:00').split(':').map(Number);
     var anpfiff = new Date(g.date.getFullYear(), g.date.getMonth(), g.date.getDate(), teileAnpfiff[0], teileAnpfiff[1]);
     var hatBegonnen = new Date() >= anpfiff;
@@ -114,9 +114,9 @@
     var actionsHTML = '<div class="fixture-day-actions">' +
       '<div class="fixture-result-row">' +
         '<div class="fixture-result">' + (g.ergebnis || '– – : – –') + '</div>' +
-        (g === naechstesHeimspiel ? '<a class="cal-link" href="/saison/profis/gameday/" title="Zum Gameday"><i data-lucide="ticket" style="width:16px;height:16px"></i></a>' : '') +
+        (g === naechstesHeimspiel ? '<a class="cal-link" href="/saison/profis/gameday/" title="Zum Gameday"><i data-lucide="ticket" style="width:20px;height:20px"></i></a>' : '') +
         berichteHTML +
-        '<a class="cal-link" href="' + calendarLink(g) + '" target="_blank" rel="noopener" title="In Kalender eintragen"><i data-lucide="calendar-plus" style="width:16px;height:16px"></i></a>' +
+        '<a class="cal-link" href="' + calendarLink(g) + '" target="_blank" rel="noopener" title="In Kalender eintragen"><i data-lucide="calendar-plus" style="width:20px;height:20px"></i></a>' +
       '</div>' +
       (g.heim && g.spielberichtUrl ? '<a class="btn btn-outline-orange btn-sm" href="' + g.spielberichtUrl + '">Zum Spiel <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>' : '') +
       (g.livestream ? '<a class="btn btn-outline-orange btn-sm" href="' + g.livestream + '" target="_blank" rel="noopener">' + (hatBegonnen ? 'Zum Replay' : 'Zum Livestream') + ' <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>' : '') +

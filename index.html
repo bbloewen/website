@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1790863058" />
+<link rel="stylesheet" href="/css/site.css?v=1791105764" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
@@ -247,19 +247,27 @@
 
   <!-- HERO — größer auf der Startseite, Platz für eine Top-News-Box; Unterseiten bleiben kompakt.
        hero-slider: automatischer Bild-Slider (7s-Intervall, js/home-hero-slider.js).
-       Weitere Bilder ergänzen: einfach weitere .hero-slide-Divs einfügen. -->
+       Weitere Bilder ergänzen: einfach weitere .hero-slide-Divs einfügen.
+
+       data-bg nennt den Bildpfad OHNE Endung. js/home-hero-slider.js setzt das
+       Bild erst, wenn die Folie an die Reihe kommt, und waehlt dabei nach
+       Fensterbreite die 1280er Variante. Vorher stand in jedem style-Attribut
+       ein background-image: der Browser lud beim Seitenaufruf alle elf Bilder
+       auf einmal — 5,8 MB — und das Spieltags-Widget daneben stand so lange
+       im Leeren (Marko, 04.10.2026). Die erste Folie bekommt ihr Bild aus
+       css/site.css, damit sie ohne JavaScript und ohne Umweg sofort da ist. -->
   <section class="hero-photo hero-lg hero-slider" data-hero-slider>
-    <div class="hero-slide active" style="background-image:url('/assets/img/startseite-hero-1.jpg');background-position:center 20%"></div>
-    <div class="hero-slide" style="background-image:url('/assets/img/startseite-hero-2.jpg');background-position:center 30%"></div>
-    <div class="hero-slide" style="background-image:url('/assets/img/startseite-hero-3.jpg');background-position:center 15%"></div>
-    <div class="hero-slide" style="background-image:url('/assets/img/startseite-hero-4.jpg');background-position:center 25%"></div>
-    <div class="hero-slide" style="background-image:url('/assets/img/startseite-hero-5.jpg');background-position:center 35%"></div>
-    <div class="hero-slide" style="background-image:url('/assets/img/startseite-hero-6.jpg');background-position:center 8%"></div>
-    <div class="hero-slide" style="background-image:url('/assets/img/startseite-hero-7.jpg');background-position:center 15%"></div>
-    <div class="hero-slide" style="background-image:url('/assets/img/startseite-hero-8.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('/assets/img/startseite-hero-9.jpg');background-position:center 40%"></div>
-    <div class="hero-slide" style="background-image:url('/assets/img/startseite-hero-10.jpg');background-position:center 45%"></div>
-    <div class="hero-slide" style="background-image:url('/assets/img/startseite-hero-11.jpg');background-position:center 20%"></div>
+    <div class="hero-slide active" style="background-position:center 20%" data-bg="/assets/img/startseite-hero-1"></div>
+    <div class="hero-slide" style="background-position:center 30%" data-bg="/assets/img/startseite-hero-2"></div>
+    <div class="hero-slide" style="background-position:center 15%" data-bg="/assets/img/startseite-hero-3"></div>
+    <div class="hero-slide" style="background-position:center 25%" data-bg="/assets/img/startseite-hero-4"></div>
+    <div class="hero-slide" style="background-position:center 35%" data-bg="/assets/img/startseite-hero-5"></div>
+    <div class="hero-slide" style="background-position:center 8%" data-bg="/assets/img/startseite-hero-6"></div>
+    <div class="hero-slide" style="background-position:center 15%" data-bg="/assets/img/startseite-hero-7"></div>
+    <div class="hero-slide" data-bg="/assets/img/startseite-hero-8"></div>
+    <div class="hero-slide" style="background-position:center 40%" data-bg="/assets/img/startseite-hero-9"></div>
+    <div class="hero-slide" style="background-position:center 45%" data-bg="/assets/img/startseite-hero-10"></div>
+    <div class="hero-slide" style="background-position:center 20%" data-bg="/assets/img/startseite-hero-11"></div>
     <div class="container">
       <div class="hero-lg-grid">
         <div>
@@ -294,7 +302,7 @@
         <!-- DESKTOP: 2 Bento-Seiten -->
         <div class="news-slider-desktop">
           <div class="news-slider-track" id="news-slider-track-desktop"><!--NEWS:news-slider-track-desktop-->
-        <div class="news-bento"><a class="news-tile news-tile-featured" href="/news/artikel/2026-10-04_profis_vorbericht-giants-leverkusen.html"><img src="/assets/img/news/giants-leverkusen-vs-loewen.webp" width="2400" height="800" alt="" onerror="this.onerror=null;this.src='/assets/img/share/og-default.jpg'" /><div class="news-tile-overlay"><h3 class="news-tile-headline">Basketball Löwen gastieren beim Rekordmeister in Leverkusen</h3><p class="news-tile-teaser">Zweiter Spieltag heute um 16 Uhr bei den Bayer Giants Leverkusen, dem Rekordmeister der Basketball-Bundesliga — Neuzugang Jacob Hadi gibt sein Debüt.</p><span class="news-tile-link">04.10.2026 · Weiterlesen <i data-lucide="arrow-right" style="width:14px;height:14px"></i></span></div></a><a class="news-tile news-tile-side" href="/news/artikel/2026-09-26_profis_spielbericht-dragons-rhoendorf.html"><img src="/assets/img/news/spielbericht-dragons-rhoendorf-kachel.webp" width="1400" height="933" alt="" onerror="this.onerror=null;this.src='/assets/img/share/og-default.jpg'" /><div class="news-tile-overlay"><h3 class="news-tile-headline">Enger Auftakt, am Ende zu wenig: Löwen unterliegen bei den Dragons Rhöndorf</h3><p class="news-tile-teaser">96:74-Niederlage zum Saisonauftakt bei den Dragons Rhöndorf — bis zum letzten Viertel ein enges Spiel, dann liefen die Gastgeber davon. Anthony Watkins mit starkem Debüt (27 Punkte).</p><span class="news-tile-link">26.09.2026 · Weiterlesen <i data-lucide="arrow-right" style="width:14px;height:14px"></i></span></div></a><a class="news-tile news-tile-small" href="/news/artikel/2026-09-26_profis_vorbericht-dragons-rhoendorf.html"><img src="/assets/img/news/dragons-rhoendorf-vs-loewen.webp" width="2400" height="800" alt="" onerror="this.onerror=null;this.src='/assets/img/share/og-default.jpg'" /><div class="news-tile-overlay"><h3 class="news-tile-headline">Basketball Löwen reisen zum Saisonauftakt zu den Dragons Rhöndorf</h3><p class="news-tile-teaser">Saisonauftakt heute um 19 Uhr bei den Dragons Rhöndorf, einem der stärksten Gegner der Südstaffel — für Co-Kapitän Samuel Nellessen ein besonderes Spiel.</p><span class="news-tile-link">26.09.2026 · Weiterlesen <i data-lucide="arrow-right" style="width:14px;height:14px"></i></span></div></a></div>
+        <div class="news-bento"><a class="news-tile news-tile-featured" href="/news/artikel/2026-10-04_profis_vorbericht-giants-leverkusen.html"><img src="/assets/img/news/giants-leverkusen-vs-loewen.webp" width="2400" height="800" loading="lazy" decoding="async" alt="" onerror="this.onerror=null;this.src='/assets/img/share/og-default.jpg'" /><div class="news-tile-overlay"><h3 class="news-tile-headline">Basketball Löwen gastieren beim Rekordmeister in Leverkusen</h3><p class="news-tile-teaser">Zweiter Spieltag heute um 16 Uhr bei den Bayer Giants Leverkusen, dem Rekordmeister der Basketball-Bundesliga — Neuzugang Jacob Hadi gibt sein Debüt.</p><span class="news-tile-link">04.10.2026 · Weiterlesen <i data-lucide="arrow-right" style="width:14px;height:14px"></i></span></div></a><a class="news-tile news-tile-side" href="/news/artikel/2026-09-26_profis_spielbericht-dragons-rhoendorf.html"><img src="/assets/img/news/spielbericht-dragons-rhoendorf-kachel.webp" width="1400" height="933" loading="lazy" decoding="async" alt="" onerror="this.onerror=null;this.src='/assets/img/share/og-default.jpg'" /><div class="news-tile-overlay"><h3 class="news-tile-headline">Enger Auftakt, am Ende zu wenig: Löwen unterliegen bei den Dragons Rhöndorf</h3><p class="news-tile-teaser">96:74-Niederlage zum Saisonauftakt bei den Dragons Rhöndorf — bis zum letzten Viertel ein enges Spiel, dann liefen die Gastgeber davon. Anthony Watkins mit starkem Debüt (27 Punkte).</p><span class="news-tile-link">26.09.2026 · Weiterlesen <i data-lucide="arrow-right" style="width:14px;height:14px"></i></span></div></a><a class="news-tile news-tile-small" href="/news/artikel/2026-09-26_profis_vorbericht-dragons-rhoendorf.html"><img src="/assets/img/news/dragons-rhoendorf-vs-loewen.webp" width="2400" height="800" loading="lazy" decoding="async" alt="" onerror="this.onerror=null;this.src='/assets/img/share/og-default.jpg'" /><div class="news-tile-overlay"><h3 class="news-tile-headline">Basketball Löwen reisen zum Saisonauftakt zu den Dragons Rhöndorf</h3><p class="news-tile-teaser">Saisonauftakt heute um 19 Uhr bei den Dragons Rhöndorf, einem der stärksten Gegner der Südstaffel — für Co-Kapitän Samuel Nellessen ein besonderes Spiel.</p><span class="news-tile-link">26.09.2026 · Weiterlesen <i data-lucide="arrow-right" style="width:14px;height:14px"></i></span></div></a></div>
 <!--/NEWS:news-slider-track-desktop--></div>
           <button type="button" class="news-slider-arrow prev" data-news-prev aria-label="Vorherige News" disabled><i data-lucide="chevron-left" class="icon-18"></i></button>
           <button type="button" class="news-slider-arrow next" data-news-next aria-label="Nächste News"><i data-lucide="chevron-right" class="icon-18"></i></button>
@@ -579,8 +587,8 @@
 <script src="/js/include.js?v=1787854261"></script>
 <script src="/js/season-config.js?v=1785398309"></script>
 <script src="/js/home-next-game.js?v=1791105167"></script>
-<script src="/js/home-news-feed.js?v=1789585539"></script>
-<script src="/js/home-hero-slider.js?v=1785398309"></script>
+<script src="/js/home-news-feed.js?v=1791105764"></script>
+<script src="/js/home-hero-slider.js?v=1791106295"></script>
 <script src="/js/partner-tile.js?v=1789837357"></script>
 <script src="/js/home-hauptpartner.js?v=1785487795"></script>
 </body>

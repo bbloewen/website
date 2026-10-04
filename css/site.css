@@ -1669,6 +1669,16 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
   opacity: 0; transition: opacity var(--dur-slow, .5s) ease;
 }
 .hero-slider .hero-slide.active { opacity: 1; }
+/* Die erste Folie bekommt ihr Bild hier und nicht aus dem data-bg-Attribut:
+   so steht es schon im CSS-Fund des Browsers und laedt ohne Umweg ueber
+   JavaScript. Die uebrigen zehn holt js/home-hero-slider.js erst, wenn sie
+   an die Reihe kommen -- vorher lud die Startseite alle elf auf einmal
+   (5,8 MB). Unter 900px die schmalere Fassung: 2400px breite Bilder sind auf
+   einem Telefon sechsfach ueberdimensioniert (Marko, 04.10.2026). */
+.hero-slider .hero-slide:first-child { background-image: url('/assets/img/startseite-hero-1.webp'); }
+@media (max-width: 899px) {
+  .hero-slider .hero-slide:first-child { background-image: url('/assets/img/startseite-hero-1-1280.webp'); }
+}
 .hero-slider::after {
   content: ''; position: absolute; inset: 0; z-index: 1;
   background: var(--hero-overlay);
@@ -2298,7 +2308,8 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .team-badge-damen { background: var(--color-orange-50); color: var(--color-orange-700); }
 .team-badge-nbbl { background: var(--color-blue-100); color: var(--color-blue-700); }
 .fixture-day-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-.fixture-result-row { display: flex; align-items: center; gap: 8px; min-height: 26px; }
+.fixture-result-row { display: flex; align-items: center; gap: 2px; min-height: 26px; }
+.fixture-result-row .fixture-result { margin-right: 6px; }
 @media (max-width: 599px) {
   .fixture-day-game { grid-template-columns: 1fr; text-align: left; }
   .fixture-day-actions { align-items: flex-start; margin-top: 4px; }
@@ -2334,7 +2345,17 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .ticket-row-meta a { color: inherit; }
 .ticket-row-meta a:hover { color: var(--color-brand-orange); text-decoration: underline; }
 .ticket-row-vvk { margin-top: 10px; }
-.cal-link { display: inline-flex; align-items: center; justify-content: center; color: var(--text-secondary); transition: color var(--dur-fast) var(--ease-out); padding: 6px; margin: -6px; border-radius: 8px; }
+/* Icon-Schaltflaechen (Vorbericht, Livescore, Tabelle, Kalender ...). Die
+   Trefferflaeche ist bewusst groesser als das Symbol: 44x44 ist die Groesse,
+   die mit dem Daumen sicher zu treffen ist, 28x28 war es nicht (Marko,
+   04.10.2026). Frueher stand hier padding:6px mit margin:-6px -- der negative
+   Rand zog benachbarte Flaechen 4px ineinander, zwei Symbole teilten sich
+   also einen Streifen. Jetzt feste Mindestgroesse ohne negativen Rand; der
+   optische Abstand kommt aus dem kleineren gap der Zeile. */
+.cal-link { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; min-height: 40px; color: var(--text-secondary); transition: color var(--dur-fast) var(--ease-out); border-radius: 8px; }
+@media (pointer: coarse) {
+  .cal-link { min-width: 44px; min-height: 44px; }
+}
 .cal-link:hover { color: var(--color-brand-orange); }
 .ticket-sidebar {
   position: sticky; top: 96px; background: #fff; border: 1px solid var(--border);
