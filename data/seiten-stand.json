@@ -54,7 +54,7 @@
       "lastmod": "2026-09-18"
     },
     "index.html": {
-      "hash": "bd494e89db15938e9f7361c242ce89f0de7dc621",
+      "hash": "7d583b8e1ebc003fa7148b86704d433e4c18af64",
       "lastmod": "2026-10-04"
     },
     "kontakt.html": {
@@ -70,12 +70,12 @@
       "lastmod": "2026-08-08"
     },
     "news/aktuelles.html": {
-      "hash": "44af9ae44fa4145316118f315526520e65414015",
-      "lastmod": "2026-09-26"
+      "hash": "23d7a4e85f4120ac64ff793b58930b5a58d0f82a",
+      "lastmod": "2026-10-04"
     },
     "news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html": {
-      "hash": "aedd7a8b563692b485777153de1d5b98bd11fa7c",
-      "lastmod": "2026-09-26"
+      "hash": "6275e13141536b70f974194d325bb2b5337addbe",
+      "lastmod": "2026-10-04"
     },
     "news/artikel/2025-04-29_profis_achtelfinale-aus.html": {
       "hash": "c38eb425968ac35de960a97abce9a1fde0a3192a",
@@ -164,6 +164,10 @@
     "news/artikel/2026-09-26_profis_vorbericht-dragons-rhoendorf.html": {
       "hash": "9729711e6e9013477f249430cf115e11888c1925",
       "lastmod": "2026-09-26"
+    },
+    "news/artikel/2026-10-04_profis_vorbericht-giants-leverkusen.html": {
+      "hash": "c46987aa01cd17c74cb7f7ddad4f5bef56a03b65",
+      "lastmod": "2026-10-04"
     },
     "news/insta-archiv/loewen-17884318188501699.html": {
       "hash": "002ceedc7cd86f481a402263912e80b5362dbb93",
@@ -258,8 +262,8 @@
       "lastmod": "2026-09-28"
     },
     "news/instagram-archiv.html": {
-      "hash": "8f818ef2ebc2ed10af262e37dc98acc1b6c526e1",
-      "lastmod": "2026-10-01"
+      "hash": "b4db1de3164414c98f58317dc8994418f23ff220",
+      "lastmod": "2026-10-04"
     },
     "news/newsletter/index.html": {
       "hash": "4caad0fb0b2a0fd640456d7f98fa89ad0d374cb4",
@@ -306,8 +310,8 @@
       "lastmod": "2026-09-26"
     },
     "saison/profis.html": {
-      "hash": "a1e4fc0a877a64ae11929ddc5795965ba49fd2b4",
-      "lastmod": "2026-10-01"
+      "hash": "37bf24a9a29feb015ec897c3b50c9a9fa9b8c7b9",
+      "lastmod": "2026-10-04"
     },
     "saison/profis/gameday/2026-10-11-bba-ludwigsburg.html": {
       "hash": "0dfb2d0f5388f0d4d0e9f7945cf2ef241cabf504",
