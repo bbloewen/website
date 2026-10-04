@@ -27,7 +27,7 @@ from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from seo_common import (BASE, REPO, artikel_datum, attr, canonical_url,
-                        indexable_pages, text_of)
+                        indexable_pages, read, text_of, tracked_html)
 
 START = "<!-- SEO:auto START (tools/build-head-meta.py — nicht von Hand ändern) -->"
 END = "<!-- SEO:auto END -->"
@@ -643,6 +643,23 @@ def apply_block(text, block):
     return text.replace("</head>", block + "</head>", 1)
 
 
+def seiten_mit_vorschau():
+    """Indexierbare Seiten PLUS noindex-Entwuerfe unter news/artikel/.
+
+    Warum: Ein Entwurf aus der Mediaplanung (Status pruefung) steht auf noindex,
+    soll aber zur Freigabe als Link geteilt werden koennen. Ohne og:/twitter:-Tags
+    zeigt WhatsApp/Slack/Teams dann kein Hero-Bild (Marko, 04.10.2026). Die Tags
+    sind fuer Suchmaschinen wirkungslos; noindex und die Abwesenheit in Sitemap und
+    Suchindex bleiben unveraendert, denn dort entscheidet weiterhin is_indexable().
+    """
+    seiten = list(indexable_pages())
+    vorhanden = {rel for rel, _ in seiten}
+    for rel in tracked_html():
+        if rel.startswith("news/artikel/") and rel not in vorhanden:
+                    seiten.append((rel, read(rel)))
+    return seiten
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true")
@@ -650,7 +667,7 @@ def main():
 
     changed, unchanged, skipped, problems = [], [], [], []
 
-    for rel, text in indexable_pages():
+    for rel, text in seiten_mit_vorschau():
         if rel.startswith(SKIP_PREFIXES):
             skipped.append(rel)
             continue
