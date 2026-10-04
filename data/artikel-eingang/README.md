@@ -14,10 +14,13 @@ das Skript ist idempotent.
 | Status | wer setzt ihn | was passiert |
 |---|---|---|
 | Geplant / In Arbeit / Entwurf | Mensch | nichts, die Automatik schaut weg |
-| **Bereit zur Prüfung** | Mensch | n8n überarbeitet den Text und legt hier einen Auftrag mit `"status": "pruefung"` ab |
-| **Bereit zur Veröffentlichung** | Automatik | der Entwurf steht im Web (noindex, unverlinkt), die URL steht im Feld `Link` |
-| **Freigegeben** | Mensch | n8n setzt `"status": "freigegeben"`, der Artikel wird verlinkt und indexierbar |
+| **Text fertig** | Mensch | n8n baut aus Notion-Text, Termin, Team und Drive-Bild einen Auftrag mit `"status": "pruefung"`; die Action legt den Entwurf an (noindex, unverlinkt), die URL steht im Feld `Link` |
+| **Bereit zum Review** | Automatik | der Entwurf ist online; eine E-Mail „Artikel bereit zum Review und Freigabe" geht an die Redaktion |
+| **Freigegeben** | Mensch | ab dem Termin setzt n8n `"status": "freigegeben"`, der Artikel wird verlinkt und indexierbar (liegt der Termin schon zurück: sofort) |
 | **Veröffentlicht** | Automatik | fertig |
+
+Das Team „Club" erscheint in `news.json` als Kategorie „Verein" ohne Feed-Team
+(`team` fehlt = allgemein), alle anderen Teams übernehmen ihren Feed-Schlüssel.
 
 Die Überarbeitung in Schritt 2 betrifft Form und Aufbau — Zwischenüberschriften,
 Absatzlängen, Kurzfassung, Typografie. Sie darf keine Fakten hinzufügen; dafür
@@ -86,7 +89,7 @@ auf den Spieltag fällt. Bei Heimspielen gibt es einen Hinweis statt einer
 Verlinkung — die haben ihre eigene Spieltagsseite.
 
 **Neu bauen:** Wer nach der Prüfung noch am Text ändern will, leert das Feld
-`Link` und setzt den Status erneut auf „Bereit zur Prüfung".
+`Link` und setzt den Status erneut auf „Text fertig".
 
 Das Feld `bild` bestimmt die Hero-CSS-Klasse (`hero-news-<Dateiname ohne
 Endung>`) und darüber auch den Namen des Share-Bildes. Das ist kein Zufall,
