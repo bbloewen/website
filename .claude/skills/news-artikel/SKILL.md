@@ -87,6 +87,23 @@ dem Entwurf fragen. Der Workflow meldet in dem Fall selbst per Mail „kein Entw
 - **Keine wörtlichen Zitate** von Personen, wenn sie nicht freigegeben vorliegen.
 - Ton, Ansprache und Absatzlänge wie in den bestehenden Artikeln unter `news/artikel/`; im Zweifel dort einen ähnlichen Artikel als Vorbild lesen.
 
+### Kategorie und Eyebrow: kommt aus dem Team, nie aus freier Wahl
+Die Zeile über der Überschrift („Aktuelles · Club“) und das Label in den Kacheln
+(„07.10.2026 · Club“) setzt der Workflow aus dem Feld **Team**. Wer den Artikel
+schreibt, muss darüber nicht nachdenken und trägt nichts dergleichen in den Text ein.
+
+| Team in Notion | Eyebrow / Kachel-Label |
+|---|---|
+| Profis | Profis |
+| Damen | Damen |
+| Nachwuchs | Nachwuchs |
+| Club | **Club** (nicht „Verein“: so heißt es auch in der Navigation) |
+| Partner | Partner |
+
+Deshalb gilt beim Anlegen: das richtige **Team** wählen, mehr nicht. Themen des Vereins
+allgemein (Podcast, Sommercamp, Interviews) sind Team **Club**. Ein Artikel zu einem
+einzelnen Team gehört diesem Team zugeordnet.
+
 ### Name: immer „Basketball Löwen Erfurt“ (SEO)
 „Löwen“ allein ist als Suchbegriff zu unspezifisch, „Erfurt“ liefert das Ortssignal.
 - **Pflicht:** Titel *oder* Lead, die Meta-Description und die erste Erwähnung im
@@ -95,11 +112,20 @@ dem Entwurf fragen. Der Workflow meldet in dem Fall selbst per Mail „kein Entw
   gestopft. Ein bis zwei weitere volle Nennungen im Text (z. B. Schlusszeile oder
   Zwischenüberschrift) genügen.
 - Eigennamen und Zitate bleiben, wie sie sind („Tip-Off, der Podcast der Basketball Löwen“).
+- **Eigene Zwischenüberschriften sind kein Eigenname.** „Folge 1: Wie die Löwen entstanden
+  sind“ wird zu „… Wie die Basketball Löwen Erfurt entstanden sind“. Nur wörtliche Titel
+  Dritter in Anführungszeichen (z. B. der Titel einer Podcast-Folge) bleiben unverändert.
+- Nach dem Schreiben **einmal alle Vorkommen von „Löwen“ durchgehen**: Überschriften,
+  Kurzfassung, Lead, Absatzanfänge. Dort, wo „Löwen“ allein steht und kein Eigenname ist,
+  entscheiden nach den Regeln oben.
 
 ### Verlinken: Organisationen und Personen
 Im Fließtext wird **die erste Nennung** jedes Ziels verlinkt, nicht jede. Nicht in
-Überschriften und nicht im Lead. Markdown: `[Text](URL)`. Eigene Adressen relativ
-(`/saison/spielplan.html`), fremde bekommen automatisch einen neuen Tab.
+Überschriften und nicht im Lead. Markdown: `[Text](URL)`. Eigene Adressen **immer
+voll** schreiben (`https://basketball-loewen.com/saison/spielplan.html`): Notion macht aus
+relativen Pfaden kaputte `app.notion.com/…`-Adressen. Die Automatik macht eigene
+Adressen auf der Seite wieder relativ, fremde bekommen einen neuen Tab.
+Nach dem Schreiben die Seite abrufen und die Links kontrollieren.
 
 1. **Partner und Sponsoren** (immer, auch dotflow): Adresse aus `data/sponsoren.json`,
    Feld `website`. Beispiel: `[dotflow](https://dotflow.com/)`.
@@ -120,7 +146,7 @@ geplant: TT.MM.JJJJ“), `Meta-Description:`, Bildname, Zielkeywords, Quelle der
 
 ## Vor „Text fertig“ kurz abhaken
 - [ ] Datum und Wochentag bestätigt, `Termin` gesetzt
-- [ ] `Team`, `Titel`, `Kanal` = News-Artikel gesetzt
+- [ ] `Team`, `Titel`, `Kanal` = News-Artikel gesetzt (Team bestimmt Eyebrow und Kachel-Label, siehe Tabelle)
 - [ ] `**Überschrift:**` und `**Lead:**` vorhanden
 - [ ] Meta-Description höchstens 155 Zeichen, mit „Basketball Löwen Erfurt“
 - [ ] Erste Nennung im Fließtext mit vollem Namen

@@ -19,7 +19,7 @@ das Skript ist idempotent.
 | **Freigegeben** | Mensch | ab dem Termin setzt n8n `"status": "freigegeben"`, der Artikel wird verlinkt und indexierbar (liegt der Termin schon zurück: sofort) |
 | **Veröffentlicht** | Automatik | fertig |
 
-Das Team „Club" erscheint in `news.json` als Kategorie „Verein" ohne Feed-Team
+Das Team „Club" erscheint als Kategorie „Club" (Eyebrow und Kachel-Label, wie in der Navigation) ohne Feed-Team
 (`team` fehlt = allgemein), alle anderen Teams übernehmen ihren Feed-Schlüssel.
 
 Die Überarbeitung in Schritt 2 betrifft Form und Aufbau — Zwischenüberschriften,
