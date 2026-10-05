@@ -905,3 +905,21 @@ Kostenlose Dauerkarte (Stehplatz, ohne Sitzplatz) für Trainer und Übungsleiter
 **Benennung (05.10.2026, Marko):** Übungsleiter-Gutscheine heißen `UL-DK-…` mit Tag `uebungsleiter_dauerkarte`, wie bei Ehrenamt `EA-DK-…` und `ehrenamts_dauerkarte`. Der Gutschein von Michael Gleichmann (ID 255) wurde nachträglich auf `UL-DK-3YKSQ7` und diesen Tag umgestellt (für den Empfänger nicht sichtbar). Der Test-Gutschein AFB5DBWSU2 (ID 254) ist abgelaufen gesetzt und behält den alten Tag "Trainer Partnervereine".
 
 **Bestellcode auf dem Ticket (05.10.2026):** Die Einzelticket-Vorlage (Layout 9) trägt unten rechts den Bestellcode in Grau (Textfeld `{order}`, Open Sans 8 pt, x 155,4, y 185,0, rechtsbündig, Farbe 80/80/80). In der Dauerkarten-Vorlage (Layout 10) fehlte er, weil die Änderung nur an Layout 9 gemacht wurde. Am 05.10. dasselbe Element per API (`PATCH …/ticketlayouts/10/` mit dem um das Element ergänzten `layout`) in Layout 10 übernommen. Hinweis: Bereits erzeugte (gecachte) Dauerkarten-PDFs zeigen den Code erst nach erneuter Erzeugung (Bestellungsänderung ohne Mail), z. B. das Ticket von Michael Gleichmann (CXS3V). Layout-Änderungen immer in beiden Vorlagen (9 Einzelticket, 10 Dauerkarte) prüfen.
+
+## Ticket-Mail "Item 46" bei freien Dauerkarten (05.10.2026)
+
+**Fehler:** Bei freien (0 €) Dauerkarten-Bestellungen kam die Ticket-Mail mit "Freie Platzwahl in deinem gewählten Block: 1× Item 46", ohne Namen in der Anrede und mit nur EINEM Ticket-PDF, auch wenn die Bestellung zwei Plätze hatte. Betroffen am 05.10.: DCMYE, R3DVV, ELYWV (Kim), 3JYEV (Aaron, 2 Plätze), WPFXB (Samuel Nellessen, 2 Plätze), 7ELWT (Luca Förster, 2 Plätze).
+
+**Ursache:** Eine freie Bestellung ist in pretix schon bei der Anlage "bezahlt". pretix' eigenes `order.paid`-Event kam deshalb, als erst die erste Position existierte (die übrigen Spiele werden vom Dauerkarten-Workflow nachgetragen). Der Ticket-Mail-Workflow las eine Bestellung mit einer Position, erkannte sie nicht als Dauerkarte (`isSeasonTicket` braucht mehrere Spiele) und sendete sofort; der spätere Auslöser des Dauerkarten-Workflows wurde durch den Marker "bereits versendet" abgewiesen. Item 46 ist "Block CS (K2) - Dauer", für das es in der Einzelticket-Label-Tabelle keinen Eintrag gibt.
+
+**Behebung:**
+- `zNGWzRFz3ebzsDkD`, Knoten "Marker pruefen": Bei einer Bestellung mit Dauerkarten-Produkt (Items 37–39, 41–47, 91), jünger als 2 Minuten, wird ein Ereignis ohne `source: "direct"` übersprungen (Grund `dauerkarte-wartet-auf-direktaufruf`). Die Mail löst der Direktaufruf des Dauerkarten-Workflows aus, wenn alle Positionen da sind. Ältere Bestellungen (z. B. später bezahlte Lastschrift-Dauerkarten) laufen unverändert.
+- `HyUXW4kbhaQVbG0A`, Knoten "DK: Ticket-Mail ausloesen (sofort bezahlt)": sendet jetzt `source: "direct"`.
+- "Anhänge zusammenführen": Die Alarm-Mail "Ticket-Mail unvollstaendig" nennt für die erneute Auslösung jetzt `"source":"direct"` dazu. **Manuelles Neu-Senden für Dauerkarten-Bestellungen immer mit `source: "direct"`**, sonst wird es bei frischen Bestellungen übersprungen.
+- Abend-Produkte (Items 48–58) haben jetzt Einträge in der Label-Tabelle, damit in den Archiv-Mails nicht "Item NN" steht.
+
+## PayPal-Abgleich 05.10.2026
+
+Marko vermutete fehlende PayPal-Zahlungen. Ergebnis: Kein Fehler im Ticketing. Der PayPal-Export reicht nur bis 30.09. 14:35 Uhr. Alle 11 Zahlungen darin passen zu einer Referenz (ET-…) und zum Betrag der Tabelle "PayPal-Zahlungen" (zwei davon am 27.08. erstattete Tests). Danach gab es nur zwei bezahlte Webshop-Bestellungen: DUTTK (62,00 €, ET-0CID60, PayPal-Capture 3A199315UR0498217, 01.10.) und CPMCL (32,00 €, ET-X3W8LX, Capture 6XY985688U3740713, 03.10.); beide "COMPLETED" laut PayPal-API. Alle anderen Bestellungen vom 05.10. sind Freikarten (0 €) oder Abendkasse-Tests. Die Ticket-Mail für freie Bestellungen sagt trotzdem "vielen Dank für deine Zahlung". Fünf bezahlte pretix-Bestellungen ohne PayPal-Zahlung und ohne Eintrag in "PayPal-Zahlungen": 3DRQM, SRJLX (28.09.), HYN7P, PJ3ZW, RACLS (29.09.), zusammen 304,50 €; vermutlich nicht über den Webshop angelegt, Herkunft offen.
+
+**Gotcha n8n-MCP:** `versionName` bei `update_workflow` maximal 80 Zeichen, längere Namen lassen die Änderung still scheitern (keine Fehlermeldung, Version bleibt gleich). Immer zurücklesen.
