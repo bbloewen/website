@@ -118,6 +118,21 @@
   .ak-wrap .seatplan-mobile-tile-cat { font-size: 11px; }
   .ak-wrap .ak-tile-info { font-size: 1.02rem; margin-top: 6px; line-height: 1.3; }
 
+  /* Preise rechts neben dem Plan (Marko, 05.10.2026): die Kassiererin haelt das iPad dem Kunden
+     hin, er soll Kategorie 1/2/3 mit vollem und ermaessigtem Preis direkt ablesen koennen.
+     Feste Position am rechten Rand, nur sichtbar, wenn der Platz reicht (iPad quer). */
+  .ak-preise { position: fixed; right: 18px; top: 50%; transform: translateY(-50%); width: 212px;
+    display: flex; flex-direction: column; gap: 14px; }
+  .ak-preise-titel { font-size: 0.8rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--text-muted); }
+  .ak-preise-zeile { display: flex; align-items: flex-start; gap: 10px; }
+  .ak-chip { flex: 0 0 auto; width: 16px; height: 16px; margin-top: 4px; border-radius: 5px; border: 1.5px solid; }
+  .ak-preise-kat { font-size: 1.15rem; font-weight: 800; color: var(--color-brand-navy, #00122d); line-height: 1.2; }
+  .ak-preise-voll { font-size: 1.15rem; font-weight: 700; color: var(--color-brand-navy, #00122d); margin-top: 2px; }
+  .ak-preise-erm { font-size: 1.05rem; font-weight: 600; color: var(--color-brand-navy, #00122d); opacity: .78; margin-top: 1px; }
+  .ak-preise:empty { display: none; }
+  @media (max-width: 1100px) { .ak-preise { display: none; } }
+
   /* "Sie sind hier": roter Punkt (wie auf Landkarten) links neben dem Haupteingang auf
      Hoehe der Spielfeld-Mitte, damit die Kassiererin dem Kunden direkt zeigen kann, wo der
      Stand liegt und wo die Bloecke sind. */
@@ -139,6 +154,7 @@
 
   <div id="ak-blockwahl">
     <div id="seatplan-root"></div>
+    <aside class="ak-preise" id="ak-preise" aria-label="Preise Kategorie 1 bis 3"></aside>
   </div>
 
   <div id="ak-tarif-panels"></div>
@@ -338,8 +354,65 @@ document.addEventListener('DOMContentLoaded', function () {
   // wuerde hier ungeschuetzt in den DOM geschrieben, loest das denselben Observer
   // sofort wieder aus (Endlosschleife). Aufruf deshalb NUR aus syncOverview(), das den
   // Observer waehrend der eigenen Schreibzugriffe kurz abhaengt (disconnect/observe).
+  // Farben (Marko, 05.10.2026): Kategorie III grau, Kategorie II (inkl. CS) in dem Gruen, das
+  // bisher Kategorie III hatte. Die Farben kommen aus dem Sitzplan; hier werden die vom
+  // SeatPicker gesetzten Inline-Farben der Kacheln getauscht (Re-Render setzt sie jedes Mal
+  // neu, deshalb steht der Tausch in der Annotate-Kette).
+  var katFarben = null;
+  function farbenTauschen() {
+    if (!picker) return;
+    var tiles = picker.root.querySelectorAll('.seatplan-mobile-tile[data-zone]');
+    function katVon(btn) {
+      var key = btn.dataset.zone, sep = key.indexOf('::');
+      var zoneId = sep === -1 ? key : key.slice(0, sep);
+      var cat = sep === -1 ? null : key.slice(sep + 2);
+      if (cat) return cat;
+      var pc = picker._purchasableCategories(zoneId);
+      return pc.length === 1 ? pc[0].category : null;
+    }
+    var farbe = {};
+    tiles.forEach(function (btn) {
+      var cat = katVon(btn);
+      if (cat && !farbe[cat]) farbe[cat] = { bg: btn.style.background, border: btn.style.borderColor };
+    });
+    var grau = farbe['Kategorie II'], gruen = farbe['Kategorie III'];
+    if (!grau || !gruen) { if (katFarben) { grau = katFarben.grau; gruen = katFarben.gruen; } else return; }
+    katFarben = { grau: grau, gruen: gruen, kat1: farbe['Kategorie I'] || (katFarben && katFarben.kat1) };
+    tiles.forEach(function (btn) {
+      var cat = katVon(btn);
+      if (cat === 'Kategorie III') { btn.style.background = grau.bg; btn.style.borderColor = grau.border; }
+      else if (cat === 'Kategorie II' || cat === 'C unten') { btn.style.background = gruen.bg; btn.style.borderColor = gruen.border; }
+      if (cat === 'C unten') {
+        var lbl = btn.querySelector('.seatplan-mobile-tile-cat');
+        if (lbl) { lbl.textContent = 'CS'; lbl.style.fontSize = '17px'; lbl.style.fontWeight = '700'; lbl.style.opacity = '1'; }
+      }
+    });
+  }
+
+  function renderPreise() {
+    var host = document.getElementById('ak-preise');
+    if (!host || !picker || !katFarben) return;
+    var reihen = [
+      { name: 'Kategorie 1', key: 'Kategorie I', farbe: katFarben.kat1 },
+      { name: 'Kategorie 2', key: 'Kategorie II', farbe: katFarben.gruen },
+      { name: 'Kategorie 3', key: 'Kategorie III', farbe: katFarben.grau }
+    ];
+    var html = '<div class="ak-preise-titel">Preise</div>';
+    reihen.forEach(function (r) {
+      var p = picker.prices[r.key];
+      if (!p || !r.farbe) return;
+      html += '<div class="ak-preise-zeile"><i class="ak-chip" style="background:' + r.farbe.bg + ';border-color:' + r.farbe.border + '"></i>' +
+        '<div><div class="ak-preise-kat">' + r.name + '</div>' +
+        '<div class="ak-preise-voll">' + fmtEUR(p.normal) + ' €</div>' +
+        '<div class="ak-preise-erm">ermäßigt ' + fmtEUR(p.ermaessigt) + ' €</div></div></div>';
+    });
+    host.innerHTML = html;
+  }
+
   function annotateTiles() {
     if (!picker) return;
+    farbenTauschen();
+    renderPreise();
     picker.root.querySelectorAll('.seatplan-mobile-tile[data-zone], .seatplan-mobile-standing[data-zone]').forEach(function (btn) {
       var key = btn.dataset.zone;
       var sep = key.indexOf('::');
