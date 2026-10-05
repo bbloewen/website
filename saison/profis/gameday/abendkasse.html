@@ -359,8 +359,21 @@ document.addEventListener('DOMContentLoaded', function () {
   // SeatPicker gesetzten Inline-Farben der Kacheln getauscht (Re-Render setzt sie jedes Mal
   // neu, deshalb steht der Tausch in der Annotate-Kette).
   var katFarben = null;
+  function cssFarbe(name, fallback) {
+    var v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return v || fallback;
+  }
+  // Zustandslos: die Farben kommen aus denselben CSS-Variablen wie im SeatPicker, nicht aus dem
+  // aktuellen Kachel-Zustand - sonst wuerde ein zweiter Durchlauf auf demselben DOM wieder zurueck tauschen.
+  function farbenBestimmen() {
+    var kat2 = { bg: cssFarbe('--seatplan-cat-kat2', '#D9DEE3'), border: cssFarbe('--seatplan-cat-kat2-border', '#B9C1C8') };
+    var kat3 = { bg: cssFarbe('--seatplan-cat-kat3', 'rgba(42,157,143,.55)'), border: cssFarbe('--seatplan-cat-kat3-border', 'rgba(42,157,143,.9)') };
+    var kat1 = { bg: cssFarbe('--seatplan-cat-kat1', ''), border: cssFarbe('--seatplan-cat-kat1-border', '') };
+    return { grau: kat2, gruen: kat3, kat1: kat1 };
+  }
   function farbenTauschen() {
     if (!picker) return;
+    katFarben = farbenBestimmen();
     var tiles = picker.root.querySelectorAll('.seatplan-mobile-tile[data-zone]');
     function katVon(btn) {
       var key = btn.dataset.zone, sep = key.indexOf('::');
@@ -370,18 +383,11 @@ document.addEventListener('DOMContentLoaded', function () {
       var pc = picker._purchasableCategories(zoneId);
       return pc.length === 1 ? pc[0].category : null;
     }
-    var farbe = {};
     tiles.forEach(function (btn) {
       var cat = katVon(btn);
-      if (cat && !farbe[cat]) farbe[cat] = { bg: btn.style.background, border: btn.style.borderColor };
-    });
-    var grau = farbe['Kategorie II'], gruen = farbe['Kategorie III'];
-    if (!grau || !gruen) { if (katFarben) { grau = katFarben.grau; gruen = katFarben.gruen; } else return; }
-    katFarben = { grau: grau, gruen: gruen, kat1: farbe['Kategorie I'] || (katFarben && katFarben.kat1) };
-    tiles.forEach(function (btn) {
-      var cat = katVon(btn);
-      if (cat === 'Kategorie III') { btn.style.background = grau.bg; btn.style.borderColor = grau.border; }
-      else if (cat === 'Kategorie II' || cat === 'C unten') { btn.style.background = gruen.bg; btn.style.borderColor = gruen.border; }
+      if (cat === 'Kategorie I' && !katFarben.kat1.bg) katFarben.kat1 = { bg: btn.style.backgroundColor, border: btn.style.borderColor };
+      if (cat === 'Kategorie III') { btn.style.backgroundColor = katFarben.grau.bg; btn.style.borderColor = katFarben.grau.border; }
+      else if (cat === 'Kategorie II' || cat === 'C unten') { btn.style.backgroundColor = katFarben.gruen.bg; btn.style.borderColor = katFarben.gruen.border; }
       if (cat === 'C unten') {
         var lbl = btn.querySelector('.seatplan-mobile-tile-cat');
         if (lbl) { lbl.textContent = 'CS'; lbl.style.fontSize = '17px'; lbl.style.fontWeight = '700'; lbl.style.opacity = '1'; }
