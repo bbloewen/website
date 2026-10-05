@@ -887,3 +887,17 @@ Die Seiten `saison/profis/gameday/abendkasse.html` und `ausschank.html` laufen i
 - **Ausschank-Log:** Data Table „Ausschank-Verkaeufe" (`qeFKgWBRf8PgvsZW`) hat zusätzlich `zahlart` (`bar`/`karte`/`karte-gutschrift`/`ohne-terminal`) und `beleg` (Terminal-Belegnummer).
 - **Abend-Preise** = Einzelticket + 2,00 € (Kat. 1 18/16, Kat. 2 14/10,50, Kat. 3 12,50/10/7, Fanblock 12,50/10, Rollstuhl 10); maßgeblich im Knoten „Abendkasse: Sitze zuordnen" (`PRICES`), Anzeige in `abendkasse.html`.
 - **Test-Bestellungen** der Abendkasse erkennt man an den „- Abend"-Items (48–58); Storno über `POST …/orders/<code>/mark_canceled/` mit `{"send_email": false}`.
+
+## Trainer-/Übungsleiter-Dauerkarten für Partnervereine (05.10.2026)
+
+Kostenlose Dauerkarte (Stehplatz, ohne Sitzplatz) für Trainer und Übungsleiter der Partnervereine. Erster Fall: Michael Gleichmann (BC Erfurt), Bestellung CXS3V.
+
+**pretix:** Neues Produkt **Item 91 "Stehplatz - Dauer"** (kein Sitzplatz, Preis 0,00 €, `require_voucher` und `hide_without_voucher`, damit es im pretix-Shop nicht kaufbar ist). 14 Kontingente "HSnn: Trainer-Dauerkarte" (IDs 334–347, je 50 Plätze, getrennt vom Stehplatz-Verkauf an der Kasse; die Namen passen nicht auf das Dashboard-Muster der Kategorie-Kontingente, die Dashboard-Kapazität bleibt also unverändert). Ticket-Layout 10 ist dem Produkt zugeordnet (nur in der Oberfläche möglich). Der Name endet auf "- Dauer", deshalb zählt das Dashboard es automatisch bei den Dauerkarten (Zeile "Stehplatz - Dauer"). Die Check-in-Liste "Einlass - alle Heimspiele" gilt für alle Produkte.
+
+**Ausstellen:** n8n-Workflow `x5VZtGVpSGlbHL4M` "Ticketing: Trainer-Dauerkarte ausstellen". Webhook `POST https://ticketing.basketball-loewen.com/webhook/trainer-dauerkarte-<Geheimteil>` mit `{"name","email","verein"}`. Der Geheimteil steht nur im Webhook-Pfad des Workflows (im n8n-Knoten "Trainer-Dauerkarte ausstellen" nachsehen) und wird nicht weitergegeben. Ablauf: Eingabe prüfen, Doppelprüfung (gibt es für die E-Mail schon eine Trainer-Dauerkarte, Abbruch), Gutschein anlegen (zufälliger Code, `max_usages` 14, 100 %, an Item 91 gebunden, Tag "Trainer Partnervereine", Kommentar mit Name und Verein), Bestellung mit 14 Positionen (je Heimspiel, 0,00 €, Gutschein an jeder Position) als bezahlt anlegen, Ticket-Mail anstoßen. Antwort: Bestellnummer und Gutschein-Code. Fehler gehen in den Fehler-Alarm.
+
+**Ticket-Mail** (`zNGWzRFz3ebzsDkD`): Eine Dauerkarte ohne Sitz erzeugt ein Ticket je Bestellung (vorher hätte jede der 14 Positionen ein eigenes PDF bekommen). Für Item 91 gibt es einen eigenen Text im Du ("wir laden dich als Trainer oder Übungsleiter ein …", "Stehplatz heißt nicht, dass du dich hinstellen musst … du kannst dir jederzeit einen freien Platz suchen und dich setzen"), Marko in BCC, Antworten an tickets@. Kein Wallet-Pass für diese Dauerkarten (das Passbook-Plugin würde nur das erste Spiel zeigen).
+
+**Test:** Testlauf mit Marko als Empfänger (Bestellung MBJB3, danach storniert, Gutschein AFB5DBWSU2, ID 254, abgelaufen gesetzt): Bestellung bezahlt, 14 Positionen, Gutschein 14 von 14 eingelöst, nach Storno 0, genau ein PDF in der Mail.
+
+**Hinweise:** Kontingent 50 je Spiel. Keine Passbook-Karte. Soll das Passbook später gehen, Item 91 in das Plugin `pretix_loewen_passbook_season` aufnehmen (Dockerfile-Rebuild) und die Ausnahme im Knoten "Passbook-Status auswerten" entfernen.
