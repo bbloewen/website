@@ -121,15 +121,18 @@
   /* Preise rechts neben dem Plan (Marko, 05.10.2026): die Kassiererin haelt das iPad dem Kunden
      hin, er soll Kategorie 1/2/3 mit vollem und ermaessigtem Preis direkt ablesen koennen.
      Feste Position am rechten Rand, nur sichtbar, wenn der Platz reicht (iPad quer). */
-  .ak-preise { position: fixed; right: 18px; top: 50%; transform: translateY(-50%); width: 212px;
-    display: flex; flex-direction: column; gap: 14px; }
-  .ak-preise-titel { font-size: 0.8rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
-    color: var(--text-muted); }
-  .ak-preise-zeile { display: flex; align-items: flex-start; gap: 10px; }
-  .ak-chip { flex: 0 0 auto; width: 16px; height: 16px; margin-top: 4px; border-radius: 5px; border: 1.5px solid; }
-  .ak-preise-kat { font-size: 1.15rem; font-weight: 800; color: var(--color-brand-navy, #00122d); line-height: 1.2; }
-  .ak-preise-voll { font-size: 1.15rem; font-weight: 700; color: var(--color-brand-navy, #00122d); margin-top: 2px; }
-  .ak-preise-erm { font-size: 1.05rem; font-weight: 600; color: var(--color-brand-navy, #00122d); opacity: .78; margin-top: 1px; }
+  /* Um 90 Grad im Uhrzeigersinn gedreht (Marko, 05.10.2026): die Kassiererin dreht das iPad
+     hochkant zum Kunden, der Text soll dann richtig herum lesbar sein. Layout-Box 212 px breit,
+     die gedrehte Darstellung ist entsprechend 212 px hoch. */
+  .ak-preise { position: fixed; right: -75px; top: 50%; width: 340px; height: 150px;
+    transform: translateY(-50%) rotate(90deg); transform-origin: center;
+    display: flex; flex-direction: column; justify-content: center; gap: 16px; }
+  .ak-preise-zeile { display: flex; align-items: center; gap: 12px; white-space: nowrap;
+    font-size: 1.2rem; color: var(--color-brand-navy, #00122d); }
+  .ak-chip { flex: 0 0 auto; width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid; }
+  .ak-preise-kat { font-weight: 800; }
+  .ak-preise-voll { font-weight: 700; }
+  .ak-preise-erm { font-size: 1.05rem; font-weight: 600; opacity: .78; }
   .ak-preise:empty { display: none; }
   @media (max-width: 1100px) { .ak-preise { display: none; } }
 
@@ -141,8 +144,10 @@
     box-shadow: 0 0 0 1px rgba(214, 40, 40, .55); pointer-events: none; }
   .ak-hier::after { content: ''; position: absolute; inset: -9px; border-radius: 50%;
     border: 2px solid rgba(214, 40, 40, .45); animation: ak-hier-puls 2.2s ease-out infinite; }
+  /* writing-mode vertical-rl dreht den Text um 90 Grad im Uhrzeigersinn (gleiche Lesrichtung
+     wie die Preise rechts). */
   .ak-hier-text { position: absolute; right: calc(100% + 8px); top: 50%; transform: translateY(-50%);
-    font-size: 12px; font-weight: 700; color: #b3392c; white-space: nowrap; }
+    writing-mode: vertical-rl; font-size: 13px; font-weight: 700; color: #b3392c; white-space: nowrap; }
   @keyframes ak-hier-puls { from { transform: scale(.6); opacity: 1; } to { transform: scale(1.5); opacity: 0; } }
   @media (prefers-reduced-motion: reduce) { .ak-hier::after { animation: none; } }
   @media (max-width: 700px) { .ak-hier-text { display: none; } }
@@ -403,14 +408,13 @@ document.addEventListener('DOMContentLoaded', function () {
       { name: 'Kategorie 2', key: 'Kategorie II', farbe: katFarben.gruen },
       { name: 'Kategorie 3', key: 'Kategorie III', farbe: katFarben.grau }
     ];
-    var html = '<div class="ak-preise-titel">Preise</div>';
+    var html = '';
     reihen.forEach(function (r) {
       var p = picker.prices[r.key];
       if (!p || !r.farbe) return;
       html += '<div class="ak-preise-zeile"><i class="ak-chip" style="background:' + r.farbe.bg + ';border-color:' + r.farbe.border + '"></i>' +
-        '<div><div class="ak-preise-kat">' + r.name + '</div>' +
-        '<div class="ak-preise-voll">' + fmtEUR(p.normal) + ' €</div>' +
-        '<div class="ak-preise-erm">ermäßigt ' + fmtEUR(p.ermaessigt) + ' €</div></div></div>';
+        '<span><span class="ak-preise-kat">' + r.name + ':</span> <span class="ak-preise-voll">' + fmtEUR(p.normal) + ' €</span> ' +
+        '<span class="ak-preise-erm">(ermäßigt ' + fmtEUR(p.ermaessigt) + ' €)</span></span></div>';
     });
     host.innerHTML = html;
   }
