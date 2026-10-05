@@ -103,6 +103,34 @@
     background: transparent; color: #666; opacity: .5; cursor: pointer; align-items: center; justify-content: center; }
   .ak-diag.ak-diag-visible { display: flex; }
   .ak-naechster { margin-top: 12px; width: 100%; font-size: 1.2rem; padding: 16px; display: none; }
+
+  /* Blockauswahl (Marko, 05.10.2026): Plan vertikal mittig statt am oberen Rand, die Block-
+     Flaechen etwas hoeher (Spielfeld selbst bleibt gleich gross, es haengt an eigenem
+     aspect-ratio) und groessere Schrift fuer Blockbuchstabe, freie Plaetze und Preis.
+     Nur hier ueberschrieben, seat-picker.css bleibt fuer die oeffentlichen Seiten unveraendert. */
+  .ak-wrap { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
+    position: relative; padding-bottom: 16px; }
+  .ak-diag-row { position: absolute; right: 10px; bottom: 6px; margin: 0; }
+  #ak-blockwahl { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+  .ak-wrap .seatplan-mobile-tile-group.seatplan-mobile-tile-group-south { aspect-ratio: 4 / 5; }
+  .ak-wrap .seatplan-mobile-tile-group:not(.seatplan-mobile-tile-group-south) { aspect-ratio: 5 / 4; }
+  .ak-wrap .seatplan-mobile-tile-letter { font-size: 22px; }
+  .ak-wrap .seatplan-mobile-tile-cat { font-size: 11px; }
+  .ak-wrap .ak-tile-info { font-size: 1.02rem; margin-top: 6px; line-height: 1.3; }
+
+  /* "Sie sind hier": roter Punkt (wie auf Landkarten) links neben dem Haupteingang auf
+     Hoehe der Spielfeld-Mitte, damit die Kassiererin dem Kunden direkt zeigen kann, wo der
+     Stand liegt und wo die Bloecke sind. */
+  .ak-hier { position: absolute; left: -24px; width: 14px; height: 14px; margin-top: -7px;
+    border-radius: 50%; background: #d62828; border: 2px solid #fff;
+    box-shadow: 0 0 0 1px rgba(214, 40, 40, .55); pointer-events: none; }
+  .ak-hier::after { content: ''; position: absolute; inset: -9px; border-radius: 50%;
+    border: 2px solid rgba(214, 40, 40, .45); animation: ak-hier-puls 2.2s ease-out infinite; }
+  .ak-hier-text { position: absolute; right: calc(100% + 8px); top: 50%; transform: translateY(-50%);
+    font-size: 12px; font-weight: 700; color: #b3392c; white-space: nowrap; }
+  @keyframes ak-hier-puls { from { transform: scale(.6); opacity: 1; } to { transform: scale(1.5); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .ak-hier::after { animation: none; } }
+  @media (max-width: 700px) { .ak-hier-text { display: none; } }
 </style>
 </head>
 <body>
@@ -343,6 +371,31 @@ document.addEventListener('DOMContentLoaded', function () {
   // Grafik inkl. dieses Overlays dann ausgeblendet wird. Muss wie annotateTiles() bei
   // jedem Re-Render neu eingefuegt werden (this.root.innerHTML wird von SeatPicker komplett
   // ersetzt), deshalb ebenfalls nur ueber syncOverview() aufgerufen.
+  // Roter "Sie sind hier"-Punkt am Haupteingang, vertikal auf Hoehe der Spielfeld-Mitte. Wird wie
+  // renderCourtInfo() bei jedem Re-Render neu gesetzt und bei Groessenaenderung nachjustiert.
+  function renderHierMarker() {
+    if (!picker) return;
+    var ent = picker.root.querySelector('.seatplan-mobile-entrance.main');
+    var row = picker.root.querySelector('.seatplan-mobile-court-row');
+    if (!ent || !row) return;
+    var old = ent.querySelector('.ak-hier');
+    if (old) old.remove();
+    var dot = document.createElement('div');
+    dot.className = 'ak-hier';
+    dot.setAttribute('role', 'img');
+    dot.setAttribute('aria-label', 'Sie sind hier (Haupteingang)');
+    var text = document.createElement('small');
+    text.className = 'ak-hier-text';
+    text.textContent = 'Sie sind hier';
+    dot.appendChild(text);
+    ent.style.position = 'relative';
+    ent.appendChild(dot);
+    var er = ent.getBoundingClientRect();
+    var rr = row.getBoundingClientRect();
+    dot.style.top = (rr.top + rr.height / 2 - er.top) + 'px';
+  }
+  window.addEventListener('resize', function () { renderHierMarker(); });
+
   function renderCourtInfo() {
     if (!picker || !currentGame) return;
     var court = picker.root.querySelector('.seatplan-mobile-court');
@@ -360,6 +413,7 @@ document.addEventListener('DOMContentLoaded', function () {
     rootObserver.disconnect();
     annotateTiles();
     renderCourtInfo();
+    renderHierMarker();
     rootObserver.observe(document.getElementById('seatplan-root'), { childList: true, subtree: true });
   }
 
