@@ -596,6 +596,15 @@
               body: JSON.stringify({ buyer: buyer, cart: cart })
             }).then(function (res) { return res.json(); }).then(function (data) {
               if (!data.ok) throw new Error(data.error || 'Die Bestellung konnte nicht vorbereitet werden.');
+              /* Server hat den Warenkorb selbst als kostenlos (0 €) berechnet und die
+                 Bestellung bereits abgeschlossen — keine PayPal-Order, direkt zur
+                 Bestaetigung. Verhindert, dass PayPal ohne Order-ID abbricht und die
+                 Seite zum erneuten Klick einlaedt (Doppelbestellungen). */
+              if (!data.orderId && data.pretixOrderCode) {
+                sessionStorage.setItem('bl_order', JSON.stringify({ orderNumber: data.reference, cart: cart, buyer: buyer, paymentMethod: 'kostenlos' }));
+                window.location.href = '/tickets/confirmation.html';
+                return new Promise(function () {});
+              }
               currentReference = data.reference;
               return data.orderId;
             });

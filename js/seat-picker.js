@@ -279,8 +279,9 @@
       Object.keys(this.blockCounts).forEach(function (key) {
         var c = self.blockCounts[key];
         if (categories.indexOf(c.category) === -1) return;
-        if (c.normal && tarifOk('normal')) units.push({ qty: c.normal, unitPrice: c.priceInfo.normal });
-        if (c.ermaessigt && tarifOk('ermaessigt')) units.push({ qty: c.ermaessigt, unitPrice: c.priceInfo.ermaessigt });
+        BLOCK_TARIFS.forEach(function (t) {
+          if (c[t] > 0 && tarifOk(t)) units.push({ qty: c[t], unitPrice: blockTarifPrice(c.priceInfo, t) });
+        });
       });
     } else {
       Object.keys(this.selected).forEach(function (guid) {
