@@ -963,3 +963,12 @@ Folge: Der Erlös im Dashboard (und in pretix) war um 304,50 € zu hoch. **Guts
 
 ### Trainer-Dauerkarten ausgestellt am 06.10.2026
 Andreas Stumpf (QPWHQ, `UL-DK-VFBAWR`, BC Erfurt), Amy Striehn (VBYAC, `UL-DK-TMP63Z`, Basketball in Gotha / BC Erfurt), Pirmin Karg (FAQMZ, `UL-DK-9K9U9E`, USV Erfurt), Kevin Vogler (YHJPC, `UL-DK-7PSJU8`, USV Erfurt). Die Absenderadresse von Anfragen, die über die Gruppe `tickets@` ("'Name' via Tickets") kommen, steht im Quelltext der Mail (Header `Reply-To` / `X-Original-Sender`, in Gmail-API-Format RAW).
+
+## Fall Lohsträter: "Dieser Gutschein gilt nicht für die Artikel in deinem Warenkorb" (06.10.2026)
+
+- **Symptom:** Kim Mauermann konnte mit einem Dashboard-Gutschein (`LOHSTRTER-SUCVJK`, 100 %, 3 Nutzungen, Kontingent "HS01: VIP" = pretix-Quota 75) 3× "Block B - VIP" nicht abschließen. Die Seite zeigte 100 % Rabatt, beim Klick auf "Kostenlose Bestellung abschließen" kam die Meldung.
+- **Ursache:** Die Gutschein-Prüfung übersetzt die Quota des Gutscheins über eine fest codierte Tabelle `QUOTA_ITEMS` in Artikel. Die Tabelle kannte nur die SWE-Sponsor-Quotas (286 bis 299) und 316. Für alle anderen Quotas (VIP, Blöcke, Fanblock, Stehplatz, Rollstuhl, Sponsoren) war die Artikelliste leer, der Server fand keine passende Zeile. Die Gutschein-Prüfung für die Seite (`gutschein-pruefen`) wertete die leere Liste als "gilt für alles", daher die 100 % in der Anzeige. Die Gutscheine selbst waren richtig angelegt, Kim muss nichts anders machen.
+- **Behoben (live, 06.10.2026):** Vollständige Zuordnung aus pretix (186 Quotas: alle Spiele, alle Blöcke, VIP, Fanblock, Stehplatz, Rollstuhl, Sponsoren, ohne Nachwuchsbeitrag und Trainer-Dauerkarte) in `QUOTA_ITEMS` eingetragen: Einzelticket-Workflow `BmpBkKdzzSZaBnZE` (Knoten "Gutschein-Rabatt berechnen" und "Sitze zuordnen") und `5Bi15oYpyehxjhXK` (Knoten "Gutschein auswerten"). Veröffentlicht.
+- **Nicht angepasst:** `QxPE1ikMJWL0fyB7` ("Rabatt berechnen", Dauerkarten) hat dieselbe feste Tabelle. Dort sind Dauerkarten-Gutscheine mit Sponsoren-Quotas (317, 318, 319 bis 332, 333) möglicherweise betroffen.
+- **Wartung:** Neue Quotas in pretix müssen in diese Tabellen (4 Knoten), sonst tritt der Fehler wieder auf. Besser wäre, die Quota-Artikel zur Laufzeit aus pretix zu laden.
+- **Aufgeräumt:** Zwei ältere, unbenutzte Gutscheine für denselben Gast gelöscht (`LOHSTRTER-Z6BBRC`, `LOHSTRTER-3CPKTC`, einer mit falsch geschriebenem Namen).
