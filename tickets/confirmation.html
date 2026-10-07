@@ -492,10 +492,9 @@
     document.getElementById('confirmation-order-number').textContent = order.orderNumber;
     document.querySelector('#confirmation-order-number').previousElementSibling.textContent = (isDauerkarte || isClub100) ? 'Referenz' : 'Bestellnummer';
     document.getElementById('confirmation-total').textContent = formatMoney(cart.total);
-    /* Kostenlose Bestellung (Gutschein, 0 EUR): keine Zahlungsart anzeigen (zuvor stand hier faelschlich PayPal). */
+    /* Kostenlose Bestellung (Gutschein, 0 EUR): Zahlungsart "Gutschein" statt PayPal (zuvor stand hier faelschlich PayPal). */
     var isFreeOrder = order.paymentMethod === 'kostenlos' || cart.total === 0;
-    document.getElementById('confirmation-method').textContent = order.paymentMethod === 'sepa' ? 'SEPA-Lastschrift' : 'PayPal';
-    if (isFreeOrder) document.getElementById('confirmation-method').parentElement.style.display = 'none';
+    document.getElementById('confirmation-method').textContent = isFreeOrder ? 'Gutschein' : (order.paymentMethod === 'sepa' ? 'SEPA-Lastschrift' : 'PayPal');
     document.getElementById('confirmation-event-label').textContent = cart.eventLabel;
 
     var fulfillmentNote = isGutschein
