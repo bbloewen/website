@@ -492,7 +492,10 @@
     document.getElementById('confirmation-order-number').textContent = order.orderNumber;
     document.querySelector('#confirmation-order-number').previousElementSibling.textContent = (isDauerkarte || isClub100) ? 'Referenz' : 'Bestellnummer';
     document.getElementById('confirmation-total').textContent = formatMoney(cart.total);
+    /* Kostenlose Bestellung (Gutschein, 0 EUR): keine Zahlungsart anzeigen (zuvor stand hier faelschlich PayPal). */
+    var isFreeOrder = order.paymentMethod === 'kostenlos' || cart.total === 0;
     document.getElementById('confirmation-method').textContent = order.paymentMethod === 'sepa' ? 'SEPA-Lastschrift' : 'PayPal';
+    if (isFreeOrder) document.getElementById('confirmation-method').parentElement.style.display = 'none';
     document.getElementById('confirmation-event-label').textContent = cart.eventLabel;
 
     var fulfillmentNote = isGutschein
@@ -514,9 +517,14 @@
           ? 'Du bekommst von uns eine E-Mail mit den Lastschrift-Details und deiner Dauerkarte an <strong id="confirmation-email-2"></strong>, sobald alles bereit ist.'
           : isClub100
             ? 'Sie erhalten von uns eine E-Mail mit den Lastschrift-Details an <strong id="confirmation-email-2"></strong>.'
-            : 'Deine Tickets als QR-Code gehen an <strong id="confirmation-email-2"></strong>, sobald die Zahlung bestätigt ist.';
+            : (isFreeOrder
+              ? 'Deine Tickets als QR-Code gehen an <strong id="confirmation-email-2"></strong>.'
+              : 'Deine Tickets als QR-Code gehen an <strong id="confirmation-email-2"></strong>, sobald die Zahlung bestätigt ist.');
     document.getElementById('confirmation-email-2').textContent = buyer.email || 'deiner E-Mail-Adresse';
-    document.querySelector('#confirmation-fulfillment-icon i').setAttribute('data-lucide', isGutschein ? 'gift' : isFanshop ? 'package' : 'mail');
+    /* Lucide kann das <i> schon durch ein <svg> ersetzt haben; ohne Pruefung brach das Skript hier ab und die
+       Bestellzeilen blieben leer (Fall Hoehme). */
+    var fulfillmentIcon = document.querySelector('#confirmation-fulfillment-icon i');
+    if (fulfillmentIcon) fulfillmentIcon.setAttribute('data-lucide', isGutschein ? 'gift' : isFanshop ? 'package' : 'mail');
     if (window.lucide) window.lucide.createIcons();
 
     document.getElementById('confirmation-lines').innerHTML = cart.lines.map(function (l) {

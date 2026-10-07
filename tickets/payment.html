@@ -798,6 +798,10 @@
           body: JSON.stringify({ buyer: buyer, cart: cart })
         }).then(function (res) { return res.json(); }).then(function (result) {
           if (!result.ok) throw new Error(result.error || 'Die Bestellung konnte nicht abgeschlossen werden.');
+          /* Server rechnet einen Betrag > 0 und hat eine PayPal-Order angelegt: NICHT als kostenlos
+             abgeschlossen. Ohne diese Pruefung zeigt die Seite "Vielen Dank" ohne Bestellung/Ticket
+             (Fall Hoehme, ET-VOZD4U). */
+          if (result.orderId) throw new Error('Die Bestellung konnte nicht kostenlos abgeschlossen werden, es wurde nichts bezahlt und kein Ticket erstellt. Bitte schreib uns an tickets@basketball-loewen.com, wir kümmern uns darum.');
           var order = { orderNumber: result.reference, cart: cart, buyer: buyer, paymentMethod: 'kostenlos' };
           sessionStorage.setItem('bl_order', JSON.stringify(order));
           window.location.href = '/tickets/confirmation.html';
