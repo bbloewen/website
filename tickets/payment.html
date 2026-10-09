@@ -728,17 +728,24 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       }).then(function (res) {
-        if (!res.ok) throw new Error('Webhook antwortete mit Fehler');
+        if (!res.ok) {
+          /* Fehlermeldung des Servers (z. B. E-Mail ohne Endung, ungueltige IBAN) direkt anzeigen */
+          return res.json().catch(function () { return {}; }).then(function (d) {
+            var err = new Error('Webhook antwortete mit Fehler');
+            if (d && d.message) err.userMessage = d.message;
+            throw err;
+          });
+        }
         return res.json();
       }).then(function (data) {
         var order = { orderNumber: data.reference || '', cart: cart, buyer: buyer, paymentMethod: method };
         sessionStorage.setItem('bl_order', JSON.stringify(order));
         window.location.href = '/tickets/confirmation.html';
-      }).catch(function () {
+      }).catch(function (err) {
         sessionStorage.removeItem('bl_dauerkarte_sent');
         btn.disabled = false;
         btn.textContent = originalBtnText;
-        alert('Deine Bestellung konnte nicht gesendet werden. Bitte versuche es gleich noch einmal oder schreib uns direkt an tickets@basketball-loewen.com.');
+        alert((err && err.userMessage) || 'Deine Bestellung konnte nicht gesendet werden. Bitte versuche es gleich noch einmal oder schreib uns direkt an tickets@basketball-loewen.com.');
       });
     }
 
