@@ -98,7 +98,7 @@
          beiden duerfen NICHT dasselbe Feld teilen, sonst zeigt das Nachbericht-
          Icon nach dem Spiel faelschlich weiter auf den alten Vorbericht
          (Marko, 26.09.2026). */
-      var vorberichtUrl = g.heim ? null : g.spielberichtUrl;
+      var vorberichtUrl = g.vorberichtUrl || (g.heim ? null : g.spielberichtUrl);
       var nachberichtUrl = g.heim ? g.spielberichtUrl : g.nachberichtUrl;
       /* Reihenfolge: Vorbericht, Boxscore, Tabelle, Spielbericht, Kalender
          (Kalender wird weiter unten in actionsHTML angehaengt). Icons sind
@@ -233,7 +233,7 @@
   window.__spielplanToday = today;
 
   Promise.all([
-    fetch('/data/heimspiele.json?v=1786356737').then(function (r) { return r.json(); }),
+    fetch('/data/heimspiele.json?v=1791539781').then(function (r) { return r.json(); }),
     fetch('/data/spielplan-saison.json?v=1790449794').then(function (r) { return r.json(); })
   ]).then(function (results) {
     var heim = results[0], saison = results[1];

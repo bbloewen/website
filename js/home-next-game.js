@@ -106,7 +106,7 @@
          (Ticket-Hub), das ist kein redaktioneller Vorbericht und wird schon
          ueber den Tickets-CTA erreicht (Marko, 26.09.2026, gleiche Regel wie
          im Spielplan js/spielplan.js). */
-      var vorberichtUrl = g.heim ? null : g.spielberichtUrl;
+      var vorberichtUrl = g.vorberichtUrl || (g.heim ? null : g.spielberichtUrl);
       rowHTML = berichtIconHTML('Vorbericht', vorberichtUrl, false) + tabelleIcon(false) + livescoreIcon(false) + livestreamLink(true);
     } else {
       /* Ab Anpfiff bis zum Dienstag-Cutoff (danach verschwindet der Slide
@@ -158,7 +158,7 @@
   if (!card) return;
 
   Promise.all([
-    fetch('/data/heimspiele.json?v=1786356737').then(function (r) { return r.json(); }),
+    fetch('/data/heimspiele.json?v=1791539781').then(function (r) { return r.json(); }),
     fetch('/data/spielplan-saison.json?v=1790449794').then(function (r) { return r.json(); })
   ]).then(function (results) {
     var heim = results[0], saison = results[1];

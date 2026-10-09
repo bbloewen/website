@@ -155,7 +155,7 @@ def slide_html(g, i, label, jetzt):
         # bei Heimspielen zeigt spielberichtUrl auf die eigene Spieltagsseite
         # (Ticket-Hub), das ist kein redaktioneller Vorbericht (Marko,
         # 26.09.2026, gleiche Regel wie im Spielplan js/spielplan.js).
-        vorbericht_url = None if g["heim"] else g.get("spielberichtUrl")
+        vorbericht_url = g.get("vorberichtUrl") or (None if g["heim"] else g.get("spielberichtUrl"))
         row_html = bericht_icon("Vorbericht", vorbericht_url, False) + tabelle_icon(False) + livescore_icon(False) + livestream_link(True)
     else:
         # Bei Heimspielen zeigt spielberichtUrl immer auf die eigene Spieltagsseite
