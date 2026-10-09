@@ -277,6 +277,7 @@
             <option value="baskidball">BasKIDball</option>
             <option value="sportvernetzt">SPORT VERNETZT</option>
             <option value="waidloewen">WAID-Löwen</option>
+            <option value="nachwuchs">Nachwuchs</option>
           </select>
         </div>
 
@@ -502,8 +503,16 @@
     loewenpark: 'LÖWENPARK',
     baskidball: 'BasKIDball',
     sportvernetzt: 'SPORT VERNETZT',
-    waidloewen: 'WAID-Löwen'
+    waidloewen: 'WAID-Löwen',
+    nachwuchs: 'Nachwuchs'
   };
+
+  /* Vorauswahl per Link, z. B. /spenden.html?zweck=nachwuchs (Spieltagsinfo) */
+  (function () {
+    var wunsch = new URLSearchParams(location.search).get('zweck');
+    var feld = document.getElementById('spenden-zweck');
+    if (wunsch && feld && Object.prototype.hasOwnProperty.call(ZWECK_LABEL, wunsch)) feld.value = wunsch;
+  })();
 
   document.getElementById('spenden-paypal-btn').addEventListener('click', function (e) {
     e.preventDefault();

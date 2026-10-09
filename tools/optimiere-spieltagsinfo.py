@@ -324,7 +324,7 @@ def main():
     html = html.replace(
         "<p>Basketball Löwen e.V.<br><b>IBAN DE68 8205 1000 0163 1313 76</b><br>BIC HELADEF1WEM</p></div>",
         '<p>Basketball Löwen e.V.<br><b>IBAN DE68 8205 1000 0163 1313 76</b><br>BIC HELADEF1WEM</p>'
-        '<a class="btn" href="/spenden.html">Online spenden</a></div>', 1)
+        '<a class="btn" href="/spenden.html?zweck=nachwuchs">Online spenden</a></div>', 1)
 
     # --- Kopf, Leiste, Fuss ----------------------------------------------------
     beschreibung = (f"Spieltagsinfo Ausgabe {n} zum Heimspiel der Basketball Löwen gegen {args.gegner} "
