@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+# Entwurfs-PDF der Spieltagsinfo Ausgabe 1 (Stand 06.10.2026): nicht in Google.
+# Entfernen, sobald die finale Fassung unter gleichem Namen liegt.
+Disallow: /assets/spieltagsinfo/ausgabe-1-spieltagsinfo.pdf
 
 Sitemap: https://basketball-loewen.com/sitemap.xml

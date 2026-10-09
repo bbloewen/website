@@ -93,6 +93,8 @@ def zeile_spielplan(s):
         '<div class="fixture-day-actions">'
         '<div class="fixture-result-row">'
         f'<div class="fixture-result">{esc(s.get("ergebnis") or "– – : – –")}</div>'
+        + (f'<a class="cal-link" href="/saison/profis/gameday/spieltagsinfo/ausgabe-{int(s["spieltagsinfo"])}/" title="Spieltagsinfo">'
+           '<i data-lucide="book-open" style="width:20px;height:20px"></i></a>' if s.get("spieltagsinfo") else '') +
         '</div>'
         f'<a class="btn btn-outline-orange btn-sm" href="{esc(ziel)}">Zum Spiel '
         '<i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>'

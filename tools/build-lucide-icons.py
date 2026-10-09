@@ -4,7 +4,7 @@
 Warum:
 
 Auf jeder der 100 Seiten stand
-`<script src="/js/vendor/lucide-icons.js?v=1787766492"></script>`. Drei Probleme in einer
+`<script src="/js/vendor/lucide-icons.js?v=1791549139"></script>`. Drei Probleme in einer
 Zeile:
 
   1. **419 KB** für rund 30 sichtbare Icons pro Seite — die komplette Bibliothek

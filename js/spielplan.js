@@ -52,6 +52,13 @@
     return '<span class="cal-link" style="opacity:.4;cursor:default" title="' + label + '"><i data-lucide="file-text" style="width:20px;height:20px"></i></span>';
   }
 
+  /* Spieltagsinfo (digitale Stadionzeitung): nur bei Heimspielen mit Ausgabe-Nummer
+     in data/heimspiele.json (Feld spieltagsinfo). */
+  function spieltagsinfoIcon(nr) {
+    if (!nr) return '';
+    return '<a class="cal-link" href="/saison/profis/gameday/spieltagsinfo/ausgabe-' + nr + '/" title="Spieltagsinfo"><i data-lucide="book-open" style="width:20px;height:20px"></i></a>';
+  }
+
   function livescoreIcon(url) {
     if (url) {
       return '<a class="cal-link" href="' + url + '" target="_blank" rel="noopener" title="Boxscore"><i data-lucide="activity" style="width:20px;height:20px"></i></a>';
@@ -105,6 +112,7 @@
          aktiv, sobald ihre URL existiert -- KEINE Anpfiff-Zeitgating mehr:
          der Vorbericht bleibt auch nach dem Spiel klickbar (Marko, 26.09.2026). */
       berichteHTML = berichtIcon('Vorbericht', vorberichtUrl, true) +
+        spieltagsinfoIcon(g.spieltagsinfo) +
         livescoreIcon(g.livescore) +
         tabelleIcon +
         berichtIcon('Nachbericht', nachberichtUrl, true);
@@ -233,7 +241,7 @@
   window.__spielplanToday = today;
 
   Promise.all([
-    fetch('/data/heimspiele.json?v=1791540827').then(function (r) { return r.json(); }),
+    fetch('/data/heimspiele.json?v=1791549139').then(function (r) { return r.json(); }),
     fetch('/data/spielplan-saison.json?v=1790449794').then(function (r) { return r.json(); })
   ]).then(function (results) {
     var heim = results[0], saison = results[1];

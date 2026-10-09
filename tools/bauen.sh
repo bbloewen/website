@@ -16,7 +16,7 @@ set -e
 cd "$(dirname "$0")/.."
 F="$1"
 for s in build-lucide-icons build-galerie-thumbs build-galerie-html \
-         build-gameday-hub build-spieltagsseiten build-freiplatz-seiten \
+         build-gameday-hub build-spieltagsinfo build-spieltagsseiten build-freiplatz-seiten \
          build-partner-wall build-fanshop build-trainingszeiten-liste build-nachwuchs-spielplan-liste build-home-news \
          build-next-game build-team-news build-newsletter-archiv build-freundeskreis \
          build-spielplan-liste build-news-list build-article-nav build-freiplaetze \

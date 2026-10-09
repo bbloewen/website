@@ -35,6 +35,22 @@ STATIC_PAGE_SOURCES = {
     "presse": REPO / "assets" / "img" / "hero-presse.webp",
 }
 
+# Spieltagsinfo: je Ausgabe das Titelbild (assets/spieltagsinfo/ausgabe-N/<cover>)
+def _spieltagsinfo_quellen():
+    import json
+    pfad = REPO / "data" / "spieltagsinfo.json"
+    if not pfad.exists():
+        return {}
+    out = {}
+    for a in json.loads(pfad.read_text(encoding="utf-8"))["ausgaben"]:
+        quelle = REPO / "assets" / "spieltagsinfo" / f"ausgabe-{a['nr']}" / a["cover"]
+        if quelle.exists():
+            out[f"spieltagsinfo-ausgabe-{a['nr']}"] = quelle
+    return out
+
+
+STATIC_PAGE_SOURCES.update(_spieltagsinfo_quellen())
+
 # Vertikaler Anker beim Beschneiden: 0.0 = oberer Rand, 0.5 = Mitte, 1.0 = unterer Rand.
 # Ein reiner Mittelschnitt köpft Hochformat-Motive (beim ersten Lauf war aus dem
 # Cheftrainer-Porträt ein Rumpf ohne Kopf geworden). Gesichter liegen im obereren

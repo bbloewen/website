@@ -264,6 +264,35 @@ def heimspiel_infos_section(game, d, offen):
 """
 
 
+def spieltagsinfo_section(game):
+    """Verweis auf die Spieltagsinfo (digitale Stadionzeitung) zu diesem Heimspiel.
+
+    Die Ausgabe-Nummer steht in data/heimspiele.json (Feld "spieltagsinfo"); eine
+    Ausgabe kann fuer mehrere Spiele gelten. Name des PDFs aus data/spieltagsinfo.json.
+    """
+    nr = game.get("spieltagsinfo")
+    if not nr:
+        return ""
+    daten = json.loads((REPO / "data" / "spieltagsinfo.json").read_text(encoding="utf-8"))
+    ausgabe = next((a for a in daten["ausgaben"] if a["nr"] == nr), None)
+    if not ausgabe:
+        raise SystemExit(f"data/heimspiele.json: spieltagsinfo {nr} fehlt in data/spieltagsinfo.json")
+    url = f"/saison/profis/gameday/spieltagsinfo/ausgabe-{nr}/"
+    return f"""  <section class="section bg-subtle">
+    <div class="container">
+      <span class="eyebrow" style="display:block;margin-bottom:16px">Spieltagsinfo</span>
+      <h2 class="t-h3">Spieltagsinfo zum Heimspiel</h2>
+      <p class="t-body mt-3">Kader der Löwen und der Gäste, Ligastand, Spielplan und Geschichten aus dem Verein: die Spieltagsinfo, Ausgabe {nr} der Saison {daten["saison"]}.</p>
+      <p class="mt-4" style="display:flex;flex-wrap:wrap;gap:8px 24px">
+        <a class="card-link" href="{url}">Spieltagsinfo lesen <i data-lucide="arrow-right" class="icon-14"></i></a>
+        <a class="card-link" href="/assets/spieltagsinfo/{ausgabe["pdf"]}" download>Als PDF herunterladen <i data-lucide="download" class="icon-14"></i></a>
+        <a class="card-link" href="/saison/profis/gameday/spieltagsinfo/">Alle Ausgaben <i data-lucide="arrow-right" class="icon-14"></i></a>
+      </p>
+    </div>
+  </section>
+"""
+
+
 def spieltag_zusatz_section():
     return """  <section class="section bg-subtle">
     <div class="container">
@@ -359,6 +388,9 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
         sections.append(spieltag_zusatz_section())
     if phase == "danach":
         sections.append(bericht_section(bericht_inhalt))
+    info = spieltagsinfo_section(game)
+    if info:
+        sections.append(info)
 
     main_content = "\n".join(sections)
     # Der gerettete gameday-extra-Abschnitt steht im Original zwischen Hero und
@@ -437,7 +469,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 {main_content}
 </main>
 {footer_html}
-<script src="/js/vendor/lucide-icons.js?v=1787766492"></script>
+<script src="/js/vendor/lucide-icons.js?v=1791549139"></script>
 <script src="/js/nav.js?v=1789585539"></script>
 <script src="/js/include.js?v=1787854261"></script>
 </body>

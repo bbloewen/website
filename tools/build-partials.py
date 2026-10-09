@@ -47,7 +47,9 @@ PARTIALS = {
 # schlug fehl). spieltagsseiten-nachbauen.yml, das dieses Skript aufruft, hat
 # zwar eine zweite `git diff --cached --quiet`-Bremse und ist deshalb nicht
 # abgestuerzt - unnoetig angefasst wurden die Insta-Seiten trotzdem.
-SKIP_PREFIXES = ("news/insta-archiv/",)
+# Spieltagsinfo-Ausgaben sind eigenstaendige Lese-Seiten (Titelbild-Kopf, eigene
+# Leiste und eigener Fuss, kein Site-Header): tools/optimiere-spieltagsinfo.py.
+SKIP_PREFIXES = ("news/insta-archiv/", "saison/profis/gameday/spieltagsinfo/ausgabe-")
 
 
 def block(name, inhalt):

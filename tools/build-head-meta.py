@@ -187,6 +187,24 @@ STATIC_PAGE_IMAGES = {
 }
 
 
+def _spieltagsinfo_bilder():
+    """Share-Bilder der Spieltagsinfo: Uebersicht = neueste Ausgabe, je Ausgabe das eigene Titelbild.
+    (Quelle und Zuschnitt: tools/build-share-images.py, dort dieselbe Ableitung.)"""
+    pfad = REPO / "data" / "spieltagsinfo.json"
+    if not pfad.exists():
+        return {}
+    ausgaben = json.loads(pfad.read_text(encoding="utf-8"))["ausgaben"]
+    out = {f"saison/profis/gameday/spieltagsinfo/ausgabe-{a['nr']}/index.html":
+           f"spieltagsinfo-ausgabe-{a['nr']}.jpg" for a in ausgaben}
+    if ausgaben:
+        neueste = max(ausgaben, key=lambda a: a["nr"])
+        out["saison/profis/gameday/spieltagsinfo/index.html"] = f"spieltagsinfo-ausgabe-{neueste['nr']}.jpg"
+    return out
+
+
+STATIC_PAGE_IMAGES.update(_spieltagsinfo_bilder())
+
+
 def jsonld(nodes):
     """@graph-Block als <script>-Tag. < wird maskiert, damit kein Tag entsteht."""
     payload = json.dumps(

@@ -578,7 +578,7 @@
   </div>
 </div>
 <!--/PARTIAL:footer--></div>
-<script src="/js/vendor/lucide-icons.js?v=1787766492"></script>
+<script src="/js/vendor/lucide-icons.js?v=1791549139"></script>
 <script src="/js/nav.js?v=1789585539"></script>
 <script src="/js/include.js?v=1787854261"></script>
 <script src="/js/team-news.js?v=1789585539"></script>
@@ -621,7 +621,7 @@
       var p = str.split('.').map(Number);
       return new Date(p[2], p[1] - 1, p[0]);
     }
-    fetch('/data/heimspiele.json?v=1786321500').then(function (r) { return r.json(); }).then(function (d) {
+    fetch('/data/heimspiele.json?v=1791549139').then(function (r) { return r.json(); }).then(function (d) {
       var today = new Date();
       today.setHours(0, 0, 0, 0);
       var next = (d.spiele || [])
