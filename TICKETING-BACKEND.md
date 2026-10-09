@@ -1000,3 +1000,7 @@ Dominic Engler (9CZ7H, `UL-DK-3JKQX6`, USV Erfurt, Trainer U12mix, später am 06
 - **Wartung:** Die Item-Zuordnung steht jetzt an vier Stellen (BLOCK_ITEM_MAP in "Sitze zuordnen", `BLOCK_ITEM_BY_KEY` in den zwei n8n-Knoten oben, `BLOCK_ITEM_BY_KEY` in `seat-picker.js`). Bei neuen Items überall nachziehen.
 - **Bestellung nachgetragen:** pretix-Order KH7FM (2 × Block F, Reihe 7 Platz 5/6, 12,00 €, Gutschein HC26-GL6QZD), Ticket-Mail mit Hinweis; Zeile ET-4T9TWI in "PayPal-Zahlungen" auf bezahlt.
 - **Offen:** Die Dauerkarten-Berechnung (gemeinsame Rabattberechnung) matcht weiter über die Kategorie; dort wählt der Kunde konkrete Plätze, und die Bestellung scheitert vor einer Zahlung.
+
+## Dashboard Tickets: Freikarten getrennt, Ø Erlös je Ticket (09.10.2026)
+- Im Löwen-Dashboard (Ticketing, Tickets) zählen die Tabellen nur noch verkaufte Tickets (Preis über 0 €). Dauerkarten- und Einzelticket-Freikarten (0 €) stehen getrennt in eigenen Bereichen mit eigener Summe (Stand 09.10.: 82 Dauerkarten-Freikarten in 53 Orders, 253 Einzelticket-Freikarten in 79 Orders). Die Einzelticket-Tabellen je Spiel haben die Spalte "Ø Erlös je Ticket" (je Zeile und in der Summenzeile), Vergleichswert Saison 2025/2026: 8,69 € je Ticket.
+- Quelle: Knoten "DK-Aufschlüsselung ergänzen" und Seite, Repo `loewen-os/dashboard`, Details im README dort.
