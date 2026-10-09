@@ -808,9 +808,16 @@
       if (e.key === 'Enter') { e.preventDefault(); voucherBtn.click(); }
     });
 
+    document.getElementById('cf-email').addEventListener('input', function () { this.setCustomValidity(''); });
     document.getElementById('checkout-form').addEventListener('submit', function (e) {
       e.preventDefault();
       if (cart.zahlungPausiert) return;
+      /* E-Mail braucht eine Domain mit Endung (name@beispiel.de). Der Browser akzeptiert "name@firma" ohne Endung,
+         pretix lehnt sie ab, dann war die Bestellung ohne Ticket (Fall Metzdorf, ET-8JMWKL). */
+      var cfEmailEl = document.getElementById('cf-email');
+      var cfEmailOk = /^[^\s@]+@[^\s@]+\.[^\s@.]{2,}$/.test(cfEmailEl.value.trim());
+      cfEmailEl.setCustomValidity(cfEmailOk ? '' : 'Bitte eine vollständige E-Mail-Adresse mit Endung angeben, z. B. name@beispiel.de');
+      if (!cfEmailOk) { cfEmailEl.reportValidity(); return; }
       var buyer = {
         email: document.getElementById('cf-email').value.trim(),
         vorname: document.getElementById('cf-vorname').value.trim(),
