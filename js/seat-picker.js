@@ -294,12 +294,15 @@
     var categories = info && info.categories;
     var tarifRestriction = info && info.tarifRestriction;
     var units = []; // { qty, unitPrice }
-    if (!categories || !categories.length) return units;
+    /* Festpreis-Gutschein ('set') ohne Produktbindung wirkt wie auf dem Server je Einheit auf ALLE Zeilen
+       (bis zu den Restnutzungen), nicht pauschal als Abzug von value vom Gesamtbetrag. */
+    var allUnits = !categories || !categories.length;
+    if (allUnits && !(info && info.priceMode === 'set')) return units;
     function tarifOk(t) { return !tarifRestriction || baseTarif(t) === tarifRestriction; }
     if (this.mode === 'blocks') {
       Object.keys(this.blockCounts).forEach(function (key) {
         var c = self.blockCounts[key];
-        if (categories.indexOf(c.category) === -1) return;
+        if (!allUnits && categories.indexOf(c.category) === -1) return;
         if (info.itemIds && info.itemIds.length) {
           var itemId = blockItemId(splitZoneKey(key).zoneId, c.category);
           if (itemId !== null && info.itemIds.indexOf(itemId) === -1) return;
@@ -311,7 +314,7 @@
     } else {
       Object.keys(this.selected).forEach(function (guid) {
         var s = self.selected[guid];
-        if (categories.indexOf(s.category) === -1) return;
+        if (!allUnits && categories.indexOf(s.category) === -1) return;
         if (!tarifOk(s.tarif)) return;
         units.push({ qty: 1, unitPrice: s.price });
       });
@@ -329,7 +332,7 @@
     var info = this.voucherInfo;
     if (!info || base <= 0) return 0;
     if (info.source === 'giftcard') return Math.min(info.balance, base);
-    if (info.categories && info.categories.length) {
+    if ((info.categories && info.categories.length) || info.priceMode === 'set') {
       var remaining = (info.remainingUses == null) ? Infinity : info.remainingUses;
       var discount = 0;
       this._voucherMatchingUnits().forEach(function (u) {
