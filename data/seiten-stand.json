@@ -54,7 +54,7 @@
       "lastmod": "2026-09-18"
     },
     "index.html": {
-      "hash": "fbac768431e88045b739b2908e82706af2bdb669",
+      "hash": "7146d8c9eb86963a86804b9084938930a4dedd97",
       "lastmod": "2026-10-09"
     },
     "kontakt.html": {
@@ -70,11 +70,11 @@
       "lastmod": "2026-08-08"
     },
     "news/aktuelles.html": {
-      "hash": "fc9523432ea8e798051d14478ec9a5154c36d905",
+      "hash": "9d920c4e836b61c7d8940d716f370130e8f657de",
       "lastmod": "2026-10-09"
     },
     "news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html": {
-      "hash": "3319ecb112755bc8a807766a912e1f3bcea02720",
+      "hash": "f28e728b57540bb1efd04555a6c3ab9624a3225c",
       "lastmod": "2026-10-09"
     },
     "news/artikel/2025-04-29_profis_achtelfinale-aus.html": {
@@ -166,12 +166,16 @@
       "lastmod": "2026-09-26"
     },
     "news/artikel/2026-10-04_profis_spielbericht-giants-leverkusen.html": {
-      "hash": "883fd92b5ad329b6a5c6b70b3dbb21ae05c041a2",
+      "hash": "5db4edee4d7315d4bc1128bb39042ae91dace92c",
       "lastmod": "2026-10-09"
     },
     "news/artikel/2026-10-04_profis_vorbericht-giants-leverkusen.html": {
       "hash": "723c82124c845f5ebc9888a8ad2014b3642afa99",
       "lastmod": "2026-10-04"
+    },
+    "news/artikel/2026-10-09_profis_vorbericht-bba-ludwigsburg.html": {
+      "hash": "e57d347f5e0705f8bff13f1a44e1d4d29a9e7325",
+      "lastmod": "2026-10-09"
     },
     "news/insta-archiv/loewen-17884318188501699.html": {
       "hash": "002ceedc7cd86f481a402263912e80b5362dbb93",
@@ -322,7 +326,7 @@
       "lastmod": "2026-09-26"
     },
     "saison/profis.html": {
-      "hash": "1eaf17f704d52ec87ccfe46fe29d9af1cce6184a",
+      "hash": "11604693f5a0fcbb8952d3e7d5d2c4bf38ba1a25",
       "lastmod": "2026-10-09"
     },
     "saison/profis/gameday/2026-10-11-bba-ludwigsburg.html": {
