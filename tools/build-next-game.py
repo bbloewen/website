@@ -137,6 +137,14 @@ def slide_html(g, i, label, jetzt):
         opazitaet = "opacity:.4;cursor:default" + (";margin-left:4px" if extra_margin else "")
         return f'<span class="cal-link" style="{opazitaet}" title="{bericht_label}"><i data-lucide="file-text" style="width:18px;height:18px"></i></span>'
 
+    def spieltagsinfo_icon():
+        # Digitale Spieltagsinfo (Feld "spieltagsinfo" = Ausgabe-Nummer in data/heimspiele.json)
+        nr = g.get("spieltagsinfo")
+        if not nr:
+            return ""
+        return (f'<a class="cal-link" href="/saison/profis/gameday/spieltagsinfo/ausgabe-{int(nr)}/" title="Spieltagsinfo">'
+                '<i data-lucide="book-open" style="width:18px;height:18px"></i></a>')
+
     def livescore_icon(extra_margin):
         stil = ' style="margin-left:4px"' if extra_margin else ""
         if g.get("livescore"):
@@ -156,7 +164,7 @@ def slide_html(g, i, label, jetzt):
         # (Ticket-Hub), das ist kein redaktioneller Vorbericht (Marko,
         # 26.09.2026, gleiche Regel wie im Spielplan js/spielplan.js).
         vorbericht_url = g.get("vorberichtUrl") or (None if g["heim"] else g.get("spielberichtUrl"))
-        row_html = bericht_icon("Vorbericht", vorbericht_url, False) + tabelle_icon(False) + livescore_icon(False) + livestream_link(True)
+        row_html = bericht_icon("Vorbericht", vorbericht_url, False) + spieltagsinfo_icon() + tabelle_icon(False) + livescore_icon(False) + livestream_link(True)
     else:
         # Bei Heimspielen zeigt spielberichtUrl immer auf die eigene Spieltagsseite
         # (gilt fuer Vor- und Nachbericht gleichermassen). Bei Auswaertsspielen
@@ -166,7 +174,7 @@ def slide_html(g, i, label, jetzt):
         nachbericht_url = g.get("spielberichtUrl") if g["heim"] else g.get("nachberichtUrl")
         row_html = (
             f'<div class="fixture-result">{esc(g.get("ergebnis") or "– – : – –")}</div>'
-            + tabelle_icon(True) + bericht_icon("Nachbericht", nachbericht_url, False)
+            + tabelle_icon(True) + spieltagsinfo_icon() + bericht_icon("Nachbericht", nachbericht_url, False)
         )
 
     if g["heim"]:

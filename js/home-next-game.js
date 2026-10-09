@@ -84,6 +84,11 @@
       }
       return '<span class="cal-link" style="opacity:.4;cursor:default' + (extraMargin ? ';margin-left:4px' : '') + '" title="' + label2 + '"><i data-lucide="file-text" style="width:22px;height:22px"></i></span>';
     }
+    function spieltagsinfoIcon() {
+      /* Digitale Spieltagsinfo: Feld spieltagsinfo = Ausgabe-Nummer in data/heimspiele.json */
+      if (!g.spieltagsinfo) return '';
+      return '<a class="cal-link" href="/saison/profis/gameday/spieltagsinfo/ausgabe-' + g.spieltagsinfo + '/" title="Spieltagsinfo"><i data-lucide="book-open" style="width:22px;height:22px"></i></a>';
+    }
     function livescoreIcon(extraMargin) {
       var stil = extraMargin ? ' style="margin-left:4px"' : '';
       return g.livescore
@@ -107,7 +112,7 @@
          ueber den Tickets-CTA erreicht (Marko, 26.09.2026, gleiche Regel wie
          im Spielplan js/spielplan.js). */
       var vorberichtUrl = g.vorberichtUrl || (g.heim ? null : g.spielberichtUrl);
-      rowHTML = berichtIconHTML('Vorbericht', vorberichtUrl, false) + tabelleIcon(false) + livescoreIcon(false) + livestreamLink(true);
+      rowHTML = berichtIconHTML('Vorbericht', vorberichtUrl, false) + spieltagsinfoIcon() + tabelleIcon(false) + livescoreIcon(false) + livestreamLink(true);
     } else {
       /* Ab Anpfiff bis zum Dienstag-Cutoff (danach verschwindet der Slide
          ohnehin): Ergebnis gross, Tabelle, Nachbericht -- kein Livestream
@@ -119,7 +124,7 @@
          auf die eigene Spieltagsseite) (Marko, 26.09.2026). */
       var nachberichtUrl = g.heim ? g.spielberichtUrl : g.nachberichtUrl;
       rowHTML = '<div class="fixture-result">' + (g.ergebnis || '– – : – –') + '</div>' +
-        tabelleIcon(true) + berichtIconHTML('Nachbericht', nachberichtUrl, false);
+        tabelleIcon(true) + spieltagsinfoIcon() + berichtIconHTML('Nachbericht', nachberichtUrl, false);
     }
 
     var ctaHTML = g.heim
