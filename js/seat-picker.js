@@ -77,6 +77,27 @@
     return sep === -1 ? { zoneId: key, category: null } : { zoneId: key.slice(0, sep), category: key.slice(sep + 2) };
   }
 
+  /* Pretix-Einzelticket-Item je Block/Produkt — gleiche Zuordnung wie BLOCK_ITEM_MAP/resolveBlockKey im
+     n8n-Workflow "Einzelticketbestellung verarbeiten" (Knoten "Sitze zuordnen"). Wird gebraucht, damit ein
+     item-/kontingentgebundener Gutschein nur die Blöcke rabattiert, an die er wirklich gebunden ist, und nicht
+     die ganze Kategorie (Fall ET-4T9TWI: Gutschein nur für Block F rabattierte auch Block C, die Bestellung
+     scheiterte erst nach der PayPal-Zahlung). Liefert null, wenn sich kein Item bestimmen lässt (dann gilt
+     weiterhin die reine Kategorie-Prüfung). */
+  var BLOCK_ITEM_BY_KEY = { 'Block A': 28, 'Block B': 35, 'Block C': 31, 'Block CS': 32, 'Block D': 29, 'Block E': 33,
+    'Block F': 30, 'VIP': 40, 'Fanblock': 27, 'Rollstuhlplatz': 34, 'Stehplatz': 23 };
+  function blockItemId(zoneId, category) {
+    var key;
+    if (zoneId === 'STEHPLATZ' || category === 'Stehplatz') key = 'Stehplatz';
+    else if (zoneId === 'ROLLSTUHL' || category === 'Rollstuhlplatz') key = 'Rollstuhlplatz';
+    else if (category === 'Fanblock' || category === 'VIP') key = category;
+    else if (category === 'C unten') key = 'Block CS';
+    else if (zoneId === 'Fanblock' || zoneId === 'VIP') key = zoneId;
+    else if (zoneId === 'CS') key = 'Block CS';
+    else if (zoneId) key = 'Block ' + zoneId;
+    else return null;
+    return BLOCK_ITEM_BY_KEY[key] || null;
+  }
+
   /* An welcher Kante die Reihen eines Blocks ausgerichtet sind. Steht als align_edge
      in den Zonendaten, weil es pro Blockseite unterschiedlich ist: A/B/F richten sich
      an der rechten Kante aus ("trailing"), C/D/E an der linken ("leading"). Fällt die
@@ -279,6 +300,10 @@
       Object.keys(this.blockCounts).forEach(function (key) {
         var c = self.blockCounts[key];
         if (categories.indexOf(c.category) === -1) return;
+        if (info.itemIds && info.itemIds.length) {
+          var itemId = blockItemId(splitZoneKey(key).zoneId, c.category);
+          if (itemId !== null && info.itemIds.indexOf(itemId) === -1) return;
+        }
         BLOCK_TARIFS.forEach(function (t) {
           if (c[t] > 0 && tarifOk(t)) units.push({ qty: c[t], unitPrice: blockTarifPrice(c.priceInfo, t) });
         });
@@ -2550,7 +2575,7 @@
               } else {
                 var info = {
                   source: result.source, code: result.code, priceMode: result.priceMode, value: result.value,
-                  categories: categories, tarifRestriction: result.tarifRestriction || null,
+                  categories: categories, itemIds: result.itemIds || null, tarifRestriction: result.tarifRestriction || null,
                   remainingUses: result.remainingUses != null ? result.remainingUses : null,
                   balance: result.balance != null ? result.balance : null
                 };
