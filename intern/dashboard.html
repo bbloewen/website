@@ -2985,7 +2985,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   // ---------- Accounting: Rückfragen (Etappe 2) ----------
   // Der Agent schlägt die Kontierung vor, Marko bestätigt, korrigiert oder gibt an den Steuerberater weiter. Jede Entscheidung wird als Wissen gespeichert.
   // Gebucht wird dabei noch nichts in BuchhaltungsButler.
-  var RF = { na: null, naFehler: null, daten: null, fehler: null, laedt: false, filter: 'offen', mandant: 'alle', bt: null, plan: {}, edit: null, meldung: '' };
+  var RF = { buch: null, na: null, naFehler: null, daten: null, fehler: null, laedt: false, filter: 'offen', mandant: 'alle', bt: null, plan: {}, edit: null, meldung: '' };
   async function ladeRF() {
     RF.laedt = true; RF.fehler = null; renderRF();
     try {
@@ -3103,6 +3103,63 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var l = b.buchungen || []; if (!l.length) return '';
     return l.map(function (x) { return esc(x.sachkonto || '') + (x.kst1 ? ' · ' + esc(x.kst1) : '') + (x.kst2 ? ' · ' + esc(x.kst2) : '') + (x.betrag !== undefined ? ' · ' + esc(formatEuro(Number(x.betrag))) : ''); }).join('<br>');
   }
+  // Zu buchen: freigegebene Rückfragen. Vorschau zeigt, was in BuchhaltungsButler passieren würde, Buchen führt es nach Bestätigung aus.
+  function rfZuBuchen(alle) { return alle.filter(function (r) { return (r.status === 'bestaetigt' || r.status === 'korrigiert') && !r.gebucht_am && r.beleg_id; }); }
+  async function buchVorschau(id, modus) {
+    RF.buch = { id: id, modus: modus, laedt: true, vorschau: null, fehler: '', laeuft: false, ergebnis: null }; renderRF();
+    try {
+      var res = await fetch('/webhook/accounting/beleg-vorschau?id=' + id);
+      var d = await res.json();
+      if (!res.ok) throw new Error(d.message || d.fehler || 'Vorschau fehlgeschlagen');
+      RF.buch.vorschau = d;
+    } catch (e) { RF.buch.fehler = e.message; }
+    RF.buch.laedt = false; renderRF();
+  }
+  async function buchAusfuehren(id) {
+    var b = RF.buch; if (!b || b.laeuft) return;
+    b.laeuft = true; b.fehler = ''; renderRF();
+    try {
+      var res = await fetch('/webhook/accounting/beleg-buchen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
+      var d = await res.json();
+      if (!res.ok) throw new Error(d.message || d.fehler || 'Buchen fehlgeschlagen');
+      b.ergebnis = d;
+    } catch (e) { b.fehler = e.message; }
+    b.laeuft = false;
+    if (b.ergebnis && b.ergebnis.ok) { RF.meldung = 'Gebucht: ' + (b.ergebnis.schritte || []).join(', ') + '.'; RF.buch = null; await ladeRF(); return; }
+    renderRF();
+  }
+  function buchPanel(r) {
+    var b = RF.buch; if (!b || b.id !== r.id) return '';
+    if (b.laedt) return '<div class="rf-box" style="margin-top:8px"><div class="laedt">Lade Vorschau …</div></div>';
+    var v = b.vorschau, h = '<div class="rf-box" style="margin-top:8px">';
+    if (b.fehler) h += '<div class="fehlerbox" role="alert">' + esc(b.fehler) + '</div>';
+    if (b.ergebnis && !b.ergebnis.ok) h += '<div class="fehlerbox" role="alert">' + esc(b.ergebnis.meldung || (b.ergebnis.probleme || []).join(' ') || 'Nicht gebucht') + (b.ergebnis.hinweis ? '<div>' + esc(b.ergebnis.hinweis) + '</div>' : '') + '</div>';
+    if (v && v.vorschau) {
+      var x = v.vorschau;
+      h += '<div class="fett">Das passiert in BuchhaltungsButler (' + esc(x.mandant) + ')</div><ol style="margin:6px 0 0 18px;padding:0">' +
+        (x.upload_noetig ? '<li>Hochladen: ' + esc(x.upload_angaben ? (x.upload_angaben.gegenpartei + ', Nr. ' + x.upload_angaben.nummer + ', ' + formatDate(x.upload_angaben.datum) + ', ' + formatEuro(Number(x.upload_angaben.betrag))) : '') + '</li>' : '<li>Der Beleg liegt schon in BuchhaltungsButler (BHB-Beleg ' + esc(x.neu_beleg_id || '') + ').</li>') +
+        '<li>Buchen auf Kreditor ' + (x.kreditor ? esc(x.kreditor.nummer + ' ' + x.kreditor.name) : '<b>nicht gefunden</b>') + ': ' + (x.buchungen || []).map(function (p) { return esc(p.sachkonto + ' · KST1 ' + (p.kst1 || '–') + ' · KST2 ' + (p.kst2 || '–') + ' · ' + p.vat + ' · ' + formatEuro(Number(p.betrag))); }).join(' + ') + '<div class="notiz" style="margin:0">Buchungstext: ' + esc(x.buchungstext || '') + '</div></li>' +
+        ((x.zahlungen || []).length ? '<li>Zahlung neu zuordnen und ausgleichen: ' + x.zahlungen.map(function (z) { return esc(formatDate(String(z.datum).slice(0, 10)) + ' ' + formatEuro(Number(z.betrag)) + ' ' + (z.gegenpartei || '')); }).join('; ') + '</li>' : '<li class="gedaempft">Keine Zahlung bisher zugeordnet.</li>') + '</ol>';
+      (v.hinweise || []).forEach(function (t) { h += '<div class="hinweis-warn" style="margin-top:6px">' + esc(t) + '</div>'; });
+      if ((v.probleme || []).length) h += '<div class="fehlerbox" role="alert" style="margin-top:6px"><b>Noch nicht buchbar:</b><ul style="margin:4px 0 0 18px;padding:0">' + v.probleme.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div>';
+    }
+    h += '<div style="display:flex;gap:8px;margin-top:8px;align-items:center">' +
+      (b.modus === 'buchen' && v && v.ok ? '<button type="button" class="btn btn-primary" data-rf="buch-ja" data-id="' + r.id + '"' + (b.laeuft ? ' disabled' : '') + '>' + (b.laeuft ? 'Buche …' : 'Ja, jetzt hochladen und buchen') + '</button>' : '') +
+      '<button type="button" class="link-btn" data-rf="buch-zu">Schließen</button></div></div>';
+    return h;
+  }
+  function renderZuBuchen(alle) {
+    var l = rfZuBuchen(alle);
+    var h = '<div class="card"><div class="card-kopf" style="margin:0">Freigegeben, noch nicht in BuchhaltungsButler gebucht · ' + esc(zahl(l.length)) + ' Belege</div><div style="padding:0 12px 12px">';
+    if (!l.length) h += '<div class="leer" style="padding:12px 0">Nichts zu buchen. Freigegebene Rückfragen erscheinen hier.</div>';
+    l.forEach(function (r) {
+      var e = r.entscheidung || {};
+      h += '<div class="rf-karte rf-' + esc(r.mandant) + ' card pad" style="margin-top:8px"><div class="zeile-titel" style="margin:0"><span class="fett"><span class="m-badge m-' + esc(r.mandant) + '">' + esc(r.mandant) + '</span> ' + esc(r.aussteller || '–') + (r.nummer ? ' · Nr. ' + esc(r.nummer) : '') + (r.brutto !== null && r.brutto !== undefined ? ' · ' + esc(formatEuro(Number(r.brutto))) : '') + '</span><span class="notiz" style="margin:0">freigegeben ' + esc(r.entschieden_am ? formatDate(String(r.entschieden_am).slice(0, 10)) : '') + '</span></div>' +
+        '<div style="margin-top:4px">' + rfKonto(e) + '<div class="notiz" style="margin:0">Buchungstext: ' + esc(rfBtText(r) || '–') + '</div></div>' +
+        '<div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn btn-secondary" data-rf="buch-vorschau" data-id="' + r.id + '">Vorschau</button><button type="button" class="btn btn-primary" data-rf="buch-pruefen" data-id="' + r.id + '">Buchen …</button></div>' + buchPanel(r) + '</div>';
+    });
+    return h + '</div></div>';
+  }
   function renderNA() {
     if (RF.naFehler && !RF.na) return '<div class="fehlerbox" role="alert">' + esc(RF.naFehler) + '</div>';
     if (!RF.na) { ladeNA(); return '<div class="laedt">Lade …</div>'; }
@@ -3130,7 +3187,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var zaehlOffen = function (m) { return alleRoh.filter(function (r) { return r.status === 'offen' && (m === 'alle' || r.mandant === m); }).length; };
     var mchip = function (m, t) { return '<button type="button" class="chip' + (RF.mandant === m ? ' aktiv' : '') + '" data-rf="mandant" data-m="' + m + '" aria-pressed="' + (RF.mandant === m) + '">' + t + ' <span class="notiz" style="display:inline;margin:0">' + esc(zahl(zaehlOffen(m))) + '</span></button>'; };
     var chip = function (w, t, n) { return '<button type="button" class="chip' + (RF.filter === w ? ' aktiv' : '') + '" data-rf="filter" data-w="' + w + '" aria-pressed="' + (RF.filter === w) + '">' + t + ' <span class="notiz" style="display:inline;margin:0">' + esc(zahl(n)) + '</span></button>'; };
-    var h = '<div class="stapel"><div class="chips" role="group" aria-label="Ansicht">' + chip('offen', 'Offen', alle.filter(function (r) { return r.status === 'offen'; }).length) + chip('steuerberater', 'Beim Steuerberater', alle.filter(function (r) { return r.status === 'steuerberater'; }).length) + chip('loeschen', 'In BHB zu löschen', alle.filter(function (r) { return r.bhb_loeschen === 'vorgemerkt'; }).length) + chip('neuaufnahme', 'Neuaufnahme', RF.na ? (RF.na.zaehler.gesamt || 0) : '…') + chip('erledigt', 'Erledigt', alle.filter(function (r) { return r.status === 'bestaetigt' || r.status === 'korrigiert' || r.status === 'verworfen'; }).length) + chip('wissen', 'Gelerntes Wissen', (RF.daten.wissen || []).filter(function (x) { return RF.mandant === 'alle' || x.mandant === RF.mandant; }).length) + '</div>' +
+    var h = '<div class="stapel"><div class="chips" role="group" aria-label="Ansicht">' + chip('offen', 'Offen', alle.filter(function (r) { return r.status === 'offen'; }).length) + chip('steuerberater', 'Beim Steuerberater', alle.filter(function (r) { return r.status === 'steuerberater'; }).length) + chip('loeschen', 'In BHB zu löschen', alle.filter(function (r) { return r.bhb_loeschen === 'vorgemerkt'; }).length) + chip('zubuchen', 'Zu buchen', rfZuBuchen(alle).length) + chip('neuaufnahme', 'Neuaufnahme', RF.na ? (RF.na.zaehler.gesamt || 0) : '…') + chip('erledigt', 'Erledigt', alle.filter(function (r) { return r.status === 'bestaetigt' || r.status === 'korrigiert' || r.status === 'verworfen'; }).length) + chip('wissen', 'Gelerntes Wissen', (RF.daten.wissen || []).filter(function (x) { return RF.mandant === 'alle' || x.mandant === RF.mandant; }).length) + '</div>' +
       '<div class="chips chips-gleich" role="group" aria-label="Mandant"><span class="notiz chips-label">Mandant</span>' + mchip('alle', 'Alle') + mchip('XXL', 'XXL') + mchip('LEV', 'LEV') + '</div>' +
       (RF.laeuftAntwort ? '<div class="laedt" role="status">Speichere …</div>' : '') + (RF.meldung ? '<div class="erfolg" role="status">' + esc(RF.meldung) + '</div>' : '');
     var stat = { bestaetigt: 'bestätigt', korrigiert: 'korrigiert', verworfen: 'kein Beleg' };
@@ -3170,6 +3227,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
           return zeile;
         }).join('') : '<tr><td colspan="5" class="leer">Nichts beim Steuerberater.</td></tr>') +
         '</tbody></table></div><div class="card-fuss">Der Entwurf an Heiko Kühnst liegt im Gmail-Postfach rechnung@ und enthält alle vorgemerkten Fälle mit Beleg-Link. Gesendet wird nichts automatisch: Du schickst ihn selbst ab und klickst danach „Als gesendet markieren“. Seine Antwort trägst du je Beleg mit „Antwort eintragen“ ein, sie wird als Wissen mit Quelle Steuerberater gespeichert.</div></div>';
+    } else if (RF.filter === 'zubuchen') {
+      h += renderZuBuchen(alle);
     } else if (RF.filter === 'neuaufnahme') {
       h += renderNA();
     } else if (RF.filter === 'loeschen') {
@@ -3192,7 +3251,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       h += '<div class="card"><div class="card-kopf" style="margin:0">Gelerntes Wissen je Falltyp (Mandant, Aussteller, Zweck)</div><div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Mandant</th><th>Aussteller</th><th>Zweck</th><th>Konto</th><th>KST 1</th><th>KST 2</th><th class="rechts"><abbr title="Wie oft ohne Korrektur bestätigt">Bestätigt</abbr></th><th class="rechts"><abbr title="Wie oft korrigiert">Korrigiert</abbr></th><th>Stand</th></tr></thead><tbody>' +
         (w.length ? w.map(function (x) { return '<tr><td>' + esc(x.mandant) + '</td><td>' + esc(x.aussteller) + '</td><td>' + esc(x.zweck || '–') + '</td><td>' + esc(x.sachkonto) + '</td><td>' + esc(x.kst1 || '') + '</td><td>' + esc(x.kst2 || '') + '</td><td class="rechts zahlen">' + esc(zahl(x.bestaetigt_n)) + '</td><td class="rechts zahlen">' + esc(zahl(x.korrigiert_n)) + '</td><td>' + esc({ gelernt: 'gelernt', sicher: 'sicher', zurueckgestuft: 'zurückgestuft' }[x.status] || x.status) + '</td></tr>'; }).join('') : '<tr><td colspan="9" class="leer">Noch nichts gelernt.</td></tr>') + '</tbody></table></div><div class="card-fuss">Jede Bestätigung oder Korrektur wird hier festgehalten. Bei weiteren Belegen desselben Falltyps schlägt der Agent genau das vor. Das selbstständige Buchen kommt erst später und nur für Falltypen, die du freigibst.</div></div>';
     }
-    h += '<div class="notiz">„Passt“ und „Anders“ merken sich die Kontierung. Gebucht wird dabei noch nichts in BuchhaltungsButler.</div></div>';
+    h += '<div class="notiz">„Passt“ und „Anders“ merken sich die Kontierung. Gebucht wird erst unter „Zu buchen“, nach deiner Bestätigung.</div></div>';
     var fokus = document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute('data-rf') === 'notiz';
     var pos = fokus ? document.activeElement.selectionStart : 0;
     el.innerHTML = h;
@@ -3247,6 +3306,10 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         RF.sbLaeuft = false;
         await ladeRF();
       }
+      else if (w === 'buch-vorschau') buchVorschau(id, 'vorschau');
+      else if (w === 'buch-pruefen') buchVorschau(id, 'buchen');
+      else if (w === 'buch-zu') { RF.buch = null; renderRF(); }
+      else if (w === 'buch-ja') { if (window.confirm('Jetzt in BuchhaltungsButler hochladen und buchen? Das schreibt echte Buchungen.')) buchAusfuehren(id); }
       else if (w === 'dup') { if (window.confirm('Diesen Beleg als Doppelung erledigen und zum Löschen in BuchhaltungsButler vormerken?')) rfAntwort(id, { aktion: 'duplikat' }); }
       else if (w === 'bhb-ok') rfAntwort(id, { aktion: 'bhb_geloescht' });
       else if (w === 'bt-edit') { var rb = RF.daten.rueckfragen.filter(function (x) { return x.id === id; })[0]; RF.meldung = ''; RF.bt = { id: id, wert: rb.buchungstext_zweck || rb.rf_zweck || rb.regel_zweck || '', standard: false, laeuft: false, fehler: '' }; renderRF(); var bi = document.getElementById('rf-bt-' + id); if (bi) bi.focus(); }
