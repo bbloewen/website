@@ -113,6 +113,11 @@ main.wrap { padding-top: 28px; padding-bottom: 48px; }
 .tbl-voll abbr[title] { text-decoration: none; cursor: help; border-bottom: 1px dotted var(--text-muted); }
 .rf-box { background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; }
 .rf-karte { margin-bottom: 0; }
+.rf-XXL { border-left: 4px solid var(--color-brand-orange); }
+.rf-LEV { border-left: 4px solid var(--color-brand-blue); }
+.m-badge { display: inline-block; min-width: 2.6rem; text-align: center; padding: 1px 8px; margin-right: 4px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #fff; }
+.m-XXL { background: var(--color-brand-orange-text); }
+.m-LEV { background: var(--color-brand-blue); }
 .btn-loeschen { background: none; border: 1px solid var(--color-error); color: var(--color-error); border-radius: var(--radius-sm); padding: 4px 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
 .btn-loeschen:hover { background: var(--color-error-bg); }
 .tbl-voll .linkreihe { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 4px; }
@@ -2977,7 +2982,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   // ---------- Accounting: Rückfragen (Etappe 2) ----------
   // Der Agent schlägt die Kontierung vor, Marko bestätigt, korrigiert oder gibt an den Steuerberater weiter. Jede Entscheidung wird als Wissen gespeichert.
   // Gebucht wird dabei noch nichts in BuchhaltungsButler.
-  var RF = { daten: null, fehler: null, laedt: false, filter: 'offen', plan: {}, edit: null, meldung: '' };
+  var RF = { daten: null, fehler: null, laedt: false, filter: 'offen', mandant: 'alle', plan: {}, edit: null, meldung: '' };
   async function ladeRF() {
     RF.laedt = true; RF.fehler = null; renderRF();
     try {
@@ -3020,12 +3025,12 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var v = r.vorschlag || {}, ed = RF.edit && RF.edit.id === r.id ? RF.edit : null;
     var imp = r.importiert ? formatDate(String(r.importiert).slice(0, 10)) : '';
     var dat = r.datum ? formatDate(String(r.datum).slice(0, 10)) + (imp ? ' (importiert ' + imp + ')' : '') : (imp ? 'importiert ' + imp : '');
-    var kopf = '<div class="zeile-titel" style="margin:0 0 4px"><span class="fett">' + esc(r.aussteller || '–') + (r.nummer ? ' · Nr. ' + esc(r.nummer) : '') + (r.brutto !== null && r.brutto !== undefined ? ' · ' + esc(formatEuro(Number(r.brutto))) : '') + (dat ? ' · ' + esc(dat) : '') + '</span><span class="notiz" style="margin:0">' + esc(r.mandant) + ' · ' + esc(rfTage(r.angelegt)) + '</span></div>';
+    var kopf = '<div class="zeile-titel" style="margin:0 0 4px"><span class="fett"><span class="m-badge m-' + esc(r.mandant) + '">' + esc(r.mandant) + '</span> ' + esc(r.aussteller || '–') + (r.nummer ? ' · Nr. ' + esc(r.nummer) : '') + (r.brutto !== null && r.brutto !== undefined ? ' · ' + esc(formatEuro(Number(r.brutto))) : '') + (dat ? ' · ' + esc(dat) : '') + '</span><span class="notiz" style="margin:0">' + esc(rfTage(r.angelegt)) + '</span></div>';
     var links = [];
     if (r.drive_url) links.push('<a href="' + esc(r.drive_url) + '" target="_blank" rel="noopener">Original in Drive</a>');
     if (r.nur_bhb && r.anhang_name) links.push('<a href="' + esc(bhbBelegLink('', r.anhang_name)) + '" target="_blank" rel="noopener">Beleg in BuchhaltungsButler</a>');
     links.push('<span class="notiz" style="display:inline;margin:0">' + (r.nur_bhb ? 'liegt in BuchhaltungsButler, noch nicht gebucht' : 'aus dem Postfach gelesen') + '</span>');
-    var h = '<div class="card pad rf-karte">' + kopf + '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px">' + links.join('') + '</div>' +
+    var h = '<div class="card pad rf-karte rf-' + esc(r.mandant) + '">' + kopf + '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px">' + links.join('') + '</div>' +
       '<div class="fett" style="margin-bottom:6px">' + esc(r.frage || '') + '</div>';
     if (v.sachkonto) {
       h += '<div class="rf-box"><div class="notiz" style="margin:0 0 4px">Vorschlag · ' + esc(rfQuelle(v)) + ' · Sicherheit ' + esc(v.sicherheit || '') + '</div>' + rfKonto(v) +
@@ -3061,9 +3066,13 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (RF.laedt && !RF.daten) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
     if (RF.fehler && !RF.daten) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(RF.fehler) + '</div>'; return; }
     if (!RF.daten) { el.innerHTML = ''; return; }
-    var z = RF.daten.zaehler || {}, alle = RF.daten.rueckfragen || [];
+    var z = RF.daten.zaehler || {}, alleRoh = RF.daten.rueckfragen || [];
+    var alle = alleRoh.filter(function (r) { return RF.mandant === 'alle' || r.mandant === RF.mandant; });
+    var zaehlOffen = function (m) { return alleRoh.filter(function (r) { return r.status === 'offen' && (m === 'alle' || r.mandant === m); }).length; };
+    var mchip = function (m, t) { return '<button type="button" class="chip' + (RF.mandant === m ? ' aktiv' : '') + '" data-rf="mandant" data-m="' + m + '" aria-pressed="' + (RF.mandant === m) + '">' + t + ' <span class="notiz" style="display:inline;margin:0">' + esc(zahl(zaehlOffen(m))) + '</span></button>'; };
     var chip = function (w, t, n) { return '<button type="button" class="chip' + (RF.filter === w ? ' aktiv' : '') + '" data-rf="filter" data-w="' + w + '" aria-pressed="' + (RF.filter === w) + '">' + t + ' <span class="notiz" style="display:inline;margin:0">' + esc(zahl(n)) + '</span></button>'; };
-    var h = '<div class="stapel"><div class="chips" role="group" aria-label="Ansicht">' + chip('offen', 'Offen', z.offen || 0) + chip('steuerberater', 'Beim Steuerberater', z.steuerberater || 0) + chip('erledigt', 'Erledigt', z.erledigt || 0) + chip('wissen', 'Gelerntes Wissen', (RF.daten.wissen || []).length) + '</div>' +
+    var h = '<div class="stapel"><div class="chips" role="group" aria-label="Ansicht">' + chip('offen', 'Offen', alle.filter(function (r) { return r.status === 'offen'; }).length) + chip('steuerberater', 'Beim Steuerberater', alle.filter(function (r) { return r.status === 'steuerberater'; }).length) + chip('erledigt', 'Erledigt', alle.filter(function (r) { return r.status === 'bestaetigt' || r.status === 'korrigiert' || r.status === 'verworfen'; }).length) + chip('wissen', 'Gelerntes Wissen', (RF.daten.wissen || []).filter(function (x) { return RF.mandant === 'alle' || x.mandant === RF.mandant; }).length) + '</div>' +
+      '<div class="chips chips-gleich" role="group" aria-label="Mandant"><span class="notiz chips-label">Mandant</span>' + mchip('alle', 'Alle') + mchip('XXL', 'XXL') + mchip('LEV', 'LEV') + '</div>' +
       (RF.laeuftAntwort ? '<div class="laedt" role="status">Speichere …</div>' : '') + (RF.meldung ? '<div class="erfolg" role="status">' + esc(RF.meldung) + '</div>' : '');
     var stat = { bestaetigt: 'bestätigt', korrigiert: 'korrigiert', verworfen: 'kein Beleg' };
     if (RF.filter === 'offen') {
@@ -3080,7 +3089,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       h += '<div class="card"><div class="card-kopf" style="margin:0">Entschieden (letzte 60 Tage)</div><div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Beleg</th><th>Entscheidung</th><th>Konto</th><th>Wer, wann</th></tr></thead><tbody>' +
         (erl.length ? erl.map(function (r) { return '<tr><td><div class="fett">' + esc(r.aussteller || '–') + '</div><div class="notiz" style="margin:0">' + esc((r.nummer ? 'Nr. ' + r.nummer + ' · ' : '') + (r.brutto !== null && r.brutto !== undefined ? formatEuro(Number(r.brutto)) : '') + ' · ' + r.mandant) + '</div></td><td>' + esc(stat[r.status] || r.status) + '</td><td>' + (r.status === 'verworfen' ? '' : rfKonto(r.entscheidung)) + '</td><td class="notiz">' + esc((r.entschieden_von || '') + ' · ' + (r.entschieden_am ? formatDateTime(r.entschieden_am) : '')) + '</td></tr>'; }).join('') : '<tr><td colspan="4" class="leer">Noch nichts entschieden.</td></tr>') + '</tbody></table></div></div>';
     } else {
-      var w = RF.daten.wissen || [];
+      var w = (RF.daten.wissen || []).filter(function (x) { return RF.mandant === 'alle' || x.mandant === RF.mandant; });
       h += '<div class="card"><div class="card-kopf" style="margin:0">Gelerntes Wissen je Falltyp (Mandant, Aussteller, Zweck)</div><div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Mandant</th><th>Aussteller</th><th>Zweck</th><th>Konto</th><th>KST 1</th><th>KST 2</th><th class="rechts"><abbr title="Wie oft ohne Korrektur bestätigt">Bestätigt</abbr></th><th class="rechts"><abbr title="Wie oft korrigiert">Korrigiert</abbr></th><th>Stand</th></tr></thead><tbody>' +
         (w.length ? w.map(function (x) { return '<tr><td>' + esc(x.mandant) + '</td><td>' + esc(x.aussteller) + '</td><td>' + esc(x.zweck || '–') + '</td><td>' + esc(x.sachkonto) + '</td><td>' + esc(x.kst1 || '') + '</td><td>' + esc(x.kst2 || '') + '</td><td class="rechts zahlen">' + esc(zahl(x.bestaetigt_n)) + '</td><td class="rechts zahlen">' + esc(zahl(x.korrigiert_n)) + '</td><td>' + esc({ gelernt: 'gelernt', sicher: 'sicher', zurueckgestuft: 'zurückgestuft' }[x.status] || x.status) + '</td></tr>'; }).join('') : '<tr><td colspan="9" class="leer">Noch nichts gelernt.</td></tr>') + '</tbody></table></div><div class="card-fuss">Jede Bestätigung oder Korrektur wird hier festgehalten. Bei weiteren Belegen desselben Falltyps schlägt der Agent genau das vor. Das selbstständige Buchen kommt erst später und nur für Falltypen, die du freigibst.</div></div>';
     }
@@ -3124,6 +3133,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       if (RF.laeuftAntwort) return;
       var w = b.getAttribute('data-rf'), id = Number(b.getAttribute('data-id'));
       if (w === 'filter') { RF.filter = b.getAttribute('data-w'); RF.meldung = ''; RF.edit = null; renderRF(); }
+      else if (w === 'mandant') { RF.mandant = b.getAttribute('data-m'); RF.edit = null; renderRF(); }
       else if (w === 'ok') rfAntwort(id, { aktion: 'bestaetigen' });
       else if (w === 'ok-alle') { var rr = RF.daten.rueckfragen.filter(function (x) { return x.id === id; })[0]; rfAntwort(id, { aktion: 'bestaetigen' }, rfGleiche(rr, true)); }
       else if (w === 'anders') { RF.meldung = ''; RF.edit = { id: id, modus: 'anders', combo: '', laeuft: false, fehler: '' }; renderRF(); await ladePlan(b.getAttribute('data-m')); renderRF(); }
