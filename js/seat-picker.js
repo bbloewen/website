@@ -632,8 +632,69 @@
     return this.blocks[id];
   };
 
+  /* Verfügbarkeits-Hinweis (Modus "blocks"), Stufen nach Marko 10.10.2026:
+     ab 50 frei "ausreichend verfügbar", 20-49 "weniger als 50 Plätze", 11-19
+     "weniger als 20 Plätze", 1-10 die konkrete Anzahl, 0 "keine Plätze mehr verfügbar"
+     ("weniger als" nur dort, wo es wörtlich stimmt: genau 20 gehört zu "weniger als 50"). Erst zeigen, wenn der Sitzstatus
+     da ist — vorher stünde dort "alles frei", was falscher wäre als kein Hinweis.
+     Grundlage ist dieselbe Zählung wie für die Mengen-Stepper (_blockFreeCount). */
+  SeatPicker.prototype._availabilityHint = function (zoneId, category) {
+    if (!this.seatStatusLoaded) return null;
+    var free = this._blockFreeCount(zoneId, category);
+    var text, level;
+    level = free <= 0 ? 'out' : free <= 10 ? 'low' : free < 50 ? 'mid' : 'ok';
+    if (free <= 0) text = 'keine Plätze mehr verfügbar';
+    else if (free <= 10) text = free === 1 ? 'nur noch 1 Platz' : 'nur noch ' + free + ' Plätze';
+    else if (free < 20) text = 'weniger als 20 Plätze';
+    else if (free < 50) text = 'weniger als 50 Plätze';
+    else text = 'ausreichend verfügbar';
+    return { free: free, text: text, level: level, soldOut: free <= 0 };
+  };
+
   SeatPicker.prototype._renderMobileOverview = function () {
     var self = this;
+
+    // Anzeigename einer Kachel wie im Übernehmen-Knopf: Fanblock/VIP/Courtside als eigene
+    // Produktnamen, sonst "Block X (Kat. n)".
+    function availabilityLabel(id, p) {
+      if (p.category === 'Fanblock' || p.category === 'VIP') return p.category;
+      if (p.category === 'C unten') return 'Block CS';
+      var z = self._zoneById(id);
+      return (z ? z.name : id) + ' (' + catShortLabel(p.category) + ')';
+    }
+
+    // Verfügbarkeit je Kachel als Liste direkt unter der Blockauswahl (nur Einzelticket).
+    // Reihenfolge wie die frühere Auslastungskachel: A, B, C (CS), D, E, F, Fanblock, VIP,
+    // Stehplatz. Erst anzeigen, wenn der Sitzstatus da ist (s. _availabilityHint).
+    function availabilityList() {
+      if (self.mode !== 'blocks' || self.readonly || !self.seatStatusLoaded) return '';
+      var items = [];
+      self.northZones.concat(self.southZones).forEach(function (id) {
+        self._purchasableCategories(id).forEach(function (p) {
+          var a = self._availabilityHint(id, p.category);
+          if (a) items.push({ key: id, order: p.category, label: availabilityLabel(id, p), a: a });
+        });
+      });
+      var ORDER_KEYS = ['A', 'B', 'C', 'CS', 'D', 'E', 'F', 'Fanblock', 'VIP'];
+      function rank(it) {
+        var k = it.order === 'Fanblock' || it.order === 'VIP' ? it.order : (it.order === 'C unten' ? 'CS' : it.key);
+        var i = ORDER_KEYS.indexOf(k);
+        return i === -1 ? 99 : i;
+      }
+      items.sort(function (x, y) { return rank(x) - rank(y); });
+      if (self.standing && self.standingPrice && self.standingBookable) {
+        var sa = self._availabilityHint('STEHPLATZ', 'Stehplatz');
+        if (sa) items.push({ label: 'Stehplatz', a: sa });
+      }
+      if (!items.length) return '';
+      return '<ul class="seatplan-avail" aria-label="Verfügbarkeit">' + items.map(function (it) {
+        return '<li class="seatplan-avail-row seatplan-avail-row--' + it.a.level + '">' +
+          '<span class="seatplan-avail-dot" aria-hidden="true"></span>' +
+          '<span class="seatplan-avail-name">' + escapeHtml(it.label) + '</span>' +
+          '<span class="seatplan-avail-text">' + escapeHtml(it.a.text) + '</span>' +
+        '</li>';
+      }).join('') + '</ul>';
+    }
 
     function blockTile(id, isNorth) {
       var zone = self._zoneById(id);
@@ -657,7 +718,11 @@
       var tiles = purchasable.map(function (p) {
         var key = multi ? id + '::' + p.category : id;
         var isPending = self.mode === 'blocks' && self.pendingBlockId === key;
-        var tileClass = 'seatplan-mobile-tile' + (isNorth ? '' : ' seatplan-mobile-tile-south') + (isPending ? ' selected' : '');
+        // Ausverkauft (Einzelticket): Kachel grau und nicht antippbar — der Nutzer soll
+        // gar nicht erst in einen Bereich ohne Plätze klicken (Marko, 10.10.2026).
+        var av = (self.mode === 'blocks' && !self.readonly) ? self._availabilityHint(id, p.category) : null;
+        var soldOut = !!(av && av.soldOut);
+        var tileClass = 'seatplan-mobile-tile' + (isNorth ? '' : ' seatplan-mobile-tile-south') + (isPending ? ' selected' : '') + (soldOut ? ' seatplan-mobile-tile--soldout' : '');
         // flex-grow proportional zur Reihenzahl: Fanblock/VIP/Courtside haben immer nur
         // 5 Reihen, ihr Gegenstück (Kat. I/II/III) mehr — die Kachel-Höhe soll das
         // abbilden statt beide Hälften eines Blocks gleich hoch zu zeigen.
@@ -673,6 +738,10 @@
         }
         if (self.readonly) {
           return '<div class="' + tileClass + '" style="' + tileStyle + '">' + inner + '</div>';
+        }
+        if (soldOut) {
+          return '<button type="button" class="' + tileClass + '" style="' + tileStyle + '" disabled aria-label="' +
+            escapeHtml(availabilityLabel(id, p)) + ': keine Plätze mehr verfügbar">' + inner + '</button>';
         }
         return '<button type="button" class="' + tileClass + '" style="' + tileStyle + '" data-zone="' + key + '">' + inner + '</button>';
       }).join('');
@@ -718,7 +787,11 @@
           confirmSuffix = (pendingZone ? pendingZone.name : pendingZoneId) + ' (' + catShortLabel(pendingMatch.category) + ')';
         }
       }
-      courtConfirm = '<button type="button" class="btn btn-primary btn-sm seatplan-mobile-court-confirm" id="seatplan-mobile-add-btn">Übernehmen' +
+      var availHint = pendingZoneId === 'STEHPLATZ'
+        ? this._availabilityHint('STEHPLATZ', 'Stehplatz')
+        : (pendingMatch ? this._availabilityHint(pendingZoneId, pendingMatch.category) : null);
+      courtConfirm = '<button type="button" class="btn btn-primary btn-sm seatplan-mobile-court-confirm" id="seatplan-mobile-add-btn"' +
+        (availHint && availHint.soldOut ? ' disabled' : '') + '>Übernehmen' +
         (confirmSuffix ? ': ' + escapeHtml(confirmSuffix) : '') + '</button>';
     }
 
@@ -763,7 +836,7 @@
         '</div>' +
         '<div class="seatplan-mobile-tiles" style="grid-column:2;grid-row:4">' + southTiles + '</div>' +
         '<div class="seatplan-mobile-entrance vip" style="grid-column:3;grid-row:4"><i>VIP-Eingang</i></div>' +
-      '</div>';
+      '</div>' + availabilityList();
 
     // Stehplatz-Box teilt sich die Selektion mit den Zonen-Kacheln (data-zone="STEHPLATZ",
     // nur vorhanden wenn buchbar) — tippen/bestätigen läuft dadurch exakt wie bei einem

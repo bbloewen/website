@@ -332,6 +332,20 @@
 .seatplan-readonly .seatplan-mobile-standing { cursor: default; }
 .seatplan-readonly .seatplan-mobile-tile:active { transform: none; }
 .seatplan-mobile-tile:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 2px; }
+.seatplan-avail { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 4px 16px; grid-template-columns: 1fr; font-size: 13px; }
+.seatplan-avail-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 8px; }
+.seatplan-avail-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: #2e7d32; transform: translateY(-1px); }
+.seatplan-avail-name { font-weight: 600; white-space: nowrap; }
+.seatplan-avail-text { flex: 1 1 auto; }
+.seatplan-avail-text { color: var(--text-muted); }
+.seatplan-avail-row--mid .seatplan-avail-dot { background: #b7791f; }
+.seatplan-avail-row--low .seatplan-avail-dot { background: #d9640a; }
+.seatplan-avail-row--low .seatplan-avail-text { color: #b45309; font-weight: 600; }
+.seatplan-avail-row--out .seatplan-avail-dot { background: #b3392c; }
+.seatplan-avail-row--out .seatplan-avail-text { color: #b3392c; font-weight: 600; }
+.seatplan-mobile-tile--soldout,
+.seatplan-mobile-tile--soldout:active { opacity: .35; filter: grayscale(1); cursor: not-allowed; transform: none; }
+.seatplan-mobile-court-confirm[disabled] { opacity: .45; cursor: not-allowed; }
 .seatplan-mobile-tile-letter { font-size: 15px; font-weight: 700; }
 .seatplan-mobile-tile-cat { font-size: 8px; font-weight: 600; letter-spacing: .02em; opacity: .8; text-align: center; padding: 0 4px; }
 /* "Courtside" (C unten): nur das führende C fett, als Ersatz für den sonst separaten
