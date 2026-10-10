@@ -385,6 +385,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   <section id="p-unternehmen" role="tabpanel" aria-labelledby="tab-unternehmen" hidden></section>
 
   <section id="p-versand" role="tabpanel" aria-labelledby="tab-versand" hidden></section>
+  <section id="p-belege" role="tabpanel" aria-labelledby="tab-belege" hidden></section>
 
 </main>
 </div>
@@ -474,6 +475,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       if (r.ok && d.ok) {
         nutzer = d; box.hidden = true; document.body.classList.remove('gesperrt');
         zeigeNutzer();
+        window.LOEWEN_NUTZER = nutzer; document.dispatchEvent(new CustomEvent('loewen-nutzer'));
         var w = wartende; wartende = []; w.forEach(function (f) { f(); });
         return;
       }
@@ -526,7 +528,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   // Alle bisherigen Aufrufe der Daten-Webhooks laufen unverändert im Seitencode und werden hier umgeleitet.
   window.fetch = function (url, opts) {
     var u = typeof url === 'string' ? url : ((url && url.url) || '');
-    var m = /^\/webhook\/((?:ticketing|crm)\/[a-z0-9-]+)(?:\?(.*))?$/.exec(u);
+    var m = /^\/webhook\/((?:ticketing|crm|accounting)\/[a-z0-9-]+)(?:\?(.*))?$/.exec(u);
     if (!m || m[1] === 'ticketing/gutschein-karte' || m[1] === 'ticketing/board') return origFetch(url, opts);
     return ueberGateway(m[1], m[2] || '', opts);
   };
@@ -644,7 +646,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     { id: 'ticketing', name: 'Ticketing', tabs: [{ id: 'dauerkarten', name: 'Tickets' }, { id: 'auslastung', name: 'Auslastung' }] },
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
-    { id: 'segmentierung', name: 'Segmentierung', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] }
+    { id: 'segmentierung', name: 'Segmentierung', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
+    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege', name: 'Belege' }] }
   ];
   var TABS = [];
   BEREICHE.forEach(function (b) { b.tabs.forEach(function (t) { TABS.push(t.id); }); });
@@ -653,10 +656,20 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     return BEREICHE.find(function (b) { return b.tabs.some(function (x) { return x.id === t; }); });
   }
 
+  // Welche Bereiche eine Person sieht, kommt aus der Rechte-Tabelle (crm-db). Hier wird nur ausgeblendet,
+  // entschieden wird im Gateway.
+  var RECHT_ID = { ticketing: 'ticketing', gutscheine: 'gutscheine', website: 'website', segmentierung: 'crm', accounting: 'accounting' };
+  function darfBereich(b) {
+    var n = window.LOEWEN_NUTZER;
+    if (!n) return true;
+    var r = n.bereiche || [];
+    return r.indexOf('alles') >= 0 || r.indexOf(RECHT_ID[b.id]) >= 0;
+  }
+
   function renderNavigation() {
     var b = bereichVon(S.tab);
     var h = '';
-    BEREICHE.forEach(function (x) {
+    BEREICHE.filter(darfBereich).forEach(function (x) {
       h += '<li><button type="button" class="bereich" data-bereich="' + x.id + '"' + (x === b ? ' aria-current="page"' : '') + '>' + esc(x.name) + '</button></li>';
     });
     $('bereiche').innerHTML = h;
@@ -675,6 +688,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   function teileHash(h) { var i = h.indexOf('/'); return i === -1 ? { tab: h, arg: '' } : { tab: h.slice(0, i), arg: h.slice(i + 1) }; }
   function setTab(t, fokus, arg) {
     if (TABS.indexOf(t) === -1) t = 'erstellen';
+    if (!darfBereich(bereichVon(t))) { var erlaubt = BEREICHE.filter(darfBereich)[0]; if (erlaubt) t = erlaubt.tabs[0].id; }
     S.tab = t; S.tabArg = arg || '';
     letzterTab[bereichVon(t).id] = t;
     renderNavigation();
@@ -687,6 +701,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (t === 'unternehmen' && !S.unternehmenGeladen) { S.unternehmenGeladen = true; loadUnternehmen(); }
     if (t === 'personen') { zeigePersonen(S.tabArg); window.scrollTo(0, 0); }
     if (t === 'versand') loadVersand();
+    if (t === 'belege') loadBelege();
     // SEO laedt erst, wenn der Tab zum ersten Mal geoeffnet wird: die
     // Sheets-Abfrage dauert laenger als die pretix-Aufrufe und wird beim
     // taeglichen Gutschein-Anlegen gar nicht gebraucht.
@@ -2622,6 +2637,90 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     });
   }
 
+  // ---------- Accounting: Belege (Etappe 1, Beobachtung: es wird nur gelesen und verglichen) ----------
+  var BE = { daten: null, fehler: null, laedt: false, filter: 'alle' };
+  var BE_BUDGET_USD = 60; // gleiche Grenze wie im Workflow "Belegeingang neu"
+  async function loadBelege() {
+    BE.laedt = true; BE.fehler = null; renderBelege();
+    try {
+      var res = await fetch('/webhook/accounting/belege');
+      var d = await res.json();
+      if (!res.ok) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
+      BE.daten = d;
+    } catch (e) { BE.fehler = e.message; }
+    BE.laedt = false; renderBelege();
+  }
+  function usd(n) { return Number(n || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' $'; }
+  function beCent(n) { return (Number(n || 0) * 100).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ct'; }
+  function beUrteil(b) {
+    if (b.status === 'fehler') return '<span class="hinweis-warn">Fehler</span>';
+    if (b.status === 'uebersprungen') return '<span class="gedaempft">übersprungen</span>';
+    if (b.urteil === 'muell') return '<span class="gedaempft">kein Beleg</span>';
+    if (b.urteil === 'sicher') return '<span class="gut">sicher' + (b.stufe === 2 ? ' (Zweitlauf)' : '') + '</span>';
+    return '<span class="hinweis-warn">prüfen</span>';
+  }
+  function beFilter(b) {
+    var f = BE.filter;
+    if (f === 'alle') return b.status !== 'uebersprungen';
+    if (f === 'pruefen') return b.status === 'erkannt' && b.urteil === 'pruefen';
+    if (f === 'sicher') return b.urteil === 'sicher';
+    if (f === 'muell') return b.status === 'muell';
+    if (f === 'fehler') return b.status === 'fehler';
+    if (f === 'uebersprungen') return b.status === 'uebersprungen';
+    return true;
+  }
+  function renderBelege() {
+    var el = $('p-belege');
+    if (BE.laedt && !BE.daten) { el.innerHTML = '<div class="laedt">Lade Belege …</div>'; return; }
+    if (BE.fehler && !BE.daten) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(BE.fehler) + '</div>'; return; }
+    if (!BE.daten) { el.innerHTML = ''; return; }
+    var d = BE.daten, u = d.urteile || {}, m = d.monat || {};
+    var gelesen = Number(d.gelesen || 0), zweit = Number(d.zweitlauf || 0);
+    var anteil = Math.min(100, Math.round(Number(m.kosten_usd || 0) / BE_BUDGET_USD * 100));
+    var h = '<div class="stapel"><div class="grid sm-4">' +
+      '<div class="card pad"><div class="kpi-label">Gelesen</div><div class="kpi">' + esc(zahl(gelesen)) + '</div><div class="notiz">sicher ' + esc(zahl(u.sicher || 0)) + ' · kein Beleg ' + esc(zahl(u.muell || 0)) + ' · Fehler ' + esc(zahl(u.fehler || 0)) + '</div></div>' +
+      '<div class="card pad"><div class="kpi-label">Zur Prüfung</div><div class="kpi' + (u.pruefen ? ' kpi-orange' : '') + '">' + esc(zahl(u.pruefen || 0)) + '</div><div class="notiz">Prüfschranke nicht durchgegangen</div></div>' +
+      '<div class="card pad"><div class="kpi-label">Zweitlauf mit Sonnet</div><div class="kpi">' + esc(gelesen ? Math.round(zweit / gelesen * 100) : 0) + ' %</div><div class="notiz">' + esc(zahl(zweit)) + ' von ' + esc(zahl(gelesen)) + ' gelesenen</div></div>' +
+      '<div class="card pad"><div class="kpi-label">Kosten diesen Monat</div><div class="kpi">' + esc(usd(m.kosten_usd)) + '</div>' +
+      '<div class="balken" role="progressbar" aria-valuemin="0" aria-valuemax="' + BE_BUDGET_USD + '" aria-valuenow="' + Math.round(Number(m.kosten_usd || 0)) + '"><div class="b-gruen" style="height:100%;width:' + anteil + '%"></div></div>' +
+      '<div class="notiz">von ' + esc(usd(BE_BUDGET_USD)) + ' Sperre · ' + esc(zahl(m.belege || 0)) + ' Anhänge · gesamt ' + esc(usd((d.gesamt || {}).kosten_usd)) + '</div></div>' +
+      '</div>';
+    var opt = function (w, t) { return '<option value="' + w + '"' + (BE.filter === w ? ' selected' : '') + '>' + t + '</option>'; };
+    var zeilen = (d.belege || []).filter(beFilter);
+    h += '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Erkannte Belege</span><span>' +
+      '<select class="auswahl" data-be="filter" aria-label="Filter">' + opt('alle', 'Alle Belege') + opt('pruefen', 'Zur Prüfung') + opt('sicher', 'Sicher') + opt('muell', 'Kein Beleg') + opt('fehler', 'Fehler') + opt('uebersprungen', 'Übersprungen (Vorfilter)') + '</select> ' +
+      '<button type="button" class="link-btn" data-be="neu">Aktualisieren</button></span></div>' +
+      '<div class="scroll-x"><table class="tbl kompakt"><thead><tr><th>Eingang</th><th>Beleg</th><th>Mandant</th><th>Brutto</th><th>Urteil</th><th>Kosten</th><th></th></tr></thead><tbody>';
+    zeilen.forEach(function (b) {
+      var gruende = Array.isArray(b.gruende) ? b.gruende : [];
+      var titel = b.aussteller || b.anhang_name;
+      var kopf = '<div class="fett">' + esc(titel) + '</div><div class="notiz" style="margin:0">' + esc([b.typ, b.nummer ? 'Nr. ' + b.nummer : '', b.datum ? formatDate(b.datum) : ''].filter(Boolean).join(' · ') || b.anhang_name) + '</div>';
+      var warum = gruende.length ? '<div class="notiz" style="margin:4px 0 0">' + gruende.map(esc).join('<br>') + '</div>' : '';
+      var fehl = b.fehler ? '<div class="notiz" style="margin:4px 0 0">' + esc(b.fehler) + '</div>' : '';
+      var hinweis = b.hinweis && b.urteil !== 'muell' ? '<details style="margin-top:4px"><summary class="text-klein">Hinweis des Modells</summary><div class="notiz" style="margin:4px 0 0">' + esc(b.hinweis) + '</div></details>' : '';
+      h += '<tr><td class="nowrap">' + esc(formatDateTime(b.eingang_am || b.angelegt)) + '</td>' +
+        '<td>' + kopf + '<div class="notiz" style="margin:0">' + esc(b.absender || '') + '</div>' + hinweis + '</td>' +
+        '<td>' + esc(b.mandant || '') + '</td>' +
+        '<td class="nowrap">' + (b.brutto !== null && b.brutto !== undefined ? esc(formatEuro(Number(b.brutto))) : '') + '</td>' +
+        '<td>' + beUrteil(b) + warum + fehl + '</td>' +
+        '<td class="nowrap">' + esc(beCent(b.kosten_usd)) + '<div class="notiz" style="margin:0">' + esc(b.modell ? b.modell.replace('claude-', '') : '') + '</div></td>' +
+        '<td>' + (b.gmail_id ? '<a href="https://mail.google.com/mail/u/rechnung@basketball-loewen.com/#all/' + esc(b.gmail_id) + '" target="_blank" rel="noopener">Mail</a>' : '') + '</td></tr>';
+    });
+    if (!zeilen.length) h += '<tr><td colspan="7" class="leer">Keine Belege in dieser Ansicht.</td></tr>';
+    h += '</tbody></table></div><div class="card-fuss">Beobachtungsbetrieb: Der Agent liest nur mit und bucht nichts. Haiku 5.5 liest zuerst, Sonnet 5.5 nur bei Zweifel. Lohnabrechnungen, Terminalbelege und Logos gehen nie an die API. Zuletzt ' + esc(String((d.belege || []).length)) + ' Anhänge.</div></div></div>';
+    el.innerHTML = h;
+  }
+  function bindBelege() {
+    var p = $('p-belege');
+    p.addEventListener('change', function (e) {
+      var s = e.target.closest('[data-be="filter"]'); if (!s) return;
+      BE.filter = s.value; renderBelege();
+    });
+    p.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-be="neu"]'); if (b) loadBelege();
+    });
+  }
+
   // ---------- Ereignisse ----------
   function bind() {
     $('bereiche').addEventListener('click', function (e) {
@@ -2737,6 +2836,10 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   bindUnternehmen();
   bindPersonen();
   bindVersand();
+  bindBelege();
+  document.addEventListener('loewen-nutzer', function () {
+    if (!darfBereich(bereichVon(S.tab))) setTab(S.tab, false, S.tabArg); else renderNavigation();
+  });
   formInFelder();
   var start = teileHash(location.hash.slice(1));
   setTab(start.tab || S.tab, false, start.arg);
