@@ -2819,7 +2819,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var z = BL[k], d = z.daten, kp = d.kpi || {};
     var anteil = Math.min(100, Math.round(Number(kp.kosten_monat || 0) / BE_BUDGET_USD * 100));
     var bhGes = Number(kp.bhb_stimmt || 0) + Number(kp.bhb_abweichung || 0) + Number(kp.bhb_fehlt || 0);
-    var h = '<div class="grid sm-3">' +
+    var kpis = '<div class="grid sm-3">' +
       '<div class="card pad"><div class="kpi-label">Vom Agenten gelesen</div><div class="kpi">' + esc(zahl(kp.gelesen || 0)) + '</div><div class="notiz">sicher ' + esc(zahl(kp.sicher || 0)) + ' · Zweitlauf ' + esc(zahl(kp.zweitlauf || 0)) + '</div></div>' +
       '<div class="card pad"><div class="kpi-label">Zur Prüfung</div><div class="kpi' + (kp.pruefen ? ' kpi-orange' : '') + '">' + esc(zahl(kp.pruefen || 0)) + '</div><div class="notiz">Prüfschranke nicht durchgegangen</div></div>' +
       '<div class="card pad"><div class="kpi-label">Abgleich mit BuchhaltungsButler</div><div class="kpi">' + esc(zahl(kp.bhb_stimmt || 0)) + ' von ' + esc(zahl(bhGes)) + '</div><div class="notiz">stimmen überein · Abweichung ' + esc(zahl(kp.bhb_abweichung || 0)) + ' · noch nicht in BHB ' + esc(zahl(kp.bhb_fehlt || 0)) + '</div></div>' +
@@ -2831,8 +2831,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var cnt = { alle: (d.belege || []).length, eingang: 0, ausgang: 0 };
     (d.belege || []).forEach(function (r) { cnt[blRichtung(r)]++; });
     var rk = function (w, t) { return '<button type="button" class="chip' + (z.richtung === w ? ' aktiv' : '') + '" data-be="richtung" data-k="' + k + '" data-w="' + w + '" aria-pressed="' + (z.richtung === w) + '">' + t + ' <span class="notiz" style="display:inline;margin:0">' + esc(zahl(cnt[w])) + '</span></button>'; };
+    var h = renderPager(z, 'data-art="beleg" data-k="' + k + '"');
     h += '<div class="chips" role="group" aria-label="Art der Belege">' + rk('alle', 'Alle Belege') + rk('eingang', 'Eingangsbelege') + rk('ausgang', 'Ausgangsbelege') + '</div>';
-    h += renderPager(z, 'data-art="beleg" data-k="' + k + '"');
+    h += kpis;
     h += '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Belege ' + esc(k) + ' · ' + esc(d.monat ? monatName(d.monat) : '') + ' · ' + esc(zahl(zeilen.length)) + ' von ' + esc(zahl((d.belege || []).length)) + '</span><span>' +
       '<input type="search" class="eingabe-klein" style="width:180px;flex:none" data-be="suche" data-k="' + k + '" placeholder="Suchen …" aria-label="Suchen" value="' + esc(z.suche) + '"> ' +
       '<select class="auswahl" data-be="filter" data-k="' + k + '" aria-label="Filter">' + opt('alle', 'Alle Belege') + opt('bezahlt', 'Gebucht und bezahlt') + opt('offen', 'Gebucht, Zahlung offen') + opt('ungebucht', 'Noch nicht gebucht') + opt('eingang', 'Nur im Eingang, nicht in BHB') + opt('pruefen', 'Agent: zur Prüfung') + '</select> ' +
@@ -2905,12 +2906,12 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var z = ZA[k], d = z.daten, kp = d.kpi || {};
     var name = { XXL: 'XXL', LEV: 'LEV', LEVLP: 'LEV Löwenpark' }[k];
     var offen = Number(kp.gesamt || 0) - Number(kp.gebucht || 0);
-    var h = '<div class="grid sm-3">' +
+    var kpis = '<div class="grid sm-3">' +
       '<div class="card pad"><div class="kpi-label">Umsätze seit 01.07.2026</div><div class="kpi">' + esc(zahl(kp.gesamt || 0)) + '</div><div class="notiz">Konto ' + esc(name) + '</div></div>' +
       '<div class="card pad"><div class="kpi-label">Gebucht</div><div class="kpi gut">' + esc(zahl(kp.gebucht || 0)) + '</div><div class="notiz">mit Beleg oder beleglos</div></div>' +
       '<div class="card pad"><div class="kpi-label">Noch offen</div><div class="kpi' + (offen ? ' kpi-orange' : '') + '">' + esc(zahl(offen)) + '</div><div class="notiz">ohne bestätigte Buchung</div></div></div>';
     var opt = function (w, t) { return '<option value="' + w + '"' + (z.filter === w ? ' selected' : '') + '>' + t + '</option>'; };
-    h += renderPager(z, 'data-art="zahlung" data-k="' + k + '"');
+    var h = renderPager(z, 'data-art="zahlung" data-k="' + k + '"') + kpis;
     var zeilen = (d.zahlungen || []).filter(function (p) {
       var gebucht = (p.buchungen || []).length > 0;
       if (z.filter === 'gebucht' && !gebucht) return false;
