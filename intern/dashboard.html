@@ -3087,10 +3087,13 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     (v.hinweise || []).filter(function (x) { return !(r.auslage || r.auslage_von) || !/^Auslage/.test(x); }).forEach(function (x) { h += '<div class="hinweis-warn" style="margin-top:6px">' + esc(x) + '</div>'; });
     if (r.hinweis) h += '<details style="margin-top:6px"><summary class="text-klein">Hinweis des Lesers</summary><div class="notiz" style="margin:4px 0 0">' + esc(r.hinweis) + '</div></details>';
     if (ed && ed.modus === 'anders') {
-      h += '<div class="rf-box" style="margin-top:8px"><label class="text-klein" for="rf-text-' + r.id + '">Was soll anders sein? Einfach sagen oder schreiben, z. B. anderer Kreditor, anderes Konto, andere Kostenstelle oder Umsatzsteuer</label>' +
-        '<textarea id="rf-text-' + r.id + '" class="eingabe" rows="3" style="width:100%;margin-top:4px" maxlength="2000" data-rf="text" placeholder="z. B. Das ist eine Auslage von André, Konto Fahrtkosten, 7 % Umsatzsteuer"' + (ed.laeuft ? ' disabled' : '') + '>' + esc(ed.text || '') + '</textarea>' +
-        (function () { var n = rfAehnliche(r).length; return n ? '<label class="text-klein" style="display:block;margin-top:8px"><input type="checkbox" data-rf="weitere"' + (ed.weitere ? ' checked' : '') + (ed.laeuft ? ' disabled' : '') + '> Auch bei den ' + n + ' anderen offenen ' + (r.auslage_von ? 'Auslagen von ' + esc(r.auslage_von) : 'Belegen von ' + esc(r.aussteller)) + ' anwenden (die KI prüft jeden Beleg einzeln und lässt aus, was nicht passt)</label>' : ''; })() + '<div style="display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap"><button type="button" class="btn btn-primary" data-rf="anders-ki" data-id="' + r.id + '"' + (ed.laeuft ? ' disabled' : '') + '>' + (ed.laeuft ? 'Die KI arbeitet …' + (ed.fortschritt ? ' (' + ed.fortschritt + ')' : '') : 'Neuen Vorschlag erstellen') + '</button><button type="button" class="link-btn" data-rf="abbruch">Abbrechen</button><button type="button" class="link-btn" data-rf="anders-liste" data-id="' + r.id + '" data-m="' + esc(r.mandant) + '">Lieber aus der Liste wählen</button></div>' +
-        (ed.rueckfrage ? '<div class="hinweis-warn" role="status" style="margin-top:6px">Rückfrage der KI: ' + esc(ed.rueckfrage) + '</div>' : '') +
+      var dlg = (v.dialog || []).slice(-6);
+      h += '<div class="rf-box" style="margin-top:8px"><div class="text-klein"><b>Mit der KI besprechen</b>: Stell eine Frage oder sag, was geändert werden soll (Kreditor, Konto, Kostenstelle, Umsatzsteuer). Die KI kennt den Beleg und antwortet hier.</div>' +
+        (dlg.length ? '<div role="log" aria-label="Gespräch mit der KI" style="margin-top:8px;display:flex;flex-direction:column;gap:6px">' + dlg.map(function (m) { return '<div style="' + (m.von === 'marko' ? 'align-self:flex-end;background:var(--bg-subtle)' : 'align-self:flex-start;border:1px solid var(--border-strong)') + ';border-radius:10px;padding:6px 10px;max-width:92%;white-space:pre-wrap"><span class="notiz" style="display:block;margin:0">' + (m.von === 'marko' ? 'Du' : 'KI' + (m.aenderung ? ' · hat den Vorschlag geändert' : '')) + '</span>' + esc(m.text) + '</div>'; }).join('') + '</div>' : '') +
+        '<label class="text-klein" for="rf-text-' + r.id + '" style="display:block;margin-top:8px">Deine Nachricht</label>' +
+        '<textarea id="rf-text-' + r.id + '" class="eingabe" rows="3" style="width:100%;margin-top:4px" maxlength="2000" data-rf="text" placeholder="z. B. Welches Konto ist 49450? oder Das ist eine Auslage von André, Konto Fahrtkosten, 7 % Umsatzsteuer"' + (ed.laeuft ? ' disabled' : '') + '>' + esc(ed.text || '') + '</textarea>' +
+        (function () { var n = rfAehnliche(r).length; return n ? '<label class="text-klein" style="display:block;margin-top:8px"><input type="checkbox" data-rf="weitere"' + (ed.weitere ? ' checked' : '') + (ed.laeuft ? ' disabled' : '') + '> Änderungen auch bei den ' + n + ' anderen offenen ' + (r.auslage_von ? 'Auslagen von ' + esc(r.auslage_von) : 'Belegen von ' + esc(r.aussteller)) + ' anwenden (die KI prüft jeden Beleg einzeln und lässt aus, was nicht passt)</label>' : ''; })() +
+        '<div style="display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap"><button type="button" class="btn btn-primary" data-rf="anders-ki" data-id="' + r.id + '"' + (ed.laeuft ? ' disabled' : '') + '>' + (ed.laeuft ? 'Die KI arbeitet …' + (ed.fortschritt ? ' (' + ed.fortschritt + ')' : '') : 'Senden') + '</button><button type="button" class="link-btn" data-rf="abbruch">Schließen</button><button type="button" class="link-btn" data-rf="anders-liste" data-id="' + r.id + '" data-m="' + esc(r.mandant) + '">Lieber aus der Liste wählen</button></div>' +
         (ed.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:6px">' + esc(ed.fehler) + '</div>' : '') + '</div>';
     } else if (ed && ed.modus === 'liste') {
       var plan = RF.plan[r.mandant];
@@ -3110,7 +3113,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     } else {
       h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center">' +
         (v.sachkonto ? '<button type="button" class="btn btn-primary" data-rf="ok" data-id="' + r.id + '">Passt</button>' : '') +
-        '<button type="button" class="btn btn-secondary" data-rf="anders" data-id="' + r.id + '" data-m="' + esc(r.mandant) + '">' + (v.sachkonto ? 'Anders …' : 'Konto wählen …') + '</button>' +
+        '<button type="button" class="btn btn-secondary" data-rf="anders" data-id="' + r.id + '" data-m="' + esc(r.mandant) + '">' + 'Mit KI besprechen …' + '</button>' +
         '<button type="button" class="btn btn-secondary" data-rf="sb" data-id="' + r.id + '">Weiß ich nicht, Steuerberater fragen</button>' +
         (r.bhb_id ? '<button type="button" class="btn-loeschen" data-rf="dup" data-id="' + r.id + '" title="Erledigt diese Rückfrage als Doppelung und merkt den Beleg zum Löschen in BuchhaltungsButler vor">Doppelt: in BHB löschen</button>' : '') + (r.bhb_id ? '<button type="button" class="btn-loeschen" data-rf="dup-bhb" data-id="' + r.id + '" title="Löscht den Beleg sofort in BuchhaltungsButler (als gelöscht markiert, wiederherstellbar) und erledigt diese Rückfrage als Doppelung. Geht nicht, wenn der Beleg schon gebucht ist.">Doppelt: jetzt in BHB löschen</button>' : '') +
         '<button type="button" class="btn btn-secondary" data-rf="zurueck" data-id="' + r.id + '" title="Legt einen Mailentwurf an Kim und Nick an: Die Rechnung soll beim Kreditor neu ausgestellt werden. Danach wird der Beleg gelöscht.">Zurückweisen …</button>' + '<button type="button" class="link-btn" data-rf="verwerfen" data-id="' + r.id + '" title="Erledigt die Rückfrage ohne Buchung und ohne etwas zu lernen. Der Beleg bleibt unverändert in BuchhaltungsButler bzw. im Postfach.">Kein Beleg, ignorieren</button></div>';
@@ -3418,14 +3421,14 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       else if (w === 'anders-ki') {
         var ed3 = RF.edit; if (!ed3) return;
         var ta = document.getElementById('rf-text-' + id); ed3.text = ta ? ta.value.trim() : (ed3.text || '');
-        if (!ed3.text) { ed3.fehler = 'Bitte sagen oder schreiben, was anders sein soll.'; renderRF(); return; }
+        if (!ed3.text) { ed3.fehler = 'Bitte schreibe eine Nachricht an die KI.'; renderRF(); return; }
         ed3.laeuft = true; ed3.fehler = ''; ed3.rueckfrage = ''; renderRF();
         try {
           var res3 = await fetch('/webhook/accounting/rueckfrage-korrektur', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, text: ed3.text }) });
           var d3 = await res3.json();
           if (!res3.ok) throw new Error(d3.message || d3.fehler || 'Anfrage fehlgeschlagen');
-          if (!d3.ok) { ed3.laeuft = false; ed3.rueckfrage = d3.rueckfrage || ''; ed3.fehler = d3.rueckfrage ? '' : (d3.meldung || 'Die KI konnte daraus keinen Vorschlag machen.'); renderRF(); return; }
-          var kand = ed3.weitere ? rfAehnliche(RF.daten.rueckfragen.filter(function (x) { return x.id === id; })[0]) : [], ok3 = 0, aus3 = [], fehl3 = 0;
+          if (!d3.ok) { ed3.laeuft = false; ed3.fehler = d3.meldung || 'Die KI hat gerade nicht geantwortet.'; renderRF(); return; }
+          var geaendert = d3.aenderung !== false; var kand = ed3.weitere && geaendert ? rfAehnliche(RF.daten.rueckfragen.filter(function (x) { return x.id === id; })[0]) : [], ok3 = 0, aus3 = [], fehl3 = 0;
           for (var k3 = 0; k3 < kand.length; k3++) {
             ed3.fortschritt = (k3 + 1) + ' von ' + kand.length; renderRF();
             try {
@@ -3434,7 +3437,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
               if (rr.ok && dd.ok) ok3++; else if (dd.uebersprungen) aus3.push(kand[k3]); else fehl3++;
             } catch (e3) { fehl3++; }
           }
-          RF.edit = null; RF.meldung = 'Neuer Vorschlag erstellt. Prüfe ihn und drücke Passt, oder ändere ihn noch einmal.' + (kand.length ? ' Bei den ähnlichen Fällen angewendet: ' + ok3 + ' von ' + kand.length + (aus3.length ? ', ausgelassen weil es nicht passt: ' + aus3.length : '') + (fehl3 ? ', nicht möglich: ' + fehl3 : '') + '.' : '');
+          ed3.laeuft = false; ed3.text = ''; ed3.fortschritt = '';
+          RF.meldung = geaendert ? 'Vorschlag geändert. Prüfe ihn und drücke Passt, oder besprich ihn weiter mit der KI.' + (kand.length ? ' Bei den ähnlichen Fällen angewendet: ' + ok3 + ' von ' + kand.length + (aus3.length ? ', ausgelassen weil es nicht passt: ' + aus3.length : '') + (fehl3 ? ', nicht möglich: ' + fehl3 : '') + '.' : '') : '';
           await ladeRF();
         } catch (err3) { ed3.laeuft = false; ed3.fehler = err3.message; renderRF(); }
       }
