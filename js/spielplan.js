@@ -13,10 +13,10 @@
     nbbl: { label: 'NBBL', badgeClass: 'team-badge-nbbl', url: '/saison/nbbl.html', tableUrl: '/saison/tabelle.html#tabelle-nbbl' }
   };
   var RIETHSPORTHALLE_MAPS_URL = 'https://www.google.com/maps/search/?api=1&query=Essener+Stra%C3%9Fe+20%2C+99089+Erfurt';
-  // Südparkhalle (Sporthalle am Südpark): Heimspielstätte der NBBL, wenn am selben Tag
+  // Sporthalle am Südpark: Heimspielstätte der NBBL, wenn am selben Tag
   // kein Pro-B-Heimspiel in der Riethsporthalle ist (Marko, 10.10.2026) — gleiche
   // Suchanfrage wie bei den Feriencamps (trainieren/feriencamps.html).
-  var SUEDPARKHALLE_MAPS_URL = 'https://www.google.com/maps/search/?api=1&query=Sporthalle+am+Suedpark%2C+Erfurt';
+  var SUEDPARK_MAPS_URL = 'https://www.google.com/maps/search/?api=1&query=Sporthalle+am+Suedpark%2C+Erfurt';
 
   var parseDMY = SiteUtils.parseDMY;
   var pad2 = SiteUtils.pad2;
@@ -36,7 +36,7 @@
       // Default-Heimspielstätte für alle Teams (Profis, Damen, NBBL) ist die
       // Riethsporthalle, solange für ein konkretes Spiel nichts anderes bekannt ist
       // (Marko, 10.08.2026 — Damen spielen ebenfalls dort).
-      details: g.heim ? 'Heimspiel der Basketball Löwen Erfurt in der ' + (g.suedpark ? 'Südparkhalle.' : 'Riethsporthalle.') : 'Auswärtsspiel der Basketball Löwen Erfurt.',
+      details: g.heim ? 'Heimspiel der Basketball Löwen Erfurt in der ' + (g.suedpark ? 'Sporthalle am Südpark.' : 'Riethsporthalle.') : 'Auswärtsspiel der Basketball Löwen Erfurt.',
       ctz: 'Europe/Berlin'
     };
     if (g.heim) params.location = g.suedpark ? 'Sporthalle am Südpark, Erfurt' : 'Essener Straße 20, 99089 Erfurt';
@@ -80,7 +80,7 @@
       // ein konkretes Spiel nichts anderes bekannt ist (Marko, 10.08.2026 — Damen
       // spielen ebenfalls dort).
       venueHTML = g.suedpark
-        ? '<div class="fixture-venue-line"><a href="' + SUEDPARKHALLE_MAPS_URL + '" target="_blank" rel="noopener"><i data-lucide="map-pin" style="width:14px;height:14px"></i> Südparkhalle</a></div>'
+        ? '<div class="fixture-venue-line"><a href="' + SUEDPARK_MAPS_URL + '" target="_blank" rel="noopener"><i data-lucide="map-pin" style="width:14px;height:14px"></i> Sporthalle am Südpark</a></div>'
         : '<div class="fixture-venue-line"><a href="' + RIETHSPORTHALLE_MAPS_URL + '" target="_blank" rel="noopener"><i data-lucide="map-pin" style="width:14px;height:14px"></i> Riethsporthalle</a></div>';
       statusHTML = '<span class="venue-heim">Heimspiel</span>';
     } else if (g.halle && g.adresse) {
@@ -266,7 +266,7 @@
       .sort(function (a, b) { return a.date - b.date; });
 
     var damenGames = (saison.damen.spiele || []).map(function (s) { return toGame(s, s.heim, 'CATL Basketball Löwinnen', 'damen'); });
-    // NBBL-Heimspiele: Riethsporthalle nur am Tag eines Pro-B-Heimspiels (davor), sonst Südparkhalle.
+    // NBBL-Heimspiele: Riethsporthalle nur am Tag eines Pro-B-Heimspiels (davor), sonst Sporthalle am Südpark.
     var proBHeimTage = {};
     heim.spiele.forEach(function (s) { proBHeimTage[dateKey(parseDMY(s.datum))] = true; });
     var nbblGames = (saison.nbbl.spiele || []).map(function (s) {
