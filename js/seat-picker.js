@@ -633,21 +633,19 @@
   };
 
   /* Verfügbarkeits-Hinweis (Modus "blocks"), Stufen nach Marko 10.10.2026:
-     ab 50 frei "ausreichend verfügbar", 20-49 "weniger als 50 Plätze", 11-19
-     "weniger als 20 Plätze", 1-10 die konkrete Anzahl, 0 "keine Plätze mehr verfügbar"
-     ("weniger als" nur dort, wo es wörtlich stimmt: genau 20 gehört zu "weniger als 50"). Erst zeigen, wenn der Sitzstatus
+     ab 50 frei "entspannt", 20-49 "es wird eng", 1-19 die konkrete Anzahl
+     ("nur noch 7"), 0 "keine Plätze mehr" (Marko, 10.10.2026, zweite Fassung). Erst zeigen, wenn der Sitzstatus
      da ist — vorher stünde dort "alles frei", was falscher wäre als kein Hinweis.
      Grundlage ist dieselbe Zählung wie für die Mengen-Stepper (_blockFreeCount). */
   SeatPicker.prototype._availabilityHint = function (zoneId, category) {
     if (!this.seatStatusLoaded) return null;
     var free = this._blockFreeCount(zoneId, category);
     var text, level;
-    level = free <= 0 ? 'out' : free <= 10 ? 'low' : free < 50 ? 'mid' : 'ok';
-    if (free <= 0) text = 'keine Plätze mehr verfügbar';
-    else if (free <= 10) text = free === 1 ? 'nur noch 1 Platz' : 'nur noch ' + free + ' Plätze';
-    else if (free < 20) text = 'weniger als 20 Plätze';
-    else if (free < 50) text = 'weniger als 50 Plätze';
-    else text = 'ausreichend verfügbar';
+    level = free <= 0 ? 'out' : free < 20 ? 'low' : free < 50 ? 'mid' : 'ok';
+    if (free <= 0) text = 'keine Plätze mehr';
+    else if (free < 20) text = 'nur noch ' + free;
+    else if (free < 50) text = 'es wird eng';
+    else text = 'entspannt';
     return { free: free, text: text, level: level, soldOut: free <= 0 };
   };
 
@@ -687,7 +685,7 @@
         if (sa) items.push({ label: 'Stehplatz', a: sa });
       }
       if (!items.length) return '';
-      return '<ul class="seatplan-avail" aria-label="Verfügbarkeit">' + items.map(function (it) {
+      return '<p class="seatplan-avail-head">Verfügbarkeit</p><ul class="seatplan-avail" aria-label="Verfügbarkeit">' + items.map(function (it) {
         return '<li class="seatplan-avail-row seatplan-avail-row--' + it.a.level + '">' +
           '<span class="seatplan-avail-dot" aria-hidden="true"></span>' +
           '<span class="seatplan-avail-name">' + escapeHtml(it.label) + '</span>' +

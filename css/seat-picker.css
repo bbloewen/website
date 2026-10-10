@@ -332,12 +332,13 @@
 .seatplan-readonly .seatplan-mobile-standing { cursor: default; }
 .seatplan-readonly .seatplan-mobile-tile:active { transform: none; }
 .seatplan-mobile-tile:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 2px; }
-.seatplan-avail { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 4px 16px; grid-template-columns: 1fr; font-size: 13px; }
-.seatplan-avail-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 8px; }
+.seatplan-avail-head { margin: 14px 0 4px; text-align: right; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); }
+.seatplan-avail { list-style: none; margin: 0; padding: 0; font-size: 13px; }
+.seatplan-avail-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 5px 0; border-top: 1px solid var(--color-border, rgba(0,0,0,.08)); }
+.seatplan-avail-row:first-child { border-top: 0; }
 .seatplan-avail-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: #2e7d32; transform: translateY(-1px); }
-.seatplan-avail-name { font-weight: 600; white-space: nowrap; }
-.seatplan-avail-text { flex: 1 1 auto; }
-.seatplan-avail-text { color: var(--text-muted); }
+.seatplan-avail-name { flex: 1 1 auto; font-weight: 600; }
+.seatplan-avail-text { flex: none; text-align: right; color: var(--text-muted); font-variant-numeric: tabular-nums; }
 .seatplan-avail-row--mid .seatplan-avail-dot { background: #b7791f; }
 .seatplan-avail-row--low .seatplan-avail-dot { background: #d9640a; }
 .seatplan-avail-row--low .seatplan-avail-text { color: #b45309; font-weight: 600; }
