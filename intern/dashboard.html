@@ -2659,6 +2659,15 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (b.urteil === 'sicher') return '<span class="gut">sicher' + (b.stufe === 2 ? ' (Zweitlauf)' : '') + '</span>';
     return '<span class="hinweis-warn">prüfen</span>';
   }
+  function beBhb(b) {
+    var v = b.bhb_vergleich;
+    if (!v || b.status !== 'erkannt' || b.urteil === 'muell') return '';
+    if (v.status === 'uebereinstimmend') return '<div class="gut">BHB stimmt überein</div>';
+    if (v.status === 'ohne_nummer') return '<div class="gedaempft">BHB: ohne Nummer nicht vergleichbar</div>';
+    if (v.status === 'nicht_in_bhb') return '<div class="hinweis-warn">nicht in BHB</div>';
+    var diffs = (v.diffs || []).map(function (d) { return esc(d.feld) + ': Agent ' + esc(d.agent) + ', BHB ' + esc(d.bhb); }).join('<br>');
+    return '<div class="hinweis-warn">' + (v.status === 'mehrdeutig' ? 'BHB mehrdeutig' : 'BHB weicht ab') + '</div>' + (diffs ? '<div class="notiz" style="margin:2px 0 0">' + diffs + '</div>' : '');
+  }
   function beFilter(b) {
     var f = BE.filter;
     if (f === 'alle') return b.status !== 'uebersprungen';
@@ -2666,6 +2675,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (f === 'sicher') return b.urteil === 'sicher';
     if (f === 'muell') return b.status === 'muell';
     if (f === 'fehler') return b.status === 'fehler';
+    if (f === 'bhb') return !!b.bhb_vergleich && ['abweichung', 'nicht_in_bhb', 'mehrdeutig'].indexOf(b.bhb_vergleich.status) >= 0;
     if (f === 'uebersprungen') return b.status === 'uebersprungen';
     return true;
   }
@@ -2677,10 +2687,12 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var d = BE.daten, u = d.urteile || {}, m = d.monat || {};
     var gelesen = Number(d.gelesen || 0), zweit = Number(d.zweitlauf || 0);
     var anteil = Math.min(100, Math.round(Number(m.kosten_usd || 0) / BE_BUDGET_USD * 100));
-    var h = '<div class="stapel"><div class="grid sm-4">' +
+    var bh = d.bhb || {}; var bhGes = (bh.uebereinstimmend || 0) + (bh.abweichung || 0) + (bh.nicht_in_bhb || 0) + (bh.mehrdeutig || 0);
+    var h = '<div class="stapel"><div class="grid sm-3">' +
       '<div class="card pad"><div class="kpi-label">Gelesen</div><div class="kpi">' + esc(zahl(gelesen)) + '</div><div class="notiz">sicher ' + esc(zahl(u.sicher || 0)) + ' · kein Beleg ' + esc(zahl(u.muell || 0)) + ' · Fehler ' + esc(zahl(u.fehler || 0)) + '</div></div>' +
       '<div class="card pad"><div class="kpi-label">Zur Prüfung</div><div class="kpi' + (u.pruefen ? ' kpi-orange' : '') + '">' + esc(zahl(u.pruefen || 0)) + '</div><div class="notiz">Prüfschranke nicht durchgegangen</div></div>' +
       '<div class="card pad"><div class="kpi-label">Zweitlauf mit Sonnet</div><div class="kpi">' + esc(gelesen ? Math.round(zweit / gelesen * 100) : 0) + ' %</div><div class="notiz">' + esc(zahl(zweit)) + ' von ' + esc(zahl(gelesen)) + ' gelesenen</div></div>' +
+      '<div class="card pad"><div class="kpi-label">Abgleich mit BuchhaltungsButler</div><div class="kpi">' + esc(zahl(bh.uebereinstimmend || 0)) + ' von ' + esc(zahl(bhGes)) + '</div><div class="notiz">stimmen überein · Abweichung ' + esc(zahl(bh.abweichung || 0)) + ' · nicht in BHB ' + esc(zahl(bh.nicht_in_bhb || 0)) + '</div></div>' +
       '<div class="card pad"><div class="kpi-label">Kosten diesen Monat</div><div class="kpi">' + esc(usd(m.kosten_usd)) + '</div>' +
       '<div class="balken" role="progressbar" aria-valuemin="0" aria-valuemax="' + BE_BUDGET_USD + '" aria-valuenow="' + Math.round(Number(m.kosten_usd || 0)) + '"><div class="b-gruen" style="height:100%;width:' + anteil + '%"></div></div>' +
       '<div class="notiz">von ' + esc(usd(BE_BUDGET_USD)) + ' Sperre · ' + esc(zahl(m.belege || 0)) + ' Anhänge · gesamt ' + esc(usd((d.gesamt || {}).kosten_usd)) + '</div></div>' +
@@ -2688,7 +2700,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var opt = function (w, t) { return '<option value="' + w + '"' + (BE.filter === w ? ' selected' : '') + '>' + t + '</option>'; };
     var zeilen = (d.belege || []).filter(beFilter);
     h += '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Erkannte Belege</span><span>' +
-      '<select class="auswahl" data-be="filter" aria-label="Filter">' + opt('alle', 'Alle Belege') + opt('pruefen', 'Zur Prüfung') + opt('sicher', 'Sicher') + opt('muell', 'Kein Beleg') + opt('fehler', 'Fehler') + opt('uebersprungen', 'Übersprungen (Vorfilter)') + '</select> ' +
+      '<select class="auswahl" data-be="filter" aria-label="Filter">' + opt('alle', 'Alle Belege') + opt('pruefen', 'Zur Prüfung') + opt('sicher', 'Sicher') + opt('muell', 'Kein Beleg') + opt('bhb', 'BHB weicht ab / fehlt') + opt('fehler', 'Fehler') + opt('uebersprungen', 'Übersprungen (Vorfilter)') + '</select> ' +
       '<button type="button" class="link-btn" data-be="neu">Aktualisieren</button></span></div>' +
       '<div class="scroll-x"><table class="tbl kompakt"><thead><tr><th>Eingang</th><th>Beleg</th><th>Mandant</th><th>Brutto</th><th>Urteil</th><th>Kosten</th><th></th></tr></thead><tbody>';
     zeilen.forEach(function (b) {
@@ -2702,12 +2714,12 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         '<td>' + kopf + '<div class="notiz" style="margin:0">' + esc(b.absender || '') + '</div>' + hinweis + '</td>' +
         '<td>' + esc(b.mandant || '') + '</td>' +
         '<td class="nowrap">' + (b.brutto !== null && b.brutto !== undefined ? esc(formatEuro(Number(b.brutto))) : '') + '</td>' +
-        '<td>' + beUrteil(b) + warum + fehl + '</td>' +
+        '<td>' + beUrteil(b) + warum + fehl + beBhb(b) + '</td>' +
         '<td class="nowrap">' + esc(beCent(b.kosten_usd)) + '<div class="notiz" style="margin:0">' + esc(b.modell ? b.modell.replace('claude-', '') : '') + '</div></td>' +
         '<td>' + (b.gmail_id ? '<a href="https://mail.google.com/mail/u/rechnung@basketball-loewen.com/#all/' + esc(b.gmail_id) + '" target="_blank" rel="noopener">Mail</a>' : '') + '</td></tr>';
     });
     if (!zeilen.length) h += '<tr><td colspan="7" class="leer">Keine Belege in dieser Ansicht.</td></tr>';
-    h += '</tbody></table></div><div class="card-fuss">Beobachtungsbetrieb: Der Agent liest nur mit und bucht nichts. Haiku 5.5 liest zuerst, Sonnet 5.5 nur bei Zweifel. Lohnabrechnungen, Terminalbelege und Logos gehen nie an die API. Zuletzt ' + esc(String((d.belege || []).length)) + ' Anhänge.</div></div></div>';
+    h += '</tbody></table></div><div class="card-fuss">Beobachtungsbetrieb: Der Agent liest nur mit und bucht nichts. Der Abgleich mit BuchhaltungsButler läuft alle 2 Stunden (nur lesend). Haiku 5.5 liest zuerst, Sonnet 5.5 nur bei Zweifel. Lohnabrechnungen, Terminalbelege und Logos gehen nie an die API. Zuletzt ' + esc(String((d.belege || []).length)) + ' Anhänge.</div></div></div>';
     el.innerHTML = h;
   }
   function bindBelege() {
