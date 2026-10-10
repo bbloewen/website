@@ -3006,7 +3006,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   function comboText(c) { return c.sachkonto + ' ' + (c.sachkontoBez || '') + ' · KST 1 ' + (c.kst1Bez || c.kst1) + ' · KST 2 ' + (c.kst2Bez || c.kst2) + (c.vat ? ' · ' + c.vat : ''); }
   function rfKarte(r) {
     var v = r.vorschlag || {}, ed = RF.edit && RF.edit.id === r.id ? RF.edit : null;
-    var kopf = '<div class="zeile-titel" style="margin:0 0 4px"><span class="fett">' + esc(r.aussteller || '–') + (r.nummer ? ' · Nr. ' + esc(r.nummer) : '') + (r.brutto !== null && r.brutto !== undefined ? ' · ' + esc(formatEuro(Number(r.brutto))) : '') + '</span><span class="notiz" style="margin:0">' + esc(r.mandant) + (r.datum ? ' · ' + esc(formatDate(String(r.datum).slice(0, 10))) : '') + ' · ' + esc(rfTage(r.angelegt)) + '</span></div>';
+    var imp = r.importiert ? formatDate(String(r.importiert).slice(0, 10)) : '';
+    var dat = r.datum ? formatDate(String(r.datum).slice(0, 10)) + (imp ? ' (importiert ' + imp + ')' : '') : (imp ? 'importiert ' + imp : '');
+    var kopf = '<div class="zeile-titel" style="margin:0 0 4px"><span class="fett">' + esc(r.aussteller || '–') + (r.nummer ? ' · Nr. ' + esc(r.nummer) : '') + (r.brutto !== null && r.brutto !== undefined ? ' · ' + esc(formatEuro(Number(r.brutto))) : '') + (dat ? ' · ' + esc(dat) : '') + '</span><span class="notiz" style="margin:0">' + esc(r.mandant) + ' · ' + esc(rfTage(r.angelegt)) + '</span></div>';
     var links = [];
     if (r.drive_url) links.push('<a href="' + esc(r.drive_url) + '" target="_blank" rel="noopener">Original in Drive</a>');
     if (r.nur_bhb && r.anhang_name) links.push('<a href="' + esc(bhbBelegLink('', r.anhang_name)) + '" target="_blank" rel="noopener">Beleg in BuchhaltungsButler</a>');
