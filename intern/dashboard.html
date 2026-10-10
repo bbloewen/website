@@ -3097,6 +3097,13 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       h += '<div class="rf-box" style="margin-top:8px"><label class="text-klein" for="rf-combo-' + r.id + '">Richtige Kontierung wählen (nur Zeilen des Kontenplans ' + esc(r.mandant) + ')</label>' +
         (plan ? '<select id="rf-combo-' + r.id + '" class="auswahl" style="width:100%;margin-top:4px" data-rf="combo"><option value="">Bitte wählen …</option>' + plan.map(function (c) { return '<option value="' + c.id + '"' + (String(ed.combo) === String(c.id) ? ' selected' : '') + '>' + esc(comboText(c)) + '</option>'; }).join('') + '</select>' : '<div class="laedt">Lade Kontenplan …</div>') +
         (r.sammelKey && (RF.sammel[r.sammelKey] || []).length > 1 ? '<label class="text-klein" style="display:block;margin-top:8px"><input type="checkbox" data-rf="alle"' + (ed.alle ? ' checked' : '') + '> Auch für die anderen ' + ((RF.sammel[r.sammelKey] || []).length - 1) + ' Belege dieser Gruppe (oben zusammen angezeigt)</label>' : '') + '<div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn btn-primary" data-rf="anders-ja" data-id="' + r.id + '"' + (ed.laeuft ? ' disabled' : '') + '>Speichern</button><button type="button" class="link-btn" data-rf="abbruch">Abbrechen</button></div>' + (ed.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:6px">' + esc(ed.fehler) + '</div>' : '') + '</div>';
+    } else if (ed && ed.modus === 'zurueck') {
+      h += '<div class="rf-box" style="margin-top:8px"><label class="text-klein" for="rf-zw-an-' + r.id + '">An (Entwurf, es wird nichts gesendet)</label><input id="rf-zw-an-' + r.id + '" class="eingabe" style="margin-top:4px" data-rf="zw-an" value="' + esc(ed.an) + '">' +
+        '<label class="text-klein" for="rf-zw-grund-' + r.id + '" style="display:block;margin-top:8px">Warum wird die Rechnung zurückgewiesen? Einfach sagen oder schreiben</label>' +
+        '<textarea id="rf-zw-grund-' + r.id + '" class="eingabe" rows="3" style="width:100%;margin-top:4px" maxlength="1500" data-rf="zw-grund" placeholder="z. B. Das Fahrzeug gehört zum Fuhrpark der XXL Baskets GmbH, die Rechnung muss auf die XXL Baskets GmbH lauten."' + (ed.laeuft ? ' disabled' : '') + '>' + esc(ed.grund || '') + '</textarea>' +
+        (r.bhb_id ? '<label class="text-klein" style="display:block;margin-top:8px"><input type="checkbox" data-rf="zw-loeschen"' + (ed.loeschen ? ' checked' : '') + (ed.laeuft ? ' disabled' : '') + '> Beleg danach in BuchhaltungsButler löschen (als gelöscht markiert, wiederherstellbar)</label>' : '') +
+        '<div style="display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap"><button type="button" class="btn btn-primary" data-rf="zurueck-ja" data-id="' + r.id + '"' + (ed.laeuft ? ' disabled' : '') + '>' + (ed.laeuft ? 'Entwurf wird angelegt …' : 'Entwurf anlegen und zurückweisen') + '</button><button type="button" class="link-btn" data-rf="abbruch">Abbrechen</button></div>' +
+        (ed.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:6px">' + esc(ed.fehler) + '</div>' : '') + '</div>';
     } else if (ed && ed.modus === 'sb') {
       h += '<div class="rf-box" style="margin-top:8px"><label class="text-klein" for="rf-notiz-' + r.id + '">Hinweis an den Steuerberater (optional)</label><input id="rf-notiz-' + r.id + '" class="eingabe" style="margin-top:4px" maxlength="500" data-rf="notiz" value="' + esc(ed.notiz) + '" placeholder="z. B. Wofür war das? Was ist unklar?">' +
         '<div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn btn-primary" data-rf="sb-ja" data-id="' + r.id + '"' + (ed.laeuft ? ' disabled' : '') + '>An den Steuerberater geben</button><button type="button" class="link-btn" data-rf="abbruch">Abbrechen</button></div>' + (ed.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:6px">' + esc(ed.fehler) + '</div>' : '') + '</div>';
@@ -3106,7 +3113,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         '<button type="button" class="btn btn-secondary" data-rf="anders" data-id="' + r.id + '" data-m="' + esc(r.mandant) + '">' + (v.sachkonto ? 'Anders …' : 'Konto wählen …') + '</button>' +
         '<button type="button" class="btn btn-secondary" data-rf="sb" data-id="' + r.id + '">Weiß ich nicht, Steuerberater fragen</button>' +
         (r.bhb_id ? '<button type="button" class="btn-loeschen" data-rf="dup" data-id="' + r.id + '" title="Erledigt diese Rückfrage als Doppelung und merkt den Beleg zum Löschen in BuchhaltungsButler vor">Doppelt: in BHB löschen</button>' : '') + (r.bhb_id ? '<button type="button" class="btn-loeschen" data-rf="dup-bhb" data-id="' + r.id + '" title="Löscht den Beleg sofort in BuchhaltungsButler (als gelöscht markiert, wiederherstellbar) und erledigt diese Rückfrage als Doppelung. Geht nicht, wenn der Beleg schon gebucht ist.">Doppelt: jetzt in BHB löschen</button>' : '') +
-        '<button type="button" class="link-btn" data-rf="verwerfen" data-id="' + r.id + '" title="Erledigt die Rückfrage ohne Buchung und ohne etwas zu lernen. Der Beleg bleibt unverändert in BuchhaltungsButler bzw. im Postfach.">Kein Beleg, ignorieren</button></div>';
+        '<button type="button" class="btn btn-secondary" data-rf="zurueck" data-id="' + r.id + '" title="Legt einen Mailentwurf an Kim und Nick an: Die Rechnung soll beim Kreditor neu ausgestellt werden. Danach wird der Beleg gelöscht.">Zurückweisen …</button>' + '<button type="button" class="link-btn" data-rf="verwerfen" data-id="' + r.id + '" title="Erledigt die Rückfrage ohne Buchung und ohne etwas zu lernen. Der Beleg bleibt unverändert in BuchhaltungsButler bzw. im Postfach.">Kein Beleg, ignorieren</button></div>';
     }
     return h + '</div>';
   }
@@ -3217,7 +3224,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var chip = function (w, t, n) { return '<button type="button" class="chip' + (RF.filter === w ? ' aktiv' : '') + '" data-rf="filter" data-w="' + w + '" aria-pressed="' + (RF.filter === w) + '">' + t + ' <span class="notiz" style="display:inline;margin:0">' + esc(zahl(n)) + '</span></button>'; };
     var h = '<div class="stapel"><div class="chips" role="group" aria-label="Ansicht">' + chip('offen', 'Offen', alle.filter(function (r) { return r.status === 'offen'; }).length) + chip('steuerberater', 'Beim Steuerberater', alle.filter(function (r) { return r.status === 'steuerberater'; }).length) + chip('loeschen', 'In BHB zu löschen', alle.filter(function (r) { return r.bhb_loeschen === 'vorgemerkt'; }).length) + chip('zubuchen', 'Zu buchen', rfZuBuchen(alle).length) + chip('neuaufnahme', 'Neuaufnahme', RF.na ? (RF.na.zaehler.gesamt || 0) : '…') + chip('erledigt', 'Erledigt', alle.filter(function (r) { return r.status === 'bestaetigt' || r.status === 'korrigiert' || r.status === 'verworfen'; }).length) + chip('wissen', 'Gelerntes Wissen', (RF.daten.wissen || []).filter(function (x) { return RF.mandant === 'alle' || x.mandant === RF.mandant; }).length) + '</div>' +
       '<div class="chips chips-gleich" role="group" aria-label="Mandant"><span class="notiz chips-label">Mandant</span>' + mchip('alle', 'Alle') + mchip('XXL', 'XXL') + mchip('LEV', 'LEV') + '</div>' +
-      (RF.laeuftAntwort ? '<div class="laedt" role="status">Speichere …</div>' : '') + (RF.meldung ? '<div class="erfolg" role="status">' + esc(RF.meldung) + '</div>' : '');
+      (RF.laeuftAntwort ? '<div class="laedt" role="status">Speichere …</div>' : '') + (RF.meldung ? '<div class="erfolg" role="status">' + esc(RF.meldung) + (RF.meldungLink && RF.meldungLinkFuer === RF.meldung ? ' <a href="' + esc(RF.meldungLink) + '" target="_blank" rel="noopener">Entwurf öffnen</a>' : '') + '</div>' : '');
     var stat = { bestaetigt: 'bestätigt', korrigiert: 'korrigiert', verworfen: 'kein Beleg' };
     if (RF.filter === 'offen') {
       var offen = alle.filter(function (r) { return r.status === 'offen'; });
@@ -3335,6 +3342,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     p.addEventListener('change', function (e) { var c = e.target.closest('[data-rf="combo"]'); if (c && RF.edit) RF.edit.combo = c.value; });
     p.addEventListener('change', function (e) { var c = e.target.closest('[data-rf="alle"]'); if (c && RF.edit) RF.edit.alle = c.checked; });
     p.addEventListener('change', function (e) { var c = e.target.closest('[data-rf="weitere"]'); if (c && RF.edit) RF.edit.weitere = c.checked; });
+    p.addEventListener('change', function (e) { var c = e.target.closest('[data-rf="zw-loeschen"]'); if (c && RF.edit) RF.edit.loeschen = c.checked; });
+    p.addEventListener('input', function (e) { var n = e.target.closest('[data-rf="zw-grund"]'); if (n && RF.edit) RF.edit.grund = n.value; var m = e.target.closest('[data-rf="zw-an"]'); if (m && RF.edit) RF.edit.an = m.value; });
     p.addEventListener('click', async function (e) {
       var b = e.target.closest('[data-rf]'); if (!b) return;
       if (RF.laeuftAntwort) return;
@@ -3359,6 +3368,21 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       else if (w === 'buch-ja') { if (window.confirm('Jetzt in BuchhaltungsButler hochladen und buchen? Das schreibt echte Buchungen.')) buchAusfuehren(id); }
       else if (w === 'dup') { if (window.confirm('Diesen Beleg als Doppelung erledigen und zum Löschen in BuchhaltungsButler vormerken?')) rfAntwort(id, { aktion: 'duplikat' }); }
       else if (w === 'bhb-ok') rfAntwort(id, { aktion: 'bhb_geloescht' });
+      else if (w === 'zurueck') { RF.meldung = ''; RF.edit = { id: id, modus: 'zurueck', an: 'kim.mauermann@basketball-loewen.com, nick.schmoock@basketball-loewen.com', grund: '', loeschen: true, laeuft: false, fehler: '' }; renderRF(); }
+      else if (w === 'zurueck-ja') {
+        var ez = RF.edit; if (!ez) return;
+        var gz = document.getElementById('rf-zw-grund-' + id); if (gz) ez.grund = gz.value;
+        var az = document.getElementById('rf-zw-an-' + id); if (az) ez.an = az.value;
+        if (!String(ez.grund || '').trim()) { ez.fehler = 'Bitte nenne den Grund der Zurückweisung.'; renderRF(); return; }
+        ez.laeuft = true; ez.fehler = ''; renderRF();
+        try {
+          var rz = await fetch('/webhook/accounting/rueckfrage-zurueckweisen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, grund: ez.grund, an: ez.an, loeschen: ez.loeschen === true }) });
+          var dz = await rz.json();
+          if (!rz.ok || !dz.ok) { ez.laeuft = false; ez.fehler = dz.meldung || dz.message || 'Zurückweisen fehlgeschlagen'; renderRF(); return; }
+          RF.edit = null; RF.meldung = dz.meldung; RF.meldungLink = dz.entwurf_link || ''; RF.meldungLinkFuer = RF.meldung;
+          await ladeRF();
+        } catch (ezz) { ez.laeuft = false; ez.fehler = ezz.message; renderRF(); }
+      }
       else if (w === 'dup-bhb') {
         if (!window.confirm('Den Beleg jetzt in BuchhaltungsButler löschen? Er wird dort als gelöscht markiert (wiederherstellbar) und diese Rückfrage ist als Doppelung erledigt.')) return;
         RF.meldung = ''; RF.laeuftAntwort = true; renderRF();
