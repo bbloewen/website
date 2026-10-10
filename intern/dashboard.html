@@ -106,6 +106,8 @@ main.wrap { padding-top: 28px; padding-bottom: 48px; }
 .tbl-voll table.tbl.fest { table-layout: fixed; min-width: 1000px; }
 .tbl-voll .tbl.fest td, .tbl-voll .tbl.fest th { overflow-wrap: anywhere; hyphens: auto; }
 .tbl-voll abbr[title] { text-decoration: none; cursor: help; border-bottom: 1px dotted var(--text-muted); }
+.rf-box { background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; }
+.rf-karte { margin-bottom: 0; }
 .btn-loeschen { background: none; border: 1px solid var(--color-error); color: var(--color-error); border-radius: var(--radius-sm); padding: 4px 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
 .btn-loeschen:hover { background: var(--color-error-bg); }
 .tbl-voll .linkreihe { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 4px; }
@@ -418,6 +420,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   <section id="p-zahlung-xxl" role="tabpanel" aria-labelledby="tab-zahlung-xxl" hidden></section>
   <section id="p-zahlung-lev" role="tabpanel" aria-labelledby="tab-zahlung-lev" hidden></section>
   <section id="p-zahlung-lev-lp" role="tabpanel" aria-labelledby="tab-zahlung-lev-lp" hidden></section>
+  <section id="p-rueckfragen" role="tabpanel" aria-labelledby="tab-rueckfragen" hidden></section>
   <section id="p-buchungstexte" role="tabpanel" aria-labelledby="tab-buchungstexte" hidden></section>
 
 </main>
@@ -680,7 +683,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
     { id: 'segmentierung', name: 'Segmentierung', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
-    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlung XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung LEV Löwenpark' }, { id: 'buchungstexte', name: 'Buchungstexte' }] }
+    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlung XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung LEV Löwenpark' }, { id: 'rueckfragen', name: 'Rückfragen' }, { id: 'buchungstexte', name: 'Buchungstexte' }] }
   ];
   var TABS = [];
   BEREICHE.forEach(function (b) { b.tabs.forEach(function (t) { TABS.push(t.id); }); });
@@ -710,7 +713,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var t = '';
     b.tabs.forEach(function (x) {
       var aktiv = x.id === S.tab;
-      t += '<button class="tab" role="tab" id="tab-' + x.id + '" data-tab="' + x.id + '" aria-controls="p-' + x.id + '" aria-selected="' + aktiv + '" tabindex="' + (aktiv ? 0 : -1) + '">' + esc(x.name) + '</button>';
+      var badge = x.id === 'rueckfragen' && RF.daten && RF.daten.zaehler && RF.daten.zaehler.offen ? ' (' + RF.daten.zaehler.offen + ')' : '';
+      t += '<button class="tab" role="tab" id="tab-' + x.id + '" data-tab="' + x.id + '" aria-controls="p-' + x.id + '" aria-selected="' + aktiv + '" tabindex="' + (aktiv ? 0 : -1) + '">' + esc(x.name + badge) + '</button>';
     });
     var tl = $('tabs');
     tl.innerHTML = t;
@@ -739,6 +743,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (BE_MANDANT[t]) ladeListe('beleg', BE_MANDANT[t]);
     if (ZA_KONTO[t]) ladeListe('zahlung', ZA_KONTO[t]);
     if (t === 'buchungstexte') ladeBT();
+    if (t === 'rueckfragen') ladeRF();
     // SEO laedt erst, wenn der Tab zum ersten Mal geoeffnet wird: die
     // Sheets-Abfrage dauert laenger als die pretix-Aufrufe und wird beim
     // taeglichen Gutschein-Anlegen gar nicht gebraucht.
@@ -2942,6 +2947,138 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       (Number(kp.ohne_konto || 0) ? ' ' + esc(zahl(kp.ohne_konto)) + ' Umsätze sind keinem Bankkonto zugeordnet.' : '') + '</div></div>';
     return h;
   }
+  // ---------- Accounting: Rückfragen (Etappe 2) ----------
+  // Der Agent schlägt die Kontierung vor, Marko bestätigt, korrigiert oder gibt an den Steuerberater weiter. Jede Entscheidung wird als Wissen gespeichert.
+  // Gebucht wird dabei noch nichts in BuchhaltungsButler.
+  var RF = { daten: null, fehler: null, laedt: false, filter: 'offen', plan: {}, edit: null, meldung: '' };
+  async function ladeRF() {
+    RF.laedt = true; RF.fehler = null; renderRF();
+    try {
+      var res = await fetch('/webhook/accounting/rueckfragen');
+      var d = await res.json();
+      if (!res.ok) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
+      RF.daten = d;
+    } catch (e) { RF.fehler = e.message; }
+    RF.laedt = false; renderRF(); renderNavigation();
+  }
+  async function ladePlan(m) {
+    if (RF.plan[m]) return;
+    try {
+      var res = await fetch('/webhook/accounting/kontenplan?mandant=' + m);
+      var d = await res.json();
+      if (!res.ok) throw new Error(d.message || d.fehler || 'Kontenplan nicht geladen');
+      RF.plan[m] = d.combos || [];
+    } catch (e) { if (RF.edit) RF.edit.fehler = e.message; }
+  }
+  function rfQuelle(v) { return { wissen: 'Wissen: schon bestätigt', regel: 'Regel im Kontenplan', praezedenz: 'Präzedenzfall aus BuchhaltungsButler', ki: 'Vorschlag der KI', keine: 'kein Vorschlag' }[v && v.quelle] || 'kein Vorschlag'; }
+  function rfTage(iso) { var d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000); return d <= 0 ? 'heute' : (d === 1 ? 'seit 1 Tag' : 'seit ' + d + ' Tagen'); }
+  function rfKonto(v) {
+    if (!v || !v.sachkonto) return '<span class="gedaempft">–</span>';
+    return '<div>' + beKonto(v.sachkonto, v.sachkontoBez) + '</div><div class="notiz" style="margin:0">KST 1 ' + beKonto(v.kst1, v.kst1Bez) + ' · KST 2 ' + beKonto(v.kst2, v.kst2Bez) + (v.vat ? ' · USt-Regel ' + esc(v.vat) : '') + (v.belegPolitik ? ' · ' + esc(v.belegPolitik) : '') + '</div>';
+  }
+  function comboText(c) { return c.sachkonto + ' ' + (c.sachkontoBez || '') + ' · KST 1 ' + (c.kst1Bez || c.kst1) + ' · KST 2 ' + (c.kst2Bez || c.kst2) + (c.vat ? ' · ' + c.vat : ''); }
+  function rfKarte(r) {
+    var v = r.vorschlag || {}, ed = RF.edit && RF.edit.id === r.id ? RF.edit : null;
+    var kopf = '<div class="zeile-titel" style="margin:0 0 4px"><span class="fett">' + esc(r.aussteller || '–') + (r.nummer ? ' · Nr. ' + esc(r.nummer) : '') + (r.brutto !== null && r.brutto !== undefined ? ' · ' + esc(formatEuro(Number(r.brutto))) : '') + '</span><span class="notiz" style="margin:0">' + esc(r.mandant) + (r.datum ? ' · ' + esc(formatDate(String(r.datum).slice(0, 10))) : '') + ' · ' + esc(rfTage(r.angelegt)) + '</span></div>';
+    var links = [];
+    if (r.drive_url) links.push('<a href="' + esc(r.drive_url) + '" target="_blank" rel="noopener">Original in Drive</a>');
+    links.push('<span class="notiz" style="display:inline;margin:0">' + (r.nur_bhb ? 'liegt in BuchhaltungsButler, noch nicht gebucht' : 'aus dem Postfach gelesen') + '</span>');
+    var h = '<div class="card pad rf-karte">' + kopf + '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px">' + links.join('') + '</div>' +
+      '<div class="fett" style="margin-bottom:6px">' + esc(r.frage || '') + '</div>';
+    if (v.sachkonto) {
+      h += '<div class="rf-box"><div class="notiz" style="margin:0 0 4px">Vorschlag · ' + esc(rfQuelle(v)) + ' · Sicherheit ' + esc(v.sicherheit || '') + '</div>' + rfKonto(v) +
+        (r.buchungstext ? '<div class="notiz" style="margin:4px 0 0">Buchungstext-Vorschlag: ' + esc(r.buchungstext) + '</div>' : '') +
+        (v.begruendung ? '<div class="text-klein" style="margin-top:4px">' + esc(v.begruendung) + '</div>' : '') + '</div>';
+    } else {
+      h += '<div class="rf-box"><div class="notiz" style="margin:0 0 4px">' + esc(rfQuelle(v)) + '</div>' + (v.begruendung ? '<div class="text-klein">' + esc(v.begruendung) + '</div>' : '') +
+        ((v.kandidaten || []).length ? '<div class="notiz" style="margin:6px 0 0">Mögliche Konten aus BuchhaltungsButler: ' + v.kandidaten.map(function (c) { return esc(comboText(c)) + (c.n ? ' (' + c.n + '×)' : ''); }).join(' · ') + '</div>' : '') + '</div>';
+    }
+    (v.hinweise || []).forEach(function (x) { h += '<div class="hinweis-warn" style="margin-top:6px">' + esc(x) + '</div>'; });
+    if (r.hinweis) h += '<details style="margin-top:6px"><summary class="text-klein">Hinweis des Lesers</summary><div class="notiz" style="margin:4px 0 0">' + esc(r.hinweis) + '</div></details>';
+    if (ed && ed.modus === 'anders') {
+      var plan = RF.plan[r.mandant];
+      h += '<div class="rf-box" style="margin-top:8px"><label class="text-klein" for="rf-combo-' + r.id + '">Richtige Kontierung wählen (nur Zeilen des Kontenplans ' + esc(r.mandant) + ')</label>' +
+        (plan ? '<select id="rf-combo-' + r.id + '" class="auswahl" style="width:100%;margin-top:4px" data-rf="combo"><option value="">Bitte wählen …</option>' + plan.map(function (c) { return '<option value="' + c.id + '"' + (String(ed.combo) === String(c.id) ? ' selected' : '') + '>' + esc(comboText(c)) + '</option>'; }).join('') + '</select>' : '<div class="laedt">Lade Kontenplan …</div>') +
+        '<div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn btn-primary" data-rf="anders-ja" data-id="' + r.id + '"' + (ed.laeuft ? ' disabled' : '') + '>Speichern</button><button type="button" class="link-btn" data-rf="abbruch">Abbrechen</button></div>' + (ed.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:6px">' + esc(ed.fehler) + '</div>' : '') + '</div>';
+    } else if (ed && ed.modus === 'sb') {
+      h += '<div class="rf-box" style="margin-top:8px"><label class="text-klein" for="rf-notiz-' + r.id + '">Hinweis an den Steuerberater (optional)</label><input id="rf-notiz-' + r.id + '" class="eingabe" style="margin-top:4px" maxlength="500" data-rf="notiz" value="' + esc(ed.notiz) + '" placeholder="z. B. Wofür war das? Was ist unklar?">' +
+        '<div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn btn-primary" data-rf="sb-ja" data-id="' + r.id + '"' + (ed.laeuft ? ' disabled' : '') + '>An den Steuerberater geben</button><button type="button" class="link-btn" data-rf="abbruch">Abbrechen</button></div>' + (ed.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:6px">' + esc(ed.fehler) + '</div>' : '') + '</div>';
+    } else {
+      h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center">' +
+        (v.sachkonto ? '<button type="button" class="btn btn-primary" data-rf="ok" data-id="' + r.id + '">Passt</button>' : '') +
+        '<button type="button" class="btn btn-secondary" data-rf="anders" data-id="' + r.id + '" data-m="' + esc(r.mandant) + '">' + (v.sachkonto ? 'Anders …' : 'Konto wählen …') + '</button>' +
+        '<button type="button" class="btn btn-secondary" data-rf="sb" data-id="' + r.id + '">Weiß ich nicht, Steuerberater fragen</button>' +
+        '<button type="button" class="link-btn" data-rf="verwerfen" data-id="' + r.id + '" title="Kein Buchungsbeleg, nichts zu klären">Kein Beleg, ignorieren</button></div>';
+    }
+    return h + '</div>';
+  }
+  function renderRF() {
+    var el = $('p-rueckfragen'); if (!el) return;
+    if (RF.laedt && !RF.daten) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
+    if (RF.fehler && !RF.daten) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(RF.fehler) + '</div>'; return; }
+    if (!RF.daten) { el.innerHTML = ''; return; }
+    var z = RF.daten.zaehler || {}, alle = RF.daten.rueckfragen || [];
+    var chip = function (w, t, n) { return '<button type="button" class="chip' + (RF.filter === w ? ' aktiv' : '') + '" data-rf="filter" data-w="' + w + '" aria-pressed="' + (RF.filter === w) + '">' + t + ' <span class="notiz" style="display:inline;margin:0">' + esc(zahl(n)) + '</span></button>'; };
+    var h = '<div class="stapel"><div class="chips" role="group" aria-label="Ansicht">' + chip('offen', 'Offen', z.offen || 0) + chip('steuerberater', 'Beim Steuerberater', z.steuerberater || 0) + chip('erledigt', 'Erledigt', z.erledigt || 0) + chip('wissen', 'Gelerntes Wissen', (RF.daten.wissen || []).length) + '</div>' +
+      (RF.meldung ? '<div class="erfolg" role="status">' + esc(RF.meldung) + '</div>' : '');
+    var stat = { bestaetigt: 'bestätigt', korrigiert: 'korrigiert', verworfen: 'kein Beleg' };
+    if (RF.filter === 'offen') {
+      var offen = alle.filter(function (r) { return r.status === 'offen'; });
+      if (!offen.length) h += '<div class="card pad">Keine offenen Rückfragen.</div>';
+      offen.forEach(function (r) { h += rfKarte(r); });
+    } else if (RF.filter === 'steuerberater') {
+      var sb = alle.filter(function (r) { return r.status === 'steuerberater'; });
+      h += '<div class="card"><div class="card-kopf" style="margin:0">Anfragen an den Steuerberater</div><div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Beleg</th><th>Vorschlag des Agenten</th><th>Hinweis von dir</th><th>Stand</th></tr></thead><tbody>' +
+        (sb.length ? sb.map(function (r) { return '<tr><td><div class="fett">' + esc(r.aussteller || '–') + '</div><div class="notiz" style="margin:0">' + esc((r.nummer ? 'Nr. ' + r.nummer + ' · ' : '') + (r.brutto !== null && r.brutto !== undefined ? formatEuro(Number(r.brutto)) : '') + ' · ' + r.mandant) + '</div></td><td>' + rfKonto(r.vorschlag) + '</td><td>' + esc((r.entscheidung && r.entscheidung.notiz) || '') + '</td><td>' + esc(r.sb_status === 'gesendet' ? 'gesendet, wartet auf Antwort' : 'vorgemerkt, noch nicht gesendet') + '<div class="notiz" style="margin:0">' + esc(rfTage(r.sb_angelegt || r.entschieden_am)) + '</div></td></tr>'; }).join('') : '<tr><td colspan="4" class="leer">Nichts beim Steuerberater.</td></tr>') +
+        '</tbody></table></div><div class="card-fuss">Die Mail an den Steuerberater mit Antwortlink ist noch nicht eingerichtet, die Anfragen sind vorgemerkt. Gebündelt gesendet wird erst, wenn du Adresse und Rhythmus festgelegt hast.</div></div>';
+    } else if (RF.filter === 'erledigt') {
+      var erl = alle.filter(function (r) { return r.status === 'bestaetigt' || r.status === 'korrigiert' || r.status === 'verworfen'; });
+      h += '<div class="card"><div class="card-kopf" style="margin:0">Entschieden (letzte 60 Tage)</div><div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Beleg</th><th>Entscheidung</th><th>Konto</th><th>Wer, wann</th></tr></thead><tbody>' +
+        (erl.length ? erl.map(function (r) { return '<tr><td><div class="fett">' + esc(r.aussteller || '–') + '</div><div class="notiz" style="margin:0">' + esc((r.nummer ? 'Nr. ' + r.nummer + ' · ' : '') + (r.brutto !== null && r.brutto !== undefined ? formatEuro(Number(r.brutto)) : '') + ' · ' + r.mandant) + '</div></td><td>' + esc(stat[r.status] || r.status) + '</td><td>' + (r.status === 'verworfen' ? '' : rfKonto(r.entscheidung)) + '</td><td class="notiz">' + esc((r.entschieden_von || '') + ' · ' + (r.entschieden_am ? formatDateTime(r.entschieden_am) : '')) + '</td></tr>'; }).join('') : '<tr><td colspan="4" class="leer">Noch nichts entschieden.</td></tr>') + '</tbody></table></div></div>';
+    } else {
+      var w = RF.daten.wissen || [];
+      h += '<div class="card"><div class="card-kopf" style="margin:0">Gelerntes Wissen je Falltyp (Mandant, Aussteller, Zweck)</div><div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Mandant</th><th>Aussteller</th><th>Zweck</th><th>Konto</th><th>KST 1</th><th>KST 2</th><th class="rechts"><abbr title="Wie oft ohne Korrektur bestätigt">Bestätigt</abbr></th><th class="rechts"><abbr title="Wie oft korrigiert">Korrigiert</abbr></th><th>Stand</th></tr></thead><tbody>' +
+        (w.length ? w.map(function (x) { return '<tr><td>' + esc(x.mandant) + '</td><td>' + esc(x.aussteller) + '</td><td>' + esc(x.zweck || '–') + '</td><td>' + esc(x.sachkonto) + '</td><td>' + esc(x.kst1 || '') + '</td><td>' + esc(x.kst2 || '') + '</td><td class="rechts zahlen">' + esc(zahl(x.bestaetigt_n)) + '</td><td class="rechts zahlen">' + esc(zahl(x.korrigiert_n)) + '</td><td>' + esc({ gelernt: 'gelernt', sicher: 'sicher', zurueckgestuft: 'zurückgestuft' }[x.status] || x.status) + '</td></tr>'; }).join('') : '<tr><td colspan="9" class="leer">Noch nichts gelernt.</td></tr>') + '</tbody></table></div><div class="card-fuss">Jede Bestätigung oder Korrektur wird hier festgehalten. Bei weiteren Belegen desselben Falltyps schlägt der Agent genau das vor. Das selbstständige Buchen kommt erst später und nur für Falltypen, die du freigibst.</div></div>';
+    }
+    h += '<div class="notiz">„Passt“ und „Anders“ merken sich die Kontierung. Gebucht wird dabei noch nichts in BuchhaltungsButler.</div></div>';
+    var fokus = document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute('data-rf') === 'notiz';
+    var pos = fokus ? document.activeElement.selectionStart : 0;
+    el.innerHTML = h;
+    if (fokus) { var n = el.querySelector('[data-rf="notiz"]'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } }
+  }
+  async function rfAntwort(id, daten) {
+    var ed = RF.edit; if (ed) { ed.laeuft = true; ed.fehler = ''; }
+    renderRF();
+    try {
+      var res = await fetch('/webhook/accounting/rueckfrage-antwort', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({ id: id }, daten)) });
+      var d = await res.json();
+      if (!res.ok || !d.ok) throw new Error(d.message || d.fehler || 'Speichern fehlgeschlagen');
+      RF.meldung = { bestaetigen: 'Kontierung bestätigt und gemerkt.', korrigieren: 'Kontierung korrigiert und gemerkt.', steuerberater: 'An den Steuerberater weitergegeben (vorgemerkt).', verworfen: 'Als „kein Beleg“ erledigt.' }[daten.aktion];
+      RF.edit = null;
+      await ladeRF();
+      return;
+    } catch (e) {
+      if (RF.edit) { RF.edit.laeuft = false; RF.edit.fehler = e.message; } else RF.meldung = 'Fehler: ' + e.message;
+    }
+    renderRF();
+  }
+  function bindRF() {
+    var p = $('p-rueckfragen');
+    p.addEventListener('input', function (e) { var n = e.target.closest('[data-rf="notiz"]'); if (n && RF.edit) RF.edit.notiz = n.value; });
+    p.addEventListener('change', function (e) { var c = e.target.closest('[data-rf="combo"]'); if (c && RF.edit) RF.edit.combo = c.value; });
+    p.addEventListener('click', async function (e) {
+      var b = e.target.closest('[data-rf]'); if (!b) return;
+      var w = b.getAttribute('data-rf'), id = Number(b.getAttribute('data-id'));
+      if (w === 'filter') { RF.filter = b.getAttribute('data-w'); RF.meldung = ''; RF.edit = null; renderRF(); }
+      else if (w === 'ok') rfAntwort(id, { aktion: 'bestaetigen' });
+      else if (w === 'anders') { RF.meldung = ''; RF.edit = { id: id, modus: 'anders', combo: '', laeuft: false, fehler: '' }; renderRF(); await ladePlan(b.getAttribute('data-m')); renderRF(); }
+      else if (w === 'sb') { RF.meldung = ''; RF.edit = { id: id, modus: 'sb', notiz: '', laeuft: false, fehler: '' }; renderRF(); }
+      else if (w === 'abbruch') { RF.edit = null; renderRF(); }
+      else if (w === 'anders-ja') { if (!RF.edit || !RF.edit.combo) { if (RF.edit) RF.edit.fehler = 'Bitte eine Kontierung wählen'; renderRF(); } else rfAntwort(id, { aktion: 'korrigieren', combo_id: Number(RF.edit.combo) }); }
+      else if (w === 'sb-ja') rfAntwort(id, { aktion: 'steuerberater', notiz: RF.edit ? RF.edit.notiz : '' });
+      else if (w === 'verwerfen') { RF.meldung = ''; RF.edit = null; rfAntwort(id, { aktion: 'verworfen' }); }
+    });
+  }
   async function btSpeichern(id) {
     var ed = BE.btEdit; if (!ed) return;
     ed.laeuft = true; ed.fehler = ''; beAlleRender();
@@ -3190,6 +3327,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   bindVersand();
   bindBelege();
   bindBT();
+  bindRF();
   document.addEventListener('loewen-nutzer', function () {
     if (!darfBereich(bereichVon(S.tab))) setTab(S.tab, false, S.tabArg); else renderNavigation();
   });
