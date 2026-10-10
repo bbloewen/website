@@ -2734,6 +2734,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     }[form];
     return '<span class="ik ' + (an ? 'ik-an' : 'ik-aus') + '" role="img" aria-label="' + esc(titel) + '" title="' + esc(titel) + '"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + innen + '</svg></span>';
   }
+  function num(v) { if (v === null || v === undefined || v === '') return null; var n = Number(v); return isFinite(n) ? n : null; }
+  function nettoVon(brutto, satz) { if (brutto === null) return null; var u = num(satz) || 0; return Math.round(brutto / (1 + u / 100) * 100) / 100; }
   function blBezahlt(r) {
     if (!r.bhb) return false;
     var brutto = Number(r.bhb.brutto || 0);
@@ -2768,7 +2770,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       (weitere ? 'An der Mail hängen noch ' + weitere + ' weitere relevante Anhänge, die Mail bleibt deshalb im Postfach.' : 'Die Mail kommt in den Papierkorb des Postfachs, weil kein weiterer relevanter Anhang daran hängt.') + ' In BuchhaltungsButler ändert sich nichts.';
     var fehler = l.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:8px">' + esc(l.fehler) + '</div>' : '';
     var aus = l.laeuft ? ' disabled' : '';
-    return '<tr><td colspan="6"><div class="hinweis-warn" role="group" aria-label="Löschen bestätigen"><div>' + esc(text) + '</div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">' +
+    return '<tr><td colspan="15"><div class="hinweis-warn" role="group" aria-label="Löschen bestätigen"><div>' + esc(text) + '</div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">' +
       '<button type="button" class="btn-gefahr" data-be="loeschen-ja" data-id="' + a.id + '" data-aktion="beleg"' + aus + '>' + (l.laeuft ? 'Lösche …' : 'Beleg löschen') + '</button>' +
       (weitere ? '<button type="button" class="btn-gefahr" data-be="loeschen-ja" data-id="' + a.id + '" data-aktion="mail"' + aus + '>Beleg und ganze Mail löschen</button>' : '') +
       '<button type="button" class="link-btn" data-be="loeschen-nein"' + aus + '>Abbrechen</button></div>' + fehler + '</div></td></tr>';
@@ -2792,7 +2794,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       '<select class="auswahl" data-be="filter" data-k="' + k + '" aria-label="Filter">' + opt('alle', 'Alle Belege') + opt('bezahlt', 'Gebucht und bezahlt') + opt('offen', 'Gebucht, Zahlung offen') + opt('eingang', 'Nur im Eingang, nicht gebucht') + opt('pruefen', 'Agent: zur Prüfung') + '</select> ' +
       '<button type="button" class="link-btn" data-be="neu" data-k="' + k + '">Aktualisieren</button></span></div>' +
       (BE.meldung ? '<div class="erfolg" role="status" style="margin:8px 12px">' + esc(BE.meldung) + '</div>' : '') +
-      '<div class="scroll-x"><table class="tbl kompakt"><thead><tr><th>Datum</th><th>Beleg</th><th>Brutto</th><th>Buchung</th><th>Status</th><th></th></tr></thead><tbody>';
+      '<div class="scroll-x"><table class="tbl kompakt"><thead><tr><th>Datum</th><th>Beleg</th><th>Status</th><th class="rechts">Belegbetrag</th><th>Buchungstext</th><th>Sachkonto</th><th>Gegenkonto</th><th>KST 1</th><th>KST 2</th><th class="rechts">USt-Satz</th><th class="rechts">Netto</th><th class="rechts">Steuer</th><th class="rechts">Brutto</th><th>Schlüssel</th><th></th></tr></thead><tbody>';
     zeilen.forEach(function (r) {
       var b = r.bhb, a = r.agent;
       var titel = (b && b.gegenpartei) || (a && (a.aussteller || a.anhang_name)) || '–';
@@ -2801,8 +2803,6 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var brutto = b && b.brutto !== null && b.brutto !== undefined ? Number(b.brutto) : (a && a.brutto !== null && a.brutto !== undefined ? Number(a.brutto) : null);
       var kopf = '<div class="fett">' + esc(titel) + '</div><div class="notiz" style="margin:0">' + esc(art + (nummer ? ' · Nr. ' + nummer : '')) + '</div>' +
         (a ? '<div class="notiz" style="margin:0">' + esc((a.absender || '') + (a.eingang_am ? ' · Mail vom ' + formatDate(String(a.eingang_am).slice(0, 10)) : '')) + '</div>' : '');
-      var buchung = '';
-      if (b) buchung = (b.buchungen || []).map(function (x) { return '<div>' + beKonten(x) + (x.ust !== null && x.ust !== undefined ? ' <span class="notiz" style="display:inline;margin:0">· ' + esc(Number(x.ust) + ' %') + '</span>' : '') + '</div>'; }).join('');
       var status = '';
       if (b) {
         var bez = blBezahlt(r);
@@ -2820,11 +2820,36 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       if (b && b.link) links.push('<a href="' + esc(b.link) + '" target="_blank" rel="noopener">Beleg in BHB</a>');
       if (a && a.gmail_id && String(a.gmail_id).indexOf('test') !== 0) links.push('<a href="https://mail.google.com/mail/?authuser=rechnung@basketball-loewen.com#all/' + esc(a.gmail_id) + '" target="_blank" rel="noopener">Mail</a>');
       if (a) links.push('<button type="button" class="link-btn" data-be="loeschen" data-id="' + a.id + '" aria-label="Löschen: ' + esc(titel) + '">Löschen</button>');
-      h += '<tr><td class="nowrap">' + esc(r.datum ? formatDate(String(r.datum).slice(0, 10)) : '') + '</td><td>' + kopf + '</td>' +
-        '<td class="nowrap">' + (brutto !== null ? esc(formatEuro(brutto)) : '') + '</td><td>' + buchung + '</td><td>' + status + '</td>' +
-        '<td class="nowrap" style="display:flex;flex-direction:column;gap:4px">' + links.join('') + '</td></tr>' + (a ? beLoeschBox(a) : '');
+      // Buchungszeilen: aus BuchhaltungsButler, sonst die Beträge je Steuersatz, die der Agent gelesen hat.
+      var zl = [];
+      if (b && (b.buchungen || []).length) zl = b.buchungen.map(function (x) {
+        var br = num(x.betrag), ne = nettoVon(br, x.ust);
+        return { text: x.text, komm: x.kommentar, bdat: x.datum, konto: x.sachkonto, kname: x.sachkonto_name, gegen: x.gegenkonto, kst1: x.kst1, kst1n: x.kst1_name, kst2: x.kst2, kst2n: x.kst2_name, satz: x.ust, netto: ne, steuer: br !== null && ne !== null ? Math.round((br - ne) * 100) / 100 : null, brutto: br, schl: x.schluessel };
+      });
+      else if (a && Array.isArray(a.betraege) && a.betraege.length) zl = a.betraege.map(function (x) { return { agent: true, satz: x.steuersatz, netto: num(x.netto), steuer: num(x.steuer), brutto: num(x.brutto) }; });
+      else zl = [{ agent: !!a, netto: a ? num(a.netto) : null, steuer: a ? num(a.steuer) : null, brutto: a ? num(a.brutto) : null }];
+      var agentLese = '';
+      if (a) {
+        var zeile = function (l, w) { return w === null || w === undefined || w === '' ? '' : '<div>' + esc(l) + ': ' + esc(w) + '</div>'; };
+        agentLese = '<details style="margin-top:4px"><summary class="text-klein">Was der Agent gelesen hat</summary><div class="notiz" style="margin:4px 0 0">' +
+          zeile('Brutto', a.brutto !== null && a.brutto !== undefined ? formatEuro(Number(a.brutto)) : '') + zeile('Netto', a.netto !== null && a.netto !== undefined ? formatEuro(Number(a.netto)) : '') + zeile('Steuer', a.steuer !== null && a.steuer !== undefined ? formatEuro(Number(a.steuer)) : '') +
+          zeile('Rechnungsdatum', a.datum ? formatDate(a.datum) : '') + zeile('Fällig', a.faellig ? formatDate(a.faellig) : '') + zeile('Leistungszeitraum', a.leistungszeitraum) + zeile('IBAN', a.iban) + zeile('Zahlungsart', a.zahlungsart) + zeile('Zweck auf dem Beleg', a.zweck) + zeile('Hinweis des Modells', a.hinweis) + '</div></details>';
+      }
+      var rs = ' rowspan="' + zl.length + '"';
+      var eu = function (n) { return n === null || n === undefined ? '' : esc(formatEuro(n)); };
+      zl.forEach(function (x, i) {
+        var text = (x.text ? '<div>' + esc(x.text) + '</div>' : '') + (x.komm ? '<div class="notiz" style="margin:0">Kommentar: ' + esc(x.komm) + '</div>' : '') +
+          (x.bdat && r.datum && String(x.bdat).slice(0, 10) !== String(r.datum).slice(0, 10) ? '<div class="notiz" style="margin:0">gebucht am ' + esc(formatDate(String(x.bdat).slice(0, 10))) + '</div>' : '') +
+          (x.agent ? '<div class="notiz" style="margin:0">vom Agenten gelesen, noch nicht gebucht</div>' : '');
+        h += '<tr>' + (i === 0 ? '<td' + rs + ' class="nowrap">' + esc(r.datum ? formatDate(String(r.datum).slice(0, 10)) : '') + '</td><td' + rs + '>' + kopf + agentLese + '</td><td' + rs + '>' + status + '</td><td' + rs + ' class="nowrap zahlen rechts">' + (brutto !== null ? esc(formatEuro(brutto)) : '') + '</td>' : '') +
+          '<td>' + text + '</td><td>' + beKonto(x.konto, x.kname) + '</td><td class="nowrap">' + esc(x.gegen || '') + '</td><td>' + beKonto(x.kst1, x.kst1n) + '</td><td>' + beKonto(x.kst2, x.kst2n) + '</td>' +
+          '<td class="nowrap zahlen rechts">' + (x.satz !== null && x.satz !== undefined && x.satz !== '' ? esc(Number(x.satz).toLocaleString('de-DE') + ' %') : '') + '</td>' +
+          '<td class="nowrap zahlen rechts">' + eu(x.netto) + '</td><td class="nowrap zahlen rechts">' + eu(x.steuer) + '</td><td class="nowrap zahlen rechts">' + eu(x.brutto) + '</td><td class="nowrap">' + esc(x.schl || '') + '</td>' +
+          (i === 0 ? '<td' + rs + ' class="nowrap"><div style="display:flex;flex-direction:column;gap:4px">' + links.join('') + '</div></td>' : '') + '</tr>';
+      });
+      if (a) h += beLoeschBox(a);
     });
-    if (!zeilen.length) h += '<tr><td colspan="6" class="leer">Keine Belege in dieser Ansicht.</td></tr>';
+    if (!zeilen.length) h += '<tr><td colspan="15" class="leer">Keine Belege in dieser Ansicht.</td></tr>';
     h += '</tbody></table></div><div class="card-fuss">Ein Eintrag je Beleg: gebuchte Belege aus BuchhaltungsButler (täglich 5:30 Uhr gelesen' + (d.stand ? ', zuletzt ' + esc(formatDateTime(d.stand)) : '') + ') und vom Agenten gelesene Anhänge aus dem Postfach. ' +
       'Zwei Symbole je Beleg: Buch = gebucht, Euro = Zahlung zugewiesen. Grün und gefüllt heißt erledigt, grau mit Kontur heißt fehlt noch. Logos, Signaturen und Terminalbelege tauchen nicht auf. Löschen entfernt Beleg und Drive-Datei und legt die Mail in den Papierkorb, wenn kein weiterer relevanter Anhang daran hängt. Belege ohne erkannten Mandanten stehen in beiden Tabs.</div></div>';
     return h;
