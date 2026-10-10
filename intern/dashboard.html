@@ -2825,13 +2825,13 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       (weitere ? '<button type="button" class="btn-gefahr" data-be="loeschen-ja" data-id="' + a.id + '" data-aktion="mail"' + aus + '>Beleg und ganze Mail löschen</button>' : '') +
       '<button type="button" class="link-btn" data-be="loeschen-nein"' + aus + '>Abbrechen</button></div>' + fehler + '</div></td></tr>';
   }
-  // Buchungstext des Agenten mit "ändern": nur für diesen Beleg oder (Haken) als neuer Standardtext des Ausstellers.
+  // Buchungstext des Agenten mit "ändern": gilt für diesen Beleg; mit Haken zusätzlich als Standardtext des Ausstellers für künftige Belege (bisherige Belege bleiben unverändert).
   function btFeld(a) {
     var ed = BE.btEdit, nr = a.nummer ? a.nummer + ' - ' : '';
     if (ed && ed.id === a.id) {
       return '<div class="btedit"><div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap"><span class="notiz" style="margin:0">' + esc(nr) + '</span>' +
         '<input class="eingabe-klein" style="flex:1 1 120px" maxlength="24" data-be="bt-wert" aria-label="Zweck im Buchungstext, höchstens 24 Zeichen" value="' + esc(ed.wert) + '"></div>' +
-        '<label class="text-klein" style="display:block;margin-top:4px"><input type="checkbox" data-be="bt-standard"' + (ed.standard ? ' checked' : '') + '> Standardtext für ' + esc(a.aussteller || 'diesen Aussteller') + ' ändern</label>' +
+        '<label class="text-klein" style="display:block;margin-top:4px"><input type="checkbox" data-be="bt-standard"' + (ed.standard ? ' checked' : '') + '> Als Standardtext für künftige Belege von ' + esc(a.aussteller || 'diesem Aussteller') + ' merken</label>' +
         '<div style="display:flex;gap:8px;margin-top:4px;align-items:center"><button type="button" class="btn btn-primary" style="padding:4px 10px" data-be="bt-speichern" data-id="' + a.id + '"' + (ed.laeuft ? ' disabled' : '') + '>' + (ed.laeuft ? 'Speichere …' : 'Speichern') + '</button>' +
         '<button type="button" class="link-btn" data-be="bt-abbruch">Abbrechen</button></div>' +
         (ed.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:4px">' + esc(ed.fehler) + '</div>' : '') + '</div>';
@@ -3116,7 +3116,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var res = await fetch('/webhook/accounting/buchungstext-aendern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ aktion: 'beleg', id: id, zweck: ed.wert, standard: !!ed.standard }) });
       var d = await res.json();
       if (!res.ok || !d.ok) throw new Error(d.message || d.fehler || 'Speichern fehlgeschlagen');
-      BE.meldung = 'Buchungstext geändert' + (ed.standard ? ', Standardtext angepasst (' + d.belege + (d.belege === 1 ? ' Beleg' : ' Belege') + ' aktualisiert)' : ' (nur dieser Beleg)') + '.';
+      BE.meldung = 'Buchungstext geändert' + (ed.standard ? ', als Standardtext für künftige Belege gemerkt, bisherige Belege bleiben unverändert' : ' (nur dieser Beleg)') + '.';
       BE.btEdit = null;
       ladeListe('beleg', 'XXL'); ladeListe('beleg', 'LEV');
       if (BT.daten) ladeBT();
@@ -3174,7 +3174,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
           : '<button type="button" class="btn btn-secondary" style="padding:4px 10px" data-bt="speichern">Speichern</button> <button type="button" class="link-btn" data-bt="loeschen" data-key="' + esc(key) + '">Löschen</button>') + '</td></tr>';
     });
     if (!regeln.length) h += '<tr><td colspan="5" class="leer">Keine Texte.</td></tr>';
-    h += '</tbody></table></div><div class="card-fuss">Eine Änderung hier gilt für künftig gelesene Belege und passt die noch nicht gebuchten Belege im Eingang an. Einen Text nur für einen Beleg änderst du direkt in der Beleg-Liste am Buchungstext. Ändern, löschen oder neu anlegen setzt die Quelle auf „von Marko festgelegt“.</div></div></div>';
+    h += '</tbody></table></div><div class="card-fuss">Eine Änderung hier gilt nur für künftig gelesene Belege, bisherige Belege behalten ihren Text. Einen Text nur für einen Beleg änderst du direkt in der Beleg-Liste am Buchungstext. Ändern, löschen oder neu anlegen setzt die Quelle auf „von Marko festgelegt“.</div></div></div>';
     el.innerHTML = h;
     if (fokus) { var n = el.querySelector('[data-bt="suche"]'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } }
   }
@@ -3186,7 +3186,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var w = b.getAttribute('data-bt'), zeile = b.closest('tr');
       if (w === 'neu-laden') { BT.meldung = ''; ladeBT(); }
       else if (w === 'neu') btRegel({ aktion: 'regel_neu', aussteller: zeile.querySelector('[data-bt="neu-aussteller"]').value, zweck: zeile.querySelector('[data-bt="neu-zweck"]').value }, 'Standardtext angelegt.');
-      else if (w === 'speichern') { var i = zeile.querySelector('[data-bt="wert"]'); btRegel({ aktion: 'regel_aendern', schluessel: i.getAttribute('data-schluessel'), alt: i.getAttribute('data-alt'), zweck: i.value }, 'Standardtext geändert.'); }
+      else if (w === 'speichern') { var i = zeile.querySelector('[data-bt="wert"]'); btRegel({ aktion: 'regel_aendern', schluessel: i.getAttribute('data-schluessel'), alt: i.getAttribute('data-alt'), zweck: i.value }, 'Standardtext geändert, gilt für künftige Belege. Bisherige Belege bleiben unverändert.'); }
       else if (w === 'loeschen') { BT.loeschen = b.getAttribute('data-key'); renderBT(); }
       else if (w === 'loeschen-nein') { BT.loeschen = null; renderBT(); }
       else if (w === 'loeschen-ja') btRegel({ aktion: 'regel_loeschen', schluessel: b.getAttribute('data-schluessel'), alt: b.getAttribute('data-alt') }, 'Standardtext gelöscht.');
