@@ -105,6 +105,9 @@ main.wrap { padding-top: 28px; padding-bottom: 48px; }
 .tbl-voll .tbl th:first-child, .tbl-voll .tbl td:first-child { padding-left: 12px; }
 .tbl-voll table.tbl.fest { table-layout: fixed; min-width: 1000px; }
 .tbl-voll .tbl.fest td, .tbl-voll .tbl.fest th { overflow-wrap: anywhere; hyphens: auto; }
+.tbl-voll abbr[title] { text-decoration: none; cursor: help; border-bottom: 1px dotted var(--text-muted); }
+.btn-loeschen { background: none; border: 1px solid var(--color-error); color: var(--color-error); border-radius: var(--radius-sm); padding: 4px 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.btn-loeschen:hover { background: var(--color-error-bg); }
 .tbl-voll .linkreihe { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 4px; }
 @media (max-width: 1100px) { .tbl-voll { overflow-x: auto; } }
 .abschnitt { font-size: 1.125rem; font-weight: 600; margin: 0 0 12px; }
@@ -415,6 +418,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   <section id="p-zahlung-xxl" role="tabpanel" aria-labelledby="tab-zahlung-xxl" hidden></section>
   <section id="p-zahlung-lev" role="tabpanel" aria-labelledby="tab-zahlung-lev" hidden></section>
   <section id="p-zahlung-lev-lp" role="tabpanel" aria-labelledby="tab-zahlung-lev-lp" hidden></section>
+  <section id="p-buchungstexte" role="tabpanel" aria-labelledby="tab-buchungstexte" hidden></section>
 
 </main>
 </div>
@@ -676,7 +680,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
     { id: 'segmentierung', name: 'Segmentierung', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
-    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlung XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung LEV Löwenpark' }] }
+    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlung XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung LEV Löwenpark' }, { id: 'buchungstexte', name: 'Buchungstexte' }] }
   ];
   var TABS = [];
   BEREICHE.forEach(function (b) { b.tabs.forEach(function (t) { TABS.push(t.id); }); });
@@ -734,6 +738,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (t === 'versand') loadVersand();
     if (BE_MANDANT[t]) ladeListe('beleg', BE_MANDANT[t]);
     if (ZA_KONTO[t]) ladeListe('zahlung', ZA_KONTO[t]);
+    if (t === 'buchungstexte') ladeBT();
     // SEO laedt erst, wenn der Tab zum ersten Mal geoeffnet wird: die
     // Sheets-Abfrage dauert laenger als die pretix-Aufrufe und wird beim
     // taeglichen Gutschein-Anlegen gar nicht gebraucht.
@@ -2678,7 +2683,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   function leer() { return { daten: null, fehler: null, laedt: false, monat: '', filter: 'alle', suche: '' }; }
   var BL = { XXL: leer(), LEV: leer() };
   var ZA = { XXL: leer(), LEV: leer(), LEVLP: leer() };
-  var BE = { loeschen: null, meldung: '' };
+  var BE = { loeschen: null, meldung: '', btEdit: null };
   function bePanel(id) { return $('p-' + id); }
   function tabVon(map, k) { return Object.keys(map).filter(function (t) { return map[t] === k; })[0]; }
   function monatName(m) { var d = new Date(m + '-15T12:00:00'); return isNaN(d) ? m : d.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' }); }
@@ -2711,6 +2716,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var pos = fokus ? fokus.selectionStart : 0;
     el.innerHTML = '<div class="stapel">' + inhalt + '</div>';
     if (fokus) { var neu = el.querySelector('[data-be="suche"]'); if (neu) { neu.focus(); try { neu.setSelectionRange(pos, pos); } catch (e) {} } }
+    var bt = el.querySelector('[data-be="bt-wert"]'); if (bt && BE.btEdit && !BE.btEdit.fokus && el.offsetParent !== null) { bt.focus(); bt.select(); BE.btEdit.fokus = true; }
   }
   function usd(n) { return Number(n || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' $'; }
   function beCent(n) { return (Number(n || 0) * 100).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ct'; }
@@ -2785,6 +2791,19 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       (weitere ? '<button type="button" class="btn-gefahr" data-be="loeschen-ja" data-id="' + a.id + '" data-aktion="mail"' + aus + '>Beleg und ganze Mail löschen</button>' : '') +
       '<button type="button" class="link-btn" data-be="loeschen-nein"' + aus + '>Abbrechen</button></div>' + fehler + '</div></td></tr>';
   }
+  // Buchungstext des Agenten mit "ändern": nur für diesen Beleg oder (Haken) als neuer Standardtext des Ausstellers.
+  function btFeld(a) {
+    var ed = BE.btEdit, nr = a.nummer ? a.nummer + ' - ' : '';
+    if (ed && ed.id === a.id) {
+      return '<div class="btedit"><div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap"><span class="notiz" style="margin:0">' + esc(nr) + '</span>' +
+        '<input class="eingabe-klein" style="flex:1 1 120px" maxlength="24" data-be="bt-wert" aria-label="Zweck im Buchungstext, höchstens 24 Zeichen" value="' + esc(ed.wert) + '"></div>' +
+        '<label class="text-klein" style="display:block;margin-top:4px"><input type="checkbox" data-be="bt-standard"' + (ed.standard ? ' checked' : '') + '> Standardtext für ' + esc(a.aussteller || 'diesen Aussteller') + ' ändern</label>' +
+        '<div style="display:flex;gap:8px;margin-top:4px;align-items:center"><button type="button" class="btn btn-primary" style="padding:4px 10px" data-be="bt-speichern" data-id="' + a.id + '"' + (ed.laeuft ? ' disabled' : '') + '>' + (ed.laeuft ? 'Speichere …' : 'Speichern') + '</button>' +
+        '<button type="button" class="link-btn" data-be="bt-abbruch">Abbrechen</button></div>' +
+        (ed.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:4px">' + esc(ed.fehler) + '</div>' : '') + '</div>';
+    }
+    return '<div>' + (a.buchungstext ? esc(a.buchungstext) : '<span class="gedaempft">kein Vorschlag</span>') + ' <button type="button" class="link-btn" data-be="bt-edit" data-id="' + a.id + '" data-zweck="' + esc(a.buchungstext_zweck || '') + '" aria-label="Buchungstext ändern">ändern</button></div>';
+  }
   function renderBelegListe(k) {
     var z = BL[k], d = z.daten, kp = d.kpi || {};
     var anteil = Math.min(100, Math.round(Number(kp.kosten_monat || 0) / BE_BUDGET_USD * 100));
@@ -2804,7 +2823,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       '<select class="auswahl" data-be="filter" data-k="' + k + '" aria-label="Filter">' + opt('alle', 'Alle Belege') + opt('bezahlt', 'Gebucht und bezahlt') + opt('offen', 'Gebucht, Zahlung offen') + opt('eingang', 'Nur im Eingang, nicht gebucht') + opt('pruefen', 'Agent: zur Prüfung') + '</select> ' +
       '<button type="button" class="link-btn" data-be="neu" data-k="' + k + '">Aktualisieren</button></span></div>' +
       (BE.meldung ? '<div class="erfolg" role="status" style="margin:8px 12px">' + esc(BE.meldung) + '</div>' : '') +
-      '<div class="tbl-voll"><table class="tbl kompakt fest"><colgroup><col style="width:7%"><col style="width:12%"><col style="width:8%"><col style="width:7%"><col style="width:11%"><col style="width:8%"><col style="width:6%"><col style="width:7%"><col style="width:7%"><col style="width:4%"><col style="width:7%"><col style="width:6%"><col style="width:7%"><col style="width:3%"></colgroup><thead><tr><th>Datum</th><th>Beleg</th><th>Status</th><th class="rechts">Belegbetrag</th><th>Buchungstext</th><th>Sachkonto</th><th>Gegenkonto</th><th>KST 1</th><th>KST 2</th><th class="rechts" title="Umsatzsteuersatz">USt</th><th class="rechts">Netto</th><th class="rechts">Steuer</th><th class="rechts">Brutto</th><th title="Steuerschlüssel">Schl.</th></tr></thead><tbody>';
+      '<div class="tbl-voll"><table class="tbl kompakt fest"><colgroup><col style="width:7%"><col style="width:12%"><col style="width:8%"><col style="width:7%"><col style="width:11%"><col style="width:8%"><col style="width:6%"><col style="width:7%"><col style="width:7%"><col style="width:4%"><col style="width:7%"><col style="width:6%"><col style="width:7%"><col style="width:3%"></colgroup><thead><tr><th><abbr title="Belegdatum">Datum</abbr></th><th><abbr title="Gegenpartei, Rechnungsnummer, Links und Quelle">Beleg</abbr></th><th><abbr title="Gebucht (Buch-Symbol) und Zahlung zugewiesen (Euro-Symbol)">Status</abbr></th><th class="rechts"><abbr title="Belegbetrag brutto">Beleg €</abbr></th><th><abbr title="Buchungstext aus BuchhaltungsButler, bei noch nicht gebuchten Belegen der Vorschlag des Agenten">Text</abbr></th><th><abbr title="Sachkonto mit Bezeichnung">Sachk.</abbr></th><th><abbr title="Gegenkonto: Kreditor oder Debitor">Gegenk.</abbr></th><th><abbr title="Kostenstelle 1">KST1</abbr></th><th><abbr title="Kostenstelle 2">KST2</abbr></th><th class="rechts"><abbr title="Umsatzsteuersatz">USt</abbr></th><th class="rechts"><abbr title="Nettobetrag der Buchungszeile (aus Brutto und Satz gerechnet)">Netto</abbr></th><th class="rechts"><abbr title="Steuerbetrag der Buchungszeile (aus Brutto und Satz gerechnet)">Steuer</abbr></th><th class="rechts"><abbr title="Bruttobetrag der Buchungszeile">Brutto</abbr></th><th><abbr title="Steuerschlüssel">Schl.</abbr></th></tr></thead><tbody>';
     zeilen.forEach(function (r) {
       var b = r.bhb, a = r.agent;
       var titel = (b && b.gegenpartei) || (a && (a.aussteller || a.anhang_name)) || '–';
@@ -2829,7 +2848,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       if (a && a.drive_url) links.push('<a href="' + esc(a.drive_url) + '" target="_blank" rel="noopener">Original</a>');
       if (b && b.link) links.push('<a href="' + esc(b.link) + '" target="_blank" rel="noopener">Beleg in BHB</a>');
       if (a && a.gmail_id && String(a.gmail_id).indexOf('test') !== 0) links.push('<a href="https://mail.google.com/mail/?authuser=rechnung@basketball-loewen.com#all/' + esc(a.gmail_id) + '" target="_blank" rel="noopener">Mail</a>');
-      if (a) links.push('<button type="button" class="link-btn" data-be="loeschen" data-id="' + a.id + '" aria-label="Löschen: ' + esc(titel) + '">Löschen</button>');
+      var loeschKnopf = a ? '<div style="margin-top:6px"><button type="button" class="btn-loeschen" data-be="loeschen" data-id="' + a.id + '" title="Entfernt diesen Beleg aus der Liste und die Datei aus Google Drive. Die Mail kommt in den Papierkorb, wenn kein weiterer relevanter Anhang daran hängt. In BuchhaltungsButler ändert sich nichts." aria-label="Beleg löschen: ' + esc(titel) + '">Beleg löschen</button></div>' : '';
       // Buchungszeilen: aus BuchhaltungsButler, sonst die Beträge je Steuersatz, die der Agent gelesen hat.
       var zl = [];
       if (b && (b.buchungen || []).length) zl = b.buchungen.map(function (x) {
@@ -2841,17 +2860,17 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var agentLese = '';
       if (a) {
         var zeile = function (l, w) { return w === null || w === undefined || w === '' ? '' : '<div>' + esc(l) + ': ' + esc(w) + '</div>'; };
-        agentLese = '<details style="margin-top:4px"><summary class="text-klein">Was der Agent gelesen hat</summary><div class="notiz" style="margin:4px 0 0">' +
+        agentLese = '<details style="margin-top:4px"' + (BE.btEdit && BE.btEdit.id === a.id && b ? ' open' : '') + '><summary class="text-klein">Was der Agent gelesen hat</summary>' + (b ? '<div style="margin:4px 0 0"><span class="notiz" style="margin:0">Buchungstext-Vorschlag</span>' + btFeld(a) + '</div>' : '') + '<div class="notiz" style="margin:4px 0 0">' +
           zeile('Brutto', a.brutto !== null && a.brutto !== undefined ? formatEuro(Number(a.brutto)) : '') + zeile('Netto', a.netto !== null && a.netto !== undefined ? formatEuro(Number(a.netto)) : '') + zeile('Steuer', a.steuer !== null && a.steuer !== undefined ? formatEuro(Number(a.steuer)) : '') +
-          zeile('Buchungstext (Vorschlag)', a.buchungstext) + zeile('Rechnungsdatum', a.datum ? formatDate(a.datum) : '') + zeile('Fällig', a.faellig ? formatDate(a.faellig) : '') + zeile('Leistungszeitraum', a.leistungszeitraum) + zeile('IBAN', a.iban) + zeile('Zahlungsart', a.zahlungsart) + zeile('Zweck auf dem Beleg', a.zweck) + zeile('Hinweis des Modells', a.hinweis) + '</div></details>';
+          zeile('Rechnungsdatum', a.datum ? formatDate(a.datum) : '') + zeile('Fällig', a.faellig ? formatDate(a.faellig) : '') + zeile('Leistungszeitraum', a.leistungszeitraum) + zeile('IBAN', a.iban) + zeile('Zahlungsart', a.zahlungsart) + zeile('Zweck auf dem Beleg', a.zweck) + zeile('Hinweis des Modells', a.hinweis) + '</div></details>';
       }
       var rs = ' rowspan="' + zl.length + '"';
       var eu = function (n) { return n === null || n === undefined ? '' : esc(formatEuro(n)); };
       zl.forEach(function (x, i) {
         var text = (x.text ? '<div>' + esc(x.text) + '</div>' : '') + (x.komm ? '<div class="notiz" style="margin:0">Kommentar: ' + esc(x.komm) + '</div>' : '') +
           (x.bdat && r.datum && String(x.bdat).slice(0, 10) !== String(r.datum).slice(0, 10) ? '<div class="notiz" style="margin:0">gebucht am ' + esc(formatDate(String(x.bdat).slice(0, 10))) + '</div>' : '') +
-          (x.agent && a && a.buchungstext ? '<div>' + esc(a.buchungstext) + '</div>' : '') + (x.agent ? '<div class="notiz" style="margin:0">' + (a && a.buchungstext ? 'Vorschlag Buchungstext, ' : '') + 'vom Agenten gelesen, noch nicht gebucht</div>' : '');
-        h += '<tr>' + (i === 0 ? '<td' + rs + ' class="nowrap">' + esc(r.datum ? formatDate(String(r.datum).slice(0, 10)) : '') + '</td><td' + rs + '>' + kopf + agentLese + '<div class="linkreihe">' + links.join('') + '</div></td><td' + rs + '>' + status + '</td><td' + rs + ' class="nowrap zahlen rechts">' + (brutto !== null ? esc(formatEuro(brutto)) : '') + '</td>' : '') +
+          (x.agent && a ? btFeld(a) : '') + (x.agent ? '<div class="notiz" style="margin:0">' + (a && a.buchungstext ? 'Vorschlag Buchungstext, ' : '') + 'vom Agenten gelesen, noch nicht gebucht</div>' : '');
+        h += '<tr>' + (i === 0 ? '<td' + rs + ' class="nowrap">' + esc(r.datum ? formatDate(String(r.datum).slice(0, 10)) : '') + '</td><td' + rs + '>' + kopf + agentLese + '<div class="linkreihe">' + links.join('') + '</div>' + loeschKnopf + '</td><td' + rs + '>' + status + '</td><td' + rs + ' class="nowrap zahlen rechts">' + (brutto !== null ? esc(formatEuro(brutto)) : '') + '</td>' : '') +
           '<td>' + text + '</td><td>' + beKonto(x.konto, x.kname) + '</td><td>' + esc(x.gegen || '') + '</td><td>' + beKonto(x.kst1, x.kst1n) + '</td><td>' + beKonto(x.kst2, x.kst2n) + '</td>' +
           '<td class="nowrap zahlen rechts">' + (x.satz !== null && x.satz !== undefined && x.satz !== '' ? esc(Number(x.satz).toLocaleString('de-DE') + ' %') : '') + '</td>' +
           '<td class="nowrap zahlen rechts">' + eu(x.netto) + '</td><td class="nowrap zahlen rechts">' + eu(x.steuer) + '</td><td class="nowrap zahlen rechts">' + eu(x.brutto) + '</td><td>' + esc(x.schl || '') + '</td>' +
@@ -2885,7 +2904,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       '<input type="search" class="eingabe-klein" style="width:180px;flex:none" data-be="suche" data-k="' + k + '" data-art="zahlung" placeholder="Suchen …" aria-label="Suchen" value="' + esc(z.suche) + '"> ' +
       '<select class="auswahl" data-be="filter" data-k="' + k + '" data-art="zahlung" aria-label="Filter">' + opt('alle', 'Alle Zahlungen') + opt('gebucht', 'Gebucht') + opt('offen', 'Noch offen') + '</select> ' +
       '<button type="button" class="link-btn" data-be="neu" data-k="' + k + '" data-art="zahlung">Aktualisieren</button></span></div>' +
-      '<div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Datum</th><th>Zahlung</th><th>Betrag</th><th>Status</th><th>Beleg und Konto</th></tr></thead><tbody>';
+      '<div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th><abbr title="Buchungsdatum des Bankumsatzes">Datum</abbr></th><th><abbr title="Gegenpartei und Verwendungszweck">Zahlung</abbr></th><th class="rechts"><abbr title="Betrag des Umsatzes, Ausgaben mit Minus">Betrag</abbr></th><th><abbr title="Beleg zugeordnet oder beleglos (Dokument-Symbol) und gebucht (Buch-Symbol)">Status</abbr></th><th><abbr title="Zugeordneter Beleg mit Sachkonto und Kostenstellen, bei beleglosen Zahlungen das Konto der Buchung">Beleg, Konto</abbr></th></tr></thead><tbody>';
     zeilen.forEach(function (p) {
       var bu = p.buchungen || [], belege = p.belege || [];
       var gebucht = bu.length > 0;
@@ -2912,6 +2931,89 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       (Number(kp.ohne_konto || 0) ? ' ' + esc(zahl(kp.ohne_konto)) + ' Umsätze sind keinem Bankkonto zugeordnet.' : '') + '</div></div>';
     return h;
   }
+  async function btSpeichern(id) {
+    var ed = BE.btEdit; if (!ed) return;
+    ed.laeuft = true; ed.fehler = ''; beAlleRender();
+    try {
+      var res = await fetch('/webhook/accounting/buchungstext-aendern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ aktion: 'beleg', id: id, zweck: ed.wert, standard: !!ed.standard }) });
+      var d = await res.json();
+      if (!res.ok || !d.ok) throw new Error(d.message || d.fehler || 'Speichern fehlgeschlagen');
+      BE.meldung = 'Buchungstext geändert' + (ed.standard ? ', Standardtext angepasst (' + d.belege + (d.belege === 1 ? ' Beleg' : ' Belege') + ' aktualisiert)' : ' (nur dieser Beleg)') + '.';
+      BE.btEdit = null;
+      ladeListe('beleg', 'XXL'); ladeListe('beleg', 'LEV');
+      if (BT.daten) ladeBT();
+      return;
+    } catch (e) { ed.laeuft = false; ed.fehler = e.message; }
+    beAlleRender();
+  }
+  // ---------- Accounting: Buchungstexte (Standardtexte je Aussteller) ----------
+  var BT = { daten: null, fehler: null, laedt: false, suche: '', meldung: '', loeschen: null, fehlerAktion: '' };
+  async function ladeBT() {
+    BT.laedt = true; BT.fehler = null; renderBT();
+    try {
+      var res = await fetch('/webhook/accounting/buchungstext-regeln');
+      var d = await res.json();
+      if (!res.ok) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
+      BT.daten = d;
+    } catch (e) { BT.fehler = e.message; }
+    BT.laedt = false; renderBT();
+  }
+  async function btRegel(daten, meldung) {
+    BT.fehlerAktion = ''; BT.meldung = '';
+    try {
+      var res = await fetch('/webhook/accounting/buchungstext-aendern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(daten) });
+      var d = await res.json();
+      if (!res.ok || !d.ok) throw new Error(d.message || d.fehler || 'Speichern fehlgeschlagen');
+      BT.meldung = meldung + (d.belege ? ' ' + d.belege + (d.belege === 1 ? ' Beleg' : ' Belege') + ' im Eingang angepasst.' : '');
+      BT.loeschen = null;
+      await ladeBT(); ladeListe('beleg', 'XXL'); ladeListe('beleg', 'LEV');
+    } catch (e) { BT.fehlerAktion = e.message; renderBT(); }
+  }
+  function renderBT() {
+    var el = $('p-buchungstexte'); if (!el) return;
+    if (BT.laedt && !BT.daten) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
+    if (BT.fehler && !BT.daten) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(BT.fehler) + '</div>'; return; }
+    if (!BT.daten) { el.innerHTML = ''; return; }
+    var q = { marko: 'von Marko festgelegt', steuerberater: 'vom Steuerberater', modell: 'Vorschlag der KI' };
+    var such = String(BT.suche || '').trim().toLowerCase();
+    var regeln = (BT.daten.regeln || []).filter(function (r) { return !such || (r.aussteller + ' ' + r.zweck).toLowerCase().indexOf(such) >= 0; });
+    var fokus = document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute('data-bt') === 'suche';
+    var pos = fokus ? document.activeElement.selectionStart : 0;
+    var th = function (k, l, c) { return '<th' + (c ? ' class="' + c + '"' : '') + '><abbr title="' + l + '">' + k + '</abbr></th>'; };
+    var h = '<div class="stapel"><div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Standardtexte für den Buchungstext · ' + esc(zahl((BT.daten.regeln || []).length)) + ' Texte</span><span>' +
+      '<input type="search" class="eingabe-klein" style="width:200px;flex:none" data-bt="suche" placeholder="Suchen …" aria-label="Suchen" value="' + esc(BT.suche) + '"> <button type="button" class="link-btn" data-bt="neu-laden">Aktualisieren</button></span></div>' +
+      (BT.meldung ? '<div class="erfolg" role="status" style="margin:8px 12px">' + esc(BT.meldung) + '</div>' : '') +
+      (BT.fehlerAktion ? '<div class="fehlerbox" role="alert" style="margin:8px 12px">' + esc(BT.fehlerAktion) + '</div>' : '') +
+      '<div class="tbl-voll"><table class="tbl kompakt"><thead><tr>' + th('Aussteller', 'Firma, die die Rechnung stellt') + th('Standardtext', 'Zweck im Buchungstext, höchstens 24 Zeichen. Der ganze Buchungstext ist Rechnungsnummer, Bindestrich, Zweck und höchstens 36 Zeichen lang') + th('Quelle', 'Wer den Text festgelegt hat. Texte von Marko und vom Steuerberater sind verbindlich') + th('Belege', 'Belege im Eingang, die diesen Text tragen', 'rechts') + '<th></th></tr></thead><tbody>' +
+      '<tr><td><input class="eingabe-klein" style="width:100%" data-bt="neu-aussteller" placeholder="Neuer Aussteller" aria-label="Neuer Aussteller"></td><td><input class="eingabe-klein" style="width:100%" maxlength="24" data-bt="neu-zweck" placeholder="Standardtext" aria-label="Neuer Standardtext"></td><td class="notiz">von Marko festgelegt</td><td></td><td><button type="button" class="btn btn-secondary" style="padding:4px 10px" data-bt="neu">Hinzufügen</button></td></tr>';
+    regeln.forEach(function (r) {
+      var key = r.schluessel + '|' + r.zweck;
+      var loe = BT.loeschen === key;
+      h += '<tr><td>' + esc(r.aussteller) + '</td>' +
+        '<td><input class="eingabe-klein" style="width:100%" maxlength="24" data-bt="wert" data-schluessel="' + esc(r.schluessel) + '" data-alt="' + esc(r.zweck) + '" aria-label="Standardtext für ' + esc(r.aussteller) + '" value="' + esc(r.zweck) + '"></td>' +
+        '<td class="notiz">' + esc(q[r.quelle] || r.quelle) + (r.beispiel_nummer ? '<br>Beispiel Nr. ' + esc(r.beispiel_nummer) : '') + '</td><td class="rechts zahlen">' + esc(zahl(r.belege || 0)) + '</td>' +
+        '<td style="white-space:nowrap">' + (loe ? '<span class="notiz" style="margin:0">Text wirklich löschen? Belege behalten ihren Text.</span> <button type="button" class="btn-gefahr" data-bt="loeschen-ja" data-schluessel="' + esc(r.schluessel) + '" data-alt="' + esc(r.zweck) + '">Löschen</button> <button type="button" class="link-btn" data-bt="loeschen-nein">Abbrechen</button>'
+          : '<button type="button" class="btn btn-secondary" style="padding:4px 10px" data-bt="speichern">Speichern</button> <button type="button" class="link-btn" data-bt="loeschen" data-key="' + esc(key) + '">Löschen</button>') + '</td></tr>';
+    });
+    if (!regeln.length) h += '<tr><td colspan="5" class="leer">Keine Texte.</td></tr>';
+    h += '</tbody></table></div><div class="card-fuss">Eine Änderung hier gilt für künftig gelesene Belege und passt die noch nicht gebuchten Belege im Eingang an. Einen Text nur für einen Beleg änderst du direkt in der Beleg-Liste am Buchungstext. Ändern, löschen oder neu anlegen setzt die Quelle auf „von Marko festgelegt“.</div></div></div>';
+    el.innerHTML = h;
+    if (fokus) { var n = el.querySelector('[data-bt="suche"]'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } }
+  }
+  function bindBT() {
+    var p = $('p-buchungstexte');
+    p.addEventListener('input', function (e) { var s = e.target.closest('[data-bt="suche"]'); if (s) { BT.suche = s.value; renderBT(); } });
+    p.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-bt]'); if (!b) return;
+      var w = b.getAttribute('data-bt'), zeile = b.closest('tr');
+      if (w === 'neu-laden') { BT.meldung = ''; ladeBT(); }
+      else if (w === 'neu') btRegel({ aktion: 'regel_neu', aussteller: zeile.querySelector('[data-bt="neu-aussteller"]').value, zweck: zeile.querySelector('[data-bt="neu-zweck"]').value }, 'Standardtext angelegt.');
+      else if (w === 'speichern') { var i = zeile.querySelector('[data-bt="wert"]'); btRegel({ aktion: 'regel_aendern', schluessel: i.getAttribute('data-schluessel'), alt: i.getAttribute('data-alt'), zweck: i.value }, 'Standardtext geändert.'); }
+      else if (w === 'loeschen') { BT.loeschen = b.getAttribute('data-key'); renderBT(); }
+      else if (w === 'loeschen-nein') { BT.loeschen = null; renderBT(); }
+      else if (w === 'loeschen-ja') btRegel({ aktion: 'regel_loeschen', schluessel: b.getAttribute('data-schluessel'), alt: b.getAttribute('data-alt') }, 'Standardtext gelöscht.');
+    });
+  }
   async function beLoeschen(id, aktion) {
     var l = BE.loeschen; if (!l) return;
     l.laeuft = true; l.fehler = ''; beAlleRender();
@@ -2935,10 +3037,12 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var p = $('p-' + id);
       var zustand = function (el) { var art = el.getAttribute('data-art') || (BE_MANDANT[id] ? 'beleg' : 'zahlung'); var k = el.getAttribute('data-k') || BE_MANDANT[id] || ZA_KONTO[id]; return { art: art, k: k, z: (art === 'beleg' ? BL : ZA)[k] }; };
       p.addEventListener('change', function (e) {
+        var c = e.target.closest('[data-be="bt-standard"]'); if (c) { if (BE.btEdit) BE.btEdit.standard = c.checked; return; }
         var s = e.target.closest('[data-be="filter"]'); if (!s) return;
         var st = zustand(s); st.z.filter = s.value; renderAccounting(st.art, st.k);
       });
       p.addEventListener('input', function (e) {
+        var w = e.target.closest('[data-be="bt-wert"]'); if (w) { if (BE.btEdit) BE.btEdit.wert = w.value; return; }
         var s = e.target.closest('[data-be="suche"]'); if (!s) return;
         var st = zustand(s); st.z.suche = s.value; renderAccounting(st.art, st.k);
       });
@@ -2950,6 +3054,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         else if (w === 'loeschen') { BE.meldung = ''; BE.loeschen = { id: Number(b.getAttribute('data-id')), laeuft: false, fehler: '' }; beAlleRender(); }
         else if (w === 'loeschen-nein') { BE.loeschen = null; beAlleRender(); }
         else if (w === 'loeschen-ja') beLoeschen(Number(b.getAttribute('data-id')), b.getAttribute('data-aktion'));
+        else if (w === 'bt-edit') { BE.meldung = ''; BE.btEdit = { id: Number(b.getAttribute('data-id')), wert: b.getAttribute('data-zweck') || '', standard: false, laeuft: false, fehler: '', fokus: false }; beAlleRender(); }
+        else if (w === 'bt-abbruch') { BE.btEdit = null; beAlleRender(); }
+        else if (w === 'bt-speichern') btSpeichern(Number(b.getAttribute('data-id')));
       });
     });
   }
@@ -3070,6 +3177,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   bindPersonen();
   bindVersand();
   bindBelege();
+  bindBT();
   document.addEventListener('loewen-nutzer', function () {
     if (!darfBereich(bereichVon(S.tab))) setTab(S.tab, false, S.tabArg); else renderNavigation();
   });
