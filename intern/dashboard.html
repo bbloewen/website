@@ -2680,7 +2680,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   var BE_MANDANT = { 'belege-xxl': 'XXL', 'belege-lev': 'LEV' };
   var ZA_KONTO = { 'zahlung-xxl': 'XXL', 'zahlung-lev': 'LEV', 'zahlung-lev-lp': 'LEVLP' };
   var BE_BUDGET_USD = 60; // gleiche Grenze wie im Workflow "Belegeingang neu"
-  function leer() { return { daten: null, fehler: null, laedt: false, monat: '', filter: 'alle', suche: '' }; }
+  function leer() { return { daten: null, fehler: null, laedt: false, monat: '', filter: 'alle', suche: '', richtung: 'alle' }; }
   var BL = { XXL: leer(), LEV: leer() };
   var ZA = { XXL: leer(), LEV: leer(), LEVLP: leer() };
   var BE = { loeschen: null, meldung: '', btEdit: null };
@@ -2752,15 +2752,19 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   }
   function num(v) { if (v === null || v === undefined || v === '') return null; var n = Number(v); return isFinite(n) ? n : null; }
   function nettoVon(brutto, satz) { if (brutto === null) return null; var u = num(satz) || 0; return Math.round(brutto / (1 + u / 100) * 100) / 100; }
+  function blGebucht(r) { return !!(r.bhb && r.bhb.buchungen && r.bhb.buchungen.length); }
   function blBezahlt(r) {
     if (!r.bhb) return false;
-    var brutto = Number(r.bhb.brutto || 0);
-    return Number(r.zahlungen || 0) > 0 || (brutto > 0 && Number(r.bhb.bezahlt || 0) >= brutto - 0.01);
+    var brutto = Math.abs(Number(r.bhb.brutto || 0));
+    return Number(r.zahlungen || 0) > 0 || (brutto > 0 && Math.abs(Number(r.bhb.bezahlt || 0)) >= brutto - 0.01);
   }
+  function blRichtung(r) { return r.bhb && /outbound/.test(r.bhb.typ || '') ? 'ausgang' : 'eingang'; }
   function blFilter(r, z) {
     var f = z.filter, a = r.agent;
-    if (f === 'bezahlt' && !(r.bhb && blBezahlt(r))) return false;
-    if (f === 'offen' && !(r.bhb && !blBezahlt(r))) return false;
+    if (z.richtung && z.richtung !== 'alle' && blRichtung(r) !== z.richtung) return false;
+    if (f === 'bezahlt' && !(blGebucht(r) && blBezahlt(r))) return false;
+    if (f === 'offen' && !(blGebucht(r) && !blBezahlt(r))) return false;
+    if (f === 'ungebucht' && blGebucht(r)) return false;
     if (f === 'eingang' && r.bhb) return false;
     if (f === 'pruefen' && !(a && (a.status === 'fehler' || (a.status === 'erkannt' && a.urteil === 'pruefen')))) return false;
     var s = String(z.suche || '').trim().toLowerCase(); if (!s) return true;
@@ -2817,10 +2821,14 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       '<div class="notiz">von ' + esc(usd(BE_BUDGET_USD)) + ' Sperre · gesamt ' + esc(usd(kp.kosten_gesamt)) + '</div></div></div>';
     var opt = function (w, t) { return '<option value="' + w + '"' + (z.filter === w ? ' selected' : '') + '>' + t + '</option>'; };
     var zeilen = (d.belege || []).filter(function (r) { return blFilter(r, z); });
+    var cnt = { alle: (d.belege || []).length, eingang: 0, ausgang: 0 };
+    (d.belege || []).forEach(function (r) { cnt[blRichtung(r)]++; });
+    var rk = function (w, t) { return '<button type="button" class="chip' + (z.richtung === w ? ' aktiv' : '') + '" data-be="richtung" data-k="' + k + '" data-w="' + w + '" aria-pressed="' + (z.richtung === w) + '">' + t + ' <span class="notiz" style="display:inline;margin:0">' + esc(zahl(cnt[w])) + '</span></button>'; };
+    h += '<div class="chips" role="group" aria-label="Art der Belege">' + rk('alle', 'Alle Belege') + rk('eingang', 'Eingangsbelege') + rk('ausgang', 'Ausgangsbelege') + '</div>';
     h += renderPager(z, 'data-art="beleg" data-k="' + k + '"');
     h += '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Belege ' + esc(k) + ' · ' + esc(d.monat ? monatName(d.monat) : '') + ' · ' + esc(zahl(zeilen.length)) + ' von ' + esc(zahl((d.belege || []).length)) + '</span><span>' +
       '<input type="search" class="eingabe-klein" style="width:180px;flex:none" data-be="suche" data-k="' + k + '" placeholder="Suchen …" aria-label="Suchen" value="' + esc(z.suche) + '"> ' +
-      '<select class="auswahl" data-be="filter" data-k="' + k + '" aria-label="Filter">' + opt('alle', 'Alle Belege') + opt('bezahlt', 'Gebucht und bezahlt') + opt('offen', 'Gebucht, Zahlung offen') + opt('eingang', 'Nur im Eingang, nicht gebucht') + opt('pruefen', 'Agent: zur Prüfung') + '</select> ' +
+      '<select class="auswahl" data-be="filter" data-k="' + k + '" aria-label="Filter">' + opt('alle', 'Alle Belege') + opt('bezahlt', 'Gebucht und bezahlt') + opt('offen', 'Gebucht, Zahlung offen') + opt('ungebucht', 'Noch nicht gebucht') + opt('eingang', 'Nur im Eingang, nicht in BHB') + opt('pruefen', 'Agent: zur Prüfung') + '</select> ' +
       '<button type="button" class="link-btn" data-be="neu" data-k="' + k + '">Aktualisieren</button></span></div>' +
       (BE.meldung ? '<div class="erfolg" role="status" style="margin:8px 12px">' + esc(BE.meldung) + '</div>' : '') +
       '<div class="tbl-voll"><table class="tbl kompakt fest"><colgroup><col style="width:7%"><col style="width:12%"><col style="width:8%"><col style="width:7%"><col style="width:11%"><col style="width:8%"><col style="width:6%"><col style="width:7%"><col style="width:7%"><col style="width:4%"><col style="width:7%"><col style="width:6%"><col style="width:7%"><col style="width:3%"></colgroup><thead><tr><th><abbr title="Belegdatum">Datum</abbr></th><th><abbr title="Gegenpartei, Rechnungsnummer, Links und Quelle">Beleg</abbr></th><th><abbr title="Gebucht (Buch-Symbol) und Zahlung zugewiesen (Euro-Symbol)">Status</abbr></th><th class="rechts"><abbr title="Belegbetrag brutto">Beleg €</abbr></th><th><abbr title="Buchungstext aus BuchhaltungsButler, bei noch nicht gebuchten Belegen der Vorschlag des Agenten">Text</abbr></th><th><abbr title="Sachkonto mit Bezeichnung">Sachk.</abbr></th><th><abbr title="Gegenkonto: Kreditor oder Debitor">Gegenk.</abbr></th><th><abbr title="Kostenstelle 1">KST1</abbr></th><th><abbr title="Kostenstelle 2">KST2</abbr></th><th class="rechts"><abbr title="Umsatzsteuersatz">USt</abbr></th><th class="rechts"><abbr title="Nettobetrag der Buchungszeile (aus Brutto und Satz gerechnet)">Netto</abbr></th><th class="rechts"><abbr title="Steuerbetrag der Buchungszeile (aus Brutto und Satz gerechnet)">Steuer</abbr></th><th class="rechts"><abbr title="Bruttobetrag der Buchungszeile">Brutto</abbr></th><th><abbr title="Steuerschlüssel">Schl.</abbr></th></tr></thead><tbody>';
@@ -2833,7 +2841,10 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var kopf = '<div class="fett">' + esc(titel) + '</div><div class="notiz" style="margin:0">' + esc(art + (nummer ? ' · Nr. ' + nummer : '')) + '</div>' +
         (a ? '<div class="notiz" style="margin:0">' + esc((a.absender || '') + (a.eingang_am ? ' · Mail vom ' + formatDate(String(a.eingang_am).slice(0, 10)) : '')) + '</div>' : '');
       var status = '';
-      if (b) {
+      if (b && !blGebucht(r)) {
+        var bez0 = blBezahlt(r);
+        status = '<div class="ikreihe">' + ikSymbol('buch', false, 'In BuchhaltungsButler hochgeladen, noch nicht gebucht') + ikSymbol('euro', bez0, bez0 ? 'Zahlung zugewiesen' : 'Zahlung fehlt noch') + '</div><div class="notiz" style="margin:2px 0 0">in BHB, noch nicht gebucht</div>';
+      } else if (b) {
         var bez = blBezahlt(r);
         var teil = !bez && Number(b.bezahlt || 0) > 0 ? esc(formatEuro(Number(b.bezahlt))) + ' von ' + esc(formatEuro(Number(b.brutto || 0))) + ' bezahlt' : '';
         status = '<div class="ikreihe">' + ikSymbol('buch', true, 'Gebucht' + (b.fixiert ? ' und festgeschrieben' : '')) + ikSymbol('euro', bez, bez ? 'Zahlung zugewiesen' : (teil ? 'Teilweise bezahlt: ' + teil : 'Zahlung fehlt noch')) + '</div>' +
@@ -2856,7 +2867,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         return { text: x.text, komm: x.kommentar, bdat: x.datum, konto: x.sachkonto, kname: x.sachkonto_name, gegen: x.gegenkonto, kst1: x.kst1, kst1n: x.kst1_name, kst2: x.kst2, kst2n: x.kst2_name, satz: x.ust, netto: ne, steuer: br !== null && ne !== null ? Math.round((br - ne) * 100) / 100 : null, brutto: br, schl: x.schluessel };
       });
       else if (a && Array.isArray(a.betraege) && a.betraege.length) zl = a.betraege.map(function (x) { return { agent: true, satz: x.steuersatz, netto: num(x.netto), steuer: num(x.steuer), brutto: num(x.brutto) }; });
-      else zl = [{ agent: !!a, netto: a ? num(a.netto) : null, steuer: a ? num(a.steuer) : null, brutto: a ? num(a.brutto) : null }];
+      else zl = [{ agent: !!a, netto: a ? num(a.netto) : null, steuer: a ? num(a.steuer) : null, brutto: a ? num(a.brutto) : null, hinweisBhb: !!b && !a }];
       var agentLese = '';
       if (a) {
         var zeile = function (l, w) { return w === null || w === undefined || w === '' ? '' : '<div>' + esc(l) + ': ' + esc(w) + '</div>'; };
@@ -2869,7 +2880,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       zl.forEach(function (x, i) {
         var text = (x.text ? '<div>' + esc(x.text) + '</div>' : '') + (x.komm ? '<div class="notiz" style="margin:0">Kommentar: ' + esc(x.komm) + '</div>' : '') +
           (x.bdat && r.datum && String(x.bdat).slice(0, 10) !== String(r.datum).slice(0, 10) ? '<div class="notiz" style="margin:0">gebucht am ' + esc(formatDate(String(x.bdat).slice(0, 10))) + '</div>' : '') +
-          (x.agent && a ? btFeld(a) : '') + (x.agent ? '<div class="notiz" style="margin:0">' + (a && a.buchungstext ? 'Vorschlag Buchungstext, ' : '') + 'vom Agenten gelesen, noch nicht gebucht</div>' : '');
+          (x.agent && a ? btFeld(a) : '') + (x.agent ? '<div class="notiz" style="margin:0">' + (a && a.buchungstext ? 'Vorschlag Buchungstext, ' : '') + 'vom Agenten gelesen, noch nicht gebucht</div>' : '') + (x.hinweisBhb ? '<div class="notiz" style="margin:0">noch keine Kontierung, nur Beleg in BuchhaltungsButler</div>' : '');
         h += '<tr>' + (i === 0 ? '<td' + rs + ' class="nowrap">' + esc(r.datum ? formatDate(String(r.datum).slice(0, 10)) : '') + '</td><td' + rs + '>' + kopf + agentLese + '<div class="linkreihe">' + links.join('') + '</div>' + loeschKnopf + '</td><td' + rs + '>' + status + '</td><td' + rs + ' class="nowrap zahlen rechts">' + (brutto !== null ? esc(formatEuro(brutto)) : '') + '</td>' : '') +
           '<td>' + text + '</td><td>' + beKonto(x.konto, x.kname) + '</td><td>' + esc(x.gegen || '') + '</td><td>' + beKonto(x.kst1, x.kst1n) + '</td><td>' + beKonto(x.kst2, x.kst2n) + '</td>' +
           '<td class="nowrap zahlen rechts">' + (x.satz !== null && x.satz !== undefined && x.satz !== '' ? esc(Number(x.satz).toLocaleString('de-DE') + ' %') : '') + '</td>' +
@@ -3050,6 +3061,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         var b = e.target.closest('[data-be]'); if (!b) return;
         var w = b.getAttribute('data-be'), st = zustand(b);
         if (w === 'neu') { BE.meldung = ''; ladeListe(st.art, st.k); }
+        else if (w === 'richtung') { var zz = (BL)[b.getAttribute('data-k')]; zz.richtung = b.getAttribute('data-w'); renderAccounting('beleg', b.getAttribute('data-k')); }
         else if (w === 'monat') { ladeListe(st.art, st.k, b.getAttribute('data-monat')); window.scrollTo(0, 0); }
         else if (w === 'loeschen') { BE.meldung = ''; BE.loeschen = { id: Number(b.getAttribute('data-id')), laeuft: false, fehler: '' }; beAlleRender(); }
         else if (w === 'loeschen-nein') { BE.loeschen = null; beAlleRender(); }
