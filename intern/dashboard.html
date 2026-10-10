@@ -2804,7 +2804,6 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var m = z.daten.monate || [];
     if (!m.length) return '';
     var h = '<nav class="chips chips-gleich" aria-label="Monat wählen"><span class="notiz chips-label">Monat</span>';
-    if (z.daten.ohne_datum) h += '<button type="button" class="chip' + (z.monat === 'ohne' ? ' aktiv' : '') + '" data-be="monat" ' + attr + ' data-monat="ohne"' + (z.monat === 'ohne' ? ' aria-current="true"' : '') + ' aria-label="Ohne Buchungsdatum, ' + z.daten.ohne_datum + ' Einträge" style="border-color:var(--color-error)">Ohne Datum <span class="notiz" style="display:inline;margin:0">' + esc(zahl(z.daten.ohne_datum)) + '</span></button>';
     var gj = m.filter(function (x) { return x.monat >= '2026-07'; }).reduce(function (s, x) { return s + Number(x.n); }, 0);
     h += '<button type="button" class="chip' + (z.monat === 'alle' ? ' aktiv' : '') + '" data-be="monat" ' + attr + ' data-monat="alle"' + (z.monat === 'alle' ? ' aria-current="true"' : '') + ' aria-label="Alle Einträge ab Juli 2026, ' + gj + ' Einträge">Alle <span class="notiz" style="display:inline;margin:0">' + esc(zahl(gj)) + '</span></button>';
     m.forEach(function (x) {
