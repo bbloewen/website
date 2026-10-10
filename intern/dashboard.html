@@ -2750,15 +2750,15 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       .concat(((r.bhb && r.bhb.buchungen) || []).map(function (x) { return [x.sachkonto, x.sachkonto_name, x.kst1_name, x.kst2_name, x.text].join(' '); })).join(' ').toLowerCase();
     return heu.indexOf(s) >= 0;
   }
+  // Monatsauswahl über der Liste: jeder Monat einmal, neuester zuerst, der gewählte ist hervorgehoben.
   function renderPager(z, attr) {
     var m = z.daten.monate || [];
     if (!m.length) return '';
-    var i = m.map(function (x) { return x.monat; }).indexOf(z.monat);
-    var knopf = function (mon, text, aktiv, label) { return '<button type="button" class="chip' + (aktiv ? ' aktiv' : '') + '" data-be="monat" ' + attr + ' data-monat="' + mon + '"' + (aktiv ? ' aria-current="true"' : '') + (label ? ' aria-label="' + esc(label) + '"' : '') + '>' + text + '</button>'; };
-    var h = '<nav class="chips" aria-label="Monat" style="margin:12px 0 0">';
-    if (i >= 0 && i < m.length - 1) h += knopf(m[i + 1].monat, '‹ ' + esc(monatKurz(m[i + 1].monat)), false, 'Vorheriger Monat: ' + monatName(m[i + 1].monat));
-    m.slice().reverse().forEach(function (x) { h += knopf(x.monat, esc(monatKurz(x.monat)) + ' <span class="notiz" style="display:inline;margin:0">' + esc(zahl(x.n)) + '</span>', x.monat === z.monat); });
-    if (i > 0) h += knopf(m[i - 1].monat, esc(monatKurz(m[i - 1].monat)) + ' ›', false, 'Nächster Monat: ' + monatName(m[i - 1].monat));
+    var h = '<nav class="chips" aria-label="Monat wählen" style="align-items:center"><span class="notiz" style="margin:0">Monat</span>';
+    m.forEach(function (x) {
+      var aktiv = x.monat === z.monat;
+      h += '<button type="button" class="chip' + (aktiv ? ' aktiv' : '') + '" data-be="monat" ' + attr + ' data-monat="' + x.monat + '"' + (aktiv ? ' aria-current="true"' : '') + ' aria-label="' + esc(monatName(x.monat) + ', ' + x.n + ' Einträge') + '">' + esc(monatName(x.monat)) + ' <span class="notiz" style="display:inline;margin:0">' + esc(zahl(x.n)) + '</span></button>';
+    });
     return h + '</nav>';
   }
   function beLoeschBox(a) {
@@ -2786,6 +2786,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       '<div class="notiz">von ' + esc(usd(BE_BUDGET_USD)) + ' Sperre · gesamt ' + esc(usd(kp.kosten_gesamt)) + '</div></div></div>';
     var opt = function (w, t) { return '<option value="' + w + '"' + (z.filter === w ? ' selected' : '') + '>' + t + '</option>'; };
     var zeilen = (d.belege || []).filter(function (r) { return blFilter(r, z); });
+    h += renderPager(z, 'data-art="beleg" data-k="' + k + '"');
     h += '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Belege ' + esc(k) + ' · ' + esc(d.monat ? monatName(d.monat) : '') + ' · ' + esc(zahl(zeilen.length)) + ' von ' + esc(zahl((d.belege || []).length)) + '</span><span>' +
       '<input type="search" class="eingabe-klein" style="width:180px;flex:none" data-be="suche" data-k="' + k + '" placeholder="Suchen …" aria-label="Suchen" value="' + esc(z.suche) + '"> ' +
       '<select class="auswahl" data-be="filter" data-k="' + k + '" aria-label="Filter">' + opt('alle', 'Alle Belege') + opt('bezahlt', 'Gebucht und bezahlt') + opt('offen', 'Gebucht, Zahlung offen') + opt('eingang', 'Nur im Eingang, nicht gebucht') + opt('pruefen', 'Agent: zur Prüfung') + '</select> ' +
@@ -2825,8 +2826,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     });
     if (!zeilen.length) h += '<tr><td colspan="6" class="leer">Keine Belege in dieser Ansicht.</td></tr>';
     h += '</tbody></table></div><div class="card-fuss">Ein Eintrag je Beleg: gebuchte Belege aus BuchhaltungsButler (täglich 5:30 Uhr gelesen' + (d.stand ? ', zuletzt ' + esc(formatDateTime(d.stand)) : '') + ') und vom Agenten gelesene Anhänge aus dem Postfach. ' +
-      'Zwei Symbole je Beleg: Buch = gebucht, Euro = Zahlung zugewiesen. Grün und gefüllt heißt erledigt, grau mit Kontur heißt fehlt noch. Logos, Signaturen und Terminalbelege tauchen nicht auf. Löschen entfernt Beleg und Drive-Datei und legt die Mail in den Papierkorb, wenn kein weiterer relevanter Anhang daran hängt. Belege ohne erkannten Mandanten stehen in beiden Tabs.</div></div>' +
-      renderPager(z, 'data-art="beleg" data-k="' + k + '"');
+      'Zwei Symbole je Beleg: Buch = gebucht, Euro = Zahlung zugewiesen. Grün und gefüllt heißt erledigt, grau mit Kontur heißt fehlt noch. Logos, Signaturen und Terminalbelege tauchen nicht auf. Löschen entfernt Beleg und Drive-Datei und legt die Mail in den Papierkorb, wenn kein weiterer relevanter Anhang daran hängt. Belege ohne erkannten Mandanten stehen in beiden Tabs.</div></div>';
     return h;
   }
   function renderZahlungen(k) {
@@ -2838,6 +2838,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       '<div class="card pad"><div class="kpi-label">Gebucht</div><div class="kpi gut">' + esc(zahl(kp.gebucht || 0)) + '</div><div class="notiz">mit Beleg oder beleglos</div></div>' +
       '<div class="card pad"><div class="kpi-label">Noch offen</div><div class="kpi' + (offen ? ' kpi-orange' : '') + '">' + esc(zahl(offen)) + '</div><div class="notiz">ohne bestätigte Buchung</div></div></div>';
     var opt = function (w, t) { return '<option value="' + w + '"' + (z.filter === w ? ' selected' : '') + '>' + t + '</option>'; };
+    h += renderPager(z, 'data-art="zahlung" data-k="' + k + '"');
     var zeilen = (d.zahlungen || []).filter(function (p) {
       var gebucht = (p.buchungen || []).length > 0;
       if (z.filter === 'gebucht' && !gebucht) return false;
@@ -2873,7 +2874,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     });
     if (!zeilen.length) h += '<tr><td colspan="5" class="leer">Keine Zahlungen in dieser Ansicht.</td></tr>';
     h += '</tbody></table></div><div class="card-fuss">Bankumsätze aus BuchhaltungsButler (nur lesend, täglich 5:30 Uhr' + (d.stand ? ', zuletzt ' + esc(formatDateTime(d.stand)) : '') + '). Zwei Symbole je Zahlung: Dokument = Beleg zugeordnet oder ausdrücklich beleglos, Buch = gebucht. Grün und gefüllt heißt erledigt, grau mit Kontur heißt fehlt noch; beides hängt an einer bestätigten Buchung (mit Beleg oder beleglos, dann mit Konto). Unbestätigte (blaue) Zahlungen gelten als offen, BuchhaltungsButler gibt sie nicht heraus.' +
-      (Number(kp.ohne_konto || 0) ? ' ' + esc(zahl(kp.ohne_konto)) + ' Umsätze sind keinem Bankkonto zugeordnet.' : '') + '</div></div>' + renderPager(z, 'data-art="zahlung" data-k="' + k + '"');
+      (Number(kp.ohne_konto || 0) ? ' ' + esc(zahl(kp.ohne_konto)) + ' Umsätze sind keinem Bankkonto zugeordnet.' : '') + '</div></div>';
     return h;
   }
   async function beLoeschen(id, aktion) {
