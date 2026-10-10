@@ -98,6 +98,13 @@ main.wrap { padding-top: 28px; padding-bottom: 48px; }
 .card-kopf .unter { font-weight: 300; font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
 .card-fuss { padding: 12px 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-muted); }
 .scroll-x { overflow-x: auto; }
+.tbl-voll table.tbl { font-size: 12px; }
+.tbl-voll .tbl th, .tbl-voll .tbl td { padding: 6px 8px; }
+.tbl-voll .tbl th:first-child, .tbl-voll .tbl td:first-child { padding-left: 12px; }
+.tbl-voll table.tbl.fest { table-layout: fixed; min-width: 1000px; }
+.tbl-voll .tbl.fest td, .tbl-voll .tbl.fest th { overflow-wrap: anywhere; hyphens: auto; }
+.tbl-voll .linkreihe { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 4px; }
+@media (max-width: 1100px) { .tbl-voll { overflow-x: auto; } }
 .abschnitt { font-size: 1.125rem; font-weight: 600; margin: 0 0 12px; }
 .abschnitt-klein { font-weight: 600; }
 .zeile-titel { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
@@ -2770,7 +2777,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       (weitere ? 'An der Mail hängen noch ' + weitere + ' weitere relevante Anhänge, die Mail bleibt deshalb im Postfach.' : 'Die Mail kommt in den Papierkorb des Postfachs, weil kein weiterer relevanter Anhang daran hängt.') + ' In BuchhaltungsButler ändert sich nichts.';
     var fehler = l.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:8px">' + esc(l.fehler) + '</div>' : '';
     var aus = l.laeuft ? ' disabled' : '';
-    return '<tr><td colspan="15"><div class="hinweis-warn" role="group" aria-label="Löschen bestätigen"><div>' + esc(text) + '</div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">' +
+    return '<tr><td colspan="14"><div class="hinweis-warn" role="group" aria-label="Löschen bestätigen"><div>' + esc(text) + '</div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">' +
       '<button type="button" class="btn-gefahr" data-be="loeschen-ja" data-id="' + a.id + '" data-aktion="beleg"' + aus + '>' + (l.laeuft ? 'Lösche …' : 'Beleg löschen') + '</button>' +
       (weitere ? '<button type="button" class="btn-gefahr" data-be="loeschen-ja" data-id="' + a.id + '" data-aktion="mail"' + aus + '>Beleg und ganze Mail löschen</button>' : '') +
       '<button type="button" class="link-btn" data-be="loeschen-nein"' + aus + '>Abbrechen</button></div>' + fehler + '</div></td></tr>';
@@ -2794,7 +2801,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       '<select class="auswahl" data-be="filter" data-k="' + k + '" aria-label="Filter">' + opt('alle', 'Alle Belege') + opt('bezahlt', 'Gebucht und bezahlt') + opt('offen', 'Gebucht, Zahlung offen') + opt('eingang', 'Nur im Eingang, nicht gebucht') + opt('pruefen', 'Agent: zur Prüfung') + '</select> ' +
       '<button type="button" class="link-btn" data-be="neu" data-k="' + k + '">Aktualisieren</button></span></div>' +
       (BE.meldung ? '<div class="erfolg" role="status" style="margin:8px 12px">' + esc(BE.meldung) + '</div>' : '') +
-      '<div class="scroll-x"><table class="tbl kompakt"><thead><tr><th>Datum</th><th>Beleg</th><th>Status</th><th class="rechts">Belegbetrag</th><th>Buchungstext</th><th>Sachkonto</th><th>Gegenkonto</th><th>KST 1</th><th>KST 2</th><th class="rechts">USt-Satz</th><th class="rechts">Netto</th><th class="rechts">Steuer</th><th class="rechts">Brutto</th><th>Schlüssel</th><th></th></tr></thead><tbody>';
+      '<div class="tbl-voll"><table class="tbl kompakt fest"><colgroup><col style="width:7%"><col style="width:12%"><col style="width:8%"><col style="width:7%"><col style="width:11%"><col style="width:8%"><col style="width:6%"><col style="width:7%"><col style="width:7%"><col style="width:4%"><col style="width:7%"><col style="width:6%"><col style="width:7%"><col style="width:3%"></colgroup><thead><tr><th>Datum</th><th>Beleg</th><th>Status</th><th class="rechts">Belegbetrag</th><th>Buchungstext</th><th>Sachkonto</th><th>Gegenkonto</th><th>KST 1</th><th>KST 2</th><th class="rechts" title="Umsatzsteuersatz">USt</th><th class="rechts">Netto</th><th class="rechts">Steuer</th><th class="rechts">Brutto</th><th title="Steuerschlüssel">Schl.</th></tr></thead><tbody>';
     zeilen.forEach(function (r) {
       var b = r.bhb, a = r.agent;
       var titel = (b && b.gegenpartei) || (a && (a.aussteller || a.anhang_name)) || '–';
@@ -2841,15 +2848,15 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         var text = (x.text ? '<div>' + esc(x.text) + '</div>' : '') + (x.komm ? '<div class="notiz" style="margin:0">Kommentar: ' + esc(x.komm) + '</div>' : '') +
           (x.bdat && r.datum && String(x.bdat).slice(0, 10) !== String(r.datum).slice(0, 10) ? '<div class="notiz" style="margin:0">gebucht am ' + esc(formatDate(String(x.bdat).slice(0, 10))) + '</div>' : '') +
           (x.agent && a && a.buchungstext ? '<div>' + esc(a.buchungstext) + '</div>' : '') + (x.agent ? '<div class="notiz" style="margin:0">' + (a && a.buchungstext ? 'Vorschlag Buchungstext, ' : '') + 'vom Agenten gelesen, noch nicht gebucht</div>' : '');
-        h += '<tr>' + (i === 0 ? '<td' + rs + ' class="nowrap">' + esc(r.datum ? formatDate(String(r.datum).slice(0, 10)) : '') + '</td><td' + rs + '>' + kopf + agentLese + '</td><td' + rs + '>' + status + '</td><td' + rs + ' class="nowrap zahlen rechts">' + (brutto !== null ? esc(formatEuro(brutto)) : '') + '</td>' : '') +
-          '<td>' + text + '</td><td>' + beKonto(x.konto, x.kname) + '</td><td class="nowrap">' + esc(x.gegen || '') + '</td><td>' + beKonto(x.kst1, x.kst1n) + '</td><td>' + beKonto(x.kst2, x.kst2n) + '</td>' +
+        h += '<tr>' + (i === 0 ? '<td' + rs + ' class="nowrap">' + esc(r.datum ? formatDate(String(r.datum).slice(0, 10)) : '') + '</td><td' + rs + '>' + kopf + agentLese + '<div class="linkreihe">' + links.join('') + '</div></td><td' + rs + '>' + status + '</td><td' + rs + ' class="nowrap zahlen rechts">' + (brutto !== null ? esc(formatEuro(brutto)) : '') + '</td>' : '') +
+          '<td>' + text + '</td><td>' + beKonto(x.konto, x.kname) + '</td><td>' + esc(x.gegen || '') + '</td><td>' + beKonto(x.kst1, x.kst1n) + '</td><td>' + beKonto(x.kst2, x.kst2n) + '</td>' +
           '<td class="nowrap zahlen rechts">' + (x.satz !== null && x.satz !== undefined && x.satz !== '' ? esc(Number(x.satz).toLocaleString('de-DE') + ' %') : '') + '</td>' +
-          '<td class="nowrap zahlen rechts">' + eu(x.netto) + '</td><td class="nowrap zahlen rechts">' + eu(x.steuer) + '</td><td class="nowrap zahlen rechts">' + eu(x.brutto) + '</td><td class="nowrap">' + esc(x.schl || '') + '</td>' +
-          (i === 0 ? '<td' + rs + ' class="nowrap"><div style="display:flex;flex-direction:column;gap:4px">' + links.join('') + '</div></td>' : '') + '</tr>';
+          '<td class="nowrap zahlen rechts">' + eu(x.netto) + '</td><td class="nowrap zahlen rechts">' + eu(x.steuer) + '</td><td class="nowrap zahlen rechts">' + eu(x.brutto) + '</td><td>' + esc(x.schl || '') + '</td>' +
+          '</tr>';
       });
       if (a) h += beLoeschBox(a);
     });
-    if (!zeilen.length) h += '<tr><td colspan="15" class="leer">Keine Belege in dieser Ansicht.</td></tr>';
+    if (!zeilen.length) h += '<tr><td colspan="14" class="leer">Keine Belege in dieser Ansicht.</td></tr>';
     h += '</tbody></table></div><div class="card-fuss">Ein Eintrag je Beleg: gebuchte Belege aus BuchhaltungsButler (täglich 5:30 Uhr gelesen' + (d.stand ? ', zuletzt ' + esc(formatDateTime(d.stand)) : '') + ') und vom Agenten gelesene Anhänge aus dem Postfach. ' +
       'Zwei Symbole je Beleg: Buch = gebucht, Euro = Zahlung zugewiesen. Grün und gefüllt heißt erledigt, grau mit Kontur heißt fehlt noch. Logos, Signaturen und Terminalbelege tauchen nicht auf. Löschen entfernt Beleg und Drive-Datei und legt die Mail in den Papierkorb, wenn kein weiterer relevanter Anhang daran hängt. Belege ohne erkannten Mandanten stehen in beiden Tabs.</div></div>';
     return h;
@@ -2875,7 +2882,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       '<input type="search" class="eingabe-klein" style="width:180px;flex:none" data-be="suche" data-k="' + k + '" data-art="zahlung" placeholder="Suchen …" aria-label="Suchen" value="' + esc(z.suche) + '"> ' +
       '<select class="auswahl" data-be="filter" data-k="' + k + '" data-art="zahlung" aria-label="Filter">' + opt('alle', 'Alle Zahlungen') + opt('gebucht', 'Gebucht') + opt('offen', 'Noch offen') + '</select> ' +
       '<button type="button" class="link-btn" data-be="neu" data-k="' + k + '" data-art="zahlung">Aktualisieren</button></span></div>' +
-      '<div class="scroll-x"><table class="tbl kompakt"><thead><tr><th>Datum</th><th>Zahlung</th><th>Betrag</th><th>Status</th><th>Beleg und Konto</th></tr></thead><tbody>';
+      '<div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Datum</th><th>Zahlung</th><th>Betrag</th><th>Status</th><th>Beleg und Konto</th></tr></thead><tbody>';
     zeilen.forEach(function (p) {
       var bu = p.buchungen || [], belege = p.belege || [];
       var gebucht = bu.length > 0;
