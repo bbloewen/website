@@ -2706,7 +2706,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   var BE = { loeschen: null, meldung: '', btEdit: null, holen: false };
   function bePanel(id) { return $('p-' + id); }
   function tabVon(map, k) { return Object.keys(map).filter(function (t) { return map[t] === k; })[0]; }
-  function monatName(m) { if (m === 'alle') return 'Alle ab Juli 2026'; if (m === 'ohne') return 'Ohne Buchungsdatum'; var d = new Date(m + '-15T12:00:00'); return isNaN(d) ? m : d.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' }); }
+  function monatName(m) { if (m === 'alle') return 'Alle ab Juli 2026'; if (m === 'alt') return 'Vor Juli 2026'; var d = new Date(m + '-15T12:00:00'); return isNaN(d) ? m : d.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' }); }
   function monatKurz(m) { var d = new Date(m + '-15T12:00:00'); return isNaN(d) ? m : d.toLocaleDateString('de-DE', { month: 'short', year: '2-digit' }); }
   async function ladeListe(art, k, monat) {
     var z = art === 'beleg' ? BL[k] : ZA[k];
@@ -2766,7 +2766,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   // Buchungsdatum (Sortierung, Monate), darunter das Eingangsdatum. Ohne Buchungsdatum (BHB-Datum vor dem 01.07.2026) ist ein Fehler, der Beleg steht dann ganz oben.
   function datumZelle(r) {
     var eing = r.eingang ? '<div class="notiz" style="margin:0">Eingang ' + esc(formatDate(String(r.eingang).slice(0, 10))) + '</div>' : '';
-    if (!r.datum) return '<div class="fett" style="color:var(--color-error)">ohne Datum</div><div class="notiz" style="margin:0">Datum in BHB ' + esc(r.bhb_datum ? formatDate(String(r.bhb_datum).slice(0, 10)) : 'fehlt') + ' liegt vor dem 01.07.2026</div>' + eing;
+    if (!r.datum) return (r.bhb_datum ? esc(formatDate(String(r.bhb_datum).slice(0, 10))) : '<span class="gedaempft">ohne Datum</span>') + '<div class="notiz" style="margin:0">vor Juli 2026</div>' + eing;
     return esc(formatDate(String(r.datum).slice(0, 10))) + eing;
   }
   function beKonten(x) {
@@ -2817,6 +2817,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var aktiv = x.monat === z.monat;
       h += '<button type="button" class="chip' + (aktiv ? ' aktiv' : '') + '" data-be="monat" ' + attr + ' data-monat="' + x.monat + '"' + (aktiv ? ' aria-current="true"' : '') + ' aria-label="' + esc(monatName(x.monat) + ', ' + x.n + ' Einträge') + '">' + esc(monatName(x.monat)) + ' <span class="notiz" style="display:inline;margin:0">' + esc(zahl(x.n)) + '</span></button>';
     });
+    if (z.daten.alt_anzahl) h += '<button type="button" class="chip' + (z.monat === 'alt' ? ' aktiv' : '') + '" data-be="monat" ' + attr + ' data-monat="alt"' + (z.monat === 'alt' ? ' aria-current="true"' : '') + ' aria-label="Vor Juli 2026, ' + z.daten.alt_anzahl + ' Einträge">Vor Juli 26 <span class="notiz" style="display:inline;margin:0">' + esc(zahl(z.daten.alt_anzahl)) + '</span></button>';
     return h + '</nav>';
   }
   function beLoeschBox(a) {
