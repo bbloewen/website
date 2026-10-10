@@ -39,9 +39,9 @@
   },
   "nbbl": {
     "spiele": [
-      { "datum": "11.10.2026", "zeit": "15:00", "gegner": "Noch offen", "heim": false },
-      { "datum": "18.10.2026", "zeit": "15:00", "gegner": "Noch offen", "heim": false },
-      { "datum": "25.10.2026", "zeit": "15:00", "gegner": "Noch offen", "heim": false },
+      { "datum": "10.10.2026", "zeit": "14:00", "gegner": "SCIENCE CITY JENA", "heim": true, "ergebnis": "71 : 95" },
+      { "datum": "18.10.2026", "zeit": "16:00", "gegner": "SG Junior Löwen Braunschweig", "heim": false, "ort": "Braunschweig" },
+      { "datum": "25.10.2026", "zeit": "13:00", "gegner": "Sartorius Juniors", "heim": true },
       { "datum": "01.11.2026", "zeit": "15:00", "gegner": "Noch offen", "heim": false },
       { "datum": "08.11.2026", "zeit": "15:00", "gegner": "Noch offen", "heim": false },
       { "datum": "15.11.2026", "zeit": "15:00", "gegner": "Noch offen", "heim": false },
@@ -71,6 +71,6 @@
       { "datum": "22.05.2027", "zeit": "15:00", "gegner": "Noch offen", "heim": false },
       { "datum": "23.05.2027", "zeit": "15:00", "gegner": "Noch offen", "heim": false }
     ],
-    "hinweis": "Spieltag-Termine stehen fest, Gegner werden vom Liga-Verband erst später zugeteilt."
+    "hinweis": "Einteilungsrunde, Gruppe E3 (Sartorius Juniors, SCIENCE CITY JENA, SG Junior Löwen Braunschweig, Basketball Löwen Erfurt): Spieltage 1 bis 3 stehen laut nbbl-basketball.de fest (Stand 10.10.2026). Gegner und Termine der folgenden Runden vergibt die Liga erst nach der Einteilungsrunde, daher Noch offen. Ergebnis vom 10.10.2026 von Marko genannt (Erfurt 71:95 gegen Jena); bei der NBBL war es am Abend noch nicht eingetragen."
   }
 }
