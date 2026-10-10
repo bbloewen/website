@@ -170,6 +170,13 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 .btn-secondary:hover { background: var(--bg-subtle); }
 .btn:disabled { opacity: .55; cursor: not-allowed; }
 .btn-voll { width: 100%; }
+.btn-gefahr { background: var(--color-error); color: #fff; border: 1px solid var(--color-error); border-radius: var(--radius-sm); padding: 8px 14px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.btn-gefahr:hover { filter: brightness(.9); }
+.btn-gefahr:disabled { opacity: .55; cursor: not-allowed; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-strong); border-radius: 999px; padding: 6px 14px; font-size: 14px; cursor: pointer; }
+.chip:hover { background: var(--bg-subtle); }
+.chip.aktiv { background: var(--bg-subtle); border-color: var(--color-brand-orange); font-weight: 600; }
 .btn-reihe { display: grid; gap: 8px; grid-template-columns: 1fr; }
 @media (min-width: 640px) { .btn-reihe { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
@@ -385,7 +392,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   <section id="p-unternehmen" role="tabpanel" aria-labelledby="tab-unternehmen" hidden></section>
 
   <section id="p-versand" role="tabpanel" aria-labelledby="tab-versand" hidden></section>
-  <section id="p-belege" role="tabpanel" aria-labelledby="tab-belege" hidden></section>
+  <section id="p-belege-xxl" role="tabpanel" aria-labelledby="tab-belege-xxl" hidden></section>
+  <section id="p-belege-lev" role="tabpanel" aria-labelledby="tab-belege-lev" hidden></section>
 
 </main>
 </div>
@@ -647,7 +655,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
     { id: 'segmentierung', name: 'Segmentierung', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
-    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege', name: 'Belege' }] }
+    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege-xxl', name: 'Belege XXL' }, { id: 'belege-lev', name: 'Belege LEV' }] }
   ];
   var TABS = [];
   BEREICHE.forEach(function (b) { b.tabs.forEach(function (t) { TABS.push(t.id); }); });
@@ -687,6 +695,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   // Adresse #tab oder #tab/<zusatz>, z. B. #personen/<notion_id>
   function teileHash(h) { var i = h.indexOf('/'); return i === -1 ? { tab: h, arg: '' } : { tab: h.slice(0, i), arg: h.slice(i + 1) }; }
   function setTab(t, fokus, arg) {
+    if (t === 'belege') t = 'belege-xxl'; // alte Adresse
     if (TABS.indexOf(t) === -1) t = 'erstellen';
     if (!darfBereich(bereichVon(t))) { var erlaubt = BEREICHE.filter(darfBereich)[0]; if (erlaubt) t = erlaubt.tabs[0].id; }
     S.tab = t; S.tabArg = arg || '';
@@ -701,7 +710,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (t === 'unternehmen' && !S.unternehmenGeladen) { S.unternehmenGeladen = true; loadUnternehmen(); }
     if (t === 'personen') { zeigePersonen(S.tabArg); window.scrollTo(0, 0); }
     if (t === 'versand') loadVersand();
-    if (t === 'belege') loadBelege();
+    if (BE_MANDANT[t]) { loadBelege(); if (BE.ansicht[BE_MANDANT[t]] === 'bhb') loadBhb(BE_MANDANT[t]); }
     // SEO laedt erst, wenn der Tab zum ersten Mal geoeffnet wird: die
     // Sheets-Abfrage dauert laenger als die pretix-Aufrufe und wird beim
     // taeglichen Gutschein-Anlegen gar nicht gebraucht.
@@ -2637,18 +2646,35 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     });
   }
 
-  // ---------- Accounting: Belege (Etappe 1, Beobachtung: es wird nur gelesen und verglichen) ----------
-  var BE = { daten: null, fehler: null, laedt: false, filter: 'alle' };
+  // ---------- Accounting: Belege XXL und Belege LEV ----------
+  // Je Mandant zwei Ansichten: "Eingang" (was der Agent aus dem Postfach gelesen hat, mit Original in Drive und Löschen)
+  // und "In BuchhaltungsButler gebucht" (alle Belegbuchungen seit dem 01.07.2026, nur lesend).
+  var BE_MANDANT = { 'belege-xxl': 'XXL', 'belege-lev': 'LEV' };
+  var BE = { daten: null, fehler: null, laedt: false, filter: 'alle', ansicht: { XXL: 'eingang', LEV: 'eingang' }, loeschen: null, meldung: '' };
+  var BB = { XXL: { daten: null, fehler: null, laedt: false, suche: '', art: 'alle' }, LEV: { daten: null, fehler: null, laedt: false, suche: '', art: 'alle' } };
   var BE_BUDGET_USD = 60; // gleiche Grenze wie im Workflow "Belegeingang neu"
+  var BB_MAX = 150;       // Zeilen, die die gebuchte Ansicht auf einmal zeigt
+  function bePanel(m) { return $('p-belege-' + m.toLowerCase()); }
+  function beAlle() { renderBelege('XXL'); renderBelege('LEV'); }
   async function loadBelege() {
-    BE.laedt = true; BE.fehler = null; renderBelege();
+    BE.laedt = true; BE.fehler = null; beAlle();
     try {
       var res = await fetch('/webhook/accounting/belege');
       var d = await res.json();
       if (!res.ok) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
       BE.daten = d;
     } catch (e) { BE.fehler = e.message; }
-    BE.laedt = false; renderBelege();
+    BE.laedt = false; beAlle();
+  }
+  async function loadBhb(m) {
+    var b = BB[m]; b.laedt = true; b.fehler = null; renderBelege(m);
+    try {
+      var res = await fetch('/webhook/accounting/bhb-belege?mandant=' + m);
+      var d = await res.json();
+      if (!res.ok) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
+      b.daten = d;
+    } catch (e) { b.fehler = e.message; }
+    b.laedt = false; renderBelege(m);
   }
   function usd(n) { return Number(n || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' $'; }
   function beCent(n) { return (Number(n || 0) * 100).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ct'; }
@@ -2679,29 +2705,51 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (f === 'uebersprungen') return b.status === 'uebersprungen';
     return true;
   }
-  function renderBelege() {
-    var el = $('p-belege');
-    if (BE.laedt && !BE.daten) { el.innerHTML = '<div class="laedt">Lade Belege …</div>'; return; }
-    if (BE.fehler && !BE.daten) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(BE.fehler) + '</div>'; return; }
-    if (!BE.daten) { el.innerHTML = ''; return; }
-    var d = BE.daten, u = d.urteile || {}, m = d.monat || {};
-    var gelesen = Number(d.gelesen || 0), zweit = Number(d.zweitlauf || 0);
-    var anteil = Math.min(100, Math.round(Number(m.kosten_usd || 0) / BE_BUDGET_USD * 100));
-    var bh = d.bhb || {}; var bhGes = (bh.uebereinstimmend || 0) + (bh.abweichung || 0) + (bh.nicht_in_bhb || 0) + (bh.mehrdeutig || 0);
-    var h = '<div class="stapel"><div class="grid sm-3">' +
-      '<div class="card pad"><div class="kpi-label">Gelesen</div><div class="kpi">' + esc(zahl(gelesen)) + '</div><div class="notiz">sicher ' + esc(zahl(u.sicher || 0)) + ' · kein Beleg ' + esc(zahl(u.muell || 0)) + ' · Fehler ' + esc(zahl(u.fehler || 0)) + '</div></div>' +
-      '<div class="card pad"><div class="kpi-label">Zur Prüfung</div><div class="kpi' + (u.pruefen ? ' kpi-orange' : '') + '">' + esc(zahl(u.pruefen || 0)) + '</div><div class="notiz">Prüfschranke nicht durchgegangen</div></div>' +
-      '<div class="card pad"><div class="kpi-label">Zweitlauf mit Sonnet</div><div class="kpi">' + esc(gelesen ? Math.round(zweit / gelesen * 100) : 0) + ' %</div><div class="notiz">' + esc(zahl(zweit)) + ' von ' + esc(zahl(gelesen)) + ' gelesenen</div></div>' +
-      '<div class="card pad"><div class="kpi-label">Abgleich mit BuchhaltungsButler</div><div class="kpi">' + esc(zahl(bh.uebereinstimmend || 0)) + ' von ' + esc(zahl(bhGes)) + '</div><div class="notiz">stimmen überein · Abweichung ' + esc(zahl(bh.abweichung || 0)) + ' · nicht in BHB ' + esc(zahl(bh.nicht_in_bhb || 0)) + '</div></div>' +
-      '<div class="card pad"><div class="kpi-label">Kosten diesen Monat</div><div class="kpi">' + esc(usd(m.kosten_usd)) + '</div>' +
-      '<div class="balken" role="progressbar" aria-valuemin="0" aria-valuemax="' + BE_BUDGET_USD + '" aria-valuenow="' + Math.round(Number(m.kosten_usd || 0)) + '"><div class="b-gruen" style="height:100%;width:' + anteil + '%"></div></div>' +
-      '<div class="notiz">von ' + esc(usd(BE_BUDGET_USD)) + ' Sperre · ' + esc(zahl(m.belege || 0)) + ' Anhänge · gesamt ' + esc(usd((d.gesamt || {}).kosten_usd)) + '</div></div>' +
+  function beKonto(nr, name) { return nr ? esc(nr) + (name ? ' <span class="notiz" style="display:inline;margin:0">' + esc(name) + '</span>' : '') : '<span class="gedaempft">–</span>'; }
+  function beUmschalter(m) {
+    var a = BE.ansicht[m];
+    var knopf = function (w, t) { return '<button type="button" class="chip' + (a === w ? ' aktiv' : '') + '" data-be="ansicht" data-m="' + m + '" data-w="' + w + '" aria-pressed="' + (a === w) + '">' + t + '</button>'; };
+    return '<div class="chips" role="group" aria-label="Ansicht" style="margin:0 0 12px">' + knopf('eingang', 'Eingang (Agent)') + knopf('bhb', 'In BuchhaltungsButler gebucht') + '</div>';
+  }
+  function beLoeschBox(b) {
+    var l = BE.loeschen; if (!l || l.id !== b.id) return '';
+    var weitere = Number(b.weitere_anhaenge || 0);
+    var text = 'Beleg aus der Liste und die Datei aus Google Drive entfernen (Papierkorb, 30 Tage wiederherstellbar). ' +
+      (weitere ? 'An der Mail hängen noch ' + weitere + ' weitere relevante Anhänge, die Mail bleibt deshalb im Postfach.' : 'Die Mail kommt in den Papierkorb des Postfachs, weil kein weiterer relevanter Anhang daran hängt.');
+    var fehler = l.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:8px">' + esc(l.fehler) + '</div>' : '';
+    var aus = l.laeuft ? ' disabled' : '';
+    return '<tr><td colspan="7"><div class="hinweis-warn" role="group" aria-label="Löschen bestätigen"><div>' + esc(text) + '</div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">' +
+      '<button type="button" class="btn-gefahr" data-be="loeschen-ja" data-id="' + b.id + '" data-aktion="beleg"' + aus + '>' + (l.laeuft ? 'Lösche …' : 'Beleg löschen') + '</button>' +
+      (weitere ? '<button type="button" class="btn-gefahr" data-be="loeschen-ja" data-id="' + b.id + '" data-aktion="mail"' + aus + '>Beleg und ganze Mail löschen</button>' : '') +
+      '<button type="button" class="link-btn" data-be="loeschen-nein"' + aus + '>Abbrechen</button></div>' + fehler + '</div></td></tr>';
+  }
+  function renderEingang(m) {
+    var d = BE.daten, u, mo = d.monat || {};
+    var alle = (d.belege || []).filter(function (b) { return b.mandant === m || (b.mandant !== 'XXL' && b.mandant !== 'LEV'); });
+    var gelesen = alle.filter(function (b) { return b.status === 'erkannt' || b.status === 'muell'; });
+    var sicher = gelesen.filter(function (b) { return b.urteil === 'sicher'; }).length;
+    var pruefen = gelesen.filter(function (b) { return b.status === 'erkannt' && b.urteil === 'pruefen'; }).length;
+    var muell = gelesen.filter(function (b) { return b.status === 'muell'; }).length;
+    var zweit = gelesen.filter(function (b) { return b.stufe === 2; }).length;
+    var bh = { uebereinstimmend: 0, abweichung: 0, nicht_in_bhb: 0, mehrdeutig: 0 };
+    alle.forEach(function (b) { if (b.bhb_vergleich && bh[b.bhb_vergleich.status] !== undefined && b.status === 'erkannt') bh[b.bhb_vergleich.status]++; });
+    var bhGes = bh.uebereinstimmend + bh.abweichung + bh.nicht_in_bhb + bh.mehrdeutig;
+    var anteil = Math.min(100, Math.round(Number(mo.kosten_usd || 0) / BE_BUDGET_USD * 100));
+    var h = '<div class="grid sm-3">' +
+      '<div class="card pad"><div class="kpi-label">Gelesen</div><div class="kpi">' + esc(zahl(gelesen.length)) + '</div><div class="notiz">sicher ' + esc(zahl(sicher)) + ' · kein Beleg ' + esc(zahl(muell)) + '</div></div>' +
+      '<div class="card pad"><div class="kpi-label">Zur Prüfung</div><div class="kpi' + (pruefen ? ' kpi-orange' : '') + '">' + esc(zahl(pruefen)) + '</div><div class="notiz">Prüfschranke nicht durchgegangen</div></div>' +
+      '<div class="card pad"><div class="kpi-label">Zweitlauf mit Sonnet</div><div class="kpi">' + esc(gelesen.length ? Math.round(zweit / gelesen.length * 100) : 0) + ' %</div><div class="notiz">' + esc(zahl(zweit)) + ' von ' + esc(zahl(gelesen.length)) + ' gelesenen</div></div>' +
+      '<div class="card pad"><div class="kpi-label">Abgleich mit BuchhaltungsButler</div><div class="kpi">' + esc(zahl(bh.uebereinstimmend)) + ' von ' + esc(zahl(bhGes)) + '</div><div class="notiz">stimmen überein · Abweichung ' + esc(zahl(bh.abweichung)) + ' · nicht in BHB ' + esc(zahl(bh.nicht_in_bhb)) + '</div></div>' +
+      '<div class="card pad"><div class="kpi-label">Kosten diesen Monat (beide Mandanten)</div><div class="kpi">' + esc(usd(mo.kosten_usd)) + '</div>' +
+      '<div class="balken" role="progressbar" aria-valuemin="0" aria-valuemax="' + BE_BUDGET_USD + '" aria-valuenow="' + Math.round(Number(mo.kosten_usd || 0)) + '"><div class="b-gruen" style="height:100%;width:' + anteil + '%"></div></div>' +
+      '<div class="notiz">von ' + esc(usd(BE_BUDGET_USD)) + ' Sperre · gesamt ' + esc(usd((d.gesamt || {}).kosten_usd)) + '</div></div>' +
       '</div>';
     var opt = function (w, t) { return '<option value="' + w + '"' + (BE.filter === w ? ' selected' : '') + '>' + t + '</option>'; };
-    var zeilen = (d.belege || []).filter(beFilter);
-    h += '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Erkannte Belege</span><span>' +
+    var zeilen = alle.filter(beFilter);
+    h += '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Erkannte Belege ' + esc(m) + '</span><span>' +
       '<select class="auswahl" data-be="filter" aria-label="Filter">' + opt('alle', 'Alle Belege') + opt('pruefen', 'Zur Prüfung') + opt('sicher', 'Sicher') + opt('muell', 'Kein Beleg') + opt('bhb', 'BHB weicht ab / fehlt') + opt('fehler', 'Fehler') + opt('uebersprungen', 'Übersprungen (Vorfilter)') + '</select> ' +
       '<button type="button" class="link-btn" data-be="neu">Aktualisieren</button></span></div>' +
+      (BE.meldung ? '<div class="erfolg" role="status" style="margin:8px 12px">' + esc(BE.meldung) + '</div>' : '') +
       '<div class="scroll-x"><table class="tbl kompakt"><thead><tr><th>Eingang</th><th>Beleg</th><th>Mandant</th><th>Brutto</th><th>Urteil</th><th>Kosten</th><th></th></tr></thead><tbody>';
     zeilen.forEach(function (b) {
       var gruende = Array.isArray(b.gruende) ? b.gruende : [];
@@ -2710,26 +2758,117 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var warum = gruende.length ? '<div class="notiz" style="margin:4px 0 0">' + gruende.map(esc).join('<br>') + '</div>' : '';
       var fehl = b.fehler ? '<div class="notiz" style="margin:4px 0 0">' + esc(b.fehler) + '</div>' : '';
       var hinweis = b.hinweis && b.urteil !== 'muell' ? '<details style="margin-top:4px"><summary class="text-klein">Hinweis des Modells</summary><div class="notiz" style="margin:4px 0 0">' + esc(b.hinweis) + '</div></details>' : '';
+      var links = [];
+      if (b.drive_url) links.push('<a href="' + esc(b.drive_url) + '" target="_blank" rel="noopener">Original</a>');
+      if (b.gmail_id && String(b.gmail_id).indexOf('test') !== 0) links.push('<a href="https://mail.google.com/mail/u/rechnung@basketball-loewen.com/#all/' + esc(b.gmail_id) + '" target="_blank" rel="noopener">Mail</a>');
+      links.push('<button type="button" class="link-btn" data-be="loeschen" data-id="' + b.id + '" aria-label="Löschen: ' + esc(titel) + '">Löschen</button>');
       h += '<tr><td class="nowrap">' + esc(formatDateTime(b.eingang_am || b.angelegt)) + '</td>' +
         '<td>' + kopf + '<div class="notiz" style="margin:0">' + esc(b.absender || '') + '</div>' + hinweis + '</td>' +
-        '<td>' + esc(b.mandant || '') + '</td>' +
+        '<td>' + esc(b.mandant === 'XXL' || b.mandant === 'LEV' ? b.mandant : (b.status === 'uebersprungen' ? '' : 'unklar')) + '</td>' +
         '<td class="nowrap">' + (b.brutto !== null && b.brutto !== undefined ? esc(formatEuro(Number(b.brutto))) : '') + '</td>' +
         '<td>' + beUrteil(b) + warum + fehl + beBhb(b) + '</td>' +
         '<td class="nowrap">' + esc(beCent(b.kosten_usd)) + '<div class="notiz" style="margin:0">' + esc(b.modell ? b.modell.replace('claude-', '') : '') + '</div></td>' +
-        '<td>' + (b.gmail_id ? '<a href="https://mail.google.com/mail/u/rechnung@basketball-loewen.com/#all/' + esc(b.gmail_id) + '" target="_blank" rel="noopener">Mail</a>' : '') + '</td></tr>';
+        '<td class="nowrap" style="display:flex;flex-direction:column;gap:4px">' + links.join('') + '</td></tr>' + beLoeschBox(b);
     });
     if (!zeilen.length) h += '<tr><td colspan="7" class="leer">Keine Belege in dieser Ansicht.</td></tr>';
-    h += '</tbody></table></div><div class="card-fuss">Beobachtungsbetrieb: Der Agent liest nur mit und bucht nichts. Der Abgleich mit BuchhaltungsButler läuft alle 2 Stunden (nur lesend). Haiku 5.5 liest zuerst, Sonnet 5.5 nur bei Zweifel. Lohnabrechnungen, Terminalbelege und Logos gehen nie an die API. Zuletzt ' + esc(String((d.belege || []).length)) + ' Anhänge.</div></div></div>';
-    el.innerHTML = h;
+    h += '</tbody></table></div><div class="card-fuss">Beobachtungsbetrieb: Der Agent liest nur mit und bucht nichts. Das Original liegt in Google Drive (Ordner „Belegagent Eingang“). Löschen entfernt Beleg und Drive-Datei und legt die Mail in den Papierkorb, wenn kein weiterer relevanter Anhang daran hängt, in BuchhaltungsButler ändert sich nichts. Belege ohne erkannten Mandanten stehen in beiden Tabs. Haiku 5.5 liest zuerst, Sonnet 5.5 nur bei Zweifel. Lohnabrechnungen, Terminalbelege und Logos gehen nie an die API.</div></div>';
+    return h;
+  }
+  function bbFilter(g, b) {
+    if (b.art === 'eingang' && !/inbound/.test(g.typ || '')) return false;
+    if (b.art === 'ausgang' && !/outbound/.test(g.typ || '')) return false;
+    var s = String(b.suche || '').trim().toLowerCase(); if (!s) return true;
+    var heu = [g.gegenpartei, g.nummer, g.beleg_id].concat((g.buchungen || []).map(function (x) { return [x.text, x.sachkonto, x.sachkonto_name, x.gegenkonto, x.kst1_name, x.kst2_name].join(' '); })).join(' ').toLowerCase();
+    return heu.indexOf(s) >= 0;
+  }
+  function renderGebucht(m) {
+    var b = BB[m];
+    if (b.laedt && !b.daten) return '<div class="laedt">Lade Buchungen …</div>';
+    if (b.fehler && !b.daten) return '<div class="fehlerbox" role="alert">' + esc(b.fehler) + '</div>';
+    if (!b.daten) return '';
+    var alle = b.daten.belege || [];
+    var zeilen = alle.filter(function (g) { return bbFilter(g, b); });
+    var opt = function (w, t) { return '<option value="' + w + '"' + (b.art === w ? ' selected' : '') + '>' + t + '</option>'; };
+    var h = '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>In BuchhaltungsButler gebucht ' + esc(m) + ' · ' + esc(zahl(alle.length)) + ' Belege, ' + esc(zahl(b.daten.buchungen || 0)) + ' Buchungen</span><span>' +
+      '<input type="search" class="eingabe-klein" style="width:200px;flex:none" data-be="suche" data-m="' + m + '" placeholder="Suchen …" aria-label="Suchen" value="' + esc(b.suche) + '"> ' +
+      '<select class="auswahl" data-be="art" data-m="' + m + '" aria-label="Art">' + opt('alle', 'Eingang und Ausgang') + opt('eingang', 'Eingangsrechnungen') + opt('ausgang', 'Ausgangsrechnungen') + '</select> ' +
+      '<button type="button" class="link-btn" data-be="neu-bhb" data-m="' + m + '">Aktualisieren</button></span></div>' +
+      '<div class="scroll-x"><table class="tbl kompakt"><thead><tr><th>Datum</th><th>Beleg</th><th>Brutto</th><th>Sachkonto</th><th>Gegenkonto</th><th>KST 1</th><th>KST 2</th><th>USt</th><th>Status</th></tr></thead><tbody>';
+    zeilen.slice(0, BB_MAX).forEach(function (g) {
+      var bu = g.buchungen || [];
+      var art = /outbound/.test(g.typ || '') ? 'Ausgang' : 'Eingang';
+      var kopf = '<td rowspan="' + bu.length + '" class="nowrap">' + esc(g.datum ? formatDate(String(g.datum).slice(0, 10)) : '') + '</td>' +
+        '<td rowspan="' + bu.length + '"><div class="fett">' + esc(g.gegenpartei || '–') + '</div><div class="notiz" style="margin:0">' + esc(art + (g.nummer ? ' · Nr. ' + g.nummer : '')) + '</div>' +
+        (g.link ? '<a href="' + esc(g.link) + '" target="_blank" rel="noopener" class="text-klein">Beleg in BHB</a>' : '') + '</td>' +
+        '<td rowspan="' + bu.length + '" class="nowrap">' + (g.brutto !== null && g.brutto !== undefined ? esc(formatEuro(Number(g.brutto))) : '') + '</td>';
+      bu.forEach(function (x, i) {
+        h += '<tr>' + (i === 0 ? kopf : '') +
+          '<td>' + beKonto(x.sachkonto, x.sachkonto_name) + (x.text ? '<div class="notiz" style="margin:0">' + esc(x.text) + '</div>' : '') + '</td>' +
+          '<td>' + beKonto(x.gegenkonto, '') + '</td>' +
+          '<td>' + beKonto(x.kst1, x.kst1_name) + '</td><td>' + beKonto(x.kst2, x.kst2_name) + '</td>' +
+          '<td class="nowrap">' + esc(x.ust !== null && x.ust !== undefined ? Number(x.ust) + ' %' : '') + (x.schluessel ? '<div class="notiz" style="margin:0">Schl. ' + esc(x.schluessel) + '</div>' : '') + '</td>' +
+          '<td class="nowrap">' + (i === 0 ? (g.fixiert ? '<span class="gedaempft">festgeschrieben</span>' : '<span class="gut">gebucht</span>') + (Number(g.bezahlt) ? '<div class="notiz" style="margin:0">bezahlt ' + esc(formatEuro(Number(g.bezahlt))) + '</div>' : '') : '') + '</td></tr>';
+      });
+    });
+    if (!zeilen.length) h += '<tr><td colspan="9" class="leer">Keine Buchungen in dieser Ansicht.</td></tr>';
+    var mehr = zeilen.length > BB_MAX ? ' Angezeigt sind die ersten ' + BB_MAX + ' von ' + esc(zahl(zeilen.length)) + ', die Suche grenzt weiter ein.' : '';
+    h += '</tbody></table></div><div class="card-fuss">Belegbuchungen seit dem 01.07.2026, gelesen aus BuchhaltungsButler (nur lesend), täglich um 5:30 Uhr' + (b.daten.stand ? ', zuletzt ' + esc(formatDateTime(b.daten.stand)) : '') + '. Zahlungsbuchungen der Bank sind nicht dabei.' + mehr + '</div></div>';
+    return h;
+  }
+  function renderBelege(m) {
+    var el = bePanel(m); if (!el) return;
+    var inhalt;
+    if (BE.ansicht[m] === 'bhb') inhalt = renderGebucht(m);
+    else if (BE.laedt && !BE.daten) inhalt = '<div class="laedt">Lade Belege …</div>';
+    else if (BE.fehler && !BE.daten) inhalt = '<div class="fehlerbox" role="alert">' + esc(BE.fehler) + '</div>';
+    else if (!BE.daten) inhalt = '';
+    else inhalt = renderEingang(m);
+    // Das Suchfeld behält beim Tippen Fokus und Cursor: nur neu zeichnen, wenn es nicht gerade bedient wird.
+    var fokus = document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute('data-be') === 'suche' ? document.activeElement : null;
+    var pos = fokus ? fokus.selectionStart : 0;
+    el.innerHTML = '<div class="stapel">' + beUmschalter(m) + inhalt + '</div>';
+    if (fokus) { var neu = el.querySelector('[data-be="suche"]'); if (neu) { neu.focus(); try { neu.setSelectionRange(pos, pos); } catch (e) {} } }
+  }
+  async function beLoeschen(id, aktion) {
+    var l = BE.loeschen; if (!l) return;
+    l.laeuft = true; l.fehler = ''; beAlle();
+    try {
+      var res = await fetch('/webhook/accounting/beleg-loeschen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, aktion: aktion }) });
+      var d = await res.json();
+      if (!res.ok || !d.ok) throw new Error(d.message || d.fehler || 'Löschen fehlgeschlagen');
+      var gm = ((BE.daten.belege || []).find(function (b) { return b.id === id; }) || {}).gmail_id;
+      BE.daten.belege = (BE.daten.belege || []).filter(function (b) { return b.id !== id && !(aktion === 'mail' && gm && b.gmail_id === gm); });
+      var teile = [d.geloescht + (d.geloescht === 1 ? ' Beleg' : ' Belege') + ' gelöscht'];
+      if (d.dateien) teile.push('Drive-Datei im Papierkorb');
+      teile.push(d.mail === 'papierkorb' ? 'Mail im Papierkorb' : (d.mail === 'fehler' ? 'Mail konnte nicht in den Papierkorb gelegt werden' : 'Mail bleibt im Postfach'));
+      BE.meldung = teile.join(' · ') + '.';
+      BE.loeschen = null;
+    } catch (e) { l.laeuft = false; l.fehler = e.message; }
+    beAlle();
   }
   function bindBelege() {
-    var p = $('p-belege');
-    p.addEventListener('change', function (e) {
-      var s = e.target.closest('[data-be="filter"]'); if (!s) return;
-      BE.filter = s.value; renderBelege();
-    });
-    p.addEventListener('click', function (e) {
-      var b = e.target.closest('[data-be="neu"]'); if (b) loadBelege();
+    ['xxl', 'lev'].forEach(function (k) {
+      var p = $('p-belege-' + k), m = k.toUpperCase();
+      p.addEventListener('change', function (e) {
+        var s = e.target.closest('[data-be]'); if (!s) return;
+        var w = s.getAttribute('data-be');
+        if (w === 'filter') { BE.filter = s.value; renderBelege(m); }
+        else if (w === 'art') { BB[m].art = s.value; renderBelege(m); }
+      });
+      p.addEventListener('input', function (e) {
+        var s = e.target.closest('[data-be="suche"]'); if (!s) return;
+        BB[m].suche = s.value; renderBelege(m);
+      });
+      p.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-be]'); if (!b) return;
+        var w = b.getAttribute('data-be');
+        if (w === 'neu') { BE.meldung = ''; loadBelege(); }
+        else if (w === 'neu-bhb') loadBhb(m);
+        else if (w === 'ansicht') { BE.ansicht[m] = b.getAttribute('data-w'); renderBelege(m); if (BE.ansicht[m] === 'bhb' && !BB[m].daten && !BB[m].laedt) loadBhb(m); }
+        else if (w === 'loeschen') { BE.meldung = ''; BE.loeschen = { id: Number(b.getAttribute('data-id')), laeuft: false, fehler: '' }; beAlle(); }
+        else if (w === 'loeschen-nein') { BE.loeschen = null; beAlle(); }
+        else if (w === 'loeschen-ja') beLoeschen(Number(b.getAttribute('data-id')), b.getAttribute('data-aktion'));
+      });
     });
   }
 
