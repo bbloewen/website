@@ -2760,7 +2760,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var hinweis = b.hinweis && b.urteil !== 'muell' ? '<details style="margin-top:4px"><summary class="text-klein">Hinweis des Modells</summary><div class="notiz" style="margin:4px 0 0">' + esc(b.hinweis) + '</div></details>' : '';
       var links = [];
       if (b.drive_url) links.push('<a href="' + esc(b.drive_url) + '" target="_blank" rel="noopener">Original</a>');
-      if (b.gmail_id && String(b.gmail_id).indexOf('test') !== 0) links.push('<a href="https://mail.google.com/mail/u/rechnung@basketball-loewen.com/#all/' + esc(b.gmail_id) + '" target="_blank" rel="noopener">Mail</a>');
+      if (b.gmail_id && String(b.gmail_id).indexOf('test') !== 0) links.push('<a href="https://mail.google.com/mail/?authuser=rechnung@basketball-loewen.com#all/' + esc(b.gmail_id) + '" target="_blank" rel="noopener">Mail</a>');
       links.push('<button type="button" class="link-btn" data-be="loeschen" data-id="' + b.id + '" aria-label="Löschen: ' + esc(titel) + '">Löschen</button>');
       h += '<tr><td class="nowrap">' + esc(formatDateTime(b.eingang_am || b.angelegt)) + '</td>' +
         '<td>' + kopf + '<div class="notiz" style="margin:0">' + esc(b.absender || '') + '</div>' + hinweis + '</td>' +
