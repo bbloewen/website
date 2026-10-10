@@ -173,6 +173,15 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 .btn-gefahr { background: var(--color-error); color: #fff; border: 1px solid var(--color-error); border-radius: var(--radius-sm); padding: 8px 14px; font-size: 14px; font-weight: 600; cursor: pointer; }
 .btn-gefahr:hover { filter: brightness(.9); }
 .btn-gefahr:disabled { opacity: .55; cursor: not-allowed; }
+.ikreihe { display: flex; gap: 6px; align-items: center; }
+.ik { display: inline-flex; width: 22px; height: 22px; flex: none; }
+.ik svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.ik-an { color: var(--color-success); }
+.ik-an svg .fl { fill: var(--color-success-bg); }
+.ik-an svg .eur-kreis { fill: var(--color-success); }
+.ik-an svg .eur-zeichen { fill: #fff; stroke: none; }
+.ik-aus { color: var(--text-muted); }
+.ik-aus svg .eur-zeichen { fill: var(--text-muted); stroke: none; }
 .chips { display: flex; gap: 8px; flex-wrap: wrap; }
 .chip { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-strong); border-radius: 999px; padding: 6px 14px; font-size: 14px; cursor: pointer; }
 .chip:hover { background: var(--bg-subtle); }
@@ -2716,7 +2725,15 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (x.kst2) teile.push('KST 2 ' + beKonto(x.kst2, x.kst2_name));
     return teile.filter(Boolean).join(' · ');
   }
-  function haken() { return '<span class="gut fett" aria-hidden="true">✓</span> '; }
+  // Zustandssymbole: grün und gefüllt = erledigt, grau und nur Kontur = fehlt noch. Der Text steht im Tooltip und für Screenreader.
+  function ikSymbol(form, an, titel) {
+    var innen = {
+      buch: '<path class="fl" d="M12 6.5C10.5 5.3 8.2 4.7 5 4.7v12.6c3.2 0 5.5.6 7 1.8 1.5-1.2 3.8-1.8 7-1.8V4.7c-3.2 0-5.5.6-7 1.8z"/><path d="M12 6.5v12.6"/>' + (an ? '<path d="M7.6 10.4l1.7 1.7 3-3.4"/>' : ''),
+      euro: '<circle class="eur-kreis" cx="12" cy="12" r="9"/><text class="eur-zeichen" x="12" y="16.4" text-anchor="middle" font-size="12" font-weight="700">€</text>',
+      dok: '<path class="fl" d="M7 3.5h7l4 4V20.5H7z"/><path d="M14 3.5v4h4"/><path d="M9.5 12h6M9.5 15.5h6"/>'
+    }[form];
+    return '<span class="ik ' + (an ? 'ik-an' : 'ik-aus') + '" role="img" aria-label="' + esc(titel) + '" title="' + esc(titel) + '"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + innen + '</svg></span>';
+  }
   function blBezahlt(r) {
     if (!r.bhb) return false;
     var brutto = Number(r.bhb.brutto || 0);
@@ -2788,9 +2805,13 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var status = '';
       if (b) {
         var bez = blBezahlt(r);
-        status = bez ? '<div class="gut fett">' + haken() + 'gebucht · bezahlt</div>' : '<div>gebucht</div><div class="notiz" style="margin:0">' + (Number(b.bezahlt || 0) > 0 ? 'teilbezahlt ' + esc(formatEuro(Number(b.bezahlt))) + ' von ' + esc(formatEuro(Number(b.brutto || 0))) : 'Zahlung noch nicht zugewiesen') + '</div>';
-        if (b.fixiert) status += '<div class="notiz" style="margin:0">festgeschrieben</div>';
-      } else status = '<div class="hinweis-warn">' + (a && a.bhb_vergleich && ['uebereinstimmend', 'abweichung', 'mehrdeutig'].indexOf(a.bhb_vergleich.status) >= 0 ? 'in BHB, noch nicht gebucht' : 'nicht gebucht') + '</div>';
+        var teil = !bez && Number(b.bezahlt || 0) > 0 ? esc(formatEuro(Number(b.bezahlt))) + ' von ' + esc(formatEuro(Number(b.brutto || 0))) + ' bezahlt' : '';
+        status = '<div class="ikreihe">' + ikSymbol('buch', true, 'Gebucht' + (b.fixiert ? ' und festgeschrieben' : '')) + ikSymbol('euro', bez, bez ? 'Zahlung zugewiesen' : (teil ? 'Teilweise bezahlt: ' + teil : 'Zahlung fehlt noch')) + '</div>' +
+          (teil ? '<div class="notiz" style="margin:2px 0 0">' + teil + '</div>' : '');
+      } else {
+        var inBhb = a && a.bhb_vergleich && ['uebereinstimmend', 'abweichung', 'mehrdeutig'].indexOf(a.bhb_vergleich.status) >= 0;
+        status = '<div class="ikreihe">' + ikSymbol('buch', false, inBhb ? 'Noch nicht gebucht (Beleg ist in BHB hochgeladen)' : 'Noch nicht gebucht') + ikSymbol('euro', false, 'Zahlung fehlt noch') + '</div>';
+      }
       if (a) status += '<div style="margin-top:4px">' + beUrteil(a) + '</div>' + beBhb(a) +
         ((a.gruende && a.gruende.length) ? '<div class="notiz" style="margin:4px 0 0">' + a.gruende.map(esc).join('<br>') + '</div>' : '') + (a.fehler ? '<div class="notiz" style="margin:4px 0 0">' + esc(a.fehler) + '</div>' : '');
       var links = [];
@@ -2804,7 +2825,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     });
     if (!zeilen.length) h += '<tr><td colspan="6" class="leer">Keine Belege in dieser Ansicht.</td></tr>';
     h += '</tbody></table></div><div class="card-fuss">Ein Eintrag je Beleg: gebuchte Belege aus BuchhaltungsButler (täglich 5:30 Uhr gelesen' + (d.stand ? ', zuletzt ' + esc(formatDateTime(d.stand)) : '') + ') und vom Agenten gelesene Anhänge aus dem Postfach. ' +
-      'Grün mit Haken: gebucht und Zahlung zugewiesen. Logos, Signaturen und Terminalbelege tauchen nicht auf. Löschen entfernt Beleg und Drive-Datei und legt die Mail in den Papierkorb, wenn kein weiterer relevanter Anhang daran hängt. Belege ohne erkannten Mandanten stehen in beiden Tabs.</div></div>' +
+      'Zwei Symbole je Beleg: Buch = gebucht, Euro = Zahlung zugewiesen. Grün und gefüllt heißt erledigt, grau mit Kontur heißt fehlt noch. Logos, Signaturen und Terminalbelege tauchen nicht auf. Löschen entfernt Beleg und Drive-Datei und legt die Mail in den Papierkorb, wenn kein weiterer relevanter Anhang daran hängt. Belege ohne erkannten Mandanten stehen in beiden Tabs.</div></div>' +
       renderPager(z, 'data-art="beleg" data-k="' + k + '"');
     return h;
   }
@@ -2833,7 +2854,10 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var bu = p.buchungen || [], belege = p.belege || [];
       var gebucht = bu.length > 0;
       var zugeordnet = belege.length > 0 || bu.some(function (x) { return !!x.beleg_ids; });
-      var status = gebucht ? '<div class="gut fett">' + haken() + (zugeordnet ? 'Beleg zugeordnet' : 'beleglos gebucht') + '</div>' : '<div class="hinweis-warn">noch offen</div>';
+      var eigen = belege.some(function (b) { return !b.link; });
+      var dokTitel = !gebucht ? 'Kein Beleg zugeordnet und nicht gebucht' : (zugeordnet ? (eigen ? 'Eigenbeleg ohne Datei zugeordnet' : 'Beleg zugeordnet') : 'Beleglos gebucht');
+      var status = '<div class="ikreihe">' + ikSymbol('dok', gebucht, dokTitel) + ikSymbol('buch', gebucht, gebucht ? 'Gebucht' : 'Noch nicht gebucht') + '</div>' +
+        '<div class="notiz" style="margin:2px 0 0">' + esc(!gebucht ? 'offen' : (zugeordnet ? (eigen ? 'Eigenbeleg' : 'Beleg zugeordnet') : 'beleglos')) + '</div>';
       var detail = '';
       if (belege.length) detail = belege.map(function (b) {
         var konten = (b.konten || []).map(function (x) { return '<div class="notiz" style="margin:0">' + beKonten(x) + '</div>'; }).join('');
@@ -2848,7 +2872,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         '<td class="nowrap zahlen rechts' + (betrag < 0 ? '' : ' gut') + '">' + esc(formatEuro(betrag)) + '</td><td>' + status + '</td><td>' + detail + '</td></tr>';
     });
     if (!zeilen.length) h += '<tr><td colspan="5" class="leer">Keine Zahlungen in dieser Ansicht.</td></tr>';
-    h += '</tbody></table></div><div class="card-fuss">Bankumsätze aus BuchhaltungsButler (nur lesend, täglich 5:30 Uhr' + (d.stand ? ', zuletzt ' + esc(formatDateTime(d.stand)) : '') + '). Grün mit Haken: eine bestätigte Buchung hängt an der Zahlung, mit zugeordnetem Beleg oder beleglos (dann mit Konto). Unbestätigte (blaue) Zahlungen gelten als offen, BuchhaltungsButler gibt sie nicht heraus.' +
+    h += '</tbody></table></div><div class="card-fuss">Bankumsätze aus BuchhaltungsButler (nur lesend, täglich 5:30 Uhr' + (d.stand ? ', zuletzt ' + esc(formatDateTime(d.stand)) : '') + '). Zwei Symbole je Zahlung: Dokument = Beleg zugeordnet oder ausdrücklich beleglos, Buch = gebucht. Grün und gefüllt heißt erledigt, grau mit Kontur heißt fehlt noch; beides hängt an einer bestätigten Buchung (mit Beleg oder beleglos, dann mit Konto). Unbestätigte (blaue) Zahlungen gelten als offen, BuchhaltungsButler gibt sie nicht heraus.' +
       (Number(kp.ohne_konto || 0) ? ' ' + esc(zahl(kp.ohne_konto)) + ' Umsätze sind keinem Bankkonto zugeordnet.' : '') + '</div></div>' + renderPager(z, 'data-art="zahlung" data-k="' + k + '"');
     return h;
   }
