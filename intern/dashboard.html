@@ -3105,7 +3105,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         (v.sachkonto ? '<button type="button" class="btn btn-primary" data-rf="ok" data-id="' + r.id + '">Passt</button>' : '') +
         '<button type="button" class="btn btn-secondary" data-rf="anders" data-id="' + r.id + '" data-m="' + esc(r.mandant) + '">' + (v.sachkonto ? 'Anders …' : 'Konto wählen …') + '</button>' +
         '<button type="button" class="btn btn-secondary" data-rf="sb" data-id="' + r.id + '">Weiß ich nicht, Steuerberater fragen</button>' +
-        ((r.dublette_von || r.imGruppe) && r.bhb_id ? '<button type="button" class="btn-loeschen" data-rf="dup" data-id="' + r.id + '" title="Erledigt diese Rückfrage als Doppelung und merkt den Beleg zum Löschen in BuchhaltungsButler vor">Doppelt: in BHB löschen</button>' : '') +
+        (r.bhb_id ? '<button type="button" class="btn-loeschen" data-rf="dup" data-id="' + r.id + '" title="Erledigt diese Rückfrage als Doppelung und merkt den Beleg zum Löschen in BuchhaltungsButler vor">Doppelt: in BHB löschen</button>' : '') +
         '<button type="button" class="link-btn" data-rf="verwerfen" data-id="' + r.id + '" title="Erledigt die Rückfrage ohne Buchung und ohne etwas zu lernen. Der Beleg bleibt unverändert in BuchhaltungsButler bzw. im Postfach.">Kein Beleg, ignorieren</button></div>';
     }
     return h + '</div>';
