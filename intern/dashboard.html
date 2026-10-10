@@ -438,6 +438,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   <section id="p-zahlung-lev-lp" role="tabpanel" aria-labelledby="tab-zahlung-lev-lp" hidden></section>
   <section id="p-rueckfragen" role="tabpanel" aria-labelledby="tab-rueckfragen" hidden></section>
   <section id="p-buchungstexte" role="tabpanel" aria-labelledby="tab-buchungstexte" hidden></section>
+  <section id="p-kostenstellen" role="tabpanel" aria-labelledby="tab-kostenstellen" hidden></section>
 
 </main>
 </div>
@@ -699,7 +700,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
     { id: 'segmentierung', name: 'Segmentierung', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
-    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlung XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung LEV Löwenpark' }, { id: 'rueckfragen', name: 'Rückfragen' }, { id: 'buchungstexte', name: 'Buchungstexte' }] }
+    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlung XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung LEV Löwenpark' }, { id: 'rueckfragen', name: 'Rückfragen' }, { id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }] }
   ];
   var TABS = [];
   BEREICHE.forEach(function (b) { b.tabs.forEach(function (t) { TABS.push(t.id); }); });
@@ -759,6 +760,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (BE_MANDANT[t]) ladeListe('beleg', BE_MANDANT[t]);
     if (ZA_KONTO[t]) ladeListe('zahlung', ZA_KONTO[t]);
     if (t === 'buchungstexte') ladeBT();
+    if (t === 'kostenstellen') ladeKS();
     if (t === 'rueckfragen') ladeRF();
     // SEO laedt erst, wenn der Tab zum ersten Mal geoeffnet wird: die
     // Sheets-Abfrage dauert laenger als die pretix-Aufrufe und wird beim
@@ -3008,11 +3010,13 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   }
   function rfQuelle(v) { return { wissen: 'Wissen: schon bestätigt', regel: 'Regel im Kontenplan', praezedenz: 'Präzedenzfall aus BuchhaltungsButler', ki: 'Vorschlag der KI', marko_text: 'nach deiner Anweisung (KI)', keine: 'kein Vorschlag' }[v && v.quelle] || 'kein Vorschlag'; }
   function rfTage(iso) { var d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000); return d <= 0 ? 'heute' : (d === 1 ? 'seit 1 Tag' : 'seit ' + d + ' Tagen'); }
+  // KST 1 immer mit Nummer: "56 - Spielaufwand - Sonstiger Spielaufwand"
+  function rfK1(nr, bez) { nr = String(nr || ''); bez = String(bez || ''); if (!nr) return bez || '–'; return bez && bez.indexOf(nr) !== 0 ? nr + ' - ' + bez : (bez || nr); }
   function rfKonto(v) {
     if (!v || !v.sachkonto) return '<span class="gedaempft">–</span>';
-    return '<div>' + beKonto(v.sachkonto, v.sachkontoBez) + '</div>' + (v.kreditor ? '<div class="notiz" style="margin:0">Kreditor ' + esc(v.kreditor) + '</div>' : '') + '<div class="notiz" style="margin:0">KST 1 ' + esc(v.kst1Bez || v.kst1 || '–') + ' · KST 2 ' + esc(v.kst2Bez || v.kst2 || '–') + (v.vat ? ' · USt-Regel ' + esc(v.vat) : '') + (v.belegPolitik ? ' · ' + esc(v.belegPolitik) : '') + '</div>';
+    return '<div>' + beKonto(v.sachkonto, v.sachkontoBez) + '</div>' + (v.kreditor ? '<div class="notiz" style="margin:0">Kreditor ' + esc(v.kreditor) + '</div>' : '') + '<div class="notiz" style="margin:0">KST 1 ' + esc(rfK1(v.kst1, v.kst1Bez)) + ' · KST 2 ' + esc(v.kst2Bez || v.kst2 || '–') + (v.vat ? ' · USt-Regel ' + esc(v.vat) : '') + (v.belegPolitik ? ' · ' + esc(v.belegPolitik) : '') + '</div>';
   }
-  function comboText(c) { return c.sachkonto + ' ' + (c.sachkontoBez || '') + ' · KST 1 ' + (c.kst1Bez || c.kst1) + ' · KST 2 ' + (c.kst2Bez || c.kst2) + (c.vat ? ' · ' + c.vat : ''); }
+  function comboText(c) { return c.sachkonto + ' ' + (c.sachkontoBez || '') + ' · KST 1 ' + rfK1(c.kst1, c.kst1Bez) + ' · KST 2 ' + (c.kst2Bez || c.kst2) + (c.vat ? ' · ' + c.vat : ''); }
   // Weitere offene Rückfragen desselben Ausstellers im selben Mandanten (Doppelungen ausgenommen). gleich = nur mit demselben Vorschlag.
   function rfSchluessel(t) { return String(t || '').toLowerCase().replace(/[^a-z0-9äöüß]/g, ''); }
   function rfGleiche(r, gleich) {
@@ -3228,7 +3232,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
             if (gezeigt[r.id]) return;
             var ids = RF.sammel[r.sammelKey], mitglieder = offen.filter(function (x) { return ids.indexOf(x.id) >= 0; }), v0 = r.vorschlag || {};
             ids.forEach(function (i) { gezeigt[i] = true; });
-            h += '<div class="rf-gruppe rf-sammel"><div class="rf-gruppe-kopf"><b>' + mitglieder.length + ' Belege von ' + esc(r.aussteller) + ' mit demselben Vorschlag</b> (' + esc(v0.sachkonto + ' ' + (v0.sachkontoBez || '')) + ', KST 1 ' + esc(v0.kst1Bez || v0.kst1 || '–') + ', KST 2 ' + esc(v0.kst2Bez || v0.kst2 || '–') + '). ' +
+            h += '<div class="rf-gruppe rf-sammel"><div class="rf-gruppe-kopf"><b>' + mitglieder.length + ' Belege von ' + esc(r.aussteller) + ' mit demselben Vorschlag</b> (' + esc(v0.sachkonto + ' ' + (v0.sachkontoBez || '')) + ', KST 1 ' + esc(rfK1(v0.kst1, v0.kst1Bez)) + ', KST 2 ' + esc(v0.kst2Bez || v0.kst2 || '–') + '). ' +
               '<button type="button" class="btn btn-primary" style="margin-left:6px" data-rf="ok-gruppe" data-k="' + esc(r.sammelKey) + '">Passt für alle ' + mitglieder.length + '</button></div>' + mitglieder.map(rfKarte).join('') + '</div>';
             return;
           }
@@ -3400,6 +3404,62 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       return;
     } catch (e) { ed.laeuft = false; ed.fehler = e.message; }
     beAlleRender();
+  }
+  // ---------- Accounting: Kostenstellenplan (aus dem Liquiditätsplan) ----------
+  var KS = { daten: null, fehler: null, laedt: false, mandant: 'XXL', suche: '', meldung: '', fehlerAktion: '', aktualisiert: false };
+  async function ladeKS() {
+    KS.laedt = true; KS.fehler = null; renderKS();
+    try {
+      var res = await fetch('/webhook/accounting/kostenstellen');
+      var d = await res.json();
+      if (!res.ok) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
+      KS.daten = d;
+    } catch (e) { KS.fehler = e.message; }
+    KS.laedt = false; renderKS();
+  }
+  async function ksEinlesen() {
+    KS.aktualisiert = true; KS.meldung = ''; KS.fehlerAktion = ''; renderKS();
+    try {
+      var res = await fetch('/webhook/accounting/kostenstellen-aktualisieren', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+      var d = await res.json();
+      if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Einlesen fehlgeschlagen');
+      KS.meldung = d.meldung;
+      KS.aktualisiert = false; await ladeKS();
+    } catch (e) { KS.aktualisiert = false; KS.fehlerAktion = e.message; renderKS(); }
+  }
+  function renderKS() {
+    var el = $('p-kostenstellen'); if (!el) return;
+    if (KS.laedt && !KS.daten) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
+    if (KS.fehler && !KS.daten) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(KS.fehler) + '</div>'; return; }
+    if (!KS.daten) { el.innerHTML = ''; return; }
+    var md = (KS.daten.mandanten || {})[KS.mandant] || null;
+    var such = String(KS.suche || '').trim().toLowerCase();
+    var liste = md ? md.eintraege.filter(function (e) { return !such || (e.kst2 + ' ' + e.kst2Bez + ' ' + e.kst1 + ' ' + e.kst1Bez).toLowerCase().indexOf(such) >= 0; }) : [];
+    var fokus = document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute('data-ks') === 'suche';
+    var pos = fokus ? document.activeElement.selectionStart : 0;
+    var chip = function (m) { var n = ((KS.daten.mandanten || {})[m] || { eintraege: [] }).eintraege.length; return '<button type="button" class="chip' + (KS.mandant === m ? ' aktiv' : '') + '" data-ks="mandant" data-m="' + m + '" aria-pressed="' + (KS.mandant === m) + '">' + m + ' <span class="notiz" style="display:inline;margin:0">' + esc(zahl(n)) + '</span></button>'; };
+    var stand = md && md.aktualisiert ? 'Stand ' + formatDate(String(md.aktualisiert).slice(0, 10)) + ', ' + String(new Date(md.aktualisiert).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })) + ' Uhr' : 'noch nicht eingelesen';
+    var h = '<div class="stapel"><nav class="chips" aria-label="Mandant wählen"><span class="notiz chips-label">Mandant</span>' + chip('XXL') + chip('LEV') + '</nav>' +
+      '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Kostenstellenplan ' + esc(KS.mandant) + ' · ' + esc(zahl(md ? md.eintraege.length : 0)) + ' Kostenstellen 2 · ' + esc(stand) + '</span><span>' +
+      '<input type="search" class="eingabe-klein" style="width:200px;flex:none" data-ks="suche" placeholder="Suchen …" aria-label="Suchen" value="' + esc(KS.suche) + '"> <button type="button" class="link-btn" data-ks="einlesen"' + (KS.aktualisiert ? ' disabled' : '') + '>' + (KS.aktualisiert ? 'Lese ein …' : 'Aus Liquiditätsplan neu einlesen') + '</button></span></div>' +
+      (KS.meldung ? '<div class="erfolg" role="status" style="margin:8px 12px">' + esc(KS.meldung) + '</div>' : '') +
+      (KS.fehlerAktion ? '<div class="fehlerbox" role="alert" style="margin:8px 12px">' + esc(KS.fehlerAktion) + '</div>' : '') +
+      '<div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>KST 2</th><th>Bezeichnung KST 2</th><th>KST 1</th><th>Bezeichnung KST 1</th></tr></thead><tbody>';
+    liste.forEach(function (e) { h += '<tr><td class="zahlen">' + esc(e.kst2) + '</td><td>' + esc(e.kst2Bez) + '</td><td class="zahlen">' + esc(e.kst1 || '–') + '</td><td>' + esc(e.kst1Bez || '') + '</td></tr>'; });
+    if (!liste.length) h += '<tr><td colspan="4" class="leer">' + (md ? 'Keine Treffer.' : 'Noch nicht eingelesen. Mit „Aus Liquiditätsplan neu einlesen“ füllen.') + '</td></tr>';
+    h += '</tbody></table></div><div class="card-fuss">Quelle ist der Liquiditätsplan: Ligaplan (Kostenstelle 1) und die Budget-Tabs (Kostenstelle 2 mit zugehöriger Kostenstelle 1). Der Plan ist maßgeblich, auch wenn BuchhaltungsButler eine Kostenstelle noch nicht kennt. Die Kostenstellen aus diesem Plan prüft auch die Korrektur per Freitext in den Rückfragen.</div></div></div>';
+    el.innerHTML = h;
+    if (fokus) { var n = el.querySelector('[data-ks="suche"]'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } }
+  }
+  function bindKS() {
+    var p = $('p-kostenstellen');
+    p.addEventListener('input', function (e) { var s = e.target.closest('[data-ks="suche"]'); if (s) { KS.suche = s.value; renderKS(); } });
+    p.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-ks]'); if (!b) return;
+      var w = b.getAttribute('data-ks');
+      if (w === 'mandant') { KS.mandant = b.getAttribute('data-m'); renderKS(); }
+      else if (w === 'einlesen') ksEinlesen();
+    });
   }
   // ---------- Accounting: Buchungstexte (Standardtexte je Aussteller) ----------
   var BT = { daten: null, fehler: null, laedt: false, suche: '', meldung: '', loeschen: null, fehlerAktion: '' };
@@ -3656,6 +3716,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   bindVersand();
   bindBelege();
   bindBT();
+  bindKS();
   bindRF();
   document.addEventListener('loewen-nutzer', function () {
     if (!darfBereich(bereichVon(S.tab))) setTab(S.tab, false, S.tabArg); else renderNavigation();
