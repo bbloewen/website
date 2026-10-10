@@ -2750,6 +2750,12 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   function beKonto(nr, name) { return nr ? esc(nr) + (name ? ' <span class="notiz" style="display:inline;margin:0">' + esc(name) + '</span>' : '') : ''; }
   // Nur die Nummer, der Name steht im Tooltip (kompakte Tabelle).
   function beZahl(nr, name) { return nr ? '<span class="tipp" data-tip="' + esc(name || '') + '" tabindex="0">' + esc(nr) + '</span>' : ''; }
+  // Link zum Beleg in BuchhaltungsButler. Gebuchte Belege liefern ihn mit; bei noch nicht gebuchten ergibt er sich aus dem Dateinamen (Muster aus den gebuchten Belegen abgeleitet).
+  function bhbBelegLink(link, dateiname) {
+    if (link) return link;
+    if (!dateiname) return '';
+    return 'https://app.buchhaltungsbutler.de/receipts/view-pdf/' + encodeURIComponent(dateiname).replace(/[!'()*]/g, function (c) { return '%' + c.charCodeAt(0).toString(16).toUpperCase(); }) + '.pdf';
+  }
   function beKonten(x) {
     var teile = [beKonto(x.sachkonto || x.konto, x.sachkonto_name || x.name)];
     if (x.kst1) teile.push('KST 1 ' + beKonto(x.kst1, x.kst1_name));
@@ -2851,7 +2857,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       '<div class="tbl-voll"><table class="tbl kompakt fest"><colgroup><col style="width:7%"><col style="width:14%"><col style="width:9%"><col style="width:7%"><col style="width:17%"><col style="width:6%"><col style="width:6%"><col style="width:5%"><col style="width:5%"><col style="width:4%"><col style="width:7%"><col style="width:6%"><col style="width:7%"><col style="width:3%"></colgroup><thead><tr><th><abbr title="Belegdatum">Datum</abbr></th><th><abbr title="Gegenpartei, Rechnungsnummer, Links und Quelle">Beleg</abbr></th><th><abbr title="Gebucht (Buch-Symbol) und Zahlung zugewiesen (Euro-Symbol)">Status</abbr></th><th class="rechts"><abbr title="Belegbetrag brutto">Beleg €</abbr></th><th><abbr title="Buchungstext aus BuchhaltungsButler, bei noch nicht gebuchten Belegen der Vorschlag des Agenten">Text</abbr></th><th><abbr title="Sachkonto. Die Bezeichnung steht im Tooltip der Nummer.">Sachk.</abbr></th><th><abbr title="Gegenkonto: Kreditor (Eingangsbeleg) oder Debitor (Ausgangsbeleg)">Gegenk.</abbr></th><th><abbr title="Kostenstelle 1. Die Bezeichnung steht im Tooltip der Nummer.">KST1</abbr></th><th><abbr title="Kostenstelle 2 (Zweck). Die Bezeichnung steht im Tooltip der Nummer.">KST2</abbr></th><th class="rechts"><abbr title="Umsatzsteuersatz">USt</abbr></th><th class="rechts"><abbr title="Nettobetrag der Buchungszeile (aus Brutto und Satz gerechnet)">Netto</abbr></th><th class="rechts"><abbr title="Steuerbetrag der Buchungszeile (aus Brutto und Satz gerechnet)">Steuer</abbr></th><th class="rechts"><abbr title="Bruttobetrag der Buchungszeile">Brutto</abbr></th><th><abbr title="Steuerschlüssel: Umsatzsteuer-Kennzeichen der Buchung aus BuchhaltungsButler">Schl.</abbr></th></tr></thead><tbody>';
     zeilen.forEach(function (r) {
       var b = r.bhb, a = r.agent;
-      var titel = (b && b.gegenpartei) || (a && (a.aussteller || a.anhang_name)) || '–';
+      var titel = (b && b.gegenpartei) || (a && (a.aussteller || a.anhang_name)) || (b && b.dateiname) || '–';
       var nummer = (b && b.nummer) || (a && a.nummer) || '';
       var art = b ? (/outbound/.test(b.typ || '') ? 'Ausgang' : 'Eingang') : (a && a.typ ? a.typ : 'Eingang');
       var brutto = b && b.brutto !== null && b.brutto !== undefined ? Number(b.brutto) : (a && a.brutto !== null && a.brutto !== undefined ? Number(a.brutto) : null);
@@ -2874,7 +2880,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         ((a.gruende && a.gruende.length) ? '<div class="notiz" style="margin:4px 0 0">' + a.gruende.map(esc).join('<br>') + '</div>' : '') + (a.fehler ? '<div class="notiz" style="margin:4px 0 0">' + esc(a.fehler) + '</div>' : '');
       var links = [];
       if (a && a.drive_url) links.push('<a href="' + esc(a.drive_url) + '" target="_blank" rel="noopener">Original</a>');
-      if (b && b.link) links.push('<a href="' + esc(b.link) + '" target="_blank" rel="noopener">Beleg in BHB</a>');
+      if (b && bhbBelegLink(b.link, b.dateiname)) links.push('<a href="' + esc(bhbBelegLink(b.link, b.dateiname)) + '" target="_blank" rel="noopener">Beleg in BHB</a>');
       if (a && a.gmail_id && String(a.gmail_id).indexOf('test') !== 0) links.push('<a href="https://mail.google.com/mail/?authuser=rechnung@basketball-loewen.com#all/' + esc(a.gmail_id) + '" target="_blank" rel="noopener">Mail</a>');
       var loeschKnopf = a ? '<div style="margin-top:6px"><button type="button" class="btn-loeschen" data-be="loeschen" data-id="' + a.id + '" title="Entfernt diesen Beleg aus der Liste und die Datei aus Google Drive. Die Mail kommt in den Papierkorb, wenn kein weiterer relevanter Anhang daran hängt. In BuchhaltungsButler ändert sich nichts." aria-label="Beleg löschen: ' + esc(titel) + '">Beleg löschen</button></div>' : '';
       // Buchungszeilen: aus BuchhaltungsButler, sonst die Beträge je Steuersatz, die der Agent gelesen hat.
@@ -2996,6 +3002,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var kopf = '<div class="zeile-titel" style="margin:0 0 4px"><span class="fett">' + esc(r.aussteller || '–') + (r.nummer ? ' · Nr. ' + esc(r.nummer) : '') + (r.brutto !== null && r.brutto !== undefined ? ' · ' + esc(formatEuro(Number(r.brutto))) : '') + '</span><span class="notiz" style="margin:0">' + esc(r.mandant) + (r.datum ? ' · ' + esc(formatDate(String(r.datum).slice(0, 10))) : '') + ' · ' + esc(rfTage(r.angelegt)) + '</span></div>';
     var links = [];
     if (r.drive_url) links.push('<a href="' + esc(r.drive_url) + '" target="_blank" rel="noopener">Original in Drive</a>');
+    if (r.nur_bhb && r.anhang_name) links.push('<a href="' + esc(bhbBelegLink('', r.anhang_name)) + '" target="_blank" rel="noopener">Beleg in BuchhaltungsButler</a>');
     links.push('<span class="notiz" style="display:inline;margin:0">' + (r.nur_bhb ? 'liegt in BuchhaltungsButler, noch nicht gebucht' : 'aus dem Postfach gelesen') + '</span>');
     var h = '<div class="card pad rf-karte">' + kopf + '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px">' + links.join('') + '</div>' +
       '<div class="fett" style="margin-bottom:6px">' + esc(r.frage || '') + '</div>';
