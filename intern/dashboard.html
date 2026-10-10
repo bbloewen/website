@@ -3010,6 +3010,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   }
   function rfQuelle(v) { return { wissen: 'Wissen: schon bestätigt', regel: 'Regel im Kontenplan', praezedenz: 'Präzedenzfall aus BuchhaltungsButler', ki: 'Vorschlag der KI', marko_text: 'nach deiner Anweisung (KI)', keine: 'kein Vorschlag' }[v && v.quelle] || 'kein Vorschlag'; }
   function rfTage(iso) { var d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000); return d <= 0 ? 'heute' : (d === 1 ? 'seit 1 Tag' : 'seit ' + d + ' Tagen'); }
+  // Empfänger für "Zurückweisen": Namen zum Anklicken (An und CC)
+  var ZW_PERSONEN = [{ n: 'Kim', m: 'kim.mauermann@basketball-loewen.com' }, { n: 'Nick', m: 'nick.schmoock@basketball-loewen.com' }, { n: 'André', m: 'andre.grenzdoerffer@basketball-loewen.com' }, { n: 'Florian', m: 'florian.gut@basketball-loewen.com' }, { n: 'Anna', m: 'anna.metzdorf@basketball-loewen.com' }, { n: 'Valentin', m: 'valentin.kern@basketball-loewen.com' }];
   // Ähnliche offene Fälle für "Auch bei ähnlichen anwenden": Auslage = gleiche Person, sonst gleicher Aussteller, im selben Mandanten
   function rfAehnliche(r) {
     var alle = (RF.daten && RF.daten.rueckfragen) || [];
@@ -3101,7 +3103,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         (plan ? '<select id="rf-combo-' + r.id + '" class="auswahl" style="width:100%;margin-top:4px" data-rf="combo"><option value="">Bitte wählen …</option>' + plan.map(function (c) { return '<option value="' + c.id + '"' + (String(ed.combo) === String(c.id) ? ' selected' : '') + '>' + esc(comboText(c)) + '</option>'; }).join('') + '</select>' : '<div class="laedt">Lade Kontenplan …</div>') +
         (r.sammelKey && (RF.sammel[r.sammelKey] || []).length > 1 ? '<label class="text-klein" style="display:block;margin-top:8px"><input type="checkbox" data-rf="alle"' + (ed.alle ? ' checked' : '') + '> Auch für die anderen ' + ((RF.sammel[r.sammelKey] || []).length - 1) + ' Belege dieser Gruppe (oben zusammen angezeigt)</label>' : '') + '<div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn btn-primary" data-rf="anders-ja" data-id="' + r.id + '"' + (ed.laeuft ? ' disabled' : '') + '>Speichern</button><button type="button" class="link-btn" data-rf="abbruch">Abbrechen</button></div>' + (ed.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:6px">' + esc(ed.fehler) + '</div>' : '') + '</div>';
     } else if (ed && ed.modus === 'zurueck') {
-      h += '<div class="rf-box" style="margin-top:8px"><label class="text-klein" for="rf-zw-an-' + r.id + '">An (Entwurf, es wird nichts gesendet)</label><input id="rf-zw-an-' + r.id + '" class="eingabe" style="margin-top:4px" data-rf="zw-an" value="' + esc(ed.an) + '">' +
+      h += '<div class="rf-box" style="margin-top:8px"><div class="text-klein"><b>Entwurf an</b> (es wird nichts gesendet), Namen anklicken</div>' + (function () {
+        var row = function (art, titel) { return '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px"><span class="notiz" style="margin:0;min-width:2.5rem">' + titel + '</span>' + ZW_PERSONEN.map(function (x) { var an = (ed[art] || []).indexOf(x.m) >= 0; return '<button type="button" class="chip' + (an ? ' aktiv' : '') + '" data-rf="zw-' + art + '" data-mail="' + esc(x.m) + '" aria-pressed="' + an + '" title="' + esc(x.m) + '"' + (ed.laeuft ? ' disabled' : '') + '>' + esc(x.n) + '</button>'; }).join('') + '</div>'; };
+        return row('an', 'An') + row('cc', 'CC');
+      })() +
+        '<label class="text-klein" for="rf-zw-extra-' + r.id + '" style="display:block;margin-top:6px">Weitere Adresse (optional, bei An)</label><input id="rf-zw-extra-' + r.id + '" class="eingabe" style="margin-top:2px" data-rf="zw-extra" value="' + esc(ed.extra || '') + '" placeholder="name@basketball-loewen.com"' + (ed.laeuft ? ' disabled' : '') + '>' +
         '<label class="text-klein" for="rf-zw-grund-' + r.id + '" style="display:block;margin-top:8px">Warum wird die Rechnung zurückgewiesen? Einfach sagen oder schreiben</label>' +
         '<textarea id="rf-zw-grund-' + r.id + '" class="eingabe" rows="3" style="width:100%;margin-top:4px" maxlength="1500" data-rf="zw-grund" placeholder="z. B. Das Fahrzeug gehört zum Fuhrpark der XXL Baskets GmbH, die Rechnung muss auf die XXL Baskets GmbH lauten."' + (ed.laeuft ? ' disabled' : '') + '>' + esc(ed.grund || '') + '</textarea>' +
         (r.bhb_id ? '<label class="text-klein" style="display:block;margin-top:8px"><input type="checkbox" data-rf="zw-loeschen"' + (ed.loeschen ? ' checked' : '') + (ed.laeuft ? ' disabled' : '') + '> Beleg danach in BuchhaltungsButler löschen (als gelöscht markiert, wiederherstellbar)</label>' : '') +
@@ -3346,7 +3352,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     p.addEventListener('change', function (e) { var c = e.target.closest('[data-rf="alle"]'); if (c && RF.edit) RF.edit.alle = c.checked; });
     p.addEventListener('change', function (e) { var c = e.target.closest('[data-rf="weitere"]'); if (c && RF.edit) RF.edit.weitere = c.checked; });
     p.addEventListener('change', function (e) { var c = e.target.closest('[data-rf="zw-loeschen"]'); if (c && RF.edit) RF.edit.loeschen = c.checked; });
-    p.addEventListener('input', function (e) { var n = e.target.closest('[data-rf="zw-grund"]'); if (n && RF.edit) RF.edit.grund = n.value; var m = e.target.closest('[data-rf="zw-an"]'); if (m && RF.edit) RF.edit.an = m.value; });
+    p.addEventListener('input', function (e) { var n = e.target.closest('[data-rf="zw-grund"]'); if (n && RF.edit) RF.edit.grund = n.value; var m = e.target.closest('[data-rf="zw-extra"]'); if (m && RF.edit) RF.edit.extra = m.value; });
     p.addEventListener('click', async function (e) {
       var b = e.target.closest('[data-rf]'); if (!b) return;
       if (RF.laeuftAntwort) return;
@@ -3371,15 +3377,22 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       else if (w === 'buch-ja') { if (window.confirm('Jetzt in BuchhaltungsButler hochladen und buchen? Das schreibt echte Buchungen.')) buchAusfuehren(id); }
       else if (w === 'dup') { if (window.confirm('Diesen Beleg als Doppelung erledigen und zum Löschen in BuchhaltungsButler vormerken?')) rfAntwort(id, { aktion: 'duplikat' }); }
       else if (w === 'bhb-ok') rfAntwort(id, { aktion: 'bhb_geloescht' });
-      else if (w === 'zurueck') { RF.meldung = ''; RF.edit = { id: id, modus: 'zurueck', an: 'kim.mauermann@basketball-loewen.com, nick.schmoock@basketball-loewen.com', grund: '', loeschen: true, laeuft: false, fehler: '' }; renderRF(); }
+      else if (w === 'zurueck') { RF.meldung = ''; RF.edit = { id: id, modus: 'zurueck', an: ['kim.mauermann@basketball-loewen.com', 'nick.schmoock@basketball-loewen.com'], cc: [], extra: '', grund: '', loeschen: true, laeuft: false, fehler: '' }; renderRF(); }
+      else if ((w === 'zw-an' || w === 'zw-cc') && RF.edit) {
+        var mz = b.getAttribute('data-mail'), ar = w === 'zw-an' ? 'an' : 'cc', gg = ar === 'an' ? 'cc' : 'an';
+        var li = RF.edit[ar] || []; var pos2 = li.indexOf(mz);
+        if (pos2 >= 0) li.splice(pos2, 1); else { li.push(mz); RF.edit[gg] = (RF.edit[gg] || []).filter(function (x) { return x !== mz; }); }
+        RF.edit[ar] = li; var gz2 = document.getElementById('rf-zw-grund-' + RF.edit.id); if (gz2) RF.edit.grund = gz2.value; renderRF();
+      }
       else if (w === 'zurueck-ja') {
         var ez = RF.edit; if (!ez) return;
         var gz = document.getElementById('rf-zw-grund-' + id); if (gz) ez.grund = gz.value;
-        var az = document.getElementById('rf-zw-an-' + id); if (az) ez.an = az.value;
+        var xz = document.getElementById('rf-zw-extra-' + id); if (xz) ez.extra = xz.value;
+        if (!(ez.an || []).length && !String(ez.extra || '').trim()) { ez.fehler = 'Bitte wähle mindestens einen Empfänger (An).'; renderRF(); return; }
         if (!String(ez.grund || '').trim()) { ez.fehler = 'Bitte nenne den Grund der Zurückweisung.'; renderRF(); return; }
         ez.laeuft = true; ez.fehler = ''; renderRF();
         try {
-          var rz = await fetch('/webhook/accounting/rueckfrage-zurueckweisen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, grund: ez.grund, an: ez.an, loeschen: ez.loeschen === true }) });
+          var rz = await fetch('/webhook/accounting/rueckfrage-zurueckweisen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, grund: ez.grund, an: (ez.an || []).concat(ez.extra ? [ez.extra] : []).join(','), cc: (ez.cc || []).join(','), loeschen: ez.loeschen === true }) });
           var dz = await rz.json();
           if (!rz.ok || !dz.ok) { ez.laeuft = false; ez.fehler = dz.meldung || dz.message || 'Zurückweisen fehlgeschlagen'; renderRF(); return; }
           RF.edit = null; RF.meldung = dz.meldung; RF.meldungLink = dz.entwurf_link || ''; RF.meldungLinkFuer = RF.meldung;
