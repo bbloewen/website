@@ -3027,11 +3027,19 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   }
   // KST 1 immer mit Nummer: "56 - Spielaufwand - Sonstiger Spielaufwand"
   function rfK1(nr, bez) { nr = String(nr || ''); bez = String(bez || ''); if (!nr) return bez || '–'; return bez && bez.indexOf(nr) !== 0 ? nr + ' - ' + bez : (bez || nr); }
-  function rfKonto(v) {
-    if (!v || !v.sachkonto) return '<span class="gedaempft">–</span>';
-    return '<div>' + beKonto(v.sachkonto, v.sachkontoBez) + '</div>' + (v.kreditor ? '<div class="notiz" style="margin:0">Kreditor ' + esc(v.kreditor) + '</div>' : '') + '<div class="notiz" style="margin:0">KST 1 ' + esc(rfK1(v.kst1, v.kst1Bez)) + ' · KST 2 ' + esc(v.kst2Bez || v.kst2 || '–') + (v.vat ? ' · USt-Regel ' + esc(v.vat) : '') + (v.belegPolitik ? ' · ' + esc(v.belegPolitik) : '') + '</div>';
+  // Umsatzsteuer-Regel lesbar; bei mehreren Steuersätzen auf dem Beleg: je Satz eine Buchungszeile
+  function vatText(c) { return { '19_pre': '19 % Vorsteuer', '7_pre': '7 % Vorsteuer', '0_none': 'keine Steuer', '19_vat': '19 % Umsatzsteuer', '7_vat': '7 % Umsatzsteuer' }[c] || c; }
+  function rfUst(v, r) {
+    var sae = []; ((r && r.betraege) || []).forEach(function (b) { var n = Number(b.steuersatz); if (!isNaN(n) && sae.indexOf(n) < 0) sae.push(n); });
+    sae.sort(function (x, y) { return y - x; });
+    if (sae.length > 1) return ' · USt ' + sae.join(' % und ') + ' % Vorsteuer, je Satz eine Buchungszeile';
+    return v.vat ? ' · USt-Regel ' + vatText(v.vat) : '';
   }
-  function comboText(c) { return c.sachkonto + ' ' + (c.sachkontoBez || '') + ' · KST 1 ' + rfK1(c.kst1, c.kst1Bez) + ' · KST 2 ' + (c.kst2Bez || c.kst2) + (c.vat ? ' · ' + c.vat : ''); }
+  function rfKonto(v, r) {
+    if (!v || !v.sachkonto) return '<span class="gedaempft">–</span>';
+    return '<div>' + beKonto(v.sachkonto, v.sachkontoBez) + '</div>' + (v.kreditor ? '<div class="notiz" style="margin:0">Kreditor ' + esc(v.kreditor) + '</div>' : '') + '<div class="notiz" style="margin:0">KST 1 ' + esc(rfK1(v.kst1, v.kst1Bez)) + ' · KST 2 ' + esc(v.kst2Bez || v.kst2 || '–') + esc(rfUst(v, r)) + (v.belegPolitik ? ' · ' + esc(v.belegPolitik) : '') + '</div>';
+  }
+  function comboText(c) { return c.sachkonto + ' ' + (c.sachkontoBez || '') + ' · KST 1 ' + rfK1(c.kst1, c.kst1Bez) + ' · KST 2 ' + (c.kst2Bez || c.kst2) + (c.vat ? ' · ' + vatText(c.vat) : ''); }
   // Weitere offene Rückfragen desselben Ausstellers im selben Mandanten (Doppelungen ausgenommen). gleich = nur mit demselben Vorschlag.
   function rfSchluessel(t) { return String(t || '').toLowerCase().replace(/[^a-z0-9äöüß]/g, ''); }
   function rfGleiche(r, gleich) {
@@ -3082,7 +3090,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (r.auslage_von) h += '<div class="notiz" style="margin:0 0 8px">' + (r.erstattung ? 'Erstattung gefunden: ' + esc(formatDate(String(r.erstattung.datum).slice(0, 10))) + ', ' + esc(formatEuro(Math.abs(Number(r.erstattung.betrag)))) + '.' : 'Noch keine Erstattung gefunden: Zahlung muss ausgelöst werden.') + '</div>';
     else if (r.auslage) h += '<div class="notiz" style="margin:0 0 8px">Auslage vermutet, Person unklar: der Kreditor ist die Person, die ausgelegt hat.</div>';
     if (v.sachkonto) {
-      h += '<div class="rf-box"><div class="notiz" style="margin:0 0 4px">Vorschlag · ' + esc(rfQuelle(v)) + ' · Sicherheit ' + esc(v.sicherheit || '') + '</div>' + rfKonto(v) +
+      h += '<div class="rf-box"><div class="notiz" style="margin:0 0 4px">Vorschlag · ' + esc(rfQuelle(v)) + ' · Sicherheit ' + esc(v.sicherheit || '') + '</div>' + rfKonto(v, r) +
         (v.begruendung ? '<div class="text-klein" style="margin-top:4px">' + esc(v.begruendung) + '</div>' : '') + '</div>';
     } else {
       h += '<div class="rf-box"><div class="notiz" style="margin:0 0 4px">' + esc(rfQuelle(v)) + '</div>' + (v.begruendung ? '<div class="text-klein">' + esc(v.begruendung) + '</div>' : '') +
@@ -3090,7 +3098,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     }
     h += rfBtZeile(r);
     if (r.dublette_von && !r.imGruppe) h += '<div class="hinweis-warn" style="margin-top:6px">Mögliche Doppelung: gleicher Aussteller, Betrag und Nummer wie Rückfrage ' + esc(String(r.dublette_von)) + ' (schon entschieden).</div>';
-    (v.hinweise || []).filter(function (x) { return !(r.auslage || r.auslage_von) || !/^Auslage/.test(x); }).forEach(function (x) { h += '<div class="hinweis-warn" style="margin-top:6px">' + esc(x) + '</div>'; });
+    (v.hinweise || []).filter(function (x) { var split = (r.betraege || []).map(function (b) { return Number(b.steuersatz); }).filter(function (n, i, ar) { return ar.indexOf(n) === i; }).length > 1; return (!(r.auslage || r.auslage_von) || !/^Auslage/.test(x)) && !(split && /^Die Regel erwartet/.test(x)); }).forEach(function (x) { h += '<div class="hinweis-warn" style="margin-top:6px">' + esc(x) + '</div>'; });
     if (r.hinweis) h += '<details style="margin-top:6px"><summary class="text-klein">Hinweis des Lesers</summary><div class="notiz" style="margin:4px 0 0">' + esc(r.hinweis) + '</div></details>';
     if (ed && ed.modus === 'anders') {
       var dlg = (v.dialog || []).slice(-6);
@@ -3203,7 +3211,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     l.forEach(function (r) {
       var e = r.entscheidung || {};
       h += '<div class="rf-karte rf-' + esc(r.mandant) + ' card pad" style="margin-top:8px"><div class="zeile-titel" style="margin:0"><span class="fett"><span class="m-badge m-' + esc(r.mandant) + '">' + esc(r.mandant) + '</span> ' + rfTitel(r) + (r.nummer ? ' · Nr. ' + esc(r.nummer) : '') + (r.brutto !== null && r.brutto !== undefined ? ' · ' + esc(formatEuro(Number(r.brutto))) : '') + '</span><span class="notiz" style="margin:0">freigegeben ' + esc(r.entschieden_am ? formatDate(String(r.entschieden_am).slice(0, 10)) : '') + '</span></div>' +
-        '<div style="margin-top:4px">' + rfKonto(e) + '<div class="notiz" style="margin:0">Buchungstext: ' + esc(rfBtText(r) || '–') + '</div></div>' +
+        '<div style="margin-top:4px">' + rfKonto(e, r) + '<div class="notiz" style="margin:0">Buchungstext: ' + esc(rfBtText(r) || '–') + '</div></div>' +
         '<div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn btn-secondary" data-rf="buch-vorschau" data-id="' + r.id + '">Vorschau</button><button type="button" class="btn btn-primary" data-rf="buch-pruefen" data-id="' + r.id + '">Buchen …</button></div>' + buchPanel(r) + '</div>';
     });
     return h + '</div></div>';
