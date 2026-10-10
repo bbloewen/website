@@ -259,7 +259,7 @@
       .concat(saison.profisAuswaerts.map(function (s) { return toGame(s, false, 'Basketball Löwen', 'profis'); }))
       .sort(function (a, b) { return a.date - b.date; });
 
-    var damenGames = (saison.damen.spiele || []).map(function (s) { return toGame(s, s.heim, 'Löwinnen Erfurt', 'damen'); });
+    var damenGames = (saison.damen.spiele || []).map(function (s) { return toGame(s, s.heim, 'CATL Basketball Löwinnen', 'damen'); });
     var nbblGames = (saison.nbbl.spiele || []).map(function (s) { return toGame(s, s.heim, 'Basketball Löwen NBBL (U19)', 'nbbl'); });
 
     var alleGames = profisGames.concat(damenGames, nbblGames).sort(function (a, b) {
