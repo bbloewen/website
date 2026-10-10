@@ -2995,6 +2995,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       h += '<div class="rf-box"><div class="notiz" style="margin:0 0 4px">' + esc(rfQuelle(v)) + '</div>' + (v.begruendung ? '<div class="text-klein">' + esc(v.begruendung) + '</div>' : '') +
         ((v.kandidaten || []).length ? '<div class="notiz" style="margin:6px 0 0">Mögliche Konten aus BuchhaltungsButler: ' + v.kandidaten.map(function (c) { return esc(comboText(c)) + (c.n ? ' (' + c.n + '×)' : ''); }).join(' · ') + '</div>' : '') + '</div>';
     }
+    if (r.dublette_von) h += '<div class="hinweis-warn" style="margin-top:6px">Mögliche Doppelung: gleicher Aussteller und gleicher Betrag wie Rückfrage ' + esc(String(r.dublette_von)) + '. Bei einer echten Doppelung nur den älteren Beleg behalten und diesen mit „Kein Beleg, ignorieren“ erledigen.</div>';
     (v.hinweise || []).forEach(function (x) { h += '<div class="hinweis-warn" style="margin-top:6px">' + esc(x) + '</div>'; });
     if (r.hinweis) h += '<details style="margin-top:6px"><summary class="text-klein">Hinweis des Lesers</summary><div class="notiz" style="margin:4px 0 0">' + esc(r.hinweis) + '</div></details>';
     if (ed && ed.modus === 'anders') {
