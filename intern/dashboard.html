@@ -54,6 +54,8 @@ a { color: var(--link); }
 
 .wrap { max-width: 1600px; margin: 0 auto; padding: 0 16px; }
 @media (min-width: 640px) { .wrap { padding: 0 24px; } }
+/* Accounting nutzt die ganze Bildschirmbreite (große Tabellen), die übrigen Bereiche bleiben bei 1600 px. */
+body.breit .wrap { max-width: none; }
 
 /* Rahmen: links Bereiche (Obermenü), rechts Kopf mit Tabs + Inhalt */
 .rahmen { display: flex; min-height: 100vh; }
@@ -720,6 +722,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     S.tab = t; S.tabArg = arg || '';
     letzterTab[bereichVon(t).id] = t;
     renderNavigation();
+    document.body.classList.toggle('breit', bereichVon(t).id === 'accounting');
     TABS.forEach(function (name) { $('p-' + name).hidden = name !== t; });
     if (fokus) $('tab-' + t).focus();
     // Jeder Tab hat eine eigene Adresse, z. B. …/board#kontakte
