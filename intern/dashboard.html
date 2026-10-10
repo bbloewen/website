@@ -2833,14 +2833,14 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         var zeile = function (l, w) { return w === null || w === undefined || w === '' ? '' : '<div>' + esc(l) + ': ' + esc(w) + '</div>'; };
         agentLese = '<details style="margin-top:4px"><summary class="text-klein">Was der Agent gelesen hat</summary><div class="notiz" style="margin:4px 0 0">' +
           zeile('Brutto', a.brutto !== null && a.brutto !== undefined ? formatEuro(Number(a.brutto)) : '') + zeile('Netto', a.netto !== null && a.netto !== undefined ? formatEuro(Number(a.netto)) : '') + zeile('Steuer', a.steuer !== null && a.steuer !== undefined ? formatEuro(Number(a.steuer)) : '') +
-          zeile('Rechnungsdatum', a.datum ? formatDate(a.datum) : '') + zeile('Fällig', a.faellig ? formatDate(a.faellig) : '') + zeile('Leistungszeitraum', a.leistungszeitraum) + zeile('IBAN', a.iban) + zeile('Zahlungsart', a.zahlungsart) + zeile('Zweck auf dem Beleg', a.zweck) + zeile('Hinweis des Modells', a.hinweis) + '</div></details>';
+          zeile('Buchungstext (Vorschlag)', a.buchungstext) + zeile('Rechnungsdatum', a.datum ? formatDate(a.datum) : '') + zeile('Fällig', a.faellig ? formatDate(a.faellig) : '') + zeile('Leistungszeitraum', a.leistungszeitraum) + zeile('IBAN', a.iban) + zeile('Zahlungsart', a.zahlungsart) + zeile('Zweck auf dem Beleg', a.zweck) + zeile('Hinweis des Modells', a.hinweis) + '</div></details>';
       }
       var rs = ' rowspan="' + zl.length + '"';
       var eu = function (n) { return n === null || n === undefined ? '' : esc(formatEuro(n)); };
       zl.forEach(function (x, i) {
         var text = (x.text ? '<div>' + esc(x.text) + '</div>' : '') + (x.komm ? '<div class="notiz" style="margin:0">Kommentar: ' + esc(x.komm) + '</div>' : '') +
           (x.bdat && r.datum && String(x.bdat).slice(0, 10) !== String(r.datum).slice(0, 10) ? '<div class="notiz" style="margin:0">gebucht am ' + esc(formatDate(String(x.bdat).slice(0, 10))) + '</div>' : '') +
-          (x.agent ? '<div class="notiz" style="margin:0">vom Agenten gelesen, noch nicht gebucht</div>' : '');
+          (x.agent && a && a.buchungstext ? '<div>' + esc(a.buchungstext) + '</div>' : '') + (x.agent ? '<div class="notiz" style="margin:0">' + (a && a.buchungstext ? 'Vorschlag Buchungstext, ' : '') + 'vom Agenten gelesen, noch nicht gebucht</div>' : '');
         h += '<tr>' + (i === 0 ? '<td' + rs + ' class="nowrap">' + esc(r.datum ? formatDate(String(r.datum).slice(0, 10)) : '') + '</td><td' + rs + '>' + kopf + agentLese + '</td><td' + rs + '>' + status + '</td><td' + rs + ' class="nowrap zahlen rechts">' + (brutto !== null ? esc(formatEuro(brutto)) : '') + '</td>' : '') +
           '<td>' + text + '</td><td>' + beKonto(x.konto, x.kname) + '</td><td class="nowrap">' + esc(x.gegen || '') + '</td><td>' + beKonto(x.kst1, x.kst1n) + '</td><td>' + beKonto(x.kst2, x.kst2n) + '</td>' +
           '<td class="nowrap zahlen rechts">' + (x.satz !== null && x.satz !== undefined && x.satz !== '' ? esc(Number(x.satz).toLocaleString('de-DE') + ' %') : '') + '</td>' +
