@@ -3105,7 +3105,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         (v.sachkonto ? '<button type="button" class="btn btn-primary" data-rf="ok" data-id="' + r.id + '">Passt</button>' : '') +
         '<button type="button" class="btn btn-secondary" data-rf="anders" data-id="' + r.id + '" data-m="' + esc(r.mandant) + '">' + (v.sachkonto ? 'Anders …' : 'Konto wählen …') + '</button>' +
         '<button type="button" class="btn btn-secondary" data-rf="sb" data-id="' + r.id + '">Weiß ich nicht, Steuerberater fragen</button>' +
-        (r.bhb_id ? '<button type="button" class="btn-loeschen" data-rf="dup" data-id="' + r.id + '" title="Erledigt diese Rückfrage als Doppelung und merkt den Beleg zum Löschen in BuchhaltungsButler vor">Doppelt: in BHB löschen</button>' : '') +
+        (r.bhb_id ? '<button type="button" class="btn-loeschen" data-rf="dup" data-id="' + r.id + '" title="Erledigt diese Rückfrage als Doppelung und merkt den Beleg zum Löschen in BuchhaltungsButler vor">Doppelt: in BHB löschen</button>' : '') + (r.bhb_id ? '<button type="button" class="btn-loeschen" data-rf="dup-bhb" data-id="' + r.id + '" title="Löscht den Beleg sofort in BuchhaltungsButler (als gelöscht markiert, wiederherstellbar) und erledigt diese Rückfrage als Doppelung. Geht nicht, wenn der Beleg schon gebucht ist.">Doppelt: jetzt in BHB löschen</button>' : '') +
         '<button type="button" class="link-btn" data-rf="verwerfen" data-id="' + r.id + '" title="Erledigt die Rückfrage ohne Buchung und ohne etwas zu lernen. Der Beleg bleibt unverändert in BuchhaltungsButler bzw. im Postfach.">Kein Beleg, ignorieren</button></div>';
     }
     return h + '</div>';
@@ -3283,7 +3283,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
           return '<tr><td><div class="fett"><span class="m-badge m-' + esc(r.mandant) + '">' + esc(r.mandant) + '</span> ' + rfTitel(r) + '</div><div class="notiz" style="margin:0">' + esc((r.nummer ? 'Nr. ' + r.nummer + ' · ' : '') + (r.brutto !== null && r.brutto !== undefined ? formatEuro(Number(r.brutto)) : '')) + '</div></td>' +
             '<td>Beleg ' + esc(r.bhb_loeschen_id || r.bhb_id || '') + ' (' + esc(r.mandant) + ')<div>' + link + '</div></td>' +
             '<td>' + esc(r.bhb_loeschen === 'erledigt' ? 'in BuchhaltungsButler gelöscht' : 'zum Löschen vorgemerkt') + '<div class="notiz" style="margin:0">' + esc(r.bhb_loeschen_am ? formatDateTime(r.bhb_loeschen_am) : '') + '</div></td>' +
-            '<td>' + (r.bhb_loeschen === 'vorgemerkt' ? '<button type="button" class="btn btn-secondary" data-rf="bhb-ok" data-id="' + r.id + '">Als gelöscht markieren</button>' : '') + '</td></tr>';
+            '<td>' + (r.bhb_loeschen === 'vorgemerkt' ? '<button type="button" class="btn btn-secondary" data-rf="bhb-ok" data-id="' + r.id + '">Als gelöscht markieren</button> <button type="button" class="btn-loeschen" data-rf="dup-bhb" data-id="' + r.id + '" title="Löscht den Beleg jetzt in BuchhaltungsButler (als gelöscht markiert, wiederherstellbar).">Jetzt in BHB löschen</button>' : '') + '</td></tr>';
         }).join('') : '<tr><td colspan="4" class="leer">Nichts zum Löschen vorgemerkt.</td></tr>') +
         '</tbody></table></div><div class="card-fuss">BuchhaltungsButler lässt das Löschen von Belegen nicht über die Schnittstelle zu, das geht nur in der Oberfläche. Entweder löschst du den Beleg dort selbst (Mandant beachten, am Beleg das Menü „Löschen“), oder du bittest Claude in einer Sitzung: „Lösche die vorgemerkten Duplikate in BuchhaltungsButler“. Danach hier „Als gelöscht markieren“.</div></div>';
     } else if (RF.filter === 'erledigt') {
@@ -3359,6 +3359,18 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       else if (w === 'buch-ja') { if (window.confirm('Jetzt in BuchhaltungsButler hochladen und buchen? Das schreibt echte Buchungen.')) buchAusfuehren(id); }
       else if (w === 'dup') { if (window.confirm('Diesen Beleg als Doppelung erledigen und zum Löschen in BuchhaltungsButler vormerken?')) rfAntwort(id, { aktion: 'duplikat' }); }
       else if (w === 'bhb-ok') rfAntwort(id, { aktion: 'bhb_geloescht' });
+      else if (w === 'dup-bhb') {
+        if (!window.confirm('Den Beleg jetzt in BuchhaltungsButler löschen? Er wird dort als gelöscht markiert (wiederherstellbar) und diese Rückfrage ist als Doppelung erledigt.')) return;
+        RF.meldung = ''; RF.laeuftAntwort = true; renderRF();
+        try {
+          var rl = await fetch('/webhook/accounting/rueckfrage-bhb-loeschen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
+          var dl = await rl.json();
+          RF.laeuftAntwort = false;
+          if (!rl.ok || !dl.ok) { RF.meldung = 'Fehler: ' + (dl.meldung || dl.message || 'Löschen fehlgeschlagen'); renderRF(); return; }
+          RF.edit = null; RF.meldung = dl.meldung || 'Beleg in BuchhaltungsButler gelöscht.';
+          await ladeRF();
+        } catch (el) { RF.laeuftAntwort = false; RF.meldung = 'Fehler: ' + el.message; renderRF(); }
+      }
       else if (w === 'bt-edit') { var rb = RF.daten.rueckfragen.filter(function (x) { return x.id === id; })[0]; RF.meldung = ''; RF.bt = { id: id, wert: rb.buchungstext_zweck || rb.rf_zweck || rb.regel_zweck || '', standard: false, laeuft: false, fehler: '' }; renderRF(); var bi = document.getElementById('rf-bt-' + id); if (bi) bi.focus(); }
       else if (w === 'bt-abbruch') { RF.bt = null; renderRF(); }
       else if (w === 'bt-ja') {
