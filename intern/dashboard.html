@@ -3004,6 +3004,18 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     return '<div>' + beKonto(v.sachkonto, v.sachkontoBez) + '</div><div class="notiz" style="margin:0">KST 1 ' + beKonto(v.kst1, v.kst1Bez) + ' · KST 2 ' + beKonto(v.kst2, v.kst2Bez) + (v.vat ? ' · USt-Regel ' + esc(v.vat) : '') + (v.belegPolitik ? ' · ' + esc(v.belegPolitik) : '') + '</div>';
   }
   function comboText(c) { return c.sachkonto + ' ' + (c.sachkontoBez || '') + ' · KST 1 ' + (c.kst1Bez || c.kst1) + ' · KST 2 ' + (c.kst2Bez || c.kst2) + (c.vat ? ' · ' + c.vat : ''); }
+  // Weitere offene Rückfragen desselben Ausstellers im selben Mandanten (Doppelungen ausgenommen). gleich = nur mit demselben Vorschlag.
+  function rfSchluessel(t) { return String(t || '').toLowerCase().replace(/[^a-z0-9äöüß]/g, ''); }
+  function rfGleiche(r, gleich) {
+    var k = rfSchluessel(r.aussteller); if (!k) return [];
+    var v = r.vorschlag || {};
+    return ((RF.daten && RF.daten.rueckfragen) || []).filter(function (x) {
+      if (x.id === r.id || x.status !== 'offen' || x.mandant !== r.mandant || x.dublette_von || rfSchluessel(x.aussteller) !== k) return false;
+      if (!gleich) return true;
+      var w = x.vorschlag || {};
+      return !!v.sachkonto && w.sachkonto === v.sachkonto && (w.kst1 || '') === (v.kst1 || '') && (w.kst2 || '') === (v.kst2 || '');
+    });
+  }
   function rfKarte(r) {
     var v = r.vorschlag || {}, ed = RF.edit && RF.edit.id === r.id ? RF.edit : null;
     var imp = r.importiert ? formatDate(String(r.importiert).slice(0, 10)) : '';
@@ -3030,13 +3042,14 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var plan = RF.plan[r.mandant];
       h += '<div class="rf-box" style="margin-top:8px"><label class="text-klein" for="rf-combo-' + r.id + '">Richtige Kontierung wählen (nur Zeilen des Kontenplans ' + esc(r.mandant) + ')</label>' +
         (plan ? '<select id="rf-combo-' + r.id + '" class="auswahl" style="width:100%;margin-top:4px" data-rf="combo"><option value="">Bitte wählen …</option>' + plan.map(function (c) { return '<option value="' + c.id + '"' + (String(ed.combo) === String(c.id) ? ' selected' : '') + '>' + esc(comboText(c)) + '</option>'; }).join('') + '</select>' : '<div class="laedt">Lade Kontenplan …</div>') +
-        '<div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn btn-primary" data-rf="anders-ja" data-id="' + r.id + '"' + (ed.laeuft ? ' disabled' : '') + '>Speichern</button><button type="button" class="link-btn" data-rf="abbruch">Abbrechen</button></div>' + (ed.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:6px">' + esc(ed.fehler) + '</div>' : '') + '</div>';
+        (rfGleiche(r, false).length ? '<label class="text-klein" style="display:block;margin-top:8px"><input type="checkbox" data-rf="alle"' + (ed.alle ? ' checked' : '') + '> Auch für ' + rfGleiche(r, false).length + ' weitere offene Belege von ' + esc(r.aussteller) + '</label>' : '') + '<div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn btn-primary" data-rf="anders-ja" data-id="' + r.id + '"' + (ed.laeuft ? ' disabled' : '') + '>Speichern</button><button type="button" class="link-btn" data-rf="abbruch">Abbrechen</button></div>' + (ed.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:6px">' + esc(ed.fehler) + '</div>' : '') + '</div>';
     } else if (ed && ed.modus === 'sb') {
       h += '<div class="rf-box" style="margin-top:8px"><label class="text-klein" for="rf-notiz-' + r.id + '">Hinweis an den Steuerberater (optional)</label><input id="rf-notiz-' + r.id + '" class="eingabe" style="margin-top:4px" maxlength="500" data-rf="notiz" value="' + esc(ed.notiz) + '" placeholder="z. B. Wofür war das? Was ist unklar?">' +
         '<div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn btn-primary" data-rf="sb-ja" data-id="' + r.id + '"' + (ed.laeuft ? ' disabled' : '') + '>An den Steuerberater geben</button><button type="button" class="link-btn" data-rf="abbruch">Abbrechen</button></div>' + (ed.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:6px">' + esc(ed.fehler) + '</div>' : '') + '</div>';
     } else {
       h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center">' +
         (v.sachkonto ? '<button type="button" class="btn btn-primary" data-rf="ok" data-id="' + r.id + '">Passt</button>' : '') +
+        (v.sachkonto && rfGleiche(r, true).length ? '<button type="button" class="btn btn-secondary" data-rf="ok-alle" data-id="' + r.id + '" title="Bestätigt diese Kontierung auch für die anderen offenen Belege desselben Ausstellers mit demselben Vorschlag">Passt, auch für ' + rfGleiche(r, true).length + ' weitere</button>' : '') +
         '<button type="button" class="btn btn-secondary" data-rf="anders" data-id="' + r.id + '" data-m="' + esc(r.mandant) + '">' + (v.sachkonto ? 'Anders …' : 'Konto wählen …') + '</button>' +
         '<button type="button" class="btn btn-secondary" data-rf="sb" data-id="' + r.id + '">Weiß ich nicht, Steuerberater fragen</button>' +
         '<button type="button" class="link-btn" data-rf="verwerfen" data-id="' + r.id + '" title="Kein Buchungsbeleg, nichts zu klären">Kein Beleg, ignorieren</button></div>';
@@ -3051,7 +3064,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var z = RF.daten.zaehler || {}, alle = RF.daten.rueckfragen || [];
     var chip = function (w, t, n) { return '<button type="button" class="chip' + (RF.filter === w ? ' aktiv' : '') + '" data-rf="filter" data-w="' + w + '" aria-pressed="' + (RF.filter === w) + '">' + t + ' <span class="notiz" style="display:inline;margin:0">' + esc(zahl(n)) + '</span></button>'; };
     var h = '<div class="stapel"><div class="chips" role="group" aria-label="Ansicht">' + chip('offen', 'Offen', z.offen || 0) + chip('steuerberater', 'Beim Steuerberater', z.steuerberater || 0) + chip('erledigt', 'Erledigt', z.erledigt || 0) + chip('wissen', 'Gelerntes Wissen', (RF.daten.wissen || []).length) + '</div>' +
-      (RF.meldung ? '<div class="erfolg" role="status">' + esc(RF.meldung) + '</div>' : '');
+      (RF.laeuftAntwort ? '<div class="laedt" role="status">Speichere …</div>' : '') + (RF.meldung ? '<div class="erfolg" role="status">' + esc(RF.meldung) + '</div>' : '');
     var stat = { bestaetigt: 'bestätigt', korrigiert: 'korrigiert', verworfen: 'kein Beleg' };
     if (RF.filter === 'offen') {
       var offen = alle.filter(function (r) { return r.status === 'offen'; });
@@ -3077,19 +3090,27 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     el.innerHTML = h;
     if (fokus) { var n = el.querySelector('[data-rf="notiz"]'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } }
   }
-  async function rfAntwort(id, daten) {
+  async function rfAntwort(id, daten, weitere) {
     var ed = RF.edit; if (ed) { ed.laeuft = true; ed.fehler = ''; }
+    if (!ed) RF.laeuftAntwort = true;
     renderRF();
+    var ids = [id].concat((weitere || []).map(function (x) { return x.id; })), fertig = 0;
     try {
-      var res = await fetch('/webhook/accounting/rueckfrage-antwort', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({ id: id }, daten)) });
-      var d = await res.json();
-      if (!res.ok || !d.ok) throw new Error(d.message || d.fehler || 'Speichern fehlgeschlagen');
-      RF.meldung = { bestaetigen: 'Kontierung bestätigt und gemerkt.', korrigieren: 'Kontierung korrigiert und gemerkt.', steuerberater: 'An den Steuerberater weitergegeben (vorgemerkt).', verworfen: 'Als „kein Beleg“ erledigt.' }[daten.aktion];
-      RF.edit = null;
+      for (var i = 0; i < ids.length; i++) {
+        var res = await fetch('/webhook/accounting/rueckfrage-antwort', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({ id: ids[i] }, daten)) });
+        var d = await res.json();
+        if (!res.ok || !d.ok) throw new Error((d.message || d.fehler || 'Speichern fehlgeschlagen') + (fertig ? ' (' + fertig + ' von ' + ids.length + ' schon gespeichert)' : ''));
+        fertig++;
+      }
+      var n = ids.length > 1 ? ' für ' + ids.length + ' Belege' : '';
+      RF.meldung = { bestaetigen: 'Kontierung bestätigt und gemerkt' + n + '.', korrigieren: 'Kontierung korrigiert und gemerkt' + n + '.', steuerberater: 'An den Steuerberater weitergegeben (vorgemerkt).', verworfen: 'Als „kein Beleg“ erledigt.' }[daten.aktion];
+      RF.edit = null; RF.laeuftAntwort = false;
       await ladeRF();
       return;
     } catch (e) {
+      RF.laeuftAntwort = false;
       if (RF.edit) { RF.edit.laeuft = false; RF.edit.fehler = e.message; } else RF.meldung = 'Fehler: ' + e.message;
+      if (fertig) await ladeRF();
     }
     renderRF();
   }
@@ -3097,15 +3118,18 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var p = $('p-rueckfragen');
     p.addEventListener('input', function (e) { var n = e.target.closest('[data-rf="notiz"]'); if (n && RF.edit) RF.edit.notiz = n.value; });
     p.addEventListener('change', function (e) { var c = e.target.closest('[data-rf="combo"]'); if (c && RF.edit) RF.edit.combo = c.value; });
+    p.addEventListener('change', function (e) { var c = e.target.closest('[data-rf="alle"]'); if (c && RF.edit) RF.edit.alle = c.checked; });
     p.addEventListener('click', async function (e) {
       var b = e.target.closest('[data-rf]'); if (!b) return;
+      if (RF.laeuftAntwort) return;
       var w = b.getAttribute('data-rf'), id = Number(b.getAttribute('data-id'));
       if (w === 'filter') { RF.filter = b.getAttribute('data-w'); RF.meldung = ''; RF.edit = null; renderRF(); }
       else if (w === 'ok') rfAntwort(id, { aktion: 'bestaetigen' });
+      else if (w === 'ok-alle') { var rr = RF.daten.rueckfragen.filter(function (x) { return x.id === id; })[0]; rfAntwort(id, { aktion: 'bestaetigen' }, rfGleiche(rr, true)); }
       else if (w === 'anders') { RF.meldung = ''; RF.edit = { id: id, modus: 'anders', combo: '', laeuft: false, fehler: '' }; renderRF(); await ladePlan(b.getAttribute('data-m')); renderRF(); }
       else if (w === 'sb') { RF.meldung = ''; RF.edit = { id: id, modus: 'sb', notiz: '', laeuft: false, fehler: '' }; renderRF(); }
       else if (w === 'abbruch') { RF.edit = null; renderRF(); }
-      else if (w === 'anders-ja') { if (!RF.edit || !RF.edit.combo) { if (RF.edit) RF.edit.fehler = 'Bitte eine Kontierung wählen'; renderRF(); } else rfAntwort(id, { aktion: 'korrigieren', combo_id: Number(RF.edit.combo) }); }
+      else if (w === 'anders-ja') { if (!RF.edit || !RF.edit.combo) { if (RF.edit) RF.edit.fehler = 'Bitte eine Kontierung wählen'; renderRF(); } else { var r2 = RF.daten.rueckfragen.filter(function (x) { return x.id === id; })[0]; rfAntwort(id, { aktion: 'korrigieren', combo_id: Number(RF.edit.combo) }, RF.edit.alle ? rfGleiche(r2, false) : []); } }
       else if (w === 'sb-ja') rfAntwort(id, { aktion: 'steuerberater', notiz: RF.edit ? RF.edit.notiz : '' });
       else if (w === 'verwerfen') { RF.meldung = ''; RF.edit = null; rfAntwort(id, { aktion: 'verworfen' }); }
     });
