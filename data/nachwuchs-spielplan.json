@@ -371,7 +371,7 @@
           "heim": false,
           "gegner": "Team Halle",
           "ergebnis": null,
-          "abgesagt": false
+          "abgesagt": true
         },
         {
           "datum": "2026-10-17",
