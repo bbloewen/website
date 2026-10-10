@@ -439,6 +439,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   <section id="p-rueckfragen" role="tabpanel" aria-labelledby="tab-rueckfragen" hidden></section>
   <section id="p-buchungstexte" role="tabpanel" aria-labelledby="tab-buchungstexte" hidden></section>
   <section id="p-kostenstellen" role="tabpanel" aria-labelledby="tab-kostenstellen" hidden></section>
+  <section id="p-sachkonten-xxl" role="tabpanel" aria-labelledby="tab-sachkonten-xxl" hidden></section>
+  <section id="p-sachkonten-lev" role="tabpanel" aria-labelledby="tab-sachkonten-lev" hidden></section>
 
 </main>
 </div>
@@ -700,7 +702,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
     { id: 'segmentierung', name: 'Segmentierung', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
-    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlung XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung LEV Löwenpark' }, { id: 'rueckfragen', name: 'Rückfragen' }, { id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }] }
+    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlung XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung LEV Löwenpark' }, { id: 'rueckfragen', name: 'Rückfragen' }, { id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }] }
   ];
   var TABS = [];
   BEREICHE.forEach(function (b) { b.tabs.forEach(function (t) { TABS.push(t.id); }); });
@@ -761,6 +763,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (ZA_KONTO[t]) ladeListe('zahlung', ZA_KONTO[t]);
     if (t === 'buchungstexte') ladeBT();
     if (t === 'kostenstellen') ladeKS();
+    if (t === 'sachkonten-xxl') ladeSK('XXL');
+    if (t === 'sachkonten-lev') ladeSK('LEV');
     if (t === 'rueckfragen') ladeRF();
     // SEO laedt erst, wenn der Tab zum ersten Mal geoeffnet wird: die
     // Sheets-Abfrage dauert laenger als die pretix-Aufrufe und wird beim
@@ -3478,6 +3482,47 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     } catch (e) { ed.laeuft = false; ed.fehler = e.message; }
     beAlleRender();
   }
+  // ---------- Accounting: Sachkontenrahmen (nur Konten, die wir bebuchen) ----------
+  var SK = { XXL: { daten: null, fehler: null, laedt: false }, LEV: { daten: null, fehler: null, laedt: false }, suche: '' };
+  async function ladeSK(m) {
+    var z = SK[m]; z.laedt = true; z.fehler = null; renderSK(m);
+    try {
+      var res = await fetch('/webhook/accounting/sachkonten?mandant=' + m);
+      var d = await res.json();
+      if (!res.ok) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
+      z.daten = d;
+    } catch (e) { z.fehler = e.message; }
+    z.laedt = false; renderSK(m);
+  }
+  function renderSK(m) {
+    var el = $('p-sachkonten-' + m.toLowerCase()); if (!el) return;
+    var z = SK[m];
+    if (z.laedt && !z.daten) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
+    if (z.fehler && !z.daten) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(z.fehler) + '</div>'; return; }
+    if (!z.daten) { el.innerHTML = ''; return; }
+    var such = String(SK.suche || '').trim().toLowerCase();
+    var liste = (z.daten.konten || []).filter(function (k) { return !such || (k.nr + ' ' + k.name + ' ' + (k.plan || []).join(' ')).toLowerCase().indexOf(such) >= 0; });
+    var fokus = document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute('data-sk') === 'suche';
+    var pos = fokus ? document.activeElement.selectionStart : 0;
+    var firma = m === 'XXL' ? 'XXL Baskets GmbH' : 'Basketball Löwen Erfurt e.V.';
+    var h = '<div class="stapel"><div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Sachkontenrahmen ' + esc(z.daten.rahmen || '') + ' · ' + esc(firma) + ' · ' + esc(zahl((z.daten.konten || []).length)) + ' bebuchte Konten</span><span>' +
+      '<input type="search" class="eingabe-klein" style="width:200px;flex:none" data-sk="suche" placeholder="Suchen …" aria-label="Suchen" value="' + esc(SK.suche) + '"> <button type="button" class="link-btn" data-sk="neu" data-m="' + m + '">Aktualisieren</button></span></div>' +
+      '<div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Konto</th><th>Bezeichnung</th><th class="rechts">Buchungen</th><th>zuletzt</th><th class="rechts">Summe</th><th>Kontenplan (KST 1 / KST 2)</th></tr></thead><tbody>';
+    liste.forEach(function (k) {
+      h += '<tr><td class="zahlen fett">' + esc(k.nr) + '</td><td>' + (k.name ? esc(k.name) : '<span class="gedaempft">–</span>') + '</td><td class="rechts zahlen">' + esc(zahl(k.buchungen || 0)) + '</td><td>' + (k.zuletzt ? esc(formatDate(String(k.zuletzt).slice(0, 10))) : '<span class="gedaempft">noch nie</span>') + '</td><td class="rechts zahlen">' + (k.summe ? esc(formatEuro(Number(k.summe))) : '') + '</td><td class="notiz">' + esc((k.plan || []).join(' · ')) + '</td></tr>';
+    });
+    if (!liste.length) h += '<tr><td colspan="6" class="leer">Keine Konten.</td></tr>';
+    h += '</tbody></table></div><div class="card-fuss">Gezeigt sind die Konten, auf die wir Belege gebucht haben, plus die Konten im Kontenplan. Die Bezeichnung kommt aus BuchhaltungsButler. Neue gebuchte Konten erscheinen automatisch mit Namen.</div></div></div>';
+    el.innerHTML = h;
+    if (fokus) { var n = el.querySelector('[data-sk="suche"]'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } }
+  }
+  function bindSK() {
+    ['xxl', 'lev'].forEach(function (k) {
+      var p = $('p-sachkonten-' + k); if (!p) return; var m = k.toUpperCase();
+      p.addEventListener('input', function (e) { var x = e.target.closest('[data-sk="suche"]'); if (x) { SK.suche = x.value; renderSK(m); } });
+      p.addEventListener('click', function (e) { var b = e.target.closest('[data-sk="neu"]'); if (b) ladeSK(m); });
+    });
+  }
   // ---------- Accounting: Kostenstellenplan (aus dem Liquiditätsplan) ----------
   var KS = { daten: null, fehler: null, laedt: false, mandant: 'XXL', suche: '', meldung: '', fehlerAktion: '', aktualisiert: false };
   async function ladeKS() {
@@ -3790,6 +3835,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   bindBelege();
   bindBT();
   bindKS();
+  bindSK();
   bindRF();
   document.addEventListener('loewen-nutzer', function () {
     if (!darfBereich(bereichVon(S.tab))) setTab(S.tab, false, S.tabArg); else renderNavigation();
