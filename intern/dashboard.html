@@ -2895,7 +2895,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var links = [];
       if (a && a.drive_url) links.push('<a href="' + esc(a.drive_url) + '" target="_blank" rel="noopener">Original</a>');
       if (b && bhbBelegLink(b.link, b.dateiname)) links.push('<a href="' + esc(bhbBelegLink(b.link, b.dateiname)) + '" target="_blank" rel="noopener">Beleg in BHB</a>');
-      if (a && a.gmail_id && String(a.gmail_id).indexOf('test') !== 0) links.push('<a href="https://mail.google.com/mail/?authuser=rechnung@basketball-loewen.com#all/' + esc(a.gmail_id) + '" target="_blank" rel="noopener">Mail</a>');
+      if (a && a.gmail_id && String(a.gmail_id).indexOf('test') !== 0 && String(a.gmail_id).indexOf('bhb:') !== 0) links.push('<a href="https://mail.google.com/mail/?authuser=rechnung@basketball-loewen.com#all/' + esc(a.gmail_id) + '" target="_blank" rel="noopener">Mail</a>');
       var loeschKnopf = a ? '<div style="margin-top:6px"><button type="button" class="btn-loeschen" data-be="loeschen" data-id="' + a.id + '" title="Entfernt diesen Beleg aus der Liste und die Datei aus Google Drive. Die Mail kommt in den Papierkorb, wenn kein weiterer relevanter Anhang daran hängt. In BuchhaltungsButler ändert sich nichts." aria-label="Beleg löschen: ' + esc(titel) + '">Beleg löschen</button></div>' : '';
       // Buchungszeilen: aus BuchhaltungsButler, sonst die Beträge je Steuersatz, die der Agent gelesen hat.
       var zl = [];
@@ -2984,7 +2984,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   // ---------- Accounting: Rückfragen (Etappe 2) ----------
   // Der Agent schlägt die Kontierung vor, Marko bestätigt, korrigiert oder gibt an den Steuerberater weiter. Jede Entscheidung wird als Wissen gespeichert.
   // Gebucht wird dabei noch nichts in BuchhaltungsButler.
-  var RF = { daten: null, fehler: null, laedt: false, filter: 'offen', mandant: 'alle', bt: null, plan: {}, edit: null, meldung: '' };
+  var RF = { na: null, naFehler: null, daten: null, fehler: null, laedt: false, filter: 'offen', mandant: 'alle', bt: null, plan: {}, edit: null, meldung: '' };
   async function ladeRF() {
     RF.laedt = true; RF.fehler = null; renderRF();
     try {
@@ -3081,6 +3081,44 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     }
     return h + '</div>';
   }
+  // Neuaufnahme: alle Eingangsbelege ab Oktober (und die ungebuchten davor) werden aus BuchhaltungsButler geholt, in Drive abgelegt und gelesen; danach löscht Marko sie dort und der Agent legt sie neu an.
+  async function ladeNA() {
+    try {
+      var res = await fetch('/webhook/accounting/neuaufnahme');
+      var d = await res.json();
+      if (!res.ok) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
+      RF.na = d; RF.naFehler = null;
+    } catch (e) { RF.naFehler = e.message; }
+    renderRF();
+  }
+  function naStand(b) {
+    if (!b.geholt) return '<span class="gedaempft">noch nicht geholt</span>';
+    if (b.status === 'erkannt') return 'gelesen' + (b.urteil === 'sicher' ? '' : ', zu prüfen');
+    if (b.status === 'muell') return 'kein Beleg (Logo oder Signatur)';
+    if (/terminal|Haendlerbeleg|Kundenbeleg|administrativer/i.test(b.dateiname || '')) return 'Kartenterminal-Zettel, wird nicht übernommen';
+    return 'übersprungen (gleiche Datei schon gelesen oder kein Beleg)';
+  }
+  function naKonto(b) {
+    var l = b.buchungen || []; if (!l.length) return '';
+    return l.map(function (x) { return esc(x.sachkonto || '') + (x.kst1 ? ' · ' + esc(x.kst1) : '') + (x.kst2 ? ' · ' + esc(x.kst2) : '') + (x.betrag !== undefined ? ' · ' + esc(formatEuro(Number(x.betrag))) : ''); }).join('<br>');
+  }
+  function renderNA() {
+    if (RF.naFehler && !RF.na) return '<div class="fehlerbox" role="alert">' + esc(RF.naFehler) + '</div>';
+    if (!RF.na) { ladeNA(); return '<div class="laedt">Lade …</div>'; }
+    var alleB = RF.na.belege || [], z = RF.na.zaehler || {};
+    var liste = alleB.filter(function (b) { return RF.mandant === 'alle' || b.mandant === RF.mandant; });
+    var h = '<div class="card pad"><b>' + esc(zahl(z.gelesen || 0)) + ' von ' + esc(zahl(z.gesamt || 0)) + ' Belegen gelesen und in Drive abgelegt</b> · ' + esc(zahl(z.uebersprungen || 0)) + ' übersprungen (Terminal-Zettel, Doppelte) · ' + esc(zahl(z.offen || 0)) + ' noch nicht geholt.' +
+      '<div class="notiz" style="margin:6px 0 0">Das sind alle Eingangsbelege mit Buchungsdatum ab Oktober 2026 und alle noch ungebuchten. Zum Löschen in BuchhaltungsButler: erst wenn hier keiner mehr „noch nicht geholt“ ist. Danach legt der Agent sie neu an. Die bisherigen Buchungen und Zahlungen sind unten festgehalten.</div></div>';
+    h += '<div class="card"><div class="card-kopf" style="margin:0">Neuaufnahme der Eingangsbelege · ' + esc(zahl(liste.length)) + ' Belege</div><div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Beleg</th><th>In BuchhaltungsButler</th><th>Stand</th><th>Auslage</th><th>Bisher gebucht</th></tr></thead><tbody>' +
+      (liste.length ? liste.map(function (b) {
+        var link = b.dateiname ? '<a href="' + esc(bhbBelegLink('', b.dateiname)) + '" target="_blank" rel="noopener" title="Funktioniert nur, wenn du in BuchhaltungsButler als ' + esc(b.mandant) + ' angemeldet bist">Beleg öffnen</a>' : '';
+        var drive = b.drive_url ? ' · <a href="' + esc(b.drive_url) + '" target="_blank" rel="noopener">Drive</a>' : '';
+        return '<tr><td><div class="fett"><span class="m-badge m-' + esc(b.mandant) + '">' + esc(b.mandant) + '</span> ' + esc(b.aussteller || b.gegenpartei || b.dateiname || '–') + '</div><div class="notiz" style="margin:0">' + esc((b.nummer ? 'Nr. ' + b.nummer + ' · ' : '') + (b.betrag !== null && b.betrag !== undefined ? formatEuro(Number(b.betrag)) : '')) + '</div></td>' +
+          '<td>Beleg ' + esc(b.beleg_id) + ' · ' + (b.gebucht ? 'gebucht' : 'ungebucht') + '<div>' + link + drive + '</div></td><td>' + naStand(b) + '</td>' +
+          '<td>' + (b.auslage_von ? esc(b.auslage_von) + (b.deckblatt ? '<div class="notiz" style="margin:0">' + esc(b.deckblatt) + '</div>' : '') : '') + '</td><td>' + naKonto(b) + '</td></tr>';
+      }).join('') : '<tr><td colspan="5" class="leer">Keine Belege.</td></tr>') + '</tbody></table></div></div>';
+    return h;
+  }
   function renderRF() {
     var el = $('p-rueckfragen'); if (!el) return;
     if (RF.laedt && !RF.daten) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
@@ -3091,7 +3129,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var zaehlOffen = function (m) { return alleRoh.filter(function (r) { return r.status === 'offen' && (m === 'alle' || r.mandant === m); }).length; };
     var mchip = function (m, t) { return '<button type="button" class="chip' + (RF.mandant === m ? ' aktiv' : '') + '" data-rf="mandant" data-m="' + m + '" aria-pressed="' + (RF.mandant === m) + '">' + t + ' <span class="notiz" style="display:inline;margin:0">' + esc(zahl(zaehlOffen(m))) + '</span></button>'; };
     var chip = function (w, t, n) { return '<button type="button" class="chip' + (RF.filter === w ? ' aktiv' : '') + '" data-rf="filter" data-w="' + w + '" aria-pressed="' + (RF.filter === w) + '">' + t + ' <span class="notiz" style="display:inline;margin:0">' + esc(zahl(n)) + '</span></button>'; };
-    var h = '<div class="stapel"><div class="chips" role="group" aria-label="Ansicht">' + chip('offen', 'Offen', alle.filter(function (r) { return r.status === 'offen'; }).length) + chip('steuerberater', 'Beim Steuerberater', alle.filter(function (r) { return r.status === 'steuerberater'; }).length) + chip('loeschen', 'In BHB zu löschen', alle.filter(function (r) { return r.bhb_loeschen === 'vorgemerkt'; }).length) + chip('erledigt', 'Erledigt', alle.filter(function (r) { return r.status === 'bestaetigt' || r.status === 'korrigiert' || r.status === 'verworfen'; }).length) + chip('wissen', 'Gelerntes Wissen', (RF.daten.wissen || []).filter(function (x) { return RF.mandant === 'alle' || x.mandant === RF.mandant; }).length) + '</div>' +
+    var h = '<div class="stapel"><div class="chips" role="group" aria-label="Ansicht">' + chip('offen', 'Offen', alle.filter(function (r) { return r.status === 'offen'; }).length) + chip('steuerberater', 'Beim Steuerberater', alle.filter(function (r) { return r.status === 'steuerberater'; }).length) + chip('loeschen', 'In BHB zu löschen', alle.filter(function (r) { return r.bhb_loeschen === 'vorgemerkt'; }).length) + chip('neuaufnahme', 'Neuaufnahme', RF.na ? (RF.na.zaehler.gesamt || 0) : '…') + chip('erledigt', 'Erledigt', alle.filter(function (r) { return r.status === 'bestaetigt' || r.status === 'korrigiert' || r.status === 'verworfen'; }).length) + chip('wissen', 'Gelerntes Wissen', (RF.daten.wissen || []).filter(function (x) { return RF.mandant === 'alle' || x.mandant === RF.mandant; }).length) + '</div>' +
       '<div class="chips chips-gleich" role="group" aria-label="Mandant"><span class="notiz chips-label">Mandant</span>' + mchip('alle', 'Alle') + mchip('XXL', 'XXL') + mchip('LEV', 'LEV') + '</div>' +
       (RF.laeuftAntwort ? '<div class="laedt" role="status">Speichere …</div>' : '') + (RF.meldung ? '<div class="erfolg" role="status">' + esc(RF.meldung) + '</div>' : '');
     var stat = { bestaetigt: 'bestätigt', korrigiert: 'korrigiert', verworfen: 'kein Beleg' };
@@ -3131,6 +3169,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
           return zeile;
         }).join('') : '<tr><td colspan="5" class="leer">Nichts beim Steuerberater.</td></tr>') +
         '</tbody></table></div><div class="card-fuss">Der Entwurf an Heiko Kühnst liegt im Gmail-Postfach rechnung@ und enthält alle vorgemerkten Fälle mit Beleg-Link. Gesendet wird nichts automatisch: Du schickst ihn selbst ab und klickst danach „Als gesendet markieren“. Seine Antwort trägst du je Beleg mit „Antwort eintragen“ ein, sie wird als Wissen mit Quelle Steuerberater gespeichert.</div></div>';
+    } else if (RF.filter === 'neuaufnahme') {
+      h += renderNA();
     } else if (RF.filter === 'loeschen') {
       var lo = alle.filter(function (r) { return r.bhb_loeschen; });
       h += '<div class="card"><div class="card-kopf" style="margin:0">Doppelte Belege, die in BuchhaltungsButler gelöscht werden sollen</div><div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Beleg</th><th>In BuchhaltungsButler</th><th>Stand</th><th>Aktion</th></tr></thead><tbody>' +
