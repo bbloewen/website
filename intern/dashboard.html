@@ -3006,11 +3006,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       RF.plan[m] = d.combos || [];
     } catch (e) { if (RF.edit) RF.edit.fehler = e.message; }
   }
-  function rfQuelle(v) { return { wissen: 'Wissen: schon bestätigt', regel: 'Regel im Kontenplan', praezedenz: 'Präzedenzfall aus BuchhaltungsButler', ki: 'Vorschlag der KI', keine: 'kein Vorschlag' }[v && v.quelle] || 'kein Vorschlag'; }
+  function rfQuelle(v) { return { wissen: 'Wissen: schon bestätigt', regel: 'Regel im Kontenplan', praezedenz: 'Präzedenzfall aus BuchhaltungsButler', ki: 'Vorschlag der KI', marko_text: 'nach deiner Anweisung (KI)', keine: 'kein Vorschlag' }[v && v.quelle] || 'kein Vorschlag'; }
   function rfTage(iso) { var d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000); return d <= 0 ? 'heute' : (d === 1 ? 'seit 1 Tag' : 'seit ' + d + ' Tagen'); }
   function rfKonto(v) {
     if (!v || !v.sachkonto) return '<span class="gedaempft">–</span>';
-    return '<div>' + beKonto(v.sachkonto, v.sachkontoBez) + '</div><div class="notiz" style="margin:0">KST 1 ' + esc(v.kst1Bez || v.kst1 || '–') + ' · KST 2 ' + esc(v.kst2Bez || v.kst2 || '–') + (v.vat ? ' · USt-Regel ' + esc(v.vat) : '') + (v.belegPolitik ? ' · ' + esc(v.belegPolitik) : '') + '</div>';
+    return '<div>' + beKonto(v.sachkonto, v.sachkontoBez) + '</div>' + (v.kreditor ? '<div class="notiz" style="margin:0">Kreditor ' + esc(v.kreditor) + '</div>' : '') + '<div class="notiz" style="margin:0">KST 1 ' + esc(v.kst1Bez || v.kst1 || '–') + ' · KST 2 ' + esc(v.kst2Bez || v.kst2 || '–') + (v.vat ? ' · USt-Regel ' + esc(v.vat) : '') + (v.belegPolitik ? ' · ' + esc(v.belegPolitik) : '') + '</div>';
   }
   function comboText(c) { return c.sachkonto + ' ' + (c.sachkontoBez || '') + ' · KST 1 ' + (c.kst1Bez || c.kst1) + ' · KST 2 ' + (c.kst2Bez || c.kst2) + (c.vat ? ' · ' + c.vat : ''); }
   // Weitere offene Rückfragen desselben Ausstellers im selben Mandanten (Doppelungen ausgenommen). gleich = nur mit demselben Vorschlag.
@@ -3068,6 +3068,12 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     (v.hinweise || []).filter(function (x) { return !(r.auslage || r.auslage_von) || !/^Auslage/.test(x); }).forEach(function (x) { h += '<div class="hinweis-warn" style="margin-top:6px">' + esc(x) + '</div>'; });
     if (r.hinweis) h += '<details style="margin-top:6px"><summary class="text-klein">Hinweis des Lesers</summary><div class="notiz" style="margin:4px 0 0">' + esc(r.hinweis) + '</div></details>';
     if (ed && ed.modus === 'anders') {
+      h += '<div class="rf-box" style="margin-top:8px"><label class="text-klein" for="rf-text-' + r.id + '">Was soll anders sein? Einfach sagen oder schreiben, z. B. anderer Kreditor, anderes Konto, andere Kostenstelle oder Umsatzsteuer</label>' +
+        '<textarea id="rf-text-' + r.id + '" class="eingabe" rows="3" style="width:100%;margin-top:4px" maxlength="2000" data-rf="text" placeholder="z. B. Das ist eine Auslage von André, Konto Fahrtkosten, 7 % Umsatzsteuer"' + (ed.laeuft ? ' disabled' : '') + '>' + esc(ed.text || '') + '</textarea>' +
+        '<div style="display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap"><button type="button" class="btn btn-primary" data-rf="anders-ki" data-id="' + r.id + '"' + (ed.laeuft ? ' disabled' : '') + '>' + (ed.laeuft ? 'Die KI arbeitet …' : 'Neuen Vorschlag erstellen') + '</button><button type="button" class="link-btn" data-rf="abbruch">Abbrechen</button><button type="button" class="link-btn" data-rf="anders-liste" data-id="' + r.id + '" data-m="' + esc(r.mandant) + '">Lieber aus der Liste wählen</button></div>' +
+        (ed.rueckfrage ? '<div class="hinweis-warn" role="status" style="margin-top:6px">Rückfrage der KI: ' + esc(ed.rueckfrage) + '</div>' : '') +
+        (ed.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:6px">' + esc(ed.fehler) + '</div>' : '') + '</div>';
+    } else if (ed && ed.modus === 'liste') {
       var plan = RF.plan[r.mandant];
       h += '<div class="rf-box" style="margin-top:8px"><label class="text-klein" for="rf-combo-' + r.id + '">Richtige Kontierung wählen (nur Zeilen des Kontenplans ' + esc(r.mandant) + ')</label>' +
         (plan ? '<select id="rf-combo-' + r.id + '" class="auswahl" style="width:100%;margin-top:4px" data-rf="combo"><option value="">Bitte wählen …</option>' + plan.map(function (c) { return '<option value="' + c.id + '"' + (String(ed.combo) === String(c.id) ? ' selected' : '') + '>' + esc(comboText(c)) + '</option>'; }).join('') + '</select>' : '<div class="laedt">Lade Kontenplan …</div>') +
@@ -3271,10 +3277,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         (w.length ? w.map(function (x) { return '<tr><td>' + esc(x.mandant) + '</td><td>' + esc(x.aussteller) + '</td><td>' + esc(x.zweck || '–') + '</td><td>' + esc(x.sachkonto) + '</td><td>' + esc(x.kst1 || '') + '</td><td>' + esc(x.kst2 || '') + '</td><td class="rechts zahlen">' + esc(zahl(x.bestaetigt_n)) + '</td><td class="rechts zahlen">' + esc(zahl(x.korrigiert_n)) + '</td><td>' + esc({ gelernt: 'gelernt', sicher: 'sicher', zurueckgestuft: 'zurückgestuft' }[x.status] || x.status) + '</td></tr>'; }).join('') : '<tr><td colspan="9" class="leer">Noch nichts gelernt.</td></tr>') + '</tbody></table></div><div class="card-fuss">Jede Bestätigung oder Korrektur wird hier festgehalten. Bei weiteren Belegen desselben Falltyps schlägt der Agent genau das vor. Das selbstständige Buchen kommt erst später und nur für Falltypen, die du freigibst.</div></div>';
     }
     h += '<div class="notiz">„Passt“ und „Anders“ merken sich die Kontierung. Gebucht wird erst unter „Zu buchen“, nach deiner Bestätigung.</div></div>';
-    var fokus = document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute('data-rf') === 'notiz';
+    var fokus = document.activeElement && document.activeElement.getAttribute && ['notiz', 'text'].indexOf(document.activeElement.getAttribute('data-rf')) >= 0;
+    var fokusArt = fokus ? document.activeElement.getAttribute('data-rf') : '';
     var pos = fokus ? document.activeElement.selectionStart : 0;
     el.innerHTML = h;
-    if (fokus) { var n = el.querySelector('[data-rf="notiz"]'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } }
+    if (fokus) { var n = el.querySelector('[data-rf="' + fokusArt + '"]'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } }
   }
   async function rfAntwort(id, daten, weitere) {
     var ed = RF.edit; if (ed) { ed.laeuft = true; ed.fehler = ''; }
@@ -3303,6 +3310,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   function bindRF() {
     var p = $('p-rueckfragen');
     p.addEventListener('input', function (e) { var n = e.target.closest('[data-rf="notiz"]'); if (n && RF.edit) RF.edit.notiz = n.value; });
+    p.addEventListener('input', function (e) { var n = e.target.closest('[data-rf="text"]'); if (n && RF.edit) RF.edit.text = n.value; });
     p.addEventListener('input', function (e) { var n = e.target.closest('[data-rf="bt-wert"]'); if (n && RF.bt) RF.bt.wert = n.value; });
     p.addEventListener('change', function (e) { var n = e.target.closest('[data-rf="bt-std"]'); if (n && RF.bt) RF.bt.standard = n.checked; });
     p.addEventListener('change', function (e) { var c = e.target.closest('[data-rf="combo"]'); if (c && RF.edit) RF.edit.combo = c.value; });
@@ -3350,6 +3358,21 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       else if (w === 'ok') rfAntwort(id, { aktion: 'bestaetigen' });
       else if (w === 'ok-gruppe') { var ids2 = RF.sammel[b.getAttribute('data-k')] || []; if (ids2.length > 1) rfAntwort(ids2[0], { aktion: 'bestaetigen' }, ids2.slice(1).map(function (x) { return { id: x }; })); }
       else if (w === 'anders') { RF.meldung = ''; RF.edit = { id: id, modus: 'anders', combo: '', laeuft: false, fehler: '' }; renderRF(); await ladePlan(b.getAttribute('data-m')); renderRF(); }
+      else if (w === 'anders-liste') { var e0 = RF.edit; RF.edit = { id: id, modus: 'liste', combo: '', laeuft: false, fehler: '' }; renderRF(); await ladePlan(b.getAttribute('data-m')); renderRF(); }
+      else if (w === 'anders-ki') {
+        var ed3 = RF.edit; if (!ed3) return;
+        var ta = document.getElementById('rf-text-' + id); ed3.text = ta ? ta.value.trim() : (ed3.text || '');
+        if (!ed3.text) { ed3.fehler = 'Bitte sagen oder schreiben, was anders sein soll.'; renderRF(); return; }
+        ed3.laeuft = true; ed3.fehler = ''; ed3.rueckfrage = ''; renderRF();
+        try {
+          var res3 = await fetch('/webhook/accounting/rueckfrage-korrektur', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, text: ed3.text }) });
+          var d3 = await res3.json();
+          if (!res3.ok) throw new Error(d3.message || d3.fehler || 'Anfrage fehlgeschlagen');
+          if (!d3.ok) { ed3.laeuft = false; ed3.rueckfrage = d3.rueckfrage || ''; ed3.fehler = d3.rueckfrage ? '' : (d3.meldung || 'Die KI konnte daraus keinen Vorschlag machen.'); renderRF(); return; }
+          RF.edit = null; RF.meldung = 'Neuer Vorschlag erstellt. Prüfe ihn und drücke Passt, oder ändere ihn noch einmal.';
+          await ladeRF();
+        } catch (err3) { ed3.laeuft = false; ed3.fehler = err3.message; renderRF(); }
+      }
       else if (w === 'sb') { RF.meldung = ''; RF.edit = { id: id, modus: 'sb', notiz: '', laeuft: false, fehler: '' }; renderRF(); }
       else if (w === 'abbruch') { RF.edit = null; renderRF(); }
       else if (w === 'anders-ja') { if (!RF.edit || !RF.edit.combo) { if (RF.edit) RF.edit.fehler = 'Bitte eine Kontierung wählen'; renderRF(); } else { var r2 = RF.daten.rueckfragen.filter(function (x) { return x.id === id; })[0]; rfAntwort(id, { aktion: 'korrigieren', combo_id: Number(RF.edit.combo) }, RF.edit.alle ? (RF.sammel[r2.sammelKey] || []).filter(function (x) { return x !== r2.id; }).map(function (x) { return { id: x }; }) : []); } }
