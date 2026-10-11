@@ -258,16 +258,33 @@ def ergebnis_section(game, phase):
 
     data/heimspiele.json: "ergebnis": "71 : 95" (Löwen zuerst, es sind Heimspiele) und
     optional "viertel": ["20 : 25", "18 : 22", "15 : 25", "18 : 23"] (bei Verlaengerung
-    ein Eintrag mehr). Boxscore-Link: Feld "livescore"."""
-    if phase != "danach" or not game.get("ergebnis"):
+    ein Eintrag mehr). Boxscore-Link: Feld "livescore".
+
+    Seit 11.10.2026 (Marko: "Viertelstaende schon mal auf die Spieltagsseite"): auch in der
+    Phase "spieltag". Ist "viertel" schon gepflegt, "ergebnis" aber noch nicht, steht dort
+    ein Zwischenstand (Summe der Viertel) unter der Ueberschrift "Zwischenstand". Erst wenn
+    "ergebnis" gesetzt ist, heisst es "Endstand". Quelle der Zahlen: n8n-Workflow
+    "Website: Liveticker auswerten" (Feld viertelAusLoewenSicht / ergebnisFuerSpielplan)."""
+    if phase not in ("spieltag", "danach"):
         return ""
-    try:
-        heim, gast = [x.strip() for x in game["ergebnis"].split(":")]
-    except ValueError:
+    viertel = game.get("viertel") or []
+    if game.get("ergebnis"):
+        stand_titel = "Endstand"
+        try:
+            heim, gast = [x.strip() for x in game["ergebnis"].split(":")]
+        except ValueError:
+            return ""
+    elif viertel:
+        stand_titel = "Zwischenstand"
+        try:
+            heim = str(sum(int(v.split(":")[0]) for v in viertel))
+            gast = str(sum(int(v.split(":")[1]) for v in viertel))
+        except ValueError:
+            return ""
+    else:
         return ""
     gegner = html.escape(game["gegner"])
     tabelle = ""
-    viertel = game.get("viertel") or []
     if viertel:
         kopf = "".join(
             '<th scope="col"><span class="v-lang">%s</span><span class="v-kurz" aria-hidden="true">%s</span></th>'
@@ -284,13 +301,14 @@ def ergebnis_section(game, phase):
                        '<i data-lucide="activity" class="icon-16"></i> Boxscore</a>')
     if game.get("livestream"):
         knoepfe.append(f'<a class="btn btn-ghost-dark btn-sm" href="{html.escape(game["livestream"])}" target="_blank" rel="noopener">'
-                       '<i data-lucide="video" class="icon-16"></i> Replay</a>')
+                       '<i data-lucide="video" class="icon-16"></i> '
+                       + ('Replay' if (phase == "danach" or game.get("ergebnis")) else 'Livestream') + '</a>')
     knoepfe_html = f'<div class="spiel-ergebnis-actions">{"".join(knoepfe)}</div>' if knoepfe else ""
     return f"""  <section class="section">
     <div class="container">
       <div class="spiel-ergebnis">
-        <span class="eyebrow">Endstand</span>
-        <div class="spiel-ergebnis-score" role="img" aria-label="Endstand: Basketball Löwen {html.escape(heim)}, {gegner} {html.escape(gast)}">
+        <span class="eyebrow">{stand_titel}</span>
+        <div class="spiel-ergebnis-score" role="img" aria-label="{stand_titel}: Basketball Löwen {html.escape(heim)}, {gegner} {html.escape(gast)}">
           <span class="spiel-ergebnis-team">Basketball Löwen</span>
           <span class="spiel-ergebnis-punkte"><b>{html.escape(heim)}</b><span aria-hidden="true">:</span><b>{html.escape(gast)}</b></span>
           <span class="spiel-ergebnis-team">{gegner}</span>
