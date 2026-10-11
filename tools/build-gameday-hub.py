@@ -476,8 +476,14 @@ def termine(liste, aktuelles):
     beiden Dateien -- aendert er sich, muessen beide angefasst werden.
     """
     zeilen = []
+    # Nur die noch kommenden Heimspiele (Marko, 11.10.2026: das schon gespielte Spiel soll nicht
+    # mehr mit "Zum Spiel" in der Liste stehen). Ist das aktuelle Spiel das letzte der Saison,
+    # bleiben alle uebrigen stehen, damit der Hub auf die Spieltagsseiten verweist.
+    saison_ende = liste[-1]["seiteSlug"] == aktuelles["seiteSlug"]
     for s in liste:
         if s["seiteSlug"] == aktuelles["seiteSlug"]:
+            continue
+        if not saison_ende and anpfiff(s) <= anpfiff(aktuelles):
             continue
         zeit = f" · {s['zeit']} Uhr" if s.get("zeit") else ""
         zeilen.append(
