@@ -50,6 +50,18 @@ def pdf_url(a):
     return f"/assets/spieltagsinfo/{a['pdf']}"
 
 
+def pdf_link_html(a, seiten):
+    """Download-Knopf nur, wenn in data/spieltagsinfo.json ein PDF hinterlegt ist.
+
+    Leeres Feld heisst: Die Druckfassung ist noch nicht freigegeben (z. B. weil
+    sie den Entwurfs-Banner traegt) -- dann zeigt die Uebersicht nur "Online lesen".
+    """
+    if not a.get("pdf"):
+        return ""
+    return (f'\n              <a class="card-link" href="{pdf_url(a)}" download>'
+            f'PDF (DIN A5{seiten}) <i data-lucide="download" class="icon-14"></i></a>')
+
+
 def vorschau(a):
     """Vorschaubild aus dem Titelbild (einmal erzeugen, danach nur pruefen)."""
     quelle = ASSETS / f"ausgabe-{a['nr']}" / a["cover"]
@@ -97,6 +109,7 @@ def karte(a, spiele):
         gegner = a["titel"]
         label = f"Ausgabe {a['nr']}"
     seiten = f", {a['seiten']} Seiten" if a.get("seiten") else ""
+    pdf_link = pdf_link_html(a, seiten)
     return f"""        <article class="card">
           {bild}
           <div class="card-body">
@@ -104,8 +117,7 @@ def karte(a, spiele):
             <h3 class="t-h4" style="margin:6px 0 8px"><a href="{ausgabe_url(a['nr'])}" style="text-decoration:none;color:inherit">{esc(gegner)}</a></h3>
             <p class="t-body-sm">{esc(a['beschreibung'])}</p>
             <p style="display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:12px">
-              <a class="card-link" href="{ausgabe_url(a['nr'])}">Online lesen <i data-lucide="arrow-right" class="icon-14"></i></a>
-              <a class="card-link" href="{pdf_url(a)}" download>PDF (DIN A5{seiten}) <i data-lucide="download" class="icon-14"></i></a>
+              <a class="card-link" href="{ausgabe_url(a['nr'])}">Online lesen <i data-lucide="arrow-right" class="icon-14"></i></a>{pdf_link}
             </p>
           </div>
         </article>"""

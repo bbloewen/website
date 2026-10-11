@@ -417,6 +417,13 @@ def spieltagsinfo_section(game):
     url = f"/saison/profis/gameday/spieltagsinfo/ausgabe-{nr}/"
     vorschau = f"/assets/spieltagsinfo/ausgabe-{nr}/vorschau.webp"
     masse = bild_masse(vorschau)
+    # Download-Knopf nur, wenn in data/spieltagsinfo.json ein PDF hinterlegt ist.
+    # Leeres Feld heisst: Druckfassung noch nicht freigegeben (Entwurfs-Banner).
+    pdf_knopf = ""
+    if ausgabe.get("pdf"):
+        pdf_knopf = ('            <a class="btn btn-ghost-dark" '
+                     f'href="/assets/spieltagsinfo/{html.escape(ausgabe["pdf"])}" download>'
+                     'PDF herunterladen</a>\n')
     media = ""
     if (REPO / vorschau.lstrip("/")).exists():
         dims = f' width="{masse[0]}" height="{masse[1]}"' if masse else ""
@@ -432,8 +439,7 @@ def spieltagsinfo_section(game):
           <p class="t-body">Kader der Löwen und der Gäste, Ligastand, Spielplan und Geschichten aus dem Verein.</p>
           <div class="spiel-band-actions">
             <a class="btn btn-primary" style="color:#fff" href="{url}">Online lesen</a>
-            <a class="btn btn-ghost-dark" href="/assets/spieltagsinfo/{html.escape(ausgabe["pdf"])}" download>PDF herunterladen</a>
-            <a class="card-link" href="/saison/profis/gameday/spieltagsinfo/">Alle Ausgaben <i data-lucide="arrow-right" class="icon-14"></i></a>
+{pdf_knopf}            <a class="card-link" href="/saison/profis/gameday/spieltagsinfo/">Alle Ausgaben <i data-lucide="arrow-right" class="icon-14"></i></a>
           </div>
         </div>
       </div>

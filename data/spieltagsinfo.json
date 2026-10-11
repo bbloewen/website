@@ -1,13 +1,13 @@
 {
   "saison": "2026/27",
-  "hinweis": "Ausgaben der digitalen Spieltagsinfo. Gebaut wird die Uebersicht von tools/build-spieltagsinfo.py; die Seite je Ausgabe entsteht aus dem Satz-HTML ueber tools/optimiere-spieltagsinfo.py. Welches Heimspiel zu welcher Ausgabe gehoert, steht in data/heimspiele.json im Feld spieltagsinfo (Ausgabe-Nummer) -- so kann eine Ausgabe fuer mehrere Spiele gelten.",
+  "hinweis": "Ausgaben der digitalen Spieltagsinfo. Gebaut wird die Uebersicht von tools/build-spieltagsinfo.py; die Seite je Ausgabe entsteht aus dem Satz-HTML ueber tools/optimiere-spieltagsinfo.py. Welches Heimspiel zu welcher Ausgabe gehoert, steht in data/heimspiele.json im Feld spieltagsinfo (Ausgabe-Nummer) -- so kann eine Ausgabe fuer mehrere Spiele gelten. Leeres Feld pdf heisst: Druckfassung noch nicht freigegeben, dann zeigen Uebersicht und Spieltagsseite nur \"Online lesen\". Ausgabe 1 pausiert seit 11.10.2026, weil ausgabe-1-spieltagsinfo.pdf den Entwurfs-Banner traegt; sobald die finale Fassung liegt, den Dateinamen wieder eintragen.",
   "ausgaben": [
     {
       "nr": 1,
       "titel": "Heimspielauftakt",
       "beschreibung": "Der Saisonstart in der Riethsporthalle: Kader der Löwen und der Gäste, Ligastand und Spielplan, die WAID Löwen mit Gold von Special Olympics und der Baufortschritt am CATL LÖWENPARK.",
       "cover": "01-titel-cover.webp",
-      "pdf": "ausgabe-1-spieltagsinfo.pdf",
+      "pdf": "",
       "seiten": 23
     }
   ]
