@@ -517,16 +517,16 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
     url = f"https://basketball-loewen.com/saison/profis/gameday/{game['seiteSlug']}.html"
 
     if phase == "danach":
-        description = f"Ergebnis und Spielbericht: Basketball Löwen Erfurt gegen {game['gegner']} am {game['datum']}."
+        description = f"Ergebnis und Spielbericht aus der 2. Basketball Bundesliga ProB: Basketball Löwen Erfurt gegen {game['gegner']} am {game['datum']}."
         zeit_text = f"{hero_datum(d)} · {game['zeit']} Uhr"
     elif phase == "spieltag":
-        description = f"Heimspiel am {game['datum']}: Basketball Löwen Erfurt gegen {game['gegner']} in der Riethsporthalle. Alle Infos zum Spieltag."
+        description = f"Heimspiel in der 2. Basketball Bundesliga ProB am {game['datum']}: Basketball Löwen Erfurt gegen {game['gegner']} in der Riethsporthalle."
         zeit_text = f"{hero_datum(d)} · {game['zeit']} Uhr"  # Wochentag und Datum statt "Heute" (Marko, 11.10.2026)
     elif phase == "vorverkauf":
-        description = f"Tickets für Basketball Löwen Erfurt gegen {game['gegner']} am {game['datum']} — Saalplan, Preise, Kategorien."
+        description = f"Tickets für das ProB-Heimspiel der Basketball Löwen Erfurt gegen {game['gegner']} am {game['datum']} — Saalplan, Preise, Kategorien."
         zeit_text = f"{hero_datum(d)} · {game['zeit']} Uhr"
     else:
-        description = f"Heimspiel gegen {game['gegner']} am {game['datum']} in der Riethsporthalle. Alle Infos zum Spieltag."
+        description = f"ProB-Heimspiel gegen {game['gegner']} am {game['datum']} in der Riethsporthalle Erfurt. Alle Infos zum Spieltag."
         zeit_text = f"{hero_datum(d)} · {game['zeit']} Uhr"
 
     # Zeit- und Ort-Zeile getrennt (Marko, 27.08.2026): die vorherige, kombinierte
