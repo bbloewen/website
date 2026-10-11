@@ -33,7 +33,8 @@ import argparse
 import json
 import re
 import sys
-from datetime import date
+from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 from pathlib import Path
 
 from seo_common import attr as esc
@@ -107,13 +108,36 @@ def kurz_datum(s):
     return f"{WOCHENTAGE[d.weekday()][:2]}, {s['datum']}"
 
 
-def naechstes(liste, heute):
-    """Das nächste Heimspiel — heute zählt noch dazu.
+# Der Hub bleibt auf einem Spiel stehen, bis es 4 Stunden nach Anpfiff vorbei ist (Marko,
+# 11.10.2026) -- vorher bis Mitternacht des Spieltags. Dann rueckt das naechste Heimspiel nach,
+# und tools/vorverkauf-starten.py eroeffnet dafuer den Vorverkauf. Ohne Uhrzeit im Datensatz
+# gilt 12:00 als Anpfiff.
+UMSCHALT_NACH_ANPFIFF = timedelta(hours=4)
+BERLIN = ZoneInfo("Europe/Berlin")
+
+
+def jetzt_berlin():
+    """Aktuelle Berliner Ortszeit, ohne Zeitzone (zum Vergleich mit spielende())."""
+    return datetime.now(BERLIN).replace(tzinfo=None)
+
+
+def anpfiff(s):
+    stunde, minute = (int(x) for x in (s.get("zeit") or "12:00").split(":")[:2])
+    d = datum(s)
+    return datetime(d.year, d.month, d.day, stunde, minute)
+
+
+def spielende(s):
+    return anpfiff(s) + UMSCHALT_NACH_ANPFIFF
+
+
+def naechstes(liste, jetzt):
+    """Das aktuelle Heimspiel: das erste, das noch nicht 4 Stunden nach Anpfiff vorbei ist.
 
     Ist die Saison vorbei, bleibt das letzte Spiel stehen statt einer leeren
     Seite. Der Hub soll nie inhaltslos sein; er ist die Adresse, die rankt.
     """
-    kuenftig = [s for s in liste if datum(s) >= heute]
+    kuenftig = [s for s in liste if spielende(s) > jetzt]
     return (kuenftig[0], True) if kuenftig else (liste[-1], False)
 
 
@@ -490,8 +514,9 @@ def uebernehmen(muster, leer):
     return m.group(0) if m else leer
 
 
-def seite(liste, heute):
-    aktuell, kommt = naechstes(liste, heute)
+def seite(liste, jetzt):
+    heute = jetzt.date()
+    aktuell, kommt = naechstes(liste, jetzt)
     zeit = f", {aktuell['zeit']} Uhr" if aktuell.get("zeit") else ""
     description = (f"Nächstes Heimspiel der Basketball Löwen Erfurt: gegen {aktuell['gegner']} "
                    f"am {aktuell['datum']}{zeit} in der Riethsporthalle. Tickets & Dauerkarte.")
@@ -582,9 +607,9 @@ def main():
     args = ap.parse_args()
 
     liste = spiele()
-    heute = date.today()
-    aktuell, kommt = naechstes(liste, heute)
-    neu = seite(liste, heute)
+    jetzt = jetzt_berlin()
+    aktuell, kommt = naechstes(liste, jetzt)
+    neu = seite(liste, jetzt)
     alt = ZIEL.read_text(encoding="utf-8") if ZIEL.exists() else None
 
     hinweis = f"nächstes Heimspiel: {aktuell['gegner']} am {aktuell['datum']}"

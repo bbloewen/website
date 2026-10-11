@@ -26,6 +26,12 @@ on:
       - data/heimspiele.json
   schedule:
     - cron: '20 4 * * *'
+    # Gameday-Hub umstellen und Vorverkauf eroeffnen, 4 Stunden nach Anpfiff (Marko, 11.10.2026).
+    # Heimspiele beginnen 14:30-19:30 Ortszeit, das Umschalten faellt also zwischen 18:30 und
+    # 23:30 Ortszeit = 16:30-22:30 UTC. Alle 20 Minuten in diesem Fenster; ein Lauf ohne
+    # Aenderung committet nichts (s. unten). GitHub verzoegert geplante Laeufe gelegentlich
+    # um einige Minuten.
+    - cron: '*/20 16-22 * * *'
   workflow_dispatch:
 
 permissions:
@@ -62,7 +68,9 @@ jobs:
       # die von build-partials.py gerade eingefuegten Header/Footer wieder leeren.
       - name: Spieltagsseiten, Startseiten-Widget, Partials, Head-Meta und Sitemap neu bauen
         run: |
+          python3 tools/vorverkauf-starten.py
           python3 tools/build-spieltagsseiten.py
+          python3 tools/build-gameday-hub.py
           python3 tools/build-next-game.py
           python3 tools/build-partials.py
           python3 tools/build-head-meta.py
