@@ -330,8 +330,8 @@
       "lastmod": "2026-08-26"
     },
     "saison/nachwuchs.html": {
-      "hash": "30cb0fabbf29e9307011b2400edfe9fd35f1591e",
-      "lastmod": "2026-10-10"
+      "hash": "a99eac4434c3f77112da2d0652cc1f6934e96c0f",
+      "lastmod": "2026-10-12"
     },
     "saison/nbbl.html": {
       "hash": "0fc276af2de2f842cf5860ae02021f0044a73308",
@@ -414,7 +414,7 @@
       "lastmod": "2026-10-11"
     },
     "saison/tabelle.html": {
-      "hash": "626a58bdde976b90a5c2c71ff7803747e6416c0e",
+      "hash": "1d8fd74d002ca08933d8f89ea44088e9d58ecae7",
       "lastmod": "2026-10-12"
     },
     "satzung.html": {
@@ -434,20 +434,20 @@
       "lastmod": "2026-09-07"
     },
     "trainieren/baskidball.html": {
-      "hash": "6563468cabf1dabb45f8f12164890dd82f8ef3fd",
-      "lastmod": "2026-09-26"
+      "hash": "c5ab98697116b4f50c1b8309e1de1283636b26e1",
+      "lastmod": "2026-10-12"
     },
     "trainieren/court-hunt.html": {
       "hash": "30ed5c49486ea6bacb6107bb6e78e29f308d825b",
       "lastmod": "2026-10-11"
     },
     "trainieren/feriencamps.html": {
-      "hash": "e8f362ecdf9fc7167eb228c1a0302ddc38d7b9fc",
-      "lastmod": "2026-10-11"
+      "hash": "fca1f1ae2174ad5e078be221ffdef5123b87dded",
+      "lastmod": "2026-10-12"
     },
     "trainieren/freiplaetze.html": {
-      "hash": "436c4c2a730df016dbae4c4f4e7653bad5d33b27",
-      "lastmod": "2026-10-11"
+      "hash": "4233b42a94fb04fe99be943a53d5f83aa71c0f66",
+      "lastmod": "2026-10-12"
     },
     "trainieren/freiplatz/loewenpark.html": {
       "hash": "06a4ce12eee8deb853d2f0ddc9a7b230c21cd466",
@@ -474,24 +474,24 @@
       "lastmod": "2026-08-27"
     },
     "trainieren/inklusion.html": {
-      "hash": "a81210ee21908cbc6a2f135b80114a7db0e1feef",
-      "lastmod": "2026-10-11"
+      "hash": "15e1eeb3b1de46bbc333d924cc7158e78be337d2",
+      "lastmod": "2026-10-12"
     },
     "trainieren/loewenpark.html": {
       "hash": "a5381f14812ba2f2fbf9c75a315f805d157981a6",
       "lastmod": "2026-10-01"
     },
     "trainieren/schulprogramm.html": {
-      "hash": "2d0a14c673555533a73411b564f536830ae61748",
-      "lastmod": "2026-09-26"
+      "hash": "2f3b5464e6e1d72c46816cd3bea3a63b0cc57864",
+      "lastmod": "2026-10-12"
     },
     "trainieren/sportvernetzt.html": {
-      "hash": "633e09ef7e91550c03b8f350e3981c3a9a0657e4",
-      "lastmod": "2026-10-01"
+      "hash": "19ba03fc4fbde7fcb4c0de8adb7e665cc2354b63",
+      "lastmod": "2026-10-12"
     },
     "trainieren/trainingszeiten.html": {
-      "hash": "d7129e6d65023023b6e915a631510605b1d46667",
-      "lastmod": "2026-10-01"
+      "hash": "ace4988c354e4e6dfef3e62f0611476af4557341",
+      "lastmod": "2026-10-12"
     }
   }
 }
