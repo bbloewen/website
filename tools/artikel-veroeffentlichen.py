@@ -269,7 +269,7 @@ def css_ergaenzen(a, schreiben):
     if not anker:
         raise SystemExit("  FEHLER: kein hero-news-Block in css/site.css gefunden.")
     zeile = (f".hero-photo.{klasse} {{ --hero-photo-url: "
-             f"url('/assets/img/news/{a['bild']}'); background-position: center center; }}\n")
+             f"url('/assets/img/news/{a['bild']}'); background-position: {a.get('heroPosition') or 'center center'}; }}\n")
     if schreiben:
         CSS.write_text(t[: anker.start()] + zeile + t[anker.start():], encoding="utf-8")
     return True
@@ -371,6 +371,40 @@ def spielplan_pflegen(a, url, schreiben):
 
 HERO_MAX_BREITE = 2400
 HERO_QUALITAET = 82
+# Hochformat -> Hero-Format (seit 11.10.2026, Marko: Hero-Bild "Anthony Watkins Dunking" im
+# Hochformat). Der Hero ist ein flacher Streifen (240-380 px hoch, background-size: cover);
+# ein Hochformat zeigte dort nur einen schmalen Ausschnitt aus der Bildmitte. Deshalb wird es
+# hier zum Breitformat umgebaut, wie es die Uebergabe-Seite in Notion fuer Hand-Arbeit vorsah:
+# Foto mittig, seitlich weich in eine unscharfe, abgedunkelte Vergroesserung auslaufend.
+# Vom Foto bleibt der obere Teil (HOCHFORMAT_BIS), dort spielt bei Sportfotos die Szene.
+# Feinjustierung im Auftrag: "heroPosition" (CSS background-position, Standard center center).
+HERO_BREIT = (2400, 900)
+HOCHFORMAT_BIS = 0.72
+HOCHFORMAT_RAND = 160
+
+
+def hero_aus_hochformat(im):
+    """Hochformat (hoeher als breit) als Breitbild HERO_BREIT zurueckgeben."""
+    from PIL import Image, ImageDraw, ImageEnhance, ImageFilter
+    breite, hoehe = HERO_BREIT
+    im = im.convert("RGB")
+    w, h = im.size
+    vorn = im.crop((0, 0, w, int(h * HOCHFORMAT_BIS)))
+    faktor = hoehe / vorn.height
+    vorn = vorn.resize((round(vorn.width * faktor), hoehe), Image.LANCZOS)
+    f = max(breite / w, hoehe / h)
+    hinten = im.resize((round(w * f), round(h * f)), Image.LANCZOS)
+    x0 = (hinten.width - breite) // 2
+    y0 = int((hinten.height - hoehe) * 0.3)
+    hinten = hinten.crop((x0, y0, x0 + breite, y0 + hoehe)).filter(ImageFilter.GaussianBlur(40))
+    hinten = ImageEnhance.Brightness(hinten).enhance(0.6)
+    maske = Image.new("L", vorn.size, 0)
+    zeichnen = ImageDraw.Draw(maske)
+    for x in range(vorn.width):
+        deckung = max(0.0, min(1.0, x / HOCHFORMAT_RAND, (vorn.width - 1 - x) / HOCHFORMAT_RAND))
+        zeichnen.line([(x, 0), (x, hoehe)], fill=int(255 * deckung))
+    hinten.paste(vorn, ((breite - vorn.width) // 2, 0), maske)
+    return hinten
 
 
 def bild_bereitstellen(a, schreiben):
@@ -400,6 +434,8 @@ def bild_bereitstellen(a, schreiben):
             from PIL import Image                     # nur hier noetig
             with Image.open(q) as im:
                 im = im.convert("RGBA" if im.mode in ("RGBA", "LA", "P") else "RGB")
+                if im.height > im.width:
+                    im = hero_aus_hochformat(im)
                 if im.width > HERO_MAX_BREITE:
                     hoehe = round(im.height * HERO_MAX_BREITE / im.width)
                     im = im.resize((HERO_MAX_BREITE, hoehe), Image.LANCZOS)
