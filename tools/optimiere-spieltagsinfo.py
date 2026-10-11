@@ -192,6 +192,38 @@ img{height:auto;max-width:100%}
 """
 
 
+VERLINKEN = {
+    "CATL": "https://www.catl.com/en/enterpriseinfoGermany/",
+    "BC Erfurt": "https://bcerfurt.de/",
+    "USV Erfurt": "https://usv-erfurt-basketball.de/",
+    "BiG Gotha": "https://www.big-gotha.de/",
+    "TV Langen": "https://tvlangen.de/",
+    "MHP RIESEN Ludwigsburg": "https://mhp-riesen-ludwigsburg.de/",
+    "Special Olympics Deutschland": "https://specialolympics.de/",
+}
+
+
+def erste_nennung_verlinken(html_text, name, ziel):
+    """Erste Nennung von `name` im reinen Text (nicht in Ueberschriften, Links, Knoepfen,
+    Attributen) mit Link versehen. Gibt es schon einen Link auf `ziel`, passiert nichts."""
+    if f'href="{ziel}"' in html_text:
+        return html_text
+    teile = re.split(r"(<[^>]+>)", html_text)
+    sperr = {"a": 0, "h1": 0, "h2": 0, "h3": 0, "button": 0, "title": 0, "script": 0, "style": 0, "figcaption": 0}
+    for i, t in enumerate(teile):
+        if t.startswith("<"):
+            m = re.match(r"<(/?)([a-zA-Z0-9]+)", t)
+            if m and m.group(2).lower() in sperr:
+                sperr[m.group(2).lower()] += -1 if m.group(1) else 1
+            continue
+        if any(v > 0 for v in sperr.values()):
+            continue
+        if name in t:
+            teile[i] = t.replace(name, f'<a href="{ziel}" target="_blank" rel="noopener">{name}</a>', 1)
+            return "".join(teile)
+    return html_text
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("quelle", type=Path)
@@ -251,8 +283,8 @@ def main():
         mime, b64 = re.search(r"src=\"data:([a-z0-9/+.\-]+);base64,([A-Za-z0-9+/=]+)\"", tag).groups()
         alt = (re.search(r'alt="([^"]*)"', tag) or [None, "bild"])[1]
         vor = html[max(0, m.start() - 400):m.start()]
-        if "GiroCode" in alt:
-            art = "girocode"
+        if "GiroCode" in alt or "QR-Code" in alt:
+            art = "girocode"   # reine QR-Bilder: scharf als 2-Farben-PNG, nie als WebP
         elif "Anzeige" in alt:
             art = "anzeige"
         elif mime == "image/svg+xml" or alt == "Basketball Löwen":
@@ -283,15 +315,25 @@ def main():
     ersetzen = [
         ("Dieses Spieltagsheft erscheint ab heute <b>zu jedem Heimspiel digital</b>. Ihr findet es auch zum Herunterladen auf basketball-loewen.com.",
          "Diese Spieltagsinfo erscheint ab heute <b>zu jedem Heimspiel digital</b>. Ihr findet sie auch zum Herunterladen auf basketball-loewen.com."),
-        ('<span class="tag">Spieltagsheft · Saison 2026/27</span>',
+        (re.compile(r'<span class="tag">Spieltagsheft · Saison [\d/]+</span>'),
          f'<span class="tag">Spieltagsinfo · Ausgabe {n} · Saison {args.saison}</span>'),
-        ("<p>Spieltagsheft Nr. 1 · Saison 2026/27 · 11.10.2026</p>",
-         f"<p>Spieltagsinfo · Ausgabe {n} · Saison {args.saison} · {args.titel_datum}</p>"),
+        (re.compile(r"Spieltagsheft Nr\. \d+ · Saison [\d/]+ · [\d.]+"),
+         f"Spieltagsinfo · Ausgabe {n} · Saison {args.saison} · {args.titel_datum}"),
     ]
     for alt, neu in ersetzen:
-        if alt not in html:
-            print(f"  Hinweis: Textstelle nicht gefunden (bei neuer Ausgabe evtl. anders): {alt[:60]}…", file=sys.stderr)
-        html = html.replace(alt, neu)
+        if isinstance(alt, str):
+            if alt not in html:
+                print(f"  Hinweis: Textstelle nicht gefunden (bei neuer Ausgabe evtl. anders): {alt[:60]}…", file=sys.stderr)
+            html = html.replace(alt, neu)
+        else:
+            html, anzahl = alt.subn(neu, html)
+            if not anzahl:
+                print(f"  Hinweis: Textstelle nicht gefunden: {alt.pattern[:60]}…", file=sys.stderr)
+    # Rest-Pruefung: der alte Name darf im sichtbaren Text nicht mehr stehen
+    rest = re.sub(r"<(style|title)[^>]*>.*?</\1>", "", html, flags=re.S)
+    if "Spieltagsheft" in rest:
+        print("  ACHTUNG: 'Spieltagsheft' steht noch im Text:", re.findall(r".{40}Spieltagsheft.{40}", rest)[:3], file=sys.stderr)
+
     # --- Links ---------------------------------------------------------------
     # Seitenintern: ohne neues Fenster
     def intern(m):
@@ -304,6 +346,12 @@ def main():
         return m.group(0).replace('rel="noopener"', 'rel="sponsored noopener"')
     html = re.sub(r'(<span class="ad-label">Anzeige</span>\s*<a [^>]*>)', anzeige, html)
     html = re.sub(r'(<p class="ad-label">Anzeige</p>\s*<a [^>]*>)', anzeige, html)
+
+    # Genannte Vereine/Organisationen beim ersten Auftreten im Fliesstext verlinken
+    # (tools/check-links.py meldet sie sonst als KONSISTENZ-Fund). Namen und Adressen sind die,
+    # die auf der Website schon verlinkt sind; kommt ein neuer Fund dazu, hier ergaenzen.
+    for name, ziel in VERLINKEN.items():
+        html = erste_nennung_verlinken(html, name, ziel)
 
     # QR-Codes auswerten: URL -> anklickbar
     for url, text in bilder.qr.items():
