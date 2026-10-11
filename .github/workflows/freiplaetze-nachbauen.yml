@@ -87,6 +87,9 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add trainieren/freiplaetze.html fans/community-events.html saison/nachwuchs.html sitemap.xml data/seiten-stand.json
+          # -u statt fester Dateiliste: build-head-meta/build-bildmasse koennen auch andere
+          # Seiten nachziehen (z. B. eine frisch gepushte Spieltagsseite). Mit fester Liste
+          # blieb dann nichts gestaged und "git commit" scheiterte (Lauf vom 11.10.2026).
+          git add -u
           git commit -m "Freiplaetze/Community-Events/Nachwuchs-Spielplan: statische Liste und Sitemap nachgezogen"
           git push
