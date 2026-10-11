@@ -13,6 +13,14 @@ Vier Phasen, hergeleitet statt von Hand gepflegt (phase()):
   spieltag      heute ist Spieltag
   danach        Spiel liegt in der Vergangenheit
 
+Aufbau seit 11.10.2026 (mit Marko abgestimmt): Der Hero traegt Termin, Halle, Tickets
+und eine Linkzeile (Livestream/Replay, Vereinsseite des Gegners). Darunter, je nach
+Daten in data/heimspiele.json: Endstand + Viertelstaende ("ergebnis": "71 : 95",
+"viertel": ["20 : 25", ...], Boxscore-Link: "livescore"), Teaser-Karten fuer Nachbericht
+("nachberichtUrl") und Vorbericht ("vorberichtUrl") -- Titel, Text und Bild kommen aus
+data/news.json --, das Spieltagsinfo-Band ("spieltagsinfo") und Zurueck/Weiter zwischen den
+Heimspielen. Die frueheren Heimspiel-Infos-Kacheln (Termin/Halle/Tickets) entfallen.
+
 Der Ticketkauf selbst (Saalplan/Kategorien/Kasse) lebt seit 27.08.2026 nicht
 mehr hier, sondern auf dem Gameday-Hub (tools/build-gameday-hub.py): weil
 ohnehin immer nur für ein Spiel gleichzeitig der Verkauf offen ist, ist der Hub
@@ -199,133 +207,188 @@ def extract_platzhalter(pfad, name, leer):
     return m.group(0) if m else leer
 
 
-def heimspiel_infos_section(game, d, offen):
-    """Ersetzt die vorherige kauf_section() (jetzt auf dem Gameday-Hub, s.
-    tools/build-gameday-hub.py) -- diese Seite zeigt vor dem Spiel nur noch,
-    ob und wo Tickets zu haben sind. Bewusst ohne Status-Wortlaut wie
-    "Vorverkauf läuft"/"angekündigt" (Marko, 27.08.2026): Der Text sagt
-    schlicht, wo Tickets sind, statt eine Verkaufsphase zu benennen.
-    """
-    # Link auf die Vereinsseite des Gegners, wenn data/heimspiele.json eine
-    # gegnerUrl fuehrt -- als Zeile unter dem Kachelraster, nicht als vierte
-    # Kachel: das Raster hat drei Spalten, eine vierte Kachel stuende allein in
-    # einer zweiten Reihe. Dasselbe Muster wie auf dem Gameday-Hub unter der
-    # Spieleliste. Der
-    # Gegnername steht sonst nur in H1 und Eyebrow, und dort wird nach
-    # Repo-Konvention nicht verlinkt -- die Seite des Gegners war damit von
-    # unserer Spieltagsseite aus nicht erreichbar (Markos Ansage, 19.09.2026:
-    # moeglichst viele Links auf externe Vereine).
-    gegner_link = ""
-    if game.get("gegnerUrl"):
-        gegner_link = (
-            '      <p class="mt-5"><a class="card-link" '
-            f'href="{html.escape(game["gegnerUrl"])}" target="_blank" rel="noopener">'
-            f'{html.escape(game["gegner"])} — zur Vereinsseite '
-            '<i data-lucide="arrow-right" class="icon-14"></i></a></p>\n'
-        )
+NEWS_DATEI = REPO / "data" / "news.json"
+SPIELTAGSINFO_DATEI = REPO / "data" / "spieltagsinfo.json"
 
-    ticket_text = (
-        'Tickets für dieses Spiel gibt es auf dem <a href="/saison/profis/gameday/">Gameday-Hub</a>.'
-        if offen else
-        'Tickets für dieses Spiel gibt es, sobald der Verkauf freigeschaltet ist — wir '
-        'kündigen das rechtzeitig hier und über unsere Kanäle an. Mit der '
-        '<a href="/tickets/dauerkarte.html">Dauerkarte</a> sicherst du dir schon jetzt '
-        'einen festen Platz für die ganze Saison.'
-    )
+
+def lade_news():
+    """data/news.json als {url: artikel} -- Titel, Teaser und Bild der Vor-/Nachberichte
+    kommen von dort, damit sie nirgends doppelt gepflegt werden."""
+    daten = json.loads(NEWS_DATEI.read_text(encoding="utf-8"))
+    return {a["url"]: a for a in daten.get("artikel", []) if a.get("url")}
+
+
+def teaser(text, grenze=230):
+    """Kurztext an einer Wortgrenze kuerzen (nur wenn noetig)."""
+    text = " ".join((text or "").split())
+    if len(text) <= grenze:
+        return text
+    return text[:grenze].rsplit(" ", 1)[0].rstrip(",.;:–- ") + " …"
+
+
+def bild_masse(pfad):
+    """(Breite, Hoehe) einer lokalen Bilddatei, sonst None."""
+    try:
+        from PIL import Image
+        with Image.open(REPO / pfad.lstrip("/")) as im:
+            return im.size
+    except Exception:
+        return None
+
+
+def hero_links(game, phase):
+    """Kleine Linkzeile unter der Halle im Hero: Livestream/Replay und Vereinsseite des
+    Gegners (die stand bisher unter den Heimspiel-Infos-Kacheln, die entfallen sind)."""
+    links = []
+    if game.get("livestream"):
+        text = "Zum Replay" if phase == "danach" else "Zum Livestream"
+        links.append(('<a class="hero-location" href="%s" target="_blank" rel="noopener">'
+                      '<i data-lucide="video" class="icon-16"></i> %s</a>') % (html.escape(game["livestream"]), text))
+    if game.get("gegnerUrl"):
+        links.append(('<a class="hero-location" href="%s" target="_blank" rel="noopener">'
+                      '<i data-lucide="external-link" class="icon-16"></i> %s — zur Vereinsseite</a>')
+                     % (html.escape(game["gegnerUrl"]), html.escape(game["gegner"])))
+    if not links:
+        return ""
+    return '          <div class="spiel-hero-links">' + "".join(links) + "</div>\n"
+
+
+def ergebnis_section(game, phase):
+    """Endstand und Viertelstaende (nur nach dem Spiel und wenn ergebnis gepflegt ist).
+
+    data/heimspiele.json: "ergebnis": "71 : 95" (Löwen zuerst, es sind Heimspiele) und
+    optional "viertel": ["20 : 25", "18 : 22", "15 : 25", "18 : 23"] (bei Verlaengerung
+    ein Eintrag mehr). Boxscore-Link: Feld "livescore"."""
+    if phase != "danach" or not game.get("ergebnis"):
+        return ""
+    try:
+        heim, gast = [x.strip() for x in game["ergebnis"].split(":")]
+    except ValueError:
+        return ""
+    gegner = html.escape(game["gegner"])
+    tabelle = ""
+    viertel = game.get("viertel") or []
+    if viertel:
+        kopf = "".join(
+            '<th scope="col"><span class="v-lang">%s</span><span class="v-kurz" aria-hidden="true">%s</span></th>'
+            % (('%d. Viertel' % (i + 1)) if i < 4 else 'Verlängerung', ('Q%d' % (i + 1)) if i < 4 else 'OT')
+            for i in range(len(viertel)))
+        zeile_heim = "".join(f"<td>{html.escape(v.split(':')[0].strip())}</td>" for v in viertel)
+        zeile_gast = "".join(f"<td>{html.escape(v.split(':')[1].strip())}</td>" for v in viertel)
+        tabelle = (f'<div class="spiel-viertel-wrap"><table class="spiel-viertel"><thead><tr><th></th>{kopf}</tr></thead><tbody>'
+                   f'<tr><th scope="row">Basketball Löwen</th>{zeile_heim}</tr>'
+                   f'<tr><th scope="row">{gegner}</th>{zeile_gast}</tr></tbody></table></div>')
+    knoepfe = []
+    if game.get("livescore"):
+        knoepfe.append(f'<a class="btn btn-ghost-dark btn-sm" href="{html.escape(game["livescore"])}" target="_blank" rel="noopener">'
+                       '<i data-lucide="activity" class="icon-16"></i> Boxscore</a>')
+    if game.get("livestream"):
+        knoepfe.append(f'<a class="btn btn-ghost-dark btn-sm" href="{html.escape(game["livestream"])}" target="_blank" rel="noopener">'
+                       '<i data-lucide="video" class="icon-16"></i> Replay</a>')
+    knoepfe_html = f'<div class="spiel-ergebnis-actions">{"".join(knoepfe)}</div>' if knoepfe else ""
     return f"""  <section class="section">
     <div class="container">
-      <span class="eyebrow" style="display:block;margin-bottom:16px">Heimspiel-Infos</span>
-      <div class="grid-3">
-        <div class="info-tile info-tile-row info-tile-row-divided">
-          <div class="info-tile-row-head">
-            <div class="tile-icon"><i data-lucide="calendar"></i></div>
-            <h3 class="t-h4">Termin</h3>
-          </div>
-          <p class="t-body-sm">{html.escape(lang_datum(d))} · {html.escape(game["zeit"])} Uhr</p>
+      <div class="spiel-ergebnis">
+        <span class="eyebrow">Endstand</span>
+        <div class="spiel-ergebnis-score" role="img" aria-label="Endstand: Basketball Löwen {html.escape(heim)}, {gegner} {html.escape(gast)}">
+          <span class="spiel-ergebnis-team">Basketball Löwen</span>
+          <span class="spiel-ergebnis-punkte"><b>{html.escape(heim)}</b><span aria-hidden="true">:</span><b>{html.escape(gast)}</b></span>
+          <span class="spiel-ergebnis-team">{gegner}</span>
         </div>
-        <div class="info-tile info-tile-row info-tile-row-divided">
-          <div class="info-tile-row-head">
-            <div class="tile-icon"><i data-lucide="map-pin"></i></div>
-            <h3 class="t-h4">Halle</h3>
-          </div>
-          <p class="t-body-sm"><a href="{RIETHSPORTHALLE_MAPS_URL}" target="_blank" rel="noopener">Riethsporthalle, Essener Straße 20, 99089 Erfurt</a></p>
-        </div>
-        <div class="info-tile info-tile-row info-tile-row-divided">
-          <div class="info-tile-row-head">
-            <div class="tile-icon"><i data-lucide="ticket"></i></div>
-            <h3 class="t-h4">Tickets</h3>
-          </div>
-          <p class="t-body-sm">{ticket_text}</p>
-        </div>
+        {tabelle}
+        {knoepfe_html}
       </div>
-{gegner_link}
+    </div>
+  </section>
+"""
+
+
+def story_karte(label, url, news):
+    a = news.get(url) or {}
+    titel = html.escape(a.get("titel") or label)
+    kurz = html.escape(teaser(a.get("kurztext", "")))
+    datum = f" · {html.escape(a['datum'])}" if a.get("datum") else ""
+    media = ""
+    if a.get("bild"):
+        masse = bild_masse(a["bild"])
+        dims = f' width="{masse[0]}" height="{masse[1]}"' if masse else ""
+        media = (f'<div class="spiel-story-media"><img loading="lazy" decoding="async" src="{html.escape(a["bild"])}"{dims} alt="" /></div>')
+    return f"""      <a class="card hoverable spiel-story{' spiel-story-ohne-bild' if not media else ''}" href="{html.escape(url)}">
+        {media}
+        <div class="spiel-story-body">
+          <span class="card-label">{label}{datum}</span>
+          <h3 class="t-h3">{titel}</h3>
+          <p class="t-body">{kurz}</p>
+          <span class="card-link">{label} lesen <i data-lucide="arrow-right" class="icon-14"></i></span>
+        </div>
+      </a>"""
+
+
+def story_section(game, phase, news):
+    """Nachbericht (nur nach dem Spiel, Feld nachberichtUrl) und Vorbericht (Feld
+    vorberichtUrl) als Teaser-Karten ueber die ganze Breite -- Text und Bild aus news.json."""
+    karten = []
+    if phase == "danach" and game.get("nachberichtUrl"):
+        karten.append(story_karte("Nachbericht", game["nachberichtUrl"], news))
+    if game.get("vorberichtUrl"):
+        karten.append(story_karte("Vorbericht", game["vorberichtUrl"], news))
+    if not karten:
+        return ""
+    return f"""  <section class="section">
+    <div class="container">
+      <span class="eyebrow" style="display:block;margin-bottom:16px">Zum Spiel</span>
+      <div class="spiel-story-liste">
+{chr(10).join(karten)}
+      </div>
     </div>
   </section>
 """
 
 
 def spieltagsinfo_section(game):
-    """Verweis auf die Spieltagsinfo (digitale Stadionzeitung) zu diesem Heimspiel.
+    """Spieltagsinfo (digitale Stadionzeitung) als Band ueber die ganze Breite.
 
-    Die Ausgabe-Nummer steht in data/heimspiele.json (Feld "spieltagsinfo"); eine
-    Ausgabe kann fuer mehrere Spiele gelten. Name des PDFs aus data/spieltagsinfo.json.
-    """
+    Die Ausgabe-Nummer steht in data/heimspiele.json (Feld "spieltagsinfo"); eine Ausgabe kann
+    fuer mehrere Spiele gelten. PDF-Name und Saison aus data/spieltagsinfo.json."""
     nr = game.get("spieltagsinfo")
     if not nr:
         return ""
-    daten = json.loads((REPO / "data" / "spieltagsinfo.json").read_text(encoding="utf-8"))
+    daten = json.loads(SPIELTAGSINFO_DATEI.read_text(encoding="utf-8"))
     ausgabe = next((a for a in daten["ausgaben"] if a["nr"] == nr), None)
     if not ausgabe:
         raise SystemExit(f"data/heimspiele.json: spieltagsinfo {nr} fehlt in data/spieltagsinfo.json")
     url = f"/saison/profis/gameday/spieltagsinfo/ausgabe-{nr}/"
-    return f"""  <section class="section bg-subtle">
+    vorschau = f"/assets/spieltagsinfo/ausgabe-{nr}/vorschau.webp"
+    masse = bild_masse(vorschau)
+    media = ""
+    if masse:
+        media = (f'<div class="spiel-band-media"><a href="{url}" tabindex="-1" aria-hidden="true">'
+                 f'<img loading="lazy" decoding="async" src="{vorschau}" width="{masse[0]}" height="{masse[1]}" alt="" /></a></div>')
+    return f"""  <section class="section section-dark">
     <div class="container">
-      <span class="eyebrow" style="display:block;margin-bottom:16px">Spieltagsinfo</span>
-      <h2 class="t-h3">Spieltagsinfo zum Heimspiel</h2>
-      <p class="t-body mt-3">Kader der Löwen und der Gäste, Ligastand, Spielplan und Geschichten aus dem Verein: die Spieltagsinfo, Ausgabe {nr} der Saison {daten["saison"]}.</p>
-      <p class="mt-4" style="display:flex;flex-wrap:wrap;gap:8px 24px">
-        <a class="card-link" href="{url}">Spieltagsinfo lesen <i data-lucide="arrow-right" class="icon-14"></i></a>
-        <a class="card-link" href="/assets/spieltagsinfo/{ausgabe["pdf"]}" download>Als PDF herunterladen <i data-lucide="download" class="icon-14"></i></a>
-        <a class="card-link" href="/saison/profis/gameday/spieltagsinfo/">Alle Ausgaben <i data-lucide="arrow-right" class="icon-14"></i></a>
-      </p>
+      <div class="spiel-band{'' if media else ' spiel-band-ohne-bild'}">
+        {media}
+        <div class="spiel-band-body">
+          <span class="eyebrow">Spieltagsinfo · Ausgabe {nr} · Saison {html.escape(daten["saison"])}</span>
+          <h2 class="t-h2">Alles zum Heimspiel in der Tasche</h2>
+          <p class="t-body">Kader der Löwen und der Gäste, Ligastand, Spielplan und Geschichten aus dem Verein.</p>
+          <div class="spiel-band-actions">
+            <a class="btn btn-primary" style="color:#fff" href="{url}">Online lesen</a>
+            <a class="btn btn-ghost-dark" href="/assets/spieltagsinfo/{html.escape(ausgabe["pdf"])}" download>PDF herunterladen</a>
+            <a class="card-link" href="/saison/profis/gameday/spieltagsinfo/">Alle Ausgaben <i data-lucide="arrow-right" class="icon-14"></i></a>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 """
 
 
-def spieltag_zusatz_section():
-    return """  <section class="section bg-subtle">
-    <div class="container">
-      <span class="eyebrow" style="display:block;margin-bottom:16px">Heute ist Spieltag</span>
-      <div class="grid-3">
-        <div class="info-tile info-tile-row info-tile-row-divided">
-          <div class="info-tile-row-head">
-            <div class="tile-icon"><i data-lucide="car"></i></div>
-            <h3 class="t-h4">Anfahrt</h3>
-          </div>
-          <p class="t-body-sm"><a href="%s" target="_blank" rel="noopener">Riethsporthalle, Essener Straße 20, 99089 Erfurt</a> — Anfahrt per Auto oder ÖPNV, Parkplätze direkt an der Halle.</p>
-        </div>
-        <div class="info-tile info-tile-row info-tile-row-divided">
-          <div class="info-tile-row-head">
-            <div class="tile-icon"><i data-lucide="door-open"></i></div>
-            <h3 class="t-h4">Einlass</h3>
-          </div>
-          <p class="t-body-sm">Die Türen öffnen eine Stunde vor Spielbeginn.</p>
-        </div>
-        <div class="info-tile info-tile-row info-tile-row-divided">
-          <div class="info-tile-row-head">
-            <div class="tile-icon"><i data-lucide="party-popper"></i></div>
-            <h3 class="t-h4">Rahmenprogramm</h3>
-          </div>
-          <p class="t-body-sm">Details zum Rahmenprogramm folgen kurzfristig.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-""" % RIETHSPORTHALLE_MAPS_URL
-
-
 def bericht_section(bericht_inhalt):
+    """Frei geschriebener Text (BERICHT:auto) -- nur zeigen, wenn jemand tatsaechlich etwas
+    hineingeschrieben hat; der Platzhalter "folgt nach dem Spiel" steht nicht mehr auf der Seite."""
+    if bericht_inhalt.strip() == BERICHT_PLATZHALTER.strip():
+        return ""
     return f"""  <section class="section">
     <div class="container container-narrow">
       <span class="eyebrow" style="display:block;margin-bottom:16px">Ergebnis &amp; Bericht</span>
@@ -337,8 +400,37 @@ def bericht_section(bericht_inhalt):
 """
 
 
+def weiter_section(vorher, naechstes):
+    """Zurueck/Weiter zwischen den Heimspielen -- die Seite ist sonst eine Sackgasse."""
+    def karte(g, richtung):
+        d = parse_dmy(g["datum"])
+        label = "Vorheriges Heimspiel" if richtung == "zurueck" else "Nächstes Heimspiel"
+        pfeil_l = '<i data-lucide="arrow-left" class="icon-14"></i> ' if richtung == "zurueck" else ""
+        pfeil_r = ' <i data-lucide="arrow-right" class="icon-14"></i>' if richtung == "weiter" else ""
+        return (f'<a class="spiel-weiter-karte spiel-weiter-{richtung}" href="/saison/profis/gameday/{g["seiteSlug"]}.html">'
+                f'<span class="card-label">{pfeil_l}{label}{pfeil_r}</span>'
+                f'<strong>Basketball Löwen – {html.escape(g["gegner"])}</strong>'
+                f'<span class="t-body-sm">{html.escape(hero_datum(d))} · {html.escape(g["zeit"])} Uhr</span></a>')
+    teile = []
+    if vorher:
+        teile.append(karte(vorher, "zurueck"))
+    if naechstes:
+        teile.append(karte(naechstes, "weiter"))
+    if not teile:
+        return ""
+    return f"""  <section class="section bg-subtle">
+    <div class="container">
+      <div class="spiel-weiter">
+        {"".join(teile)}
+      </div>
+    </div>
+  </section>
+"""
+
+
 def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html=LEER_FOOTER,
-               seo_block=LEER_SEO, gameday_extra=""):
+               seo_block=LEER_SEO, gameday_extra="", vorher=None, naechstes=None, news=None):
+    news = news if news is not None else lade_news()
     d = parse_dmy(game["datum"])
     gegner = html.escape(game["gegner"])
     url = f"https://basketball-loewen.com/saison/profis/gameday/{game['seiteSlug']}.html"
@@ -381,16 +473,17 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
         '        </div>\n'
     )
 
-    sections = []
-    if phase in ("angekuendigt", "vorverkauf", "spieltag"):
-        sections.append(heimspiel_infos_section(game, d, offen=bool(game.get("ticketUrl"))))
-    if phase == "spieltag":
-        sections.append(spieltag_zusatz_section())
-    if phase == "danach":
-        sections.append(bericht_section(bericht_inhalt))
-    info = spieltagsinfo_section(game)
-    if info:
-        sections.append(info)
+    # Aufbau seit 11.10.2026 (Marko): Hero traegt Termin, Halle und Tickets -- die drei
+    # Heimspiel-Infos-Kacheln entfallen. Danach: Endstand, Berichte-Teaser, Spieltagsinfo,
+    # Zurueck/Weiter. Nach dem Spiel steht das Ergebnis ganz oben.
+    sections = [
+        ergebnis_section(game, phase),
+        story_section(game, phase, news),
+        spieltagsinfo_section(game),
+        bericht_section(bericht_inhalt) if phase == "danach" else "",
+        weiter_section(vorher, naechstes),
+    ]
+    sections = [x for x in sections if x]
 
     main_content = "\n".join(sections)
     # Der gerettete gameday-extra-Abschnitt steht im Original zwischen Hero und
@@ -433,7 +526,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1791539849" />
+<link rel="stylesheet" href="/css/site.css?v=1791710555" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
@@ -461,7 +554,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
           <h1 class="nowrap-lg" style="font-size:clamp(20px,5vw,56px)"><span class="kw">{gegner}<span class="swoosh" aria-hidden="true"></span></span>.</h1>
           <p class="lead"><a href="{kalender_link}" target="_blank" rel="noopener" title="In Kalender eintragen" style="display:inline-flex;vertical-align:middle;color:inherit"><i data-lucide="calendar-plus" class="icon-16"></i></a> {html.escape(zeit_text)}</p>
           <a class="hero-location" href="{RIETHSPORTHALLE_MAPS_URL}" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Riethsporthalle, Essener Straße 20, 99089 Erfurt</a>
-        </div>
+{hero_links(game, phase)}        </div>
 {tickets_cta}      </div>
     </div>
   </section>
@@ -469,7 +562,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 {main_content}
 </main>
 {footer_html}
-<script src="/js/vendor/lucide-icons.js?v=1791549139"></script>
+<script src="/js/vendor/lucide-icons.js?v=1791710586"></script>
 <script src="/js/nav.js?v=1789585539"></script>
 <script src="/js/include.js?v=1787854261"></script>
 </body>
@@ -488,7 +581,11 @@ def main():
 
     ZIEL_DIR.mkdir(parents=True, exist_ok=True)
     geschrieben, unveraendert = [], []
-    for game in daten["spiele"]:
+    news = lade_news()
+    spiele = sorted(daten["spiele"], key=lambda g: parse_dmy(g["datum"]))
+    for pos, game in enumerate(spiele):
+        vorher = spiele[pos - 1] if pos > 0 else None
+        naechstes = spiele[pos + 1] if pos + 1 < len(spiele) else None
         phase = phase_of(game, today)
         pfad = ZIEL_DIR / f"{game['seiteSlug']}.html"
         bericht = extract_bericht(pfad)
@@ -496,7 +593,7 @@ def main():
         footer_html = extract_platzhalter(pfad, "footer", LEER_FOOTER)
         gameday_extra = extract_gameday_extra(pfad)
         seo_block = extract_seo_block(pfad)
-        neu = build_page(game, phase, bericht, header_html, footer_html, seo_block, gameday_extra)
+        neu = build_page(game, phase, bericht, header_html, footer_html, seo_block, gameday_extra, vorher, naechstes, news)
         alt = pfad.read_text(encoding="utf-8") if pfad.exists() else None
         if neu == alt:
             unveraendert.append((game["seiteSlug"], phase))
