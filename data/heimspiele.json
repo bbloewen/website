@@ -17,7 +17,14 @@
       "spielberichtUrl": "/saison/profis/gameday/2026-10-11-bba-ludwigsburg.html",
       "stehplatzBuchbar": false,
       "livestream": "https://sporteurope.tv/basketball-loewen-erfurt/catl-basketball-loewen-vs-porsche-bba-ludwigsburg",
-      "livescore": "https://live.2basketballbundesliga.de/g/2006143"
+      "livescore": "https://live.2basketballbundesliga.de/g/2006143",
+      "ergebnis": "76 : 74",
+      "viertel": [
+        "22 : 21",
+        "22 : 17",
+        "19 : 23",
+        "13 : 13"
+      ]
     },
     {
       "datum": "18.10.2026",
