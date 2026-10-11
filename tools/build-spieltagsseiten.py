@@ -457,7 +457,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
         zeit_text = f"{hero_datum(d)} · {game['zeit']} Uhr"
     elif phase == "spieltag":
         description = f"Heute Heimspiel: Basketball Löwen Erfurt gegen {game['gegner']} in der Riethsporthalle."
-        zeit_text = f"Heute, {game['zeit']} Uhr"
+        zeit_text = f"{hero_datum(d)} · {game['zeit']} Uhr"  # Wochentag und Datum statt "Heute" (Marko, 11.10.2026)
     elif phase == "vorverkauf":
         description = f"Tickets für Basketball Löwen Erfurt gegen {game['gegner']} am {game['datum']} — Saalplan, Preise, Kategorien."
         zeit_text = f"{hero_datum(d)} · {game['zeit']} Uhr"
