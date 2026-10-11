@@ -3100,11 +3100,13 @@ a.training-group-header:hover { color: var(--color-brand-orange); }
    11.10.2026). Eigene Klasse .fixture-v3, weil .fixture-day-game auch der Nachwuchs-
    Spielplan nutzt. */
 .fixture-day-game.fixture-v3 {
-  grid-template-columns: 250px minmax(0, 1fr) auto;
-  grid-template-areas: "zeit paarung stand" "halle links stand" "marke . icons";
+  /* Spalte 1 so schmal wie die Zeit-Zeile, Spalte 2 nimmt den Rest; die Icon-Reihe darf in der
+     dritten Zeile in die freie Mittelspalte laufen (Marko, 11.10.2026: einzeilig bleiben). */
+  grid-template-columns: max-content minmax(0, 1fr) auto;
+  grid-template-areas: "zeit paarung stand" "halle links stand" "marke icons icons";
   column-gap: 20px; row-gap: 6px; align-items: center;
 }
-.fixture-v3 .fx-zeit { grid-area: zeit; font-size: 14px; }
+.fixture-v3 .fx-zeit { grid-area: zeit; font-size: 14px; white-space: nowrap; }
 .fixture-v3 .fx-paarung { grid-area: paarung; font-size: 14px; font-weight: var(--weight-bold); margin: 0; min-width: 0; }
 .fixture-v3 .fx-stand { grid-area: stand; justify-self: end; font-size: 28px; line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .fixture-v3 .fx-halle { grid-area: halle; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; min-width: 0; }
@@ -3112,7 +3114,7 @@ a.training-group-header:hover { color: var(--color-brand-orange); }
 .fixture-v3 .fx-link { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: var(--weight-bold); color: var(--color-brand-orange-text); text-decoration: none; }
 .fixture-v3 .fx-link:hover { text-decoration: underline; }
 .fixture-v3 .fx-marke { grid-area: marke; }
-.fixture-v3 .fx-icons { grid-area: icons; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 2px; }
+.fixture-v3 .fx-icons { grid-area: icons; display: flex; flex-wrap: nowrap; justify-content: flex-end; gap: 2px; }
 .fixture-v3 .cal-link { min-width: 34px; min-height: 34px; }
 @media (max-width: 720px) {
   .fixture-day-game.fixture-v3 {
@@ -3125,3 +3127,23 @@ a.training-group-header:hover { color: var(--color-brand-orange); }
   .fixture-day-game.fixture-v3 { column-gap: 8px; }
   .fixture-v3 .cal-link { min-width: 32px; min-height: 36px; }
 }
+
+/* ---------- Kalender-Menue (Spielplan, Spieltagsseiten, Hub) ----------
+   <details class="kal-menu">: Icon mit zwei Eintraegen -- Google Kalender und .ics-Datei fuer
+   Apple/Outlook (tools/build-kalender.py). Schliesst per js/nav.js bei Klick daneben. */
+.kal-menu { position: relative; display: inline-flex; vertical-align: middle; }
+.kal-menu > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.kal-menu > summary::-webkit-details-marker { display: none; }
+.kal-menu > summary:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: 6px; }
+.kal-menu-liste {
+  position: absolute; right: 0; top: calc(100% + 4px); z-index: 40; min-width: 220px; padding: 6px;
+  display: flex; flex-direction: column; background: #fff; border: 1px solid var(--border);
+  border-radius: 12px; box-shadow: var(--shadow-card);
+}
+.kal-menu-liste a { padding: 10px 12px; border-radius: 8px; color: var(--text-primary); font-size: 14px; font-weight: var(--weight-semibold); text-decoration: none; white-space: nowrap; }
+.kal-menu-liste a:hover, .kal-menu-liste a:focus-visible { background: var(--color-orange-50); color: var(--color-brand-orange-text); }
+/* Hero: kein Aufklappmenue (der Hero schneidet ab), sondern Icon plus Textlink "iCal" */
+.kal-ics { color: inherit; font-size: .8em; font-weight: var(--weight-bold); text-decoration: underline; text-underline-offset: 3px; margin-right: 4px; }
+.kal-ics:hover { color: var(--color-brand-orange); }
+/* Das Menue ragt aus der Spielplan-Karte heraus */
+.fixture-day.card { overflow: visible; }

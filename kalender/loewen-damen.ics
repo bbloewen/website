@@ -1,0 +1,222 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Basketball Löwen Erfurt//Spielplan//DE
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Basketball Löwen – Damen (Regionalliga)
+X-WR-TIMEZONE:Europe/Berlin
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VTIMEZONE
+TZID:Europe/Berlin
+BEGIN:DAYLIGHT
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+TZNAME:CEST
+DTSTART:19700329T020000
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+TZNAME:CET
+DTSTART:19701025T030000
+RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:damen-2026-09-27@basketball-loewen.com
+DTSTAMP:20261011T000000Z
+SEQUENCE:0
+DTSTART;TZID=Europe/Berlin:20260927T150000
+DTEND;TZID=Europe/Berlin:20260927T170000
+SUMMARY:CATL Basketball Löwinnen – Post SV Nürnberg
+LOCATION:Riethsporthalle\, Essener Straße 20\, 99089 Erfurt
+DESCRIPTION:Heimspiel · Damen (Regionalliga)\nAlle Infos: https://basketba
+ ll-loewen.com/saison/spielplan.html?team=damen
+URL:https://basketball-loewen.com/saison/spielplan.html?team=damen
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+UID:damen-2026-10-03@basketball-loewen.com
+DTSTAMP:20261011T000000Z
+SEQUENCE:0
+DTSTART;TZID=Europe/Berlin:20261003T160000
+DTEND;TZID=Europe/Berlin:20261003T180000
+SUMMARY:TB 1888 Erlangen – CATL Basketball Löwinnen
+LOCATION:Erlangen
+DESCRIPTION:Auswärtsspiel · Damen (Regionalliga)\nAlle Infos: https://bas
+ ketball-loewen.com/saison/spielplan.html?team=damen
+URL:https://basketball-loewen.com/saison/spielplan.html?team=damen
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+UID:damen-2026-10-11@basketball-loewen.com
+DTSTAMP:20261011T000000Z
+SEQUENCE:0
+DTSTART;TZID=Europe/Berlin:20261011T130000
+DTEND;TZID=Europe/Berlin:20261011T150000
+SUMMARY:CATL Basketball Löwinnen – BC Dresden
+LOCATION:Riethsporthalle\, Essener Straße 20\, 99089 Erfurt
+DESCRIPTION:Heimspiel · Damen (Regionalliga)\nAlle Infos: https://basketba
+ ll-loewen.com/saison/spielplan.html?team=damen
+URL:https://basketball-loewen.com/saison/spielplan.html?team=damen
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+UID:damen-2026-10-17@basketball-loewen.com
+DTSTAMP:20261011T000000Z
+SEQUENCE:0
+DTSTART;VALUE=DATE:20261017
+DTEND;VALUE=DATE:20261018
+SUMMARY:DJK Don Bosco Bamberg – CATL Basketball Löwinnen
+LOCATION:Bamberg
+DESCRIPTION:Auswärtsspiel · Damen (Regionalliga)\nAlle Infos: https://bas
+ ketball-loewen.com/saison/spielplan.html?team=damen
+URL:https://basketball-loewen.com/saison/spielplan.html?team=damen
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+UID:damen-2026-10-24@basketball-loewen.com
+DTSTAMP:20261011T000000Z
+SEQUENCE:0
+DTSTART;TZID=Europe/Berlin:20261024T170000
+DTEND;TZID=Europe/Berlin:20261024T190000
+SUMMARY:CATL Basketball Löwinnen – Leipzig Lakers
+LOCATION:Riethsporthalle\, Essener Straße 20\, 99089 Erfurt
+DESCRIPTION:Heimspiel · Damen (Regionalliga)\nAlle Infos: https://basketba
+ ll-loewen.com/saison/spielplan.html?team=damen
+URL:https://basketball-loewen.com/saison/spielplan.html?team=damen
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+UID:damen-2026-10-31@basketball-loewen.com
+DTSTAMP:20261011T000000Z
+SEQUENCE:0
+DTSTART;TZID=Europe/Berlin:20261031T170000
+DTEND;TZID=Europe/Berlin:20261031T190000
+SUMMARY:CATL Basketball Löwinnen – TG 48 Würzburg 2
+LOCATION:Riethsporthalle\, Essener Straße 20\, 99089 Erfurt
+DESCRIPTION:Heimspiel · Damen (Regionalliga)\nAlle Infos: https://basketba
+ ll-loewen.com/saison/spielplan.html?team=damen
+URL:https://basketball-loewen.com/saison/spielplan.html?team=damen
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+UID:damen-2026-11-07@basketball-loewen.com
+DTSTAMP:20261011T000000Z
+SEQUENCE:0
+DTSTART;TZID=Europe/Berlin:20261107T171500
+DTEND;TZID=Europe/Berlin:20261107T191500
+SUMMARY:BG Litzendorf – CATL Basketball Löwinnen
+LOCATION:Litzendorf
+DESCRIPTION:Auswärtsspiel · Damen (Regionalliga)\nAlle Infos: https://bas
+ ketball-loewen.com/saison/spielplan.html?team=damen
+URL:https://basketball-loewen.com/saison/spielplan.html?team=damen
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+UID:damen-2026-11-14@basketball-loewen.com
+DTSTAMP:20261011T000000Z
+SEQUENCE:0
+DTSTART;TZID=Europe/Berlin:20261114T150000
+DTEND;TZID=Europe/Berlin:20261114T170000
+SUMMARY:Post SV Nürnberg – CATL Basketball Löwinnen
+LOCATION:Nürnberg
+DESCRIPTION:Auswärtsspiel · Damen (Regionalliga)\nAlle Infos: https://bas
+ ketball-loewen.com/saison/spielplan.html?team=damen
+URL:https://basketball-loewen.com/saison/spielplan.html?team=damen
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+UID:damen-2026-11-21@basketball-loewen.com
+DTSTAMP:20261011T000000Z
+SEQUENCE:0
+DTSTART;TZID=Europe/Berlin:20261121T170000
+DTEND;TZID=Europe/Berlin:20261121T190000
+SUMMARY:CATL Basketball Löwinnen – TB 1888 Erlangen
+LOCATION:Riethsporthalle\, Essener Straße 20\, 99089 Erfurt
+DESCRIPTION:Heimspiel · Damen (Regionalliga)\nAlle Infos: https://basketba
+ ll-loewen.com/saison/spielplan.html?team=damen
+URL:https://basketball-loewen.com/saison/spielplan.html?team=damen
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+UID:damen-2026-11-28@basketball-loewen.com
+DTSTAMP:20261011T000000Z
+SEQUENCE:0
+DTSTART;TZID=Europe/Berlin:20261128T181500
+DTEND;TZID=Europe/Berlin:20261128T201500
+SUMMARY:BC Dresden – CATL Basketball Löwinnen
+LOCATION:Dresden
+DESCRIPTION:Auswärtsspiel · Damen (Regionalliga)\nAlle Infos: https://bas
+ ketball-loewen.com/saison/spielplan.html?team=damen
+URL:https://basketball-loewen.com/saison/spielplan.html?team=damen
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+UID:damen-2026-12-04@basketball-loewen.com
+DTSTAMP:20261011T000000Z
+SEQUENCE:0
+DTSTART;TZID=Europe/Berlin:20261204T200000
+DTEND;TZID=Europe/Berlin:20261204T220000
+SUMMARY:CATL Basketball Löwinnen – DJK Don Bosco Bamberg
+LOCATION:Riethsporthalle\, Essener Straße 20\, 99089 Erfurt
+DESCRIPTION:Heimspiel · Damen (Regionalliga)\nAlle Infos: https://basketba
+ ll-loewen.com/saison/spielplan.html?team=damen
+URL:https://basketball-loewen.com/saison/spielplan.html?team=damen
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+UID:damen-2026-12-06@basketball-loewen.com
+DTSTAMP:20261011T000000Z
+SEQUENCE:0
+DTSTART;TZID=Europe/Berlin:20261206T130000
+DTEND;TZID=Europe/Berlin:20261206T150000
+SUMMARY:Leipzig Lakers – CATL Basketball Löwinnen
+LOCATION:Leipzig
+DESCRIPTION:Auswärtsspiel · Damen (Regionalliga)\nAlle Infos: https://bas
+ ketball-loewen.com/saison/spielplan.html?team=damen
+URL:https://basketball-loewen.com/saison/spielplan.html?team=damen
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+UID:damen-2026-12-12@basketball-loewen.com
+DTSTAMP:20261011T000000Z
+SEQUENCE:0
+DTSTART;TZID=Europe/Berlin:20261212T144500
+DTEND;TZID=Europe/Berlin:20261212T164500
+SUMMARY:TG 48 Würzburg 2 – CATL Basketball Löwinnen
+LOCATION:Würzburg
+DESCRIPTION:Auswärtsspiel · Damen (Regionalliga)\nAlle Infos: https://bas
+ ketball-loewen.com/saison/spielplan.html?team=damen
+URL:https://basketball-loewen.com/saison/spielplan.html?team=damen
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+UID:damen-2027-01-09@basketball-loewen.com
+DTSTAMP:20261011T000000Z
+SEQUENCE:0
+DTSTART;TZID=Europe/Berlin:20270109T180000
+DTEND;TZID=Europe/Berlin:20270109T200000
+SUMMARY:CATL Basketball Löwinnen – BG Litzendorf
+LOCATION:Riethsporthalle\, Essener Straße 20\, 99089 Erfurt
+DESCRIPTION:Heimspiel · Damen (Regionalliga)\nAlle Infos: https://basketba
+ ll-loewen.com/saison/spielplan.html?team=damen
+URL:https://basketball-loewen.com/saison/spielplan.html?team=damen
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+END:VEVENT
+END:VCALENDAR

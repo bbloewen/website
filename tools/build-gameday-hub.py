@@ -158,8 +158,10 @@ def hero(s, heute):
     kalender_link = gcal_link(s["gegner"], datum(s), zeit) if zeit else None
     zeit_zeile = (
         f'<p class="lead"><a href="{kalender_link}" target="_blank" rel="noopener" '
-        f'title="In Kalender eintragen" style="display:inline-flex;vertical-align:middle;color:inherit">'
-        f'<i data-lucide="calendar-plus" class="icon-16"></i></a> {esc(zeile)}</p>'
+        f'title="In Google Kalender eintragen" style="display:inline-flex;vertical-align:middle;color:inherit">'
+        f'<i data-lucide="calendar-plus" class="icon-16"></i></a> '
+        f'<a class="kal-ics" href="/kalender/spiel/profis-{datum(s).isoformat()}.ics" title="In Apple- oder Outlook-Kalender laden (.ics)">iCal</a> '
+        f'{esc(zeile)}</p>'
         if kalender_link else f'<p class="lead">{esc(zeile)}</p>'
     )
     return f"""  <section class="hero-photo hero-tickets hero-half">
@@ -561,7 +563,7 @@ def seite(liste, jetzt):
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1791752984" />
+<link rel="stylesheet" href="/css/site.css?v=1791753312" />
 <link rel="stylesheet" href="/css/seat-picker.css?v=1791624432" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
@@ -600,7 +602,7 @@ def seite(liste, jetzt):
   }});
 </script>
 <script src="/js/vendor/lucide-icons.js?v=1791710586"></script>
-<script src="/js/nav.js?v=1789585539"></script>
+<script src="/js/nav.js?v=1791753237"></script>
 <script src="/js/include.js?v=1787854261"></script>
 </body>
 </html>

@@ -71,6 +71,7 @@ jobs:
           python3 tools/vorverkauf-starten.py
           python3 tools/build-spieltagsseiten.py
           python3 tools/build-gameday-hub.py
+          python3 tools/build-kalender.py
           python3 tools/build-next-game.py
           python3 tools/build-partials.py
           python3 tools/build-head-meta.py
@@ -86,7 +87,7 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add saison/profis/gameday/ data/heimspiele.json saison/spielplan.html index.html sitemap.xml data/seiten-stand.json
+          git add saison/profis/gameday/ kalender/ data/heimspiele.json saison/spielplan.html index.html sitemap.xml data/seiten-stand.json
           git diff --cached --quiet && { echo "Nichts nachzuziehen."; exit 0; }
           git commit -m "Spieltagsseiten und Startseiten-Widget: Phase/Sitemap nachgezogen"
           git push

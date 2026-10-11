@@ -43,6 +43,18 @@
     return 'https://calendar.google.com/calendar/render?' + new URLSearchParams(params).toString();
   }
 
+  /* Kalender-Menue am Icon: Google Kalender oder .ics-Datei (Apple, Outlook, Android). Die Dateien
+     erzeugt tools/build-kalender.py unter /kalender/spiel/<team>-<Datum>.ics (Marko, 11.10.2026). */
+  function kalenderMenuHTML(g) {
+    var ics = '/kalender/spiel/' + g.team + '-' + dateKey(g.date) + '.ics';
+    return '<details class="kal-menu"><summary class="cal-link" title="In Kalender eintragen" aria-label="In Kalender eintragen">' +
+      '<i data-lucide="calendar-plus" style="width:20px;height:20px"></i></summary>' +
+      '<div class="kal-menu-liste">' +
+        '<a href="' + calendarLink(g) + '" target="_blank" rel="noopener">Google Kalender</a>' +
+        '<a href="' + ics + '">Apple / Outlook (.ics)</a>' +
+      '</div></details>';
+  }
+
   /* Vorbericht/Nachbericht-Icon fuer Pro-B-Spiele: dieselbe Idee wie im
      Startseiten-Widget (js/home-next-game.js), aber hier immer BEIDE Icons
      sichtbar (nicht nur je nach Anpfiff-Status), weil der Spielplan die ganze
@@ -132,7 +144,7 @@
        Abschnitt "Spielplan-Karte v3". */
     var iconsHTML = (g === naechstesHeimspiel ? '<a class="cal-link" href="/saison/profis/gameday/" title="Zum Gameday"><i data-lucide="ticket" style="width:20px;height:20px"></i></a>' : '') +
       berichteHTML +
-      '<a class="cal-link" href="' + calendarLink(g) + '" target="_blank" rel="noopener" title="In Kalender eintragen"><i data-lucide="calendar-plus" style="width:20px;height:20px"></i></a>';
+      kalenderMenuHTML(g);
     // Reihenfolge der Links: Livestream/Replay zuerst, dann "Zum Spiel" (Marko, 11.10.2026)
     var linksHTML = (g.livestream ? '<a class="fx-link" href="' + g.livestream + '" target="_blank" rel="noopener"><i data-lucide="video" style="width:14px;height:14px"></i> ' + (hatBegonnen ? 'Zum Replay' : 'Zum Livestream') + '</a>' : '') +
       (g.heim && g.spielberichtUrl ? '<a class="fx-link" href="' + g.spielberichtUrl + '">Zum Spiel <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>' : '');

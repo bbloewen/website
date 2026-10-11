@@ -540,6 +540,15 @@ def weiter_section(vorher, naechstes):
 """
 
 
+def kalender_menue(google_link, d):
+    """Kalender im Hero: Google-Icon wie bisher, daneben der Textlink "iCal" fuer die .ics-Datei
+    (Apple/Outlook, tools/build-kalender.py: kalender/spiel/profis-<Datum>.ics). Bewusst kein
+    Aufklappmenue: der Hero schneidet ueberstehende Elemente ab."""
+    return (f'<a href="{google_link}" target="_blank" rel="noopener" title="In Google Kalender eintragen" '
+            'style="display:inline-flex;vertical-align:middle;color:inherit"><i data-lucide="calendar-plus" class="icon-16"></i></a> '
+            f'<a class="kal-ics" href="/kalender/spiel/profis-{d.isoformat()}.ics" title="In Apple- oder Outlook-Kalender laden (.ics)">iCal</a>')
+
+
 def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html=LEER_FOOTER,
                seo_block=LEER_SEO, gameday_extra="", vorher=None, naechstes=None, news=None):
     news = news if news is not None else lade_news()
@@ -639,7 +648,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1791752984" />
+<link rel="stylesheet" href="/css/site.css?v=1791753312" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
@@ -665,7 +674,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
         <div>
           <span class="eyebrow">{eyebrow}</span>
           <h1 class="nowrap-lg" style="font-size:clamp(20px,5vw,56px)"><span class="kw">{gegner}<span class="swoosh" aria-hidden="true"></span></span>.</h1>
-          <p class="lead"><a href="{kalender_link}" target="_blank" rel="noopener" title="In Kalender eintragen" style="display:inline-flex;vertical-align:middle;color:inherit"><i data-lucide="calendar-plus" class="icon-16"></i></a> {html.escape(zeit_text)}</p>
+          <p class="lead">{kalender_menue(kalender_link, d)} {html.escape(zeit_text)}</p>
           <a class="hero-location" href="{RIETHSPORTHALLE_MAPS_URL}" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Riethsporthalle, Essener Straße 20, 99089 Erfurt</a>
 {hero_links(game, phase)}        </div>
 {tickets_cta}      </div>
@@ -676,7 +685,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 </main>
 {footer_html}
 <script src="/js/vendor/lucide-icons.js?v=1791710586"></script>
-<script src="/js/nav.js?v=1789585539"></script>
+<script src="/js/nav.js?v=1791753237"></script>
 <script src="/js/include.js?v=1787854261"></script>
 </body>
 </html>

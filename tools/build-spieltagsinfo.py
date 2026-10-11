@@ -189,7 +189,7 @@ def seite(daten):
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1791752984" />
+<link rel="stylesheet" href="/css/site.css?v=1791753312" />
 {ANALYTICS}{seo}</head>
 <body data-nav-group="gameday" class="hide-mobile-cta">
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
@@ -199,7 +199,7 @@ def seite(daten):
 </main>
 {footer}
 <script src="/js/vendor/lucide-icons.js?v=1791710586"></script>
-<script src="/js/nav.js?v=1789585539"></script>
+<script src="/js/nav.js?v=1791753237"></script>
 <script src="/js/include.js?v=1787854261"></script>
 </body>
 </html>

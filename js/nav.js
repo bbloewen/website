@@ -411,3 +411,18 @@ window.initNav = function initNav() {
     });
   }
 };
+
+
+/* Kalender-Menue (details.kal-menu, s. css/site.css): schliesst bei Klick daneben und mit Escape.
+   Das Menue bietet Google Kalender und eine .ics-Datei fuer Apple/Outlook (tools/build-kalender.py). */
+(function () {
+  document.addEventListener('click', function (e) {
+    document.querySelectorAll('details.kal-menu[open]').forEach(function (d) {
+      if (!d.contains(e.target)) d.removeAttribute('open');
+    });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    document.querySelectorAll('details.kal-menu[open]').forEach(function (d) { d.removeAttribute('open'); });
+  });
+})();
