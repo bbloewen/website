@@ -250,7 +250,14 @@ def cache_buster_abgleichen(seite):
 def seite_bauen(a):
     seite = VORLAGE.read_text(encoding="utf-8")
     titel = a.get("seitentitel") or a["titel"]
-    seite = seite.replace("__TITLE__", esc(f"{titel} — Basketball Löwen Erfurt"))
+    # Markensuffix nur, wenn der Titel den Vereinsnamen nicht ohnehin schon traegt.
+    # Sonst stand er doppelt drin ("… Basketball Löwen Erfurt feiern ersten Saisonsieg
+    # — Basketball Löwen Erfurt", 97 Zeichen) und die Google-Vorschau schnitt ab.
+    seitentitel = titel if "Basketball Löwen" in titel else f"{titel} — Basketball Löwen Erfurt"
+    if len(seitentitel) > 65:
+        print(f"  Hinweis: Seitentitel {len(seitentitel)} Zeichen, Google zeigt rund 60 — "
+              f"in Notion kuerzen: {seitentitel}")
+    seite = seite.replace("__TITLE__", esc(seitentitel))
     seite = seite.replace("__DESCRIPTION__", esc(typografie(a["beschreibung"])))
     seite = seite.replace("__MAIN__", main_block(a))
     if a["status"] == "pruefung":
