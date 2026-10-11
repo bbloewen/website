@@ -270,39 +270,6 @@ WISSENSWERTES_HTML = """      <span class="eyebrow" style="display:block;margin-
       </div>"""
 
 
-def spieltag_zusatz_section():
-    return f"""  <section class="section bg-subtle">
-    <div class="container">
-      <span class="eyebrow" style="display:block;margin-bottom:16px">Heute ist Spieltag</span>
-      <div class="grid-3">
-        <div class="info-tile info-tile-row info-tile-row-divided">
-          <div class="info-tile-row-head">
-            <div class="tile-icon"><i data-lucide="car"></i></div>
-            <h3 class="t-h4">Anfahrt</h3>
-          </div>
-          <p class="t-body-sm"><a href="{MAPS}" target="_blank" rel="noopener">Riethsporthalle, Essener Straße 20, 99089 Erfurt</a> — Anfahrt per Auto oder ÖPNV, Parkplätze direkt an der Halle.</p>
-        </div>
-        <div class="info-tile info-tile-row info-tile-row-divided">
-          <div class="info-tile-row-head">
-            <div class="tile-icon"><i data-lucide="door-open"></i></div>
-            <h3 class="t-h4">Einlass</h3>
-          </div>
-          <p class="t-body-sm">Die Türen öffnen eine Stunde vor Spielbeginn.</p>
-        </div>
-        <div class="info-tile info-tile-row info-tile-row-divided">
-          <div class="info-tile-row-head">
-            <div class="tile-icon"><i data-lucide="party-popper"></i></div>
-            <h3 class="t-h4">Rahmenprogramm</h3>
-          </div>
-          <p class="t-body-sm">Details zum Rahmenprogramm folgen kurzfristig.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-"""
-
-
 def kauf_bereich(aktuell, kommt, heute):
     """Der Ticketkauf für das nächste Heimspiel -- seit 27.08.2026 (Marko)
     direkt hier auf dem Hub statt auf der jeweiligen Spieltagsseite: Weil
@@ -341,7 +308,6 @@ def kauf_bereich(aktuell, kommt, heute):
         "stehplatzBuchbar": aktuell.get("stehplatzBuchbar", True),
         "zahlungPausiert": aktuell.get("zahlungPausiert", False),
     }, ensure_ascii=False)
-    zusatz = spieltag_zusatz_section() if datum(aktuell) == heute else ""
     return f"""  <section class="section">
     <div class="container">
       <div class="section-head">
@@ -369,7 +335,7 @@ def kauf_bereich(aktuell, kommt, heute):
     </div>
   </section>
 
-{zusatz}  <section class="section bg-subtle">
+  <section class="section bg-subtle">
     <div class="container container-narrow">
       <span class="eyebrow" style="display:block;text-align:center;margin-bottom:6px">Kontakt</span>
       <h2 class="t-h2 text-center mb-5">Fragen zum Ticket?</h2>
