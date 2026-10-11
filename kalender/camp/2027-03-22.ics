@@ -1,0 +1,22 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Basketball Löwen Erfurt//Feriencamps//DE
+CALSCALE:GREGORIAN
+BEGIN:VEVENT
+UID:camp-2027-03-22@basketball-loewen.com
+DTSTAMP:20261011T000000Z
+SEQUENCE:0
+DTSTART;VALUE=DATE:20270322
+DTEND;VALUE=DATE:20270327
+SUMMARY:QUNDIS Ostercamp 2027 – Basketball Löwen Erfurt
+LOCATION:Löwenpark\, Erfurt
+DESCRIPTION:Ferien-Basketballcamp der Basketball Loewen Erfurt in den Oster
+ ferien 2027. Termin noch nicht offiziell bestaetigt\, voraussichtlich 22.-
+ 26. Maerz 2027 (erste Ferienwoche). Alle Infos: basketball-loewen.com/trai
+ nieren/feriencamps.html\nAlle Infos: https://basketball-loewen.com/trainie
+ ren/feriencamps.html
+URL:https://basketball-loewen.com/trainieren/feriencamps.html
+STATUS:CONFIRMED
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

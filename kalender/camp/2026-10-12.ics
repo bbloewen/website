@@ -1,0 +1,20 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Basketball Löwen Erfurt//Feriencamps//DE
+CALSCALE:GREGORIAN
+BEGIN:VEVENT
+UID:camp-2026-10-12@basketball-loewen.com
+DTSTAMP:20261011T000000Z
+SEQUENCE:0
+DTSTART;VALUE=DATE:20261012
+DTEND;VALUE=DATE:20261016
+SUMMARY:Herbstcamp 2026 – Basketball Löwen Erfurt
+LOCATION:Sporthalle am Südpark\, Erfurt
+DESCRIPTION:Ferien-Basketballcamp der Basketball Loewen Erfurt in den Herbs
+ tferien. Alle Infos: basketball-loewen.com/trainieren/feriencamps.html\nAl
+ le Infos: https://basketball-loewen.com/trainieren/feriencamps.html
+URL:https://basketball-loewen.com/trainieren/feriencamps.html
+STATUS:CONFIRMED
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

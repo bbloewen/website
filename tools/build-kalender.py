@@ -8,6 +8,8 @@ nutzt, soll auch bedient werden. Zwei Arten von Dateien:
   kalender/loewen-<team>.ics               abonnierbarer Kalender je Team (damen, nbbl; die Profis
                                            haben den Liga-Kalender, s. spielplan.html)
 
+  kalender/camp/<Startdatum>.ics           ein Feriencamp (aus den Karten in trainieren/feriencamps.html)
+
 Quellen: data/heimspiele.json (Profis-Heimspiele), data/spielplan-saison.json (Profis auswaerts,
 Damen, NBBL). Die Regeln fuer Titel, Halle und Reihenfolge entsprechen js/spielplan.js; fuer die
 NBBL gilt die Hallenregel von dort (Riethsporthalle nur am Tag eines Pro-B-Heimspiels, sonst
@@ -16,6 +18,12 @@ Sporthalle am Suedpark).
 Gleiche Termine behalten beim erneuten Bauen dieselbe UID (<team>-<Datum>@basketball-loewen.com),
 ein erneuter Import legt sie also nicht doppelt an. Spiele ohne Uhrzeit sind ganztaegige Termine.
 Keine Erinnerung (VALARM), bewusst die neutrale Voreinstellung.
+
+Feriencamps: Termin, Titel und Halle liest das Skript aus den Karten (`camp-slider-card`) in
+trainieren/feriencamps.html -- aus dem Google-Kalender-Link der Karte (Feld `dates`, Ende
+exklusiv) und der Hallenzeile. Jede Karte braucht daneben den Link
+`<a class="kal-ics" href="/kalender/camp/<Startdatum JJJJ-MM-TT>.ics">iCal</a>`; fehlt er, meldet das
+Skript es.
 
 Dateien, die beim Lauf nicht mehr entstehen (Spiel verschoben), werden aus kalender/spiel/ entfernt.
 
@@ -166,6 +174,52 @@ def kalender(events, name=None):
     return "\r\n".join(fold(z) for z in zeilen) + "\r\n"
 
 
+def camps():
+    """Feriencamps aus trainieren/feriencamps.html (ganztaegige Termine)."""
+    import html as _html
+    import re
+    import urllib.parse
+    text = (REPO / "trainieren" / "feriencamps.html").read_text(encoding="utf-8")
+    bloecke = re.split(r'(?=<div class="card hoverable camp-slider-card">)', text)[1:]
+    out, ohne_link = [], []
+    for b in bloecke:
+        b = b.split('<div class="card hoverable camp-slider-card">', 1)[-1]
+        b = re.split(r'</section>|<div class="card hoverable camp-slider-card">', b)[0]
+        h3 = re.search(r"<h3>(.*?)</h3>", b, re.S)
+        g = re.search(r'href="(https://calendar\.google\.com[^"]*)"', b)
+        if not (h3 and g):
+            continue
+        titel = _html.unescape(re.sub(r"<[^>]+>", "", h3.group(1))).strip()
+        q = urllib.parse.parse_qs(urllib.parse.urlparse(_html.unescape(g.group(1))).query)
+        try:
+            a, e = q["dates"][0].split("/")
+            start = datetime.strptime(a, "%Y%m%d").date()
+            ende = datetime.strptime(e, "%Y%m%d").date()
+        except (KeyError, ValueError):
+            continue
+        ort = re.search(r"map-pin[^>]*></i>\s*([^<]*)</a>", b)
+        ort = f"{ort.group(1).strip()}, Erfurt" if ort else ""
+        details = (q.get("details") or [""])[0]
+        key = start.isoformat()
+        if f"/kalender/camp/{key}.ics" not in b:
+            ohne_link.append(titel)
+        out.append({"key": key, "titel": titel, "start": start, "ende": ende, "ort": ort, "details": details})
+    return out, ohne_link
+
+
+def camp_kalender(c):
+    zeilen = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Basketball Löwen Erfurt//Feriencamps//DE", "CALSCALE:GREGORIAN",
+              "BEGIN:VEVENT", f"UID:camp-{c['key']}@basketball-loewen.com", "DTSTAMP:20261011T000000Z", "SEQUENCE:0",
+              f"DTSTART;VALUE=DATE:{c['start']:%Y%m%d}", f"DTEND;VALUE=DATE:{c['ende']:%Y%m%d}",
+              f"SUMMARY:{esc(c['titel'] + ' – Basketball Löwen Erfurt')}"]
+    if c["ort"]:
+        zeilen.append(f"LOCATION:{esc(c['ort'])}")
+    beschr = (c["details"] + "\n" if c["details"] else "") + f"Alle Infos: {BASE}/trainieren/feriencamps.html"
+    zeilen += [f"DESCRIPTION:{esc(beschr)}", f"URL:{BASE}/trainieren/feriencamps.html", "STATUS:CONFIRMED", "TRANSP:TRANSPARENT",
+               "END:VEVENT", "END:VCALENDAR"]
+    return "\r\n".join(fold(z) for z in zeilen) + "\r\n"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true")
@@ -180,6 +234,12 @@ def main():
     for team in ("damen", "nbbl"):
         soll[OUT / f"loewen-{team}.ics"] = kalender([g for g in alle if g["team"] == team], f"Basketball Löwen – {TEAMNAME[team]}")
 
+    camp_liste, camp_ohne_link = camps()
+    for c in camp_liste:
+        soll[OUT / "camp" / f"{c['key']}.ics"] = camp_kalender(c)
+    for titel in camp_ohne_link:
+        print(f"  HINWEIS: Camp-Karte '{titel}' hat keinen iCal-Link (<a class=\"kal-ics\" href=\"/kalender/camp/<Startdatum>.ics\">iCal</a>)", file=sys.stderr)
+
     geaendert = []
     for pfad, inhalt in soll.items():
         alt = pfad.read_bytes().decode("utf-8") if pfad.exists() else None
@@ -189,7 +249,7 @@ def main():
                 pfad.parent.mkdir(parents=True, exist_ok=True)
                 with open(pfad, "w", encoding="utf-8", newline="") as f:
                     f.write(inhalt)
-    veraltet = [p for p in (OUT / "spiel").glob("*.ics") if p not in soll] if (OUT / "spiel").exists() else []
+    veraltet = [p for sub in ("spiel", "camp") if (OUT / sub).exists() for p in (OUT / sub).glob("*.ics") if p not in soll]
     for p in veraltet:
         if not args.check:
             p.unlink()
