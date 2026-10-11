@@ -3100,9 +3100,10 @@ a.training-group-header:hover { color: var(--color-brand-orange); }
    11.10.2026). Eigene Klasse .fixture-v3, weil .fixture-day-game auch der Nachwuchs-
    Spielplan nutzt. */
 .fixture-day-game.fixture-v3 {
-  /* Spalte 1 so schmal wie die Zeit-Zeile, Spalte 2 nimmt den Rest; die Icon-Reihe darf in der
+  /* Spalte 1 feste Breite (breiteste Hallenzeile "Sporthalle am Südpark · HEIMSPIEL" = 276 px), damit die
+     Ansetzung in allen Karten an derselben Stelle beginnt; die Icon-Reihe darf in der
      dritten Zeile in die freie Mittelspalte laufen (Marko, 11.10.2026: einzeilig bleiben). */
-  grid-template-columns: max-content minmax(0, 1fr) auto;
+  grid-template-columns: 280px minmax(0, 1fr) auto;
   grid-template-areas: "zeit paarung stand" "halle links stand" "marke icons icons";
   column-gap: 20px; row-gap: 6px; align-items: center;
 }
@@ -3116,6 +3117,9 @@ a.training-group-header:hover { color: var(--color-brand-orange); }
 .fixture-v3 .fx-marke { grid-area: marke; }
 .fixture-v3 .fx-icons { grid-area: icons; display: flex; flex-wrap: nowrap; justify-content: flex-end; gap: 2px; }
 .fixture-v3 .cal-link { min-width: 34px; min-height: 34px; }
+@media (min-width: 721px) and (max-width: 1000px) {
+  .fixture-day-game.fixture-v3 { grid-template-columns: 230px minmax(0, 1fr) auto; }
+}
 @media (max-width: 720px) {
   .fixture-day-game.fixture-v3 {
     /* drei Spalten, damit die Icon-Reihe unten nicht die Breite der Ergebnisspalte bestimmt */
