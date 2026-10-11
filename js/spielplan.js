@@ -85,7 +85,7 @@
   function gameRowHTML(g, divider) {
     var meta = TEAM_META[g.team];
     var matchup = g.heim ? (g.teamLabel + ' – ' + g.gegner) : (g.gegner + ' – ' + g.teamLabel);
-    var dateTimeStr = WOCHENTAGE[g.date.getDay()] + ', ' + formatShort(g.date) + (g.zeit ? ', ' + g.zeit + ' Uhr' : '');
+    var dateTimeStr = WOCHENTAGE[g.date.getDay()] + ', ' + pad2(g.date.getDate()) + '.' + pad2(g.date.getMonth() + 1) + '.' + (g.zeit ? ', ' + g.zeit + ' Uhr' : '');
     var venueHTML, statusHTML;
     if (g.heim) {
       // Default-Heimspielstätte für alle Teams ist die Riethsporthalle, solange für

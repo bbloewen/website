@@ -62,7 +62,7 @@ def spiele():
 def datum_text(s, mit_zeit):
     tag, monat, jahr = (int(x) for x in s["datum"].split("."))
     d = date(jahr, monat, tag)
-    text = f"{WOCHENTAGE[(d.weekday() + 1) % 7]}, {s['datum']}"
+    text = f"{WOCHENTAGE[(d.weekday() + 1) % 7]}, {tag:02d}.{monat:02d}."
     if mit_zeit and s.get("zeit"):
         text += f", {s['zeit']} Uhr"
     return text

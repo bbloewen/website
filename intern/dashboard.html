@@ -1098,9 +1098,19 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var nw = g.nachwuchsOrders != null;
       h += '<div class="card scroll-x"><div class="card-kopf"><div style="font-weight:500">' + esc(g.name) + '</div><div class="unter">' + esc(formatDate(g.dateFrom)) + '</div></div>' +
         '<table class="tbl"><thead><tr><th>Typ</th><th>Kategorie</th><th>Orders</th><th>Tickets</th><th>Gesamtpreis</th><th>Ø Erlös je Ticket</th></tr></thead><tbody>';
-      rows.forEach(function (r) {
+      // Zwischensumme je Typ (Abendkasse/Einzelticket), wenn das Spiel beide Typen hat (11.10.2026, Marko)
+      var typen = [];
+      rows.forEach(function (r) { if (typen.indexOf(r.type) === -1) typen.push(r.type); });
+      rows.forEach(function (r, i) {
         var t = r.tickets != null ? r.tickets : r.count;
         h += trZeile([r.type, r.category, r.orders != null ? r.orders : '–', t, formatEuro(r.totalPrice), avgErloes(r.totalPrice, t)]);
+        var next = rows[i + 1];
+        if (typen.length > 1 && (!next || next.type !== r.type)) {
+          var gleich = rows.filter(function (x) { return x.type === r.type; });
+          var tkTyp = sumBy(gleich, 'tickets'), erTyp = sumBy(gleich, 'totalPrice');
+          var oTyp = g.paidOrdersByType && g.paidOrdersByType[r.type] != null ? zahl(g.paidOrdersByType[r.type]) : '–';
+          h += trZeile(['Zwischensumme ' + r.type, '', oTyp, zahl(tkTyp), formatEuro(erTyp), avgErloes(erTyp, tkTyp)], 'summe');
+        }
       });
       if (rows.length === 0) h += '<tr><td colspan="6" class="leer">Keine Verkäufe.</td></tr>';
       else {

@@ -3118,7 +3118,7 @@ a.training-group-header:hover { color: var(--color-brand-orange); }
 .fixture-v3 .fx-icons { grid-area: icons; display: flex; flex-wrap: nowrap; justify-content: flex-end; gap: 2px; }
 .fixture-v3 .cal-link { min-width: 34px; min-height: 34px; }
 @media (min-width: 721px) and (max-width: 1000px) {
-  .fixture-day-game.fixture-v3 { grid-template-columns: 230px minmax(0, 1fr) auto; }
+  .fixture-day-game.fixture-v3 { grid-template-columns: 218px minmax(0, 1fr) auto; column-gap: 14px; }
 }
 @media (max-width: 720px) {
   .fixture-day-game.fixture-v3 {

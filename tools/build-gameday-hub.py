@@ -563,7 +563,7 @@ def seite(liste, jetzt):
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1791753850" />
+<link rel="stylesheet" href="/css/site.css?v=1791754084" />
 <link rel="stylesheet" href="/css/seat-picker.css?v=1791624432" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
