@@ -57,6 +57,10 @@ WOCHENTAG = {"Mo": "Montag", "Di": "Dienstag", "Mi": "Mittwoch", "Do": "Donnerst
 def zeile(g):
     verein = VEREIN.get(g.get("verein"), g.get("verein") or "")
     kopf = f'{esc(g["team"])} <span class="training-row-jahrgang">({esc(g["jahrgang"])})</span>'
+    # Steht in den Daten ein Aufnahmestopp, gehoert er sichtbar an die Gruppe -- sonst
+    # meldet sich eine Familie fuer eine Gruppe an, die gerade niemanden aufnehmen kann.
+    if g.get("aufnahmestopp"):
+        kopf += ' <span class="badge">Aufnahmestopp</span>'
     if g.get("termine"):
         termine = "".join(
             '<div class="training-slot">'

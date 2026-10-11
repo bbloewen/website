@@ -23,5 +23,10 @@ for s in build-lucide-icons build-galerie-thumbs build-galerie-html \
          build-community-events build-instagram-archiv build-pressefotos build-partials build-bildmasse \
          build-head-meta build-sitemap; do
   printf '%s\n' "$s"
-  python3 "tools/$s.py" $F
+  if [ "$s" = "build-partials" ]; then
+    # Kompletter Lauf: Header/Footer auch in die Insta-Archivseiten schreiben.
+    python3 "tools/$s.py" $F --auch-insta
+  else
+    python3 "tools/$s.py" $F
+  fi
 done
