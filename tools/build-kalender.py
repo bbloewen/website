@@ -44,7 +44,7 @@ OUT = REPO / "kalender"
 DAUER = timedelta(hours=2)
 
 LABEL = {"profis": "Basketball Löwen", "damen": "CATL Basketball Löwinnen", "nbbl": "Basketball Löwen NBBL"}
-TEAMNAME = {"profis": "Profis (Pro B)", "damen": "Damen (Regionalliga)", "nbbl": "NBBL (U19)"}
+TEAMNAME = {"profis": "Profis (ProB)", "damen": "Damen (Regionalliga)", "nbbl": "NBBL (U19)"}
 RIETH = "Riethsporthalle, Essener Straße 20, 99089 Erfurt"
 SUEDPARK = "Sporthalle am Südpark, Erfurt"
 

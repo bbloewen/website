@@ -207,7 +207,7 @@ def halle():
         </div>
       </div>
       <p class="t-body">Alle Heimspiele der Basketball Löwen finden in der Riethsporthalle im
-      Erfurter Norden statt — die Profis in der Pro B, die Löwinnen in der Regionalliga und die
+      Erfurter Norden statt — die Profis in der ProB, die Löwinnen in der Regionalliga und die
       U19 in der NBBL. Wer zu einem Löwen-Heimspiel geht, geht hierher.</p>
       <a class="freiplatz-adresse-link mt-4" href="__MAPS__" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Essener Straße 20, 99089 Erfurt</a>
       <p class="t-body mt-5">Auf der einen Seite des Spielfelds liegen die <strong>Blöcke D, E und

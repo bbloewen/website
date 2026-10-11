@@ -94,7 +94,7 @@ def zeile_spielplan(s):
         '</div>'
         f'<div class="fx-links"><a class="fx-link" href="{esc(ziel)}">Zum Spiel '
         '<i data-lucide="arrow-right" style="width:14px;height:14px"></i></a></div>'
-        '<div class="fx-marke"><a class="team-badge team-badge-profis" href="/saison/profis.html">Pro B</a></div>'
+        '<div class="fx-marke"><a class="team-badge team-badge-profis" href="/saison/profis.html">ProB</a></div>'
         f'<div class="fx-icons">{icons}</div>'
         '</div>'
         '</div>'
