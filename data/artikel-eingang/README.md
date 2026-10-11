@@ -66,7 +66,8 @@ Skill `news-artikel`.
 | `icon`, `tint` | — | Kachel-Icon (lucide) und Farbton, Standard `newspaper` / `tint-orange` |
 | `topNews` | — | `true` = große Kachel auf der Startseite |
 | `bild` | ja | Zieldateiname unter `assets/img/news/` (immer `.webp`) |
-| `quellbild` | — | Pfad des Originals unter `data/artikel-eingang/bilder/` (JPG, PNG oder WebP). Das Skript wandelt es nach `bild` um (Breite höchstens 2400 px, Qualität 82) und **löscht das Original danach**. Fehlt das Feld, muss `bild` schon unter `assets/img/news/` liegen. |
+| `quellbild` | — | Pfad des Originals unter `data/artikel-eingang/bilder/` (JPG, PNG oder WebP). Das Skript wandelt es nach `bild` um (Breite höchstens 2400 px, Qualität 82) und **löscht das Original danach**. Fehlt das Feld, muss `bild` schon unter `assets/img/news/` liegen. Ein **Hochformat** (JPG/PNG) baut das Skript seit 11.10.2026 selbst ins Hero-Format um: 2400 × 900, Foto mittig (oberer Teil), seitlich weich in eine unscharfe Vergrößerung auslaufend. |
+| `heroPosition` | — | CSS `background-position` des Heros, Standard `center center`; z. B. `center 30%`, wenn die Szene im oberen Bildteil liegt |
 | `markdown` | ja | Fließtext: `##` Zwischenüberschrift, `>` Zitat, `-` Liste, `[Text](URL)`, `**fett**` |
 | `spiel` | — | `{"datum": "04.10.2026", "feld": "spielberichtUrl"}` — verlinkt den Artikel beim Spiel im Spielplan und im Startseiten-Widget |
 
