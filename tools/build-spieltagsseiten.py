@@ -321,8 +321,21 @@ def ergebnis_section(game, phase):
 """
 
 
+def artikel_aus_datei(url):
+    """Notfall, falls der Artikel noch nicht in data/news.json steht (die Veroeffentlichung
+    traegt ihn erst nach der Freigabe ein): Titel und Beschreibung aus dem <head> der Seite."""
+    pfad = REPO / url.lstrip("/")
+    if not pfad.exists():
+        return {}
+    text = pfad.read_text(encoding="utf-8")
+    t = re.search(r"<title>(.*?)</title>", text, re.S)
+    d = re.search(r'<meta name="description" content="(.*?)"\s*/?>', text, re.S)
+    titel = re.sub(r"\s*[—–-]\s*Basketball L(ö|oe)wen Erfurt\s*$", "", html.unescape(t.group(1)).strip()) if t else ""
+    return {"titel": titel, "kurztext": html.unescape(d.group(1)).strip() if d else ""}
+
+
 def story_karte(label, url, news):
-    a = news.get(url) or {}
+    a = news.get(url) or artikel_aus_datei(url)
     titel = html.escape(a.get("titel") or label)
     kurz = html.escape(teaser(a.get("kurztext", "")))
     datum = f" · {html.escape(a['datum'])}" if a.get("datum") else ""
@@ -343,10 +356,10 @@ def story_karte(label, url, news):
 
 
 def story_section(game, phase, news):
-    """Nachbericht (nur nach dem Spiel, Feld nachberichtUrl) und Vorbericht (Feld
+    """Nachbericht (sobald Feld nachberichtUrl gesetzt ist) und Vorbericht (Feld
     vorberichtUrl) als Teaser-Karten ueber die ganze Breite -- Text und Bild aus news.json."""
     karten = []
-    if phase == "danach" and game.get("nachberichtUrl"):
+    if game.get("nachberichtUrl"):   # gesetzt = Bericht ist da, auch am Spieltag selbst zeigen
         karten.append(story_karte("Nachbericht", game["nachberichtUrl"], news))
     if game.get("vorberichtUrl"):
         karten.append(story_karte("Vorbericht", game["vorberichtUrl"], news))
