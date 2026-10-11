@@ -401,28 +401,45 @@ def bericht_section(bericht_inhalt):
 
 
 def weiter_section(vorher, naechstes):
-    """Zurueck/Weiter zwischen den Heimspielen -- die Seite ist sonst eine Sackgasse."""
-    def karte(g, richtung):
-        d = parse_dmy(g["datum"])
-        label = "Vorheriges Heimspiel" if richtung == "zurueck" else "Nächstes Heimspiel"
-        pfeil_l = '<i data-lucide="arrow-left" class="icon-14"></i> ' if richtung == "zurueck" else ""
-        pfeil_r = ' <i data-lucide="arrow-right" class="icon-14"></i>' if richtung == "weiter" else ""
-        return (f'<a class="spiel-weiter-karte spiel-weiter-{richtung}" href="/saison/profis/gameday/{g["seiteSlug"]}.html">'
-                f'<span class="card-label">{pfeil_l}{label}{pfeil_r}</span>'
-                f'<strong>Basketball Löwen – {html.escape(g["gegner"])}</strong>'
-                f'<span class="t-body-sm">{html.escape(hero_datum(d))} · {html.escape(g["zeit"])} Uhr</span></a>')
-    teile = []
-    if vorher:
-        teile.append(karte(vorher, "zurueck"))
-    if naechstes:
-        teile.append(karte(naechstes, "weiter"))
-    if not teile:
+    """Naechstes Heimspiel als breites Band (Marko, 11.10.2026: die kleine Eckkarte wirkte
+    verloren). Tickets-Knopf nur, wenn fuer das naechste Spiel der Verkauf offen ist (ticketUrl
+    gesetzt); das vorherige Spiel nur als Textlink darunter. Ohne naechstes Spiel (Saisonende)
+    fuehrt das Band zum Spielplan."""
+    if not naechstes and not vorher:
         return ""
+    if naechstes:
+        d = parse_dmy(naechstes["datum"])
+        gegner = html.escape(naechstes["gegner"])
+        slug = naechstes["seiteSlug"]
+        knoepfe = [f'<a class="btn btn-primary" style="color:#fff" href="/saison/profis/gameday/{slug}.html">Zur Spieltagsseite</a>']
+        if naechstes.get("ticketUrl"):
+            knoepfe.append('<a class="btn btn-ghost" href="/saison/profis/gameday/"><i data-lucide="ticket" class="icon-16"></i> Tickets</a>')
+        band = f"""<div class="spiel-naechstes">
+          <div class="spiel-naechstes-text">
+            <span class="eyebrow">Nächstes Heimspiel</span>
+            <h2 class="t-h3">Basketball Löwen – {gegner}</h2>
+            <p class="t-body">{html.escape(lang_datum(d))} · {html.escape(naechstes["zeit"])} Uhr · Riethsporthalle</p>
+          </div>
+          <div class="spiel-naechstes-actions">{"".join(knoepfe)}</div>
+        </div>"""
+    else:
+        band = """<div class="spiel-naechstes">
+          <div class="spiel-naechstes-text">
+            <span class="eyebrow">Saison 2026/27</span>
+            <h2 class="t-h3">Das war das letzte Heimspiel der Saison</h2>
+            <p class="t-body">Alle Spiele der Löwen, Löwinnen und der NBBL im Überblick.</p>
+          </div>
+          <div class="spiel-naechstes-actions"><a class="btn btn-primary" style="color:#fff" href="/saison/spielplan.html">Zum Spielplan</a></div>
+        </div>"""
+    zurueck = ""
+    if vorher:
+        dv = parse_dmy(vorher["datum"])
+        zurueck = (f'<p class="spiel-zurueck"><a class="card-link" href="/saison/profis/gameday/{vorher["seiteSlug"]}.html">'
+                   f'<i data-lucide="arrow-left" class="icon-14"></i> Vorheriges Heimspiel: {html.escape(vorher["gegner"])} ({html.escape(lang_datum(dv))})</a></p>')
     return f"""  <section class="section bg-subtle">
     <div class="container">
-      <div class="spiel-weiter">
-        {"".join(teile)}
-      </div>
+      {band}
+      {zurueck}
     </div>
   </section>
 """
@@ -526,7 +543,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1791710555" />
+<link rel="stylesheet" href="/css/site.css?v=1791710841" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.

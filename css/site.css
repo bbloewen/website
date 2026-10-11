@@ -3073,16 +3073,16 @@ a.training-group-header:hover { color: var(--color-brand-orange); }
 .spiel-band .card-link { color: #fff; }
 @media (max-width: 720px) { .spiel-band { grid-template-columns: 1fr; gap: 20px; } }
 
-.spiel-weiter { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.spiel-weiter-karte {
-  display: flex; flex-direction: column; gap: 4px; padding: 20px 22px; text-decoration: none; color: inherit;
-  background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg);
-  transition: all var(--dur-fast) var(--ease-out);
+.spiel-naechstes {
+  display: flex; align-items: center; justify-content: space-between; gap: 24px 32px; flex-wrap: wrap;
+  background: #fff; border: 1px solid var(--border); border-left: 6px solid var(--color-brand-orange);
+  border-radius: var(--radius-lg); padding: 28px 32px;
 }
-.spiel-weiter-karte:hover { box-shadow: var(--shadow-card); transform: translateY(-2px); }
-.spiel-weiter-zurueck { grid-column: 1; }
-.spiel-weiter-weiter { grid-column: 2; text-align: right; }
-@media (max-width: 720px) {
-  .spiel-weiter { grid-template-columns: 1fr; }
-  .spiel-weiter-zurueck, .spiel-weiter-weiter { grid-column: 1; text-align: left; }
-}
+.spiel-naechstes-text { flex: 1 1 320px; }
+.spiel-naechstes-text h2 { margin: 6px 0 8px; }
+.spiel-naechstes-text p { margin: 0; }
+.spiel-naechstes-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.spiel-zurueck { margin: 18px 0 0; }
+.spiel-zurueck .card-link { white-space: normal; align-items: flex-start; line-height: 1.4; }
+.spiel-zurueck .card-link svg { margin-top: 3px; flex-shrink: 0; }
+@media (max-width: 720px) { .spiel-naechstes { padding: 22px 20px; } }
