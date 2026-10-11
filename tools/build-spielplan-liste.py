@@ -77,28 +77,25 @@ def zeile_spielplan(s):
     als Ankertext ist er genau das, wonach gesucht wird, und deutlich mehr wert
     als ein Icon."""
     ziel = ziel_url(s)
+    icons = ""
+    if s.get("spieltagsinfo"):
+        icons = (f'<a class="cal-link" href="/saison/profis/gameday/spieltagsinfo/ausgabe-{int(s["spieltagsinfo"])}/" title="Spieltagsinfo">'
+                 '<i data-lucide="book-open" style="width:20px;height:20px"></i></a>')
     return (
         '<div class="card fixture-day" data-teams="profis">'
-        '<div class="fixture-day-game" data-team="profis" data-heim="1">'
-        '<div class="fixture-day-meta">'
-        f'<div class="fixture-time">{esc(datum_text(s, True))}</div>'
+        '<div class="fixture-day-game fixture-v3" data-team="profis" data-heim="1">'
+        f'<div class="fixture-time fx-zeit">{esc(datum_text(s, True))}</div>'
+        f'<div class="matchup fx-paarung"><a href="{esc(ziel)}">{esc(paarung(s))}</a></div>'
+        f'<div class="fixture-result fx-stand">{esc(s.get("ergebnis") or "– – : – –")}</div>'
+        '<div class="fx-halle">'
         f'<div class="fixture-venue-line"><a href="{MAPS_SPIELPLAN}" target="_blank" rel="noopener">'
         '<i data-lucide="map-pin" style="width:14px;height:14px"></i> Riethsporthalle</a></div>'
         '<span class="venue-heim">Heimspiel</span>'
         '</div>'
-        '<div class="fixture-mid">'
-        '<a class="team-badge team-badge-profis" href="/saison/profis.html">Pro B</a>'
-        f'<div class="matchup"><a href="{esc(ziel)}">{esc(paarung(s))}</a></div>'
-        '</div>'
-        '<div class="fixture-day-actions">'
-        '<div class="fixture-result-row">'
-        f'<div class="fixture-result">{esc(s.get("ergebnis") or "– – : – –")}</div>'
-        + (f'<a class="cal-link" href="/saison/profis/gameday/spieltagsinfo/ausgabe-{int(s["spieltagsinfo"])}/" title="Spieltagsinfo">'
-           '<i data-lucide="book-open" style="width:20px;height:20px"></i></a>' if s.get("spieltagsinfo") else '') +
-        '</div>'
-        f'<a class="btn btn-outline-orange btn-sm" href="{esc(ziel)}">Zum Spiel '
-        '<i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>'
-        '</div>'
+        f'<div class="fx-links"><a class="fx-link" href="{esc(ziel)}">Zum Spiel '
+        '<i data-lucide="arrow-right" style="width:14px;height:14px"></i></a></div>'
+        '<div class="fx-marke"><a class="team-badge team-badge-profis" href="/saison/profis.html">Pro B</a></div>'
+        f'<div class="fx-icons">{icons}</div>'
         '</div>'
         '</div>'
     )

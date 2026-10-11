@@ -3094,3 +3094,34 @@ a.training-group-header:hover { color: var(--color-brand-orange); }
 .spiel-zurueck .card-link { white-space: normal; align-items: flex-start; line-height: 1.4; }
 .spiel-zurueck .card-link svg { margin-top: 3px; flex-shrink: 0; }
 @media (max-width: 720px) { .spiel-naechstes { padding: 22px 20px; } }
+
+/* ---------- Spielplan-Karte v3 (js/spielplan.js, gameRowHTML) ----------
+   Drei Zeilen je Karte, Ergebnis ueber Zeile 1+2, Icons darunter ohne Leerplaetze (Marko,
+   11.10.2026). Eigene Klasse .fixture-v3, weil .fixture-day-game auch der Nachwuchs-
+   Spielplan nutzt. */
+.fixture-day-game.fixture-v3 {
+  grid-template-columns: 250px minmax(0, 1fr) auto;
+  grid-template-areas: "zeit paarung stand" "halle links stand" "marke . icons";
+  column-gap: 20px; row-gap: 6px; align-items: center;
+}
+.fixture-v3 .fx-zeit { grid-area: zeit; font-size: 14px; }
+.fixture-v3 .fx-paarung { grid-area: paarung; font-size: 14px; font-weight: var(--weight-bold); margin: 0; min-width: 0; }
+.fixture-v3 .fx-stand { grid-area: stand; justify-self: end; font-size: 28px; line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.fixture-v3 .fx-halle { grid-area: halle; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; min-width: 0; }
+.fixture-v3 .fx-links { grid-area: links; display: flex; flex-wrap: wrap; gap: 4px 18px; align-items: center; }
+.fixture-v3 .fx-link { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: var(--weight-bold); color: var(--color-brand-orange-text); text-decoration: none; }
+.fixture-v3 .fx-link:hover { text-decoration: underline; }
+.fixture-v3 .fx-marke { grid-area: marke; }
+.fixture-v3 .fx-icons { grid-area: icons; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 2px; }
+.fixture-v3 .cal-link { min-width: 34px; min-height: 34px; }
+@media (max-width: 720px) {
+  .fixture-day-game.fixture-v3 {
+    /* drei Spalten, damit die Icon-Reihe unten nicht die Breite der Ergebnisspalte bestimmt */
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: "zeit zeit stand" "paarung paarung stand" "halle halle stand" "links links links" "marke icons icons";
+    text-align: left;
+  }
+  .fixture-v3 .fx-stand { font-size: 24px; align-self: start; }
+  .fixture-day-game.fixture-v3 { column-gap: 8px; }
+  .fixture-v3 .cal-link { min-width: 32px; min-height: 36px; }
+}

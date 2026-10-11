@@ -125,27 +125,25 @@
     } else {
       berichteHTML = tabelleIcon;
     }
-    var actionsHTML = '<div class="fixture-day-actions">' +
-      '<div class="fixture-result-row">' +
-        '<div class="fixture-result">' + (g.ergebnis || '– – : – –') + '</div>' +
-        (g === naechstesHeimspiel ? '<a class="cal-link" href="/saison/profis/gameday/" title="Zum Gameday"><i data-lucide="ticket" style="width:20px;height:20px"></i></a>' : '') +
-        berichteHTML +
-        '<a class="cal-link" href="' + calendarLink(g) + '" target="_blank" rel="noopener" title="In Kalender eintragen"><i data-lucide="calendar-plus" style="width:20px;height:20px"></i></a>' +
-      '</div>' +
-      (g.heim && g.spielberichtUrl ? '<a class="btn btn-outline-orange btn-sm" href="' + g.spielberichtUrl + '">Zum Spiel <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>' : '') +
-      (g.livestream ? '<a class="btn btn-outline-orange btn-sm" href="' + g.livestream + '" target="_blank" rel="noopener">' + (hatBegonnen ? 'Zum Replay' : 'Zum Livestream') + ' <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>' : '') +
-      '</div>';
-    return '<div class="fixture-day-game' + (divider ? ' has-divider' : '') + '" data-team="' + g.team + '" data-heim="' + (g.heim ? '1' : '0') + '">' +
-      '<div class="fixture-day-meta">' +
-        '<div class="fixture-time">' + dateTimeStr + '</div>' +
-        venueHTML +
-        statusHTML +
-      '</div>' +
-      '<div class="fixture-mid">' +
-        '<a class="team-badge ' + meta.badgeClass + '" href="' + meta.url + '">' + meta.label + '</a>' +
-        '<div class="matchup">' + matchup + '</div>' +
-      '</div>' +
-      actionsHTML +
+    /* Karte in drei Zeilen (Aufbau mit Marko am 11.10.2026): Zeile 1 Zeit | Ansetzung | Ergebnis,
+       Zeile 2 Halle + Heim/Auswaerts | Links | Ergebnis (laeuft ueber beide Zeilen), Zeile 3
+       Liga-Marke | frei | Icons -- nur die vorhandenen, ohne Leerplaetze. Jede Karte hat immer
+       alle drei Zeilen, damit alle gleich hoch sind. Raster und Mobil-Umbruch: css/site.css,
+       Abschnitt "Spielplan-Karte v3". */
+    var iconsHTML = (g === naechstesHeimspiel ? '<a class="cal-link" href="/saison/profis/gameday/" title="Zum Gameday"><i data-lucide="ticket" style="width:20px;height:20px"></i></a>' : '') +
+      berichteHTML +
+      '<a class="cal-link" href="' + calendarLink(g) + '" target="_blank" rel="noopener" title="In Kalender eintragen"><i data-lucide="calendar-plus" style="width:20px;height:20px"></i></a>';
+    // Reihenfolge der Links: Livestream/Replay zuerst, dann "Zum Spiel" (Marko, 11.10.2026)
+    var linksHTML = (g.livestream ? '<a class="fx-link" href="' + g.livestream + '" target="_blank" rel="noopener"><i data-lucide="video" style="width:14px;height:14px"></i> ' + (hatBegonnen ? 'Zum Replay' : 'Zum Livestream') + '</a>' : '') +
+      (g.heim && g.spielberichtUrl ? '<a class="fx-link" href="' + g.spielberichtUrl + '">Zum Spiel <i data-lucide="arrow-right" style="width:14px;height:14px"></i></a>' : '');
+    return '<div class="fixture-day-game fixture-v3' + (divider ? ' has-divider' : '') + '" data-team="' + g.team + '" data-heim="' + (g.heim ? '1' : '0') + '">' +
+      '<div class="fixture-time fx-zeit">' + dateTimeStr + '</div>' +
+      '<div class="matchup fx-paarung">' + matchup + '</div>' +
+      '<div class="fixture-result fx-stand">' + (g.ergebnis || '– – : – –') + '</div>' +
+      '<div class="fx-halle">' + venueHTML + statusHTML + '</div>' +
+      '<div class="fx-links">' + linksHTML + '</div>' +
+      '<div class="fx-marke"><a class="team-badge ' + meta.badgeClass + '" href="' + meta.url + '">' + meta.label + '</a></div>' +
+      '<div class="fx-icons">' + iconsHTML + '</div>' +
       '</div>';
   }
 
