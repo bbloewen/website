@@ -210,6 +210,7 @@ VERLINKEN = {
     "BiG Gotha": "https://www.big-gotha.de/",
     "TV Langen": "https://tvlangen.de/",
     "MHP RIESEN Ludwigsburg": "https://mhp-riesen-ludwigsburg.de/",
+    "Porsche BBA Ludwigsburg": "https://bba-ludwigsburg.de/",
     "Special Olympics Deutschland": "https://specialolympics.de/",
 }
 

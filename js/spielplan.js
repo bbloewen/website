@@ -280,8 +280,16 @@
       return (a.zeit || '').localeCompare(b.zeit || '');
     });
 
+    /* Das Ticket-Icon sitzt am aktuellen Heimspiel -- derselben Regel wie der Gameday-Hub
+       (tools/build-gameday-hub.py, naechstes()): ein Spiel zaehlt, bis es 4 Stunden nach
+       Anpfiff vorbei ist, danach rueckt das naechste nach (Marko, 11.10.2026). Das rechnet
+       der Browser selbst, die Seite muss dafuer nicht neu gebaut werden. */
+    function spielEnde(g) {
+      var t = (g.zeit || '12:00').split(':').map(Number);
+      return new Date(g.date.getFullYear(), g.date.getMonth(), g.date.getDate(), t[0], t[1]).getTime() + 4 * 3600 * 1000;
+    }
     for (var ni = 0; ni < alleGames.length; ni++) {
-      if (alleGames[ni].heim && alleGames[ni].spielberichtUrl && alleGames[ni].date >= today) {
+      if (alleGames[ni].heim && alleGames[ni].spielberichtUrl && spielEnde(alleGames[ni]) > Date.now()) {
         naechstesHeimspiel = alleGames[ni];
         break;
       }
