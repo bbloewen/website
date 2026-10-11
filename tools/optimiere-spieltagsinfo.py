@@ -192,6 +192,17 @@ img{height:auto;max-width:100%}
 """
 
 
+# Verweise auf eigene Themenseiten. Das Heft nennt diese Begriffe im Fliesstext,
+# verlinkt sie aber nicht -- dabei sind es genau die Seiten, die fuer "loewenpark
+# erfurt", "basketball loewinnen erfurt" und den Nachwuchs ranken sollen. Laeuft vor
+# VERLINKEN, damit "CATL LOEWENPARK" nicht vom kuerzeren "CATL" eingefangen wird.
+INTERN_VERLINKEN = {
+    "CATL LÖWENPARK": "/trainieren/loewenpark.html",
+    "CATL Basketball Löwinnen": "/saison/damen.html",
+    "Nachwuchsteams": "/saison/nachwuchs.html",
+}
+
+
 VERLINKEN = {
     "CATL": "https://www.catl.com/en/enterpriseinfoGermany/",
     "BC Erfurt": "https://bcerfurt.de/",
@@ -203,9 +214,11 @@ VERLINKEN = {
 }
 
 
-def erste_nennung_verlinken(html_text, name, ziel):
+def erste_nennung_verlinken(html_text, name, ziel, extern=True):
     """Erste Nennung von `name` im reinen Text (nicht in Ueberschriften, Links, Knoepfen,
-    Attributen) mit Link versehen. Gibt es schon einen Link auf `ziel`, passiert nichts."""
+    Attributen) mit Link versehen. Gibt es schon einen Link auf `ziel`, passiert nichts.
+
+    extern=False fuer Verweise auf die eigene Website: kein neues Fenster, kein rel."""
     if f'href="{ziel}"' in html_text:
         return html_text
     teile = re.split(r"(<[^>]+>)", html_text)
@@ -219,7 +232,8 @@ def erste_nennung_verlinken(html_text, name, ziel):
         if any(v > 0 for v in sperr.values()):
             continue
         if name in t:
-            teile[i] = t.replace(name, f'<a href="{ziel}" target="_blank" rel="noopener">{name}</a>', 1)
+            attr = ' target="_blank" rel="noopener"' if extern else ''
+            teile[i] = t.replace(name, f'<a href="{ziel}"{attr}>{name}</a>', 1)
             return "".join(teile)
     return html_text
 
@@ -350,6 +364,8 @@ def main():
     # Genannte Vereine/Organisationen beim ersten Auftreten im Fliesstext verlinken
     # (tools/check-links.py meldet sie sonst als KONSISTENZ-Fund). Namen und Adressen sind die,
     # die auf der Website schon verlinkt sind; kommt ein neuer Fund dazu, hier ergaenzen.
+    for name, ziel in INTERN_VERLINKEN.items():
+        html = erste_nennung_verlinken(html, name, ziel, extern=False)
     for name, ziel in VERLINKEN.items():
         html = erste_nennung_verlinken(html, name, ziel)
 
@@ -375,9 +391,12 @@ def main():
         '<a class="btn" href="/spenden.html?zweck=nachwuchs">Online spenden</a></div>', 1)
 
     # --- Kopf, Leiste, Fuss ----------------------------------------------------
-    beschreibung = (f"Spieltagsinfo Ausgabe {n} zum Heimspiel der Basketball Löwen gegen {args.gegner} "
-                    f"am {args.titel_datum}: Kader, Ligastand, Spielplan und Neuigkeiten aus Erfurt.")
-    titel = f"Spieltagsinfo Ausgabe {n} · {args.gegner} · {args.titel_datum} — Basketball Löwen Erfurt"
+    # Titel und Description tragen die ueberwachten Begriffe: "heimspiel erfurt",
+    # "riethsporthalle", "basketball loewen erfurt". Der alte Titel begann mit
+    # "Spieltagsinfo Ausgabe N" und war mit 91 Zeichen in der Google-Vorschau abgeschnitten.
+    beschreibung = (f"Heimspiel am {args.titel_datum} in der Riethsporthalle: Spieltagsinfo mit "
+                    f"Kader der Basketball Löwen Erfurt, Tabelle, Spielplan und Neues aus dem Verein.")
+    titel = f"Spieltagsinfo {n}: Heimspiel in Erfurt gegen {args.gegner}"
 
     css = re.search(r"<style>.*?</style>", html, re.S).group(0)
     css = css.replace("</style>", ZUSATZ_CSS + "</style>")

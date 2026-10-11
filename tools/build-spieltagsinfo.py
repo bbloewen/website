@@ -181,7 +181,7 @@ def seite(daten):
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="format-detection" content="telephone=no" />
-<title>Spieltagsinfo zu den Heimspielen — Basketball Löwen Erfurt</title>
+<title>Spieltagsinfo zu den Heimspielen in Erfurt — Basketball Löwen</title>
 <meta name="description" content="{esc(beschreibung)}" />
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png" />
