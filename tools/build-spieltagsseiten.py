@@ -16,7 +16,7 @@ Vier Phasen, hergeleitet statt von Hand gepflegt (phase()):
 Aufbau seit 11.10.2026 (mit Marko abgestimmt): Der Hero traegt Termin, Halle, Tickets
 und eine Linkzeile (Livestream/Replay, Vereinsseite des Gegners). Darunter, je nach
 Daten in data/heimspiele.json: Endstand + Viertelstaende ("ergebnis": "71 : 95",
-"viertel": ["20 : 25", ...], Boxscore-Link: "livescore"), Teaser-Karten fuer Nachbericht
+"viertel": ["20 : 25", ...], Boxscore-Link: "livescore"), Gegner im Ueberblick (Vereinsseite, Liga-Kader per ligaId, Hinspiel-Ergebnis), Teaser-Karten fuer Nachbericht
 ("nachberichtUrl") und Vorbericht ("vorberichtUrl") -- Titel, Text und Bild kommen aus
 data/news.json --, das Spieltagsinfo-Band ("spieltagsinfo") und Zurueck/Weiter zwischen den
 Heimspielen. Die frueheren Heimspiel-Infos-Kacheln (Termin/Halle/Tickets) entfallen.
@@ -345,6 +345,63 @@ def story_section(game, phase, news):
 """
 
 
+SAISON_DATEI = REPO / "data" / "spielplan-saison.json"
+
+
+def hinspiel(game):
+    """Fruehere Begegnung mit demselben Gegner (Auswaertsspiel, schon gespielt, Ergebnis gepflegt).
+
+    Quelle: data/spielplan-saison.json (profisAuswaerts), Feld "ergebnis" steht dort als
+    "Heim : Gast" -- bei einem Auswaertsspiel also Gegner zuerst."""
+    daten = json.loads(SAISON_DATEI.read_text(encoding="utf-8"))
+    heute_spiel = parse_dmy(game["datum"])
+    for a in daten.get("profisAuswaerts", []):
+        if a.get("gegner") == game["gegner"] and a.get("ergebnis") and parse_dmy(a["datum"]) < heute_spiel:
+            return a
+    return None
+
+
+def gegner_section(game):
+    """Gegner im Ueberblick (Marko, 11.10.2026): immer vorhanden, ohne zusaetzliche Pflege.
+    Links zur Vereinsseite (gegnerUrl) und zur Liga-Kaderliste (ligaId, 2basketballbundesliga.de),
+    dazu das Ergebnis der ersten Begegnung, sobald es eine gibt."""
+    gegner = html.escape(game["gegner"])
+    fakten = []
+    h = hinspiel(game)
+    if h:
+        try:
+            gast = h["ergebnis"].split(":")
+            erg = f'{html.escape(h["gegner"])} {html.escape(gast[0].strip())} : {html.escape(gast[1].strip())} Basketball Löwen'
+        except IndexError:
+            erg = html.escape(h["ergebnis"])
+        ort = f", {html.escape(h['ort'])}" if h.get("ort") else ""
+        fakten.append(f"Hinspiel ({html.escape(lang_datum(parse_dmy(h['datum'])))}{ort}): {erg}")
+    knoepfe = []
+    if game.get("gegnerUrl"):
+        knoepfe.append(f'<a class="btn btn-ghost" href="{html.escape(game["gegnerUrl"])}" target="_blank" rel="noopener">'
+                       '<i data-lucide="external-link" class="icon-16"></i> Vereinsseite</a>')
+    if game.get("ligaId"):
+        knoepfe.append(f'<a class="btn btn-ghost" href="https://www.2basketballbundesliga.de/teams/kader/{int(game["ligaId"])}/" target="_blank" rel="noopener">'
+                       '<i data-lucide="users" class="icon-16"></i> Kader in der Liga</a>')
+    if not knoepfe and not fakten:
+        return ""
+    fakten_html = "".join(f'<p class="t-body">{f}</p>' for f in fakten)
+    return f"""  <section class="section">
+    <div class="container">
+      <div class="spiel-gegner">
+        <div class="spiel-naechstes-text">
+          <span class="eyebrow">Gegner im Überblick</span>
+          <h2 class="t-h3">{gegner}</h2>
+          <p class="t-body">Unser Gegner in der ProB Süd.</p>
+          {fakten_html}
+        </div>
+        <div class="spiel-naechstes-actions">{"".join(knoepfe)}</div>
+      </div>
+    </div>
+  </section>
+"""
+
+
 def spieltagsinfo_section(game):
     """Spieltagsinfo (digitale Stadionzeitung) als Band ueber die ganze Breite.
 
@@ -496,6 +553,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
     sections = [
         ergebnis_section(game, phase),
         story_section(game, phase, news),
+        gegner_section(game),
         spieltagsinfo_section(game),
         bericht_section(bericht_inhalt) if phase == "danach" else "",
         weiter_section(vorher, naechstes),
@@ -543,7 +601,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1791710841" />
+<link rel="stylesheet" href="/css/site.css?v=1791711263" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.

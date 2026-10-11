@@ -3078,6 +3078,13 @@ a.training-group-header:hover { color: var(--color-brand-orange); }
   background: #fff; border: 1px solid var(--border); border-left: 6px solid var(--color-brand-orange);
   border-radius: var(--radius-lg); padding: 28px 32px;
 }
+.spiel-gegner {
+  display: flex; align-items: center; justify-content: space-between; gap: 24px 32px; flex-wrap: wrap;
+  background: #fff; border: 1px solid var(--border); border-left: 6px solid var(--color-brand-blue);
+  border-radius: var(--radius-lg); padding: 28px 32px;
+}
+@media (max-width: 720px) { .spiel-gegner { padding: 22px 20px; } }
+.spiel-gegner .spiel-naechstes-text p + p { margin-top: 6px; }
 .spiel-naechstes-text { flex: 1 1 320px; }
 .spiel-naechstes-text h2 { margin: 6px 0 8px; }
 .spiel-naechstes-text p { margin: 0; }
