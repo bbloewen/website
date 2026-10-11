@@ -393,8 +393,7 @@ def kauf_bereich(aktuell, kommt, heute):
           {{ zone: 'A', rows: ['1'], excludeSeatNumbers: ['1', '2', '3', '4', '5', '6', '7', '16', '17', '18', '19', '20'] }}
         ],
         nvSeats: [
-          {{ zone: 'A', rows: ['1', '2', '3'], maxSeatNumber: 7 }},
-          {{ zone: 'A', rows: ['4'], maxSeatNumber: 7, excludeSeatNumbers: ['1', '2', '3', '4', '5', '6'] }}
+          {{ zone: 'A', rows: ['1', '2', '3'], maxSeatNumber: 7 }}
         ],
         northZones: ['D', 'E', 'F'],
         southZones: ['A', 'B', 'C'],
