@@ -160,7 +160,6 @@ def hero(s, heute):
         f'<p class="lead"><a href="{kalender_link}" target="_blank" rel="noopener" '
         f'title="In Google Kalender eintragen" style="display:inline-flex;vertical-align:middle;color:inherit">'
         f'<i data-lucide="calendar-plus" class="icon-16"></i></a> '
-        f'<a class="kal-ics" href="/kalender/spiel/profis-{datum(s).isoformat()}.ics" title="In Apple- oder Outlook-Kalender laden (.ics)">iCal</a> '
         f'{esc(zeile)}</p>'
         if kalender_link else f'<p class="lead">{esc(zeile)}</p>'
     )
