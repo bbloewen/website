@@ -291,7 +291,7 @@ def news_json_pflegen(a, url, schreiben):
             "titel": typografie(a["titel"]),
             "kurztext": typografie(a.get("kurztext") or a["beschreibung"]),
             "url": url,
-            "bild": f"/assets/img/news/{a['bild']}",
+            "bild": f"/assets/img/news/{kachel_name(a['bild']) if (BILD_DIR / kachel_name(a['bild'])).is_file() else a['bild']}",
             "topNews": bool(a.get("topNews", False)),
         })
         if a["team"] in NEWS_TEAM:
@@ -407,6 +407,27 @@ def hero_aus_hochformat(im):
     return hinten
 
 
+# Kachelbild (seit 11.10.2026, Marko: Nachbericht-Karte auf der Spieltagsseite sah neben dem
+# Vorbericht schlechter aus). Die Karten auf Startseite, Aktuelles und Spieltagsseite zeigen
+# news.json "bild" im Format 3:2 (object-fit: cover). Das Breitbild aus hero_aus_hochformat()
+# zeigte dort vor allem die unscharfen Raender. Fuer Hochformate entsteht deshalb zusaetzlich
+# <bild>-kachel.webp: ein 3:2-Ausschnitt aus dem Original, oben angesetzt (KACHEL_OBEN), weil
+# bei Sportfotos die Szene meist im oberen Teil liegt. news.json verweist dann darauf.
+KACHEL_OBEN = 0.12
+
+
+def kachel_name(bild):
+    return Path(bild).stem + "-kachel.webp"
+
+
+def kachel_aus_hochformat(im):
+    im = im.convert("RGB")
+    w, h = im.size
+    kh = round(w * 2 / 3)
+    y0 = min(int(h * KACHEL_OBEN), h - kh)
+    return im.crop((0, y0, w, y0 + kh))
+
+
 def bild_bereitstellen(a, schreiben):
     """Hero-Bild aus dem Eingang in assets/img/news/ ablegen -- als WebP.
 
@@ -435,6 +456,8 @@ def bild_bereitstellen(a, schreiben):
             with Image.open(q) as im:
                 im = im.convert("RGBA" if im.mode in ("RGBA", "LA", "P") else "RGB")
                 if im.height > im.width:
+                    kachel_aus_hochformat(im).save(BILD_DIR / kachel_name(a["bild"]), "WEBP",
+                                                   quality=HERO_QUALITAET, method=6)
                     im = hero_aus_hochformat(im)
                 if im.width > HERO_MAX_BREITE:
                     hoehe = round(im.height * HERO_MAX_BREITE / im.width)
