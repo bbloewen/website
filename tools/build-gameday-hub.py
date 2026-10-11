@@ -522,7 +522,7 @@ def seite(liste, heute):
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="format-detection" content="telephone=no" />
-<title>Game Day in der Riethsporthalle — Basketball Löwen Erfurt</title>
+<title>Heimspiele in Erfurt — Game Day in der Riethsporthalle</title>
 <meta name="description" content="{esc(description)}" />
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png" />
