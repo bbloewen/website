@@ -310,7 +310,9 @@ def _spiel_event_node(g, mainEntityOfPage_url):
     d, m, y = g["datum"].split(".")
     hh, mm = g["zeit"].split(":")
     start = datetime(int(y), int(m), int(d), int(hh), int(mm), tzinfo=berlin)
-    heute = date.today()
+    # Berliner Datum, nicht das des Rechners: der CI-Runner laeuft in UTC und hielt ein Spiel
+    # vom Vortag zwischen 0 und 2 Uhr deutscher Zeit noch fuer "nicht gespielt" (Lauf 11.10.2026).
+    heute = datetime.now(berlin).date()
     node = {
         "@type": "SportsEvent",
         "name": f"Basketball Löwen Erfurt – {g['gegner']}",
