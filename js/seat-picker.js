@@ -900,6 +900,7 @@
     var gesamt = 0, belegt = 0;
     group.rows.forEach(function (r) {
       r.seats.forEach(function (seat) {
+        if (seat.wheelchair) return; // zählt zum Rollstuhlkontingent, nicht zum Block (Marko, 11.10.2026)
         gesamt++;
         if (self._isBlocked(seat.seat_guid)) belegt++;
       });
@@ -1045,8 +1046,10 @@
     return this._categoryGroups(zone).filter(function (g) { return g.category === category; })
       .reduce(function (sum, g) {
         return sum + g.rows.reduce(function (s, r) {
+          // Rollstuhlsitze zählen nicht zum Blockkontingent, sie laufen über das
+          // eigene Rollstuhlkontingent (Marko, 11.10.2026).
           return s + r.seats.filter(function (seat) {
-            return !self._isBlocked(seat.seat_guid);
+            return !seat.wheelchair && !self._isBlocked(seat.seat_guid);
           }).length;
         }, 0);
       }, 0);
