@@ -50,6 +50,12 @@ jobs:
         with:
           python-version: '3.12'
 
+      # Seit 11.10.2026 liest build-spieltagsseiten.py Bildmasse (Berichte-Teaser,
+      # Spieltagsinfo-Band) -- das braucht Pillow. Ohne laeuft der CI-Bau anders als
+      # der lokale und schrieb die Seiten ohne Band-Bild zurueck.
+      - name: Pillow installieren
+        run: pip install --quiet --disable-pip-version-check pillow
+
       # Reihenfolge ist hier bindend, s. tools/README.md: build-spieltagsseiten.py
       # baut jede Seite komplett neu und uebernimmt Header/Footer/SEO-Block nur
       # unveraendert aus der bestehenden Datei -- andersherum wuerde jeder Lauf

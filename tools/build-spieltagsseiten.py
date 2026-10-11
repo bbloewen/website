@@ -418,9 +418,10 @@ def spieltagsinfo_section(game):
     vorschau = f"/assets/spieltagsinfo/ausgabe-{nr}/vorschau.webp"
     masse = bild_masse(vorschau)
     media = ""
-    if masse:
+    if (REPO / vorschau.lstrip("/")).exists():
+        dims = f' width="{masse[0]}" height="{masse[1]}"' if masse else ""
         media = (f'<div class="spiel-band-media"><a href="{url}" tabindex="-1" aria-hidden="true">'
-                 f'<img loading="lazy" decoding="async" src="{vorschau}" width="{masse[0]}" height="{masse[1]}" alt="" /></a></div>')
+                 f'<img loading="lazy" decoding="async" src="{vorschau}"{dims} alt="" /></a></div>')
     return f"""  <section class="section section-dark">
     <div class="container">
       <div class="spiel-band{'' if media else ' spiel-band-ohne-bild'}">
