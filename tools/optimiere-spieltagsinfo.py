@@ -208,7 +208,7 @@ VERLINKEN = {
     "BC Erfurt": "https://bcerfurt.de/",
     "USV Erfurt": "https://usv-erfurt-basketball.de/",
     "BiG Gotha": "https://www.big-gotha.de/",
-    "TV Langen": "https://tvlangen.de/",
+    "TV Langen": "https://langen-basketball.de/",
     "MHP RIESEN Ludwigsburg": "https://mhp-riesen-ludwigsburg.de/",
     "Porsche BBA Ludwigsburg": "https://bba-ludwigsburg.de/",
     "Special Olympics Deutschland": "https://specialolympics.de/",
