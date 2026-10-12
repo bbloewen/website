@@ -1,5 +1,5 @@
 /* Erzeugt von tools/build-lucide-icons.py — nicht von Hand ändern.
-   Enthält nur die 83 Symbole, die im Repo wirklich vorkommen, aus
+   Enthält nur die 84 Symbole, die im Repo wirklich vorkommen, aus
    lucide-static 1.34.0. Ersetzt die 410 KB grosse Gesamtbibliothek von
    unpkg; Begründung im Kopf des Skripts. */
 (function () {
@@ -27,6 +27,7 @@
   "chevron-right": "<path d=\"m9 18 6-6-6-6\"/>",
   "clipboard-list": "<rect width=\"8\" height=\"4\" x=\"8\" y=\"2\" rx=\"1\" ry=\"1\"/> <path d=\"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2\"/> <path d=\"M12 11h4\"/> <path d=\"M12 16h4\"/> <path d=\"M8 11h.01\"/> <path d=\"M8 16h.01\"/>",
   "clock": "<circle cx=\"12\" cy=\"12\" r=\"10\"/> <path d=\"M12 6v6l4 2\"/>",
+  "crown": "<path d=\"M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z\"/> <path d=\"M5 21h14\"/>",
   "door-open": "<path d=\"M11 20H2\"/> <path d=\"M11 4.562v16.157a1 1 0 0 0 1.242.97L19 20V5.562a2 2 0 0 0-1.515-1.94l-4-1A2 2 0 0 0 11 4.561z\"/> <path d=\"M11 4H8a2 2 0 0 0-2 2v14\"/> <path d=\"M14 12h.01\"/> <path d=\"M22 20h-3\"/>",
   "download": "<path d=\"M12 15V3\"/> <path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"/> <path d=\"m7 10 5 5 5-5\"/>",
   "euro": "<path d=\"M4 10h12\"/> <path d=\"M4 14h9\"/> <path d=\"M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2\"/>",
