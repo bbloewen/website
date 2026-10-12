@@ -1,5 +1,5 @@
 /* Erzeugt von tools/build-lucide-icons.py — nicht von Hand ändern.
-   Enthält nur die 84 Symbole, die im Repo wirklich vorkommen, aus
+   Enthält nur die 87 Symbole, die im Repo wirklich vorkommen, aus
    lucide-static 1.34.0. Ersetzt die 410 KB grosse Gesamtbibliothek von
    unpkg; Begründung im Kopf des Skripts. */
 (function () {
@@ -52,7 +52,9 @@
   "map-pin-check": "<path d=\"M19.43 12.935c.357-.967.57-1.955.57-2.935a8 8 0 0 0-16 0c0 4.993 5.539 10.193 7.399 11.799a1 1 0 0 0 1.202 0 32.197 32.197 0 0 0 .813-.728\"/> <circle cx=\"12\" cy=\"10\" r=\"3\"/> <path d=\"m16 18 2 2 4-4\"/>",
   "medal": "<path d=\"M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15\"/> <path d=\"M11 12 5.12 2.2\"/> <path d=\"m13 12 5.88-9.8\"/> <path d=\"M8 7h8\"/> <circle cx=\"12\" cy=\"17\" r=\"5\"/> <path d=\"M12 18v-2h-.5\"/>",
   "menu": "<path d=\"M4 5h16\"/> <path d=\"M4 12h16\"/> <path d=\"M4 19h16\"/>",
+  "message-circle": "<path d=\"M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719\"/>",
   "message-square": "<path d=\"M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z\"/>",
+  "navigation": "<polygon points=\"3 11 22 2 13 21 11 13 3 11\"/>",
   "newspaper": "<path d=\"M15 18h-5\"/> <path d=\"M18 14h-8\"/> <path d=\"M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0v-9a2 2 0 0 1 2-2h2\"/> <rect width=\"8\" height=\"4\" x=\"10\" y=\"6\" rx=\"1\"/>",
   "paperclip": "<path d=\"m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551\"/>",
   "percent": "<line x1=\"19\" x2=\"5\" y1=\"5\" y2=\"19\"/> <circle cx=\"6.5\" cy=\"6.5\" r=\"2.5\"/> <circle cx=\"17.5\" cy=\"17.5\" r=\"2.5\"/>",
@@ -78,6 +80,7 @@
   "ticket": "<path d=\"M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z\"/> <path d=\"M13 5v2\"/> <path d=\"M13 17v2\"/> <path d=\"M13 11v2\"/>",
   "trending-up": "<path d=\"M16 7h6v6\"/> <path d=\"m22 7-8.5 8.5-5-5L2 17\"/>",
   "trophy": "<path d=\"M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2\"/> <path d=\"M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2\"/> <path d=\"M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3\"/> <path d=\"M4 22h16\"/> <path d=\"M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z\"/> <path d=\"M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3\"/>",
+  "tv": "<path d=\"m17 2-5 5-5-5\"/> <rect width=\"20\" height=\"15\" x=\"2\" y=\"7\" rx=\"2\"/>",
   "user": "<path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\"/> <circle cx=\"12\" cy=\"7\" r=\"4\"/>",
   "user-check": "<path d=\"m16 11 2 2 4-4\"/> <path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"/> <circle cx=\"9\" cy=\"7\" r=\"4\"/>",
   "user-cog": "<path d=\"M10 15H6a4 4 0 0 0-4 4v2\"/> <path d=\"m14.305 16.53.923-.382\"/> <path d=\"m15.228 13.852-.923-.383\"/> <path d=\"m16.852 12.228-.383-.923\"/> <path d=\"m16.852 17.772-.383.924\"/> <path d=\"m19.148 12.228.383-.923\"/> <path d=\"m19.53 18.696-.382-.924\"/> <path d=\"m20.772 13.852.924-.383\"/> <path d=\"m20.772 16.148.924.383\"/> <circle cx=\"18\" cy=\"15\" r=\"3\"/> <circle cx=\"9\" cy=\"7\" r=\"4\"/>",
