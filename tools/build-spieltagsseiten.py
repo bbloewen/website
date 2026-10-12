@@ -426,11 +426,14 @@ def story_section(game, phase, news):
                    else platzhalter_karte("Nachbericht", aufbau["nachbericht"]) if aufbau.get("nachbericht") else None)
     vorbericht = (story_karte("Vorbericht", game["vorberichtUrl"], news) if game.get("vorberichtUrl")
                   else platzhalter_karte("Vorbericht", aufbau["vorbericht"]) if aufbau.get("vorbericht") else None)
-    # Reihenfolge wie bei der Seite zum ersten Heimspiel: Nachbericht oben, darunter der Vorbericht.
+    # Nach dem Spiel (oder sobald der Nachbericht da ist) steht er oben, davor der Vorbericht (Marko, 12.10.2026).
     karten = []
     if aufbau.get("teaser"):   # optional, im Probelauf 18.10.2026 bewusst nicht benutzt
         karten.append(platzhalter_karte("Zum Spiel", aufbau["teaser"]))
-    karten += [nachbericht, vorbericht]
+    if phase == "danach" or game.get("nachberichtUrl"):
+        karten += [nachbericht, vorbericht]
+    else:
+        karten += [vorbericht, nachbericht]
     karten = [k for k in karten if k]
     if not karten:
         return ""
