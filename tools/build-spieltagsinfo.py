@@ -189,7 +189,7 @@ def seite(daten):
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1791837663" />
+<link rel="stylesheet" href="/css/site.css?v=1791837957" />
 {ANALYTICS}{seo}</head>
 <body data-nav-group="gameday" class="hide-mobile-cta">
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
