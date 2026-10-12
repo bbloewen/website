@@ -355,14 +355,52 @@ def story_karte(label, url, news):
       </a>"""
 
 
+def platzhalter_karte(label, daten):
+    """Karte ohne Link fuer einen Bericht, der noch nicht da ist (Feld "seitenaufbau" in
+    data/heimspiele.json): Bild vom aktuellen Heimspiel, Titel, Text und ein Hinweis, wann er kommt."""
+    media = ""
+    if daten.get("bild"):
+        masse = bild_masse(daten["bild"])
+        dims = f' width="{masse[0]}" height="{masse[1]}"' if masse else ""
+        media = (f'<div class="spiel-story-media"><img loading="lazy" decoding="async" '
+                 f'src="{html.escape(daten["bild"])}"{dims} alt="" /></div>')
+    pille = ""
+    if daten.get("hinweis"):
+        pille = (f'<span class="spiel-story-pille"><i data-lucide="clock" class="icon-14"></i> '
+                 f'{html.escape(daten["hinweis"])}</span>')
+    return f"""      <div class="card spiel-story spiel-story-platzhalter{' spiel-story-ohne-bild' if not media else ''}">
+        {media}
+        <div class="spiel-story-body">
+          <span class="card-label">{html.escape(label)}</span>
+          <h3 class="t-h3">{html.escape(daten.get("titel", label))}</h3>
+          <p class="t-body">{html.escape(daten.get("text", ""))}</p>
+          {pille}
+        </div>
+      </div>"""
+
+
 def story_section(game, phase, news):
     """Nachbericht (sobald Feld nachberichtUrl gesetzt ist) und Vorbericht (Feld
-    vorberichtUrl) als Teaser-Karten ueber die ganze Breite -- Text und Bild aus news.json."""
+    vorberichtUrl) als Teaser-Karten ueber die ganze Breite -- Text und Bild aus news.json.
+
+    Mit dem Feld "seitenaufbau" (bisher nur 18.10.2026, Probelauf auf Wunsch von Marko) sieht die
+    Seite schon vor dem Spiel vollstaendig aus: eine Teaser-Karte, und fuer jeden noch fehlenden
+    Bericht eine Platzhalter-Karte mit Hinweis, wann er erscheint. Sobald vorberichtUrl bzw.
+    nachberichtUrl gesetzt ist, ersetzt die echte Karte den Platzhalter von selbst."""
+    aufbau = game.get("seitenaufbau") or {}
+    nachbericht = (story_karte("Nachbericht", game["nachberichtUrl"], news) if game.get("nachberichtUrl")
+                   else platzhalter_karte("Nachbericht", aufbau["nachbericht"]) if aufbau.get("nachbericht") else None)
+    vorbericht = (story_karte("Vorbericht", game["vorberichtUrl"], news) if game.get("vorberichtUrl")
+                  else platzhalter_karte("Vorbericht", aufbau["vorbericht"]) if aufbau.get("vorbericht") else None)
     karten = []
-    if game.get("nachberichtUrl"):   # gesetzt = Bericht ist da, auch am Spieltag selbst zeigen
-        karten.append(story_karte("Nachbericht", game["nachberichtUrl"], news))
-    if game.get("vorberichtUrl"):
-        karten.append(story_karte("Vorbericht", game["vorberichtUrl"], news))
+    if phase == "danach":
+        karten = [nachbericht, vorbericht]
+    else:
+        if aufbau.get("teaser"):
+            karten.append(platzhalter_karte("Zum Spiel", aufbau["teaser"]))
+        # Vor dem Spiel in zeitlicher Reihenfolge, ein vorhandener Nachbericht (am Spieltag) zuerst
+        karten += [nachbericht, vorbericht] if game.get("nachberichtUrl") else [vorbericht, nachbericht]
+    karten = [k for k in karten if k]
     if not karten:
         return ""
     return f"""  <section class="section">
@@ -541,12 +579,10 @@ def weiter_section(vorher, naechstes):
 
 
 def kalender_menue(google_link, d):
-    """Kalender im Hero: Google-Icon wie bisher, daneben der Textlink "iCal" fuer die .ics-Datei
-    (Apple/Outlook, tools/build-kalender.py: kalender/spiel/profis-<Datum>.ics). Bewusst kein
-    Aufklappmenue: der Hero schneidet ueberstehende Elemente ab."""
+    """Kalender im Hero: nur das Google-Icon. Der iCal-Link ist seit 12.10.2026 (Marko) aus dem
+    Hero entfernt, die .ics-Dateien (tools/build-kalender.py) gibt es weiter im Spielplan."""
     return (f'<a href="{google_link}" target="_blank" rel="noopener" title="In Google Kalender eintragen" '
-            'style="display:inline-flex;vertical-align:middle;color:inherit"><i data-lucide="calendar-plus" class="icon-16"></i></a> '
-            f'<a class="kal-ics" href="/kalender/spiel/profis-{d.isoformat()}.ics" title="In Apple- oder Outlook-Kalender laden (.ics)">iCal</a>')
+            'style="display:inline-flex;vertical-align:middle;color:inherit"><i data-lucide="calendar-plus" class="icon-16"></i></a>')
 
 
 def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html=LEER_FOOTER,
@@ -648,7 +684,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1791838305" />
+<link rel="stylesheet" href="/css/site.css?v=1791839363" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.

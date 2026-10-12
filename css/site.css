@@ -3057,6 +3057,8 @@ a.training-group-header:hover { color: var(--color-brand-orange); }
 .spiel-story-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .spiel-story-body { padding: 28px; display: flex; flex-direction: column; gap: 10px; justify-content: center; }
 .spiel-story-body h3 { margin: 0; }
+.spiel-story-platzhalter { cursor: default; }
+.spiel-story-pille { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; padding: 6px 12px; border-radius: 999px; background: var(--color-orange-50); color: var(--color-brand-orange-text); font-size: 13px; font-weight: var(--weight-semibold); }
 .spiel-story-body p { margin: 0; }
 @media (max-width: 720px) {
   .spiel-story { grid-template-columns: 1fr; }
