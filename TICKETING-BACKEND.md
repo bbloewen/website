@@ -334,22 +334,39 @@ Drei Preise lagen nie auf der 13er-Regel (Kategorie 2 ermäßigt wurde 2025/26 b
 auf 115 angehoben, VIP hat einen eigenen Anker). Sie sind anteilig × 12/13 gekürzt und
 auf volle Euro **aufgerundet** (Marko, 12.10.2026).
 
-**Die Preise stehen an vier Stellen und müssen immer zusammen geändert werden:**
+**Seit 12.10.2026 rechnet das niemand mehr von Hand.** Die Preise werden aus den noch ausstehenden
+Heimspielen berechnet und sinken 4 Stunden nach jedem Heimspiel von selbst um einen Einzelpreis:
 
-1. `tickets/dauerkarte.html`: die `data-base`-Werte samt sichtbarem Text und das `prices`-Objekt
-   im Skript am Seitenende.
-2. Game Hub (`saison/profis/gameday/index.html`): kein eigener Wert, `tools/build-gameday-hub.py`
-   liest die `data-base`-Werte aus Punkt 1 (Bauen mit `tools/bauen.sh`).
-3. n8n-Workflow „Ticketing: Bestellprozess - Dauerkartenbestellung verarbeiten"
-   (`HyUXW4kbhaQVbG0A`): zwei identische `PRICES`-Blöcke in den Nodes „Preis serverseitig
-   berechnen" und „Mitgliedsrabatt verifizieren". Der Server rechnet immer selbst, die Summe
-   aus dem Browser wird nicht übernommen. Nach jeder Änderung den Workflow **veröffentlichen**,
-   sonst läuft weiter die alte Fassung.
-4. pretix, Event `saison2627`: Standardpreis (`default_price`) der Dauer-Items und ihrer
-   Variationen (Items 37, 38, 39, 41 bis 47, siehe Tabelle oben). Beim Anlegen der Order setzt
-   der Workflow den Preis ausdrücklich auf die erste Position, die Standardpreise sind also nicht
-   rechnungsrelevant, sollen aber in pretix stimmen. Stehplatz-Dauer (Item 91, Trainerkarte)
-   bleibt bei 0,00 €.
+- **Regel:** Preis = Ausgangspreis × zuBezahlendeSpiele / 13, aufgerundet auf volle Euro. zuBezahlendeSpiele =
+  verbleibende Heimspiele − 1 (mindestens 1). Ein Heimspiel „verbleibt", bis es 4 Stunden nach Anpfiff vorbei
+  ist (`spielende()` in `tools/build-gameday-hub.py`, dieselbe Regel wie beim Umschalten des Hubs). Der
+  Ausgangspreis ist der Preis der Saisonkarte mit 14 Spielen zum Preis von 13 (208 / 182 / 156 / 115 / 136,50 /
+  104 / 65 / 136,50 / 104 / 104 / 1.290 / 495).
+- **Einzige Stelle, an der gerechnet wird:** `tools/build-dauerkartenpreise.py`. Von Hand gepflegt wird nur der
+  Block `basis` in `data/dauerkarte-preise.json`, alles andere dort (`stand`, `preise`) schreibt das Skript.
+- **Läuft:** im Workflow `spieltagsseiten-nachbauen.yml` (täglich 04:20 UTC und alle 20 Minuten zwischen 16 und
+  22 UTC, also im Abstand von höchstens 20 Minuten nach „Spiel vorbei + 4 Stunden"), vor dem Hub-Bau; und in
+  `tools/bauen.sh`.
+
+**Wer die Preise liest:**
+
+1. **Webseite:** das Skript setzt die `data-base`-Werte und den sichtbaren Preis in `tickets/dauerkarte.html`;
+   das `prices`-Objekt im Seiten-Skript liest die `data-base`-Werte. Der Game Hub liest sie ebenfalls von dort.
+2. **n8n-Workflow „Ticketing: Bestellprozess - Dauerkartenbestellung verarbeiten"** (`HyUXW4kbhaQVbG0A`): der
+   Node „Dauerkartenpreise laden" holt `data/dauerkarte-preise.json`, „Preis serverseitig berechnen" rechnet damit
+   (Rückfallliste im Code, falls der Abruf scheitert oder die Datei unvollständig ist; Stand 12.10.2026), und
+   „Mitgliedsrabatt verifizieren" nutzt dieselbe Tabelle (`preisTabelle`). Der Server rechnet bei jeder
+   Bestellung selbst, die Summe aus dem Browser wird nicht übernommen.
+3. **pretix** (Event `saison2627`): Der Workflow **„Dauerkarten: pretix-Standardpreise nachziehen"**
+   (`Tgrxrv7iFW5WP8nd`) vergleicht alle 30 Minuten die Standardpreise (`default_price`) der Dauer-Items 37 bis 47
+   und ihrer Variationen mit der JSON und setzt nur Abweichungen. Beim Anlegen der Order setzt der
+   Bestell-Workflow den Preis ausdrücklich, die Standardpreise sind also nicht rechnungsrelevant, sollen aber
+   stimmen. Stehplatz-Dauer (Item 91, Trainerkarten) bleibt bei 0,00 €. Wird ein Item neu angelegt, die
+   Zuordnung im Node „Abweichungen finden" ergänzen.
+
+Beim Wechsel fällt die Anzeige auf der Seite höchstens etwa 20 Minuten (Takt des Workflows) plus Pages-Deploy
+hinter den Server zurück. Der Server berechnet in dem Fenster ebenfalls schon den neuen Preis, sobald die JSON
+live ist, die Kunden zahlen also nie mehr als angezeigt.
 
 **Gespielte Heimspiele kommen in neue Dauerkarten nicht mehr hinein.** Der Node „Ausgeschlossene
 Subevents ermitteln" schloss bisher nur Spiele aus, deren Einzelticket-Vorverkauf offen und die

@@ -196,6 +196,15 @@ Verlinkt ist der Hub aus `saison/spielplan.html` und `tickets.html`, jeweils
 **ausserhalb** der JavaScript-ersetzten Container — ein Link darin wuerde beim
 Laden fuer Menschen verschwinden.
 
+**`build-dauerkartenpreise.py`** — rechnet die Dauerkartenpreise und schreibt sie in
+`data/dauerkarte-preise.json` und die Preiszeilen in `tickets/dauerkarte.html`.
+Regel: Ausgangspreis × (verbleibende Heimspiele − 1) / 13, aufgerundet auf volle Euro;
+ein Heimspiel gilt bis Anpfiff + 4 Stunden als verbleibend (wie `spielende()` im Hub).
+Von Hand gepflegt wird nur `basis` in der JSON. Die Zahlen lesen die Seite, der Game Hub
+(über `data-base`), der n8n-Bestellworkflow und der pretix-Abgleich. `--check` schreibt
+nichts und endet mit 1, wenn etwas abweicht. Läuft in `bauen.sh` und im GitHub-Workflow
+`spieltagsseiten-nachbauen.yml`.
+
 **`build-freiplatz-seiten.py`** — erzeugt je Freiplatz eine eigene, indexierbare
 Seite unter `trainieren/freiplatz/<slug>.html`. Vorher teilten sich alle sechs
 Plätze die Adresse `trainieren/freiplatz.html?platz=<slug>`; die steht auf
