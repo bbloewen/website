@@ -298,9 +298,9 @@ def ergebnis_section(game, phase):
     "ergebnis" gesetzt ist, heisst es "Endstand". Quelle der Zahlen: n8n-Workflow
     "Website: Liveticker auswerten" (Feld viertelAusLoewenSicht / ergebnisFuerSpielplan)."""
     if phase not in ("spieltag", "danach"):
-        # Probelauf 18.10.2026: Spiele mit "seitenaufbau" zeigen den Ergebnis-Bereich schon vorher
-        # als leere Anzeige (Striche), damit sichtbar ist, was am Spieltag hier erscheint.
-        return ergebnis_platzhalter(game) if game.get("seitenaufbau") else ""
+        # Vor dem Spiel steht der Ergebnis-Bereich schon als leere Anzeige (Striche), damit sichtbar
+        # ist, was am Spieltag hier erscheint (Marko, 12.10.2026, fuer alle Spieltagsseiten).
+        return ergebnis_platzhalter(game)
     viertel = game.get("viertel") or []
     if game.get("ergebnis"):
         stand_titel = "Endstand"
@@ -389,6 +389,33 @@ def story_karte(label, url, news):
       </a>"""
 
 
+STANDARD_BILD_VOR = "/assets/img/spieltag/spieltag-vorbericht.webp"
+STANDARD_BILD_NACH = "/assets/img/spieltag/spieltag-nachbericht.webp"
+
+
+def aufbau_von(game, phase):
+    """Texte und Bilder fuer die Platzhalter-Karten. Standard fuer jedes Spiel, das noch nicht
+    gespielt ist (Rollout auf alle Spieltagsseiten am 12.10.2026, Marko); das Feld "seitenaufbau"
+    in data/heimspiele.json ueberschreibt einzelne Angaben (z. B. Fotos vom aktuellen Spiel)."""
+    if phase == "danach":
+        return {}
+    d = parse_dmy(game["datum"])
+    standard = {
+        "nachbericht": {
+            "titel": "Der Nachbericht folgt nach dem Spiel",
+            "text": "Endstand, Viertelstände und die Geschichte des Spiels: Nach dem Spiel gibt es hier den Bericht.",
+            "hinweis": "Folgt nach dem Spiel", "bild": STANDARD_BILD_NACH},
+    }
+    if phase != "spieltag":
+        standard["vorbericht"] = {
+            "titel": "Der Vorbericht ist in Arbeit",
+            "text": ("Der Gegner, die Höhepunkte des Spieltags und alles, was Sie vor dem Anpfiff wissen sollten. "
+                     f"Der Vorbericht erscheint rechtzeitig vor dem Spiel am {lang_datum(d)}."),
+            "hinweis": "Erscheint vor dem Spiel", "bild": STANDARD_BILD_VOR}
+    eigen = game.get("seitenaufbau") or {}
+    return {k: {**v, **(eigen.get(k) or {})} for k, v in standard.items()}
+
+
 def platzhalter_karte(label, daten):
     """Karte ohne Link fuer einen Bericht, der noch nicht da ist (Feld "seitenaufbau" in
     data/heimspiele.json): Bild vom aktuellen Heimspiel, Titel, Text und ein Hinweis, wann er kommt."""
@@ -413,7 +440,7 @@ def platzhalter_karte(label, daten):
       </div>"""
 
 
-def story_section(game, phase, news):
+def story_section(game, phase, news, teil="beide"):
     """Nachbericht (sobald Feld nachberichtUrl gesetzt ist) und Vorbericht (Feld
     vorberichtUrl) als Teaser-Karten ueber die ganze Breite -- Text und Bild aus news.json.
 
@@ -421,25 +448,31 @@ def story_section(game, phase, news):
     Seite schon vor dem Spiel vollstaendig aus: fuer jeden noch fehlenden
     Bericht eine Platzhalter-Karte mit Hinweis, wann er erscheint. Sobald vorberichtUrl bzw.
     nachberichtUrl gesetzt ist, ersetzt die echte Karte den Platzhalter von selbst."""
-    aufbau = game.get("seitenaufbau") or {}
+    aufbau = aufbau_von(game, phase)
     nachbericht = (story_karte("Nachbericht", game["nachberichtUrl"], news) if game.get("nachberichtUrl")
                    else platzhalter_karte("Nachbericht", aufbau["nachbericht"]) if aufbau.get("nachbericht") else None)
     vorbericht = (story_karte("Vorbericht", game["vorberichtUrl"], news) if game.get("vorberichtUrl")
                   else platzhalter_karte("Vorbericht", aufbau["vorbericht"]) if aufbau.get("vorbericht") else None)
     # Nach dem Spiel (oder sobald der Nachbericht da ist) steht er oben, davor der Vorbericht (Marko, 12.10.2026).
+    # teil="vor" / "nach": je eine Karte fuer die Reihenfolge vor dem Spiel (Vorbericht, Gegner,
+    # Spieltagsinfo, Endstand, Nachbericht); "beide" = beide Karten untereinander (nach dem Spiel).
     karten = []
-    if aufbau.get("teaser"):   # optional, im Probelauf 18.10.2026 bewusst nicht benutzt
-        karten.append(platzhalter_karte("Zum Spiel", aufbau["teaser"]))
-    if phase == "danach" or game.get("nachberichtUrl"):
-        karten += [nachbericht, vorbericht]
+    if teil == "vor":
+        karten = [vorbericht]
+    elif teil == "nach":
+        karten = [nachbericht]
+    elif phase == "danach" or game.get("nachberichtUrl"):
+        karten = [nachbericht, vorbericht]
     else:
-        karten += [vorbericht, nachbericht]
+        karten = [vorbericht, nachbericht]
     karten = [k for k in karten if k]
     if not karten:
         return ""
+    eyebrow = ('      <span class="eyebrow" style="display:block;margin-bottom:16px">Zum Spiel</span>\n'
+               if teil != "nach" else "")
     return f"""  <section class="section">
     <div class="container">
-      <span class="eyebrow" style="display:block;margin-bottom:16px">Zum Spiel</span>
+{eyebrow}
       <div class="spiel-story-liste">
 {chr(10).join(karten)}
       </div>
@@ -511,9 +544,12 @@ def spieltagsinfo_section(game):
     Die Ausgabe-Nummer steht in data/heimspiele.json (Feld "spieltagsinfo"); eine Ausgabe kann
     fuer mehrere Spiele gelten. PDF-Name und Saison aus data/spieltagsinfo.json."""
     nr = game.get("spieltagsinfo")
+    daten = json.loads(SPIELTAGSINFO_DATEI.read_text(encoding="utf-8"))
+    if not nr:
+        # Ohne eigene Ausgabe verweist die Seite auf die neueste (Rollout 12.10.2026, Marko).
+        nr = max((a["nr"] for a in daten["ausgaben"]), default=None)
     if not nr:
         return ""
-    daten = json.loads(SPIELTAGSINFO_DATEI.read_text(encoding="utf-8"))
     ausgabe = next((a for a in daten["ausgaben"] if a["nr"] == nr), None)
     if not ausgabe:
         raise SystemExit(f"data/heimspiele.json: spieltagsinfo {nr} fehlt in data/spieltagsinfo.json")
@@ -667,14 +703,26 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
     # Aufbau seit 11.10.2026 (Marko): Hero traegt Termin, Halle und Tickets -- die drei
     # Heimspiel-Infos-Kacheln entfallen. Danach: Endstand, Berichte-Teaser, Spieltagsinfo,
     # Zurueck/Weiter. Nach dem Spiel steht das Ergebnis ganz oben.
-    sections = [
-        ergebnis_section(game, phase),
-        story_section(game, phase, news),
-        gegner_section(game),
-        spieltagsinfo_section(game),
-        bericht_section(bericht_inhalt) if phase == "danach" else "",
-        weiter_section(vorher, naechstes),
-    ]
+    if phase in ("angekuendigt", "vorverkauf"):
+        # Vor dem Spiel (Marko, 12.10.2026): Vorbericht, Gegner, Spieltagsinfo, Endstand, Nachbericht.
+        sections = [
+            story_section(game, phase, news, teil="vor"),
+            gegner_section(game),
+            spieltagsinfo_section(game),
+            ergebnis_section(game, phase),
+            story_section(game, phase, news, teil="nach"),
+            weiter_section(vorher, naechstes),
+        ]
+    else:
+        # Am Spieltag und danach: Endstand, Nachbericht, Vorbericht, Gegner, Spieltagsinfo.
+        sections = [
+            ergebnis_section(game, phase),
+            story_section(game, phase, news),
+            gegner_section(game),
+            spieltagsinfo_section(game),
+            bericht_section(bericht_inhalt) if phase == "danach" else "",
+            weiter_section(vorher, naechstes),
+        ]
     sections = [x for x in sections if x]
 
     main_content = "\n".join(sections)
