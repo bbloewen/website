@@ -315,6 +315,49 @@ pretix pruefen (`GET .../orders/{code}/`, Positionsanzahl vs. erwartete Anzahl),
 von einem echten Datenverlust ausgeht — die Meldung allein beweist noch keine fehlende
 Position.
 
+## Dauerkartenpreise um ein Heimspiel gekürzt (12.10.2026)
+
+Die Dauerkarte war nach der Regel „14 Spiele zum Preis von 13" kalkuliert (Einzelpreis × 13).
+Nach dem ersten Heimspiel (11.10.) gilt Einzelpreis × 12; jedes gespielte Heimspiel kürzt den
+Preis um einen weiteren Einzelpreis. Neue Preise (Basispreis, vor Mitgliedsrabatt):
+
+| Tarif | vorher | jetzt | Einzelpreis |
+|---|---|---|---|
+| Kategorie 1 / ermäßigt | 208 / 182 | 192 / 168 | 16 / 14 |
+| Kategorie 2 / ermäßigt | 156 / 115 | 144 / 107 | 12 / 8,50 |
+| Kategorie 3 / ermäßigt / Kinder | 136,50 / 104 / 65 | 126 / 96 / 60 | 10,50 / 8 / 5 |
+| Fanblock / ermäßigt | 136,50 / 104 | 126 / 96 | 10,50 / 8 |
+| Rollstuhlplatz | 104 | 96 | 8 |
+| VIP / ermäßigt | 1.290 / 495 | 1.191 / 457 | 119 / – |
+
+Drei Preise lagen nie auf der 13er-Regel (Kategorie 2 ermäßigt wurde 2025/26 bewusst von 110,50
+auf 115 angehoben, VIP hat einen eigenen Anker). Sie sind anteilig × 12/13 gekürzt und
+auf volle Euro **aufgerundet** (Marko, 12.10.2026).
+
+**Die Preise stehen an vier Stellen und müssen immer zusammen geändert werden:**
+
+1. `tickets/dauerkarte.html`: die `data-base`-Werte samt sichtbarem Text und das `prices`-Objekt
+   im Skript am Seitenende.
+2. Game Hub (`saison/profis/gameday/index.html`): kein eigener Wert, `tools/build-gameday-hub.py`
+   liest die `data-base`-Werte aus Punkt 1 (Bauen mit `tools/bauen.sh`).
+3. n8n-Workflow „Ticketing: Bestellprozess - Dauerkartenbestellung verarbeiten"
+   (`HyUXW4kbhaQVbG0A`): zwei identische `PRICES`-Blöcke in den Nodes „Preis serverseitig
+   berechnen" und „Mitgliedsrabatt verifizieren". Der Server rechnet immer selbst, die Summe
+   aus dem Browser wird nicht übernommen. Nach jeder Änderung den Workflow **veröffentlichen**,
+   sonst läuft weiter die alte Fassung.
+4. pretix, Event `saison2627`: Standardpreis (`default_price`) der Dauer-Items und ihrer
+   Variationen (Items 37, 38, 39, 41 bis 47, siehe Tabelle oben). Beim Anlegen der Order setzt
+   der Workflow den Preis ausdrücklich auf die erste Position, die Standardpreise sind also nicht
+   rechnungsrelevant, sollen aber in pretix stimmen. Stehplatz-Dauer (Item 91, Trainerkarte)
+   bleibt bei 0,00 €.
+
+**Gespielte Heimspiele kommen in neue Dauerkarten nicht mehr hinein.** Der Node „Ausgeschlossene
+Subevents ermitteln" schloss bisher nur Spiele aus, deren Einzelticket-Vorverkauf offen und die
+noch nicht gespielt waren. Ein gespieltes Spiel fiel aus dieser Liste und wurde wieder eine
+Position, samt Saisonpreis auf der ersten Position. Jetzt ist ein Spiel vor heute ausgeschlossen.
+Neue Dauerkarten bestehen damit nur aus den verbleibenden Heimspielen, der Preisanker liegt auf dem
+ersten davon. Bestehende Dauerkarten sind nicht betroffen.
+
 ## Frühbucherrabatt abgeschafft (31.08.2026)
 
 Der Frühbucherrabatt auf die Dauerkarte (20 %, Stichtag 31.08.2026, mit dem
