@@ -253,6 +253,38 @@ def hero_links(game, phase):
     return '          <div class="spiel-hero-links">' + "".join(links) + "</div>\n"
 
 
+def ergebnis_platzhalter(game):
+    """Leere Ergebnis-Anzeige vor dem Spiel: Striche statt Zahlen, vier Viertel, Hinweis."""
+    gegner = html.escape(game["gegner"])
+    kopf = "".join(
+        '<th scope="col"><span class="v-lang">%d. Viertel</span><span class="v-kurz" aria-hidden="true">Q%d</span></th>' % (i, i)
+        for i in range(1, 5))
+    striche = "<td>–</td>" * 4
+    tabelle = (f'<div class="spiel-viertel-wrap"><table class="spiel-viertel"><thead><tr><th></th>{kopf}</tr></thead><tbody>'
+               f'<tr><th scope="row">Basketball Löwen</th>{striche}</tr>'
+               f'<tr><th scope="row">{gegner}</th>{striche}</tr></tbody></table></div>')
+    knopf = ""
+    if game.get("livestream"):
+        knopf = (f'<div class="spiel-ergebnis-actions"><a class="btn btn-ghost-dark btn-sm" href="{html.escape(game["livestream"])}" '
+                 'target="_blank" rel="noopener"><i data-lucide="video" class="icon-16"></i> Livestream</a></div>')
+    return f"""  <section class="section">
+    <div class="container">
+      <div class="spiel-ergebnis">
+        <span class="eyebrow">Endstand</span>
+        <div class="spiel-ergebnis-score" role="img" aria-label="Der Endstand folgt nach dem Spiel">
+          <span class="spiel-ergebnis-team">Basketball Löwen</span>
+          <span class="spiel-ergebnis-punkte"><b>–</b><span aria-hidden="true">:</span><b>–</b></span>
+          <span class="spiel-ergebnis-team">{gegner}</span>
+        </div>
+        {tabelle}
+        <p class="spiel-ergebnis-hinweis">Endstand und Viertelstände erscheinen hier am Spieltag.</p>
+        {knopf}
+      </div>
+    </div>
+  </section>
+"""
+
+
 def ergebnis_section(game, phase):
     """Endstand und Viertelstaende (nur nach dem Spiel und wenn ergebnis gepflegt ist).
 
@@ -266,7 +298,9 @@ def ergebnis_section(game, phase):
     "ergebnis" gesetzt ist, heisst es "Endstand". Quelle der Zahlen: n8n-Workflow
     "Website: Liveticker auswerten" (Feld viertelAusLoewenSicht / ergebnisFuerSpielplan)."""
     if phase not in ("spieltag", "danach"):
-        return ""
+        # Probelauf 18.10.2026: Spiele mit "seitenaufbau" zeigen den Ergebnis-Bereich schon vorher
+        # als leere Anzeige (Striche), damit sichtbar ist, was am Spieltag hier erscheint.
+        return ergebnis_platzhalter(game) if game.get("seitenaufbau") else ""
     viertel = game.get("viertel") or []
     if game.get("ergebnis"):
         stand_titel = "Endstand"
@@ -684,7 +718,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1791839363" />
+<link rel="stylesheet" href="/css/site.css?v=1791839588" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
