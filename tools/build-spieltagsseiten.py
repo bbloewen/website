@@ -418,7 +418,7 @@ def story_section(game, phase, news):
     vorberichtUrl) als Teaser-Karten ueber die ganze Breite -- Text und Bild aus news.json.
 
     Mit dem Feld "seitenaufbau" (bisher nur 18.10.2026, Probelauf auf Wunsch von Marko) sieht die
-    Seite schon vor dem Spiel vollstaendig aus: eine Teaser-Karte, und fuer jeden noch fehlenden
+    Seite schon vor dem Spiel vollstaendig aus: fuer jeden noch fehlenden
     Bericht eine Platzhalter-Karte mit Hinweis, wann er erscheint. Sobald vorberichtUrl bzw.
     nachberichtUrl gesetzt ist, ersetzt die echte Karte den Platzhalter von selbst."""
     aufbau = game.get("seitenaufbau") or {}
@@ -426,14 +426,11 @@ def story_section(game, phase, news):
                    else platzhalter_karte("Nachbericht", aufbau["nachbericht"]) if aufbau.get("nachbericht") else None)
     vorbericht = (story_karte("Vorbericht", game["vorberichtUrl"], news) if game.get("vorberichtUrl")
                   else platzhalter_karte("Vorbericht", aufbau["vorbericht"]) if aufbau.get("vorbericht") else None)
+    # Reihenfolge wie bei der Seite zum ersten Heimspiel: Nachbericht oben, darunter der Vorbericht.
     karten = []
-    if phase == "danach":
-        karten = [nachbericht, vorbericht]
-    else:
-        if aufbau.get("teaser"):
-            karten.append(platzhalter_karte("Zum Spiel", aufbau["teaser"]))
-        # Vor dem Spiel in zeitlicher Reihenfolge, ein vorhandener Nachbericht (am Spieltag) zuerst
-        karten += [nachbericht, vorbericht] if game.get("nachberichtUrl") else [vorbericht, nachbericht]
+    if aufbau.get("teaser"):   # optional, im Probelauf 18.10.2026 bewusst nicht benutzt
+        karten.append(platzhalter_karte("Zum Spiel", aufbau["teaser"]))
+    karten += [nachbericht, vorbericht]
     karten = [k for k in karten if k]
     if not karten:
         return ""
