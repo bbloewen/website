@@ -291,7 +291,9 @@ window.initNav = function initNav() {
     window.addEventListener('resize', setHeroWrapHeight);
   }
 
-  if (hero && heroInner && !prefersReducedMotion) {
+  /* Heroes mit Formular oder Infobox (Klasse hero-static, z. B. crestcom-Einladung) blenden
+     nicht aus: Inhalt, den man bedienen soll, darf beim Scrollen nicht durchsichtig werden. */
+  if (hero && heroInner && !prefersReducedMotion && !hero.classList.contains('hero-static')) {
     var onHeroScroll = function () {
       var progress = Math.min(window.scrollY / hero.offsetHeight, 1);
       heroInner.style.transform = 'translateY(' + (progress * -50) + 'px)';

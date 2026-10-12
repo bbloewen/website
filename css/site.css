@@ -3184,7 +3184,7 @@ a.training-group-header:hover { color: var(--color-brand-orange); }
 @media (max-width: 420px) { .cc-sponsor { gap: 10px; padding: 8px 16px; } .cc-sponsor-label { font-size: 11px; letter-spacing: .04em; } .cc-sponsor img { height: 22px; } }
 
 /* Spielinfo als ruhiges Glas-Panel statt vier Kacheln */
-.cc-match { background: rgba(0, 18, 45, .58); border: 1px solid rgba(255, 255, 255, .2); border-radius: var(--radius-lg); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); width: 100%; max-width: 560px; }
+.cc-match { background: rgba(0, 18, 45, .72); border: 1px solid rgba(255, 255, 255, .2); border-radius: var(--radius-lg); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); width: 100%; max-width: 560px; }
 .cc-match-row { display: flex; align-items: center; gap: 16px; padding: 16px 18px; color: #fff; }
 .cc-match-row + .cc-match-row { border-top: 1px solid rgba(255, 255, 255, .16); }
 .cc-match-row > svg { flex-shrink: 0; color: var(--color-orange-300); }
@@ -3193,6 +3193,12 @@ a.training-group-header:hover { color: var(--color-brand-orange); }
 .cc-match-text span { font-size: 14px; opacity: .8; }
 .cc-match-link { flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; border: 1.5px solid rgba(255, 255, 255, .45); transition: all var(--dur-fast) var(--ease-out); }
 .cc-match-link:hover, .cc-match-link:focus-visible { background: var(--color-brand-orange); border-color: var(--color-brand-orange); color: var(--color-brand-navy); }
+/* Mobil: Infobox und Formular vollständig deckend, damit sie vor dem Foto gut lesbar bleiben */
+@media (max-width: 980px) {
+  .cc-match { background: #0b2347; border-color: rgba(255, 255, 255, .28); backdrop-filter: none; -webkit-backdrop-filter: none; max-width: none; }
+  .cc-form-card { background: #fff; opacity: 1; }
+  .cc-sponsor { background: #fff; }
+}
 
 /* Formular: kompakt, fest im Hero, kein eigenes Scrollen */
 .cc-form-card { background: #fff; border-radius: var(--radius-xl); padding: clamp(18px, 2vw, 26px); box-shadow: 0 18px 50px rgba(0, 18, 45, .35); color: var(--text-primary); }
