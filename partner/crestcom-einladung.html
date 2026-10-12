@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1791836534" />
+<link rel="stylesheet" href="/css/site.css?v=1791837663" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
@@ -279,27 +279,29 @@
           <input type="text" name="website" id="cc-website" class="cc-hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
           <input type="hidden" name="umfrage" id="cc-umfrage" value="" />
 
+          <div class="field">
+            <label for="cc-firma">Firma *</label>
+            <input type="text" id="cc-firma" name="firma" autocomplete="organization" required />
+          </div>
           <div class="cc-row">
-            <div class="field">
-              <label for="cc-firma">Firma *</label>
-              <input type="text" id="cc-firma" name="firma" autocomplete="organization" required />
-            </div>
             <div class="field">
               <label for="cc-ap-name">Ansprechpartner *</label>
               <input type="text" id="cc-ap-name" name="ansprechpartner" autocomplete="name" required />
             </div>
-          </div>
-          <div class="cc-row">
             <div class="field">
               <label for="cc-ap-mail">E-Mail *</label>
               <input type="email" id="cc-ap-mail" name="ap_email" autocomplete="email" required />
             </div>
-            <div class="field">
-              <label for="cc-ap-tel">Telefon</label>
-              <input type="tel" id="cc-ap-tel" name="ap_telefon" autocomplete="tel" />
-            </div>
           </div>
-          <div class="cc-row">
+          <div class="field">
+            <label for="cc-ap-tel">Telefon</label>
+            <input type="tel" id="cc-ap-tel" name="ap_telefon" autocomplete="tel" />
+          </div>
+          <div class="field-checkbox cc-same">
+            <input type="checkbox" id="cc-gf-same" name="gf_same" />
+            <label for="cc-gf-same">Der Ansprechpartner ist die Geschäftsführung</label>
+          </div>
+          <div class="cc-row" id="cc-gf-row">
             <div class="field">
               <label for="cc-gf-name">Geschäftsführung *</label>
               <input type="text" id="cc-gf-name" name="gf_name" required />
@@ -658,6 +660,11 @@
 
   var vorgabe = parseInt(params.get('ma'), 10);
   if (vorgabe) maInput.value = Math.max(10, Math.min(50, vorgabe));
+  var gfRow = document.getElementById('cc-gf-row');
+  form.gf_same.addEventListener('change', function () {
+    gfRow.hidden = form.gf_same.checked;
+    form.gf_name.required = !form.gf_same.checked;
+  });
   document.getElementById('cc-minus').addEventListener('click', function () { setze((parseInt(maInput.value, 10) || 10) - 1); });
   document.getElementById('cc-plus').addEventListener('click', function () { setze((parseInt(maInput.value, 10) || 9) + 1); });
   maInput.addEventListener('input', zeigeSumme);
@@ -699,8 +706,9 @@
     if (!form.firma.value.trim()) fehlt.push(FELDNAMEN.firma);
     if (!form.ansprechpartner.value.trim()) fehlt.push(FELDNAMEN.ansprechpartner);
     if (!MAILMUSTER.test(form.ap_email.value.trim())) fehlt.push(FELDNAMEN.ap_email);
-    if (!form.gf_name.value.trim()) fehlt.push(FELDNAMEN.gf_name);
-    if (form.gf_email.value.trim() && !MAILMUSTER.test(form.gf_email.value.trim())) fehlt.push(FELDNAMEN.gf_email);
+    var gfGleich = form.gf_same.checked;
+    if (!gfGleich && !form.gf_name.value.trim()) fehlt.push(FELDNAMEN.gf_name);
+    if (!gfGleich && form.gf_email.value.trim() && !MAILMUSTER.test(form.gf_email.value.trim())) fehlt.push(FELDNAMEN.gf_email);
     var n = parseInt(maInput.value, 10);
     if (!(n >= 10 && n <= maMax)) fehlt.push(FELDNAMEN.mitarbeitende);
     if (!form.datenschutz.checked) fehlt.push(FELDNAMEN.datenschutz);
@@ -715,8 +723,8 @@
       ansprechpartner: form.ansprechpartner.value.trim(),
       ap_email: form.ap_email.value.trim(),
       ap_telefon: form.ap_telefon.value.trim(),
-      gf_name: form.gf_name.value.trim(),
-      gf_email: form.gf_email.value.trim(),
+      gf_name: gfGleich ? form.ansprechpartner.value.trim() : form.gf_name.value.trim(),
+      gf_email: gfGleich ? form.ap_email.value.trim() : form.gf_email.value.trim(),
       mitarbeitende: n,
       anmerkung: '',
       datenschutz: true,

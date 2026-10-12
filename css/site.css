@@ -3203,6 +3203,9 @@ a.training-group-header:hover { color: var(--color-brand-orange); }
 .cc-form-card .field label { margin-bottom: 4px; }
 .cc-form-card .field input { padding: 11px 12px; }
 .cc-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.cc-row[hidden] { display: none; }
+.cc-same { margin: 0 0 10px; align-items: center; }
+.cc-same label { font-size: 14px; }
 @media (max-width: 560px) { .cc-row { grid-template-columns: 1fr; gap: 0; } }
 .cc-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
 .cc-stepper { display: grid; grid-template-columns: 42px minmax(0, 1fr) 42px; gap: 6px; }
