@@ -526,7 +526,7 @@ def gegner_section(game):
     <div class="container">
       <div class="spiel-gegner">
         <div class="spiel-naechstes-text">
-          <span class="eyebrow">Gegner im Überblick</span>
+          <span class="eyebrow">Unser Gegner im Überblick</span>
           <h2 class="t-h3">{gegner}</h2>
           <p class="t-body">Unser Gegner in der ProB Süd.</p>
           {fakten_html}
