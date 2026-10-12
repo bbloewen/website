@@ -538,6 +538,9 @@
     }
 
     function start(game) {
+    /* Preis einer Zeile der Preisbox (data-base) als Zahl, s. prices unten. */
+    function dkBase(id) { return parseFloat(document.getElementById('dk-price-' + id).getAttribute('data-base')); }
+
     var picker = new SeatPicker(document.getElementById('seatplan-root'), {
       nachwuchsBeitrag: true,
       nachwuchsAmount: 2,
@@ -606,22 +609,22 @@
       // waren vorher über gepoolte Sammel-Items (20/21) geregelt, die jetzt deaktiviert
       // sind — Block E/Block B(Kat.1)/Block D/Block F/Block C oben/Block C unten haben
       // seither jeweils ein eigenes Dauerkarte-Item (41/44/43/45/42/46).
-      // Stand 12.10.2026: um ein Heimspiel gekuerzt (Einzelpreis x 12 statt x 13, das erste
-      // Heimspiel ist gespielt). Muss synchron bleiben mit den data-base-Werten oben, den
-      // PRICES-Bloecken in den n8n-Nodes "Preis serverseitig berechnen" / "Mitgliedsrabatt
-      // verifizieren" und den Standardpreisen der Dauer-Items in pretix.
+      // Die Preise kommen aus den data-base-Werten der Preisbox oben, nicht von Hand: sie werden
+      // von tools/build-dauerkartenpreise.py gesetzt (Einzelpreis x (verbleibende Heimspiele - 1),
+      // nach jedem gespielten Heimspiel einen Einzelpreis weniger, Marko 12.10.2026). Der n8n-
+      // Workflow der Dauerkartenbestellung rechnet mit denselben Zahlen (data/dauerkarte-preise.json).
       prices: {
-        'Kategorie I': { normal: 192, ermaessigt: 168 },
-        'Kategorie II': { normal: 144, ermaessigt: 107 },
+        'Kategorie I': { normal: dkBase('kat1'), ermaessigt: dkBase('kat1-erm') },
+        'Kategorie II': { normal: dkBase('kat2'), ermaessigt: dkBase('kat2-erm') },
         // C unten: eigenes Kontingent/Produkt, aber Preis bleibt identisch zu Kategorie II
         // (Marko, 09.08.2026: "Kategorie 2 Pricing") — ohne eigenen Eintrag hier würde
         // _purchasableCategories() diese Kategorie als "kein Preis" herausfiltern und die
         // Kachel/Sitze wären in dieser Datei gar nicht buchbar.
-        'C unten': { normal: 144, ermaessigt: 107 },
-        'Kategorie III': { normal: 126, ermaessigt: 96, kind: 60 },
-        'Fanblock': { normal: 126, ermaessigt: 96 },
-        'Rollstuhlplatz': { normal: 96 },
-        'VIP': { normal: 1191, ermaessigt: 457 }
+        'C unten': { normal: dkBase('kat2'), ermaessigt: dkBase('kat2-erm') },
+        'Kategorie III': { normal: dkBase('kat3'), ermaessigt: dkBase('kat3-erm'), kind: dkBase('kat3-kind') },
+        'Fanblock': { normal: dkBase('fanblock'), ermaessigt: dkBase('fanblock-erm') },
+        'Rollstuhlplatz': { normal: dkBase('rollstuhl') },
+        'VIP': { normal: dkBase('vip'), ermaessigt: dkBase('vip-erm') }
       },
       // Frühbucherrabatt (20 % bis 31.08.2026) am 31.08.2026 ersatzlos entfernt —
       // hier bleibt nur noch der dauerhafte Mitgliedsrabatt des Löwen e.V.

@@ -1,0 +1,36 @@
+{
+  "hinweis": "Dauerkartenpreise. NICHT von Hand aendern: Der Block 'preise' (und 'stand') wird von tools/build-dauerkartenpreise.py geschrieben, taeglich und 4 Stunden nach jedem Heimspiel im Workflow spieltagsseiten-nachbauen.yml. Von Hand gepflegt wird nur 'basis'. Drei Leser: tickets/dauerkarte.html (data-base-Werte, der Game Hub liest sie von dort), der n8n-Workflow der Dauerkartenbestellung (Server rechnet mit 'preise') und der n8n-Workflow 'Dauerkarten: pretix-Standardpreise nachziehen' (setzt die Standardpreise der Dauer-Items in pretix).",
+  "regel": "Preis = Ausgangspreis x (zuBezahlendeSpiele / 13), aufgerundet auf volle Euro. zuBezahlendeSpiele = verbleibende Heimspiele - 1 (mindestens 1). Ein Heimspiel gilt als verbleibend, bis es 4 Stunden nach Anpfiff vorbei ist (dieselbe Regel wie beim Gameday-Hub). Der Ausgangspreis ist der Preis der Saisonkarte mit 14 Heimspielen zum Preis von 13. Bei Einzelpreis x 13 ist das Ergebnis exakt Einzelpreis x zuBezahlendeSpiele; Kategorie 2 ermaessigt (115 statt 110,50) und VIP liegen nicht auf dieser Regel und werden anteilig gekuerzt (Marko, 12.10.2026: auf volle Euro aufrunden).",
+  "basis": {
+    "kat1": 208,
+    "kat1-erm": 182,
+    "kat2": 156,
+    "kat2-erm": 115,
+    "kat3": 136.5,
+    "kat3-erm": 104,
+    "kat3-kind": 65,
+    "fanblock": 136.5,
+    "fanblock-erm": 104,
+    "rollstuhl": 104,
+    "vip": 1290,
+    "vip-erm": 495
+  },
+  "stand": {
+    "verbleibendeHeimspiele": 13,
+    "zuBezahlendeSpiele": 12
+  },
+  "preise": {
+    "kat1": 192,
+    "kat1-erm": 168,
+    "kat2": 144,
+    "kat2-erm": 107,
+    "kat3": 126,
+    "kat3-erm": 96,
+    "kat3-kind": 60,
+    "fanblock": 126,
+    "fanblock-erm": 96,
+    "rollstuhl": 96,
+    "vip": 1191,
+    "vip-erm": 457
+  }
+}

@@ -6,40 +6,34 @@ Merge, Veröffentlichen und alles mit Außenwirkung erst auf seine ausdrücklich
 
 ## Dauerkartenpreise: Regel und die vier Stellen
 
-**Regel (Stand 12.10.2026):** Dauerkarte = Einzelpreis × (verbleibende Heimspiele − 1). Die Saison hat
-14 Heimspiele; ursprünglich „14 zum Preis von 13“ (× 13). Nach dem ersten gespielten Heimspiel (11.10.)
-gilt × 12, **nach jedem weiteren gespielten Heimspiel sinkt jeder Preis um einen weiteren Einzelpreis.**
-Das nächste Mal nach dem Spiel am 18.10. Aktuell (Basispreis, vor 30 % Mitgliedsrabatt):
+**Regel (Stand 12.10.2026, seit dem Tag automatisiert):** Dauerkarte = Ausgangspreis × (verbleibende Heimspiele − 1) / 13,
+aufgerundet auf volle Euro. Die Saison hat 14 Heimspiele, ursprünglich „14 zum Preis von 13“. Ein Heimspiel
+„verbleibt“, bis es 4 Stunden nach Anpfiff vorbei ist (wie beim Umschalten des Game Hubs). **Nach jedem
+gespielten Heimspiel sinkt jeder Preis um einen weiteren Einzelpreis, ohne dass jemand etwas tun muss.**
+Stand nach dem ersten Heimspiel (Basispreis, vor 30 % Mitgliedsrabatt): Kategorie 1 / ermäßigt 192 / 168,
+Kategorie 2 144 / 107, Kategorie 3 126 / 96 / Kinder 60, Fanblock 126 / 96, Rollstuhl 96, VIP 1.191 / 457.
 
-| Tarif | Preis | Einzelpreis |
-|---|---|---|
-| Kategorie 1 / ermäßigt | 192 / 168 | 16 / 14 |
-| Kategorie 2 / ermäßigt | 144 / 107 | 12 / 8,50 |
-| Kategorie 3 / ermäßigt / Kinder | 126 / 96 / 60 | 10,50 / 8 / 5 |
-| Fanblock / ermäßigt | 126 / 96 | 10,50 / 8 |
-| Rollstuhlplatz | 96 | 8 |
-| VIP / ermäßigt | 1.191 / 457 | 119 / – |
+Kategorie 2 ermäßigt (115, nicht 13 × 8,50) und VIP (eigener Anker, Catering) liegen nicht auf der Einzelpreis-
+Regel; sie werden anteilig gekürzt, ebenfalls **aufgerundet auf volle Euro** (Entscheidung Marko, 12.10.2026).
 
-Kategorie 2 ermäßigt (war 115, nicht 13 × 8,50) und VIP (eigener Anker, Catering) liegen nicht auf der
-Regel: anteilig × 12/13, **aufgerundet auf volle Euro** (Entscheidung Marko, 12.10.2026). Bei der nächsten
-Kürzung dieselbe Methode und vorher bei Marko bestätigen lassen.
+**Gerechnet wird nur an einer Stelle:** `tools/build-dauerkartenpreise.py` schreibt `data/dauerkarte-preise.json`
+(Blöcke `stand`, `preise`) und die `data-base`-Werte in `tickets/dauerkarte.html`. Von Hand gepflegt wird nur der
+Block `basis` (Ausgangspreise) in der JSON. Das Skript läuft im Workflow `spieltagsseiten-nachbauen.yml` (täglich
+und alle 20 Minuten am Abend, vor dem Hub-Bau) und in `tools/bauen.sh`. Die Leser:
 
-**Die Preise stehen an vier Stellen, immer alle zusammen ändern:**
+1. `tickets/dauerkarte.html` (das `prices`-Objekt liest die `data-base`-Werte) und der Game Hub (liest `data-base`).
+2. n8n „Ticketing: Bestellprozess - Dauerkartenbestellung verarbeiten“ (`HyUXW4kbhaQVbG0A`): Node
+   „Dauerkartenpreise laden“ holt die JSON, „Preis serverseitig berechnen“ rechnet damit (Rückfallliste bei
+   Fehler), „Mitgliedsrabatt verifizieren“ nutzt dieselbe Tabelle. **Änderungen am Workflow erst nach `publish_workflow`.**
+3. n8n „Dauerkarten: pretix-Standardpreise nachziehen“ (`Tgrxrv7iFW5WP8nd`, alle 30 Minuten): setzt `default_price`
+   der Dauer-Items 37 bis 47 und ihrer Variationen in pretix, nur bei Abweichung. Item 91 (Stehplatz-Dauer) bleibt 0 €.
+4. Doku: `TICKETING-BACKEND.md` und in Notion „Ticketing/ Sitzplan & Bestellungen“, „Ticketpreise 2026/27“
+   (die Notion-Seite „Themen-Spieltage“ nennt ebenfalls Preise).
 
-1. `tickets/dauerkarte.html`: sichtbare Preise, `data-base`, `prices`-Objekt im Skript. Der Game Hub
-   (`saison/profis/gameday/index.html`) liest die `data-base`-Werte beim Bauen (`tools/bauen.sh`), dort
-   nichts von Hand ändern.
-2. n8n-Workflow „Ticketing: Bestellprozess - Dauerkartenbestellung verarbeiten“ (`HyUXW4kbhaQVbG0A`):
-   zwei identische `PRICES`-Blöcke in „Preis serverseitig berechnen“ und „Mitgliedsrabatt verifizieren“.
-   Der Server rechnet selbst. **Nach jeder Änderung veröffentlichen**, sonst läuft die alte Fassung.
-3. pretix, Event `saison2627`: `default_price` der Dauer-Items und Variationen (Items 37 bis 47; Item 91
-   Stehplatz-Dauer bleibt 0 €). Nach dem Setzen per API nachlesen.
-4. Doku: `TICKETING-BACKEND.md` und in Notion die Seiten „Ticketing/ Sitzplan & Bestellungen“ und
-   „Ticketpreise 2026/27“ (Notion-Seite „Themen-Spieltage“ nennt ebenfalls Preise).
-
-Reihenfolge beim Ändern: n8n und pretix zuerst, Webseite zuletzt (die Webseite schickt keine Summe, der
-Server rechnet). Gespielte Heimspiele schließt der Knoten „Ausgeschlossene Subevents ermitteln“ aus neuen
-Dauerkarten aus; bestehende Dauerkarten bleiben unberührt.
+**Ändert sich die Regel oder ein Ausgangspreis, nur `basis` bzw. das Skript anfassen**, dann
+`python3 tools/build-dauerkartenpreise.py` laufen lassen und vorher bei Marko bestätigen. Gespielte Heimspiele
+schließt der Knoten „Ausgeschlossene Subevents ermitteln“ aus neuen Dauerkarten aus; bestehende Dauerkarten
+bleiben unberührt.
 
 ## Weitere feste Regeln
 
