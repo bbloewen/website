@@ -163,6 +163,11 @@ def hero(s, heute):
         f'{esc(zeile)}</p>'
         if kalender_link else f'<p class="lead">{esc(zeile)}</p>'
     )
+    # Lange Vereinsnamen (z. B. "TSG Schöller SI Ravens Reutlingen", 33 Zeichen): kleinere Schrift und der Name
+    # bricht nicht mehr mitten im Namen um, sondern allenfalls vor ihm (Marko, 13.10.2026).
+    lang = len(s["gegner"]) > 28
+    h1_groesse = "clamp(17px,3.2vw,36px)" if lang else "clamp(22px,3.4vw,40px)"
+    kw_nowrap = ' style="white-space:nowrap"' if lang else ""
     return f"""  <section class="hero-photo hero-tickets hero-half">
     <div class="container">
       <div class="hero-lg-grid">
@@ -172,7 +177,7 @@ def hero(s, heute):
                mit dem ausgeschriebenen "Basketball Löwen Erfurt vs." passt die Zeile sonst nicht
                mehr in die Spalte und die Seite scrollt waagerecht. Andere Hero-Varianten loesen
                das ueber eigene Klassen (hero-article, hero-lg, ...), hier inline wie die Groesse. -->
-          <h1 style="font-size:clamp(22px,3.4vw,40px);white-space:normal">Basketball Löwen Erfurt vs. <span class="kw">{esc(s['gegner'])}<span class="swoosh" aria-hidden="true"></span></span>.</h1>
+          <h1 style="font-size:{h1_groesse};white-space:normal">Basketball Löwen Erfurt vs. <span class="kw"{kw_nowrap}>{esc(s['gegner'])}<span class="swoosh" aria-hidden="true"></span></span>.</h1>
           {zeit_zeile}
           <a class="hero-location" href="{MAPS}" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Riethsporthalle, Essener Straße 20, 99089 Erfurt</a>
         </div>
