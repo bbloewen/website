@@ -1,0 +1,29 @@
+{
+  "notionId": "3efa2418-e2d7-8124-a009-e540ce124c02",
+  "status": "pruefung",
+  "hinweis": "Schnellweg 13.10.2026: Text aus dem Liveticker der 2. Basketball-Bundesliga (Spiel 2006152, n8n \"Website: Liveticker auswerten\"), Viertel aus Löwen-Sicht, Spielernamen aus der Data Table \"Liveticker Spieler\". Kein O-Ton. Hero-Bild: Foto 160 aus dem Ordner 261011_H_Porsche BBA Ludwigsburg (Mannschaft im Kreis), bei Bedarf gegen ein Foto aus Langen tauschen.",
+  "datum": "2026-10-13",
+  "team": "profis",
+  "slug": "spielbericht-tv-langen",
+  "titel": "63:71 beim TV Langen: Basketball Löwen Erfurt kämpfen sich nach schwachem Start zurück ins Spiel",
+  "lead": "Die Basketball Löwen Erfurt haben das Auswärtsspiel beim TV Langen am 13. Oktober 2026 mit 63:71 verloren. Nach einem schwachen ersten Viertel kämpfte sich das Team bis zur Pause auf zwei Punkte heran und blieb bis zum Schluss im Spiel.",
+  "beschreibung": "Basketball Löwen Erfurt unterliegen beim TV Langen 63:71. Nach schwachem Start kämpfte sich das Team zur Pause auf zwei Punkte heran.",
+  "kategorie": "Spielbericht",
+  "icon": "trophy",
+  "tint": "tint-blue",
+  "topNews": false,
+  "bild": "spielbericht-tv-langen.webp",
+  "heroPosition": "center 40%",
+  "markdown": "### Schwacher Start, starkes zweites Viertel\n\nDie Basketball Löwen Erfurt haben ihr Auswärtsspiel beim [TV Langen](https://langen-basketball.de/) am Dienstag, 13. Oktober 2026, in der BARMER 2. Basketball Bundesliga ProB mit 63:71 verloren. Nach einem schwachen ersten Viertel (10:19) kämpften sich die Löwen mit einem 20:13 im zweiten Abschnitt bis zur Pause auf 30:32 heran und blieben im Spiel. Im dritten Viertel setzte sich Langen wieder ab (12:18 aus Sicht der Löwen), im Schlussviertel hielten die Erfurter dagegen: 21:21. Am Ende fehlten acht Punkte.\n\n### Claßen und Watkins vorn\n\nTim Claßen war mit 16 Punkten bester Werfer der Löwen und traf fünf seiner sechs Zweipunktwürfe. Anthony Watkins steuerte 14 Punkte bei, darunter vier Dreier. Marko Bacak kam auf sieben Punkte und fünf Rebounds, Jasper Brand und Samuel Elias Nellessen holten je sieben Rebounds. Mit zwölf Offensivrebounds und acht Ballgewinnen zeigte das Team Einsatz. Bester Mann der Gastgeber war Langens Nummer 8 mit 20 Punkten und 15 Rebounds.\n\n### Lernpunkte für die nächsten Spiele\n\nAus dem Abend nimmt die junge Mannschaft zwei Lernpunkte mit: 23 Ballverluste und eine Dreierquote von 30 Prozent (10 von 33 Versuchen) kosteten Punkte. Dass die Löwen trotzdem bis zum Schluss im Spiel blieben, zeigt, wie viel in der Mannschaft steckt.\n\n### Weiter geht es in Erfurt\n\nFür die Basketball Löwen Erfurt und den Sport in Erfurt geht es schon am Sonntag, 18. Oktober 2026, um 17 Uhr in der Riethsporthalle weiter. Zu Gast ist die [TSG Schöller SI Ravens Reutlingen](https://basketball-loewen.com/saison/profis/gameday/2026-10-18-tsg-reutlingen-ravens.html); Tickets und Infos stehen auf der Spieltagsseite. Danach reisen die Löwen am Samstag, 24. Oktober 2026, um 17:30 Uhr zum SV Fellbach Flashers. Alle Termine stehen im [Spielplan](https://basketball-loewen.com/saison/spielplan.html).",
+  "h1": "63:71 beim TV Langen: Basketball Löwen Erfurt kämpfen sich nach schwachem Start zurück ins Spiel",
+  "kurzfassung": [
+    "63:71 beim TV Langen am 13. Oktober 2026 in der ProB-Saison 2026/27.",
+    "Nach 10:19 im ersten Viertel holten die Löwen das zweite Viertel mit 20:13 und gingen mit 30:32 in die Pause, das Schlussviertel endete 21:21.",
+    "Tim Claßen (16 Punkte) und Anthony Watkins (14) punkten zweistellig; 23 Ballverluste und die Dreierquote sind die Lernpunkte."
+  ],
+  "spiel": {
+    "datum": "13.10.2026",
+    "feld": "nachberichtUrl"
+  },
+  "quellbild": "data/artikel-eingang/bilder/spielbericht-tv-langen.jpg"
+}
