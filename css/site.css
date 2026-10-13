@@ -3229,6 +3229,7 @@ a.training-group-header:hover { color: var(--color-brand-orange); }
 .cc-consent label { font-size: 12.5px; line-height: 1.45; }
 .cc-form-hint { margin: 12px 0 0; font-size: 14px; text-align: center; color: var(--text-muted); }
 .cc-form-hint a { font-weight: var(--weight-semibold); }
+.cc-form-help { margin-top: 8px; }
 .cc-state[hidden], .cc-form-card form[hidden] { display: none; }
 .cc-state .t-h4 { margin: 0 0 10px; }
 .cc-danke-icon { margin-bottom: 14px; }
