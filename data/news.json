@@ -38,6 +38,18 @@
       "team": "profis"
     },
     {
+      "datum": "13.10.2026",
+      "kategorie": "Spielbericht",
+      "tint": "tint-blue",
+      "icon": "trophy",
+      "titel": "63:71 beim TV Langen: Basketball Löwen Erfurt verlieren umkämpftes Auswärtsspiel",
+      "kurztext": "Basketball Löwen Erfurt verlieren beim TV Langen 63:71. Nach schwachem Start kämpft sich das Team bis zur Pause auf zwei Punkte heran.",
+      "url": "/news/artikel/2026-10-13_profis_spielbericht-tv-langen.html",
+      "bild": "/assets/img/news/spielbericht-tv-langen.webp",
+      "topNews": false,
+      "team": "profis"
+    },
+    {
       "datum": "09.10.2026",
       "kategorie": "Profis",
       "tint": "tint-orange",
