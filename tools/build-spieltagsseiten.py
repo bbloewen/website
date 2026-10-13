@@ -660,6 +660,9 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
     news = news if news is not None else lade_news()
     d = parse_dmy(game["datum"])
     gegner = html.escape(game["gegner"])
+    # Lange Vereinsnamen (z. B. "TSG Schöller SI Ravens Reutlingen", 33 Zeichen) bekommen eine kleinere
+    # Hero-Schrift, damit die Ueberschrift auch mobil in einer Zeile bleibt (Marko, 13.10.2026).
+    h1_groesse = "clamp(17px,3.6vw,42px)" if len(game["gegner"]) > 28 else "clamp(20px,5vw,56px)"
     url = f"https://basketball-loewen.com/saison/profis/gameday/{game['seiteSlug']}.html"
 
     if phase == "danach":
@@ -791,7 +794,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
       <div class="hero-lg-grid">
         <div>
           <span class="eyebrow">{eyebrow}</span>
-          <h1 class="nowrap-lg" style="font-size:clamp(20px,5vw,56px)"><span class="kw">{gegner}<span class="swoosh" aria-hidden="true"></span></span>.</h1>
+          <h1 class="nowrap-lg" style="font-size:{h1_groesse}"><span class="kw">{gegner}<span class="swoosh" aria-hidden="true"></span></span>.</h1>
           <p class="lead">{kalender_menue(kalender_link, d)} {html.escape(zeit_text)}</p>
           <a class="hero-location" href="{RIETHSPORTHALLE_MAPS_URL}" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Riethsporthalle, Essener Straße 20, 99089 Erfurt</a>
 {hero_links(game, phase)}        </div>
