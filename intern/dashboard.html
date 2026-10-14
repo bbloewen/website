@@ -3783,6 +3783,16 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   function ueZeileSichern(p, zeilenId) {
     return uePost('posten-zeile', { mandant: UE.mandant, fall_id: zeilenId, eingang: !p.erstattung, gegenpartei: p.gegenpartei, betrag: p.betrag, datum: p.datum, rechnungsnr: p.rechnungsnr });
   }
+  async function ueLastschrift(fallId, an, posten) {
+    UE.fehlerAktion = ''; UE.meldung = '';
+    try {
+      if (posten) await ueZeileSichern(posten, posten.fallId);
+      var r = await uePost('posten-lastschrift', { mandant: UE.mandant, fall_id: fallId, lastschrift: an });
+      if (!r.ok) throw new Error(r.meldung || 'Nicht gespeichert');
+      UE.meldung = an ? 'Beleg ' + fallId + ' ist als Lastschrift gekennzeichnet und steht nicht mehr in der Überweisungsliste.' : 'Die Lastschrift-Kennzeichnung bei Beleg ' + fallId + ' ist zurückgenommen.';
+      await ladeUE(true);
+    } catch (e) { UE.fehlerAktion = e.message; renderUE(); }
+  }
   async function ueSpeichern(p, art, wert, btn) {
     UE.fehlerAktion = ''; UE.meldung = '';
     try {
@@ -3854,7 +3864,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var empf = '<div>' + esc(p.empfaenger) + '</div><div class="notiz" style="margin:0">Kreditor ' + esc(p.kreditor || '–') + (p.kst2 ? ' · KST2 ' + esc(p.kst2) : '') + '</div>';
     var zweck = '<input type="text" class="eingabe-klein" style="width:100%;min-width:190px" maxlength="120" data-ue="zweck" data-key="' + esc(p.key) + '" value="' + esc(p.zweckBasis) + '" aria-label="Verwendungszweck Beleg ' + esc(p.fallId) + '"' + (p.inDatei ? ' disabled' : '') + '>' + (p.teilAnzahl ? '<div class="notiz" style="margin:0">+ · ' + p.teilIndex + '. von ' + p.teilAnzahl + '. Zahlungen</div>' : '');
     var faellig = '<input type="date" class="eingabe-klein" style="width:130px;flex:none" data-ue="faellig" data-key="' + esc(p.key) + '" value="' + esc(p.faellig) + '" aria-label="Fälligkeit Beleg ' + esc(p.fallId) + '"' + (p.inDatei ? ' disabled' : '') + '>' + (p.faellig ? '' : '<div class="notiz" style="margin:0">ohne Angabe: sofort</div>') + (p.faelligQuelle === 'bhb' ? '<div class="notiz" style="margin:0">laut Rechnung</div>' : '');
-    return '<tr><td>' + chk + '</td><td>' + beleg + '</td><td>' + empf + '</td><td>' + zweck + '</td><td>' + faellig + '</td><td style="text-align:right;white-space:nowrap"><div style="font-weight:500">' + esc(formatEuro(p.betrag)) + '</div>' + vText + '</td><td>' + bank + '</td></tr>';
+    var ls = p.inDatei ? '' : '<div><button type="button" class="link-btn" data-ue="lastschrift" data-key="' + esc(p.key) + '" title="Die Firma zieht den Betrag selbst ein, es ist nichts zu überweisen">Lastschrift</button></div>';
+    return '<tr><td>' + chk + ls + '</td><td>' + beleg + '</td><td>' + empf + '</td><td>' + zweck + '</td><td>' + faellig + '</td><td style="text-align:right;white-space:nowrap"><div style="font-weight:500">' + esc(formatEuro(p.betrag)) + '</div>' + vText + '</td><td>' + bank + '</td></tr>';
   }
   function renderUE() {
     var el = $('p-ueberweisungen'); if (!el) return;
@@ -3889,6 +3900,14 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       else h += '<button type="button" class="link-btn" data-ue="datei" data-konto="' + k + '">Zahlungsdatei erzeugen</button>';
       h += '</span></div></div>';
     });
+    var lsl = d.lastschriften || [];
+    if (lsl.length) {
+      h += '<div class="card scroll-x"><div class="card-kopf zeile-titel" style="margin:0"><span>Als Lastschrift gekennzeichnet · ' + esc(zahl(lsl.length)) + ' (werden von der Firma eingezogen, nicht überwiesen)</span></div><table class="tbl kompakt"><tbody>';
+      lsl.forEach(function (l) {
+        h += '<tr><td>' + esc(l.gegenpartei || '–') + '</td><td>' + (l.link ? '<a href="' + esc(l.link) + '" target="_blank" rel="noopener">' + esc(l.rechnungsnr || ('Beleg ' + l.fallId)) + '</a>' : esc(l.rechnungsnr || ('Beleg ' + l.fallId))) + '</td><td style="text-align:right">' + esc(formatEuro(l.betrag)) + '</td><td><button type="button" class="link-btn" data-ue="lastschrift-zurueck" data-fall="' + esc(l.fallId) + '">zurücknehmen</button></td></tr>';
+      });
+      h += '</tbody></table></div>';
+    }
     h += '<div><button type="button" class="link-btn" data-ue="neu">Aktualisieren</button> <button type="button" class="link-btn" data-ue="abgleichen"' + (UE.holen ? ' disabled' : '') + '>' + (UE.holen ? 'gleiche ab …' : 'Mit BuchhaltungsButler abgleichen') + '</button></div>' +
       '<div class="notiz">Offen ist ein gebuchter Beleg ab 01.07.2026 ohne zugeordnete Zahlung. Dazu kommen Belege aus dem Dashboard, die noch nicht in BuchhaltungsButler gebucht sind (Rechnungen per Überweisung und Auslagen): sie sind nur vorangehakt, wenn du sie in den Rückfragen bestätigt hast. Zahlst du vor dem Buchen, ordnet BuchhaltungsButler die Zahlung beim Buchen selbst zu. Abgänge auf dem Konto, die zu einem Posten passen, setzen den Haken zurück („wohl schon bezahlt“). Lastschriften stehen nicht in der Liste. Beträge über 100.000 € werden in gleiche Teile geteilt.</div></div>';
     el.innerHTML = h;
@@ -3908,6 +3927,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var w = b.getAttribute('data-ue');
       if (w === 'mandant') { UE.mandant = b.getAttribute('data-m'); UE.bereit = ''; UE.meldung = ''; UE.fehlerAktion = ''; if (UE.daten[UE.mandant]) renderUE(); else ladeUE(); }
       else if (w === 'datei') ueDatei(b.getAttribute('data-konto'));
+      else if (w === 'lastschrift') { var pl = ueFinden(b.getAttribute('data-key')); if (pl) ueLastschrift(pl.fallId, true, pl); }
+      else if (w === 'lastschrift-zurueck') ueLastschrift(b.getAttribute('data-fall'), false, null);
       else if (w === 'abbrechen') { UE.bereit = ''; renderUE(); }
       else if (w === 'neu') { UE.meldung = ''; ladeUE(); }
       else if (w === 'abgleichen') ueAbgleichen();
