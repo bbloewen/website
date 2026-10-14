@@ -3608,8 +3608,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   // Zeile je Spieltag. Vorschlag aus pretix (Dauerkarten, Einzeltickets Vorverkauf, Abendkasse); Kartenumsatz der
   // Terminals und Ausschank-Gutscheine kommen aus den Kassenbelegen bzw. werden von Hand eingetragen. „Festhalten“ speichert die Zeile.
   var AW = { daten: null, fehler: null, laedt: false, edit: {}, meldung: '', fehlerAktion: '', speichert: '' };
-  var AW_FELDER = ['gesamt_besucher', 'dauerkarten', 'einzel_vvk_anzahl', 'einzel_vvk_euro', 'abendkasse_anzahl', 'abendkasse_euro', 'kasse_ticketing_euro', 'ausschank_euro', 'ausschank_gutscheine'];
-  var AW_EURO = { einzel_vvk_euro: 1, abendkasse_euro: 1, kasse_ticketing_euro: 1, ausschank_euro: 1 };
+  var AW_FELDER = ['gesamt_besucher', 'dauerkarten', 'einzel_vvk_anzahl', 'einzel_vvk_euro', 'abendkasse_anzahl', 'kasse_ticketing_euro', 'abendkasse_bar_euro', 'ausschank_euro', 'ausschank_bar_euro', 'ausschank_gutscheine'];
+  var AW_EURO = { einzel_vvk_euro: 1, kasse_ticketing_euro: 1, abendkasse_bar_euro: 1, ausschank_euro: 1, ausschank_bar_euro: 1 };
   async function ladeAW() {
     AW.laedt = true; AW.fehler = null; renderAW();
     try {
@@ -3658,9 +3658,10 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (z.vorschlag && z.vorschlag[f] != null) return z.vorschlag[f];
     return '';
   }
-  // Einnahmen je Besucher: Einzeltickets Vorverkauf + Abendkasse (pretix, ohne Dauerkarten) + Ausschank (Kartenumsatz) geteilt durch die Besucherzahl.
-  // Der Kartenumsatz des Ticketing-Terminals steckt schon in der Abendkasse und wird nicht noch einmal gezählt.
-  function awEinnahmen(z) { return awZahl(awWert(z, 'einzel_vvk_euro')) + awZahl(awWert(z, 'abendkasse_euro')) + awZahl(awWert(z, 'ausschank_euro')); }
+  // Einnahmen: Einzeltickets Vorverkauf (pretix) + Abendkasse (Terminal-Umsatz + Barkasse) + Ausschank (Terminal-Umsatz + Barkasse), ohne Dauerkarten.
+  // Die Abendkasse aus pretix steht nur zur Kontrolle am Feld „Abendkasse Karte €“: sie ist derselbe Umsatz wie der des Terminals und wird nie zusätzlich gezählt.
+  function awEinnahmenSumme(t) { return t.einzel_vvk_euro + t.kasse_ticketing_euro + t.abendkasse_bar_euro + t.ausschank_euro + t.ausschank_bar_euro; }
+  function awEinnahmen(z) { var t = {}; AW_FELDER.forEach(function (f) { t[f] = awZahl(awWert(z, f)); }); return awEinnahmenSumme(t); }
   function awJeBesucher(einnahmen, besucher) { return besucher > 0 ? einnahmen / besucher : null; }
   function awZahl(v) { if (v === '' || v === null || v === undefined) return 0; var n = Number(String(v).replace(',', '.')); return isNaN(n) ? 0 : n; }
   function awSummen() {
@@ -3685,15 +3686,15 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (AW.meldung) h += '<div class="notiz" role="status">' + esc(AW.meldung) + '</div>';
     if (AW.fehlerAktion) h += '<div class="fehlerbox" role="alert">' + esc(AW.fehlerAktion) + '</div>';
     h += '<div class="card scroll-x"><div class="card-kopf"><div style="font-weight:500">Auswertung je Spieltag</div>' +
-      '<div class="unter">Vorschlag aus pretix, Kartenumsatz laut Kassenbelegen (Terminal Ticketing 60002672, Ausschank 60002670). Besucher gesamt = Dauerkarten + Einzeltickets Vorverkauf + Abendkasse, falls nicht überschrieben. Einnahmen gesamt = Einzel VVK € + Abendkasse € + Ausschank Karte € (ohne Dauerkarten). Einnahmen je Besucher = Einnahmen gesamt geteilt durch die Besucher. Zahlen anpassen und „Festhalten“ drücken.</div></div>' +
-      '<table class="tbl kompakt aw"><thead><tr><th>Spieltag</th><th>Besucher gesamt</th><th>Dauerkarten</th><th>Einzel VVK Anzahl</th><th>Einzel VVK €</th><th>Abendkasse Anzahl</th><th>Abendkasse €</th><th>Karte Ticketing €</th><th>Ausschank Karte €</th><th>Ausschank Gutscheine</th><th>Einnahmen gesamt</th><th>Einnahmen je Besucher</th><th></th></tr></thead><tbody>';
-    if (!zeilen.length) h += '<tr><td colspan="13" class="leer">Noch keine Spieltage.</td></tr>';
+      '<div class="unter">Vorschlag aus pretix für Besucher, Dauerkarten, Vorverkauf und Abendkasse-Anzahl. Umsatz kommt vom Terminal (Ticketing 60002672, Ausschank 60002670, laut Kassenbelegen) plus Barkasse. Besucher gesamt = Dauerkarten + Einzeltickets Vorverkauf + Abendkasse, falls nicht überschrieben. Einnahmen gesamt = Einzel VVK € + Abendkasse Karte € + Abendkasse bar € + Ausschank Karte € + Ausschank bar € (ohne Dauerkarten); die Abendkasse aus pretix zählt nicht mit, sie ist derselbe Umsatz wie der Terminal. Einnahmen je Besucher = Einnahmen gesamt geteilt durch die Besucher. Zahlen anpassen und „Festhalten“ drücken.</div></div>' +
+      '<table class="tbl kompakt aw"><thead><tr><th>Spieltag</th><th>Besucher gesamt</th><th>Dauerkarten</th><th>Einzel VVK Anzahl</th><th>Einzel VVK €</th><th>Abendkasse Anzahl</th><th>Abendkasse Karte €</th><th>Abendkasse bar €</th><th>Ausschank Karte €</th><th>Ausschank bar €</th><th>Ausschank Gutscheine</th><th>Einnahmen gesamt</th><th>Einnahmen je Besucher</th><th></th></tr></thead><tbody>';
+    if (!zeilen.length) h += '<tr><td colspan="14" class="leer">Noch keine Spieltage.</td></tr>';
     zeilen.forEach(function (z) {
       var fest = z.gespeichert && z.gespeichert.festgehalten_am;
       h += '<tr><td><div style="font-weight:500">' + esc(formatDate(z.datum)) + '</div><div class="notiz" style="margin:0">' + esc(z.gegner) + '</div></td>' +
         feld(z, 'gesamt_besucher', 'Besucher gesamt') + feld(z, 'dauerkarten', 'Dauerkarten') + feld(z, 'einzel_vvk_anzahl', 'Einzeltickets Vorverkauf') + feld(z, 'einzel_vvk_euro', 'Einzeltickets Vorverkauf Euro') +
-        feld(z, 'abendkasse_anzahl', 'Abendkasse Anzahl') + feld(z, 'abendkasse_euro', 'Abendkasse Euro') + feld(z, 'kasse_ticketing_euro', 'Karte Ticketing Euro') +
-        feld(z, 'ausschank_euro', 'Ausschank Karte Euro') + feld(z, 'ausschank_gutscheine', 'Ausschank Gutscheine') +
+        feld(z, 'abendkasse_anzahl', 'Abendkasse Anzahl') + feld(z, 'kasse_ticketing_euro', 'Abendkasse Karte Euro') + feld(z, 'abendkasse_bar_euro', 'Abendkasse bar Euro') +
+        feld(z, 'ausschank_euro', 'Ausschank Karte Euro') + feld(z, 'ausschank_bar_euro', 'Ausschank bar Euro') + feld(z, 'ausschank_gutscheine', 'Ausschank Gutscheine') +
         '<td data-aw-ges="' + esc(z.key) + '">' + esc(formatEuro(awEinnahmen(z))) + '</td>' +
         '<td data-aw-je="' + esc(z.key) + '">' + awJeText(z) + '</td>' +
         '<td><button type="button" class="link-btn" data-aw-aktion="festhalten" data-key="' + esc(z.key) + '"' + (AW.speichert === z.key ? ' disabled' : '') + '>' + (AW.speichert === z.key ? 'Speichere …' : 'Festhalten') + '</button>' +
@@ -3701,13 +3702,13 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     });
     var t = awSummen();
     if (zeilen.length) {
-      h += '<tr class="summe" id="aw-summe"><td>Summe</td>' + AW_FELDER.map(function (f) { return '<td data-aw-summe="' + f + '">' + esc(AW_EURO[f] ? formatEuro(t[f]) : zahl(t[f])) + '</td>'; }).join('') + '<td data-aw-summe="ges">' + esc(formatEuro(t.einzel_vvk_euro + t.abendkasse_euro + t.ausschank_euro)) + '</td><td data-aw-summe="je">' + awSummeJe(t) + '</td><td></td></tr>';
+      h += '<tr class="summe" id="aw-summe"><td>Summe</td>' + AW_FELDER.map(function (f) { return '<td data-aw-summe="' + f + '">' + esc(AW_EURO[f] ? formatEuro(t[f]) : zahl(t[f])) + '</td>'; }).join('') + '<td data-aw-summe="ges">' + esc(formatEuro(awEinnahmenSumme(t))) + '</td><td data-aw-summe="je">' + awSummeJe(t) + '</td><td></td></tr>';
     }
     h += '</tbody></table></div><div>' + aktualisierenBtn('auswertung') + '</div></div>';
     el.innerHTML = h;
   }
   function awSummeJe(t) {
-    var v = awJeBesucher(t.einzel_vvk_euro + t.abendkasse_euro + t.ausschank_euro, t.gesamt_besucher);
+    var v = awJeBesucher(awEinnahmenSumme(t), t.gesamt_besucher);
     return v === null ? '–' : esc(formatEuro(v)) + ' Ø';
   }
   function awSummeAktualisieren() {
@@ -3720,7 +3721,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     awZeilen().forEach(function (z) { var n = document.querySelector('[data-aw-je="' + z.key + '"]'); if (n) n.textContent = awJeBesucher(awEinnahmen(z), awZahl(awWert(z, 'gesamt_besucher'))) === null ? '–' : formatEuro(awJeBesucher(awEinnahmen(z), awZahl(awWert(z, 'gesamt_besucher')))); });
     var t = awSummen();
     AW_FELDER.forEach(function (f) { var n = document.querySelector('[data-aw-summe="' + f + '"]'); if (n) n.textContent = AW_EURO[f] ? formatEuro(t[f]) : zahl(t[f]); });
-    var ng = document.querySelector('[data-aw-summe="ges"]'); if (ng) ng.textContent = formatEuro(t.einzel_vvk_euro + t.abendkasse_euro + t.ausschank_euro);
+    var ng = document.querySelector('[data-aw-summe="ges"]'); if (ng) ng.textContent = formatEuro(awEinnahmenSumme(t));
     var nj = document.querySelector('[data-aw-summe="je"]'); if (nj) nj.innerHTML = awSummeJe(t);
     awZeilen().forEach(function (z) { var n = document.querySelector('[data-aw-ges="' + z.key + '"]'); if (n) n.textContent = formatEuro(awEinnahmen(z)); });
   }
