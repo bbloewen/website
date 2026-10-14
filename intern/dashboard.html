@@ -3840,9 +3840,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     }
     var bank;
     if (p.inDatei) bank = '<div class="notiz" style="margin:0">in Datei<br>' + esc(p.inDatei) + '</div>';
-    else if (ok) bank = esc(p.ibanKurz) + (p.ibanQuelle === 'fall' ? '<div class="notiz" style="margin:0">nur für diesen Beleg</div>' : '') + (p.ibanQuelle === 'beleg' ? '<div class="notiz" style="margin:0">IBAN vom Beleg, bitte prüfen</div>' : '') + (p.ibanAbweichung ? '<div class="notiz" style="margin:0;color:var(--color-error)">IBAN am Beleg weicht vom Kreditor ab</div>' : '');
+    else if (ok) bank = esc(p.ibanKurz) + (p.ibanQuelle === 'fall' ? '<div class="notiz" style="margin:0">nur für diesen Beleg</div>' : '') + (p.ibanQuelle === 'beleg' ? '<div class="notiz" style="margin:0">IBAN vom Beleg, bitte prüfen</div>' : '') + (p.ibanQuelle === 'auslagenbeleg' ? '<div class="notiz" style="margin:0">IBAN vom Auslagenbeleg</div>' : '') + (p.ibanAbweichung ? '<div class="notiz" style="margin:0;color:var(--color-error)">IBAN am Beleg weicht vom Kreditor ab</div>' : '');
     else bank = '<div class="notiz" style="margin:0;color:var(--color-error)">' + (p.hatIban ? 'IBAN ungültig' : 'IBAN fehlt') + '</div>' +
-      (p.ibanVorschlag ? '<div class="notiz" style="margin:0">Deckblatt nennt ' + esc(p.ibanVorschlag.replace(/(.{4})/g, '$1 ').trim()) + ' <button type="button" class="link-btn" data-ue="iban-vorschlag" data-key="' + esc(p.key) + '">übernehmen</button></div>' : '') +
       '<input type="text" class="eingabe-klein" style="width:170px;flex:none" placeholder="IBAN nur für diesen Beleg" data-ue="iban" data-key="' + esc(p.key) + '" aria-label="IBAN für Beleg ' + esc(p.fallId) + '">';
     var chk = '<input type="checkbox" data-ue="haken" data-key="' + esc(p.key) + '"' + (ueGewaehlt(p) ? ' checked' : '') + (p.inDatei || !ok ? ' disabled' : '') + ' aria-label="Beleg ' + esc(p.fallId) + ' überweisen">';
     var teil = p.teilAnzahl ? '<div class="notiz" style="margin:0">' + p.teilIndex + '. von ' + p.teilAnzahl + '. Zahlungen</div>' : '';
@@ -3909,7 +3908,6 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var w = b.getAttribute('data-ue');
       if (w === 'mandant') { UE.mandant = b.getAttribute('data-m'); UE.bereit = ''; UE.meldung = ''; UE.fehlerAktion = ''; if (UE.daten[UE.mandant]) renderUE(); else ladeUE(); }
       else if (w === 'datei') ueDatei(b.getAttribute('data-konto'));
-      else if (w === 'iban-vorschlag') { var pv = ueFinden(b.getAttribute('data-key')); if (pv && pv.ibanVorschlag) ueSpeichern(pv, 'iban', pv.ibanVorschlag); }
       else if (w === 'abbrechen') { UE.bereit = ''; renderUE(); }
       else if (w === 'neu') { UE.meldung = ''; ladeUE(); }
       else if (w === 'abgleichen') ueAbgleichen();
