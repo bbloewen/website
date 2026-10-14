@@ -441,6 +441,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   <section id="p-zahlung-lev-lp" role="tabpanel" aria-labelledby="tab-zahlung-lev-lp" hidden></section>
   <section id="p-rueckfragen" role="tabpanel" aria-labelledby="tab-rueckfragen" hidden></section>
   <section id="p-buchungstexte" role="tabpanel" aria-labelledby="tab-buchungstexte" hidden></section>
+  <section id="p-ueberweisungen" role="tabpanel" aria-labelledby="tab-ueberweisungen" hidden></section>
   <section id="p-kostenstellen" role="tabpanel" aria-labelledby="tab-kostenstellen" hidden></section>
   <section id="p-sachkonten-xxl" role="tabpanel" aria-labelledby="tab-sachkonten-xxl" hidden></section>
   <section id="p-sachkonten-lev" role="tabpanel" aria-labelledby="tab-sachkonten-lev" hidden></section>
@@ -705,7 +706,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
     { id: 'segmentierung', name: 'Segmentierung', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
-    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlung XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung LEV Löwenpark' }, { id: 'rueckfragen', name: 'Rückfragen' }, { id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }] }
+    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlung XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung LEV Löwenpark' }, { id: 'ueberweisungen', name: 'Überweisungen' }, { id: 'rueckfragen', name: 'Rückfragen' }, { id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }] }
   ];
   var TABS = [];
   BEREICHE.forEach(function (b) { b.tabs.forEach(function (t) { TABS.push(t.id); }); });
@@ -770,6 +771,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (t === 'sachkonten-xxl') ladeSK('XXL');
     if (t === 'sachkonten-lev') ladeSK('LEV');
     if (t === 'rueckfragen') ladeRF();
+    if (t === 'ueberweisungen') ladeUE();
     // SEO laedt erst, wenn der Tab zum ersten Mal geoeffnet wird: die
     // Sheets-Abfrage dauert laenger als die pretix-Aufrufe und wird beim
     // taeglichen Gutschein-Anlegen gar nicht gebraucht.
@@ -3749,6 +3751,162 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       if (b.getAttribute('data-aw-aktion') === 'festhalten') awFesthalten(b.getAttribute('data-key'));
     });
   }
+  // ---------- Accounting: Überweisungen (offene Posten, Zahlungsdatei) ----------
+  // Port der Zahlungsfunktion des alten Buchungsagent-Boards. Die Posten leitet der Webhook accounting/offene-posten ab
+  // (gebucht, aber ohne zugeordnete Zahlung, ab 01.07.2026), die Zahlungsdatei erzeugt n8n und schickt sie per Mail an Marko.
+  // Das Dashboard löst nie eine Zahlung aus. Fremde IBANs kommen nur gekürzt in die Seite.
+  var UE = { mandant: 'XXL', daten: { XXL: null, LEV: null }, laedt: false, fehler: '', meldung: '', fehlerAktion: '', auswahl: {}, bereit: '', arbeitet: '', holen: false };
+  var UE_KONTEN = { 'XXL': 'XXL Girokonto', 'LEV-GIRO': 'BLEV Girokonto', 'LEV-LOEWENPARK': 'Löwenparkkonto' };
+  async function ladeUE(still) {
+    var m = UE.mandant;
+    if (!still) { UE.laedt = true; UE.fehler = ''; renderUE(); }
+    try {
+      var res = await fetch('/webhook/accounting/offene-posten?mandant=' + m);
+      var d = await res.json();
+      if (!res.ok) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
+      UE.daten[m] = d;
+    } catch (e) { UE.fehler = e.message; }
+    UE.laedt = false; renderUE();
+  }
+  function uePost(pfad, body) {
+    return fetch('/webhook/accounting/' + pfad, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (res) {
+      return res.json().then(function (d) { if (!res.ok) throw new Error(d.message || d.fehler || 'Fehler'); return d; });
+    });
+  }
+  function ueFinden(key) { var d = UE.daten[UE.mandant]; return d ? (d.posten || []).filter(function (p) { return p.key === key; })[0] : null; }
+  function ueGewaehlt(p) {
+    if (p.inDatei || !p.hatIban || !p.ibanOk) return false;
+    var a = UE.auswahl[UE.mandant + '|' + p.key];
+    return a !== undefined ? a : !!p.vorbelegt;
+  }
+  function ueZeileSichern(p, zeilenId) {
+    return uePost('posten-zeile', { mandant: UE.mandant, fall_id: zeilenId, eingang: !p.erstattung, gegenpartei: p.gegenpartei, betrag: p.betrag, datum: p.datum, rechnungsnr: p.rechnungsnr });
+  }
+  async function ueSpeichern(p, art, wert, btn) {
+    UE.fehlerAktion = ''; UE.meldung = '';
+    try {
+      if (art === 'faellig') {
+        await ueZeileSichern(p, p.zeilenId);
+        var r = await uePost('posten-faelligkeit', { mandant: UE.mandant, fall_id: p.zeilenId, faelligkeit: wert });
+        if (!r.ok) throw new Error(r.meldung || 'Fälligkeit nicht gespeichert');
+        UE.meldung = 'Fälligkeit zu Beleg ' + p.fallId + (p.teilIndex ? ' (' + p.teilIndex + '. Teil)' : '') + (wert ? ' ' + formatDate(wert) + ' vermerkt.' : ' entfernt.');
+      } else {
+        await ueZeileSichern(p, p.fallId);
+        var body = { mandant: UE.mandant, fall_id: p.fallId };
+        if (art === 'zweck') body.zahl_zweck = wert; else if (art === 'iban') body.zahl_iban = wert;
+        var r2 = await uePost('posten-zahlweg', body);
+        if (!r2.ok) throw new Error(r2.meldung || 'Nicht gespeichert');
+        UE.meldung = (art === 'zweck' ? 'Verwendungszweck' : 'IBAN (nur für diesen Beleg)') + ' zu Beleg ' + p.fallId + ' gespeichert.';
+      }
+      await ladeUE(true);
+    } catch (e) { UE.fehlerAktion = e.message; renderUE(); }
+  }
+  async function ueDatei(konto) {
+    var d = UE.daten[UE.mandant]; if (!d) return;
+    var dabei = (d.posten || []).filter(function (p) { return p.konto === konto && ueGewaehlt(p); });
+    if (!dabei.length) { UE.fehlerAktion = 'Für ' + UE_KONTEN[konto] + ' ist nichts angehakt.'; UE.bereit = ''; renderUE(); return; }
+    if (UE.bereit !== konto) { UE.bereit = konto; UE.fehlerAktion = ''; renderUE(); return; }
+    UE.arbeitet = konto; UE.bereit = ''; UE.fehlerAktion = ''; UE.meldung = ''; renderUE();
+    try {
+      for (var i = 0; i < dabei.length; i++) { if (!dabei[i].notizVorhanden) await ueZeileSichern(dabei[i], dabei[i].zeilenId); }
+      var r = await uePost('ueberweisung-datei', { mandant: UE.mandant, konto: konto, schluessel: dabei.map(function (p) { return p.key; }) });
+      if (!r.ok) throw new Error(r.meldung || 'Zahlungsdatei nicht erzeugt');
+      var e = r.ergebnis || {};
+      UE.meldung = 'Zahlungsdatei erzeugt: ' + (e.anzahl != null ? e.anzahl : dabei.length) + ' Überweisungen über ' + formatEuro(e.betrag != null ? e.betrag : dabei.reduce(function (t, p) { return t + p.betrag; }, 0)) + (e.dateiname ? ' · ' + e.dateiname : '') + ' — liegt in deinem Postfach.';
+      if (e.fehler && e.fehler.length) UE.meldung += ' Übersprungen: ' + e.fehler.length + ' (siehe Mail).';
+      UE.arbeitet = ''; await ladeUE(true);
+    } catch (e2) { UE.arbeitet = ''; UE.fehlerAktion = e2.message; renderUE(); }
+  }
+  async function ueAbgleichen() {
+    if (UE.holen) return;
+    UE.holen = true; UE.meldung = ''; UE.fehlerAktion = ''; renderUE();
+    try {
+      var res = await fetch('/webhook/accounting/aktualisieren', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+      var d = await res.json();
+      if (!res.ok || !d.ok) throw new Error(d.message || d.fehler || 'Aktualisierung fehlgeschlagen');
+      UE.meldung = 'Mit BuchhaltungsButler abgeglichen (Vormonat und aktueller Monat).';
+    } catch (e) { UE.fehlerAktion = e.message; }
+    UE.holen = false; await ladeUE(true);
+  }
+  function ueZeile(p) {
+    var ok = p.hatIban && p.ibanOk;
+    var v = p.verdacht;
+    var vText = '';
+    if (v) {
+      vText = v.art === 'beleg'
+        ? '<div class="notiz" style="margin:0;color:var(--color-success)">bezahlt? Zahlung vom ' + esc(formatDate(v.datum)) + ' über ' + esc(formatEuro(v.zahlBetrag)) + ' nennt diese Rechnung</div>'
+        : '<div class="notiz" style="margin:0;color:var(--color-error)">wohl schon bezahlt: Abgang ' + esc(formatDate(v.datum)) + ', ' + esc(formatEuro(v.zahlBetrag)) + ' an ' + esc(v.name) + (v.art === 'name' && Math.abs(v.zahlBetrag - p.betrag) > 0.02 ? ' (anderer Betrag, Beleg prüfen)' : '') + '</div>';
+    }
+    var bank;
+    if (p.inDatei) bank = '<div class="notiz" style="margin:0">in Datei<br>' + esc(p.inDatei) + '</div>';
+    else if (ok) bank = esc(p.ibanKurz) + (p.ibanQuelle === 'fall' ? '<div class="notiz" style="margin:0">nur für diesen Beleg</div>' : '');
+    else bank = '<div class="notiz" style="margin:0;color:var(--color-error)">' + (p.hatIban ? 'IBAN ungültig' : 'IBAN fehlt') + '</div>' +
+      '<input type="text" class="eingabe-klein" style="width:170px;flex:none" placeholder="IBAN nur für diesen Beleg" data-ue="iban" data-key="' + esc(p.key) + '" aria-label="IBAN für Beleg ' + esc(p.fallId) + '">';
+    var chk = '<input type="checkbox" data-ue="haken" data-key="' + esc(p.key) + '"' + (ueGewaehlt(p) ? ' checked' : '') + (p.inDatei || !ok ? ' disabled' : '') + ' aria-label="Beleg ' + esc(p.fallId) + ' überweisen">';
+    var teil = p.teilAnzahl ? '<div class="notiz" style="margin:0">' + p.teilIndex + '. von ' + p.teilAnzahl + '. Zahlungen</div>' : '';
+    var beleg = '<div style="font-weight:500">' + esc(p.rechnungsnr || ('Beleg ' + p.fallId)) + '</div><div class="notiz" style="margin:0">' + (p.link ? '<a href="' + esc(p.link) + '" target="_blank" rel="noopener">Beleg ' + esc(p.fallId) + '</a>' : 'Beleg ' + esc(p.fallId)) + ' · ' + esc(formatDate(p.datum)) + (p.erstattung ? ' · Erstattung' : '') + '</div>' + teil;
+    var empf = '<div>' + esc(p.empfaenger) + '</div><div class="notiz" style="margin:0">Kreditor ' + esc(p.kreditor || '–') + (p.kst2 ? ' · KST2 ' + esc(p.kst2) : '') + '</div>';
+    var zweck = '<input type="text" class="eingabe-klein" style="width:100%;min-width:190px" maxlength="120" data-ue="zweck" data-key="' + esc(p.key) + '" value="' + esc(p.zweckBasis) + '" aria-label="Verwendungszweck Beleg ' + esc(p.fallId) + '"' + (p.inDatei ? ' disabled' : '') + '>' + (p.teilAnzahl ? '<div class="notiz" style="margin:0">+ · ' + p.teilIndex + '. von ' + p.teilAnzahl + '. Zahlungen</div>' : '');
+    var faellig = '<input type="date" class="eingabe-klein" style="width:130px;flex:none" data-ue="faellig" data-key="' + esc(p.key) + '" value="' + esc(p.faellig) + '" aria-label="Fälligkeit Beleg ' + esc(p.fallId) + '"' + (p.inDatei ? ' disabled' : '') + '>' + (p.faellig ? '' : '<div class="notiz" style="margin:0">ohne Angabe: sofort</div>') + (p.faelligQuelle === 'bhb' ? '<div class="notiz" style="margin:0">laut Rechnung</div>' : '');
+    return '<tr><td>' + chk + '</td><td>' + beleg + '</td><td>' + empf + '</td><td>' + zweck + '</td><td>' + faellig + '</td><td style="text-align:right;white-space:nowrap"><div style="font-weight:500">' + esc(formatEuro(p.betrag)) + '</div>' + vText + '</td><td>' + bank + '</td></tr>';
+  }
+  function renderUE() {
+    var el = $('p-ueberweisungen'); if (!el) return;
+    var d = UE.daten[UE.mandant];
+    if (UE.laedt && !d) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
+    if (UE.fehler && !d) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(UE.fehler) + '</div>'; return; }
+    if (!d) { el.innerHTML = ''; return; }
+    var chip = function (m) { return '<button type="button" class="chip' + (UE.mandant === m ? ' aktiv' : '') + '" data-ue="mandant" data-m="' + m + '" aria-pressed="' + (UE.mandant === m) + '">' + m + '</button>'; };
+    var stand = d.stand ? 'Stand der BuchhaltungsButler-Daten ' + formatDate(String(d.stand).slice(0, 10)) + ', ' + new Date(d.stand).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr' : '';
+    var h = '<div class="stapel"><nav class="chips" aria-label="Mandant wählen"><span class="notiz chips-label">Mandant</span>' + chip('XXL') + chip('LEV') + '</nav>';
+    if (UE.meldung) h += '<div class="notiz" role="status">' + esc(UE.meldung) + '</div>';
+    if (UE.fehlerAktion) h += '<div class="fehlerbox" role="alert">' + esc(UE.fehlerAktion) + '</div>';
+    var konten = Object.keys(UE_KONTEN).filter(function (k) { return UE.mandant === 'XXL' ? k === 'XXL' : k !== 'XXL'; });
+    konten.forEach(function (k) {
+      var liste = (d.posten || []).filter(function (p) { return p.konto === k; });
+      var offen = liste.filter(function (p) { return !p.inDatei; });
+      var inD = liste.filter(function (p) { return p.inDatei; });
+      var diese = offen.filter(function (p) { return !p.faellig || p.faellig <= d.wochenEnde; });
+      var spaeter = offen.filter(function (p) { return p.faellig && p.faellig > d.wochenEnde; });
+      var dabei = liste.filter(ueGewaehlt);
+      var summe = dabei.reduce(function (t, p) { return t + p.betrag; }, 0);
+      var sumOffen = offen.reduce(function (t, p) { return t + p.betrag; }, 0);
+      h += '<div class="card scroll-x"><div class="card-kopf zeile-titel" style="margin:0"><span>Offene Posten · ' + esc(UE_KONTEN[k]) + ' · ' + esc(zahl(offen.length)) + ' Posten · ' + esc(formatEuro(sumOffen)) + '</span><span class="notiz" style="margin:0">' + esc(stand) + '</span></div>' +
+        '<table class="tbl kompakt"><thead><tr><th>zahlen</th><th>Beleg</th><th>Empfänger</th><th>Verwendungszweck</th><th>Fällig</th><th>Betrag</th><th>Bankverbindung</th></tr></thead><tbody>';
+      if (!liste.length) h += '<tr><td colspan="7" class="leer">Keine offenen Posten.</td></tr>';
+      if (diese.length) { h += abschnittZeile('Fällig bis Ende dieser Woche (' + formatDate(d.wochenEnde) + ') und überfällig', 7); diese.forEach(function (p) { h += ueZeile(p); }); }
+      if (spaeter.length) { h += abschnittZeile('Noch nicht fällig (standardmäßig nicht angehakt)', 7); spaeter.forEach(function (p) { h += ueZeile(p); }); }
+      if (inD.length) { h += abschnittZeile('Zahlungsdatei bereits erzeugt', 7); inD.forEach(function (p) { h += ueZeile(p); }); }
+      h += '</tbody></table><div class="zeile-titel" style="margin:8px 12px;gap:12px;flex-wrap:wrap"><span>Angehakt: ' + esc(zahl(dabei.length)) + ' · ' + esc(formatEuro(summe)) + '</span><span>';
+      if (UE.arbeitet === k) h += '<button type="button" class="link-btn" disabled>erzeuge Datei …</button>';
+      else if (UE.bereit === k) h += '<span class="notiz" style="margin:0">' + esc(zahl(dabei.length)) + ' Überweisungen über ' + esc(formatEuro(summe)) + ' erzeugen? Die Datei geht per Mail an dich, gezahlt wird erst im Online-Banking.</span> <button type="button" class="link-btn" data-ue="datei" data-konto="' + k + '">Ja, Datei erzeugen</button> <button type="button" class="link-btn" data-ue="abbrechen">Abbrechen</button>';
+      else h += '<button type="button" class="link-btn" data-ue="datei" data-konto="' + k + '">Zahlungsdatei erzeugen</button>';
+      h += '</span></div></div>';
+    });
+    h += '<div><button type="button" class="link-btn" data-ue="neu">Aktualisieren</button> <button type="button" class="link-btn" data-ue="abgleichen"' + (UE.holen ? ' disabled' : '') + '>' + (UE.holen ? 'gleiche ab …' : 'Mit BuchhaltungsButler abgleichen') + '</button></div>' +
+      '<div class="notiz">Offen ist ein gebuchter Beleg ab 01.07.2026 ohne zugeordnete Zahlung. Abgänge auf dem Konto, die zu einem Posten passen, setzen den Haken zurück („wohl schon bezahlt“). Lastschriften stehen nicht in der Liste. Beträge über 100.000 € werden in gleiche Teile geteilt.</div></div>';
+    el.innerHTML = h;
+  }
+  function bindUE() {
+    var p = $('p-ueberweisungen'); if (!p) return;
+    p.addEventListener('change', function (e) {
+      var t = e.target.closest('[data-ue]'); if (!t) return;
+      var w = t.getAttribute('data-ue'), post = ueFinden(t.getAttribute('data-key'));
+      if (w === 'haken' && post) { UE.auswahl[UE.mandant + '|' + post.key] = t.checked; UE.bereit = ''; renderUE(); }
+      else if (w === 'faellig' && post) ueSpeichern(post, 'faellig', t.value);
+      else if (w === 'zweck' && post) { if (String(t.value).trim() !== post.zweckBasis) ueSpeichern(post, 'zweck', t.value); }
+      else if (w === 'iban' && post) { if (String(t.value).trim()) ueSpeichern(post, 'iban', t.value); }
+    });
+    p.addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-ue]'); if (!b) return;
+      var w = b.getAttribute('data-ue');
+      if (w === 'mandant') { UE.mandant = b.getAttribute('data-m'); UE.bereit = ''; UE.meldung = ''; UE.fehlerAktion = ''; if (UE.daten[UE.mandant]) renderUE(); else ladeUE(); }
+      else if (w === 'datei') ueDatei(b.getAttribute('data-konto'));
+      else if (w === 'abbrechen') { UE.bereit = ''; renderUE(); }
+      else if (w === 'neu') { UE.meldung = ''; ladeUE(); }
+      else if (w === 'abgleichen') ueAbgleichen();
+    });
+  }
   // ---------- Accounting: Buchungstexte (Standardtexte je Aussteller) ----------
   var BT = { daten: null, fehler: null, laedt: false, suche: '', meldung: '', loeschen: null, fehlerAktion: '' };
   async function ladeBT() {
@@ -4007,6 +4165,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   bindBT();
   bindKS();
   bindAW();
+  bindUE();
   bindSK();
   bindRF();
   document.addEventListener('loewen-nutzer', function () {
