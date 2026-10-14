@@ -1029,19 +1029,16 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (S.dkLoading) { el.innerHTML = '<div class="laedt">Lade Tickets …</div>'; return; }
     var dk = S.dauerkarten;
     if (!dk) { el.innerHTML = ''; return; }
-    var platzPct = dk.gesamtKapazitaet > 0 ? (dk.gesamtWirklichVerkauft / dk.gesamtKapazitaet * 100) : null;
     var umsatzPct = S.zielUmsatz > 0 ? (dk.gesamtUmsatz / S.zielUmsatz * 100) : null;
     var cats = dk.byCategory || [];
     var h = '<div class="stapel">';
 
     h += '<div><h2 class="abschnitt">Gesamtzahl</h2><div class="grid sm-2">';
-    h += '<div class="card pad"><div class="kpi-label">Verkaufte Plätze / Tickets (Saison gesamt)</div>' +
-      '<div class="kpi">' + esc(zahl(dk.gesamtWirklichVerkauft)) + '</div>' +
-      '<div class="notiz">von ' + esc(zahl(dk.gesamtKapazitaet)) + ' möglichen Plätzen · ' + esc(pct(platzPct)) + ' (gehört zu ' + esc(zahl(dk.gesamtWirklichVerkauftTickets)) + ' Tickets)</div>' +
-      balken(platzPct || 0, 'b-blau', 'notiz-2') +
-      '<div class="notiz notiz-2">Gesamt inkl. Freikarten (100 % Rabatt): ' + esc(zahl(dk.gesamtVerkauft)) + ' Plätze</div>' +
-      '<div class="notiz">Saison 2025/2026 zum Vergleich: 2.483 bezahlte Einzeltickets + 70 Dauerkarten (nicht auf Plätze umgerechnet, da altes System)</div>' +
-      '<div class="notiz">Zur Einordnung: 11.149 Zuschauer bei 12 Heimspielen in der Saison 2025/2026 (inkl. Freikarten) — diese Saison stehen 17.066 Plätze bei 14 Heimspielen zur Verfügung.</div></div>';
+    // 14.10.2026 (Marko): Die Platz-Spiele-Zahl (jede Dauerkarte 14-mal) ist uninteressant und steht nicht mehr da; gezeigt wird nur die Anzahl der Dauerkarten.
+    h += '<div class="card pad"><div class="kpi-label">Dauerkarten (Saison 2026/2027)</div>' +
+      '<div class="kpi">' + esc(zahl(dk.total)) + '</div>' +
+      '<div class="notiz">davon ' + esc(zahl(dk.verkauft)) + ' bezahlt und ' + esc(zahl((dk.total || 0) - (dk.verkauft || 0))) + ' Freikarten (100 % Rabatt, z. B. Sponsoren, Ehrenamtliche, Trainer)</div>' +
+      '<div class="notiz notiz-2">Saison 2025/2026 zum Vergleich: 70 Dauerkarten</div></div>';
     h += '<div class="card pad"><div class="kpi-label">Erlös (Saison gesamt)</div>' +
       '<div class="kpi">' + esc(formatEuro(dk.gesamtUmsatz)) + '</div>' +
       '<div class="notiz">von Zielbetrag ' + esc(formatEuro(S.zielUmsatz)) + ' · ' + esc(pct(umsatzPct)) + '</div>' +
@@ -3626,7 +3623,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var summe = function (typ, feld) { return rows.filter(function (r) { return r.type === typ; }).reduce(function (t, r) { return t + (Number(r[feld != null ? feld : 'tickets']) || 0); }, 0); };
     var dk = S.dauerkarten || {};
     return {
-      dauerkarten: dk.gesamtWirklichVerkauft != null ? dk.gesamtWirklichVerkauft : null,
+      dauerkarten: g.dauerPlaetze != null ? g.dauerPlaetze : null,
       einzel_vvk_anzahl: summe('Einzelticket'), einzel_vvk_euro: Math.round(summe('Einzelticket', 'totalPrice') * 100) / 100,
       abendkasse_anzahl: summe('Abendkasse'), abendkasse_euro: Math.round(summe('Abendkasse', 'totalPrice') * 100) / 100
     };
