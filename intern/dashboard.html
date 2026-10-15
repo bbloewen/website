@@ -3071,7 +3071,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var gp = a && a.geplant && ['bestaetigt', 'korrigiert'].indexOf(a.geplant.status) >= 0 && !blGebucht(r) ? a.geplant : null;
       if (gp) zl.forEach(function (x) {
         if (!x.agent) return;
-        x.plan = true; x.konto = gp.sachkonto; x.kname = gp.sachkonto_name; var gk = gp.gegenkonto; x.gegen = gk && gk.eindeutig ? gk.nummer : ''; x.gname = gk && gk.name ? gk.name : ''; x.gunklar = gk && !gk.eindeutig ? (gk.kandidaten || []) : null; x.kst1 = gp.kst1; x.kst1n = gp.kst1_name; x.kst2 = gp.kst2; x.kst2n = gp.kst2_name;
+        x.plan = true; x.konto = gp.sachkonto; x.kname = gp.sachkonto_name; var gk = gp.gegenkonto; x.gegen = gk && gk.eindeutig ? (gk.neu ? 'neu' : gk.nummer) : ''; x.gname = gk && gk.name ? gk.name + (gk.neu ? ' (wird beim Übertragen angelegt)' : '') : ''; x.gunklar = gk && !gk.eindeutig ? (gk.kandidaten || []) : null; x.kst1 = gp.kst1; x.kst1n = gp.kst1_name; x.kst2 = gp.kst2; x.kst2n = gp.kst2_name;
         if ((x.satz === null || x.satz === undefined || x.satz === '') && gp.vat) { var sv = parseFloat(String(gp.vat)); if (isFinite(sv)) x.satz = sv; }
       });
       else if (a && a.geplant && a.geplant.status === 'steuerberater' && !blGebucht(r)) zl.forEach(function (x) { if (x.agent) x.beiStb = true; });
@@ -3360,6 +3360,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       if (RF.buch) renderRF();
     } catch (e) { RF.kred[m] = []; }
   }
+  // Kreditor in der Vorschau: vorhanden (Nummer und Name), neu (wird beim Übertragen angelegt und in die Kreditorenliste aufgenommen) oder nicht gefunden
+  function krVorschauText(k) { return k ? (k.neu ? '<b>neu anlegen</b>: ' + esc(k.name) + ' (kommt in die Kreditorenliste)' : esc(k.nummer + ' ' + k.name)) : '<b>nicht gefunden</b>'; }
   async function buchVorschau(id, modus) {
     RF.buch = { id: id, modus: modus, laedt: true, vorschau: null, fehler: '', laeuft: false, ergebnis: null }; renderRF();
     var rfr = RF.daten && RF.daten.rueckfragen ? RF.daten.rueckfragen.filter(function (x) { return x.id === id; })[0] : null;
@@ -3395,7 +3397,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var x = v.vorschau;
       h += '<div class="fett">Das passiert in BuchhaltungsButler (' + esc(x.mandant) + ')</div><ol style="margin:6px 0 0 18px;padding:0">' +
         (x.upload_noetig ? '<li>Hochladen: ' + esc(x.upload_angaben ? (x.upload_angaben.gegenpartei + ', Nr. ' + x.upload_angaben.nummer + ', ' + formatDate(x.upload_angaben.datum) + ', ' + formatEuro(Number(x.upload_angaben.betrag))) : '') + '</li>' : '<li>Der Beleg liegt schon in BuchhaltungsButler (BHB-Beleg ' + esc(x.neu_beleg_id || '') + ').</li>') +
-        '<li>Buchen auf Kreditor ' + (x.kreditor ? esc(x.kreditor.nummer + ' ' + x.kreditor.name) : '<b>nicht gefunden</b>') + ': ' + (x.buchungen || []).map(function (p) { return esc(p.sachkonto + ' · KST1 ' + (p.kst1 || '–') + ' · KST2 ' + (p.kst2 || '–') + ' · ' + p.vat + ' · ' + formatEuro(Number(p.betrag))); }).join(' + ') + '<div class="notiz" style="margin:0">Buchungstext: ' + esc(x.buchungstext || '') + '</div></li>' +
+        '<li>Buchen auf Kreditor ' + krVorschauText(x.kreditor) + ': ' + (x.buchungen || []).map(function (p) { return esc(p.sachkonto + ' · KST1 ' + (p.kst1 || '–') + ' · KST2 ' + (p.kst2 || '–') + ' · ' + p.vat + ' · ' + formatEuro(Number(p.betrag))); }).join(' + ') + '<div class="notiz" style="margin:0">Buchungstext: ' + esc(x.buchungstext || '') + '</div></li>' +
         ((x.zahlungen || []).length ? '<li>Zahlung neu zuordnen und ausgleichen: ' + x.zahlungen.map(function (z) { return esc(formatDate(String(z.datum).slice(0, 10)) + ' ' + formatEuro(Number(z.betrag)) + ' ' + (z.gegenpartei || '')); }).join('; ') + '</li>' : '<li class="gedaempft">Keine Zahlung bisher zugeordnet.</li>') + '</ol>';
       (v.hinweise || []).forEach(function (t) { h += '<div class="hinweis-warn" style="margin-top:6px">' + esc(t) + '</div>'; });
       if ((v.probleme || []).length) h += '<div class="fehlerbox" role="alert" style="margin-top:6px"><b>Noch nicht buchbar:</b><ul style="margin:4px 0 0 18px;padding:0">' + v.probleme.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div>';
@@ -4401,7 +4403,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     u.items.forEach(function (it) {
       var v = it.vorschau, x = v && v.vorschau;
       h += '<div class="rf-box" style="margin-top:8px"><div class="zeile-titel" style="margin:0"><span class="fett">' + esc(it.titel || ('Rückfrage ' + it.id)) + (x && x.mandant ? ' <span class="m-badge m-' + esc(x.mandant) + '">' + esc(x.mandant) + '</span>' : '') + '</span><span class="' + (it.status === 'problem' || it.status === 'fehler' ? 'pflicht' : '') + '">' + esc(stText[it.status] || it.status) + '</span></div>';
-      if (x) h += '<div class="notiz" style="margin:4px 0 0">' + (x.upload_noetig ? 'Wird hochgeladen. ' : 'Der Beleg liegt schon in BuchhaltungsButler. ') + 'Kreditor ' + (x.kreditor ? esc(x.kreditor.nummer + ' ' + x.kreditor.name) : '<b>nicht gefunden</b>') + '</div><div class="notiz" style="margin:0">' + (x.buchungen || []).map(function (p) { return esc(p.sachkonto + ' · KST 1 ' + (p.kst1 || '–') + ' · KST 2 ' + (p.kst2 || '–') + ' · ' + p.vat + ' · ' + formatEuro(Number(p.betrag))); }).join('<br>') + '</div>' + ((x.zahlungen || []).length ? '<div class="notiz" style="margin:0">Zahlung wird zugeordnet: ' + x.zahlungen.map(function (z) { return esc(formatDate(String(z.datum).slice(0, 10)) + ' ' + formatEuro(Number(z.betrag)) + ' ' + (z.gegenpartei || '')); }).join('; ') + '</div>' : '');
+      if (x) h += '<div class="notiz" style="margin:4px 0 0">' + (x.upload_noetig ? 'Wird hochgeladen. ' : 'Der Beleg liegt schon in BuchhaltungsButler. ') + 'Kreditor ' + krVorschauText(x.kreditor) + '</div><div class="notiz" style="margin:0">' + (x.buchungen || []).map(function (p) { return esc(p.sachkonto + ' · KST 1 ' + (p.kst1 || '–') + ' · KST 2 ' + (p.kst2 || '–') + ' · ' + p.vat + ' · ' + formatEuro(Number(p.betrag))); }).join('<br>') + '</div>' + ((x.zahlungen || []).length ? '<div class="notiz" style="margin:0">Zahlung wird zugeordnet: ' + x.zahlungen.map(function (z) { return esc(formatDate(String(z.datum).slice(0, 10)) + ' ' + formatEuro(Number(z.betrag)) + ' ' + (z.gegenpartei || '')); }).join('; ') + '</div>' : '');
       ((v && v.hinweise) || []).forEach(function (t) { h += '<div class="hinweis-warn" style="margin-top:6px">' + esc(t) + '</div>'; });
       if (it.probleme && it.probleme.length) h += '<div class="fehlerbox" role="alert" style="margin-top:6px"><ul style="margin:0 0 0 18px;padding:0">' + it.probleme.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div>';
       if (it.meldung) h += '<div class="' + (it.status === 'gebucht' ? 'erfolg' : 'fehlerbox') + '" role="status" style="margin-top:6px">' + esc(it.meldung) + '</div>';
