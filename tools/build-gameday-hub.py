@@ -189,6 +189,65 @@ def hero(s, heute):
   </section>"""
 
 
+def spieltagsinfo(aktuell):
+    """Verweis auf das Heft zum naechsten Heimspiel: lesen oder herunterladen.
+
+    Bewusst nur ein Verweis und nicht das ganze Heft (Marko, 15.10.2026, dort anders
+    angedacht): Eingebettet steht es schon auf der Spieltagsseite, und derselbe
+    Volltext auf zwei Adressen nimmt genau den Vorteil wieder weg, wegen dem wir
+    ihn dort hingelegt haben. Der Knopf springt deshalb zum Heft auf der
+    Spieltagsseite -- das PDF laedt man direkt hier herunter.
+    """
+    datei = REPO / "data" / "spieltagsinfo.json"
+    daten = json.loads(datei.read_text(encoding="utf-8"))
+    nr = aktuell.get("spieltagsinfo")
+    eigenes = bool(nr)
+    if not nr:
+        # Noch kein Heft zum naechsten Heimspiel: dann die neueste Ausgabe zeigen,
+        # aber als eigene Seite -- nicht als Heft zu einem Spiel, zu dem es nicht gehoert.
+        nr = max((a["nr"] for a in daten["ausgaben"]), default=None)
+    if not nr:
+        return ""
+    ausgabe = next((a for a in daten["ausgaben"] if a["nr"] == nr), None)
+    if not ausgabe:
+        return ""
+    if eigenes:
+        seite_url = f"/saison/profis/gameday/{esc(aktuell['seiteSlug'])}.html#spieltagsinfo"
+        ueberschrift = "Das Heft zum Heimspiel"
+    else:
+        seite_url = f"/saison/profis/gameday/spieltagsinfo/ausgabe-{nr}/"
+        ueberschrift = "Die aktuelle Spieltagsinfo"
+    vorschau = f"/assets/spieltagsinfo/ausgabe-{nr}/vorschau.webp"
+    media = ""
+    if (REPO / vorschau.lstrip("/")).exists():
+        # Ohne width/height: tools/build-bildmasse.py traegt sie spaeter in der Kette nach.
+        media = (f'<div class="spiel-band-media"><a href="{seite_url}" tabindex="-1" aria-hidden="true">'
+                 f'<img loading="lazy" decoding="async" src="{vorschau}" alt="" /></a></div>')
+    pdf = ""
+    if ausgabe.get("pdf"):
+        pdf = ('            <a class="btn btn-ghost-dark" '
+               f'href="/assets/spieltagsinfo/{esc(ausgabe["pdf"])}" download>'
+               'PDF herunterladen</a>\n')
+    seiten = f", {ausgabe['seiten']} Seiten" if ausgabe.get("seiten") else ""
+    return f"""  <section class="section section-dark">
+    <div class="container">
+      <div class="spiel-band{'' if media else ' spiel-band-ohne-bild'}">
+        {media}
+        <div class="spiel-band-body">
+          <span class="eyebrow">Spieltagsinfo · Ausgabe {nr} · Saison {esc(daten["saison"])}</span>
+          <h2 class="t-h2">{ueberschrift}</h2>
+          <p class="t-body">Kader der Löwen und der Gäste, Ligastand, Spielplan und Geschichten aus dem Verein{seiten}.</p>
+          <div class="spiel-band-actions">
+            <a class="btn btn-primary" style="color:#fff" href="{seite_url}">Online lesen</a>
+{pdf}            <a class="card-link" href="/saison/profis/gameday/spieltagsinfo/">Alle Ausgaben <i data-lucide="arrow-right" class="icon-14"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+"""
+
+
 def halle():
     """Die Halle als eigener Abschnitt, ganz unten auf der Seite (Marko,
     27.08.2026): für den Kauf nicht wichtig, aber der Grund, warum diese Seite
@@ -550,7 +609,8 @@ def seite(liste, jetzt):
     # sind fuer den Kauf nicht wichtig -- nur fuer SEO -- und wandern deshalb
     # ganz ans Ende.
     inhalt = "\n\n".join(x for x in [
-        hero(aktuell, heute), kauf_bereich(aktuell, kommt, heute), termine(liste, aktuell), halle(),
+        hero(aktuell, heute), kauf_bereich(aktuell, kommt, heute), spieltagsinfo(aktuell),
+        termine(liste, aktuell), halle(),
     ] if x)
 
     return f"""<!doctype html>
