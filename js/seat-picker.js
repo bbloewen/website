@@ -131,6 +131,8 @@
     // (Ausweis mit Merkzeichen B) wird am Einlass kontrolliert. Serverseitig begrenzt der n8n-Workflow
     // die Zahl der Begleitpersonen auf Rollstuhlplätze + Sitze mit diesem Tarif.
     ermaessigt_begleit: 'Ermäßigt (mit Begleitperson)',
+    // dasselbe mit Mitgliedsrabatt (Marko, 15.10.2026: Mitglieder mit Begleitperson konnten beides bisher nicht kombinieren)
+    ermaessigt_begleit_member: 'Ermäßigt (mit Begleitperson) mit Mitgliedsrabatt (Löwen e.V.)',
     kind: 'Kinder 7–14',
     normal_member: 'Normalpreis mit Mitgliedsrabatt (Löwen e.V.)',
     ermaessigt_member: 'Ermäßigt mit Mitgliedsrabatt (Löwen e.V.)',
@@ -442,7 +444,7 @@
       // Ein Sitz mit "Ermäßigt (mit Begleitperson)" zählt wie ein Rollstuhlplatz als Grundlage für
       // eine Begleitperson (Marko, 15.10.2026) — aber nicht für sich selbst: wechselte er auf
       // "Begleitperson", verlöre er die eigene Grundlage.
-      if (s.category === 'Rollstuhlplatz' || (s.tarif === 'ermaessigt_begleit' && g !== guid)) wheelchairCount++;
+      if (s.category === 'Rollstuhlplatz' || (isBegleitBasis(s.tarif) && g !== guid)) wheelchairCount++;
       else if (s.tarif === 'begleitung' && g !== guid) usedCount++;
     });
     return wheelchairCount > usedCount;
@@ -2596,6 +2598,8 @@
   /* Normalisiert einen Tarif-Wert auf seine Basisform (z.B. "ermaessigt_member" ->
      "ermaessigt") — Mitgliedsrabatt-Varianten zaehlen fuer die Gutschein-Tarifpruefung
      als derselbe Tarif. */
+  /* Tarife, die eine kostenlose Begleitperson freigeben: "Ermäßigt (mit Begleitperson)" mit und ohne Mitgliedsrabatt. */
+  function isBegleitBasis(t) { return (t || '').indexOf('ermaessigt_begleit') === 0; }
   function baseTarif(t) { return (t || '').replace('_member', '').replace('_begleit', ''); }
 
   /* Gutschein-/Wertgutschein-Code — gemeinsam für "seats"- und "blocks"-Modus,
@@ -2738,7 +2742,7 @@
         var hasKind = s.priceInfo.kind !== undefined;
         var tarifOptions = ['normal'].concat(hasErmaessigt ? ['ermaessigt'] : []).concat(hasErmaessigt && s.category !== 'Rollstuhlplatz' ? ['ermaessigt_begleit'] : []).concat(hasKind ? ['kind'] : []);
         if (self.dkDiscount) {
-          tarifOptions = tarifOptions.concat(['normal_member'], hasErmaessigt ? ['ermaessigt_member'] : [], hasKind ? ['kind_member'] : []);
+          tarifOptions = tarifOptions.concat(['normal_member'], hasErmaessigt ? ['ermaessigt_member'] : [], hasErmaessigt && s.category !== 'Rollstuhlplatz' ? ['ermaessigt_begleit_member'] : [], hasKind ? ['kind_member'] : []);
         }
         // "Begleitperson (kostenlos)" nur fuer normale Sitze, nicht fuer den
         // Rollstuhlplatz-Sitz selbst, und nur solange noch ein freier Begleit-Slot
@@ -2877,7 +2881,7 @@
           // komplett aus dem Warenkorb entfernt, nicht nur auf einen bezahlten Tarif
           // zurueckgesetzt (Marko, 13.08.2026: "muss dann auch aus dem Warenkorb
           // geloescht werden").
-          if (removed && (removed.category === 'Rollstuhlplatz' || removed.tarif === 'ermaessigt_begleit')) {
+          if (removed && (removed.category === 'Rollstuhlplatz' || isBegleitBasis(removed.tarif))) {
             self._removeOrphanedCompanions(removed.zoneLabel);
           }
           self._renderCart();
