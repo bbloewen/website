@@ -3707,7 +3707,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         pay.forEach(function (g) { var b = Number(g.betrag) || 0; if (/ausschank/i.test(g.kasse || '')) pA += b; else pT += b; });
         h += '<tr class="aw-payone"><td title="Von PAYONE gutgeschrieben">PAYONE</td>' + AW_FELDER.map(function (f) {
           return '<td>' + (f === 'kasse_ticketing_euro' ? esc(formatEuro(pT)) : (f === 'ausschank_euro' ? esc(formatEuro(pA)) : '')) + '</td>';
-        }).join('') + '<td></td><td></td><td></td></tr>';
+        }).join('') + '<td title="PAYONE gesamt gutgeschrieben">' + esc(formatEuro(pT + pA)) + '</td><td></td><td></td></tr>';
       }
     });
     var t = awSummen();
