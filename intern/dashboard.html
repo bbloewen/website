@@ -226,6 +226,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 .eingabe { width: 100%; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 8px 12px; font-size: 14px; background: var(--bg-card); }
 .tbl.aw th:not(:first-child), .tbl.aw td:not(:first-child) { text-align: right; }
 .tbl.aw input[type=number] { text-align: right; }
+.konten-name { margin: 0; font-size: 11px; line-height: 1.25; color: var(--text-secondary); white-space: normal; overflow-wrap: anywhere; }
+.auswahl-zelle { text-align: center; padding-left: 2px; padding-right: 2px; }
+.auswahl-zelle input { width: 18px; height: 18px; }
 .eingabe-klein { border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 4px 8px; font-size: 12px; background: var(--bg-card); flex: 1; min-width: 0; }
 .auswahl { border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 4px 8px; font-size: 14px; background: var(--bg-card); }
 .hilfe { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
@@ -2829,7 +2832,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   function leer() { return { daten: null, fehler: null, laedt: false, monat: '', filter: 'alle', suche: '', richtung: 'alle' }; }
   var BL = { XXL: leer(), LEV: leer() };
   var ZA = { XXL: leer(), LEV: leer(), LEVLP: leer() };
-  var BE = { loeschen: null, meldung: '', btEdit: null, holen: false };
+  var BE = { loeschen: null, meldung: '', btEdit: null, holen: false, sel: {}, ueb: null };
   function bePanel(id) { return $('p-' + id); }
   function tabVon(map, k) { return Object.keys(map).filter(function (t) { return map[t] === k; })[0]; }
   function monatName(m) { if (m === 'alle') return 'Alle ab Juli 2026'; if (m === 'alt') return 'Vor Juli 2026'; var d = new Date(m + '-15T12:00:00'); return isNaN(d) ? m : d.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' }); }
@@ -2882,6 +2885,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   }
   function beKonto(nr, name) { return nr ? esc(nr) + (name ? ' <span class="notiz" style="display:inline;margin:0">' + esc(name) + '</span>' : '') : ''; }
   // Nur die Nummer, der Name steht im Tooltip (kompakte Tabelle).
+  // Nummer, darunter die Bezeichnung ausgeschrieben (Wunsch Marko 15.10.2026: nicht nur als Tooltip)
+  function beKontoName(nr, name) { return nr ? '<div class="zahlen">' + esc(nr) + '</div>' + (name ? '<div class="konten-name">' + esc(name) + '</div>' : '') : ''; }
   function beZahl(nr, name) { return nr ? '<span class="tipp" data-tip="' + esc(name || '') + '" tabindex="0">' + esc(nr) + '</span>' : ''; }
   // Link zum Beleg in BuchhaltungsButler. Gebuchte Belege liefern ihn mit; bei noch nicht gebuchten ergibt er sich aus dem Dateinamen (Muster aus den gebuchten Belegen abgeleitet).
   function bhbBelegLink(link, dateiname) {
@@ -2953,7 +2958,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       (weitere ? 'An der Mail hängen noch ' + weitere + ' weitere relevante Anhänge, die Mail bleibt deshalb im Postfach.' : 'Die Mail kommt in den Papierkorb des Postfachs, weil kein weiterer relevanter Anhang daran hängt.') + ' In BuchhaltungsButler ändert sich nichts.';
     var fehler = l.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:8px">' + esc(l.fehler) + '</div>' : '';
     var aus = l.laeuft ? ' disabled' : '';
-    return '<tr><td colspan="14"><div class="hinweis-warn" role="group" aria-label="Löschen bestätigen"><div>' + esc(text) + '</div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">' +
+    return '<tr><td colspan="15"><div class="hinweis-warn" role="group" aria-label="Löschen bestätigen"><div>' + esc(text) + '</div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">' +
       '<button type="button" class="btn-gefahr" data-be="loeschen-ja" data-id="' + a.id + '" data-aktion="beleg"' + aus + '>' + (l.laeuft ? 'Lösche …' : 'Beleg löschen') + '</button>' +
       (weitere ? '<button type="button" class="btn-gefahr" data-be="loeschen-ja" data-id="' + a.id + '" data-aktion="mail"' + aus + '>Beleg und ganze Mail löschen</button>' : '') +
       '<button type="button" class="link-btn" data-be="loeschen-nein"' + aus + '>Abbrechen</button></div>' + fehler + '</div></td></tr>';
@@ -2989,12 +2994,13 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var rk = function (w, t) { return '<button type="button" class="chip' + (z.richtung === w ? ' aktiv' : '') + '" data-be="richtung" data-k="' + k + '" data-w="' + w + '" aria-pressed="' + (z.richtung === w) + '">' + t + ' <span class="notiz" style="display:inline;margin:0">' + esc(zahl(cnt[w])) + '</span></button>'; };
     var h = renderPager(z, 'data-art="beleg" data-k="' + k + '"');
     h += '<div class="chips chips-gleich" role="group" aria-label="Art der Belege"><span class="notiz chips-label">Belege</span>' + rk('alle', 'Alle') + rk('eingang', 'Eingangsbelege') + rk('ausgang', 'Ausgangsbelege') + '</div>';
+    h += uebLeiste();
     h += '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Belege ' + esc(k) + ' · ' + esc(d.monat ? monatName(d.monat) : '') + ' · ' + esc(zahl(zeilen.length)) + ' von ' + esc(zahl((d.belege || []).length)) + '</span><span>' +
       '<input type="search" class="eingabe-klein" style="width:180px;flex:none" data-be="suche" data-k="' + k + '" placeholder="Suchen …" aria-label="Suchen" value="' + esc(z.suche) + '"> ' +
       '<select class="auswahl" data-be="filter" data-k="' + k + '" aria-label="Filter">' + opt('alle', 'Alle Belege') + opt('bezahlt', 'Gebucht und bezahlt') + opt('offen', 'Gebucht, Zahlung offen') + opt('ungebucht', 'Noch nicht gebucht') + opt('eingang', 'Nur im Eingang, nicht in BHB') + opt('pruefen', 'Agent: zur Prüfung') + '</select> ' +
       '<button type="button" class="link-btn" data-be="neu" data-k="' + k + '"' + (BE.holen ? ' disabled' : '') + '>' + (BE.holen ? 'Hole aus BuchhaltungsButler …' : 'Aktualisieren') + '</button></span></div>' +
       (BE.meldung ? '<div class="erfolg" role="status" style="margin:8px 12px">' + esc(BE.meldung) + '</div>' : '') +
-      '<div class="tbl-voll"><table class="tbl kompakt fest"><colgroup><col style="width:7%"><col style="width:14%"><col style="width:9%"><col style="width:7%"><col style="width:17%"><col style="width:6%"><col style="width:6%"><col style="width:5%"><col style="width:5%"><col style="width:4%"><col style="width:7%"><col style="width:6%"><col style="width:7%"><col style="width:3%"></colgroup><thead><tr><th style="white-space:normal"><abbr title="Buchungsdatum: danach wird sortiert und nach Monaten geblättert. Das Rechnungsdatum steht beim Beleg, das Eingangsdatum darunter.">Buchungs&shy;datum</abbr></th><th><abbr title="Gegenpartei, Rechnungsnummer, Links und Quelle">Beleg</abbr></th><th><abbr title="Gebucht (Buch-Symbol) und Zahlung zugewiesen (Euro-Symbol)">Status</abbr></th><th class="rechts"><abbr title="Belegbetrag brutto">Beleg €</abbr></th><th><abbr title="Buchungstext aus BuchhaltungsButler, bei noch nicht gebuchten Belegen der Vorschlag des Agenten">Text</abbr></th><th><abbr title="Sachkonto. Die Bezeichnung steht im Tooltip der Nummer.">Sachk.</abbr></th><th><abbr title="Gegenkonto: Kreditor (Eingangsbeleg) oder Debitor (Ausgangsbeleg)">Gegenk.</abbr></th><th><abbr title="Kostenstelle 1. Die Bezeichnung steht im Tooltip der Nummer.">KST1</abbr></th><th><abbr title="Kostenstelle 2 (Zweck). Die Bezeichnung steht im Tooltip der Nummer.">KST2</abbr></th><th class="rechts"><abbr title="Umsatzsteuersatz">USt</abbr></th><th class="rechts"><abbr title="Nettobetrag der Buchungszeile (aus Brutto und Satz gerechnet)">Netto</abbr></th><th class="rechts"><abbr title="Steuerbetrag der Buchungszeile (aus Brutto und Satz gerechnet)">Steuer</abbr></th><th class="rechts"><abbr title="Bruttobetrag der Buchungszeile">Brutto</abbr></th><th><abbr title="Steuerschlüssel: Umsatzsteuer-Kennzeichen der Buchung aus BuchhaltungsButler">Schl.</abbr></th></tr></thead><tbody>';
+      '<div class="tbl-voll"><table class="tbl kompakt fest"><colgroup><col style="width:4%"><col style="width:7%"><col style="width:11%"><col style="width:9%"><col style="width:6%"><col style="width:14%"><col style="width:9%"><col style="width:8%"><col style="width:8%"><col style="width:8%"><col style="width:4%"><col style="width:6%"><col style="width:5%"><col style="width:6%"><col style="width:3%"></colgroup><thead><tr><th><span class="sr-only">Zur Übertragung auswählen</span></th><th style="white-space:normal"><abbr title="Buchungsdatum: danach wird sortiert und nach Monaten geblättert. Das Rechnungsdatum steht beim Beleg, das Eingangsdatum darunter.">Buchungs&shy;datum</abbr></th><th><abbr title="Gegenpartei, Rechnungsnummer, Links und Quelle">Beleg</abbr></th><th><abbr title="Gebucht (Buch-Symbol) und Zahlung zugewiesen (Euro-Symbol)">Status</abbr></th><th class="rechts"><abbr title="Belegbetrag brutto">Beleg €</abbr></th><th><abbr title="Buchungstext aus BuchhaltungsButler, bei noch nicht gebuchten Belegen der Vorschlag des Agenten">Text</abbr></th><th><abbr title="Sachkonto. Die Bezeichnung steht im Tooltip der Nummer.">Sachk.</abbr></th><th><abbr title="Gegenkonto: Kreditor (Eingangsbeleg) oder Debitor (Ausgangsbeleg)">Gegenk.</abbr></th><th><abbr title="Kostenstelle 1. Die Bezeichnung steht im Tooltip der Nummer.">KST1</abbr></th><th><abbr title="Kostenstelle 2 (Zweck). Die Bezeichnung steht im Tooltip der Nummer.">KST2</abbr></th><th class="rechts"><abbr title="Umsatzsteuersatz">USt</abbr></th><th class="rechts"><abbr title="Nettobetrag der Buchungszeile (aus Brutto und Satz gerechnet)">Netto</abbr></th><th class="rechts"><abbr title="Steuerbetrag der Buchungszeile (aus Brutto und Satz gerechnet)">Steuer</abbr></th><th class="rechts"><abbr title="Bruttobetrag der Buchungszeile">Brutto</abbr></th><th><abbr title="Steuerschlüssel: Umsatzsteuer-Kennzeichen der Buchung aus BuchhaltungsButler">Schl.</abbr></th></tr></thead><tbody>';
     zeilen.forEach(function (r) {
       var b = r.bhb, a = r.agent;
       var titel = (b && b.gegenpartei) || (a && (a.aussteller || a.anhang_name)) || (b && b.dateiname) || '–';
@@ -3040,8 +3046,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         if ((x.satz === null || x.satz === undefined || x.satz === '') && gp.vat) { var sv = parseFloat(String(gp.vat)); if (isFinite(sv)) x.satz = sv; }
       });
       else if (a && a.geplant && a.geplant.status === 'steuerberater' && !blGebucht(r)) zl.forEach(function (x) { if (x.agent) x.beiStb = true; });
-      if (gp) status += '<div class="notiz" style="margin:4px 0 0"><b>Bereit zu buchen</b></div>';
+      if (gp) status += '<div class="notiz" style="margin:4px 0 0"><b>' + (gp.gebucht_am ? 'Gebucht am ' + esc(formatDate(String(gp.gebucht_am).slice(0, 10))) : 'Bereit zu buchen') + '</b>' + (gp.gebucht_am ? ' · erscheint hier aus BuchhaltungsButler nach dem nächsten Abgleich' : '') + '</div>';
       else if (a && a.geplant && a.geplant.status === 'steuerberater' && !blGebucht(r)) status += '<div class="notiz" style="margin:4px 0 0">Wartet auf den Steuerberater</div>';
+      var auswahlZelle = gp && !gp.gebucht_am && gp.rueckfrage ? '<input type="checkbox" data-be-sel="' + gp.rueckfrage + '" data-titel="' + esc(titel) + '"' + (BE.sel[gp.rueckfrage] ? ' checked' : '') + ' aria-label="Zur Übertragung nach BuchhaltungsButler auswählen: ' + esc(titel) + '">' : '';
       // Zahlweg (Lastschrift, Überweisung, Erstattung, schon bezahlt) und passende Abbuchung vom Konto, vor dem Buchen
       if (a && a.zahlweg && !blGebucht(r)) {
         var zw = a.zahlweg, zv = a.zahlungsvorschlag;
@@ -3061,16 +3068,16 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       zl.forEach(function (x, i) {
         var text = (x.text ? '<div>' + esc(x.text) + '</div>' : '') + (x.komm ? '<div class="notiz" style="margin:0">Kommentar: ' + esc(x.komm) + '</div>' : '') +
           (x.bdat && r.datum && String(x.bdat).slice(0, 10) !== String(r.datum).slice(0, 10) ? '<div class="notiz" style="margin:0">gebucht am ' + esc(formatDate(String(x.bdat).slice(0, 10))) + '</div>' : '') +
-          (x.agent && a ? btFeld(a) : '') + (x.agent ? '<div class="notiz" style="margin:0">' + (x.plan ? 'Kontierung aus der Rückfrage, noch nicht gebucht' + (x.gunklar ? '. Kreditor nicht eindeutig' + (x.gunklar.length ? ' (' + x.gunklar.map(esc).join(', ') + ')' : ', in BuchhaltungsButler anlegen') + ', bitte in der Buchungsvorschau wählen' : '') : (a && a.buchungstext ? 'Vorschlag Buchungstext, ' : '') + 'vom Agenten gelesen, noch nicht gebucht') + '</div>' : '') + (x.hinweisBhb ? '<div class="notiz" style="margin:0">noch keine Kontierung, nur Beleg in BuchhaltungsButler</div>' : '');
-        h += '<tr>' + (i === 0 ? '<td' + rs + ' class="nowrap">' + datumZelle(r) + '</td><td' + rs + '>' + kopf + agentLese + '<div class="linkreihe">' + links.join('') + '</div>' + loeschKnopf + '</td><td' + rs + '>' + status + '</td><td' + rs + ' class="nowrap zahlen rechts">' + (brutto !== null ? esc(formatEuro(brutto)) : '') + '</td>' : '') +
-          '<td>' + text + '</td><td class="nowrap">' + beZahl(x.konto, x.kname ? 'Sachkonto ' + x.konto + ': ' + x.kname : 'Sachkonto ' + x.konto) + '</td><td class="nowrap">' + beZahl(x.gegen, 'Gegenkonto ' + x.gegen + (x.gname ? ': ' + x.gname : (b && b.gegenpartei ? ': ' + b.gegenpartei : ''))) + '</td><td class="nowrap">' + beZahl(x.kst1, x.kst1n ? 'Kostenstelle 1 ' + x.kst1 + ': ' + x.kst1n : 'Kostenstelle 1 ' + x.kst1) + '</td><td class="nowrap">' + beZahl(x.kst2, x.kst2n ? 'Kostenstelle 2 ' + x.kst2 + ': ' + x.kst2n : 'Kostenstelle 2 ' + x.kst2) + '</td>' +
+          (x.agent && a ? btFeld(a) : '') + (x.agent ? '<div class="notiz" style="margin:0">' + (x.plan ? 'Kontierung aus der Rückfrage' + (gp && gp.gebucht_am ? '' : ', noch nicht gebucht') + (x.gunklar ? '. Kreditor nicht eindeutig' + (x.gunklar.length ? ' (' + x.gunklar.map(esc).join(', ') + ')' : ', in BuchhaltungsButler anlegen') + ', bitte in der Buchungsvorschau wählen' : '') : (a && a.buchungstext ? 'Vorschlag Buchungstext, ' : '') + 'vom Agenten gelesen, noch nicht gebucht') + '</div>' : '') + (x.hinweisBhb ? '<div class="notiz" style="margin:0">noch keine Kontierung, nur Beleg in BuchhaltungsButler</div>' : '');
+        h += '<tr>' + (i === 0 ? '<td' + rs + ' class="auswahl-zelle">' + auswahlZelle + '</td><td' + rs + ' class="nowrap">' + datumZelle(r) + '</td><td' + rs + '>' + kopf + agentLese + '<div class="linkreihe">' + links.join('') + '</div>' + loeschKnopf + '</td><td' + rs + '>' + status + '</td><td' + rs + ' class="nowrap zahlen rechts">' + (brutto !== null ? esc(formatEuro(brutto)) : '') + '</td>' : '') +
+          '<td>' + text + '</td><td>' + beKontoName(x.konto, x.kname ? x.kname : '') + '</td><td>' + beKontoName(x.gegen, x.gname ? x.gname : (b && b.gegenpartei ? b.gegenpartei : '')) + '</td><td>' + beKontoName(x.kst1, x.kst1n) + '</td><td>' + beKontoName(x.kst2, x.kst2n) + '</td>' +
           '<td class="nowrap zahlen rechts">' + (x.satz !== null && x.satz !== undefined && x.satz !== '' ? esc(Number(x.satz).toLocaleString('de-DE') + ' %') : '') + '</td>' +
           '<td class="nowrap zahlen rechts">' + eu(x.netto) + '</td><td class="nowrap zahlen rechts">' + eu(x.steuer) + '</td><td class="nowrap zahlen rechts">' + eu(x.brutto) + '</td><td>' + esc(x.schl || '') + '</td>' +
           '</tr>';
       });
       if (a) h += beLoeschBox(a);
     });
-    if (!zeilen.length) h += '<tr><td colspan="14" class="leer">Keine Belege in dieser Ansicht.</td></tr>';
+    if (!zeilen.length) h += '<tr><td colspan="15" class="leer">Keine Belege in dieser Ansicht.</td></tr>';
     h += '</tbody></table></div><div class="card-fuss">Ein Eintrag je Beleg: gebuchte Belege aus BuchhaltungsButler (täglich 5:30 Uhr gelesen' + (d.stand ? ', zuletzt ' + esc(formatDateTime(d.stand)) : '') + ') und vom Agenten gelesene Anhänge aus dem Postfach. ' +
       'Zwei Symbole je Beleg: Buch = gebucht, Euro = Zahlung zugewiesen. Grün und gefüllt heißt erledigt, grau mit Kontur heißt fehlt noch. Logos, Signaturen und Terminalbelege tauchen nicht auf. Löschen entfernt Beleg und Drive-Datei und legt die Mail in den Papierkorb, wenn kein weiterer relevanter Anhang daran hängt. Belege ohne erkannten Mandanten stehen in beiden Tabs.</div></div>';
     h += kpis;
@@ -4333,6 +4340,71 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     Object.keys(BL).forEach(function (kk) { if (BL[kk].daten) renderAccounting('beleg', kk); });
     Object.keys(ZA).forEach(function (kk) { if (ZA[kk].daten) renderAccounting('zahlung', kk); });
   }
+  // ---------- Einzelne Belege nach BuchhaltungsButler übertragen ----------
+  // Auswahl in der Belegliste, erst Vorschau je Beleg, dann nach Bestätigung hochladen und buchen (gleiche Webhooks wie im Rückfragen-Tab).
+  function uebAnzahl() { return Object.keys(BE.sel).filter(function (i) { return BE.sel[i]; }).length; }
+  function uebLeiste() {
+    var n = uebAnzahl(), u = BE.ueb;
+    if (!n && !u) return '';
+    var h = '<div class="card pad" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span class="fett">' + n + (n === 1 ? ' Beleg' : ' Belege') + ' ausgewählt</span>' +
+      '<button type="button" class="btn btn-primary" data-be="ueb-start"' + (n && !u ? '' : ' disabled') + '>Nach BuchhaltungsButler übertragen …</button>' +
+      (n && !u ? '<button type="button" class="link-btn" data-be="ueb-leeren">Auswahl aufheben</button>' : '') + '</div>';
+    return h + (u ? uebPanel() : '');
+  }
+  function uebPanel() {
+    var u = BE.ueb, bereit = u.items.filter(function (it) { return it.status === 'bereit'; }).length;
+    var stText = { lade: 'prüfe …', bereit: 'bereit', problem: 'nicht buchbar', bucht: 'bucht …', gebucht: 'gebucht', fehler: 'Fehler' };
+    var h = '<div class="card pad" role="region" aria-label="Übertragung nach BuchhaltungsButler"><div class="fett">Übertragung nach BuchhaltungsButler</div>';
+    u.items.forEach(function (it) {
+      var v = it.vorschau, x = v && v.vorschau;
+      h += '<div class="rf-box" style="margin-top:8px"><div class="zeile-titel" style="margin:0"><span class="fett">' + esc(it.titel || ('Rückfrage ' + it.id)) + (x && x.mandant ? ' <span class="m-badge m-' + esc(x.mandant) + '">' + esc(x.mandant) + '</span>' : '') + '</span><span class="' + (it.status === 'problem' || it.status === 'fehler' ? 'pflicht' : '') + '">' + esc(stText[it.status] || it.status) + '</span></div>';
+      if (x) h += '<div class="notiz" style="margin:4px 0 0">' + (x.upload_noetig ? 'Wird hochgeladen. ' : 'Der Beleg liegt schon in BuchhaltungsButler. ') + 'Kreditor ' + (x.kreditor ? esc(x.kreditor.nummer + ' ' + x.kreditor.name) : '<b>nicht gefunden</b>') + '</div><div class="notiz" style="margin:0">' + (x.buchungen || []).map(function (p) { return esc(p.sachkonto + ' · KST 1 ' + (p.kst1 || '–') + ' · KST 2 ' + (p.kst2 || '–') + ' · ' + p.vat + ' · ' + formatEuro(Number(p.betrag))); }).join('<br>') + '</div>' + ((x.zahlungen || []).length ? '<div class="notiz" style="margin:0">Zahlung wird zugeordnet: ' + x.zahlungen.map(function (z) { return esc(formatDate(String(z.datum).slice(0, 10)) + ' ' + formatEuro(Number(z.betrag)) + ' ' + (z.gegenpartei || '')); }).join('; ') + '</div>' : '');
+      ((v && v.hinweise) || []).forEach(function (t) { h += '<div class="hinweis-warn" style="margin-top:6px">' + esc(t) + '</div>'; });
+      if (it.probleme && it.probleme.length) h += '<div class="fehlerbox" role="alert" style="margin-top:6px"><ul style="margin:0 0 0 18px;padding:0">' + it.probleme.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div>';
+      if (it.meldung) h += '<div class="' + (it.status === 'gebucht' ? 'erfolg' : 'fehlerbox') + '" role="status" style="margin-top:6px">' + esc(it.meldung) + '</div>';
+      h += '</div>';
+    });
+    h += '<div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap">' +
+      (u.phase === 'bereit' && bereit ? '<button type="button" class="btn btn-primary" data-be="ueb-ja">Ja, ' + bereit + (bereit === 1 ? ' Beleg' : ' Belege') + ' hochladen und buchen</button>' : '') +
+      (u.phase === 'laeuft' ? '<span class="laedt" role="status">Buche …</span>' : '<button type="button" class="link-btn" data-be="ueb-zu">Schließen</button>') + '</div></div>';
+    return h;
+  }
+  async function uebVorschau() {
+    var ids = Object.keys(BE.sel).filter(function (i) { return BE.sel[i]; }).map(Number);
+    if (!ids.length) return;
+    BE.meldung = '';
+    BE.ueb = { phase: 'vorschau', items: ids.map(function (id) { return { id: id, titel: BE.sel[id], status: 'lade', vorschau: null, probleme: [], meldung: '' }; }) };
+    beAlleRender();
+    for (var i = 0; i < BE.ueb.items.length; i++) {
+      var it = BE.ueb.items[i];
+      try {
+        var res = await fetch('/webhook/accounting/beleg-vorschau?id=' + it.id);
+        var d = await res.json();
+        if (!res.ok) throw new Error(d.message || d.fehler || 'Vorschau fehlgeschlagen');
+        it.vorschau = d; it.probleme = d.probleme || []; it.status = d.ok ? 'bereit' : 'problem';
+      } catch (e) { it.status = 'problem'; it.probleme = [e.message]; }
+      beAlleRender();
+    }
+    BE.ueb.phase = 'bereit'; beAlleRender();
+  }
+  async function uebBuchen() {
+    var u = BE.ueb; if (!u || u.phase !== 'bereit') return;
+    u.phase = 'laeuft'; beAlleRender();
+    for (var i = 0; i < u.items.length; i++) {
+      var it = u.items[i]; if (it.status !== 'bereit') continue;
+      it.status = 'bucht'; beAlleRender();
+      try {
+        var res = await fetch('/webhook/accounting/beleg-buchen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: it.id }) });
+        var d = await res.json();
+        if (!res.ok || !d.ok) { it.status = 'fehler'; it.meldung = (d && (d.meldung || (d.probleme || []).join(' ') || d.message || d.fehler)) || 'Nicht gebucht'; if (d && d.hinweis) it.meldung += ' ' + d.hinweis; }
+        else { it.status = 'gebucht'; it.meldung = 'Gebucht: ' + (d.schritte || []).join(', ') + '.'; delete BE.sel[it.id]; }
+      } catch (e) { it.status = 'fehler'; it.meldung = e.message; }
+      beAlleRender();
+    }
+    u.phase = 'fertig'; beAlleRender();
+    ['XXL', 'LEV'].forEach(function (k) { if (BL[k] && BL[k].daten) ladeListe('beleg', k, BL[k].daten.monat); });
+    if (typeof ladeRF === 'function') ladeRF();
+  }
   function beAlleRender() { renderAccounting('beleg', 'XXL'); renderAccounting('beleg', 'LEV'); }
   function bindBelege() {
     var ids = Object.keys(BE_MANDANT).concat(Object.keys(ZA_KONTO));
@@ -4341,6 +4413,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var zustand = function (el) { var art = el.getAttribute('data-art') || (BE_MANDANT[id] ? 'beleg' : 'zahlung'); var k = el.getAttribute('data-k') || BE_MANDANT[id] || ZA_KONTO[id]; return { art: art, k: k, z: (art === 'beleg' ? BL : ZA)[k] }; };
       p.addEventListener('change', function (e) {
         var c = e.target.closest('[data-be="bt-standard"]'); if (c) { if (BE.btEdit) BE.btEdit.standard = c.checked; return; }
+        var sc = e.target.closest('[data-be-sel]');
+        if (sc) { var rid = sc.getAttribute('data-be-sel'); if (sc.checked) BE.sel[rid] = sc.getAttribute('data-titel') || ''; else delete BE.sel[rid]; beAlleRender(); var nf = document.querySelector('[data-be-sel="' + rid + '"]'); if (nf) nf.focus(); return; }
         var s = e.target.closest('[data-be="filter"]'); if (!s) return;
         var st = zustand(s); st.z.filter = s.value; renderAccounting(st.art, st.k);
       });
@@ -4361,6 +4435,10 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         else if (w === 'bt-edit') { BE.meldung = ''; BE.btEdit = { id: Number(b.getAttribute('data-id')), wert: b.getAttribute('data-zweck') || '', standard: false, laeuft: false, fehler: '', fokus: false }; beAlleRender(); }
         else if (w === 'bt-abbruch') { BE.btEdit = null; beAlleRender(); }
         else if (w === 'bt-speichern') btSpeichern(Number(b.getAttribute('data-id')));
+        else if (w === 'ueb-start') uebVorschau();
+        else if (w === 'ueb-ja') uebBuchen();
+        else if (w === 'ueb-leeren') { BE.sel = {}; beAlleRender(); }
+        else if (w === 'ueb-zu') { BE.ueb = null; beAlleRender(); }
       });
     });
   }
