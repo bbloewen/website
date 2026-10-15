@@ -457,6 +457,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   <section id="p-sachkonten-xxl" role="tabpanel" aria-labelledby="tab-sachkonten-xxl" hidden></section>
   <section id="p-sachkonten-lev" role="tabpanel" aria-labelledby="tab-sachkonten-lev" hidden></section>
   <section id="p-auslage-neu" role="tabpanel" aria-labelledby="tab-auslage-neu" hidden></section>
+  <section id="p-vorschuss-neu" role="tabpanel" aria-labelledby="tab-vorschuss-neu" hidden></section>
+  <section id="p-vorschuesse" role="tabpanel" aria-labelledby="tab-vorschuesse" hidden></section>
 
 </main>
 </div>
@@ -804,8 +806,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
     { id: 'segmentierung', name: 'Segmentierung', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
-    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'rueckfragen', name: 'Rückfragen' }, { id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlung XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung LEV Löwenpark' }, { id: 'ueberweisungen', name: 'Überweisungen' }, { id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }] },
-    { id: 'auslagen', name: 'Auslagen', tabs: [{ id: 'auslage-neu', name: 'Auslage einreichen' }] }
+    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'rueckfragen', name: 'Rückfragen' }, { id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlung XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung LEV Löwenpark' }, { id: 'ueberweisungen', name: 'Überweisungen' }, { id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }, { id: 'vorschuesse', name: 'Vorschüsse' }] },
+    { id: 'auslagen', name: 'Auslagen', tabs: [{ id: 'auslage-neu', name: 'Auslage einreichen' }, { id: 'vorschuss-neu', name: 'Vorschuss beantragen' }] }
   ];
   var TABS = [];
   BEREICHE.forEach(function (b) { b.tabs.forEach(function (t) { TABS.push(t.id); }); });
@@ -835,7 +837,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var t = '';
     b.tabs.forEach(function (x) {
       var aktiv = x.id === S.tab;
-      var badge = x.id === 'rueckfragen' && RF.daten && RF.daten.zaehler && RF.daten.zaehler.offen ? ' (' + RF.daten.zaehler.offen + ')' : '';
+      var badge = x.id === 'rueckfragen' && RF.daten && RF.daten.zaehler && RF.daten.zaehler.offen ? ' (' + RF.daten.zaehler.offen + ')' : (x.id === 'vorschuesse' && VW.daten && vwOffen() ? ' (' + vwOffen() + ')' : '');
       t += '<button class="tab" role="tab" id="tab-' + x.id + '" data-tab="' + x.id + '" aria-controls="p-' + x.id + '" aria-selected="' + aktiv + '" tabindex="' + (aktiv ? 0 : -1) + '">' + esc(x.name + badge) + '</button>';
     });
     var tl = $('tabs');
@@ -868,6 +870,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (ZA_KONTO[t]) ladeListe('zahlung', ZA_KONTO[t]);
     if (t === 'buchungstexte') ladeBT();
     if (t === 'auslage-neu') ladeAU();
+    if (t === 'vorschuss-neu') ladeVZ();
+    if (t === 'vorschuesse') ladeVW();
     if (t === 'kostenstellen') ladeKS();
     if (t === 'sachkonten-xxl') ladeSK('XXL');
     if (t === 'sachkonten-lev') ladeSK('LEV');
@@ -4455,11 +4459,13 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   }
 
   // ---------- Auslagen: Formular für Mitarbeitende ----------
-  // Beleg hochladen mit den fünf Pflichtangaben (Lieferant, Steuersatz, Anlass, wer gezahlt hat, wohin ausgezahlt wird).
+  // Erst den Beleg fotografieren oder wählen: Er wird im Hintergrund gelesen und füllt das Formular vor (Lieferant, Datum, Betrag, Steuersatz, Anlass, Gesellschaft).
   // Die Angaben gehen mit dem Beleg als PDF (Deckblatt + Beleg) in den Belegeingang. Fotos werden hier im Browser zu einem PDF.
-  var AU = { ich: null, fehler: null, laedt: false, dateien: [], senden: false, fertig: '', fehlerForm: '', f: null };
+  var AU = { ich: null, fehler: null, laedt: false, dateien: [], senden: false, fertig: '', fehlerForm: '', f: null, vorschuesse: [], lesen: { laeuft: false, meldung: '', warnung: '', vorbelegt: {}, von: null }, beruehrt: {} };
+  var AU_BILD = new WeakMap();
   function auHeute() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
-  function auLeer(alt) { return { mandant: alt ? alt.mandant : '', zahlung: alt ? alt.zahlung : 'privat', zahler: 'ich', zahlerFrei: '', lieferant: '', datum: auHeute(), betrag: '', s19: false, s7: false, s0: false, unklar: false, anlass: '', bewirtete: '', notiz: '', iban: '' }; }
+  function auLeer(alt) { return { mandant: alt ? alt.mandant : '', zahlung: alt ? alt.zahlung : 'privat', zahler: 'ich', zahlerFrei: '', vorschuss: '', lieferant: '', datum: auHeute(), betrag: '', s19: false, s7: false, s0: false, unklar: false, anlass: '', bewirtete: '', notiz: '', iban: '' }; }
+  function auEuro(n) { return Number(n).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
   async function ladeAU() {
     if (AU.ich || AU.laedt) return;
     AU.laedt = true; AU.fehler = null; renderAU();
@@ -4470,12 +4476,19 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       AU.ich = d; if (!AU.f) AU.f = auLeer();
     } catch (e) { AU.fehler = e.message; }
     AU.laedt = false; renderAU();
+    ladeVorschuesseAU();
+  }
+  async function ladeVorschuesseAU() {
+    try { var res = await fetch('/webhook/auslagen/vorschuesse'); var d = await res.json(); if (res.ok && d.ok) { AU.vorschuesse = d.vorschuesse || []; VZ.liste = AU.vorschuesse; renderAU(); renderVZ(); } } catch (e) {}
   }
   function auBrauchtIban() { var f = AU.f; if (!f || f.zahlung !== 'privat') return false; if (f.zahler === 'ich') return !(AU.ich && AU.ich.iban_da); return true; }
   function auZahlerEintrag() { var f = AU.f; if (f.zahler === 'ich') return null; return (AU.ich.darf_fuer || [])[Number(f.zahler.slice(1))] || null; }
   function auBetrag(t) { var s = String(t || '').trim().replace(/\s|€/g, ''); if (/^\d{1,3}(\.\d{3})+(,\d{1,2})?$/.test(s)) s = s.replace(/\./g, ''); s = s.replace(',', '.'); var n = Number(s); return /^\d+(\.\d{1,2})?$/.test(s) && n > 0 ? n : 0; }
+  function auIstPdf(d) { return d.type === 'application/pdf' || /\.pdf$/i.test(d.name); }
+  function auOffeneVorschuesse() { return (AU.vorschuesse || []).filter(function (v) { return v.status === 'ausgezahlt'; }); }
   function auPruefen() {
     var f = AU.f;
+    if (!AU.dateien.length) return 'Bitte zuerst den Beleg als PDF oder Foto hinzufügen.';
     if (!f.mandant) return 'Bitte wählen, für welche Gesellschaft der Beleg ist.';
     if (f.zahlung === 'privat' && f.zahler !== 'ich') { var z = auZahlerEintrag(); if (z && z.frei && f.zahlerFrei.trim().length < 3) return 'Bitte den Namen der Person eintragen, die ausgelegt hat.'; }
     if (f.lieferant.trim().length < 2) return 'Bitte den Lieferanten eintragen.';
@@ -4483,15 +4496,13 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (!auBetrag(f.betrag)) return 'Bitte den Betrag in Euro angeben, zum Beispiel 23,90.';
     if (!f.s19 && !f.s7 && !f.s0 && !f.unklar) return 'Bitte den Steuersatz oder die Steuersätze auf dem Beleg angeben.';
     if (f.anlass.trim().length < 3) return 'Bitte den Anlass angeben, zum Beispiel Spielerverpflegung.';
-    if (/bewirtung/i.test(f.anlass) && f.bewirtete.trim().length < 3) return 'Bei Bewirtung bitte die bewirteten Personen und den Anlass eintragen.';
+    if (/bewirtung/i.test(f.anlass) && f.bewirtete.trim().length < 3) return 'Bei Bewirtung Externe bitte die bewirteten Personen und den Anlass eintragen.';
     if (auBrauchtIban() && !f.iban.trim()) return 'Bitte die IBAN eintragen, auf die ausgezahlt werden soll.';
-    if (!AU.dateien.length) return 'Bitte den Beleg als PDF oder Foto hinzufügen.';
-    var pdfs = AU.dateien.filter(function (d) { return d.type === 'application/pdf' || /\.pdf$/i.test(d.name); });
-    if (pdfs.length && AU.dateien.length > 1) return 'Entweder eine PDF-Datei oder ein bis mehrere Fotos, nicht beides gemischt.';
+    if (AU.dateien.some(auIstPdf) && AU.dateien.length > 1) return 'Entweder eine PDF-Datei oder ein bis mehrere Fotos, nicht beides gemischt.';
     return '';
   }
   function auBytesZuBase64(bytes) { var s = '', n = 0x8000; for (var i = 0; i < bytes.length; i += n) s += String.fromCharCode.apply(null, bytes.subarray(i, i + n)); return btoa(s); }
-  function auBild(datei) {
+  function auBildLesen(datei) {
     return new Promise(function (ok, nein) {
       var url = URL.createObjectURL(datei), img = new Image();
       img.onload = function () {
@@ -4505,6 +4516,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       img.src = url;
     });
   }
+  // Je Foto nur einmal verkleinern: Vorab-Lesen und späteres Einreichen nutzen dasselbe Ergebnis
+  function auBild(datei) { var c = AU_BILD.get(datei); if (!c) { c = auBildLesen(datei); AU_BILD.set(datei, c); c.catch(function () { AU_BILD.delete(datei); }); } return c; }
   // Ein PDF aus JPEG-Seiten, ohne Bibliothek: je Foto eine Seite (höchstens A4 groß, Seitenverhältnis bleibt).
   function auPdfAusBildern(bilder) {
     var teile = [], pos = 0, offs = [];
@@ -4529,13 +4542,39 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   }
   async function auDateiAlsPdf() {
     var d = AU.dateien;
-    if (d.length === 1 && (d[0].type === 'application/pdf' || /\.pdf$/i.test(d[0].name))) {
+    if (d.length === 1 && auIstPdf(d[0])) {
       var b = new Uint8Array(await d[0].arrayBuffer());
       if (String.fromCharCode(b[0], b[1], b[2], b[3]) !== '%PDF') throw new Error('Die Datei ist kein gültiges PDF.');
       return b;
     }
     var bilder = []; for (var i = 0; i < d.length; i++) bilder.push(await auBild(d[i]));
     return auPdfAusBildern(bilder);
+  }
+  // Beleg im Hintergrund lesen und das Formular vorbelegen. Nur Felder, die noch niemand angefasst hat.
+  async function auBelegLesen() {
+    var datei = AU.dateien[0]; if (!datei || AU.lesen.von === datei) return;
+    AU.lesen = { laeuft: true, meldung: '', warnung: '', vorbelegt: {}, von: datei }; renderAU();
+    try {
+      var daten;
+      if (auIstPdf(datei)) { var b = new Uint8Array(await datei.arrayBuffer()); daten = { mime: 'application/pdf', b64: auBytesZuBase64(b) }; }
+      else { var bild = await auBild(datei); daten = { mime: 'image/jpeg', b64: auBytesZuBase64(bild.jpeg) }; }
+      var res = await fetch('/webhook/auslagen/beleg-lesen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ datei: daten }) });
+      var d = await res.json().catch(function () { return {}; });
+      if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Der Beleg konnte nicht gelesen werden.');
+      auVorbelegen(d.daten || {});
+    } catch (e) { AU.lesen.laeuft = false; AU.lesen.warnung = e.message + ' Du kannst die Angaben auch selbst eintragen.'; }
+    AU.lesen.laeuft = false; renderAU();
+  }
+  function auVorbelegen(d) {
+    var f = AU.f, v = AU.lesen.vorbelegt, bt = AU.beruehrt, ok = [];
+    if (d.lieferant && !bt.lieferant && !f.lieferant.trim()) { f.lieferant = d.lieferant; v.lieferant = 1; ok.push(d.lieferant); }
+    if (d.datum && !bt.datum) { f.datum = d.datum; v.datum = 1; }
+    if (d.betrag && !bt.betrag && !f.betrag.trim()) { f.betrag = auEuro(d.betrag); v.betrag = 1; ok.push(auEuro(d.betrag) + ' €'); }
+    if (d.steuersaetze && d.steuersaetze.length && !bt.steuer) { f.s19 = d.steuersaetze.indexOf(19) >= 0; f.s7 = d.steuersaetze.indexOf(7) >= 0; f.s0 = d.steuersaetze.indexOf(0) >= 0; f.unklar = false; v.steuer = 1; }
+    if (d.mandant && !bt.mandant && !f.mandant) { f.mandant = d.mandant; v.mandant = 1; }
+    if (d.anlass && !bt.anlass && !f.anlass.trim()) { f.anlass = d.anlass; v.anlass = 1; }
+    AU.lesen.meldung = ok.length ? 'Aus dem Beleg gelesen: ' + ok.join(', ') + '. Bitte prüfe alle Angaben und ergänze, was fehlt.' : 'Aus dem Beleg konnte nichts sicher gelesen werden. Bitte die Angaben selbst eintragen.';
+    if (d.sicherheit === 'niedrig' || d.hinweis) AU.lesen.warnung = (d.sicherheit === 'niedrig' ? 'Der Beleg war schwer lesbar. ' : '') + (d.hinweis || '');
   }
   async function auSenden() {
     var f = AU.f; AU.fehlerForm = ''; AU.fertig = '';
@@ -4546,15 +4585,16 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       if (pdf.length > 9500000) throw new Error('Die Datei ist zu groß (höchstens etwa 9 MB). Bitte ein kleineres Foto oder PDF verwenden.');
       var ze = f.zahlung === 'privat' ? auZahlerEintrag() : null, gez = {};
       if (ze) gez = ze.frei ? { name: f.zahlerFrei.trim() } : { name: ze.name, email: ze.email };
-      var body = { mandant: f.mandant, zahlung: f.zahlung, gezahlt_von: gez, lieferant: f.lieferant.trim(), datum: f.datum, betrag: String(auBetrag(f.betrag)),
+      var body = { mandant: f.mandant, zahlung: f.zahlung, gezahlt_von: gez, vorschuss_id: f.zahlung === 'privat' && f.vorschuss ? Number(f.vorschuss) : 0, lieferant: f.lieferant.trim(), datum: f.datum, betrag: String(auBetrag(f.betrag)),
         steuersaetze: [f.s19 ? '19' : '', f.s7 ? '7' : '', f.s0 ? '0' : ''].filter(Boolean), steuersatz_unklar: !!f.unklar && !f.s19 && !f.s7 && !f.s0,
         anlass: f.anlass.trim(), bewirtete: /bewirtung/i.test(f.anlass) ? f.bewirtete.trim() : '', notiz: f.notiz.trim(), iban: auBrauchtIban() ? f.iban.trim() : '',
         datei: { mime: 'application/pdf', b64: auBytesZuBase64(pdf) } };
       var res = await fetch('/webhook/auslagen/einreichen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       var d = await res.json().catch(function () { return {}; });
       if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Das Einreichen hat nicht geklappt. Bitte versuche es noch einmal.');
-      AU.fertig = 'Eingereicht: ' + f.lieferant.trim() + ', ' + auBetrag(f.betrag).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €. Der Beleg ist in der Buchhaltung angekommen.';
-      AU.f = auLeer(f); AU.dateien = [];
+      AU.fertig = 'Eingereicht: ' + f.lieferant.trim() + ', ' + auEuro(auBetrag(f.betrag)) + ' €. Der Beleg ist in der Buchhaltung angekommen.';
+      AU.f = auLeer(f); AU.dateien = []; AU.beruehrt = {}; AU.lesen = { laeuft: false, meldung: '', warnung: '', vorbelegt: {}, von: null };
+      ladeVorschuesseAU();
     } catch (e) { AU.fehlerForm = e.message; }
     AU.senden = false; renderAU();
   }
@@ -4563,16 +4603,31 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (AU.laedt && !AU.ich) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
     if (AU.fehler && !AU.ich) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(AU.fehler) + '</div>'; return; }
     if (!AU.ich || !AU.f) { el.innerHTML = ''; return; }
-    var f = AU.f, ich = AU.ich, aus = AU.senden ? ' disabled' : '';
-    var feld = function (id, label, inner, hilfe, pflicht) { return '<div><label for="au-' + id + '" class="text-klein" style="font-weight:600;display:block;margin-bottom:4px">' + esc(label) + (pflicht === false ? '' : ' <span class="pflicht" aria-hidden="true">*</span>') + '</label>' + inner + (hilfe ? '<div class="hilfe">' + hilfe + '</div>' : '') + '</div>'; };
+    var f = AU.f, ich = AU.ich, aus = AU.senden ? ' disabled' : '', vb = AU.lesen.vorbelegt;
+    var feld = function (id, label, inner, hilfe, pflicht, vbKey) { return '<div><label for="au-' + id + '" class="text-klein" style="font-weight:600;display:block;margin-bottom:4px">' + esc(label) + (pflicht === false ? '' : ' <span class="pflicht" aria-hidden="true">*</span>') + (vb[vbKey || id] ? ' <span class="gedaempft" style="font-weight:400">· vom Beleg gelesen</span>' : '') + '</label>' + inner + (hilfe ? '<div class="hilfe">' + hilfe + '</div>' : '') + '</div>'; };
     var text = function (id, typ, ph) { return '<input id="au-' + id + '" class="eingabe" type="' + typ + '" data-au="' + id + '" value="' + esc(f[id]) + '"' + (ph ? ' placeholder="' + esc(ph) + '"' : '') + aus + '>'; };
     var radio = function (name, wert, label, an) { return '<label class="text-klein" style="display:flex;gap:8px;align-items:center"><input type="radio" name="au-' + name + '" data-au-radio="' + name + '" value="' + esc(wert) + '"' + (an ? ' checked' : '') + aus + '> ' + esc(label) + '</label>'; };
     var haken = function (id, label) { return '<label class="text-klein" style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-au-haken="' + id + '"' + (f[id] ? ' checked' : '') + aus + '> ' + esc(label) + '</label>'; };
-    var h = '<div class="card" style="max-width:680px"><div class="card-kopf">Auslage einreichen<div class="unter">Eingekauft für den Verein oder die GmbH? Hier den Beleg hochladen, die Buchhaltung erledigt den Rest. Mit * sind Pflichtangaben markiert.</div></div><div style="padding:16px 20px;display:grid;gap:16px">';
+    var h = '<div class="card" style="max-width:680px"><div class="card-kopf">Auslage einreichen<div class="unter">Erst den Beleg fotografieren: Er wird gelesen und füllt das Formular vor. Mit * sind Pflichtangaben markiert.</div></div><div style="padding:16px 20px;display:grid;gap:16px">';
     if (AU.fertig) h += '<div class="erfolg" role="status">' + esc(AU.fertig) + '</div>';
     if (AU.fehlerForm) h += '<div class="fehlerbox" role="alert">' + esc(AU.fehlerForm) + '</div>';
-    h += '<fieldset style="border:0;padding:0;margin:0"><legend class="text-klein" style="font-weight:600;margin-bottom:6px">Für welche Gesellschaft? <span class="pflicht" aria-hidden="true">*</span></legend><div style="display:grid;gap:6px">' +
+    // 1. Beleg
+    var dl = '';
+    if (AU.dateien.length) { dl = '<ul style="margin:8px 0 0;padding-left:20px">'; AU.dateien.forEach(function (d, i) { dl += '<li class="text-klein">' + esc(d.name) + ' <button type="button" class="link-btn" data-au-aktion="entfernen" data-i="' + i + '"' + aus + '>entfernen</button></li>'; }); dl += '</ul>'; }
+    h += '<div><div class="text-klein" style="font-weight:600;margin-bottom:8px">1. Beleg <span class="pflicht" aria-hidden="true">*</span></div><div style="display:flex;flex-wrap:wrap;gap:8px">' +
+      '<input id="au-foto" class="sr-only" type="file" accept="image/*" capture="environment" data-au-datei' + aus + '><label for="au-foto" class="btn btn-primary">Beleg fotografieren</label>' +
+      '<input id="au-datei" class="sr-only" type="file" accept="application/pdf,image/*" multiple data-au-datei' + aus + '><label for="au-datei" class="btn btn-secondary">Foto oder PDF wählen</label></div>' + dl +
+      (AU.lesen.laeuft ? '<div class="text-klein" role="status" style="margin-top:8px">Der Beleg wird gelesen …</div>' : '') +
+      (AU.lesen.meldung ? '<div class="erfolg" role="status" style="margin-top:8px">' + esc(AU.lesen.meldung) + '</div>' : '') +
+      (AU.lesen.warnung ? '<div class="hinweis-warn" role="status" style="margin-top:8px">' + esc(AU.lesen.warnung) + '</div>' : '') +
+      '<div class="hilfe">Mehrere Fotos desselben Belegs werden zu einem PDF zusammengefasst. Nicht erstattungsfähige Positionen bitte vorher auf dem Beleg durchstreichen.</div></div>';
+    h += '<fieldset style="border:0;padding:0;margin:0"><legend class="text-klein" style="font-weight:600;margin-bottom:6px">Für welche Gesellschaft? <span class="pflicht" aria-hidden="true">*</span>' + (vb.mandant ? ' <span class="gedaempft" style="font-weight:400">· vom Beleg gelesen</span>' : '') + '</legend><div style="display:grid;gap:6px">' +
       radio('mandant', 'XXL', 'XXL Baskets GmbH (Spielbetrieb, Trainingslager, Auswärtsspiele)', f.mandant === 'XXL') + radio('mandant', 'LEV', 'Basketball Löwen Erfurt e.V. (Verein, Nachwuchs)', f.mandant === 'LEV') + '</div></fieldset>';
+    h += feld('lieferant', 'Lieferant', text('lieferant', 'text', 'z. B. Globus, Bäckerei Müller'));
+    h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">' + feld('datum', 'Belegdatum', '<input id="au-datum" class="eingabe" type="date" data-au="datum" max="' + auHeute() + '" value="' + esc(f.datum) + '"' + aus + '>') + feld('betrag', 'Betrag brutto in Euro', text('betrag', 'text', '23,90')) + '</div>';
+    h += '<fieldset style="border:0;padding:0;margin:0"><legend class="text-klein" style="font-weight:600;margin-bottom:6px">Steuersatz auf dem Beleg <span class="pflicht" aria-hidden="true">*</span>' + (vb.steuer ? ' <span class="gedaempft" style="font-weight:400">· vom Beleg gelesen</span>' : '') + '</legend><div style="display:flex;flex-wrap:wrap;gap:8px 20px">' + haken('s19', '19 %') + haken('s7', '7 %') + haken('s0', '0 % / keine Steuer') + haken('unklar', 'steht nicht auf dem Beleg') + '</div><div class="hilfe">Bei gemischten Belegen alle vorkommenden Sätze ankreuzen.</div></fieldset>';
+    h += feld('anlass', 'Anlass', text('anlass', 'text', 'z. B. Spielerverpflegung, Trainingslager').replace('<input ', '<input list="au-anlaesse" ') + '<datalist id="au-anlaesse"><option value="Spielerverpflegung"><option value="Trainerverpflegung"><option value="Trainingslager"><option value="Auswärtsspiel"><option value="Bewirtung Externe"><option value="Fahrtkosten"><option value="Übernachtung"><option value="Material"><option value="Reparatur"></datalist>', 'Wofür wurde eingekauft?');
+    if (/bewirtung/i.test(f.anlass)) h += feld('bewirtete', 'Bewirtete Personen und Anlass', '<textarea id="au-bewirtete" class="eingabe" rows="3" data-au="bewirtete"' + aus + '>' + esc(f.bewirtete) + '</textarea>', 'Namen der bewirteten Personen außerhalb des Vereins und wozu die Einladung war.');
     h += '<fieldset style="border:0;padding:0;margin:0"><legend class="text-klein" style="font-weight:600;margin-bottom:6px">Wie wurde bezahlt? <span class="pflicht" aria-hidden="true">*</span></legend><div style="display:grid;gap:6px">' +
       radio('zahlung', 'privat', 'Privat ausgelegt, bitte erstatten', f.zahlung === 'privat') + radio('zahlung', 'ec', 'Mit der Firmen-EC-Karte', f.zahlung === 'ec') + '</div></fieldset>';
     if (f.zahlung === 'privat') {
@@ -4586,35 +4641,170 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       } else h += '<div class="text-klein"><span style="font-weight:600">Ausgelegt von:</span> ' + esc(ich.name) + '</div>';
       if (f.zahler === 'ich' && ich.iban_da) h += '<div class="text-klein"><span style="font-weight:600">Auszahlung auf:</span> ' + esc(ich.iban_maske) + ' <span class="gedaempft">(aus den Stammdaten)</span></div>';
       if (auBrauchtIban()) h += feld('iban', 'IBAN für die Auszahlung', text('iban', 'text', 'DE00 0000 0000 0000 0000 00'), f.zahler === 'ich' ? 'Für dich ist noch keine IBAN hinterlegt.' : 'Nur nötig, wenn für diese Person noch keine IBAN hinterlegt ist.');
+      var ov = auOffeneVorschuesse();
+      if (ov.length) {
+        var vo = '<option value="">Nein, kein Vorschuss</option>';
+        ov.forEach(function (v) { vo += '<option value="' + v.id + '"' + (String(f.vorschuss) === String(v.id) ? ' selected' : '') + '>Nr. ' + v.id + ', ' + esc(v.anlass) + ', ' + auEuro(v.betrag) + ' €</option>'; });
+        h += feld('vorschuss', 'Gehört der Beleg zu einem Vorschuss?', '<select id="au-vorschuss" class="eingabe" data-au-wahl="vorschuss"' + aus + '>' + vo + '</select>', 'Dann wird er mit dem Vorschuss abgerechnet und nicht noch einmal erstattet.', false);
+      }
     } else h += '<div class="text-klein gedaempft">Bei Zahlung mit der Firmenkarte gibt es nichts zu erstatten.</div>';
-    h += feld('lieferant', 'Lieferant', text('lieferant', 'text', 'z. B. Globus, Bäckerei Müller'));
-    h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">' + feld('datum', 'Belegdatum', '<input id="au-datum" class="eingabe" type="date" data-au="datum" max="' + auHeute() + '" value="' + esc(f.datum) + '"' + aus + '>') + feld('betrag', 'Betrag brutto in Euro', text('betrag', 'text', '23,90')) + '</div>';
-    h += '<fieldset style="border:0;padding:0;margin:0"><legend class="text-klein" style="font-weight:600;margin-bottom:6px">Steuersatz auf dem Beleg <span class="pflicht" aria-hidden="true">*</span></legend><div style="display:flex;flex-wrap:wrap;gap:8px 20px">' + haken('s19', '19 %') + haken('s7', '7 %') + haken('s0', '0 % / keine Steuer') + haken('unklar', 'steht nicht auf dem Beleg') + '</div><div class="hilfe">Bei gemischten Belegen alle vorkommenden Sätze ankreuzen.</div></fieldset>';
-    h += feld('anlass', 'Anlass', text('anlass', 'text', 'z. B. Spielerverpflegung, Trainingslager') .replace('<input ', '<input list="au-anlaesse" ') + '<datalist id="au-anlaesse"><option value="Spielerverpflegung"><option value="Trainerverpflegung"><option value="Trainingslager"><option value="Auswärtsspiel"><option value="Bewirtung"><option value="Fahrtkosten"><option value="Übernachtung"><option value="Material"><option value="Reparatur"></datalist>', 'Wofür wurde eingekauft?');
-    if (/bewirtung/i.test(f.anlass)) h += feld('bewirtete', 'Bewirtete Personen und Anlass', '<textarea id="au-bewirtete" class="eingabe" rows="3" data-au="bewirtete"' + aus + '>' + esc(f.bewirtete) + '</textarea>', 'Namen der bewirteten Personen und wozu die Einladung war.');
-    h += feld('notiz', 'Hinweis (optional)', '<textarea id="au-notiz" class="eingabe" rows="2" data-au="notiz"' + aus + '>' + esc(f.notiz) + '</textarea>', 'Nicht erstattungsfähige Positionen bitte vor dem Foto auf dem Beleg durchstreichen.', false);
-    var dl = '';
-    if (AU.dateien.length) { dl = '<ul style="margin:8px 0 0;padding-left:20px">'; AU.dateien.forEach(function (d, i) { dl += '<li class="text-klein">' + esc(d.name) + ' <button type="button" class="link-btn" data-au-aktion="entfernen" data-i="' + i + '"' + aus + '>entfernen</button></li>'; }); dl += '</ul>'; }
-    h += feld('datei', 'Beleg als PDF oder Foto', '<input id="au-datei" type="file" data-au-datei accept="application/pdf,image/*" multiple' + aus + '>' + dl, 'Mehrere Fotos desselben Belegs werden zu einem PDF zusammengefasst.');
+    h += feld('notiz', 'Hinweis (optional)', '<textarea id="au-notiz" class="eingabe" rows="2" data-au="notiz"' + aus + '>' + esc(f.notiz) + '</textarea>', '', false);
     h += '<div><button type="button" class="btn btn-primary" data-au-aktion="senden"' + aus + '>' + (AU.senden ? 'Sende …' : 'Auslage einreichen') + '</button></div></div></div>';
     var fokus = document.activeElement && document.activeElement.id, pos = document.activeElement && document.activeElement.selectionStart;
     el.innerHTML = h;
-    if (fokus && fokus.indexOf('au-') === 0) { var n = document.getElementById(fokus); if (n) { n.focus(); try { if (pos !== null && pos !== undefined) n.setSelectionRange(pos, pos); } catch (e) {} } }
+    if (fokus && fokus.indexOf('au-') === 0 && fokus !== 'au-foto' && fokus !== 'au-datei') { var n = document.getElementById(fokus); if (n) { n.focus(); try { if (pos !== null && pos !== undefined) n.setSelectionRange(pos, pos); } catch (e) {} } }
   }
   function bindAU() {
     var p = $('p-auslage-neu');
-    p.addEventListener('input', function (e) { var n = e.target.getAttribute('data-au'); if (!n || !AU.f) return; AU.f[n] = e.target.value; if (n === 'anlass') { var b = /bewirtung/i.test(AU.f.anlass); if (b !== !!p.querySelector('#au-bewirtete')) renderAU(); } });
+    p.addEventListener('input', function (e) { var n = e.target.getAttribute('data-au'); if (!n || !AU.f) return; AU.f[n] = e.target.value; AU.beruehrt[n] = 1; if (AU.lesen.vorbelegt[n]) { delete AU.lesen.vorbelegt[n]; } if (n === 'anlass') { var b = /bewirtung/i.test(AU.f.anlass); if (b !== !!p.querySelector('#au-bewirtete')) renderAU(); } });
     p.addEventListener('change', function (e) {
       var t = e.target, r = t.getAttribute('data-au-radio'), hk = t.getAttribute('data-au-haken'), w = t.getAttribute('data-au-wahl');
-      if (r) { AU.f[r] = t.value; renderAU(); }
-      else if (hk) { AU.f[hk] = t.checked; if (hk === 'unklar' && t.checked) { AU.f.s19 = AU.f.s7 = AU.f.s0 = false; renderAU(); } else if (hk !== 'unklar' && t.checked && AU.f.unklar) { AU.f.unklar = false; renderAU(); } }
+      if (r) { AU.f[r] = t.value; AU.beruehrt[r] = 1; renderAU(); }
+      else if (hk) { AU.f[hk] = t.checked; AU.beruehrt.steuer = 1; if (hk === 'unklar' && t.checked) { AU.f.s19 = AU.f.s7 = AU.f.s0 = false; } else if (hk !== 'unklar' && t.checked && AU.f.unklar) { AU.f.unklar = false; } renderAU(); }
       else if (w) { AU.f[w] = t.value; renderAU(); }
-      else if (t.hasAttribute('data-au-datei')) { var neu = Array.prototype.slice.call(t.files || []); AU.dateien = AU.dateien.concat(neu); t.value = ''; renderAU(); }
+      else if (t.hasAttribute('data-au-datei')) { var neu = Array.prototype.slice.call(t.files || []); AU.dateien = AU.dateien.concat(neu); t.value = ''; AU.fehlerForm = ''; renderAU(); auBelegLesen(); }
     });
     p.addEventListener('click', function (e) {
       var b = e.target.closest('[data-au-aktion]'); if (!b) return;
-      if (b.getAttribute('data-au-aktion') === 'entfernen') { AU.dateien.splice(Number(b.getAttribute('data-i')), 1); renderAU(); }
+      if (b.getAttribute('data-au-aktion') === 'entfernen') { AU.dateien.splice(Number(b.getAttribute('data-i')), 1); if (!AU.dateien.length) AU.lesen = { laeuft: false, meldung: '', warnung: '', vorbelegt: {}, von: null }; renderAU(); if (AU.dateien.length) auBelegLesen(); }
       else if (b.getAttribute('data-au-aktion') === 'senden') auSenden();
+    });
+  }
+
+  // ---------- Vorschuss beantragen (Mitarbeitende) ----------
+  var VZ = { liste: [], f: null, senden: false, fertig: '', fehler: '', geladen: false };
+  function vzLeer() { return { mandant: '', anlass: '', verwendung: '', betrag: '', bis: '', iban: '', ok: false }; }
+  var VZ_STATUS = { beantragt: 'wartet auf Freigabe', genehmigt: 'genehmigt, die Auszahlung folgt', ausgezahlt: 'ausgezahlt', abgerechnet: 'abgerechnet', abgelehnt: 'abgelehnt' };
+  function vzDatum(iso) { return iso ? String(iso).slice(8, 10) + '.' + String(iso).slice(5, 7) + '.' + String(iso).slice(0, 4) : ''; }
+  async function ladeVZ() {
+    if (!VZ.f) VZ.f = vzLeer();
+    await ladeAU(); // Name, IBAN-Stand
+    ladeVorschuesseAU(); renderVZ();
+  }
+  async function vzSenden() {
+    var f = VZ.f; VZ.fehler = ''; VZ.fertig = '';
+    var betrag = auBetrag(f.betrag);
+    if (!f.mandant) VZ.fehler = 'Bitte wählen, für welche Gesellschaft der Vorschuss ist.';
+    else if (f.anlass.trim().length < 3) VZ.fehler = 'Bitte die Maßnahme angeben, zum Beispiel Trainingslager Luxemburg.';
+    else if (f.verwendung.trim().length < 8) VZ.fehler = 'Bitte kurz beschreiben, wofür das Geld gebraucht wird.';
+    else if (!betrag) VZ.fehler = 'Bitte den Betrag in Euro angeben.';
+    else if (!f.bis) VZ.fehler = 'Bitte angeben, bis wann das Geld gebraucht wird.';
+    else if (AU.ich && !AU.ich.iban_da && !f.iban.trim()) VZ.fehler = 'Bitte die IBAN für die Auszahlung eintragen.';
+    else if (!f.ok) VZ.fehler = 'Bitte bestätigen, dass du den Vorschuss mit Originalbelegen abrechnest.';
+    if (VZ.fehler) { renderVZ(); return; }
+    VZ.senden = true; renderVZ();
+    try {
+      var res = await fetch('/webhook/auslagen/vorschuss-beantragen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: f.mandant, anlass: f.anlass.trim(), verwendung: f.verwendung.trim(), betrag: String(betrag), benoetigt_bis: f.bis, bestaetigt: true, iban: AU.ich && !AU.ich.iban_da ? f.iban.trim() : '' }) });
+      var d = await res.json().catch(function () { return {}; });
+      if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Der Antrag hat nicht geklappt. Bitte versuche es noch einmal.');
+      VZ.fertig = 'Antrag gesendet: ' + f.anlass.trim() + ', ' + auEuro(betrag) + ' €. Du bekommst das Geld, sobald der Vorschuss genehmigt und überwiesen ist.';
+      VZ.f = vzLeer(); ladeVorschuesseAU();
+    } catch (e) { VZ.fehler = e.message; }
+    VZ.senden = false; renderVZ();
+  }
+  function renderVZ() {
+    var el = $('p-vorschuss-neu'); if (!el) return;
+    if (!AU.ich) { el.innerHTML = AU.fehler ? '<div class="fehlerbox" role="alert">' + esc(AU.fehler) + '</div>' : '<div class="laedt">Lade …</div>'; return; }
+    if (!VZ.f) VZ.f = vzLeer();
+    var f = VZ.f, aus = VZ.senden ? ' disabled' : '';
+    var feld = function (id, label, inner, hilfe) { return '<div><label for="vz-' + id + '" class="text-klein" style="font-weight:600;display:block;margin-bottom:4px">' + esc(label) + ' <span class="pflicht" aria-hidden="true">*</span></label>' + inner + (hilfe ? '<div class="hilfe">' + hilfe + '</div>' : '') + '</div>'; };
+    var text = function (id, ph) { return '<input id="vz-' + id + '" class="eingabe" type="text" data-vz="' + id + '" value="' + esc(f[id]) + '"' + (ph ? ' placeholder="' + esc(ph) + '"' : '') + aus + '>'; };
+    var radio = function (wert, label) { return '<label class="text-klein" style="display:flex;gap:8px;align-items:center"><input type="radio" name="vz-mandant" data-vz-radio="mandant" value="' + wert + '"' + (f.mandant === wert ? ' checked' : '') + aus + '> ' + esc(label) + '</label>'; };
+    var h = '<div class="card" style="max-width:680px"><div class="card-kopf">Vorschuss beantragen<div class="unter">Für eine Maßnahme, bei der du Geld auslegen musst. Der Vorschuss wird geprüft, genehmigt und überwiesen. Mit * sind Pflichtangaben markiert.</div></div><div style="padding:16px 20px;display:grid;gap:16px">';
+    if (VZ.fertig) h += '<div class="erfolg" role="status">' + esc(VZ.fertig) + '</div>';
+    if (VZ.fehler) h += '<div class="fehlerbox" role="alert">' + esc(VZ.fehler) + '</div>';
+    h += '<fieldset style="border:0;padding:0;margin:0"><legend class="text-klein" style="font-weight:600;margin-bottom:6px">Für welche Gesellschaft? <span class="pflicht" aria-hidden="true">*</span></legend><div style="display:grid;gap:6px">' + radio('XXL', 'XXL Baskets GmbH (Spielbetrieb, Trainingslager, Auswärtsspiele)') + radio('LEV', 'Basketball Löwen Erfurt e.V. (Verein, Nachwuchs)') + '</div></fieldset>';
+    h += feld('anlass', 'Maßnahme', text('anlass', 'z. B. Trainingslager Luxemburg'), 'Für jede Maßnahme gibt es genau eine verantwortliche Person, die Geld und Belege führt.');
+    h += feld('verwendung', 'Wofür wird das Geld gebraucht?', '<textarea id="vz-verwendung" class="eingabe" rows="3" data-vz="verwendung"' + aus + '>' + esc(f.verwendung) + '</textarea>', 'Zum Beispiel Verpflegung, Fahrtkosten, Unterkunft.');
+    h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">' + feld('betrag', 'Betrag in Euro', text('betrag', '500,00')) + feld('bis', 'Benötigt bis', '<input id="vz-bis" class="eingabe" type="date" data-vz="bis" min="' + auHeute() + '" value="' + esc(f.bis) + '"' + aus + '>') + '</div>';
+    if (AU.ich.iban_da) h += '<div class="text-klein"><span style="font-weight:600">Auszahlung auf:</span> ' + esc(AU.ich.iban_maske) + ' <span class="gedaempft">(aus den Stammdaten)</span></div>';
+    else h += feld('iban', 'IBAN für die Auszahlung', text('iban', 'DE00 0000 0000 0000 0000 00'), 'Für dich ist noch keine IBAN hinterlegt.');
+    h += '<label class="text-klein" style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" data-vz-haken="ok"' + (f.ok ? ' checked' : '') + aus + ' style="margin-top:3px"> <span>Ich rechne den Vorschuss mit Originalbelegen ab, spätestens zum Ende des Quartals nach der Auszahlung. Nicht abgerechnete Vorschüsse gelten als Lohn.</span></label>';
+    h += '<div><button type="button" class="btn btn-primary" data-vz-aktion="senden"' + aus + '>' + (VZ.senden ? 'Sende …' : 'Vorschuss beantragen') + '</button></div></div></div>';
+    if (VZ.liste.length) {
+      h += '<div class="card" style="max-width:680px;margin-top:16px"><div class="card-kopf">Meine Vorschüsse</div><div class="scroll-x"><table class="tbl kompakt"><thead><tr><th>Nr.</th><th>Maßnahme</th><th class="zahlen">Betrag</th><th>Stand</th></tr></thead><tbody>';
+      var heute = auHeute();
+      VZ.liste.forEach(function (v) {
+        var stand = VZ_STATUS[v.status] || v.status, extra = '';
+        if (v.status === 'ausgezahlt') {
+          var ueber = v.abrechnen_bis && v.abrechnen_bis < heute;
+          extra = '<div class="notiz" style="margin:0">ausgezahlt am ' + esc(vzDatum(v.ausgezahlt_am)) + ', abrechnen bis ' + esc(vzDatum(v.abrechnen_bis)) + '. Belegt: ' + esc(auEuro(v.belegt)) + ' von ' + esc(auEuro(v.betrag)) + ' €.</div>' + (ueber ? '<div class="hinweis-warn" style="margin-top:4px">Die Frist ist abgelaufen. Bitte sofort abrechnen, sonst gilt der Vorschuss als Lohn.</div>' : '') + '<a class="link-btn" href="#auslage-neu">Beleg dazu einreichen</a>';
+        }
+        h += '<tr><td class="zahlen">' + v.id + '</td><td>' + esc(v.anlass) + '</td><td class="zahlen">' + esc(auEuro(v.betrag)) + ' €</td><td>' + esc(stand) + extra + '</td></tr>';
+      });
+      h += '</tbody></table></div></div>';
+    }
+    var fokus = document.activeElement && document.activeElement.id, pos = document.activeElement && document.activeElement.selectionStart;
+    el.innerHTML = h;
+    if (fokus && fokus.indexOf('vz-') === 0) { var n = document.getElementById(fokus); if (n) { n.focus(); try { if (pos !== null && pos !== undefined) n.setSelectionRange(pos, pos); } catch (e) {} } }
+  }
+  function bindVZ() {
+    var p = $('p-vorschuss-neu');
+    p.addEventListener('input', function (e) { var n = e.target.getAttribute('data-vz'); if (n && VZ.f) VZ.f[n] = e.target.value; });
+    p.addEventListener('change', function (e) {
+      var t = e.target, r = t.getAttribute('data-vz-radio'), hk = t.getAttribute('data-vz-haken');
+      if (r) { VZ.f[r] = t.value; renderVZ(); } else if (hk) { VZ.f[hk] = t.checked; }
+    });
+    p.addEventListener('click', function (e) { var b = e.target.closest('[data-vz-aktion]'); if (b && b.getAttribute('data-vz-aktion') === 'senden') vzSenden(); });
+  }
+
+  // ---------- Vorschüsse verwalten (Accounting) ----------
+  var VW = { daten: null, fehler: null, laedt: false, meldung: '', fehlerAktion: '', laeuft: 0 };
+  async function ladeVW() {
+    VW.laedt = true; VW.fehler = null; renderVW();
+    try {
+      var res = await fetch('/webhook/accounting/vorschuesse'); var d = await res.json();
+      if (!res.ok || !d.ok) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
+      VW.daten = d;
+    } catch (e) { VW.fehler = e.message; }
+    VW.laedt = false; renderVW(); renderNavigation();
+  }
+  function vwOffen() { return VW.daten ? VW.daten.vorschuesse.filter(function (v) { return v.status === 'beantragt'; }).length : 0; }
+  async function vwAktion(id, aktion, datum) {
+    VW.laeuft = id; VW.meldung = ''; VW.fehlerAktion = ''; renderVW();
+    try {
+      var res = await fetch('/webhook/accounting/vorschuss-status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, aktion: aktion, datum: datum || undefined }) });
+      var d = await res.json().catch(function () { return {}; });
+      if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Das hat nicht geklappt.');
+      VW.meldung = { genehmigen: 'Vorschuss genehmigt.', ablehnen: 'Vorschuss abgelehnt.', ausgezahlt: 'Als ausgezahlt eingetragen. Die Frist zur Abrechnung läuft bis zum Quartalsende.', abgerechnet: 'Als abgerechnet eingetragen.' }[aktion] || 'Gespeichert.';
+    } catch (e) { VW.fehlerAktion = e.message; }
+    VW.laeuft = 0; await ladeVW();
+  }
+  function renderVW() {
+    var el = $('p-vorschuesse'); if (!el) return;
+    if (VW.laedt && !VW.daten) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
+    if (VW.fehler && !VW.daten) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(VW.fehler) + '</div>'; return; }
+    if (!VW.daten) { el.innerHTML = ''; return; }
+    var heute = auHeute(), liste = VW.daten.vorschuesse;
+    var h = '<div class="stapel">' + (VW.meldung ? '<div class="erfolg" role="status">' + esc(VW.meldung) + '</div>' : '') + (VW.fehlerAktion ? '<div class="fehlerbox" role="alert">' + esc(VW.fehlerAktion) + '</div>' : '');
+    h += '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Vorschüsse · ' + vwOffen() + ' warten auf Freigabe</span><span><button type="button" class="link-btn" data-vw="neu">Aktualisieren</button></span></div>';
+    if (!liste.length) h += '<div class="card-fuss">Noch keine Vorschüsse beantragt.</div>';
+    else {
+      h += '<div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Nr.</th><th>Person</th><th>Maßnahme</th><th class="zahlen">Betrag</th><th>Stand</th><th></th></tr></thead><tbody>';
+      liste.forEach(function (v) {
+        var aus = VW.laeuft === v.id ? ' disabled' : '', stand = VZ_STATUS[v.status] || v.status, knoepfe = '', zus = '';
+        if (v.status === 'beantragt') knoepfe = '<button type="button" class="btn btn-primary" style="padding:4px 10px" data-vw="genehmigen" data-id="' + v.id + '"' + aus + '>Genehmigen</button> <button type="button" class="link-btn" data-vw="ablehnen" data-id="' + v.id + '"' + aus + '>Ablehnen</button>';
+        else if (v.status === 'genehmigt') knoepfe = '<input type="date" class="eingabe-klein" style="flex:none;width:140px" id="vw-datum-' + v.id + '" value="' + heute + '" aria-label="Auszahlungsdatum"> <button type="button" class="btn btn-secondary" style="padding:4px 10px" data-vw="ausgezahlt" data-id="' + v.id + '"' + aus + '>Als ausgezahlt eintragen</button> <button type="button" class="link-btn" data-vw="ablehnen" data-id="' + v.id + '"' + aus + '>Ablehnen</button>';
+        else if (v.status === 'ausgezahlt') {
+          var ueber = v.abrechnen_bis && v.abrechnen_bis < heute;
+          zus = '<div class="notiz" style="margin:0">ausgezahlt ' + esc(vzDatum(v.ausgezahlt_am)) + ', abrechnen bis ' + esc(vzDatum(v.abrechnen_bis)) + '. Belegt ' + esc(auEuro(v.belegt)) + ' von ' + esc(auEuro(v.betrag)) + ' € (' + v.belege + ' Belege)</div>' + (ueber ? '<div class="hinweis-warn" style="margin-top:4px">Frist abgelaufen: gilt als Lohn, wenn nicht abgerechnet.</div>' : '');
+          knoepfe = '<button type="button" class="btn btn-secondary" style="padding:4px 10px" data-vw="abgerechnet" data-id="' + v.id + '"' + aus + '>Als abgerechnet eintragen</button>';
+        }
+        h += '<tr><td class="zahlen">' + v.id + '</td><td>' + esc(v.name) + '<div class="notiz" style="margin:0">' + esc(v.mandant) + (v.iban ? ' · ' + esc(v.iban.replace(/(.{4})/g, '$1 ').trim()) : '') + '</div></td><td>' + esc(v.anlass) + '<div class="notiz" style="margin:0">' + esc(v.verwendung || '') + (v.benoetigt_bis ? ' · benötigt bis ' + esc(vzDatum(v.benoetigt_bis)) : '') + '</div></td><td class="zahlen">' + esc(auEuro(v.betrag)) + ' €</td><td>' + esc(stand) + zus + '</td><td>' + knoepfe + '</td></tr>';
+      });
+      h += '</tbody></table></div><div class="card-fuss">Das System überweist nichts. Nach der Genehmigung überweist du den Vorschuss und trägst ihn hier als ausgezahlt ein. Ein Vorschuss muss mit Originalbelegen bis zum Quartalsende abgerechnet sein.</div>';
+    }
+    h += '</div></div>';
+    el.innerHTML = h;
+  }
+  function bindVW() {
+    $('p-vorschuesse').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-vw]'); if (!b) return;
+      var a = b.getAttribute('data-vw'), id = Number(b.getAttribute('data-id'));
+      if (a === 'neu') ladeVW();
+      else if (a === 'ausgezahlt') { var dt = document.getElementById('vw-datum-' + id); vwAktion(id, a, dt && dt.value); }
+      else if (a === 'ablehnen') { if (window.confirm('Diesen Vorschuss wirklich ablehnen?')) vwAktion(id, a); }
+      else vwAktion(id, a);
     });
   }
 
@@ -4634,12 +4824,14 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   bindSK();
   bindRF();
   bindAU();
+  bindVZ();
+  bindVW();
   document.addEventListener('loewen-nutzer', function () {
     if (!darfBereich(bereichVon(S.tab))) setTab(S.tab, false, S.tabArg); else renderNavigation();
     rfZaehlerLaden();
   });
   // Die Zahl der offenen Rückfragen steht schon im Reiter, bevor er geöffnet wird
-  function rfZaehlerLaden() { if (!RF.daten && !RF.laedt && darfBereich(bereichVon('rueckfragen'))) ladeRF(); }
+  function rfZaehlerLaden() { if (!RF.daten && !RF.laedt && darfBereich(bereichVon('rueckfragen'))) ladeRF(); if (!VW.daten && !VW.laedt && darfBereich(bereichVon('vorschuesse'))) ladeVW(); }
   formInFelder();
   var start = teileHash(location.hash.slice(1));
   setTab(start.tab || S.tab, false, start.arg);
