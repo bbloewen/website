@@ -504,6 +504,80 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     try { var p = t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'); return JSON.parse(atob(p)).exp * 1000; } catch (e) { return 0; }
   }
   function gueltig() { return !!token && expMs(token) - Date.now() > 60000; }
+  function mailVon(t) {
+    try { var p = t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'); return String(JSON.parse(atob(p)).email || '').toLowerCase(); } catch (e) { return ''; }
+  }
+
+  // Ruhige Erneuerung (15.10.2026): Das Google-Token gilt nur etwa eine Stunde. Kurz vor Ablauf (und beim
+  // Zurueckkehren in den Tab sowie vor einer Anmeldeaufforderung) holt die Seite ohne Klick ein neues, solange
+  // Google den Browser kennt (auto_select). Klappt das nicht, bleibt alles wie bisher: Anmeldeschirm.
+  var VORLAUF = window.LOEWEN_ERNEUERUNG_VORLAUF || 300000;      // 5 Minuten vor Ablauf
+  var gisAngemeldet = false, erneuerTimer = null, erneuerLaeuft = null;
+
+  function gisStarten() {
+    return ladeGis().then(function () {
+      /* global google */
+      if (!gisAngemeldet) {
+        google.accounts.id.initialize({ client_id: CLIENT_ID, callback: beiGoogle, hd: DOMAIN, auto_select: true, cancel_on_tap_outside: false, itp_support: true });
+        gisAngemeldet = true;
+      }
+    });
+  }
+
+  // Eine Antwort von Google: im laufenden Betrieb (gleiche Person) nur das Token tauschen, sonst normale Anmeldung.
+  function beiGoogle(antwort) {
+    var neu = antwort && antwort.credential;
+    if (nutzer && neu && mailVon(neu) && mailVon(neu) === String(nutzer.email || '').toLowerCase()) {
+      token = neu;
+      try { sessionStorage.setItem('tb_idtoken', token); } catch (e) {}
+      planeErneuerung();
+      if (erneuerLaeuft) erneuerLaeuft.ok(true);
+      return;
+    }
+    beiAnmeldung(antwort);
+  }
+
+  function stilleErneuerung(maxMs) {
+    if (erneuerLaeuft) return erneuerLaeuft.promise;
+    var eintrag = {};
+    eintrag.promise = new Promise(function (ok) {
+      eintrag.ok = ok;
+      var frist = setTimeout(function () { ok(false); }, maxMs || 6000);
+      eintrag.frist = frist;
+      gisStarten().then(function () {
+        google.accounts.id.prompt(function (n) {
+          // Uebersprungen/nicht angezeigt = Google erneuert nicht ohne Klick. Kurz warten, falls das Token
+          // gerade parallel ankommt (die Reihenfolge der beiden Meldungen ist nicht garantiert).
+          try {
+            if ((n.isNotDisplayed && n.isNotDisplayed()) || (n.isSkippedMoment && n.isSkippedMoment())) setTimeout(function () { ok(false); }, 1500);
+          } catch (e) {}
+        });
+      }).catch(function () { ok(false); });
+    }).then(function (erfolg) {
+      clearTimeout(eintrag.frist);
+      if (erneuerLaeuft === eintrag) erneuerLaeuft = null;
+      return erfolg;
+    });
+    erneuerLaeuft = eintrag;
+    return eintrag.promise;
+  }
+
+  function planeErneuerung() {
+    clearTimeout(erneuerTimer);
+    if (!token) return;
+    var rest = expMs(token) - Date.now() - VORLAUF;
+    erneuerTimer = setTimeout(function () {
+      stilleErneuerung().then(function (ok) {
+        // Nicht geklappt, aber das Token gilt noch: in zwei Minuten noch einmal versuchen.
+        if (!ok && nutzer && expMs(token) - Date.now() > 90000) { clearTimeout(erneuerTimer); erneuerTimer = setTimeout(planeErneuerung, 120000); }
+      });
+    }, Math.max(rest, 15000));
+  }
+
+  // Tab war im Hintergrund (Rechner im Ruhezustand): Zeitgeber laufen dort nicht puenktlich, also beim Zurueckkehren pruefen.
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && nutzer && token && expMs(token) - Date.now() < VORLAUF) stilleErneuerung();
+  });
 
   function text(t, fehler) { var el = document.getElementById('anm-text'); el.textContent = t; el.className = fehler ? 'fehler' : ''; }
 
@@ -524,10 +598,10 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     text(meldung || 'Bitte mit deinem Löwen-Konto anmelden.', fehler);
     var knopf = document.getElementById('anm-knopf'); knopf.innerHTML = '';
     if (CLIENT_ID.indexOf('FOLGT') >= 0) { text('Die Anmeldung ist noch nicht eingerichtet.', true); return; }
-    ladeGis().then(function () {
-      /* global google */
-      google.accounts.id.initialize({ client_id: CLIENT_ID, callback: beiAnmeldung, hd: DOMAIN, auto_select: true, cancel_on_tap_outside: false });
+    gisStarten().then(function () {
       google.accounts.id.renderButton(knopf, { theme: 'outline', size: 'large', text: 'signin_with', locale: 'de', width: 280 });
+      // Ohne Klick anmelden, wenn Google den Browser kennt (nicht direkt nach "Abmelden").
+      if (meldung !== 'Abgemeldet.') { try { google.accounts.id.prompt(); } catch (e) {} }
     }).catch(function (e) { text(e.message, true); });
   }
 
@@ -546,6 +620,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         nutzer = d; box.hidden = true; document.body.classList.remove('gesperrt');
         zeigeNutzer();
         window.LOEWEN_NUTZER = nutzer; document.dispatchEvent(new CustomEvent('loewen-nutzer'));
+        planeErneuerung();
         var w = wartende; wartende = []; w.forEach(function (f) { f(); });
         return;
       }
@@ -571,6 +646,17 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 
   function bereit() {
     if (nutzer && gueltig()) return Promise.resolve();
+    if (nutzer && !gueltig()) {
+      // Abgelaufen: zuerst ruhig erneuern, erst dann den Anmeldeschirm zeigen.
+      return stilleErneuerung(6000).then(function (ok) {
+        if (ok && nutzer && gueltig()) return;
+        return warteAufAnmeldung();
+      });
+    }
+    return warteAufAnmeldung();
+  }
+
+  function warteAufAnmeldung() {
     return new Promise(function (ok) {
       wartende.push(ok);
       if (!gestartet) { gestartet = true; if (gueltig()) pruefe(); else zeigeLogin(); }
