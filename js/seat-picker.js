@@ -126,6 +126,11 @@
   var DK_TARIF_LABELS = {
     normal: 'Normalpreis',
     ermaessigt: 'Ermäßigt',
+    // Mensch mit Behinderung (nicht nur Rollstuhl): gleicher Preis wie "Ermäßigt", dazu darf im
+    // selben Block eine kostenlose Begleitperson gewählt werden (Marko, 15.10.2026). Der Nachweis
+    // (Ausweis mit Merkzeichen B) wird am Einlass kontrolliert. Serverseitig begrenzt der n8n-Workflow
+    // die Zahl der Begleitpersonen auf Rollstuhlplätze + Sitze mit diesem Tarif.
+    ermaessigt_begleit: 'Ermäßigt (mit Begleitperson)',
     kind: 'Kinder 7–14',
     normal_member: 'Normalpreis mit Mitgliedsrabatt (Löwen e.V.)',
     ermaessigt_member: 'Ermäßigt mit Mitgliedsrabatt (Löwen e.V.)',
@@ -429,7 +434,10 @@
     Object.keys(this.selected).forEach(function (g) {
       var s = self.selected[g];
       if (s.zoneLabel !== zoneLabel) return;
-      if (s.category === 'Rollstuhlplatz') wheelchairCount++;
+      // Ein Sitz mit "Ermäßigt (mit Begleitperson)" zählt wie ein Rollstuhlplatz als Grundlage für
+      // eine Begleitperson (Marko, 15.10.2026) — aber nicht für sich selbst: wechselte er auf
+      // "Begleitperson", verlöre er die eigene Grundlage.
+      if (s.category === 'Rollstuhlplatz' || (s.tarif === 'ermaessigt_begleit' && g !== guid)) wheelchairCount++;
       else if (s.tarif === 'begleitung' && g !== guid) usedCount++;
     });
     return wheelchairCount > usedCount;
@@ -2571,7 +2579,7 @@
   /* Normalisiert einen Tarif-Wert auf seine Basisform (z.B. "ermaessigt_member" ->
      "ermaessigt") — Mitgliedsrabatt-Varianten zaehlen fuer die Gutschein-Tarifpruefung
      als derselbe Tarif. */
-  function baseTarif(t) { return (t || '').replace('_member', ''); }
+  function baseTarif(t) { return (t || '').replace('_member', '').replace('_begleit', ''); }
 
   /* Gutschein-/Wertgutschein-Code — gemeinsam für "seats"- und "blocks"-Modus,
      wird wie der Nachwuchsbeitrag nur angezeigt, wenn der Warenkorb nicht leer
@@ -2711,7 +2719,7 @@
         row.className = 'seatplan-cart-item';
         var hasErmaessigt = s.priceInfo.ermaessigt !== undefined;
         var hasKind = s.priceInfo.kind !== undefined;
-        var tarifOptions = ['normal'].concat(hasErmaessigt ? ['ermaessigt'] : []).concat(hasKind ? ['kind'] : []);
+        var tarifOptions = ['normal'].concat(hasErmaessigt ? ['ermaessigt'] : []).concat(hasErmaessigt && s.category !== 'Rollstuhlplatz' ? ['ermaessigt_begleit'] : []).concat(hasKind ? ['kind'] : []);
         if (self.dkDiscount) {
           tarifOptions = tarifOptions.concat(['normal_member'], hasErmaessigt ? ['ermaessigt_member'] : [], hasKind ? ['kind_member'] : []);
         }
@@ -2773,6 +2781,8 @@
           var s = self.selected[guid];
           s.tarif = this.value;
           s.price = self._dkTarifPrice(s.priceInfo, s.tarif);
+          // Verliert der Sitz die Grundlage für eine Begleitperson, fällt diese aus dem Warenkorb.
+          self._removeOrphanedCompanions(s.zoneLabel);
           /* Tarifwechsel entwertet eine vorherige Mitgliedsprüfung — bei erneuter
              Wahl von "..._member" muss der Name erneut geprüft werden. */
           s.memberChecked = false;
@@ -2850,7 +2860,7 @@
           // komplett aus dem Warenkorb entfernt, nicht nur auf einen bezahlten Tarif
           // zurueckgesetzt (Marko, 13.08.2026: "muss dann auch aus dem Warenkorb
           // geloescht werden").
-          if (removed && removed.category === 'Rollstuhlplatz') {
+          if (removed && (removed.category === 'Rollstuhlplatz' || removed.tarif === 'ermaessigt_begleit')) {
             self._removeOrphanedCompanions(removed.zoneLabel);
           }
           self._renderCart();
