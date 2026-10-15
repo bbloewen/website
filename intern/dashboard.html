@@ -3711,7 +3711,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       n.setAttribute('data-p', basis > 0 ? pct(wert / basis * 100) : '');
     });
   }
-  // Dauerkarten werden nicht über die Spieltage addiert: in der Summenzeile steht die höchste Zahl (Marko, 15.10.2026).
+  // Dauerkarten werden nicht über die Spieltage addiert: in der Summenzeile steht die höchste Zahl (Marko, 15.10.2026). Der Prozentwert darunter nutzt die über alle Spieltage addierten Dauerkarten, damit die Prozente der Anzahl-Spalten zusammen 100 % ergeben (Marko, 15.10.2026).
   function awDauerMax() { return awZeilen().reduce(function (m, z) { return Math.max(m, awZahl(awWert(z, 'dauerkarten'))); }, 0); }
   function awFreiSumme() { return awZeilen().reduce(function (t0, z0) { return t0 + (awFrei(z0) || 0); }, 0); }
   function renderAW() {
@@ -3758,7 +3758,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         if (f === 'dauerkarten') wert = zahl(awDauerMax());
         else if (f === 'FREI') wert = zahl(awFreiSumme());
         else wert = AW_EURO[f] ? formatEuro(t[f]) : zahl(t[f]);
-        return '<td data-aw-summe="' + (f === 'FREI' ? 'frei' : f) + '">' + esc(wert) + (f === 'dauerkarten' ? '' : awPzSpan(f, '*')) + '</td>';
+        return '<td data-aw-summe="' + (f === 'FREI' ? 'frei' : f) + '">' + esc(wert) + awPzSpan(f, '*') + '</td>';
       }).join('') + '<td data-aw-summe="ges">' + esc(formatEuro(awEinnahmenSumme(t))) + '</td><td data-aw-summe="je">' + awSummeJe(t) + '</td><td></td></tr>';
     }
     h += '</tbody></table></div>';
