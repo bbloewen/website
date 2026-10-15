@@ -3169,12 +3169,12 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (r.buchungstext) return r.buchungstext;
     if (r.rf_buchungstext) return r.rf_buchungstext;
     var z = r.regel_zweck; if (!z) return '';
-    return ((r.nummer ? String(r.nummer).trim() + ' - ' : '') + z).slice(0, 36);
+    return z.slice(0, 60);
   }
   function rfBtZeile(r) {
     var bt = RF.bt && RF.bt.id === r.id ? RF.bt : null, text = rfBtText(r);
     if (bt) {
-      return '<div class="rf-box" style="margin-top:8px"><label class="text-klein" for="rf-bt-' + r.id + '">Zweck für den Buchungstext (höchstens 24 Zeichen), der Buchungstext wird Rechnungsnummer - Zweck</label>' +
+      return '<div class="rf-box" style="margin-top:8px"><label class="text-klein" for="rf-bt-' + r.id + '">Zweck für den Buchungstext (höchstens 24 Zeichen), der Buchungstext wird daraus mit Datum und Aussteller (bei Auslagen mit Person) gebaut, höchstens 60 Zeichen. Die Rechnungsnummer steht in Belegfeld 1</label>' +
         '<input id="rf-bt-' + r.id + '" class="eingabe-klein" style="width:100%;margin-top:4px" maxlength="24" data-rf="bt-wert" value="' + esc(bt.wert) + '">' +
         '<label class="text-klein" style="display:block;margin-top:6px"><input type="checkbox" data-rf="bt-std"' + (bt.standard ? ' checked' : '') + '> Als Standardtext für künftige Belege von ' + esc(r.aussteller || 'diesem Aussteller') + ' merken</label>' +
         '<div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn btn-primary" data-rf="bt-ja" data-id="' + r.id + '"' + (bt.laeuft ? ' disabled' : '') + '>Speichern</button><button type="button" class="link-btn" data-rf="bt-abbruch">Abbrechen</button></div>' + (bt.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:6px">' + esc(bt.fehler) + '</div>' : '') + '</div>';
