@@ -3701,7 +3701,27 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (zeilen.length) {
       h += '<tr class="summe" id="aw-summe"><td>Summe</td>' + AW_FELDER.map(function (f) { return '<td data-aw-summe="' + f + '">' + (f === 'dauerkarten' ? '–' : esc(AW_EURO[f] ? formatEuro(t[f]) : zahl(t[f]))) + '</td>'; }).join('') + '<td data-aw-summe="ges">' + esc(formatEuro(awEinnahmenSumme(t))) + '</td><td data-aw-summe="je">' + awSummeJe(t) + '</td><td></td></tr>';
     }
-    h += '</tbody></table></div><div>' + aktualisierenBtn('auswertung') + '</div></div>';
+    h += '</tbody></table></div>';
+    // PAYONE-Gutschriften je Spieltag (Tabelle payone_gutschriften, Marko 15.10.2026): eingegangene Kartenzahlungen gegen den Kartenumsatz laut Kassenbelegen.
+    var pz = zeilen.filter(function (z) { return z.gespeichert && z.gespeichert.payone && z.gespeichert.payone.length; });
+    if (pz.length) {
+      h += '<div class="card scroll-x"><div class="card-kopf"><div style="font-weight:500">PAYONE-Gutschriften (Kartenzahlungen)</div>' +
+        '<div class="unter">Eingegangene Gutschriften je Spieltag. Kartenumsatz laut Kassenbelegen = Terminal Ticketing (Abendkasse Karte €) plus Terminal Ausschank (Ausschank Karte €).</div></div>' +
+        '<table class="tbl kompakt"><thead><tr><th>Spieltag</th><th>Valuta</th><th>Kasse</th><th>Verwendungszweck</th><th>Betrag</th></tr></thead><tbody>';
+      pz.forEach(function (z) {
+        var sum = 0;
+        z.gespeichert.payone.forEach(function (g, i) {
+          sum += Number(g.betrag) || 0;
+          h += '<tr><td>' + (i === 0 ? esc(formatDate(z.datum)) : '') + '</td><td>' + esc(formatDate(g.valuta)) + '</td><td>' + esc(g.kasse || '') + '</td><td>' + esc(g.verwendungszweck || '') + '</td><td>' + esc(formatEuro(Number(g.betrag) || 0)) + '</td></tr>';
+        });
+        var beleg = awZahl(awWert(z, 'kasse_ticketing_euro')) + awZahl(awWert(z, 'ausschank_euro'));
+        h += '<tr class="summe"><td colspan="4">Summe Gutschriften</td><td>' + esc(formatEuro(sum)) + '</td></tr>' +
+          '<tr><td colspan="4">Kartenumsatz laut Kassenbelegen</td><td>' + esc(formatEuro(beleg)) + '</td></tr>' +
+          '<tr><td colspan="4">Noch offen (Belege minus Gutschriften)</td><td>' + esc(formatEuro(beleg - sum)) + '</td></tr>';
+      });
+      h += '</tbody></table></div>';
+    }
+    h += '<div>' + aktualisierenBtn('auswertung') + '</div></div>';
     el.innerHTML = h;
   }
   function awSummeJe(t) {
