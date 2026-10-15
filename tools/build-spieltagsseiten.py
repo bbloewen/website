@@ -248,6 +248,10 @@ def hero_links(game, phase):
         links.append(('<a class="hero-location" href="%s" target="_blank" rel="noopener">'
                       '<i data-lucide="external-link" class="icon-16"></i> %s — zur Vereinsseite</a>')
                      % (html.escape(game["gegnerUrl"]), html.escape(game["gegner"])))
+    # Sprung zum eingebetteten Heft weiter unten (nur wenn es eins gibt, s. spieltagsinfo_section)
+    if game.get("spieltagsinfo") and fragment_datei(game["spieltagsinfo"]).exists():
+        links.append('<a class="hero-location" href="#spieltagsinfo">'
+                     '<i data-lucide="book-open" class="icon-16"></i> Spieltagsinfo lesen</a>')
     if not links:
         return ""
     return '          <div class="spiel-hero-links">' + "".join(links) + "</div>\n"
@@ -538,11 +542,23 @@ def gegner_section(game):
 """
 
 
-def spieltagsinfo_section(game):
-    """Spieltagsinfo (digitale Stadionzeitung) als Band ueber die ganze Breite.
+def fragment_datei(nr):
+    """Einbettbare Fassung der Ausgabe, erzeugt von tools/build-spieltagsinfo-fragment.py."""
+    return REPO / "data" / "spieltagsinfo" / f"ausgabe-{nr}.html"
 
-    Die Ausgabe-Nummer steht in data/heimspiele.json (Feld "spieltagsinfo"); eine Ausgabe kann
-    fuer mehrere Spiele gelten. PDF-Name und Saison aus data/spieltagsinfo.json."""
+
+def spieltagsinfo_section(game):
+    """Spieltagsinfo (digitale Stadionzeitung) auf der Spieltagsseite.
+
+    Hat das Spiel eine EIGENE Ausgabe (Feld "spieltagsinfo" in data/heimspiele.json), steht das
+    Heft seit dem 15.10.2026 komplett auf der Seite -- eine starke Seite statt zweier, und die
+    rund 85 % der Besucher, die den Link nicht angeklickt haben, sehen es jetzt beim Scrollen.
+    Oben im Hero springt ein Link hierher.
+
+    Ohne eigene Ausgabe bleibt es beim Band mit Link auf die neueste: eingebettet stuende
+    dasselbe Heft auf mehreren Spieltagsseiten, und genau diesen doppelten Text wollen wir nicht.
+
+    PDF-Name und Saison aus data/spieltagsinfo.json."""
     nr = game.get("spieltagsinfo")
     daten = json.loads(SPIELTAGSINFO_DATEI.read_text(encoding="utf-8"))
     if not nr:
@@ -563,6 +579,32 @@ def spieltagsinfo_section(game):
         pdf_knopf = ('            <a class="btn btn-ghost-dark" '
                      f'href="/assets/spieltagsinfo/{html.escape(ausgabe["pdf"])}" download>'
                      'PDF herunterladen</a>\n')
+    # Eigene Ausgabe: das Heft steht direkt auf der Seite.
+    if game.get("spieltagsinfo") and fragment_datei(nr).exists():
+        frag = fragment_datei(nr).read_text(encoding="utf-8")
+        pdf_zeile = ""
+        if ausgabe.get("pdf"):
+            pdf_zeile = (f'        <a class="btn btn-ghost-dark" '
+                         f'href="/assets/spieltagsinfo/{html.escape(ausgabe["pdf"])}" download>'
+                         f'PDF herunterladen</a>\n')
+        return f"""  <section class="section" id="spieltagsinfo">
+    <div class="container">
+      <div class="section-head">
+        <div class="head-text">
+          <span class="eyebrow">Spieltagsinfo · Ausgabe {nr} · Saison {html.escape(daten["saison"])}</span>
+          <h2 class="t-h2">Alles zum Heimspiel</h2>
+          <p class="t-body mt-3">Kader der Löwen und der Gäste, Ligastand, Spielplan und Geschichten aus dem Verein.</p>
+        </div>
+      </div>
+      <div class="spiel-band-actions mt-4">
+{pdf_zeile}        <a class="card-link" href="{url}">Als eigene Seite öffnen <i data-lucide="arrow-right" class="icon-14"></i></a>
+      </div>
+    </div>
+    <div class="container mt-5">
+{frag}    </div>
+  </section>
+"""
+
     media = ""
     if (REPO / vorschau.lstrip("/")).exists():
         dims = f' width="{masse[0]}" height="{masse[1]}"' if masse else ""

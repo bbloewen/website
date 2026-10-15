@@ -35,7 +35,10 @@ NOINDEX_RE = re.compile(r'<meta\s+name=["\']robots["\']\s+content=["\'][^"\']*no
 # Navigation, und in Google haben sie nichts verloren. Sie werden deshalb aus
 # allen Build-Schritten herausgehalten -- sonst meldet build-partials.py bei
 # jedem Lauf einen fehlenden Platzhalter, den es dort nie geben wird.
-AUSGENOMMEN = ("partials/", "tools/druck/")
+# data/ sind Datenbausteine, keine Seiten: data/spieltagsinfo/ausgabe-N.html ist die
+# einbettbare Fassung eines Hefts, die build-spieltagsseiten.py in die Spieltagsseite
+# kopiert. Ohne diese Ausnahme meldet check-links.py sie als verwaiste Seite.
+AUSGENOMMEN = ("partials/", "tools/druck/", "data/")
 
 
 def tracked_html():
