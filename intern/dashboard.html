@@ -3931,8 +3931,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       if (k) {
         // Tooltip: was das Terminal laut Belegen gezählt hat, und woher der angezeigte Betrag stammt
         var tv = awWert(z, f), pv = awPayone(z)[k];
-        tip = pv !== null ? ('Ausgezahlt von PAYONE: ' + formatEuro(pv) + (tv !== '' ? ' · Terminal laut Belegen: ' + formatEuro(awZahl(tv)) : ''))
-          : ('Noch keine PAYONE-Auszahlung, Terminal laut Belegen' + (tv !== '' ? ': ' + formatEuro(awZahl(tv)) : ''));
+        tip = pv !== null ? ('Ausgezahlt vom S-Cube: ' + formatEuro(pv) + (tv !== '' ? ' · Terminal laut Belegen: ' + formatEuro(awZahl(tv)) : ''))
+          : ('Noch keine S-Cube-Auszahlung, Terminal laut Belegen' + (tv !== '' ? ': ' + formatEuro(awZahl(tv)) : ''));
       }
       return '<td' + (tip ? ' title="' + esc(tip) + '"' : '') + '>' + (v === '' ? '–' : esc(AW_EURO[f] ? formatEuro(awZahl(v)) : zahl(awZahl(v)))) + awPzSpan(f, z.key) + '</td>';
     };
@@ -3940,7 +3940,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (AW.meldung) h += '<div class="notiz" role="status">' + esc(AW.meldung) + '</div>';
     if (AW.fehlerAktion) h += '<div class="fehlerbox" role="alert">' + esc(AW.fehlerAktion) + '</div>';
     h += '<div class="card"><div class="card-kopf"><div style="font-weight:500">Auswertung je Spieltag</div>' +
-      '<div class="unter">Vorschlag aus pretix für Besucher, Dauerkarten-Besucher, Vorverkauf und Abendkasse-Anzahl. Karten-Umsatz: Sobald PAYONE ausgezahlt hat, zählt der ausgezahlte Betrag (der Terminal-Umsatz laut Kassenbelegen steht im Tooltip), bis dahin der Terminal-Umsatz (Ticketing 60002672, Ausschank 60002670). Dazu die Barkasse. Besucher gesamt = Dauerkarten-Besucher + Einzeltickets Vorverkauf + Freikarten + Abendkasse, falls nicht überschrieben (Dauerkarten-Besucher = Dauerkarten-Zuschauer des Spiels, nicht die Zahl der verkauften Dauerkarten; sie werden über die Spieltage addiert). Einnahmen gesamt = Einzel VVK € + Abendkasse Karte € + Abendkasse bar € + Ausschank Karte € + Ausschank bar € (ohne Dauerkarten); die Abendkasse aus pretix zählt nicht mit, sie ist derselbe Umsatz wie der Terminal. Einnahmen je Besucher = Einnahmen gesamt geteilt durch die Besucher. Offene Spieltage zeigen die aktuellen Zahlen; „Abschließen“ hält sie einmalig fest.</div></div>' +
+      '<div class="unter">Vorschlag aus pretix für Besucher, Dauerkarten-Besucher, Vorverkauf und Abendkasse-Anzahl. Karten-Umsatz: Sobald der S-Cube ausgezahlt hat, zählt der ausgezahlte Betrag (der Terminal-Umsatz laut Kassenbelegen steht im Tooltip), bis dahin der Terminal-Umsatz (Ticketing 60002672, Ausschank 60002670). Dazu die Barkasse. Besucher gesamt = Dauerkarten-Besucher + Einzeltickets Vorverkauf + Freikarten + Abendkasse, falls nicht überschrieben (Dauerkarten-Besucher = Dauerkarten-Zuschauer des Spiels, nicht die Zahl der verkauften Dauerkarten; sie werden über die Spieltage addiert). Einnahmen gesamt = Einzel VVK € + Abendkasse Karte € + Abendkasse bar € + Ausschank Karte € + Ausschank bar € (ohne Dauerkarten); die Abendkasse aus pretix zählt nicht mit, sie ist derselbe Umsatz wie der Terminal. Einnahmen je Besucher = Einnahmen gesamt geteilt durch die Besucher. Offene Spieltage zeigen die aktuellen Zahlen; „Abschließen“ hält sie einmalig fest.</div></div>' +
       '<table class="tbl kompakt aw"><thead><tr><th>Spieltag</th>' + AW_SPALTEN.map(function (c) { return '<th>' + esc(c.t) + '</th>'; }).join('') + '<th>Einnahmen gesamt</th><th>Einnahmen je Besucher</th><th></th></tr></thead><tbody>';
     if (!zeilen.length) h += '<tr><td colspan="15" class="leer">Noch keine Spieltage.</td></tr>';
     zeilen.forEach(function (z) {
@@ -4040,7 +4040,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       h += abschnittZeile('Abgleich mit der Spieltag-Auswertung (abgeschlossen)', 3);
       if (!isNaN(awKarte)) h += trZeile(['Karte: Ausschank Karte € laut Auswertung (Differenz zur App ' + formatEuro(awKarte - karte) + ')', '', formatEuro(awKarte)]);
       if (!isNaN(awBar)) h += trZeile(['Bar: Ausschank bar € laut Auswertung (Differenz zur App ' + formatEuro(awBar - bar) + ')', '', formatEuro(awBar)]);
-      h += trZeile(['Karte (S-Cube) laut App (inkl. Gutschriften) / Bar laut App (SumUp wird von SumUp ausgezahlt, nicht von PAYONE)', '', formatEuro(karte) + ' / ' + formatEuro(bar)]);
+      h += trZeile(['Karte (S-Cube) laut App (inkl. Gutschriften) / Bar laut App (SumUp wird von SumUp ausgezahlt, nicht über den S-Cube)', '', formatEuro(karte) + ' / ' + formatEuro(bar)]);
     }
     h += '</tbody></table></div>';
     // Artikel
