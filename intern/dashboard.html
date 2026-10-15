@@ -3699,7 +3699,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     });
     var t = awSummen();
     if (zeilen.length) {
-      h += '<tr class="summe" id="aw-summe"><td>Summe</td>' + AW_FELDER.map(function (f) { return '<td data-aw-summe="' + f + '">' + esc(AW_EURO[f] ? formatEuro(t[f]) : zahl(t[f])) + '</td>'; }).join('') + '<td data-aw-summe="ges">' + esc(formatEuro(awEinnahmenSumme(t))) + '</td><td data-aw-summe="je">' + awSummeJe(t) + '</td><td></td></tr>';
+      h += '<tr class="summe" id="aw-summe"><td>Summe</td>' + AW_FELDER.map(function (f) { return '<td data-aw-summe="' + f + '">' + (f === 'dauerkarten' ? '–' : esc(AW_EURO[f] ? formatEuro(t[f]) : zahl(t[f]))) + '</td>'; }).join('') + '<td data-aw-summe="ges">' + esc(formatEuro(awEinnahmenSumme(t))) + '</td><td data-aw-summe="je">' + awSummeJe(t) + '</td><td></td></tr>';
     }
     h += '</tbody></table></div><div>' + aktualisierenBtn('auswertung') + '</div></div>';
     el.innerHTML = h;
@@ -3717,7 +3717,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     });
     awZeilen().forEach(function (z) { var n = document.querySelector('[data-aw-je="' + z.key + '"]'); if (n) n.textContent = awJeBesucher(awEinnahmen(z), awZahl(awWert(z, 'gesamt_besucher'))) === null ? '–' : formatEuro(awJeBesucher(awEinnahmen(z), awZahl(awWert(z, 'gesamt_besucher')))); });
     var t = awSummen();
-    AW_FELDER.forEach(function (f) { var n = document.querySelector('[data-aw-summe="' + f + '"]'); if (n) n.textContent = AW_EURO[f] ? formatEuro(t[f]) : zahl(t[f]); });
+    // Dauerkarten werden nicht über die Spieltage addiert (Dauerkarten mal Spiele wäre irreführend, Marko 15.10.2026).
+    AW_FELDER.forEach(function (f) { var n = document.querySelector('[data-aw-summe="' + f + '"]'); if (n && f !== 'dauerkarten') n.textContent = AW_EURO[f] ? formatEuro(t[f]) : zahl(t[f]); });
     var ng = document.querySelector('[data-aw-summe="ges"]'); if (ng) ng.textContent = formatEuro(awEinnahmenSumme(t));
     var nj = document.querySelector('[data-aw-summe="je"]'); if (nj) nj.innerHTML = awSummeJe(t);
     awZeilen().forEach(function (z) { var n = document.querySelector('[data-aw-ges="' + z.key + '"]'); if (n) n.textContent = formatEuro(awEinnahmen(z)); });
