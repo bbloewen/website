@@ -4553,7 +4553,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var res = await fetch('/webhook/auslagen/einreichen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       var d = await res.json().catch(function () { return {}; });
       if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Das Einreichen hat nicht geklappt. Bitte versuche es noch einmal.');
-      AU.fertig = 'Eingereicht: ' + f.lieferant.trim() + ', ' + zahl(auBetrag(f.betrag)) + ' €. Der Beleg ist in der Buchhaltung angekommen.';
+      AU.fertig = 'Eingereicht: ' + f.lieferant.trim() + ', ' + auBetrag(f.betrag).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €. Der Beleg ist in der Buchhaltung angekommen.';
       AU.f = auLeer(f); AU.dateien = [];
     } catch (e) { AU.fehlerForm = e.message; }
     AU.senden = false; renderAU();
