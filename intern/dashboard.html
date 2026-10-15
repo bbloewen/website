@@ -3052,6 +3052,23 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     h += kpis;
     return h;
   }
+  // Regeln des Steuerberaters für Zahlungen (15.10.2026): Krankenkasse, Finanzamt, Lohn und Bank nie über Debitoren/Kreditoren, EC-Karte über Kreditor Sparkasse, ohne Beleg nie auf den Kreditor der Person
+  function zahlungRegel(p) {
+    var t = (String(p.gegenpartei || '') + ' ' + String(p.zweck || '')).toLowerCase();
+    var bu = p.buchungen || [];
+    var personenkonto = bu.some(function (x) { return /^[0-9]{6}$/.test(String(x.konto || '')); });
+    var eigenbeleg = bu.some(function (x) { return /eigenbeleg/i.test(String(x.text || '')); }) || (p.belege || []).some(function (b) { return !b.link; });
+    var typ = null;
+    if (/kfz-steuer|kraftfahrzeugsteuer/.test(t)) typ = { n: 'Kfz-Steuer', h: 'Direkt auf Kfz-Steuern (45100), Kennzeichen in den Buchungstext, kein Beleg nötig.' };
+    else if (/barmer|aok|techniker|\btk\b|salus|\bbkk\b|knappschaft|\bikk\b|\bdak\b|kkh|hkk|debeka|krankenkasse|ersatzkasse|beitragsnachweis|gkv/.test(t)) typ = { n: 'Krankenkasse', h: 'Direkt buchen: Beitrag auf Verbindlichkeiten soziale Sicherheit (17420), Erstattung auf 15200, Belegfeld 1 mit Jahr und Monat. Nicht über Debitor oder Kreditor.' };
+    else if (/finanzamt|bundeskasse|steuernummer|lohnsteuer|umsatzsteuer|\bust\b/.test(t)) typ = { n: 'Finanzamt', h: 'Nie über Debitor oder Kreditor, sonst löst eine Erstattung automatisch Umsatzsteuer aus. Lohnsteuer auf 17410, Belegfeld 1 mit Jahr und Monat; im Buchungstext angeben, was bezahlt wurde.' };
+    else if (/\blohn\b|gehalt|vergütung|netto.*(lohn|gehalt)/.test(t)) typ = { n: 'Lohn', h: 'Nettolohn auf 17400, nie über Kreditor, Belegfeld 1 mit Jahr und Monat (zum Beispiel 202609).' };
+    else if (/kontoführung|kontoabschluss|abrechnung.*(entgelt|konto)|bankgebühr|entgelt|kontopauschale|überziehungszins/.test(t)) typ = { n: 'Bankgebühren', h: 'Direkt auf Bankgebühren (49700) buchen, nicht über Kreditor; prüfen, ob die Bank Vorsteuer mit abbucht.' };
+    else if (/kartenzahlung|girocard|ec-karte|\bvisa\b|mastercard/.test(t)) typ = { n: 'EC-Karte', h: 'Mit Firmen-EC-Karte bezahlt: Beleg auf den Kreditor Sparkasse. Fehlt der Beleg, auf durchlaufende Posten, nie auf den Kreditor einer Person.' };
+    if (!typ) return eigenbeleg ? { n: 'Eigenbeleg', h: 'Eigenbelege sind nur in engen Grenzen zulässig (ungefähr fünfmal im Jahr). Beleg anfordern oder auf durchlaufende Posten.', verstoss: true } : null;
+    typ.verstoss = (typ.n !== 'EC-Karte' && personenkonto) || eigenbeleg;
+    return typ;
+  }
   function renderZahlungen(k) {
     var z = ZA[k], d = z.daten, kp = d.kpi || {};
     var name = { XXL: 'XXL', LEV: 'LEV', LEVLP: 'LEV Löwenpark' }[k];
@@ -3093,7 +3110,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       else if (gebucht) detail = bu.map(function (x) { return '<div>' + beKonten(x) + (x.text ? '<div class="notiz" style="margin:0">' + esc(x.text) + '</div>' : '') + '</div>'; }).join('');
       var betrag = Number(p.betrag || 0);
       h += '<tr><td class="nowrap">' + esc(p.datum ? formatDate(String(p.datum).slice(0, 10)) : '') + '</td>' +
-        '<td><div class="fett">' + esc(String(p.gegenpartei || '–').replace(/\s*\n\s*/g, ' ')) + '</div><div class="notiz" style="margin:0">' + esc(String(p.zweck || '').replace(/\s*\n\s*/g, ' ').slice(0, 160)) + '</div></td>' +
+        '<td><div class="fett">' + esc(String(p.gegenpartei || '–').replace(/\s*\n\s*/g, ' ')) + '</div><div class="notiz" style="margin:0">' + esc(String(p.zweck || '').replace(/\s*\n\s*/g, ' ').slice(0, 160)) + '</div>' + (function () { var sr = zahlungRegel(p); return sr ? '<div class="' + (sr.verstoss ? 'hinweis-warn' : 'notiz') + '" style="margin:4px 0 0"><b>Regel Steuerberater (' + esc(sr.n) + ')' + (sr.verstoss ? ', bisher falsch gebucht' : '') + ':</b> ' + esc(sr.h) + '</div>' : ''; })() + '</td>' +
         '<td class="nowrap zahlen rechts' + (betrag < 0 ? '' : ' gut') + '">' + esc(formatEuro(betrag)) + '</td><td>' + status + '</td><td>' + detail + '</td></tr>';
     });
     if (!zeilen.length) h += '<tr><td colspan="5" class="leer">Keine Zahlungen in dieser Ansicht.</td></tr>';
