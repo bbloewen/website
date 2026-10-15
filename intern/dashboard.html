@@ -803,7 +803,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
     { id: 'segmentierung', name: 'Segmentierung', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
-    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlung XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung LEV Löwenpark' }, { id: 'ueberweisungen', name: 'Überweisungen' }, { id: 'rueckfragen', name: 'Rückfragen' }, { id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }] }
+    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'rueckfragen', name: 'Rückfragen' }, { id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlung XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung LEV Löwenpark' }, { id: 'ueberweisungen', name: 'Überweisungen' }, { id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }] }
   ];
   var TABS = [];
   BEREICHE.forEach(function (b) { b.tabs.forEach(function (t) { TABS.push(t.id); }); });
@@ -4424,13 +4424,17 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   bindRF();
   document.addEventListener('loewen-nutzer', function () {
     if (!darfBereich(bereichVon(S.tab))) setTab(S.tab, false, S.tabArg); else renderNavigation();
+    rfZaehlerLaden();
   });
+  // Die Zahl der offenen Rückfragen steht schon im Reiter, bevor er geöffnet wird
+  function rfZaehlerLaden() { if (!RF.daten && !RF.laedt && darfBereich(bereichVon('rueckfragen'))) ladeRF(); }
   formInFelder();
   var start = teileHash(location.hash.slice(1));
   setTab(start.tab || S.tab, false, start.arg);
   loadFormular();
   loadStats();
   loadDauerkarten();
+  if (window.LOEWEN_NUTZER) rfZaehlerLaden();
 })();
 </script>
 <script>
