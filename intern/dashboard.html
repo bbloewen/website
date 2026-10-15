@@ -3784,10 +3784,16 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   ];
   // Prozentwerte in Klammern (Marko, 15.10.2026): Anzahlen in % von "Besucher gesamt", Beträge in % von "Einnahmen gesamt".
   var AW_PZ = { dauerkarten: 1, einzel_vvk_anzahl: 1, FREI: 1, abendkasse_anzahl: 1, einzel_vvk_euro: 1, kasse_ticketing_euro: 1, abendkasse_bar_euro: 1, ausschank_euro: 1, ausschank_bar_euro: 1 };
+  // Eine Nachkommastelle, damit die Prozente einer Gruppe zusammen 100,0 % ergeben (Marko, 15.10.2026: ganze Prozente summierten sich durch Runden auf 101 %).
+  function awPct(v) { return (Math.round(v * 10) / 10).toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' %'; }
   function awPzSpan(f, key) { return AW_PZ[f] ? '<span class="aw-pz" data-aw-pz="' + esc(f + '|' + key) + '" data-p=""></span>' : ''; }
   function awPzSetzen() {
     var t = awSummen();
     var zmap = {}; awZeilen().forEach(function (z) { zmap[z.key] = z; });
+    // Je Zeile (und Summenzeile) zwei Gruppen: Anzahlen (Basis Besucher gesamt) und Beträge (Basis Einnahmen gesamt).
+    // Summieren sich die Teile einer Gruppe zur Basis, werden die Prozente nach dem Verfahren des größten Rests auf eine
+    // Nachkommastelle gerundet, damit die Gruppe genau 100,0 % ergibt (Marko, 15.10.2026). Sonst normal gerundet.
+    var gruppen = {};
     document.querySelectorAll('[data-aw-pz]').forEach(function (n) {
       var a = n.getAttribute('data-aw-pz').split('|'), f = a[0], key = a[1], wert, basis;
       if (key === '*') {
@@ -3798,7 +3804,23 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         wert = f === 'FREI' ? (awFrei(z) || 0) : awZahl(awWert(z, f));
         basis = AW_EURO[f] ? awEinnahmen(z) : awZahl(awWert(z, 'gesamt_besucher'));
       }
-      n.setAttribute('data-p', basis > 0 ? pct(wert / basis * 100) : '');
+      if (!(basis > 0)) { n.setAttribute('data-p', ''); return; }
+      var gk = key + '|' + (AW_EURO[f] ? 'euro' : 'anzahl');
+      var g = gruppen[gk] || (gruppen[gk] = { basis: basis, teile: [] });
+      g.teile.push({ n: n, wert: wert });
+    });
+    Object.keys(gruppen).forEach(function (gk) {
+      var g = gruppen[gk];
+      var summe = g.teile.reduce(function (x, e) { return x + e.wert; }, 0);
+      var zehntel = g.teile.map(function (e) { return e.wert / g.basis * 1000; });
+      var rund = zehntel.map(function (v) { return Math.round(v); });
+      if (Math.abs(summe - g.basis) < 0.005 && g.teile.length > 1) {
+        rund = zehntel.map(function (v) { return Math.floor(v + 1e-9); });
+        var rest = 1000 - rund.reduce(function (x, v) { return x + v; }, 0);
+        zehntel.map(function (v, k) { return { k: k, r: v - Math.floor(v + 1e-9) }; })
+          .sort(function (a, b) { return b.r - a.r; }).slice(0, Math.max(0, rest)).forEach(function (o) { rund[o.k] += 1; });
+      }
+      g.teile.forEach(function (e, k) { e.n.setAttribute('data-p', awPct(rund[k] / 10)); });
     });
   }
   // Dauerkarten-Besucher (nicht verkaufte Dauerkarten) werden über die Spieltage addiert, auch in der Summenzeile (Marko, 15.10.2026).
