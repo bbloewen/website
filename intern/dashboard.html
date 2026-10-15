@@ -3657,7 +3657,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     return Object.keys(map).map(function (k) { return map[k]; }).sort(function (a, b) { return a.datum < b.datum ? 1 : -1; });
   }
   // Gesamtzahl der Besucher: gespeicherter Wert, sonst Dauerkarten + Einzeltickets Vorverkauf + Freikarten + Abendkasse.
-  function awFrei(z) { return z.vorschlag && z.vorschlag.freikarten != null ? Number(z.vorschlag.freikarten) : null; }
+  // Freikarten: bei abgeschlossenem Spieltag der gespeicherte Wert (kommt sofort mit der Zeile, ohne pretix), sonst live aus pretix (Marko, 15.10.2026).
+  function awFrei(z) {
+    if (z.gespeichert && z.gespeichert.freikarten != null) return Number(z.gespeichert.freikarten);
+    return z.vorschlag && z.vorschlag.freikarten != null ? Number(z.vorschlag.freikarten) : null;
+  }
   function awGesamtVorschlag(z) { return awZahl(awWert(z, 'dauerkarten')) + awZahl(awWert(z, 'einzel_vvk_anzahl')) + (awFrei(z) || 0) + awZahl(awWert(z, 'abendkasse_anzahl')); }
   function awWert(z, f) {
     if (f === 'gesamt_besucher') {
@@ -3773,6 +3777,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (!window.confirm('Spieltag ' + formatDate(z.datum) + ' abschließen? Die aktuellen Zahlen werden fest gespeichert.')) return;
     var zeile = { spiel_key: z.key, datum: z.datum, gegner: z.gegner, notiz: z.gespeichert ? z.gespeichert.notiz : null };
     AW_FELDER.forEach(function (f) { var v = awWert(z, f); zeile[f] = v === '' ? null : v; });
+    zeile.freikarten = awFrei(z);
     AW.speichert = key; AW.meldung = ''; AW.fehlerAktion = ''; renderAW();
     try {
       var res = await fetch('/webhook/ticketing/auswertung-speichern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ zeilen: [zeile] }) });
