@@ -284,6 +284,12 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 .tt:hover .tt-box, .tt:focus .tt-box, .tt:focus-within .tt-box { opacity: 1; visibility: visible; }
 @media (prefers-reduced-motion: reduce) { .tt-box { transition: none; } }
   .aw tr.aw-payone td { font-size: 12px; color: var(--text-secondary); padding-top: 0; }
+  /* Auswertung je Spieltag: kompakt, damit die Tabelle neben der Navigation ohne Seitwärtsscrollen passt (Marko, 15.10.2026) */
+  table.tbl.kompakt.aw { font-size: 12px; }
+  .tbl.kompakt.aw th, .tbl.kompakt.aw td { padding-left: 4px; padding-right: 4px; }
+  .tbl.kompakt.aw th:first-child, .tbl.kompakt.aw td:first-child { padding-left: 12px; }
+  .tbl.kompakt.aw th { white-space: normal; vertical-align: bottom; line-height: 1.25; }
+  .tbl.kompakt.aw input.eingabe-klein { padding-left: 4px; padding-right: 4px; }
 </style>
 </head>
 <body>
@@ -755,7 +761,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     S.tab = t; S.tabArg = arg || '';
     letzterTab[bereichVon(t).id] = t;
     renderNavigation();
-    document.body.classList.toggle('breit', bereichVon(t).id === 'accounting');
+    document.body.classList.toggle('breit', bereichVon(t).id === 'accounting' || t === 'auswertung');
     TABS.forEach(function (name) { $('p-' + name).hidden = name !== t; });
     if (fokus) $('tab-' + t).focus();
     // Jeder Tab hat eine eigene Adresse, z. B. …/board#kontakte
@@ -3628,7 +3634,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     return {
       dauerkarten: g.dauerPlaetze != null ? g.dauerPlaetze : null,
       einzel_vvk_anzahl: summe('Einzelticket'), einzel_vvk_euro: Math.round(summe('Einzelticket', 'totalPrice') * 100) / 100,
-      abendkasse_anzahl: summe('Abendkasse'), abendkasse_euro: Math.round(summe('Abendkasse', 'totalPrice') * 100) / 100
+      abendkasse_anzahl: summe('Abendkasse'), abendkasse_euro: Math.round(summe('Abendkasse', 'totalPrice') * 100) / 100,
+      // Freikarten (0 €) dieses Spiels: Einzeltickets und Abendkasse (Marko, 15.10.2026); nur Anzeige, wird nicht gespeichert
+      freikarten: g.freeRows != null ? (g.freeRows || []).reduce(function (t, r) { return t + (Number(r.tickets) || 0); }, 0) : null
     };
   }
   // Alle Spieltage bis heute: gespeicherte Zeilen plus pretix-Spiele; je Feld zählt zuerst die Eingabe, dann der gespeicherte Wert, dann der Vorschlag.
@@ -3645,8 +3653,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     });
     return Object.keys(map).map(function (k) { return map[k]; }).sort(function (a, b) { return a.datum < b.datum ? 1 : -1; });
   }
-  // Gesamtzahl der Besucher: Eingabe, sonst gespeicherter Wert, sonst Dauerkarten + Einzeltickets Vorverkauf + Abendkasse.
-  function awGesamtVorschlag(z) { return awZahl(awWert(z, 'dauerkarten')) + awZahl(awWert(z, 'einzel_vvk_anzahl')) + awZahl(awWert(z, 'abendkasse_anzahl')); }
+  // Gesamtzahl der Besucher: Eingabe, sonst gespeicherter Wert, sonst Dauerkarten + Einzeltickets Vorverkauf + Freikarten + Abendkasse.
+  function awFrei(z) { return z.vorschlag && z.vorschlag.freikarten != null ? Number(z.vorschlag.freikarten) : null; }
+  function awGesamtVorschlag(z) { return awZahl(awWert(z, 'dauerkarten')) + awZahl(awWert(z, 'einzel_vvk_anzahl')) + (awFrei(z) || 0) + awZahl(awWert(z, 'abendkasse_anzahl')); }
   function awWert(z, f) {
     if (f === 'gesamt_besucher') {
       var eg = AW.edit[z.key]; if (eg && eg[f] !== undefined) return eg[f];
@@ -3680,19 +3689,19 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (!AW.daten) { el.innerHTML = ''; return; }
     var zeilen = awZeilen();
     var feld = function (z, f, titel) {
-      return '<td><input type="number" min="0" step="' + (AW_EURO[f] ? '0.01' : '1') + '" class="eingabe-klein" style="width:' + (AW_EURO[f] ? '92' : '70') + 'px;flex:none" data-aw="' + f + '" data-key="' + esc(z.key) + '" aria-label="' + esc(titel + ' ' + formatDate(z.datum)) + '" value="' + esc(awWert(z, f)) + '"></td>';
+      return '<td><input type="number" min="0" step="' + (AW_EURO[f] ? '0.01' : '1') + '" class="eingabe-klein" style="width:' + (AW_EURO[f] ? '72' : '54') + 'px;flex:none" data-aw="' + f + '" data-key="' + esc(z.key) + '" aria-label="' + esc(titel + ' ' + formatDate(z.datum)) + '" value="' + esc(awWert(z, f)) + '"></td>';
     };
     var h = '<div class="stapel">';
     if (AW.meldung) h += '<div class="notiz" role="status">' + esc(AW.meldung) + '</div>';
     if (AW.fehlerAktion) h += '<div class="fehlerbox" role="alert">' + esc(AW.fehlerAktion) + '</div>';
-    h += '<div class="card scroll-x"><div class="card-kopf"><div style="font-weight:500">Auswertung je Spieltag</div>' +
+    h += '<div class="card"><div class="card-kopf"><div style="font-weight:500">Auswertung je Spieltag</div>' +
       '<div class="unter">Vorschlag aus pretix für Besucher, Dauerkarten, Vorverkauf und Abendkasse-Anzahl. Umsatz kommt vom Terminal (Ticketing 60002672, Ausschank 60002670, laut Kassenbelegen) plus Barkasse. Besucher gesamt = Dauerkarten + Einzeltickets Vorverkauf + Abendkasse, falls nicht überschrieben. Einnahmen gesamt = Einzel VVK € + Abendkasse Karte € + Abendkasse bar € + Ausschank Karte € + Ausschank bar € (ohne Dauerkarten); die Abendkasse aus pretix zählt nicht mit, sie ist derselbe Umsatz wie der Terminal. Einnahmen je Besucher = Einnahmen gesamt geteilt durch die Besucher. Zahlen anpassen und „Festhalten“ drücken.</div></div>' +
-      '<table class="tbl kompakt aw"><thead><tr><th>Spieltag</th><th>Besucher gesamt</th><th>Dauerkarten</th><th>Einzel VVK Anzahl</th><th>Einzel VVK €</th><th>Abendkasse Anzahl</th><th>Abendkasse Karte €</th><th>Abendkasse bar €</th><th>Ausschank Karte €</th><th>Ausschank bar €</th><th>Ausschank Gutscheine</th><th>Einnahmen gesamt</th><th>Einnahmen je Besucher</th><th></th></tr></thead><tbody>';
-    if (!zeilen.length) h += '<tr><td colspan="14" class="leer">Noch keine Spieltage.</td></tr>';
+      '<table class="tbl kompakt aw"><thead><tr><th>Spieltag</th><th>Besucher gesamt</th><th>Dauerkarten</th><th>Einzel VVK Anzahl</th><th>Einzel VVK €</th><th>Freikarten</th><th>Abendkasse Anzahl</th><th>Abendkasse Karte €</th><th>Abendkasse bar €</th><th>Ausschank Karte €</th><th>Ausschank bar €</th><th>Ausschank Gutscheine</th><th>Einnahmen gesamt</th><th>Einnahmen je Besucher</th><th></th></tr></thead><tbody>';
+    if (!zeilen.length) h += '<tr><td colspan="15" class="leer">Noch keine Spieltage.</td></tr>';
     zeilen.forEach(function (z) {
       var fest = z.gespeichert && z.gespeichert.festgehalten_am;
       h += '<tr><td><div style="font-weight:500">' + esc(formatDate(z.datum)) + '</div><div class="notiz" style="margin:0">' + esc(z.gegner) + '</div></td>' +
-        feld(z, 'gesamt_besucher', 'Besucher gesamt') + feld(z, 'dauerkarten', 'Dauerkarten') + feld(z, 'einzel_vvk_anzahl', 'Einzeltickets Vorverkauf') + feld(z, 'einzel_vvk_euro', 'Einzeltickets Vorverkauf Euro') +
+        feld(z, 'gesamt_besucher', 'Besucher gesamt') + feld(z, 'dauerkarten', 'Dauerkarten') + feld(z, 'einzel_vvk_anzahl', 'Einzeltickets Vorverkauf') + feld(z, 'einzel_vvk_euro', 'Einzeltickets Vorverkauf Euro') + '<td data-aw-frei="' + esc(z.key) + '">' + (awFrei(z) === null ? '–' : esc(zahl(awFrei(z)))) + '</td>' +
         feld(z, 'abendkasse_anzahl', 'Abendkasse Anzahl') + feld(z, 'kasse_ticketing_euro', 'Abendkasse Karte Euro') + feld(z, 'abendkasse_bar_euro', 'Abendkasse bar Euro') +
         feld(z, 'ausschank_euro', 'Ausschank Karte Euro') + feld(z, 'ausschank_bar_euro', 'Ausschank bar Euro') + feld(z, 'ausschank_gutscheine', 'Ausschank Gutscheine') +
         '<td data-aw-ges="' + esc(z.key) + '">' + esc(formatEuro(awEinnahmen(z))) + '</td>' +
@@ -3706,13 +3715,13 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         var pT = 0, pA = 0;
         pay.forEach(function (g) { var b = Number(g.betrag) || 0; if (/ausschank/i.test(g.kasse || '')) pA += b; else pT += b; });
         h += '<tr class="aw-payone"><td title="Von PAYONE gutgeschrieben">PAYONE</td>' + AW_FELDER.map(function (f) {
-          return '<td>' + (f === 'kasse_ticketing_euro' ? esc(formatEuro(pT)) : (f === 'ausschank_euro' ? esc(formatEuro(pA)) : '')) + '</td>';
+          return '<td>' + (f === 'kasse_ticketing_euro' ? esc(formatEuro(pT)) : (f === 'ausschank_euro' ? esc(formatEuro(pA)) : '')) + '</td>' + (f === 'einzel_vvk_euro' ? '<td></td>' : '');
         }).join('') + '<td title="PAYONE gesamt gutgeschrieben">' + esc(formatEuro(pT + pA)) + '</td><td></td><td></td></tr>';
       }
     });
     var t = awSummen();
     if (zeilen.length) {
-      h += '<tr class="summe" id="aw-summe"><td>Summe</td>' + AW_FELDER.map(function (f) { return '<td data-aw-summe="' + f + '">' + (f === 'dauerkarten' ? '–' : esc(AW_EURO[f] ? formatEuro(t[f]) : zahl(t[f]))) + '</td>'; }).join('') + '<td data-aw-summe="ges">' + esc(formatEuro(awEinnahmenSumme(t))) + '</td><td data-aw-summe="je">' + awSummeJe(t) + '</td><td></td></tr>';
+      h += '<tr class="summe" id="aw-summe"><td>Summe</td>' + AW_FELDER.map(function (f) { return '<td data-aw-summe="' + f + '">' + (f === 'dauerkarten' ? '–' : esc(AW_EURO[f] ? formatEuro(t[f]) : zahl(t[f]))) + '</td>' + (f === 'einzel_vvk_euro' ? '<td data-aw-summe="frei">' + esc(zahl(zeilen.reduce(function (t0, z0) { return t0 + (awFrei(z0) || 0); }, 0))) + '</td>' : ''); }).join('') + '<td data-aw-summe="ges">' + esc(formatEuro(awEinnahmenSumme(t))) + '</td><td data-aw-summe="je">' + awSummeJe(t) + '</td><td></td></tr>';
     }
     h += '</tbody></table></div>';
     h += '<div>' + aktualisierenBtn('auswertung') + '</div></div>';
