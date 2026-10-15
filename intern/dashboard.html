@@ -4962,6 +4962,32 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     } catch (e) { k.zahlweg = alt; KR.fehlerAktion = e.message; }
     renderKR();
   }
+  // Bei Doppelten gewinnt der Kreditor mit den meisten gebuchten Belegen, der andere wird gesperrt (Marko 15.10.2026)
+  function krBester(k) {
+    if (!k.gruppe) return null;
+    var m = KR.daten.kreditoren.filter(function (x) { return x.gruppe === k.gruppe && x.mandant === k.mandant && !x.gesperrt; }).sort(function (a, b) { return b.belege - a.belege; });
+    return m.length === 1 ? m[0] : (m.length > 1 && m[0].belege > m[1].belege ? m[0] : null);
+  }
+  async function krSperre(mandant, nr, ersetzt) {
+    var k = KR.daten.kreditoren.filter(function (x) { return x.mandant === mandant && x.nr === nr; })[0]; if (!k) return false;
+    var altG = k.gesperrt, altE = k.ersetzt; KR.meldung = ''; KR.fehlerAktion = '';
+    try {
+      var res = await fetch('/webhook/accounting/kreditor-sperre', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: mandant, nr: nr, ersetzt_durch: ersetzt }) });
+      var d = await res.json().catch(function () { return {}; });
+      if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Speichern fehlgeschlagen');
+      k.gesperrt = !!ersetzt; k.ersetzt = ersetzt || '';
+      KR.meldung = ersetzt ? k.name + ' (' + nr + ') ist gesperrt, es wird ' + ersetzt + ' verwendet. In BuchhaltungsButler ist noch kein Vermerk gesetzt.' : 'Sperre für ' + nr + ' aufgehoben.';
+      return true;
+    } catch (e) { k.gesperrt = altG; k.ersetzt = altE; KR.fehlerAktion = e.message; return false; }
+  }
+  async function krBereinigen() {
+    var todo = KR.daten.kreditoren.filter(function (k) { return k.doppelt && !k.gesperrt && krBester(k) && krBester(k) !== k; });
+    if (!todo.length) { KR.meldung = 'Nichts zu bereinigen: Bei allen Gruppen steht kein Kreditor mit mehr Belegen fest.'; renderKR(); return; }
+    var text = 'Diese ' + todo.length + ' Kreditoren sperren und stattdessen den Kreditor mit den meisten Belegen verwenden?' + NL + NL + todo.map(function (k) { return k.mandant + ' ' + k.nr + ' ' + k.name + ' (' + k.belege + ' Belege) -> ' + krBester(k).nr; }).join(NL);
+    if (!window.confirm(text)) return;
+    var n = 0; for (var i = 0; i < todo.length; i++) { var b = krBester(todo[i]); if (b && await krSperre(todo[i].mandant, todo[i].nr, b.nr)) n++; }
+    KR.meldung = n + ' Kreditoren gesperrt. In BuchhaltungsButler ist noch kein Vermerk gesetzt.'; renderKR();
+  }
   function renderKR() {
     var el = $('p-kreditoren'); if (!el) return;
     if (KR.laedt && !KR.daten) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
@@ -4977,16 +5003,16 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       '<input type="search" class="eingabe-klein" style="width:200px;flex:none" data-kr="suche" placeholder="Suchen …" aria-label="Kreditoren suchen" value="' + esc(KR.suche) + '"> ' +
       '<label class="text-klein" style="white-space:nowrap"><input type="checkbox" data-kr="doppelt"' + (KR.nurDoppelt ? ' checked' : '') + '> nur mögliche Doppelte (' + nDopp + ')</label> ' +
       '<label class="text-klein" style="white-space:nowrap"><input type="checkbox" data-kr="volumen"' + (KR.nurVolumen ? ' checked' : '') + '> nur mit Buchungen seit 01.07.</label> ' +
-      '<button type="button" class="btn btn-secondary" style="padding:4px 10px" data-kr="export">Export für den Steuerberater (CSV)</button> <button type="button" class="link-btn" data-kr="neu">Aktualisieren</button></span></div>' +
+      '<button type="button" class="btn btn-secondary" style="padding:4px 10px" data-kr="export">Export für den Steuerberater (CSV)</button> <button type="button" class="btn btn-secondary" style="padding:4px 10px" data-kr="bereinigen">Doppelte bereinigen</button> <button type="button" class="link-btn" data-kr="neu">Aktualisieren</button></span></div>' +
       (KR.meldung ? '<div class="erfolg" role="status" style="margin:8px 12px">' + esc(KR.meldung) + '</div>' : '') + (KR.fehlerAktion ? '<div class="fehlerbox" role="alert" style="margin:8px 12px">' + esc(KR.fehlerAktion) + '</div>' : '') +
       '<div class="tbl-voll"><table class="tbl kompakt"><thead><tr>' + th('mandant', 'Mandant') + th('nr', 'Nr.') + th('name', 'Name') + th('zahlweg', 'Zahlweg') + th('belege', 'Belege seit 01.07.', true) + th('summe', 'Volumen seit 01.07.', true) + th('letzter', 'Letzter Beleg') + '<th>IBAN</th>' + th('doppelt', 'Mögliche Doppelte') + '</tr></thead><tbody>';
     l.forEach(function (k) {
       var opt = function (w, t) { return '<option value="' + w + '"' + (k.zahlweg === w ? ' selected' : '') + '>' + t + '</option>'; };
-      h += '<tr' + (k.doppelt ? ' style="background:var(--color-warning-bg)"' : '') + '><td><span class="m-badge m-' + esc(k.mandant) + '">' + esc(k.mandant) + '</span></td><td class="zahlen">' + esc(k.nr) + '</td><td>' + esc(k.name) + (k.ort ? '<div class="notiz" style="margin:0">' + esc((k.plz + ' ' + k.ort).trim()) + '</div>' : '') + '</td>' +
+      h += '<tr' + (k.gesperrt ? ' style="opacity:.6"' : (k.doppelt ? ' style="background:var(--color-warning-bg)"' : '')) + '><td><span class="m-badge m-' + esc(k.mandant) + '">' + esc(k.mandant) + '</span></td><td class="zahlen">' + esc(k.nr) + '</td><td>' + esc(k.name) + (k.ort ? '<div class="notiz" style="margin:0">' + esc((k.plz + ' ' + k.ort).trim()) + '</div>' : '') + '</td>' +
         '<td><select class="auswahl" data-kr="weg" data-m="' + esc(k.mandant) + '" data-nr="' + esc(k.nr) + '" aria-label="Zahlweg für ' + esc(k.name) + '">' + opt('', 'offen') + opt('lastschrift', 'Lastschrift') + opt('ueberweisung', 'Überweisung') + '</select></td>' +
         '<td class="rechts zahlen">' + (k.belege ? esc(zahl(k.belege)) : '<span class="gedaempft">0</span>') + '</td><td class="rechts zahlen">' + (k.belege ? esc(formatEuro(k.summe)) : '<span class="gedaempft">–</span>') + '</td><td class="nowrap">' + (k.letzter ? esc(formatDate(k.letzter)) : '') + '</td>' +
         '<td class="nowrap">' + (k.iban ? esc(k.iban.slice(0, 4) + ' … ' + k.iban.slice(-4)) : '<span class="gedaempft">fehlt</span>') + '</td>' +
-        '<td>' + (k.doppelt ? '<span class="pflicht">Doppelt?</span> ' + k.doppelt.map(function (t) { return esc(t); }).join('<br>') : '') + '</td></tr>';
+        '<td>' + (k.gesperrt ? '<b>Gesperrt</b>, nutze ' + esc(k.ersetzt) + ' <button type="button" class="link-btn" data-kr="entsperren" data-m="' + esc(k.mandant) + '" data-nr="' + esc(k.nr) + '">Sperre aufheben</button>' : (k.doppelt ? '<span class="pflicht">Doppelt?</span> ' + k.doppelt.map(function (t) { return esc(t); }).join('<br>') + (krBester(k) && krBester(k) !== k ? '<div><button type="button" class="btn btn-secondary" style="padding:2px 8px" data-kr="sperren" data-m="' + esc(k.mandant) + '" data-nr="' + esc(k.nr) + '" data-ers="' + esc(krBester(k).nr) + '">Sperren, nutze ' + esc(krBester(k).nr) + '</button></div>' : '<div class="notiz" style="margin:0">' + (krBester(k) === k ? 'behalten: meiste Belege' : 'gleich viele Belege, bitte selbst entscheiden') + '</div>') : '')) + '</td></tr>';
     });
     if (!l.length) h += '<tr><td colspan="9" class="leer">Keine Kreditoren in dieser Ansicht.</td></tr>';
     h += '</tbody></table></div><div class="card-fuss">Stammdaten aus BuchhaltungsButler. Belege und Volumen zählen die gebuchten Eingangsbelege seit dem 01.07.2026' + (KR.daten.stand ? ' (Stand ' + esc(formatDateTime(KR.daten.stand)) + ', täglich 5:30 Uhr gelesen)' : '') + '; Gutschriften mindern das Volumen. Doppelte werden am Namen erkannt, im selben Mandanten. Der Zahlweg gilt für alle Belege des Kreditors in der Belegliste und unter Überweisungen.</div></div></div>';
@@ -5007,6 +5033,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       if (w === 'mandant') { KR.mandant = b.getAttribute('data-m'); renderKR(); }
       else if (w === 'sort') { var k = b.getAttribute('data-key'); KR.sort = { key: k, dir: KR.sort.key === k ? -KR.sort.dir : (k === 'summe' || k === 'belege' || k === 'letzter' ? -1 : 1) }; renderKR(); }
       else if (w === 'export') krExport();
+      else if (w === 'sperren') { krSperre(b.getAttribute('data-m'), b.getAttribute('data-nr'), b.getAttribute('data-ers')).then(renderKR); }
+      else if (w === 'entsperren') { krSperre(b.getAttribute('data-m'), b.getAttribute('data-nr'), '').then(renderKR); }
+      else if (w === 'bereinigen') krBereinigen();
       else if (w === 'neu') ladeKR();
     });
   }
