@@ -283,8 +283,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 .tt-rechts .tt-box { right: 0; }
 .tt:hover .tt-box, .tt:focus .tt-box, .tt:focus-within .tt-box { opacity: 1; visibility: visible; }
 @media (prefers-reduced-motion: reduce) { .tt-box { transition: none; } }
-  .aw-payone-wert { margin: 4px 0 0; font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
-  .aw-payone-wert::before { content: attr(data-l) ' '; }
+  .aw tr.aw-payone td { font-size: 12px; color: var(--text-secondary); padding-top: 0; }
 </style>
 </head>
 <body>
@@ -3674,14 +3673,6 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var v = awJeBesucher(awEinnahmen(z), awZahl(awWert(z, 'gesamt_besucher')));
     return v === null ? '–' : esc(formatEuro(v));
   }
-  // PAYONE-Gutschriften des Spieltags (Tabelle payone_gutschriften): einmal, unter dem Feld "Abendkasse Karte €" (Marko, 15.10.2026).
-  // Die Beschriftung steht per CSS (::before), damit die Spalte für die Ausrichtung weiter nur aus Zahlen besteht.
-  function kartePayone(td, z) {
-    var pay = (z.gespeichert && z.gespeichert.payone) || [];
-    if (!pay.length) return td;
-    var ps = pay.reduce(function (t0, g) { return t0 + (Number(g.betrag) || 0); }, 0);
-    return td.replace(/<\/td>$/, '<div class="aw-payone-wert" data-l="PAYONE gutgeschrieben" title="' + esc(pay.map(function (g) { return formatDate(g.valuta) + ' ' + (g.kasse || '') + ' ' + formatEuro(Number(g.betrag) || 0); }).join(' · ')) + '">' + esc(formatEuro(ps)) + '</div></td>');
-  }
   function renderAW() {
     var el = $('p-auswertung'); if (!el) return;
     if (AW.laedt && !AW.daten) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
@@ -3702,12 +3693,22 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var fest = z.gespeichert && z.gespeichert.festgehalten_am;
       h += '<tr><td><div style="font-weight:500">' + esc(formatDate(z.datum)) + '</div><div class="notiz" style="margin:0">' + esc(z.gegner) + '</div></td>' +
         feld(z, 'gesamt_besucher', 'Besucher gesamt') + feld(z, 'dauerkarten', 'Dauerkarten') + feld(z, 'einzel_vvk_anzahl', 'Einzeltickets Vorverkauf') + feld(z, 'einzel_vvk_euro', 'Einzeltickets Vorverkauf Euro') +
-        feld(z, 'abendkasse_anzahl', 'Abendkasse Anzahl') + kartePayone(feld(z, 'kasse_ticketing_euro', 'Abendkasse Karte Euro'), z) + feld(z, 'abendkasse_bar_euro', 'Abendkasse bar Euro') +
+        feld(z, 'abendkasse_anzahl', 'Abendkasse Anzahl') + feld(z, 'kasse_ticketing_euro', 'Abendkasse Karte Euro') + feld(z, 'abendkasse_bar_euro', 'Abendkasse bar Euro') +
         feld(z, 'ausschank_euro', 'Ausschank Karte Euro') + feld(z, 'ausschank_bar_euro', 'Ausschank bar Euro') + feld(z, 'ausschank_gutscheine', 'Ausschank Gutscheine') +
         '<td data-aw-ges="' + esc(z.key) + '">' + esc(formatEuro(awEinnahmen(z))) + '</td>' +
         '<td data-aw-je="' + esc(z.key) + '">' + awJeText(z) + '</td>' +
         '<td><button type="button" class="link-btn" data-aw-aktion="festhalten" data-key="' + esc(z.key) + '"' + (AW.speichert === z.key ? ' disabled' : '') + '>' + (AW.speichert === z.key ? 'Speichere …' : 'Festhalten') + '</button>' +
         '<div class="notiz" style="margin:0">' + (fest ? 'festgehalten ' + esc(formatDate(String(fest).slice(0, 10))) : 'Vorschlag') + '</div></td></tr>';
+      // PAYONE-Gutschriften (Tabelle payone_gutschriften): eine Zeile unter dem Spieltag, je Terminal in der passenden Karten-Spalte
+      // (Ticketing -> Abendkasse Karte €, Ausschank -> Ausschank Karte €), Marko 15.10.2026. Nur Zahlen in den Zellen, die Spalten werden nicht breiter.
+      var pay = (z.gespeichert && z.gespeichert.payone) || [];
+      if (pay.length) {
+        var pT = 0, pA = 0;
+        pay.forEach(function (g) { var b = Number(g.betrag) || 0; if (/ausschank/i.test(g.kasse || '')) pA += b; else pT += b; });
+        h += '<tr class="aw-payone"><td title="Von PAYONE gutgeschrieben">PAYONE</td>' + AW_FELDER.map(function (f) {
+          return '<td>' + (f === 'kasse_ticketing_euro' ? esc(formatEuro(pT)) : (f === 'ausschank_euro' ? esc(formatEuro(pA)) : '')) + '</td>';
+        }).join('') + '<td></td><td></td><td></td></tr>';
+      }
     });
     var t = awSummen();
     if (zeilen.length) {
