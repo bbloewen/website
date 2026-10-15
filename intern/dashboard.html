@@ -309,6 +309,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   <section id="p-dauerkarten" role="tabpanel" aria-labelledby="tab-dauerkarten" hidden></section>
   <section id="p-auslastung" role="tabpanel" aria-labelledby="tab-auslastung" hidden></section>
   <section id="p-auswertung" role="tabpanel" aria-labelledby="tab-auswertung" hidden></section>
+  <section id="p-ausschank" role="tabpanel" aria-labelledby="tab-ausschank" hidden></section>
   <section id="p-statistik" role="tabpanel" aria-labelledby="tab-statistik" hidden></section>
 
   <section id="p-erstellen" role="tabpanel" aria-labelledby="tab-erstellen" hidden>
@@ -702,7 +703,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   // ---------- Navigation: Bereiche (links) und Tabs (oben) ----------
   // Neuer Tab = Eintrag hier + <section id="p-..."> im HTML.
   var BEREICHE = [
-    { id: 'ticketing', name: 'Spieltag', tabs: [{ id: 'dauerkarten', name: 'Tickets' }, { id: 'auslastung', name: 'Auslastung' }, { id: 'auswertung', name: 'Auswertung' }] },
+    { id: 'ticketing', name: 'Spieltag', tabs: [{ id: 'dauerkarten', name: 'Tickets' }, { id: 'auslastung', name: 'Auslastung' }, { id: 'auswertung', name: 'Auswertung' }, { id: 'ausschank', name: 'Ausschank' }] },
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
     { id: 'segmentierung', name: 'Segmentierung', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
@@ -764,6 +765,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (t === 'personen') { zeigePersonen(S.tabArg); window.scrollTo(0, 0); }
     if (t === 'versand') loadVersand();
     if (t === 'auswertung') ladeAW();
+    if (t === 'ausschank') ladeAS();
     if (BE_MANDANT[t]) ladeListe('beleg', BE_MANDANT[t]);
     if (ZA_KONTO[t]) ladeListe('zahlung', ZA_KONTO[t]);
     if (t === 'buchungstexte') ladeBT();
@@ -3616,7 +3618,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       if (!res.ok) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
       AW.daten = d.zeilen || [];
     } catch (e) { AW.fehler = e.message; }
-    AW.laedt = false; renderAW();
+    AW.laedt = false; renderAW(); if (typeof renderAS === 'function') renderAS();
   }
   function awVorschlag(g) {
     var rows = (g.paidRows || g.rows || []);
@@ -3777,6 +3779,81 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     p.addEventListener('click', function (e) {
       var b = e.target.closest('[data-aw-aktion]'); if (!b) return;
       if (b.getAttribute('data-aw-aktion') === 'festhalten') awFesthalten(b.getAttribute('data-key'));
+    });
+  }
+  // ---------- Spieltag: Ausschank-Artikelverkaufsbericht (Data Table Ausschank-Verkaeufe, Webhook ticketing/ausschank-bericht) ----------
+  // Je Tag (Europe/Berlin): Artikel mit Menge/Liter/Umsatz/Pfand, Zahlarten, Leergut (Becher mit Pfand gegen Pfand zurück), Bier.
+  // Abgleich mit der Spieltag-Auswertung (Ausschank Karte €, Ausschank bar €), sobald diese festgehalten ist.
+  var AS = { daten: null, fehler: null, laedt: false, tag: null };
+  async function ladeAS() {
+    AS.laedt = true; AS.fehler = null; renderAS();
+    try {
+      var res = await fetch('/webhook/ticketing/ausschank-bericht');
+      var d = await res.json();
+      if (!res.ok) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
+      AS.daten = d.tage || [];
+      if (!AS.tag || !AS.daten.some(function (t) { return t.tag === AS.tag; })) AS.tag = AS.daten.length ? AS.daten[0].tag : null;
+    } catch (e) { AS.fehler = e.message; }
+    AS.laedt = false; renderAS();
+    if (!AW.daten && !AW.laedt) ladeAW();
+  }
+  function asLiter(n) { return (Math.round(n * 100) / 100).toString().replace('.', ',') + ' l'; }
+  var AS_ZAHLART = { 'bar': 'Bar', 'karte': 'Karte', 'karte-gutschrift': 'Karte, Gutschrift', 'ohne Angabe': 'ohne Angabe' };
+  function renderAS() {
+    var el = $('p-ausschank'); if (!el) return;
+    if (AS.laedt && !AS.daten) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
+    if (AS.fehler && !AS.daten) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(AS.fehler) + '</div>'; return; }
+    if (!AS.daten) { el.innerHTML = ''; return; }
+    if (!AS.daten.length) { el.innerHTML = '<div class="card pad">Noch keine Ausschank-Verkäufe.</div>'; return; }
+    var t = AS.daten.filter(function (x) { return x.tag === AS.tag; })[0] || AS.daten[0];
+    var chip = function (x) { return '<button type="button" class="chip' + (x.tag === t.tag ? ' aktiv' : '') + '" data-as-tag="' + esc(x.tag) + '" aria-pressed="' + (x.tag === t.tag) + '">' + esc(formatDate(x.tag)) + ' · ' + esc(zahl(x.belege)) + ' Belege</button>'; };
+    var h = '<div class="stapel"><nav class="chips" aria-label="Tag wählen"><span class="notiz chips-label">Tag</span>' + AS.daten.map(chip).join('') + '</nav>';
+    var pf = t.pfand || {};
+    h += '<div class="grid sm-4">' +
+      '<div class="card pad"><div class="kpi-label">Umsatz</div><div class="kpi">' + esc(formatEuro(t.umsatz)) + '</div><div class="notiz">' + esc(zahl(t.belege)) + ' Belege, inkl. Pfand, nach Rückgabe</div></div>' +
+      '<div class="card pad"><div class="kpi-label">Becher mit Pfand</div><div class="kpi">' + esc(zahl(pf.becherAusgegeben)) + '</div><div class="notiz">zurückgegeben ' + esc(zahl(pf.zurueckQty)) + ' · nicht zurück ' + esc(zahl(pf.nichtZurueck)) + '</div></div>' +
+      '<div class="card pad"><div class="kpi-label">Pfand-Saldo</div><div class="kpi">' + esc(formatEuro(pf.saldo)) + '</div><div class="notiz">eingenommen ' + esc(formatEuro(pf.pfandEingenommen)) + ' · zurückgezahlt ' + esc(formatEuro(-pf.zurueckBetrag)) + '</div></div>' +
+      '<div class="card pad"><div class="kpi-label">Bier</div><div class="kpi">' + esc(zahl((t.bier || {}).menge)) + '</div><div class="notiz">Becher, Umsatz ' + esc(formatEuro((t.bier || {}).umsatz)) + ' ohne Pfand</div></div></div>';
+    // Zahlarten (+ Abgleich mit der Auswertung)
+    var karte = 0, bar = 0;
+    h += '<div class="card scroll-x"><div class="card-kopf"><div style="font-weight:500">Zahlarten</div></div><table class="tbl kompakt"><thead><tr><th>Zahlart</th><th>Belege</th><th>Summe</th></tr></thead><tbody>';
+    (t.zahlarten || []).forEach(function (z) {
+      if (z.zahlart === 'karte' || z.zahlart === 'karte-gutschrift') karte += z.summe; else if (z.zahlart === 'bar') bar += z.summe;
+      h += trZeile([AS_ZAHLART[z.zahlart] || z.zahlart, zahl(z.belege), formatEuro(z.summe)]);
+    });
+    h += trZeile(['Summe', zahl(t.belege), formatEuro(t.umsatz)], 'summe');
+    var aw = (AW.daten || []).filter(function (r) { return r.spiel_key === t.tag; })[0];
+    if (aw) {
+      var awKarte = Number(aw.ausschank_euro), awBar = Number(aw.ausschank_bar_euro);
+      h += abschnittZeile('Abgleich mit der Spieltag-Auswertung (festgehalten)', 3);
+      if (!isNaN(awKarte)) h += trZeile(['Karte: Ausschank Karte € laut Auswertung (Differenz zur App ' + formatEuro(awKarte - karte) + ')', '', formatEuro(awKarte)]);
+      if (!isNaN(awBar)) h += trZeile(['Bar: Ausschank bar € laut Auswertung (Differenz zur App ' + formatEuro(awBar - bar) + ')', '', formatEuro(awBar)]);
+      h += trZeile(['Karte laut App (inkl. Gutschriften) / Bar laut App', '', formatEuro(karte) + ' / ' + formatEuro(bar)]);
+    }
+    h += '</tbody></table></div>';
+    // Artikel
+    h += '<div class="card scroll-x"><div class="card-kopf"><div style="font-weight:500">Artikelverkauf</div><div class="unter">Menge, Liter (bei Größenangabe im Namen), Getränke ohne Pfand, Pfand und Gesamt je Artikel. Stückpreise je Artikel stehen in Klammern, wenn sie sich geändert haben.</div></div>' +
+      '<table class="tbl kompakt"><thead><tr><th>Artikel</th><th>Menge</th><th>Liter</th><th>Getränke</th><th>Pfand</th><th>Gesamt</th></tr></thead><tbody>';
+    var sm = 0, sg = 0, sp = 0, sl = 0, fass = 0;
+    (t.artikel || []).forEach(function (a) {
+      sm += a.menge; sg += a.getraenk; sp += a.pfand; if (a.liter) sl += a.liter; if (/Fass/i.test(a.name) && a.liter) fass += a.liter;
+      var preise = (a.preise || []).length > 1 ? ' (' + a.preise.map(function (x) { return zahl(x.menge) + '× ' + formatEuro(x.preis); }).join(', ') + ')' : '';
+      h += trZeile([a.name + preise, zahl(a.menge), a.liter ? asLiter(a.liter) : '–', formatEuro(a.getraenk), formatEuro(a.pfand), formatEuro(a.gesamt)]);
+    });
+    h += trZeile(['Zwischensumme Artikel', zahl(sm), sl ? asLiter(sl) : '–', formatEuro(sg), formatEuro(sp), formatEuro(sg + sp)], 'summe');
+    h += trZeile(['Pfand zurück', zahl(pf.zurueckQty), '–', '', '', formatEuro(pf.zurueckBetrag)]);
+    h += trZeile(['Umsatz gesamt', '', '', '', '', formatEuro(t.umsatz)], 'summe gesamt');
+    h += '</tbody></table>';
+    h += '<div class="notiz" style="padding:8px 12px">Leergut: ' + esc(zahl(pf.becherAusgegeben)) + ' Becher mit Pfand ausgegeben, ' + esc(zahl(pf.zurueckQty)) + ' zurückgegeben, ' + esc(zahl(pf.nichtZurueck)) + ' nicht über die Kasse zurück. ' +
+      (fass ? 'Fassbier ' + esc(asLiter(fass)) + '. ' : '') + (t.belegeMitAbweichung ? esc(zahl(t.belegeMitAbweichung)) + ' Belege mit abweichender Summe (Positionen passen nicht zum Gesamtbetrag). ' : '') + 'Nur Verkäufe über das Ausschank-Tool, Pfand zurück zählt als eigene Position.</div></div>';
+    h += '<div>' + aktualisierenBtn('ausschank') + '</div></div>';
+    el.innerHTML = h;
+  }
+  function bindAS() {
+    var p = $('p-ausschank'); if (!p) return;
+    p.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-as-tag]'); if (!b) return;
+      AS.tag = b.getAttribute('data-as-tag'); renderAS();
     });
   }
   // ---------- Accounting: Überweisungen (offene Posten, Zahlungsdatei) ----------
@@ -4138,6 +4215,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var a = btn.getAttribute('data-aktion');
       if (a === 'dauerkarten') loadDauerkarten();
       else if (a === 'auswertung') { loadDauerkarten(); ladeAW(); }
+      else if (a === 'ausschank') ladeAS();
       else if (a === 'platzkarten') platzkartenDrucken();
       else if (a === 'stats') loadStats();
       else if (a === 'seo') loadSeo();
@@ -4219,6 +4297,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   bindBT();
   bindKS();
   bindAW();
+  bindAS();
   bindUE();
   bindSK();
   bindRF();
