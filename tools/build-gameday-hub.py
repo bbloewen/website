@@ -229,11 +229,6 @@ def spieltagsinfo(aktuell):
                f'href="/assets/spieltagsinfo/{esc(ausgabe["pdf"])}" download>'
                'PDF herunterladen</a>\n')
     seiten = f", {ausgabe['seiten']} Seiten" if ausgabe.get("seiten") else ""
-    # Archivlink erst ab der zweiten Ausgabe, s. tools/build-spieltagsseiten.py
-    archiv_link = ""
-    if len(daten.get("ausgaben", [])) > 1:
-        archiv_link = ('            <a class="card-link" href="/saison/profis/gameday/spieltagsinfo/">'
-                       'Alle Ausgaben <i data-lucide="arrow-right" class="icon-14"></i></a>\n')
     return f"""  <section class="section section-dark">
     <div class="container">
       <div class="spiel-band{'' if media else ' spiel-band-ohne-bild'}">
@@ -244,7 +239,7 @@ def spieltagsinfo(aktuell):
           <p class="t-body">Kader der Löwen und der Gäste, Ligastand, Spielplan und Geschichten aus dem Verein{seiten}.</p>
           <div class="spiel-band-actions">
             <a class="btn btn-primary" style="color:#fff" href="{seite_url}">Online lesen</a>
-{pdf}{archiv_link}
+{pdf}
           </div>
         </div>
       </div>

@@ -413,9 +413,8 @@ def main():
                 f'{f" ({pdf_mb:.1f} MB)" if pdf_mb else ""}</a>') if pdf_mb else ""
 
     leiste = ('<div class="sitebar noprint"><a href="/">Basketball Löwen</a>'
-              '<a href="/saison/profis/gameday/spieltagsinfo/">Alle Spieltagsinfos</a>' + pdf_link + "</div>\n")
+              '<a href="/saison/profis/gameday/">Gameday &amp; Tickets</a>' + pdf_link + "</div>\n")
     fuss = ('<footer class="pagefoot noprint"><div class="in">'
-            '<a href="/saison/profis/gameday/spieltagsinfo/">Alle Ausgaben</a>'
             '<a href="/saison/profis/gameday/">Gameday &amp; Tickets</a>'
             + (f'<a href="/assets/spieltagsinfo/{pdfname}" download>PDF herunterladen</a>' if pdf_mb else "") +
             '<a href="/impressum.html">Impressum</a><a href="/datenschutz.html">Datenschutz</a>'

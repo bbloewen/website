@@ -605,13 +605,6 @@ def spieltagsinfo_section(game):
   </section>
 """
 
-    # "Alle Ausgaben" erst, wenn es wirklich mehrere gibt. Bei einer einzigen fuehrte der
-    # Link von 13 Spieltagsseiten auf eine Seite mit genau einer Kachel -- auf dasselbe Heft,
-    # das daneben schon verlinkt ist (Marko, 15.10.2026).
-    archiv_link = ""
-    if len(daten.get("ausgaben", [])) > 1:
-        archiv_link = ('            <a class="card-link" href="/saison/profis/gameday/spieltagsinfo/">'
-                       'Alle Ausgaben <i data-lucide="arrow-right" class="icon-14"></i></a>\n')
     media = ""
     if (REPO / vorschau.lstrip("/")).exists():
         dims = f' width="{masse[0]}" height="{masse[1]}"' if masse else ""
@@ -627,7 +620,7 @@ def spieltagsinfo_section(game):
           <p class="t-body">Kader der Löwen und der Gäste, Ligastand, Spielplan und Geschichten aus dem Verein.</p>
           <div class="spiel-band-actions">
             <a class="btn btn-primary" style="color:#fff" href="{url}">Online lesen</a>
-{pdf_knopf}{archiv_link}
+{pdf_knopf}
           </div>
         </div>
       </div>
