@@ -124,6 +124,7 @@
   .au-actions .btn { font-size: 1.2rem; padding: 16px 24px; white-space: nowrap; justify-content: center; }
   .au-actions .btn:disabled { opacity: 0.4; }
   .au-storno { padding-left: 18px; padding-right: 18px; }
+  .au-actions [hidden] { display: none !important; }
 
   /* Betrags-Einblendung nach dem Bezahlen (Marko, 01.10.2026): kein voller
      Bildschirm, kein Begleittext - nur der grosse Betrag selbst, ueber den Kacheln und
@@ -166,8 +167,9 @@
       </div>
       <div class="au-actions">
         <button type="button" class="btn btn-outline-orange au-storno" id="au-storno" disabled>Stornieren</button>
+        <button type="button" class="btn btn-primary" id="au-sumup" disabled>SumUp</button>
+        <button type="button" class="btn btn-outline-orange" id="au-cube" disabled>S-Cube</button>
         <button type="button" class="btn btn-outline-orange" id="au-bar" disabled>Bar</button>
-        <button type="button" class="btn btn-primary" id="au-karte" disabled>Karte</button>
       </div>
     </div>
   </div>
@@ -177,7 +179,7 @@
   <div class="au-overlay-total" id="au-overlay-total">0,00 €</div>
 </div>
 
-<script src="opi-bridge.js?v=7"></script>
+<script src="opi-bridge.js?v=8"></script>
 <script>
   (function () {
     var b = document.getElementById('au-diag');
@@ -289,7 +291,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Stornieren/Bar/Karte nur mit Inhalt im Warenkorb und nicht waehrend einer laufenden Zahlung.
   function setActionsEnabled() {
     var aus = !hasItems() || zahlungLaeuft;
-    ['au-storno', 'au-bar', 'au-karte'].forEach(function (id) { document.getElementById(id).disabled = aus; });
+    ['au-storno', 'au-sumup', 'au-cube', 'au-bar'].forEach(function (id) { document.getElementById(id).disabled = aus; });
   }
 
   function add(key) {
@@ -380,11 +382,21 @@ document.addEventListener('DOMContentLoaded', function () {
     render();
   });
 
-  // Bar und Karte sind eigene Knoepfe (Marko, 15.10.2026, vorher langer Druck auf den Betrag).
+  // Drei Zahlwege als eigene Knoepfe (Marko, 15.10.2026): SumUp (Standard), S-Cube (Sparkassen-Terminal), Bar.
   // Bar: kein Terminalvorgang, wird als "bar" protokolliert (Kassenabgleich); Rueckfrage, damit ein
   // Fehltipp nicht ungewollt abschliesst. Bei Gesamtbetrag 0 (z. B. nur Helfergetraenk oder Pfand
-  // genau gegen Getraenk) braucht es weder Terminal noch Rueckfrage - beide Knoepfe buchen direkt.
-  function bezahlen(bar) {
+  // genau gegen Getraenk) braucht es weder Terminal noch Rueckfrage - jeder Knopf bucht direkt.
+  function zahlungFehlgeschlagen(err, istGutschrift) {
+    zahlungLaeuft = false;
+    // Abgebrochene/abgelehnte Zahlung: Warenkorb leeren, damit sofort die naechste
+    // Bestellung moeglich ist (Marko, 02.10.2026) - es wird nichts protokolliert.
+    counts = {};
+    render();
+    var unklar = err.terminal && err.terminal.unknown;
+    window.alert((istGutschrift ? 'Gutschrift fehlgeschlagen: ' : 'Zahlung fehlgeschlagen: ') + err.message + (unklar ? '' : ' — der Warenkorb wurde geleert, bitte neu eingeben.'));
+  }
+
+  function bezahlen(art) {
     if (zahlungLaeuft || !hasItems()) return;
     var betrag = total();
     if (Math.abs(betrag) < 0.005) {
@@ -392,8 +404,9 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
     var istGutschrift = betrag < 0;
+    var inApp = !!(window.OpiBridge && window.OpiBridge.isAvailable());
 
-    if (bar) {
+    if (art === 'bar') {
       var frage = istGutschrift
         ? 'Barauszahlung: ' + fmtEUR(-betrag) + '\n\nBar ausgezahlt?'
         : 'Barzahlung: ' + fmtEUR(betrag) + '\n\nBar kassiert?';
@@ -401,11 +414,26 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    // Laeuft die Seite in der nativen Kassen-Bridge-App, wird die Kartenzahlung ZUERST
+    if (art === 'sumup') {
+      // SumUp erstattet nicht ueber die App: Pfand-Gutschrift (negative Summe) nur ueber S-Cube oder bar.
+      if (istGutschrift) {
+        window.alert('Eine Gutschrift (Pfand zurück) geht nicht über SumUp. Bitte S-Cube oder Bar wählen.');
+        return;
+      }
+      zahlungLaeuft = true;
+      setActionsEnabled();
+      window.OpiBridge.sumup(betrag).then(function (result) {
+        zahlungLaeuft = false;
+        verkaufAbschliessen({ sumup: true, receiptNumber: result.receiptNumber, refund: false });
+      }).catch(function (err) { zahlungFehlgeschlagen(err, false); });
+      return;
+    }
+
+    // S-Cube: Laeuft die Seite in der nativen Kassen-Bridge-App, wird die Kartenzahlung ZUERST
     // am Terminal ausgeloest - erst nach Freigabe wird der Verkauf protokolliert und
     // der Warenkorb geleert. Ohne die App (normaler Browser) bleibt der bisherige
     // Ablauf (sofort protokollieren) unveraendert.
-    if (window.OpiBridge && window.OpiBridge.isAvailable()) {
+    if (inApp) {
       zahlungLaeuft = true;
       setActionsEnabled();
       // Negativer Gesamtbetrag (nur Pfand zurueck): Gutschrift auf die Karte statt Zahlung.
@@ -418,22 +446,23 @@ document.addEventListener('DOMContentLoaded', function () {
           receiptNumber: result.receiptNumber,
           refund: istGutschrift
         });
-      }).catch(function (err) {
-        zahlungLaeuft = false;
-        // Abgebrochene/abgelehnte Zahlung: Warenkorb leeren, damit sofort die naechste
-        // Bestellung moeglich ist (Marko, 02.10.2026) - es wird nichts protokolliert.
-        counts = {};
-        render();
-        var unklar = err.terminal && err.terminal.unknown;
-        window.alert((istGutschrift ? 'Gutschrift fehlgeschlagen: ' : 'Zahlung fehlgeschlagen: ') + err.message + (unklar ? '' : ' — der Warenkorb wurde geleert, bitte neu eingeben.'));
-      });
+      }).catch(function (err) { zahlungFehlgeschlagen(err, istGutschrift); });
     } else {
       verkaufAbschliessen(null);
     }
   }
 
-  document.getElementById('au-bar').addEventListener('click', function () { bezahlen(true); });
-  document.getElementById('au-karte').addEventListener('click', function () { bezahlen(false); });
+  document.getElementById('au-bar').addEventListener('click', function () { bezahlen('bar'); });
+  document.getElementById('au-cube').addEventListener('click', function () { bezahlen('cube'); });
+  document.getElementById('au-sumup').addEventListener('click', function () { bezahlen('sumup'); });
+
+  // Ohne SumUp in dieser App (aeltere App, normaler Browser): Knopf ausblenden, S-Cube wird der Hauptknopf.
+  if (!(window.OpiBridge && window.OpiBridge.sumupAvailable && window.OpiBridge.sumupAvailable())) {
+    document.getElementById('au-sumup').hidden = true;
+    var cubeKnopf = document.getElementById('au-cube');
+    cubeKnopf.classList.remove('btn-outline-orange');
+    cubeKnopf.classList.add('btn-primary');
+  }
 
   // Zettel-Toggle (Marko, 01.10.2026: "ausblenden, damit die Kacheln noch groesser
   // werden") - Zustand pro Geraet in localStorage gemerkt (reine Anzeige-Bequemlichkeit,

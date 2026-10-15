@@ -105,6 +105,15 @@
     charge: function (amount) {
       return send('charge', amount);
     },
+    // SumUp-Kartenleser (Air, Bluetooth) - nur in der Ausschank-App mit eingebundenem SumUp-SDK (die App setzt
+    // window.__sumupAvailable). Gleiches Promise-Verhalten wie charge(): bei Erfolg result.receiptNumber = SumUp-
+    // Transaktionscode, sonst Error mit err.terminal (unknown = Zahlungsstatus unklar, nicht erneut kassieren).
+    sumupAvailable: function () {
+      return available && !!global.__sumupAvailable;
+    },
+    sumup: function (amount) {
+      return send('sumup', amount);
+    },
     // Gutschrift auf die Karte (z. B. Pfand-Rueckgabe): amount als positive Zahl, die Karte
     // wird am Terminal vorgehalten. Gleiches Promise-Verhalten wie charge().
     refund: function (amount) {

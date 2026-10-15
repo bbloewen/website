@@ -4010,7 +4010,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (!AW.daten && !AW.laedt) ladeAW();
   }
   function asLiter(n) { return (Math.round(n * 100) / 100).toString().replace('.', ',') + ' l'; }
-  var AS_ZAHLART = { 'bar': 'Bar', 'karte': 'Karte', 'karte-gutschrift': 'Karte, Gutschrift', 'ohne Angabe': 'ohne Angabe' };
+  var AS_ZAHLART = { 'bar': 'Bar', 'karte': 'Karte (S-Cube)', 'karte-gutschrift': 'Karte (S-Cube), Gutschrift', 'sumup': 'SumUp (Air)', 'ohne Angabe': 'ohne Angabe' };
   function renderAS() {
     var el = $('p-ausschank'); if (!el) return;
     if (AS.laedt && !AS.daten) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
@@ -4040,7 +4040,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       h += abschnittZeile('Abgleich mit der Spieltag-Auswertung (abgeschlossen)', 3);
       if (!isNaN(awKarte)) h += trZeile(['Karte: Ausschank Karte € laut Auswertung (Differenz zur App ' + formatEuro(awKarte - karte) + ')', '', formatEuro(awKarte)]);
       if (!isNaN(awBar)) h += trZeile(['Bar: Ausschank bar € laut Auswertung (Differenz zur App ' + formatEuro(awBar - bar) + ')', '', formatEuro(awBar)]);
-      h += trZeile(['Karte laut App (inkl. Gutschriften) / Bar laut App', '', formatEuro(karte) + ' / ' + formatEuro(bar)]);
+      h += trZeile(['Karte (S-Cube) laut App (inkl. Gutschriften) / Bar laut App (SumUp wird von SumUp ausgezahlt, nicht von PAYONE)', '', formatEuro(karte) + ' / ' + formatEuro(bar)]);
     }
     h += '</tbody></table></div>';
     // Artikel
