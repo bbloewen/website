@@ -2956,7 +2956,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var ed = BE.btEdit, nr = a.nummer ? a.nummer + ' - ' : '';
     if (ed && ed.id === a.id) {
       return '<div class="btedit"><div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap"><span class="notiz" style="margin:0">' + esc(nr) + '</span>' +
-        '<input class="eingabe-klein" style="flex:1 1 120px" maxlength="24" data-be="bt-wert" aria-label="Zweck im Buchungstext, höchstens 24 Zeichen" value="' + esc(ed.wert) + '"></div>' +
+        '<input class="eingabe-klein" style="flex:1 1 120px" maxlength="60" data-be="bt-wert" aria-label="Buchungstext, höchstens 60 Zeichen" value="' + esc(ed.wert) + '"></div>' +
         '<label class="text-klein" style="display:block;margin-top:4px"><input type="checkbox" data-be="bt-standard"' + (ed.standard ? ' checked' : '') + '> Als Standardtext für künftige Belege von ' + esc(a.aussteller || 'diesem Aussteller') + ' merken</label>' +
         '<div style="display:flex;gap:8px;margin-top:4px;align-items:center"><button type="button" class="btn btn-primary" style="padding:4px 10px" data-be="bt-speichern" data-id="' + a.id + '"' + (ed.laeuft ? ' disabled' : '') + '>' + (ed.laeuft ? 'Speichere …' : 'Speichern') + '</button>' +
         '<button type="button" class="link-btn" data-be="bt-abbruch">Abbrechen</button></div>' +
@@ -3191,8 +3191,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   function rfBtZeile(r) {
     var bt = RF.bt && RF.bt.id === r.id ? RF.bt : null, text = rfBtText(r);
     if (bt) {
-      return '<div class="rf-box" style="margin-top:8px"><label class="text-klein" for="rf-bt-' + r.id + '">Zweck für den Buchungstext (höchstens 24 Zeichen), der Buchungstext wird daraus mit Datum und Aussteller (bei Auslagen mit Person) gebaut, höchstens 60 Zeichen. Die Rechnungsnummer steht in Belegfeld 1</label>' +
-        '<input id="rf-bt-' + r.id + '" class="eingabe-klein" style="width:100%;margin-top:4px" maxlength="24" data-rf="bt-wert" value="' + esc(bt.wert) + '">' +
+      return '<div class="rf-box" style="margin-top:8px"><label class="text-klein" for="rf-bt-' + r.id + '">Buchungstext (höchstens 60 Zeichen). Datum und Aussteller (bei Auslagen die Person) werden angehängt, soweit sie noch in die 60 Zeichen passen. Die Rechnungsnummer steht in Belegfeld 1</label>' +
+        '<input id="rf-bt-' + r.id + '" class="eingabe-klein" style="width:100%;margin-top:4px" maxlength="60" data-rf="bt-wert" value="' + esc(bt.wert) + '">' +
         '<label class="text-klein" style="display:block;margin-top:6px"><input type="checkbox" data-rf="bt-std"' + (bt.standard ? ' checked' : '') + '> Als Standardtext für künftige Belege von ' + esc(r.aussteller || 'diesem Aussteller') + ' merken</label>' +
         '<div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn btn-primary" data-rf="bt-ja" data-id="' + r.id + '"' + (bt.laeuft ? ' disabled' : '') + '>Speichern</button><button type="button" class="link-btn" data-rf="bt-abbruch">Abbrechen</button></div>' + (bt.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:6px">' + esc(bt.fehler) + '</div>' : '') + '</div>';
     }
@@ -3585,7 +3585,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       else if (w === 'bt-ja') {
         var rb2 = RF.daten.rueckfragen.filter(function (x) { return x.id === id; })[0], bt = RF.bt;
         var zw = String(bt.wert || '').replace(/\s+/g, ' ').trim();
-        if (zw.length < 2 || zw.length > 24) { bt.fehler = 'Der Zweck braucht 2 bis 24 Zeichen'; renderRF(); return; }
+        if (zw.length < 2 || zw.length > 60) { bt.fehler = 'Der Buchungstext braucht 2 bis 60 Zeichen'; renderRF(); return; }
         bt.laeuft = true; bt.fehler = ''; renderRF();
         try {
           var res2 = await fetch('/webhook/accounting/buchungstext-aendern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ aktion: rb2.beleg_id ? 'beleg' : 'rueckfrage_bhb', id: rb2.beleg_id || rb2.id, zweck: zw, standard: !!bt.standard }) });
@@ -4241,13 +4241,13 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       '<input type="search" class="eingabe-klein" style="width:200px;flex:none" data-bt="suche" placeholder="Suchen …" aria-label="Suchen" value="' + esc(BT.suche) + '"> <button type="button" class="link-btn" data-bt="neu-laden">Aktualisieren</button></span></div>' +
       (BT.meldung ? '<div class="erfolg" role="status" style="margin:8px 12px">' + esc(BT.meldung) + '</div>' : '') +
       (BT.fehlerAktion ? '<div class="fehlerbox" role="alert" style="margin:8px 12px">' + esc(BT.fehlerAktion) + '</div>' : '') +
-      '<div class="tbl-voll"><table class="tbl kompakt"><thead><tr>' + th('Aussteller', 'Firma, die die Rechnung stellt') + th('Standardtext', 'Zweck im Buchungstext, höchstens 24 Zeichen. Der ganze Buchungstext ist Rechnungsnummer, Bindestrich, Zweck und höchstens 36 Zeichen lang') + th('Quelle', 'Wer den Text festgelegt hat. Texte von Marko und vom Steuerberater sind verbindlich') + th('Belege', 'Belege im Eingang, die diesen Text tragen', 'rechts') + '<th></th></tr></thead><tbody>' +
-      '<tr><td><input class="eingabe-klein" style="width:100%" data-bt="neu-aussteller" placeholder="Neuer Aussteller" aria-label="Neuer Aussteller"></td><td><input class="eingabe-klein" style="width:100%" maxlength="24" data-bt="neu-zweck" placeholder="Standardtext" aria-label="Neuer Standardtext"></td><td class="notiz">von Marko festgelegt</td><td></td><td><button type="button" class="btn btn-secondary" style="padding:4px 10px" data-bt="neu">Hinzufügen</button></td></tr>';
+      '<div class="tbl-voll"><table class="tbl kompakt"><thead><tr>' + th('Aussteller', 'Firma, die die Rechnung stellt') + th('Standardtext', 'Text für den Buchungstext, höchstens 60 Zeichen. Datum und Aussteller werden angehängt, soweit sie noch hineinpassen. Die Rechnungsnummer steht in Belegfeld 1') + th('Quelle', 'Wer den Text festgelegt hat. Texte von Marko und vom Steuerberater sind verbindlich') + th('Belege', 'Belege im Eingang, die diesen Text tragen', 'rechts') + '<th></th></tr></thead><tbody>' +
+      '<tr><td><input class="eingabe-klein" style="width:100%" data-bt="neu-aussteller" placeholder="Neuer Aussteller" aria-label="Neuer Aussteller"></td><td><input class="eingabe-klein" style="width:100%" maxlength="60" data-bt="neu-zweck" placeholder="Standardtext" aria-label="Neuer Standardtext"></td><td class="notiz">von Marko festgelegt</td><td></td><td><button type="button" class="btn btn-secondary" style="padding:4px 10px" data-bt="neu">Hinzufügen</button></td></tr>';
     regeln.forEach(function (r) {
       var key = r.schluessel + '|' + r.zweck;
       var loe = BT.loeschen === key;
       h += '<tr><td>' + esc(r.aussteller) + '</td>' +
-        '<td><input class="eingabe-klein" style="width:100%" maxlength="24" data-bt="wert" data-schluessel="' + esc(r.schluessel) + '" data-alt="' + esc(r.zweck) + '" aria-label="Standardtext für ' + esc(r.aussteller) + '" value="' + esc(r.zweck) + '"></td>' +
+        '<td><input class="eingabe-klein" style="width:100%" maxlength="60" data-bt="wert" data-schluessel="' + esc(r.schluessel) + '" data-alt="' + esc(r.zweck) + '" aria-label="Standardtext für ' + esc(r.aussteller) + '" value="' + esc(r.zweck) + '"></td>' +
         '<td class="notiz">' + esc(q[r.quelle] || r.quelle) + (r.beispiel_nummer ? '<br>Beispiel Nr. ' + esc(r.beispiel_nummer) : '') + '</td><td class="rechts zahlen">' + esc(zahl(r.belege || 0)) + '</td>' +
         '<td style="white-space:nowrap">' + (loe ? '<span class="notiz" style="margin:0">Text wirklich löschen? Belege behalten ihren Text.</span> <button type="button" class="btn-gefahr" data-bt="loeschen-ja" data-schluessel="' + esc(r.schluessel) + '" data-alt="' + esc(r.zweck) + '">Löschen</button> <button type="button" class="link-btn" data-bt="loeschen-nein">Abbrechen</button>'
           : '<button type="button" class="btn btn-secondary" style="padding:4px 10px" data-bt="speichern">Speichern</button> <button type="button" class="link-btn" data-bt="loeschen" data-key="' + esc(key) + '">Löschen</button>') + '</td></tr>';
