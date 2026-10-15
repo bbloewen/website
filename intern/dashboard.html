@@ -286,6 +286,10 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   .aw tr.aw-payone td { font-size: 12px; color: var(--text-secondary); padding-top: 0; }
   /* Auswertung je Spieltag: kompakt, damit die Tabelle neben der Navigation ohne Seitwärtsscrollen passt (Marko, 15.10.2026) */
   table.tbl.kompakt.aw { font-size: 12px; }
+  /* Prozentwert in Klammern unter der Zahl; per CSS (::before), damit die Spalte für die Ausrichtung weiter nur aus Zahlen besteht */
+  .aw-pz { display: block; font-size: 11px; color: var(--text-secondary); margin-top: 2px; white-space: nowrap; }
+  .aw-pz::before { content: '(' attr(data-p) ')'; }
+  .aw-pz[data-p=''] { display: none; }
   .tbl.kompakt.aw th, .tbl.kompakt.aw td { padding-left: 4px; padding-right: 4px; }
   .tbl.kompakt.aw th:first-child, .tbl.kompakt.aw td:first-child { padding-left: 12px; }
   .tbl.kompakt.aw th { white-space: normal; vertical-align: bottom; line-height: 1.25; }
@@ -3691,6 +3695,25 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     { k: 'abendkasse_bar_euro', t: 'Abendkasse bar €', a: 'Abendkasse bar Euro' }, { k: 'ausschank_euro', t: 'Ausschank Karte €', a: 'Ausschank Karte Euro' },
     { k: 'ausschank_bar_euro', t: 'Ausschank bar €', a: 'Ausschank bar Euro' }
   ];
+  // Prozentwerte in Klammern (Marko, 15.10.2026): Anzahlen in % von "Besucher gesamt", Beträge in % von "Einnahmen gesamt".
+  var AW_PZ = { dauerkarten: 1, einzel_vvk_anzahl: 1, FREI: 1, abendkasse_anzahl: 1, einzel_vvk_euro: 1, kasse_ticketing_euro: 1, abendkasse_bar_euro: 1, ausschank_euro: 1, ausschank_bar_euro: 1 };
+  function awPzSpan(f, key) { return AW_PZ[f] ? '<span class="aw-pz" data-aw-pz="' + esc(f + '|' + key) + '" data-p=""></span>' : ''; }
+  function awPzSetzen() {
+    var t = awSummen();
+    var zmap = {}; awZeilen().forEach(function (z) { zmap[z.key] = z; });
+    document.querySelectorAll('[data-aw-pz]').forEach(function (n) {
+      var a = n.getAttribute('data-aw-pz').split('|'), f = a[0], key = a[1], wert, basis;
+      if (key === '*') {
+        wert = f === 'FREI' ? awFreiSumme() : t[f];
+        basis = AW_EURO[f] ? awEinnahmenSumme(t) : t.gesamt_besucher;
+      } else {
+        var z = zmap[key]; if (!z) { n.setAttribute('data-p', ''); return; }
+        wert = f === 'FREI' ? (awFrei(z) || 0) : awZahl(awWert(z, f));
+        basis = AW_EURO[f] ? awEinnahmen(z) : awZahl(awWert(z, 'gesamt_besucher'));
+      }
+      n.setAttribute('data-p', basis > 0 ? pct(wert / basis * 100) : '');
+    });
+  }
   // Dauerkarten werden nicht über die Spieltage addiert: in der Summenzeile steht die höchste Zahl (Marko, 15.10.2026).
   function awDauerMax() { return awZeilen().reduce(function (m, z) { return Math.max(m, awZahl(awWert(z, 'dauerkarten'))); }, 0); }
   function awFreiSumme() { return awZeilen().reduce(function (t0, z0) { return t0 + (awFrei(z0) || 0); }, 0); }
@@ -3701,7 +3724,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (!AW.daten) { el.innerHTML = ''; return; }
     var zeilen = awZeilen();
     var feld = function (z, f, titel) {
-      return '<td><input type="number" min="0" step="' + (AW_EURO[f] ? '0.01' : '1') + '" class="eingabe-klein" style="width:' + (AW_EURO[f] ? '72' : '54') + 'px;flex:none" data-aw="' + f + '" data-key="' + esc(z.key) + '" aria-label="' + esc(titel + ' ' + formatDate(z.datum)) + '" value="' + esc(awWert(z, f)) + '"></td>';
+      return '<td><input type="number" min="0" step="' + (AW_EURO[f] ? '0.01' : '1') + '" class="eingabe-klein" style="width:' + (AW_EURO[f] ? '72' : '54') + 'px;flex:none" data-aw="' + f + '" data-key="' + esc(z.key) + '" aria-label="' + esc(titel + ' ' + formatDate(z.datum)) + '" value="' + esc(awWert(z, f)) + '">' + awPzSpan(f, z.key) + '</td>';
     };
     var h = '<div class="stapel">';
     if (AW.meldung) h += '<div class="notiz" role="status">' + esc(AW.meldung) + '</div>';
@@ -3713,7 +3736,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     zeilen.forEach(function (z) {
       var fest = z.gespeichert && z.gespeichert.festgehalten_am;
       h += '<tr><td><div style="font-weight:500">' + esc(formatDate(z.datum)) + '</div><div class="notiz" style="margin:0">' + esc(z.gegner) + '</div></td>' +
-        AW_SPALTEN.map(function (c) { return c.k === 'FREI' ? '<td data-aw-frei="' + esc(z.key) + '">' + (awFrei(z) === null ? '–' : esc(zahl(awFrei(z)))) + '</td>' : feld(z, c.k, c.a); }).join('') +
+        AW_SPALTEN.map(function (c) { return c.k === 'FREI' ? '<td data-aw-frei="' + esc(z.key) + '">' + (awFrei(z) === null ? '–' : esc(zahl(awFrei(z)))) + awPzSpan('FREI', z.key) + '</td>' : feld(z, c.k, c.a); }).join('') +
         '<td data-aw-ges="' + esc(z.key) + '">' + esc(formatEuro(awEinnahmen(z))) + '</td>' +
         '<td data-aw-je="' + esc(z.key) + '">' + awJeText(z) + '</td>' +
         '<td><button type="button" class="link-btn" data-aw-aktion="festhalten" data-key="' + esc(z.key) + '"' + (AW.speichert === z.key ? ' disabled' : '') + '>' + (AW.speichert === z.key ? 'Speichere …' : 'Festhalten') + '</button>' +
@@ -3736,12 +3759,13 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         if (f === 'dauerkarten') wert = zahl(awDauerMax());
         else if (f === 'FREI') wert = zahl(awFreiSumme());
         else wert = AW_EURO[f] ? formatEuro(t[f]) : zahl(t[f]);
-        return '<td data-aw-summe="' + (f === 'FREI' ? 'frei' : f) + '">' + esc(wert) + '</td>';
+        return '<td data-aw-summe="' + (f === 'FREI' ? 'frei' : f) + '">' + esc(wert) + (f === 'dauerkarten' ? '' : awPzSpan(f, '*')) + '</td>';
       }).join('') + '<td data-aw-summe="ges">' + esc(formatEuro(awEinnahmenSumme(t))) + '</td><td data-aw-summe="je">' + awSummeJe(t) + '</td><td></td></tr>';
     }
     h += '</tbody></table></div>';
     h += '<div>' + aktualisierenBtn('auswertung') + '</div></div>';
     el.innerHTML = h;
+    awPzSetzen();
   }
   function awSummeJe(t) {
     var v = awJeBesucher(awEinnahmenSumme(t), t.gesamt_besucher);
@@ -3762,6 +3786,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var ng = document.querySelector('[data-aw-summe="ges"]'); if (ng) ng.textContent = formatEuro(awEinnahmenSumme(t));
     var nj = document.querySelector('[data-aw-summe="je"]'); if (nj) nj.innerHTML = awSummeJe(t);
     awZeilen().forEach(function (z) { var n = document.querySelector('[data-aw-ges="' + z.key + '"]'); if (n) n.textContent = formatEuro(awEinnahmen(z)); });
+    awPzSetzen();
   }
   async function awFesthalten(key) {
     var z = awZeilen().filter(function (x) { return x.key === key; })[0]; if (!z) return;
