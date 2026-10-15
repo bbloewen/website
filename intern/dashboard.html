@@ -3330,7 +3330,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     try {
       var res = await fetch('/webhook/accounting/kreditoren?mandant=' + m);
       var d = await res.json();
-      RF.kred[m] = d.kreditoren || [];
+      RF.kred[m] = (d.kreditoren || []).filter(function (k) { return !k.gesperrt; }); // gesperrte (fälschlich angelegte) Kreditoren sind nicht wählbar
       if (RF.buch) renderRF();
     } catch (e) { RF.kred[m] = []; }
   }
@@ -4976,7 +4976,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var d = await res.json().catch(function () { return {}; });
       if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Speichern fehlgeschlagen');
       k.gesperrt = !!ersetzt; k.ersetzt = ersetzt || '';
-      KR.meldung = ersetzt ? k.name + ' (' + nr + ') ist gesperrt, es wird ' + ersetzt + ' verwendet. In BuchhaltungsButler ist noch kein Vermerk gesetzt.' : 'Sperre für ' + nr + ' aufgehoben.';
+      KR.meldung = ersetzt ? k.name + ' (' + nr + ') ist gesperrt, es wird ' + ersetzt + ' verwendet.' : 'Sperre für ' + nr + ' aufgehoben.';
       return true;
     } catch (e) { k.gesperrt = altG; k.ersetzt = altE; KR.fehlerAktion = e.message; return false; }
   }
@@ -4986,7 +4986,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var text = 'Diese ' + todo.length + ' Kreditoren sperren und stattdessen den Kreditor mit den meisten Belegen verwenden?' + NL + NL + todo.map(function (k) { return k.mandant + ' ' + k.nr + ' ' + k.name + ' (' + k.belege + ' Belege) -> ' + krBester(k).nr; }).join(NL);
     if (!window.confirm(text)) return;
     var n = 0; for (var i = 0; i < todo.length; i++) { var b = krBester(todo[i]); if (b && await krSperre(todo[i].mandant, todo[i].nr, b.nr)) n++; }
-    KR.meldung = n + ' Kreditoren gesperrt. In BuchhaltungsButler ist noch kein Vermerk gesetzt.'; renderKR();
+    KR.meldung = n + ' Kreditoren gesperrt.'; renderKR();
   }
   function renderKR() {
     var el = $('p-kreditoren'); if (!el) return;
@@ -5012,7 +5012,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         '<td><select class="auswahl" data-kr="weg" data-m="' + esc(k.mandant) + '" data-nr="' + esc(k.nr) + '" aria-label="Zahlweg für ' + esc(k.name) + '">' + opt('', 'offen') + opt('lastschrift', 'Lastschrift') + opt('ueberweisung', 'Überweisung') + '</select></td>' +
         '<td class="rechts zahlen">' + (k.belege ? esc(zahl(k.belege)) : '<span class="gedaempft">0</span>') + '</td><td class="rechts zahlen">' + (k.belege ? esc(formatEuro(k.summe)) : '<span class="gedaempft">–</span>') + '</td><td class="nowrap">' + (k.letzter ? esc(formatDate(k.letzter)) : '') + '</td>' +
         '<td class="nowrap">' + (k.iban ? esc(k.iban.slice(0, 4) + ' … ' + k.iban.slice(-4)) : '<span class="gedaempft">fehlt</span>') + '</td>' +
-        '<td>' + (k.gesperrt ? '<b>Gesperrt</b>, nutze ' + esc(k.ersetzt) + ' <button type="button" class="link-btn" data-kr="entsperren" data-m="' + esc(k.mandant) + '" data-nr="' + esc(k.nr) + '">Sperre aufheben</button>' : (k.doppelt ? '<span class="pflicht">Doppelt?</span> ' + k.doppelt.map(function (t) { return esc(t); }).join('<br>') + (krBester(k) && krBester(k) !== k ? '<div><button type="button" class="btn btn-secondary" style="padding:2px 8px" data-kr="sperren" data-m="' + esc(k.mandant) + '" data-nr="' + esc(k.nr) + '" data-ers="' + esc(krBester(k).nr) + '">Sperren, nutze ' + esc(krBester(k).nr) + '</button></div>' : '<div class="notiz" style="margin:0">' + (krBester(k) === k ? 'behalten: meiste Belege' : 'gleich viele Belege, bitte selbst entscheiden') + '</div>') : '')) + '</td></tr>';
+        '<td>' + (k.gesperrt ? '<b>Gesperrt</b> (nicht mehr verwenden), nutze ' + esc(k.ersetzt) + ' <button type="button" class="link-btn" data-kr="entsperren" data-m="' + esc(k.mandant) + '" data-nr="' + esc(k.nr) + '">Sperre aufheben</button>' : (k.doppelt ? '<span class="pflicht">Doppelt?</span> ' + k.doppelt.map(function (t) { return esc(t); }).join('<br>') + (krBester(k) && krBester(k) !== k ? '<div><button type="button" class="btn btn-secondary" style="padding:2px 8px" data-kr="sperren" data-m="' + esc(k.mandant) + '" data-nr="' + esc(k.nr) + '" data-ers="' + esc(krBester(k).nr) + '">Sperren, nutze ' + esc(krBester(k).nr) + '</button></div>' : '<div class="notiz" style="margin:0">' + (krBester(k) === k ? 'behalten: meiste Belege' : 'gleich viele Belege, bitte selbst entscheiden') + '</div>') : '')) + '</td></tr>';
     });
     if (!l.length) h += '<tr><td colspan="9" class="leer">Keine Kreditoren in dieser Ansicht.</td></tr>';
     h += '</tbody></table></div><div class="card-fuss">Stammdaten aus BuchhaltungsButler. Belege und Volumen zählen die gebuchten Eingangsbelege seit dem 01.07.2026' + (KR.daten.stand ? ' (Stand ' + esc(formatDateTime(KR.daten.stand)) + ', täglich 5:30 Uhr gelesen)' : '') + '; Gutschriften mindern das Volumen. Doppelte werden am Namen erkannt, im selben Mandanten. Der Zahlweg gilt für alle Belege des Kreditors in der Belegliste und unter Überweisungen.</div></div></div>';
