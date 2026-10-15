@@ -456,6 +456,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   <section id="p-kostenstellen" role="tabpanel" aria-labelledby="tab-kostenstellen" hidden></section>
   <section id="p-sachkonten-xxl" role="tabpanel" aria-labelledby="tab-sachkonten-xxl" hidden></section>
   <section id="p-sachkonten-lev" role="tabpanel" aria-labelledby="tab-sachkonten-lev" hidden></section>
+  <section id="p-auslage-neu" role="tabpanel" aria-labelledby="tab-auslage-neu" hidden></section>
 
 </main>
 </div>
@@ -684,7 +685,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   // Alle bisherigen Aufrufe der Daten-Webhooks laufen unverändert im Seitencode und werden hier umgeleitet.
   window.fetch = function (url, opts) {
     var u = typeof url === 'string' ? url : ((url && url.url) || '');
-    var m = /^\/webhook\/((?:ticketing|crm|accounting)\/[a-z0-9-]+)(?:\?(.*))?$/.exec(u);
+    var m = /^\/webhook\/((?:ticketing|crm|accounting|auslagen)\/[a-z0-9-]+)(?:\?(.*))?$/.exec(u);
     if (!m || m[1] === 'ticketing/gutschein-karte' || m[1] === 'ticketing/board') return origFetch(url, opts);
     return ueberGateway(m[1], m[2] || '', opts);
   };
@@ -803,7 +804,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
     { id: 'segmentierung', name: 'Segmentierung', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
-    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'rueckfragen', name: 'Rückfragen' }, { id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlung XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung LEV Löwenpark' }, { id: 'ueberweisungen', name: 'Überweisungen' }, { id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }] }
+    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'rueckfragen', name: 'Rückfragen' }, { id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlung XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung LEV Löwenpark' }, { id: 'ueberweisungen', name: 'Überweisungen' }, { id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }] },
+    { id: 'auslagen', name: 'Auslagen', tabs: [{ id: 'auslage-neu', name: 'Auslage einreichen' }] }
   ];
   var TABS = [];
   BEREICHE.forEach(function (b) { b.tabs.forEach(function (t) { TABS.push(t.id); }); });
@@ -814,7 +816,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 
   // Welche Bereiche eine Person sieht, kommt aus der Rechte-Tabelle (crm-db). Hier wird nur ausgeblendet,
   // entschieden wird im Gateway.
-  var RECHT_ID = { ticketing: 'ticketing', gutscheine: 'gutscheine', website: 'website', segmentierung: 'crm', accounting: 'accounting' };
+  var RECHT_ID = { ticketing: 'ticketing', gutscheine: 'gutscheine', website: 'website', segmentierung: 'crm', accounting: 'accounting', auslagen: 'auslagen' };
   function darfBereich(b) {
     var n = window.LOEWEN_NUTZER;
     if (!n) return true;
@@ -865,6 +867,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (BE_MANDANT[t]) ladeListe('beleg', BE_MANDANT[t]);
     if (ZA_KONTO[t]) ladeListe('zahlung', ZA_KONTO[t]);
     if (t === 'buchungstexte') ladeBT();
+    if (t === 'auslage-neu') ladeAU();
     if (t === 'kostenstellen') ladeKS();
     if (t === 'sachkonten-xxl') ladeSK('XXL');
     if (t === 'sachkonten-lev') ladeSK('LEV');
@@ -4451,6 +4454,170 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     return se ? se.id : text;
   }
 
+  // ---------- Auslagen: Formular für Mitarbeitende ----------
+  // Beleg hochladen mit den fünf Pflichtangaben (Lieferant, Steuersatz, Anlass, wer gezahlt hat, wohin ausgezahlt wird).
+  // Die Angaben gehen mit dem Beleg als PDF (Deckblatt + Beleg) in den Belegeingang. Fotos werden hier im Browser zu einem PDF.
+  var AU = { ich: null, fehler: null, laedt: false, dateien: [], senden: false, fertig: '', fehlerForm: '', f: null };
+  function auHeute() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function auLeer(alt) { return { mandant: alt ? alt.mandant : '', zahlung: alt ? alt.zahlung : 'privat', zahler: 'ich', zahlerFrei: '', lieferant: '', datum: auHeute(), betrag: '', s19: false, s7: false, s0: false, unklar: false, anlass: '', bewirtete: '', notiz: '', iban: '' }; }
+  async function ladeAU() {
+    if (AU.ich || AU.laedt) return;
+    AU.laedt = true; AU.fehler = null; renderAU();
+    try {
+      var res = await fetch('/webhook/auslagen/ich');
+      var d = await res.json();
+      if (!res.ok || !d.ok) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
+      AU.ich = d; if (!AU.f) AU.f = auLeer();
+    } catch (e) { AU.fehler = e.message; }
+    AU.laedt = false; renderAU();
+  }
+  function auBrauchtIban() { var f = AU.f; if (!f || f.zahlung !== 'privat') return false; if (f.zahler === 'ich') return !(AU.ich && AU.ich.iban_da); return true; }
+  function auZahlerEintrag() { var f = AU.f; if (f.zahler === 'ich') return null; return (AU.ich.darf_fuer || [])[Number(f.zahler.slice(1))] || null; }
+  function auBetrag(t) { var s = String(t || '').trim().replace(/\s|€/g, ''); if (/^\d{1,3}(\.\d{3})+(,\d{1,2})?$/.test(s)) s = s.replace(/\./g, ''); s = s.replace(',', '.'); var n = Number(s); return /^\d+(\.\d{1,2})?$/.test(s) && n > 0 ? n : 0; }
+  function auPruefen() {
+    var f = AU.f;
+    if (!f.mandant) return 'Bitte wählen, für welche Gesellschaft der Beleg ist.';
+    if (f.zahlung === 'privat' && f.zahler !== 'ich') { var z = auZahlerEintrag(); if (z && z.frei && f.zahlerFrei.trim().length < 3) return 'Bitte den Namen der Person eintragen, die ausgelegt hat.'; }
+    if (f.lieferant.trim().length < 2) return 'Bitte den Lieferanten eintragen.';
+    if (!f.datum) return 'Bitte das Belegdatum angeben.';
+    if (!auBetrag(f.betrag)) return 'Bitte den Betrag in Euro angeben, zum Beispiel 23,90.';
+    if (!f.s19 && !f.s7 && !f.s0 && !f.unklar) return 'Bitte den Steuersatz oder die Steuersätze auf dem Beleg angeben.';
+    if (f.anlass.trim().length < 3) return 'Bitte den Anlass angeben, zum Beispiel Spielerverpflegung.';
+    if (/bewirtung/i.test(f.anlass) && f.bewirtete.trim().length < 3) return 'Bei Bewirtung bitte die bewirteten Personen und den Anlass eintragen.';
+    if (auBrauchtIban() && !f.iban.trim()) return 'Bitte die IBAN eintragen, auf die ausgezahlt werden soll.';
+    if (!AU.dateien.length) return 'Bitte den Beleg als PDF oder Foto hinzufügen.';
+    var pdfs = AU.dateien.filter(function (d) { return d.type === 'application/pdf' || /\.pdf$/i.test(d.name); });
+    if (pdfs.length && AU.dateien.length > 1) return 'Entweder eine PDF-Datei oder ein bis mehrere Fotos, nicht beides gemischt.';
+    return '';
+  }
+  function auBytesZuBase64(bytes) { var s = '', n = 0x8000; for (var i = 0; i < bytes.length; i += n) s += String.fromCharCode.apply(null, bytes.subarray(i, i + n)); return btoa(s); }
+  function auBild(datei) {
+    return new Promise(function (ok, nein) {
+      var url = URL.createObjectURL(datei), img = new Image();
+      img.onload = function () {
+        var m = 2000, s = Math.min(1, m / Math.max(img.naturalWidth, img.naturalHeight)), w = Math.max(1, Math.round(img.naturalWidth * s)), h = Math.max(1, Math.round(img.naturalHeight * s));
+        var c = document.createElement('canvas'); c.width = w; c.height = h;
+        var x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(img, 0, 0, w, h);
+        URL.revokeObjectURL(url);
+        c.toBlob(function (b) { if (!b) { nein(new Error('Das Foto konnte nicht verarbeitet werden: ' + datei.name)); return; } b.arrayBuffer().then(function (ab) { ok({ w: w, h: h, jpeg: new Uint8Array(ab) }); }); }, 'image/jpeg', 0.82);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); nein(new Error('Das Foto konnte nicht gelesen werden: ' + datei.name + '. Bitte als JPEG, PNG oder PDF hochladen.')); };
+      img.src = url;
+    });
+  }
+  // Ein PDF aus JPEG-Seiten, ohne Bibliothek: je Foto eine Seite (höchstens A4 groß, Seitenverhältnis bleibt).
+  function auPdfAusBildern(bilder) {
+    var teile = [], pos = 0, offs = [];
+    function roh(t) { var b = typeof t === 'string' ? new TextEncoder().encode(t) : t; teile.push(b); pos += b.length; }
+    function obj(n, kopf, strom) { offs[n] = pos; roh(n + ' 0 obj\n' + kopf + (strom ? '\nstream\n' : '\n')); if (strom) { roh(strom); roh('\nendstream\n'); } roh('endobj\n'); }
+    roh('%PDF-1.4\n');
+    var n = bilder.length, kids = [];
+    for (var i = 0; i < n; i++) kids.push((3 + i * 3) + ' 0 R');
+    obj(1, '<< /Type /Catalog /Pages 2 0 R >>');
+    obj(2, '<< /Type /Pages /Kids [' + kids.join(' ') + '] /Count ' + n + ' >>');
+    bilder.forEach(function (b, i) {
+      var sk = Math.min(595 / b.w, 842 / b.h), w = (b.w * sk).toFixed(2), h = (b.h * sk).toFixed(2), s = 3 + i * 3, inhalt = 'q ' + w + ' 0 0 ' + h + ' 0 0 cm /Im0 Do Q';
+      obj(s, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + w + ' ' + h + '] /Resources << /XObject << /Im0 ' + (s + 2) + ' 0 R >> >> /Contents ' + (s + 1) + ' 0 R >>');
+      obj(s + 1, '<< /Length ' + inhalt.length + ' >>', inhalt);
+      obj(s + 2, '<< /Type /XObject /Subtype /Image /Width ' + b.w + ' /Height ' + b.h + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + b.jpeg.length + ' >>', b.jpeg);
+    });
+    var xref = pos, tot = 3 + n * 3, x = 'xref\n0 ' + tot + '\n0000000000 65535 f \n';
+    for (var k = 1; k < tot; k++) x += String(offs[k]).padStart(10, '0') + ' 00000 n \n';
+    roh(x + 'trailer\n<< /Size ' + tot + ' /Root 1 0 R >>\nstartxref\n' + xref + '\n%%EOF\n');
+    var out = new Uint8Array(pos), p = 0; teile.forEach(function (t) { out.set(t, p); p += t.length; });
+    return out;
+  }
+  async function auDateiAlsPdf() {
+    var d = AU.dateien;
+    if (d.length === 1 && (d[0].type === 'application/pdf' || /\.pdf$/i.test(d[0].name))) {
+      var b = new Uint8Array(await d[0].arrayBuffer());
+      if (String.fromCharCode(b[0], b[1], b[2], b[3]) !== '%PDF') throw new Error('Die Datei ist kein gültiges PDF.');
+      return b;
+    }
+    var bilder = []; for (var i = 0; i < d.length; i++) bilder.push(await auBild(d[i]));
+    return auPdfAusBildern(bilder);
+  }
+  async function auSenden() {
+    var f = AU.f; AU.fehlerForm = ''; AU.fertig = '';
+    var fe = auPruefen(); if (fe) { AU.fehlerForm = fe; renderAU(); return; }
+    AU.senden = true; renderAU();
+    try {
+      var pdf = await auDateiAlsPdf();
+      if (pdf.length > 9500000) throw new Error('Die Datei ist zu groß (höchstens etwa 9 MB). Bitte ein kleineres Foto oder PDF verwenden.');
+      var ze = f.zahlung === 'privat' ? auZahlerEintrag() : null, gez = {};
+      if (ze) gez = ze.frei ? { name: f.zahlerFrei.trim() } : { name: ze.name, email: ze.email };
+      var body = { mandant: f.mandant, zahlung: f.zahlung, gezahlt_von: gez, lieferant: f.lieferant.trim(), datum: f.datum, betrag: String(auBetrag(f.betrag)),
+        steuersaetze: [f.s19 ? '19' : '', f.s7 ? '7' : '', f.s0 ? '0' : ''].filter(Boolean), steuersatz_unklar: !!f.unklar && !f.s19 && !f.s7 && !f.s0,
+        anlass: f.anlass.trim(), bewirtete: /bewirtung/i.test(f.anlass) ? f.bewirtete.trim() : '', notiz: f.notiz.trim(), iban: auBrauchtIban() ? f.iban.trim() : '',
+        datei: { mime: 'application/pdf', b64: auBytesZuBase64(pdf) } };
+      var res = await fetch('/webhook/auslagen/einreichen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      var d = await res.json().catch(function () { return {}; });
+      if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Das Einreichen hat nicht geklappt. Bitte versuche es noch einmal.');
+      AU.fertig = 'Eingereicht: ' + f.lieferant.trim() + ', ' + zahl(auBetrag(f.betrag)) + ' €. Der Beleg ist in der Buchhaltung angekommen.';
+      AU.f = auLeer(f); AU.dateien = [];
+    } catch (e) { AU.fehlerForm = e.message; }
+    AU.senden = false; renderAU();
+  }
+  function renderAU() {
+    var el = $('p-auslage-neu'); if (!el) return;
+    if (AU.laedt && !AU.ich) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
+    if (AU.fehler && !AU.ich) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(AU.fehler) + '</div>'; return; }
+    if (!AU.ich || !AU.f) { el.innerHTML = ''; return; }
+    var f = AU.f, ich = AU.ich, aus = AU.senden ? ' disabled' : '';
+    var feld = function (id, label, inner, hilfe, pflicht) { return '<div><label for="au-' + id + '" class="text-klein" style="font-weight:600;display:block;margin-bottom:4px">' + esc(label) + (pflicht === false ? '' : ' <span class="pflicht" aria-hidden="true">*</span>') + '</label>' + inner + (hilfe ? '<div class="hilfe">' + hilfe + '</div>' : '') + '</div>'; };
+    var text = function (id, typ, ph) { return '<input id="au-' + id + '" class="eingabe" type="' + typ + '" data-au="' + id + '" value="' + esc(f[id]) + '"' + (ph ? ' placeholder="' + esc(ph) + '"' : '') + aus + '>'; };
+    var radio = function (name, wert, label, an) { return '<label class="text-klein" style="display:flex;gap:8px;align-items:center"><input type="radio" name="au-' + name + '" data-au-radio="' + name + '" value="' + esc(wert) + '"' + (an ? ' checked' : '') + aus + '> ' + esc(label) + '</label>'; };
+    var haken = function (id, label) { return '<label class="text-klein" style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-au-haken="' + id + '"' + (f[id] ? ' checked' : '') + aus + '> ' + esc(label) + '</label>'; };
+    var h = '<div class="card" style="max-width:680px"><div class="card-kopf">Auslage einreichen<div class="unter">Eingekauft für den Verein oder die GmbH? Hier den Beleg hochladen, die Buchhaltung erledigt den Rest. Mit * sind Pflichtangaben markiert.</div></div><div style="padding:16px 20px;display:grid;gap:16px">';
+    if (AU.fertig) h += '<div class="erfolg" role="status">' + esc(AU.fertig) + '</div>';
+    if (AU.fehlerForm) h += '<div class="fehlerbox" role="alert">' + esc(AU.fehlerForm) + '</div>';
+    h += '<fieldset style="border:0;padding:0;margin:0"><legend class="text-klein" style="font-weight:600;margin-bottom:6px">Für welche Gesellschaft? <span class="pflicht" aria-hidden="true">*</span></legend><div style="display:grid;gap:6px">' +
+      radio('mandant', 'XXL', 'XXL Baskets GmbH (Spielbetrieb, Trainingslager, Auswärtsspiele)', f.mandant === 'XXL') + radio('mandant', 'LEV', 'Basketball Löwen Erfurt e.V. (Verein, Nachwuchs)', f.mandant === 'LEV') + '</div></fieldset>';
+    h += '<fieldset style="border:0;padding:0;margin:0"><legend class="text-klein" style="font-weight:600;margin-bottom:6px">Wie wurde bezahlt? <span class="pflicht" aria-hidden="true">*</span></legend><div style="display:grid;gap:6px">' +
+      radio('zahlung', 'privat', 'Privat ausgelegt, bitte erstatten', f.zahlung === 'privat') + radio('zahlung', 'ec', 'Mit der Firmen-EC-Karte', f.zahlung === 'ec') + '</div></fieldset>';
+    if (f.zahlung === 'privat') {
+      var dar = ich.darf_fuer || [];
+      if (dar.length) {
+        var opt = '<option value="ich"' + (f.zahler === 'ich' ? ' selected' : '') + '>' + esc(ich.name) + ' (ich)</option>';
+        dar.forEach(function (p, i) { opt += '<option value="p' + i + '"' + (f.zahler === 'p' + i ? ' selected' : '') + '>' + esc(p.name) + '</option>'; });
+        h += feld('zahler', 'Wer hat ausgelegt?', '<select id="au-zahler" class="eingabe" data-au-wahl="zahler"' + aus + '>' + opt + '</select>');
+        var ze = auZahlerEintrag();
+        if (ze && ze.frei) h += feld('zahlerFrei', 'Name der Person (' + ze.name + ')', text('zahlerFrei', 'text', 'Vor- und Nachname'));
+      } else h += '<div class="text-klein"><span style="font-weight:600">Ausgelegt von:</span> ' + esc(ich.name) + '</div>';
+      if (f.zahler === 'ich' && ich.iban_da) h += '<div class="text-klein"><span style="font-weight:600">Auszahlung auf:</span> ' + esc(ich.iban_maske) + ' <span class="gedaempft">(aus den Stammdaten)</span></div>';
+      if (auBrauchtIban()) h += feld('iban', 'IBAN für die Auszahlung', text('iban', 'text', 'DE00 0000 0000 0000 0000 00'), f.zahler === 'ich' ? 'Für dich ist noch keine IBAN hinterlegt.' : 'Nur nötig, wenn für diese Person noch keine IBAN hinterlegt ist.');
+    } else h += '<div class="text-klein gedaempft">Bei Zahlung mit der Firmenkarte gibt es nichts zu erstatten.</div>';
+    h += feld('lieferant', 'Lieferant', text('lieferant', 'text', 'z. B. Globus, Bäckerei Müller'));
+    h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">' + feld('datum', 'Belegdatum', '<input id="au-datum" class="eingabe" type="date" data-au="datum" max="' + auHeute() + '" value="' + esc(f.datum) + '"' + aus + '>') + feld('betrag', 'Betrag brutto in Euro', text('betrag', 'text', '23,90')) + '</div>';
+    h += '<fieldset style="border:0;padding:0;margin:0"><legend class="text-klein" style="font-weight:600;margin-bottom:6px">Steuersatz auf dem Beleg <span class="pflicht" aria-hidden="true">*</span></legend><div style="display:flex;flex-wrap:wrap;gap:8px 20px">' + haken('s19', '19 %') + haken('s7', '7 %') + haken('s0', '0 % / keine Steuer') + haken('unklar', 'steht nicht auf dem Beleg') + '</div><div class="hilfe">Bei gemischten Belegen alle vorkommenden Sätze ankreuzen.</div></fieldset>';
+    h += feld('anlass', 'Anlass', text('anlass', 'text', 'z. B. Spielerverpflegung, Trainingslager') .replace('<input ', '<input list="au-anlaesse" ') + '<datalist id="au-anlaesse"><option value="Spielerverpflegung"><option value="Trainerverpflegung"><option value="Trainingslager"><option value="Auswärtsspiel"><option value="Bewirtung"><option value="Fahrtkosten"><option value="Übernachtung"><option value="Material"><option value="Reparatur"></datalist>', 'Wofür wurde eingekauft?');
+    if (/bewirtung/i.test(f.anlass)) h += feld('bewirtete', 'Bewirtete Personen und Anlass', '<textarea id="au-bewirtete" class="eingabe" rows="3" data-au="bewirtete"' + aus + '>' + esc(f.bewirtete) + '</textarea>', 'Namen der bewirteten Personen und wozu die Einladung war.');
+    h += feld('notiz', 'Hinweis (optional)', '<textarea id="au-notiz" class="eingabe" rows="2" data-au="notiz"' + aus + '>' + esc(f.notiz) + '</textarea>', 'Nicht erstattungsfähige Positionen bitte vor dem Foto auf dem Beleg durchstreichen.', false);
+    var dl = '';
+    if (AU.dateien.length) { dl = '<ul style="margin:8px 0 0;padding-left:20px">'; AU.dateien.forEach(function (d, i) { dl += '<li class="text-klein">' + esc(d.name) + ' <button type="button" class="link-btn" data-au-aktion="entfernen" data-i="' + i + '"' + aus + '>entfernen</button></li>'; }); dl += '</ul>'; }
+    h += feld('datei', 'Beleg als PDF oder Foto', '<input id="au-datei" type="file" data-au-datei accept="application/pdf,image/*" multiple' + aus + '>' + dl, 'Mehrere Fotos desselben Belegs werden zu einem PDF zusammengefasst.');
+    h += '<div><button type="button" class="btn btn-primary" data-au-aktion="senden"' + aus + '>' + (AU.senden ? 'Sende …' : 'Auslage einreichen') + '</button></div></div></div>';
+    var fokus = document.activeElement && document.activeElement.id, pos = document.activeElement && document.activeElement.selectionStart;
+    el.innerHTML = h;
+    if (fokus && fokus.indexOf('au-') === 0) { var n = document.getElementById(fokus); if (n) { n.focus(); try { if (pos !== null && pos !== undefined) n.setSelectionRange(pos, pos); } catch (e) {} } }
+  }
+  function bindAU() {
+    var p = $('p-auslage-neu');
+    p.addEventListener('input', function (e) { var n = e.target.getAttribute('data-au'); if (!n || !AU.f) return; AU.f[n] = e.target.value; if (n === 'anlass') { var b = /bewirtung/i.test(AU.f.anlass); if (b !== !!p.querySelector('#au-bewirtete')) renderAU(); } });
+    p.addEventListener('change', function (e) {
+      var t = e.target, r = t.getAttribute('data-au-radio'), hk = t.getAttribute('data-au-haken'), w = t.getAttribute('data-au-wahl');
+      if (r) { AU.f[r] = t.value; renderAU(); }
+      else if (hk) { AU.f[hk] = t.checked; if (hk === 'unklar' && t.checked) { AU.f.s19 = AU.f.s7 = AU.f.s0 = false; renderAU(); } else if (hk !== 'unklar' && t.checked && AU.f.unklar) { AU.f.unklar = false; renderAU(); } }
+      else if (w) { AU.f[w] = t.value; renderAU(); }
+      else if (t.hasAttribute('data-au-datei')) { var neu = Array.prototype.slice.call(t.files || []); AU.dateien = AU.dateien.concat(neu); t.value = ''; renderAU(); }
+    });
+    p.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-au-aktion]'); if (!b) return;
+      if (b.getAttribute('data-au-aktion') === 'entfernen') { AU.dateien.splice(Number(b.getAttribute('data-i')), 1); renderAU(); }
+      else if (b.getAttribute('data-au-aktion') === 'senden') auSenden();
+    });
+  }
+
   // ---------- Start ----------
   try { S.form.erstelltVon = localStorage.getItem('tb_erstelltVon') || ''; } catch (e) {}
   bind();
@@ -4466,6 +4633,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   bindUE();
   bindSK();
   bindRF();
+  bindAU();
   document.addEventListener('loewen-nutzer', function () {
     if (!darfBereich(bereichVon(S.tab))) setTab(S.tab, false, S.tabArg); else renderNavigation();
     rfZaehlerLaden();
@@ -4475,9 +4643,16 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   formInFelder();
   var start = teileHash(location.hash.slice(1));
   setTab(start.tab || S.tab, false, start.arg);
-  loadFormular();
-  loadStats();
-  loadDauerkarten();
+  // Personen nur mit dem Bereich Auslagen sollen keine Ticket- und Gutschein-Daten anfragen (das Gateway lehnt sie ohnehin ab)
+  function darfRecht(id) { var n = window.LOEWEN_NUTZER; if (!n) return true; var r = n.bereiche || []; return r.indexOf('alles') >= 0 || r.indexOf(id) >= 0; }
+  var startGeladen = false;
+  function startLaden() {
+    if (startGeladen || !window.LOEWEN_NUTZER) return; startGeladen = true;
+    if (darfRecht('gutscheine')) { loadFormular(); loadStats(); }
+    if (darfRecht('ticketing')) loadDauerkarten();
+  }
+  document.addEventListener('loewen-nutzer', startLaden);
+  startLaden();
   if (window.LOEWEN_NUTZER) rfZaehlerLaden();
 })();
 </script>
