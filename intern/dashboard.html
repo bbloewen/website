@@ -286,7 +286,6 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 .tt-rechts .tt-box { right: 0; }
 .tt:hover .tt-box, .tt:focus .tt-box, .tt:focus-within .tt-box { opacity: 1; visibility: visible; }
 @media (prefers-reduced-motion: reduce) { .tt-box { transition: none; } }
-  .aw tr.aw-payone td { font-size: 12px; color: var(--text-secondary); padding-top: 0; }
   /* Auswertung je Spieltag: kompakt, damit die Tabelle neben der Navigation ohne Seitwärtsscrollen passt (Marko, 15.10.2026) */
   table.tbl.kompakt.aw { font-size: 12px; }
   /* Prozentwert in Klammern unter der Zahl; per CSS (::before), damit die Spalte für die Ausrichtung weiter nur aus Zahlen besteht */
@@ -3838,12 +3837,30 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   // Einnahmen: Einzeltickets Vorverkauf (pretix) + Abendkasse (Terminal-Umsatz + Barkasse) + Ausschank (Terminal-Umsatz + Barkasse), ohne Dauerkarten.
   // Die Abendkasse aus pretix steht nur zur Kontrolle am Feld „Abendkasse Karte €“: sie ist derselbe Umsatz wie der des Terminals und wird nie zusätzlich gezählt.
   function awEinnahmenSumme(t) { return t.einzel_vvk_euro + t.kasse_ticketing_euro + t.abendkasse_bar_euro + t.ausschank_euro + t.ausschank_bar_euro; }
-  function awEinnahmen(z) { var t = {}; AW_FELDER.forEach(function (f) { t[f] = awZahl(awWert(z, f)); }); return awEinnahmenSumme(t); }
+  // PAYONE-Gutschriften (Tabelle payone_gutschriften) sind führend (Marko, 15.10.2026): Sobald für ein Terminal Auszahlungen
+  // vorliegen, zählt in "Abendkasse Karte €" (Ticketing-Terminal) und "Ausschank Karte €" (Ausschank-Terminal) der ausgezahlte Betrag,
+  // solange nicht, der Terminal-Umsatz laut Kassenbelegen. Gespeichert wird weiter der Terminal-Wert (awWert), nur Anzeige,
+  // Einnahmen und Prozente nutzen awEff.
+  function awPayone(z) {
+    var pay = (z.gespeichert && z.gespeichert.payone) || [], r = { T: null, A: null };
+    pay.forEach(function (g) {
+      var b = Number(g.betrag) || 0, k = /ausschank/i.test(g.kasse || '') ? 'A' : 'T';
+      r[k] = (r[k] || 0) + b;
+    });
+    return r;
+  }
+  var AW_PAYONE_FELD = { kasse_ticketing_euro: 'T', ausschank_euro: 'A' };
+  function awEff(z, f) {
+    var k = AW_PAYONE_FELD[f];
+    if (k) { var p = awPayone(z)[k]; if (p !== null) return Math.round(p * 100) / 100; }
+    return awWert(z, f);
+  }
+  function awEinnahmen(z) { var t = {}; AW_FELDER.forEach(function (f) { t[f] = awZahl(awEff(z, f)); }); return awEinnahmenSumme(t); }
   function awJeBesucher(einnahmen, besucher) { return besucher > 0 ? einnahmen / besucher : null; }
   function awZahl(v) { if (v === '' || v === null || v === undefined) return 0; var n = Number(String(v).replace(',', '.')); return isNaN(n) ? 0 : n; }
   function awSummen() {
     var t = {}; AW_FELDER.forEach(function (f) { t[f] = 0; });
-    awZeilen().forEach(function (z) { AW_FELDER.forEach(function (f) { t[f] += awZahl(awWert(z, f)); }); });
+    awZeilen().forEach(function (z) { AW_FELDER.forEach(function (f) { t[f] += awZahl(awEff(z, f)); }); });
     return t;
   }
   function awJeText(z) {
@@ -3878,7 +3895,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         basis = AW_EURO[f] ? awEinnahmenSumme(t) : t.gesamt_besucher;
       } else {
         var z = zmap[key]; if (!z) { n.setAttribute('data-p', ''); return; }
-        wert = f === 'FREI' ? (awFrei(z) || 0) : awZahl(awWert(z, f));
+        wert = f === 'FREI' ? (awFrei(z) || 0) : awZahl(awEff(z, f));
         basis = AW_EURO[f] ? awEinnahmen(z) : awZahl(awWert(z, 'gesamt_besucher'));
       }
       if (!(basis > 0)) { n.setAttribute('data-p', ''); return; }
@@ -3909,14 +3926,21 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (!AW.daten) { el.innerHTML = ''; return; }
     var zeilen = awZeilen();
     var feld = function (z, f) {
-      var v = awWert(z, f);
-      return '<td>' + (v === '' ? '–' : esc(AW_EURO[f] ? formatEuro(awZahl(v)) : zahl(awZahl(v)))) + awPzSpan(f, z.key) + '</td>';
+      var v = awEff(z, f), tip = '';
+      var k = AW_PAYONE_FELD[f];
+      if (k) {
+        // Tooltip: was das Terminal laut Belegen gezählt hat, und woher der angezeigte Betrag stammt
+        var tv = awWert(z, f), pv = awPayone(z)[k];
+        tip = pv !== null ? ('Ausgezahlt von PAYONE: ' + formatEuro(pv) + (tv !== '' ? ' · Terminal laut Belegen: ' + formatEuro(awZahl(tv)) : ''))
+          : ('Noch keine PAYONE-Auszahlung, Terminal laut Belegen' + (tv !== '' ? ': ' + formatEuro(awZahl(tv)) : ''));
+      }
+      return '<td' + (tip ? ' title="' + esc(tip) + '"' : '') + '>' + (v === '' ? '–' : esc(AW_EURO[f] ? formatEuro(awZahl(v)) : zahl(awZahl(v)))) + awPzSpan(f, z.key) + '</td>';
     };
     var h = '<div class="stapel">';
     if (AW.meldung) h += '<div class="notiz" role="status">' + esc(AW.meldung) + '</div>';
     if (AW.fehlerAktion) h += '<div class="fehlerbox" role="alert">' + esc(AW.fehlerAktion) + '</div>';
     h += '<div class="card"><div class="card-kopf"><div style="font-weight:500">Auswertung je Spieltag</div>' +
-      '<div class="unter">Vorschlag aus pretix für Besucher, Dauerkarten-Besucher, Vorverkauf und Abendkasse-Anzahl. Umsatz kommt vom Terminal (Ticketing 60002672, Ausschank 60002670, laut Kassenbelegen) plus Barkasse. Besucher gesamt = Dauerkarten-Besucher + Einzeltickets Vorverkauf + Freikarten + Abendkasse, falls nicht überschrieben (Dauerkarten-Besucher = Dauerkarten-Zuschauer des Spiels, nicht die Zahl der verkauften Dauerkarten; sie werden über die Spieltage addiert). Einnahmen gesamt = Einzel VVK € + Abendkasse Karte € + Abendkasse bar € + Ausschank Karte € + Ausschank bar € (ohne Dauerkarten); die Abendkasse aus pretix zählt nicht mit, sie ist derselbe Umsatz wie der Terminal. Einnahmen je Besucher = Einnahmen gesamt geteilt durch die Besucher. Offene Spieltage zeigen die aktuellen Zahlen; „Abschließen“ hält sie einmalig fest.</div></div>' +
+      '<div class="unter">Vorschlag aus pretix für Besucher, Dauerkarten-Besucher, Vorverkauf und Abendkasse-Anzahl. Karten-Umsatz: Sobald PAYONE ausgezahlt hat, zählt der ausgezahlte Betrag (der Terminal-Umsatz laut Kassenbelegen steht im Tooltip), bis dahin der Terminal-Umsatz (Ticketing 60002672, Ausschank 60002670). Dazu die Barkasse. Besucher gesamt = Dauerkarten-Besucher + Einzeltickets Vorverkauf + Freikarten + Abendkasse, falls nicht überschrieben (Dauerkarten-Besucher = Dauerkarten-Zuschauer des Spiels, nicht die Zahl der verkauften Dauerkarten; sie werden über die Spieltage addiert). Einnahmen gesamt = Einzel VVK € + Abendkasse Karte € + Abendkasse bar € + Ausschank Karte € + Ausschank bar € (ohne Dauerkarten); die Abendkasse aus pretix zählt nicht mit, sie ist derselbe Umsatz wie der Terminal. Einnahmen je Besucher = Einnahmen gesamt geteilt durch die Besucher. Offene Spieltage zeigen die aktuellen Zahlen; „Abschließen“ hält sie einmalig fest.</div></div>' +
       '<table class="tbl kompakt aw"><thead><tr><th>Spieltag</th>' + AW_SPALTEN.map(function (c) { return '<th>' + esc(c.t) + '</th>'; }).join('') + '<th>Einnahmen gesamt</th><th>Einnahmen je Besucher</th><th></th></tr></thead><tbody>';
     if (!zeilen.length) h += '<tr><td colspan="15" class="leer">Noch keine Spieltage.</td></tr>';
     zeilen.forEach(function (z) {
@@ -3928,16 +3952,6 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         '<td>' + (fest ? '<div class="notiz" style="margin:0">abgeschlossen ' + esc(formatDate(String(fest).slice(0, 10))) + '</div>' :
           '<button type="button" class="link-btn" data-aw-aktion="abschliessen" data-key="' + esc(z.key) + '"' + (AW.speichert === z.key ? ' disabled' : '') + '>' + (AW.speichert === z.key ? 'Schließe ab …' : 'Abschließen') + '</button>' +
           '<div class="notiz" style="margin:0">laufend</div>') + '</td></tr>';
-      // PAYONE-Gutschriften (Tabelle payone_gutschriften): eine Zeile unter dem Spieltag, je Terminal in der passenden Karten-Spalte
-      // (Ticketing -> Abendkasse Karte €, Ausschank -> Ausschank Karte €), Marko 15.10.2026. Nur Zahlen in den Zellen, die Spalten werden nicht breiter.
-      var pay = (z.gespeichert && z.gespeichert.payone) || [];
-      if (pay.length) {
-        var pT = 0, pA = 0;
-        pay.forEach(function (g) { var b = Number(g.betrag) || 0; if (/ausschank/i.test(g.kasse || '')) pA += b; else pT += b; });
-        h += '<tr class="aw-payone"><td title="Von PAYONE gutgeschrieben">PAYONE</td>' + AW_SPALTEN.map(function (c) {
-          return '<td>' + (c.k === 'kasse_ticketing_euro' ? esc(formatEuro(pT)) : (c.k === 'ausschank_euro' ? esc(formatEuro(pA)) : '')) + '</td>';
-        }).join('') + '<td title="PAYONE gesamt gutgeschrieben">' + esc(formatEuro(pT + pA)) + '</td><td></td><td></td></tr>';
-      }
     });
     var t = awSummen();
     if (zeilen.length) {
