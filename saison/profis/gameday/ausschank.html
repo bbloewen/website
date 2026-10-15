@@ -46,10 +46,6 @@
     border-radius: 10px; padding: 10px 12px; }
   .au-receipt[hidden] { display: none !important; }
   .au-receipt { display: flex; flex-direction: column; }
-  .au-reset { margin: 10px 0 6px; padding: 8px 10px; border: 1px solid var(--border-strong, #ccc);
-    border-radius: 8px; background: transparent; color: var(--color-brand-navy, #00122d);
-    font-size: 0.78rem; font-weight: 600; cursor: pointer; width: 100%; }
-  .au-reset:disabled { opacity: .35; cursor: default; }
   .au-diag { display: none; margin-top: auto; position: sticky; bottom: 0; align-self: flex-end;
     width: 32px; height: 32px; padding: 0; border: 0; border-radius: 8px; background: transparent;
     color: var(--text-muted, #666); opacity: .5; cursor: pointer; align-items: center; justify-content: center; }
@@ -122,10 +118,14 @@
     justify-content: space-between; flex-wrap: wrap; gap: 10px 16px; }
   .au-total-label { font-size: 1rem; color: var(--text-muted); }
   .au-total { font-size: 2rem; font-weight: 800; white-space: nowrap; }
-  .au-fertig { font-size: 1.2rem; padding: 16px 24px; white-space: nowrap; }
-  .au-fertig:disabled { opacity: 0.4; }
+  /* Stornieren / Bar / Karte (Marko, 15.10.2026): Bar ist kein verstecktes Langdruck-Feature
+     mehr, sondern ein eigener Knopf; Stornieren verwirft den Warenkorb vor der Zahlung. */
+  .au-actions { display: flex; align-items: center; gap: 12px; }
+  .au-actions .btn { font-size: 1.2rem; padding: 16px 24px; white-space: nowrap; justify-content: center; }
+  .au-actions .btn:disabled { opacity: 0.4; }
+  .au-storno { padding-left: 18px; padding-right: 18px; }
 
-  /* Betrags-Einblendung nach "Jetzt bestellen" (Marko, 01.10.2026): kein voller
+  /* Betrags-Einblendung nach dem Bezahlen (Marko, 01.10.2026): kein voller
      Bildschirm, kein Begleittext - nur der grosse Betrag selbst, ueber den Kacheln und
      dem Kassenzettel schwebend, blendet ueber FERTIG_OVERLAY_MS (Konstante, Marko testet
      die Dauer noch live) wieder aus. Deckt per pointer-events nur waehrend des Sichtbar-
@@ -154,7 +154,6 @@
       <div class="au-receipt-total" id="au-receipt-total" hidden>
         <span>Gesamt</span><span id="au-receipt-total-amount">0,00 €</span>
       </div>
-      <button type="button" class="au-reset" id="au-reset" disabled>Warenkorb zurücksetzen</button>
       <button type="button" class="au-diag" id="au-diag" aria-label="Kassen-Einstellungen"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="7" x2="21" y2="7"/><circle cx="9" cy="7" r="2.2" fill="var(--bg-page,#fff)"/><line x1="3" y1="17" x2="21" y2="17"/><circle cx="15" cy="17" r="2.2" fill="var(--bg-page,#fff)"/></svg></button>
     </div>
   </div>
@@ -165,7 +164,11 @@
         <div class="au-total-label">Gesamt</div>
         <div class="au-total" id="au-total">0,00 €</div>
       </div>
-      <button type="button" class="btn btn-primary au-fertig" id="au-fertig" disabled>Jetzt bestellen</button>
+      <div class="au-actions">
+        <button type="button" class="btn btn-outline-orange au-storno" id="au-storno" disabled>Stornieren</button>
+        <button type="button" class="btn btn-outline-orange" id="au-bar" disabled>Bar</button>
+        <button type="button" class="btn btn-primary" id="au-karte" disabled>Karte</button>
+      </div>
     </div>
   </div>
 </div>
@@ -216,6 +219,7 @@ document.addEventListener('DOMContentLoaded', function () {
     { key: 'tee', name: 'Tee 0,25 l', price: 2.00, pfand: 0, bg: 'hsl(140,30%,72%)' },
     { key: 'brezel', name: 'Butterbrezel', price: 3.50, pfand: 0, bg: 'hsl(35,55%,70%)' },
     { key: 'riegel', name: 'Schokoriegel', price: 2.00, pfand: 0, bg: 'hsl(20,40%,66%)' },
+    { key: 'helfer', name: 'Helfergetränk', price: 0, pfand: 0, bg: 'hsl(165,35%,76%)' },
     { key: 'pfand_rueckgabe', name: 'Pfand zurück', price: -2.00, pfand: 0, bg: 'hsl(0,0%,88%)' }
   ];
 
@@ -253,8 +257,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     var t = total();
     document.getElementById('au-total').textContent = fmtEUR(t);
-    document.getElementById('au-fertig').disabled = !hasItems();
-    document.getElementById('au-reset').disabled = !hasItems();
+    setActionsEnabled();
     renderReceipt(t);
   }
 
@@ -281,6 +284,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }).join('');
     totalEl.hidden = false;
     document.getElementById('au-receipt-total-amount').textContent = fmtEUR(t);
+  }
+
+  // Stornieren/Bar/Karte nur mit Inhalt im Warenkorb und nicht waehrend einer laufenden Zahlung.
+  function setActionsEnabled() {
+    var aus = !hasItems() || zahlungLaeuft;
+    ['au-storno', 'au-bar', 'au-karte'].forEach(function (id) { document.getElementById(id).disabled = aus; });
   }
 
   function add(key) {
@@ -320,7 +329,7 @@ document.addEventListener('DOMContentLoaded', function () {
     grid.appendChild(tile);
   });
 
-  // "Jetzt bestellen" statt "Fertig/Neuer Verkauf" (Marko, 01.10.2026): Das Personal liest
+  // Bezahlen per "Bar"/"Karte" (frueher "Jetzt bestellen", Marko, 01.10.2026): Das Personal liest
   // den Betrag vor und fragt den Kunden, ob er passt - erst NACH dieser muendlichen
   // Bestaetigung wird der Knopf getippt. Technisch bleibt es ein einziger Tap: Protokollierung
   // ist reiner Kassennachweis fuer den spaeteren Kassenschnitt - das Geld fliesst unabhaengig
@@ -364,33 +373,33 @@ document.addEventListener('DOMContentLoaded', function () {
     render();
   }
 
-  // Verstecktes Barzahlen: 2 s auf die Gesamtsumme druecken (nur in der Kassen-App). Wird wie ein
-  // Terminalvorgang protokolliert, aber als "bar" markiert (Kassenabgleich).
-  if (window.OpiBridge && window.OpiBridge.isAvailable()) {
-    var summenBlock = document.getElementById('au-total').parentNode;
-    summenBlock.style.webkitUserSelect = 'none';
-    summenBlock.style.userSelect = 'none';
-    summenBlock.style.webkitTouchCallout = 'none';
-    window.OpiBridge.onLongPress(summenBlock, 2000, function () {
-      if (zahlungLaeuft || !hasItems()) return;
-      var betrag = total();
-      if (Math.abs(betrag) < 0.005) return;
-      var frage = betrag < 0
-        ? 'Barauszahlung: ' + fmtEUR(-betrag) + '\n\nBar ausgezahlt?'
-        : 'Barzahlung: ' + fmtEUR(betrag) + '\n\nBar kassiert?';
-      if (window.confirm(frage)) verkaufAbschliessen({ bar: true, refund: betrag < 0 });
-    });
-  }
-
-  // Schnellster Weg bei Vertippern: alles verwerfen (Marko, 02.10.2026).
-  document.getElementById('au-reset').addEventListener('click', function () {
+  // Stornieren (Marko, 15.10.2026): verwirft den Warenkorb vor der Zahlung.
+  document.getElementById('au-storno').addEventListener('click', function () {
     if (zahlungLaeuft) return;
     counts = {};
     render();
   });
 
-  document.getElementById('au-fertig').addEventListener('click', function () {
+  // Bar und Karte sind eigene Knoepfe (Marko, 15.10.2026, vorher langer Druck auf den Betrag).
+  // Bar: kein Terminalvorgang, wird als "bar" protokolliert (Kassenabgleich); Rueckfrage, damit ein
+  // Fehltipp nicht ungewollt abschliesst. Bei Gesamtbetrag 0 (z. B. nur Helfergetraenk oder Pfand
+  // genau gegen Getraenk) braucht es weder Terminal noch Rueckfrage - beide Knoepfe buchen direkt.
+  function bezahlen(bar) {
     if (zahlungLaeuft || !hasItems()) return;
+    var betrag = total();
+    if (Math.abs(betrag) < 0.005) {
+      verkaufAbschliessen(null);
+      return;
+    }
+    var istGutschrift = betrag < 0;
+
+    if (bar) {
+      var frage = istGutschrift
+        ? 'Barauszahlung: ' + fmtEUR(-betrag) + '\n\nBar ausgezahlt?'
+        : 'Barzahlung: ' + fmtEUR(betrag) + '\n\nBar kassiert?';
+      if (window.confirm(frage)) verkaufAbschliessen({ bar: true, refund: istGutschrift });
+      return;
+    }
 
     // Laeuft die Seite in der nativen Kassen-Bridge-App, wird die Kartenzahlung ZUERST
     // am Terminal ausgeloest - erst nach Freigabe wird der Verkauf protokolliert und
@@ -398,16 +407,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Ablauf (sofort protokollieren) unveraendert.
     if (window.OpiBridge && window.OpiBridge.isAvailable()) {
       zahlungLaeuft = true;
-      document.getElementById('au-fertig').disabled = true;
+      setActionsEnabled();
       // Negativer Gesamtbetrag (nur Pfand zurueck): Gutschrift auf die Karte statt Zahlung.
-      // Gesamtbetrag 0 (z. B. Pfand genau gegen Getraenk): kein Terminalvorgang noetig.
-      var betrag = total();
-      if (Math.abs(betrag) < 0.005) {
-        zahlungLaeuft = false;
-        verkaufAbschliessen(null);
-        return;
-      }
-      var istGutschrift = betrag < 0;
       var vorgang = istGutschrift ? window.OpiBridge.refund(-betrag) : window.OpiBridge.charge(betrag);
       vorgang.then(function (result) {
         zahlungLaeuft = false;
@@ -429,7 +430,10 @@ document.addEventListener('DOMContentLoaded', function () {
     } else {
       verkaufAbschliessen(null);
     }
-  });
+  }
+
+  document.getElementById('au-bar').addEventListener('click', function () { bezahlen(true); });
+  document.getElementById('au-karte').addEventListener('click', function () { bezahlen(false); });
 
   // Zettel-Toggle (Marko, 01.10.2026: "ausblenden, damit die Kacheln noch groesser
   // werden") - Zustand pro Geraet in localStorage gemerkt (reine Anzeige-Bequemlichkeit,

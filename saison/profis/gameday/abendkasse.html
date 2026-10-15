@@ -87,7 +87,12 @@
   .ak-step-count { font-size: 1.4rem; font-weight: 700; min-width: 28px; text-align: center; }
 
   .seatplan-cart-total { font-size: 1.4rem; font-weight: 700; padding: 10px 0; }
-  #seatplan-cta { font-size: 1.3rem; padding: 20px; min-height: 64px; }
+  #seatplan-cta, #ak-bar { font-size: 1.3rem; padding: 20px; min-height: 64px; }
+  /* Karte / Bar nebeneinander, Stornieren darunter (Marko, 15.10.2026). */
+  .ak-pay { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+  .ak-pay .btn { flex: 1 1 0; justify-content: center; }
+  .ak-pay .ak-storno { flex: 1 1 100%; font-size: 1.1rem; padding: 14px; }
+  .ak-pay[hidden], #ak-bar[hidden], #ak-storno[hidden] { display: none !important; }
   /* Die ".btn"-Klasse aus site.css setzt display explizit (inline-flex o.ae.) - das
      sticht die Browser-Vorgabe fuer [hidden] (sehr niedrige Spezifitaet), der Knopf
      bliebe sonst trotz hidden sichtbar. */
@@ -97,7 +102,6 @@
   .ak-status.ak-status-ok { display: block; background: #e3f3ea; color: #1f6a43; }
   .ak-status.ak-status-error { display: block; background: #fbeaea; color: #a32d2d; }
   .ak-status.ak-status-busy { display: block; background: #ececec; color: #333; }
-  #ak-gesamt { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
   .ak-diag-row { display: flex; justify-content: flex-end; margin-top: 8px; }
   .ak-diag { display: none; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 8px;
     background: transparent; color: #666; opacity: .5; cursor: pointer; align-items: center; justify-content: center; }
@@ -166,10 +170,15 @@
 
   <div id="seatplan-cart"></div>
   <div class="seatplan-cart-total" id="ak-gesamt" hidden><span>Gesamt</span><span id="seatplan-total">0,00 €</span></div>
-  <button class="btn btn-primary" id="seatplan-cta" style="width:100%;justify-content:center" disabled hidden>Jetzt bestellen</button>
+  <div class="ak-pay" id="ak-pay">
+    <button class="btn btn-primary" id="seatplan-cta" disabled hidden>Karte</button>
+    <button class="btn btn-outline-orange" id="ak-bar" disabled hidden>Bar</button>
+    <button class="btn btn-outline-orange ak-storno" id="ak-storno" hidden>Stornieren</button>
+  </div>
   <div id="seatplan-occupancy"></div>
 
   <div class="ak-status" id="ak-status"></div>
+  <button class="btn btn-primary ak-naechster" id="ak-erneut">Ticket erneut anlegen</button>
   <button class="btn btn-outline-orange ak-naechster" id="ak-naechster">Nächster Verkauf</button>
   <div class="ak-diag-row"><button type="button" class="ak-diag" id="ak-diag" aria-label="Kassen-Einstellungen"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="7" x2="21" y2="7"/><circle cx="9" cy="7" r="2.2" fill="var(--bg-page,#fff)"/><line x1="3" y1="17" x2="21" y2="17"/><circle cx="15" cy="17" r="2.2" fill="var(--bg-page,#fff)"/></svg></button></div>
 </div>
@@ -511,6 +520,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('ak-status').className = 'ak-status';
     document.getElementById('ak-naechster').style.display = 'none';
     document.getElementById('ak-naechster').textContent = 'Nächster Verkauf';
+    document.getElementById('ak-erneut').style.display = 'none';
     document.getElementById('ak-tarif-panels').innerHTML = '';
     document.getElementById('ak-blockwahl').classList.remove('ak-hidden');
 
@@ -572,9 +582,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
   var bestellLaeuft = false;
   var naechsterEl = document.getElementById('ak-naechster');
+  var erneutEl = document.getElementById('ak-erneut');
+  var ctaEl = document.getElementById('seatplan-cta');
+  var barEl = document.getElementById('ak-bar');
+  var stornoEl = document.getElementById('ak-storno');
 
-  // bar = Barzahlung (langer Druck auf die Gesamtsumme, nur in der Kassen-App): kein Terminalvorgang,
-  // Ticket wird sofort angelegt und gedruckt, die Order bekommt den Kommentar BARZAHLUNG.
+  // Der Seat-Picker steuert nur #seatplan-cta (= "Karte": disabled/hidden). Bar und Stornieren
+  // ziehen nach; Stornieren verschwindet, sobald ein Verkauf laeuft (Marko, 15.10.2026).
+  function syncPay() {
+    barEl.hidden = ctaEl.hidden;
+    barEl.disabled = ctaEl.disabled;
+    stornoEl.hidden = ctaEl.hidden || bestellLaeuft;
+  }
+  new MutationObserver(syncPay).observe(ctaEl, { attributes: true, attributeFilter: ['disabled', 'hidden'] });
+
+  // bar = Barzahlung (eigener Knopf "Bar"): kein Terminalvorgang, Ticket wird sofort angelegt und
+  // gedruckt, die Order bekommt den Kommentar BARZAHLUNG. Kartenzahlung in der Kassen-App: ERST
+  // bezahlen, DANN Bestellung anlegen und drucken (Marko, 15.10.2026) - so entsteht bei einer
+  // gescheiterten Zahlung weder ein Ticket noch eine Geisterbestellung in pretix.
   function startVerkauf(bar) {
     if (bestellLaeuft) return;
     var summary = picker.getSummary();
@@ -582,11 +607,11 @@ document.addEventListener('DOMContentLoaded', function () {
     bestellLaeuft = true;
 
     var statusEl = document.getElementById('ak-status');
-    statusEl.className = 'ak-status ak-status-busy';
-    statusEl.textContent = 'Ticket wird angelegt …';
-    document.getElementById('seatplan-cta').disabled = true;
+    ctaEl.disabled = true;
+    syncPay();
     naechsterEl.style.display = 'none';
     naechsterEl.textContent = 'Nächster Verkauf';
+    erneutEl.style.display = 'none';
 
     var cart = {
       productType: 'abendkasse',
@@ -611,12 +636,9 @@ document.addEventListener('DOMContentLoaded', function () {
       newsletter: false, webseite: ''
     };
 
-    // Zahlung und Bestellung/Druck laufen parallel (Marko, 02.10.2026): das Ticket wird
-    // angelegt und gedruckt, ohne auf das Terminal zu warten - auch wenn die Zahlung
-    // scheitert. Deshalb hier zwei getrennte Zustaende und eine gemeinsame Anzeige.
     var inApp = !!(window.OpiBridge && window.OpiBridge.isAvailable());
     var pay = { state: bar ? 'bar' : (inApp ? 'offen' : 'keine'), message: '', unklar: false };   // offen | ok | fehler | keine | bar
-    var order = { state: 'offen', message: '', paid: false };                     // offen | ok | fehler
+    var order = { state: pay.state === 'offen' ? 'wartet' : 'offen', message: '', paid: false };  // wartet | offen | ok | fehler
 
     function zeigeStatus() {
       var payOffen = pay.state === 'offen';
@@ -624,23 +646,19 @@ document.addEventListener('DOMContentLoaded', function () {
       var cls = 'ak-status ak-status-error';
       var text;
       if (pay.state === 'fehler') {
-        text = 'Zahlung fehlgeschlagen: ' + pay.message + ' — Ticket NICHT aushändigen!' +
-          (order.state === 'ok' ? ' (Das Ticket wurde trotzdem angelegt und gedruckt.)'
-            : orderOffen ? ' Ticket wird noch angelegt …'
-            : ' Es wurde kein Ticket angelegt.');
+        text = pay.unklar
+          ? 'Zahlungsstatus unklar: ' + pay.message + ' — NICHT erneut kassieren, Beleg am Terminal bzw. in den Einstellungen prüfen. Es wurde kein Ticket angelegt.'
+          : 'Zahlung fehlgeschlagen: ' + pay.message + ' — es wurde kein Ticket angelegt.';
       } else if (order.state === 'fehler') {
-        if (pay.state === 'ok') {
-          text = 'Zahlung erfolgt, aber das Ticket konnte nicht angelegt werden: ' + order.message +
-            ' — NICHT erneut kassieren, Ticket manuell anlegen.';
-        } else if (payOffen) {
-          text = 'Ticket konnte nicht angelegt werden: ' + order.message + ' — Zahlung am Terminal läuft noch …';
-        } else {
-          text = 'Fehlgeschlagen: ' + order.message + (order.paid ? '' : ' — bitte erneut versuchen.');
-        }
+        text = pay.state === 'ok'
+          ? 'Zahlung erfolgt, aber das Ticket konnte nicht angelegt werden: ' + order.message +
+            (order.paid ? ' — NICHT erneut kassieren, Ticket manuell anlegen.' : ' — NICHT erneut kassieren, „Ticket erneut anlegen“ tippen.')
+          : 'Fehlgeschlagen: ' + order.message + (order.paid ? '' : ' — bitte erneut versuchen.');
       } else if (payOffen || orderOffen) {
         cls = 'ak-status ak-status-busy';
-        text = (payOffen ? 'Zahlung am Terminal …' : (bar ? 'Barzahlung.' : 'Zahlung bestätigt.')) + ' ' +
-          (orderOffen ? 'Ticket wird angelegt …' : 'Ticket wird gedruckt.');
+        text = payOffen
+          ? 'Zahlung am Terminal … Das Ticket wird erst nach bestätigter Zahlung angelegt und gedruckt.'
+          : (bar ? 'Barzahlung. ' : inApp ? 'Zahlung bestätigt. ' : '') + 'Ticket wird angelegt …';
       } else {
         cls = 'ak-status ak-status-ok';
         text = bar
@@ -654,24 +672,36 @@ document.addEventListener('DOMContentLoaded', function () {
       statusEl.textContent = text;
       if (payOffen || orderOffen) return;
 
-      // Beides abgeschlossen. Nur wenn weder bezahlt noch bestellt wurde (oder der
-      // Zahlungsstatus geklaert ist), darf dieselbe Bestellung erneut versucht werden.
-      var nichtPassiert = order.state === 'fehler' && !order.paid &&
-        (pay.state === 'keine' || pay.state === 'bar' || (pay.state === 'fehler' && !pay.unklar));
+      // Vorgang abgeschlossen. Nur wenn nichts bezahlt wurde und der Zahlungsstatus geklaert ist,
+      // darf derselbe Warenkorb erneut versucht werden.
+      var nichtPassiert = (pay.state === 'fehler' && !pay.unklar) ||
+        (order.state === 'fehler' && !order.paid && (pay.state === 'keine' || pay.state === 'bar'));
       if (nichtPassiert) {
-        document.getElementById('seatplan-cta').disabled = false;
+        ctaEl.disabled = false;
         bestellLaeuft = false;
+        syncPay();
         naechsterEl.textContent = 'Abbrechen – neuer Verkauf';
       } else {
         naechsterEl.textContent = 'Nächster Verkauf';
       }
+      // Bezahlt, aber Bestellung gescheitert (nichts angelegt): Anlegen darf wiederholt werden,
+      // ohne erneut zu kassieren.
+      erneutEl.style.display = (order.state === 'fehler' && !order.paid && pay.state === 'ok') ? 'block' : 'none';
       naechsterEl.style.display = 'block';
     }
 
+    erneutEl.onclick = function () {
+      erneutEl.style.display = 'none';
+      naechsterEl.style.display = 'none';
+      order.state = 'offen';
+      order.message = '';
+      zeigeStatus();
+      bestellungAnlegen();
+    };
+
     // Antwort ist entweder ein rohes PDF (Erfolg) oder JSON {ok:false, error, paid?}
     // (Fehler) - paid:true bedeutet, die Bestellung ist bereits erfasst (Order angelegt +
-    // bezahlt markiert), nur der PDF-Abruf ist gescheitert. In diesem Fall NICHT den
-    // "Jetzt bestellen"-Knopf fuer denselben Warenkorb wieder freigeben.
+    // bezahlt markiert), nur der PDF-Abruf ist gescheitert. In diesem Fall NICHT erneut anlegen.
     function bestellungAnlegen() {
       fetch('https://ticketing.basketball-loewen.com/webhook/abendkasse-bestellung', {
         method: 'POST',
@@ -715,31 +745,38 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     zeigeStatus();
-    bestellungAnlegen();
     if (inApp && !bar) {
-      window.OpiBridge.charge(summary.total).then(function (result) {
+      window.OpiBridge.charge(summary.total).then(function () {
         pay.state = 'ok';
+        order.state = 'offen';
         zeigeStatus();
+        bestellungAnlegen();
       }).catch(function (err) {
         pay.state = 'fehler';
         pay.message = err.message;
         pay.unklar = !!(err.terminal && err.terminal.unknown);
         zeigeStatus();
       });
+    } else {
+      bestellungAnlegen();
     }
   }
 
-  document.getElementById('seatplan-cta').addEventListener('click', function () { startVerkauf(false); });
+  ctaEl.addEventListener('click', function () { startVerkauf(false); });
 
-  // Verstecktes Barzahlen: 2 s auf die Gesamtsumme druecken (nur in der Kassen-App).
-  if (window.OpiBridge && window.OpiBridge.isAvailable()) {
-    window.OpiBridge.onLongPress(document.getElementById('ak-gesamt'), 2000, function () {
-      if (bestellLaeuft || !picker) return;
-      var summary = picker.getSummary();
-      if (!summary.lines.length) return;
-      if (window.confirm('Barzahlung: ' + fmtEUR(summary.total) + ' €\n\nBar kassiert? Das Ticket wird angelegt und gedruckt.')) startVerkauf(true);
-    });
-  }
+  // Bar: eigener Knopf; die Rueckfrage bleibt, damit ein Fehltipp nicht ohne Zahlung ein Ticket druckt.
+  barEl.addEventListener('click', function () {
+    if (bestellLaeuft || !picker) return;
+    var summary = picker.getSummary();
+    if (!summary.lines.length) return;
+    if (window.confirm('Barzahlung: ' + fmtEUR(summary.total) + ' €\n\nBar kassiert? Das Ticket wird angelegt und gedruckt.')) startVerkauf(true);
+  });
+
+  // Stornieren: Auswahl verwerfen und von vorn beginnen (nur vor der Zahlung sichtbar).
+  stornoEl.addEventListener('click', function () {
+    if (bestellLaeuft) return;
+    initPicker(currentGame);
+  });
 
   document.getElementById('ak-naechster').addEventListener('click', function () {
     bestellLaeuft = false;
