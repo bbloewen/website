@@ -3290,8 +3290,21 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   }
   // Zu buchen: freigegebene Rückfragen. Vorschau zeigt, was in BuchhaltungsButler passieren würde, Buchen führt es nach Bestätigung aus.
   function rfZuBuchen(alle) { return alle.filter(function (r) { return (r.status === 'bestaetigt' || r.status === 'korrigiert') && !r.gebucht_am && r.beleg_id; }); }
+  // Kreditorenliste je Mandant aus BuchhaltungsButler, für "Kreditor wählen" in der Buchungsvorschau
+  RF.kred = RF.kred || {};
+  async function ladeKreditoren(m) {
+    if (RF.kred[m]) return;
+    try {
+      var res = await fetch('/webhook/accounting/kreditoren?mandant=' + m);
+      var d = await res.json();
+      RF.kred[m] = d.kreditoren || [];
+      if (RF.buch) renderRF();
+    } catch (e) { RF.kred[m] = []; }
+  }
   async function buchVorschau(id, modus) {
     RF.buch = { id: id, modus: modus, laedt: true, vorschau: null, fehler: '', laeuft: false, ergebnis: null }; renderRF();
+    var rfr = RF.daten && RF.daten.rueckfragen ? RF.daten.rueckfragen.filter(function (x) { return x.id === id; })[0] : null;
+    if (rfr) ladeKreditoren(rfr.mandant);
     try {
       var res = await fetch('/webhook/accounting/beleg-vorschau?id=' + id);
       var d = await res.json();
@@ -3327,6 +3340,10 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         ((x.zahlungen || []).length ? '<li>Zahlung neu zuordnen und ausgleichen: ' + x.zahlungen.map(function (z) { return esc(formatDate(String(z.datum).slice(0, 10)) + ' ' + formatEuro(Number(z.betrag)) + ' ' + (z.gegenpartei || '')); }).join('; ') + '</li>' : '<li class="gedaempft">Keine Zahlung bisher zugeordnet.</li>') + '</ol>';
       (v.hinweise || []).forEach(function (t) { h += '<div class="hinweis-warn" style="margin-top:6px">' + esc(t) + '</div>'; });
       if ((v.probleme || []).length) h += '<div class="fehlerbox" role="alert" style="margin-top:6px"><b>Noch nicht buchbar:</b><ul style="margin:4px 0 0 18px;padding:0">' + v.probleme.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div>';
+    }
+    if (v && v.vorschau) {
+      var kl = RF.kred && RF.kred[v.vorschau.mandant];
+      h += '<div style="margin-top:8px"><label class="text-klein" for="kred-' + r.id + '">Anderer Kreditor? Name oder Nummer wählen</label><div style="display:flex;gap:8px;margin-top:2px;flex-wrap:wrap"><input id="kred-' + r.id + '" class="eingabe-klein" style="flex:1 1 260px" list="kredliste-' + r.id + '" placeholder="' + (kl ? 'Suchen in ' + kl.length + ' Kreditoren …' : 'Kreditoren werden geladen …') + '" data-rf="kred-feld"><datalist id="kredliste-' + r.id + '">' + (kl || []).map(function (k) { return '<option value="' + esc(k.nr + ' ' + k.name) + '"></option>'; }).join('') + '</datalist><button type="button" class="btn btn-secondary" data-rf="kred-speichern" data-id="' + r.id + '">Kreditor übernehmen</button></div></div>';
     }
     h += '<div style="display:flex;gap:8px;margin-top:8px;align-items:center">' +
       (b.modus === 'buchen' && v && v.ok ? '<button type="button" class="btn btn-primary" data-rf="buch-ja" data-id="' + r.id + '"' + (b.laeuft ? ' disabled' : '') + '>' + (b.laeuft ? 'Buche …' : 'Ja, jetzt hochladen und buchen') + '</button>' : '') +
@@ -3513,6 +3530,16 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         await ladeRF();
       }
       else if (w === 'buch-vorschau') buchVorschau(id, 'vorschau');
+      else if (w === 'kred-speichern') {
+        var inp = document.getElementById('kred-' + id); var m2 = inp ? /^\s*([0-9]{5,6})/.exec(inp.value) : null;
+        if (!m2) { RF.buch.fehler = 'Bitte einen Kreditor aus der Liste wählen (mit Nummer).'; renderRF(); return; }
+        try {
+          var rk = await fetch('/webhook/accounting/rueckfrage-kreditor', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, kreditor: m2[1] }) });
+          var dk = await rk.json();
+          if (!rk.ok || !dk.ok) { RF.buch.fehler = dk.meldung || 'Speichern fehlgeschlagen'; renderRF(); return; }
+          buchVorschau(id, RF.buch.modus || 'vorschau');
+        } catch (ek) { RF.buch.fehler = ek.message; renderRF(); }
+      }
       else if (w === 'buch-pruefen') buchVorschau(id, 'buchen');
       else if (w === 'buch-zu') { RF.buch = null; renderRF(); }
       else if (w === 'buch-ja') { if (window.confirm('Jetzt in BuchhaltungsButler hochladen und buchen? Das schreibt echte Buchungen.')) buchAusfuehren(id); }
