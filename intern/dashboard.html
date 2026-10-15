@@ -3291,7 +3291,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (ed && ed.modus === 'anders') {
       var dlg = (v.dialog || []).slice(-6);
       h += '<div class="rf-box" style="margin-top:8px"><div class="text-klein"><b>Mit der KI besprechen</b>: Stell eine Frage oder sag, was geändert werden soll (Kreditor, Konto, Kostenstelle, Umsatzsteuer). Die KI kennt den Beleg und antwortet hier.</div>' +
-        (dlg.length ? '<div role="log" aria-label="Gespräch mit der KI" style="margin-top:8px;display:flex;flex-direction:column;gap:6px">' + dlg.map(function (m) { return '<div style="' + (m.von === 'marko' ? 'align-self:flex-end;background:var(--bg-subtle)' : 'align-self:flex-start;border:1px solid var(--border-strong)') + ';border-radius:10px;padding:6px 10px;max-width:92%;white-space:pre-wrap"><span class="notiz" style="display:block;margin:0">' + (m.von === 'marko' ? 'Du' : 'KI' + (m.aenderung ? ' · hat den Vorschlag geändert' : '')) + '</span>' + esc(m.text) + '</div>'; }).join('') + '</div>' : '') +
+        (dlg.length ? '<div role="log" aria-label="Gespräch mit der KI" style="margin-top:8px;display:flex;flex-direction:column;gap:6px">' + dlg.map(function (m) { return '<div style="' + (m.von === 'marko' ? 'align-self:flex-end;background:var(--bg-subtle)' : 'align-self:flex-start;border:1px solid var(--border-strong)') + ';border-radius:10px;padding:6px 10px;max-width:92%;white-space:pre-wrap"><span class="notiz" style="display:block;margin:0">' + (m.von === 'marko' ? 'Du' : 'KI' + (m.aenderung ? ' · hat den Vorschlag geändert' : '')) + '</span>' + esc(m.text) + (m.regel ? '<div class="notiz" style="margin:6px 0 0;white-space:normal"><b>Im Kontenplan gespeichert:</b> ' + esc(m.regel) + ' <button type="button" class="link-btn" data-rf="regel-zurueck" data-id="' + r.id + '">Rückgängig</button></div>' : '') + (m.regelFehler ? '<div class="notiz" style="margin:6px 0 0;white-space:normal"><b>Regel nicht gespeichert:</b> ' + esc(m.regelFehler) + '</div>' : '') + '</div>'; }).join('') + '</div>' : '') +
         '<label class="text-klein" for="rf-text-' + r.id + '" style="display:block;margin-top:8px">Deine Nachricht</label>' +
         '<textarea id="rf-text-' + r.id + '" class="eingabe" rows="3" style="width:100%;margin-top:4px" maxlength="2000" data-rf="text" placeholder="z. B. Welches Konto ist 49450? oder Das ist eine Auslage von André, Konto Fahrtkosten, 7 % Umsatzsteuer"' + (ed.laeuft ? ' disabled' : '') + '>' + esc(ed.text || '') + '</textarea>' +
         (function () { var n = rfAehnliche(r).length; return n ? '<label class="text-klein" style="display:block;margin-top:8px"><input type="checkbox" data-rf="weitere"' + (ed.weitere ? ' checked' : '') + (ed.laeuft ? ' disabled' : '') + '> Änderungen auch bei den ' + n + ' anderen offenen ' + (r.auslage_von ? 'Auslagen von ' + esc(r.auslage_von) : 'Belegen von ' + esc(r.aussteller)) + ' anwenden (die KI prüft jeden Beleg einzeln und lässt aus, was nicht passt)</label>' : ''; })() +
@@ -3642,6 +3642,15 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         } catch (el) { RF.laeuftAntwort = false; RF.meldung = 'Fehler: ' + el.message; renderRF(); }
       }
       else if (w === 'bt-edit') { var rb = RF.daten.rueckfragen.filter(function (x) { return x.id === id; })[0]; RF.meldung = ''; RF.bt = { id: id, wert: rb.buchungstext_zweck || rb.rf_zweck || rb.regel_zweck || '', standard: false, laeuft: false, fehler: '' }; renderRF(); var bi = document.getElementById('rf-bt-' + id); if (bi) bi.focus(); }
+      else if (w === 'regel-zurueck') {
+        if (!window.confirm('Die letzte Änderung im Kontenplan zu dieser Rückfrage zurücknehmen?')) return;
+        try {
+          var resR = await fetch('/webhook/accounting/kontenplan-rueckgaengig', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ rueckfrage: id }) });
+          var dR = await resR.json().catch(function () { return {}; });
+          RF.meldung = dR.ok ? dR.meldung : (dR.meldung || dR.message || 'Zurücknehmen fehlgeschlagen');
+        } catch (eR) { RF.meldung = 'Fehler: ' + eR.message; }
+        renderRF();
+      }
       else if (w === 'bt-abbruch') { RF.bt = null; renderRF(); }
       else if (w === 'bt-ja') {
         var rb2 = RF.daten.rueckfragen.filter(function (x) { return x.id === id; })[0], bt = RF.bt;
