@@ -817,7 +817,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
     { id: 'segmentierung', name: 'Segmentierung', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
-    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'rueckfragen', name: 'Rückfragen' }, { id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlung XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung LEV Löwenpark' }, { id: 'ueberweisungen', name: 'Überweisungen' }, { id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }, { id: 'kreditoren', name: 'Kreditoren' }, { id: 'vorschuesse', name: 'Vorschüsse' }] },
+    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'rueckfragen', name: 'Rückfragen' }, { id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlung XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung LEV Löwenpark' }, { id: 'ueberweisungen', name: 'Überweisungen' }, { id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }, { id: 'kreditoren', name: 'Kreditoren / Debitoren' }, { id: 'vorschuesse', name: 'Vorschüsse' }] },
     { id: 'auslagen', name: 'Auslagen', tabs: [{ id: 'auslage-neu', name: 'Auslage einreichen' }, { id: 'vorschuss-neu', name: 'Vorschuss beantragen' }] }
   ];
   var TABS = [];
@@ -2888,8 +2888,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var v = b.bhb_vergleich;
     if (!v || b.status !== 'erkannt') return '';
     if (v.status === 'uebereinstimmend') return '<div class="gedaempft text-klein">Werte stimmen mit BHB überein</div>';
-    if (v.status === 'ohne_nummer') return '<div class="gedaempft text-klein">ohne Nummer nicht mit BHB vergleichbar</div>';
-    if (v.status === 'nicht_in_bhb') return '<div class="hinweis-warn">noch nicht in BHB</div>';
+    // "noch nicht in BHB" und "ohne Nummer" zeigen wir nicht mehr: Belege werden aus dem Dashboard übertragen, das steht schon im Status (Bereit zu buchen / Gebucht). Nur echte Abweichungen bleiben sichtbar.
+    if (v.status === 'ohne_nummer' || v.status === 'nicht_in_bhb') return '';
     var diffs = (v.diffs || []).map(function (d) { return esc(d.feld) + ': Agent ' + esc(d.agent) + ', BHB ' + esc(d.bhb); }).join('<br>');
     return '<div class="hinweis-warn">' + (v.status === 'mehrdeutig' ? 'BHB mehrdeutig' : 'BHB weicht ab') + '</div>' + (diffs ? '<div class="notiz" style="margin:2px 0 0">' + diffs + '</div>' : '');
   }
@@ -5022,7 +5022,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   }
 
   // ---------- Kreditoren: Gesamtliste mit Volumen seit 01.07., Doppelten, Zahlweg und Export ----------
-  var KR = { daten: null, fehler: null, laedt: false, mandant: 'alle', nurDoppelt: false, nurVolumen: false, suche: '', sort: { key: 'name', dir: 1 }, meldung: '', fehlerAktion: '' };
+  var KR = { edit: null, sperr: null, art: 'kreditor', daten: null, fehler: null, laedt: false, mandant: 'alle', nurDoppelt: false, nurVolumen: false, suche: '', sort: { key: 'name', dir: 1 }, meldung: '', fehlerAktion: '' };
   var KR_WEG = { lastschrift: 'Lastschrift', ueberweisung: 'Überweisung' };
   async function ladeKR() {
     KR.laedt = true; KR.fehler = null; renderKR();
@@ -5036,6 +5036,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   function krNorm(t) { return String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
   function krListe() {
     var l = (KR.daten ? KR.daten.kreditoren : []).filter(function (k) {
+      if ((k.art || 'kreditor') !== KR.art) return false;
       if (KR.mandant !== 'alle' && k.mandant !== KR.mandant) return false;
       if (KR.nurDoppelt && !k.doppelt) return false;
       if (KR.nurVolumen && !k.belege) return false;
@@ -5055,9 +5056,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   function krCsv(l) {
     var q = function (v) { v = String(v === null || v === undefined ? '' : v); return /[;"\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
     var z = function (n) { return Number(n).toFixed(2).replace('.', ','); };
-    var kopf = ['Mandant', 'Kreditor-Nr', 'Name', 'Strasse', 'PLZ', 'Ort', 'Land', 'USt-IdNr', 'IBAN', 'BIC', 'Zahlweg', 'Belege seit 01.07.2026', 'Volumen seit 01.07.2026 EUR', 'Letzter Beleg', 'Moegliche Doppelte'];
+    var kopf = ['Art', 'Mandant', 'Kreditor-Nr', 'Name', 'Strasse', 'PLZ', 'Ort', 'Land', 'USt-IdNr', 'IBAN', 'BIC', 'Zahlweg', 'Belege seit 01.07.2026', 'Volumen seit 01.07.2026 EUR', 'Letzter Beleg', 'Moegliche Doppelte'];
     var zeilen = [kopf.join(';')];
-    l.forEach(function (k) { zeilen.push([k.mandant, k.nr, k.name, k.strasse, k.plz, k.ort, k.land, k.ustid, k.iban, k.bic, KR_WEG[k.zahlweg] || '', k.belege, z(k.summe), k.letzter ? formatDate(k.letzter) : '', (k.doppelt || []).join(' / ')].map(q).join(';')); });
+    l.forEach(function (k) { zeilen.push([(k.art || 'kreditor') === 'debitor' ? 'Debitor' : 'Kreditor', k.mandant, k.nr, k.name, k.strasse, k.plz, k.ort, k.land, k.ustid, k.iban, k.bic, KR_WEG[k.zahlweg] || '', k.belege, z(k.summe), k.letzter ? formatDate(k.letzter) : '', (k.doppelt || []).join(' / ')].map(q).join(';')); });
     return '﻿' + zeilen.join('\r\n') + '\r\n';
   }
   function krExport() {
@@ -5084,17 +5085,48 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var m = KR.daten.kreditoren.filter(function (x) { return x.gruppe === k.gruppe && x.mandant === k.mandant && !x.gesperrt; }).sort(function (a, b) { return b.belege - a.belege; });
     return m.length === 1 ? m[0] : (m.length > 1 && m[0].belege > m[1].belege ? m[0] : null);
   }
-  async function krSperre(mandant, nr, ersetzt) {
+  function krKurz(m, nr) { var x = KR.daten.kreditoren.filter(function (y) { return y.mandant === m && y.nr === nr && (y.art || 'kreditor') === 'kreditor'; })[0]; return x ? x.nr + ' ' + x.name : nr; }
+  async function krSperre(mandant, nr, ersetzt, aufheben) {
     var k = KR.daten.kreditoren.filter(function (x) { return x.mandant === mandant && x.nr === nr; })[0]; if (!k) return false;
     var altG = k.gesperrt, altE = k.ersetzt; KR.meldung = ''; KR.fehlerAktion = '';
     try {
-      var res = await fetch('/webhook/accounting/kreditor-sperre', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: mandant, nr: nr, ersetzt_durch: ersetzt }) });
+      var res = await fetch('/webhook/accounting/kreditor-sperre', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: mandant, nr: nr, aktion: aufheben ? 'aufheben' : 'sperren', ersetzt_durch: aufheben ? '' : (ersetzt || '') }) });
       var d = await res.json().catch(function () { return {}; });
       if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Speichern fehlgeschlagen');
-      k.gesperrt = !!ersetzt; k.ersetzt = ersetzt || '';
-      KR.meldung = ersetzt ? k.name + ' (' + nr + ') ist gesperrt, es wird ' + ersetzt + ' verwendet.' : 'Sperre für ' + nr + ' aufgehoben.';
+      k.gesperrt = !aufheben; k.ersetzt = aufheben ? '' : (ersetzt || '');
+      KR.meldung = aufheben ? 'Sperre für ' + nr + ' aufgehoben.' : k.name + ' (' + nr + ') ist gesperrt' + (ersetzt ? ', es wird ' + krKurz(mandant, ersetzt) + ' verwendet.' : ', ohne Ersatz.');
       return true;
     } catch (e) { k.gesperrt = altG; k.ersetzt = altE; KR.fehlerAktion = e.message; return false; }
+  }
+  async function krSpeichern() {
+    var e = KR.edit; if (!e || e.laeuft) return;
+    var k = KR.daten.kreditoren.filter(function (x) { return x.mandant === e.m && x.nr === e.nr; })[0]; if (!k) return;
+    var name = String(e.name || '').replace(/\s+/g, ' ').trim(), iban = String(e.iban || '').replace(/\s+/g, '').toUpperCase();
+    var body = { mandant: e.m, nr: e.nr };
+    if (name && name !== k.name) body.name = name;
+    if (iban && iban !== k.iban) body.iban = iban;
+    if (!body.name && !body.iban) { KR.edit = null; renderKR(); return; }
+    e.laeuft = true; e.fehler = ''; renderKR();
+    try {
+      var res = await fetch('/webhook/accounting/kreditor-aendern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      var d = await res.json().catch(function () { return {}; });
+      if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Speichern fehlgeschlagen');
+      k.name = d.name || k.name; k.iban = d.iban || k.iban; if (d.bic) k.bic = d.bic;
+      KR.edit = null; KR.meldung = 'In BuchhaltungsButler gespeichert: ' + k.nr + ' ' + k.name + (k.iban ? ', IBAN ' + k.iban.replace(/(.{4})/g, '$1 ').trim() : '') + '.'; KR.fehlerAktion = '';
+    } catch (er) { e.laeuft = false; e.fehler = er.message; }
+    renderKR();
+  }
+  async function krErsatzSpeichern() {
+    var e = KR.sperr; if (!e || e.laeuft) return;
+    var eingabe = String(e.ers || '').trim(), kand = KR.daten.kreditoren.filter(function (x) { return (x.art || 'kreditor') === 'kreditor' && x.mandant === e.m && !x.gesperrt && x.nr !== e.nr; }), ers = '';
+    if (eingabe) {
+      if (/^[0-9]{5,6}$/.test(eingabe)) ers = eingabe; else { var q = krNorm(eingabe), tr = kand.filter(function (x) { return krNorm(x.name) === q; }); if (!tr.length) tr = kand.filter(function (x) { return krNorm(x.name).indexOf(q) >= 0; }); if (tr.length === 1) ers = tr[0].nr; }
+      if (!ers || !kand.some(function (x) { return x.nr === ers; })) { e.fehler = 'Bitte einen vorhandenen, nicht gesperrten Kreditor wählen (Nummer oder eindeutiger Name) oder das Feld leer lassen.'; renderKR(); return; }
+    }
+    e.laeuft = true; e.fehler = ''; renderKR();
+    var ok = await krSperre(e.m, e.nr, ers);
+    if (ok) KR.sperr = null; else { e.laeuft = false; e.fehler = KR.fehlerAktion || 'Das hat nicht geklappt.'; KR.fehlerAktion = ''; }
+    renderKR();
   }
   async function krBereinigen() {
     var todo = KR.daten.kreditoren.filter(function (k) { return k.doppelt && !k.gesperrt && krBester(k) && krBester(k) !== k; });
@@ -5109,48 +5141,66 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (KR.laedt && !KR.daten) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
     if (KR.fehler && !KR.daten) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(KR.fehler) + '</div>'; return; }
     if (!KR.daten) { el.innerHTML = ''; return; }
-    var alle = KR.daten.kreditoren, l = krListe();
+    var alle = KR.daten.kreditoren.filter(function (k) { return (k.art || 'kreditor') === KR.art; }), l = krListe(), bez = KR.art === 'debitor' ? 'Debitoren' : 'Kreditoren';
     var nDopp = alle.filter(function (k) { return k.doppelt && (KR.mandant === 'alle' || k.mandant === KR.mandant); }).length;
     var chip = function (m, t) { var n = alle.filter(function (k) { return m === 'alle' || k.mandant === m; }).length; return '<button type="button" class="chip' + (KR.mandant === m ? ' aktiv' : '') + '" data-kr="mandant" data-m="' + m + '" aria-pressed="' + (KR.mandant === m) + '">' + t + ' <span class="notiz" style="display:inline;margin:0">' + esc(zahl(n)) + '</span></button>'; };
     var th = function (key, text, rechts) { var a = KR.sort.key === key; return '<th' + (rechts ? ' class="rechts"' : '') + ' aria-sort="' + (a ? (KR.sort.dir > 0 ? 'ascending' : 'descending') : 'none') + '"><button type="button" class="link-btn" style="font-weight:600" data-kr="sort" data-key="' + key + '">' + esc(text) + (a ? (KR.sort.dir > 0 ? ' ▲' : ' ▼') : '') + '</button></th>'; };
     var suchFokus = document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute('data-kr') === 'suche', pos = suchFokus ? document.activeElement.selectionStart : 0;
-    var h = '<div class="stapel"><nav class="chips" aria-label="Mandant"><span class="notiz chips-label">Mandant</span>' + chip('alle', 'Alle') + chip('XXL', 'XXL') + chip('LEV', 'LEV') + '</nav>' +
-      '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Kreditoren · ' + esc(zahl(l.length)) + ' von ' + esc(zahl(alle.length)) + '</span><span>' +
-      '<input type="search" class="eingabe-klein" style="width:200px;flex:none" data-kr="suche" placeholder="Suchen …" aria-label="Kreditoren suchen" value="' + esc(KR.suche) + '"> ' +
+    var chipArt = function (a, t) { var n = KR.daten.kreditoren.filter(function (k) { return (k.art || 'kreditor') === a; }).length; return '<button type="button" class="chip' + (KR.art === a ? ' aktiv' : '') + '" data-kr="art" data-a="' + a + '" aria-pressed="' + (KR.art === a) + '">' + t + ' <span class="notiz" style="display:inline;margin:0">' + esc(zahl(n)) + '</span></button>'; };
+    var h = '<div class="stapel"><nav class="chips" aria-label="Art"><span class="notiz chips-label">Art</span>' + chipArt('kreditor', 'Kreditoren') + chipArt('debitor', 'Debitoren') + '</nav><nav class="chips" aria-label="Mandant"><span class="notiz chips-label">Mandant</span>' + chip('alle', 'Alle') + chip('XXL', 'XXL') + chip('LEV', 'LEV') + '</nav>' +
+      '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>' + bez + ' · ' + esc(zahl(l.length)) + ' von ' + esc(zahl(alle.length)) + '</span><span>' +
+      '<input type="search" class="eingabe-klein" style="width:200px;flex:none" data-kr="suche" placeholder="Suchen …" aria-label="Suchen" value="' + esc(KR.suche) + '"> ' +
       '<label class="text-klein" style="white-space:nowrap"><input type="checkbox" data-kr="doppelt"' + (KR.nurDoppelt ? ' checked' : '') + '> nur mögliche Doppelte (' + nDopp + ')</label> ' +
       '<label class="text-klein" style="white-space:nowrap"><input type="checkbox" data-kr="volumen"' + (KR.nurVolumen ? ' checked' : '') + '> nur mit Buchungen seit 01.07.</label> ' +
-      '<button type="button" class="btn btn-secondary" style="padding:4px 10px" data-kr="export">Export für den Steuerberater (CSV)</button> <button type="button" class="btn btn-secondary" style="padding:4px 10px" data-kr="bereinigen">Doppelte bereinigen</button> <button type="button" class="link-btn" data-kr="neu">Aktualisieren</button></span></div>' +
+      '<button type="button" class="btn btn-secondary" style="padding:4px 10px" data-kr="export">Export für den Steuerberater (CSV)</button> ' + (KR.art === 'kreditor' ? '<button type="button" class="btn btn-secondary" style="padding:4px 10px" data-kr="bereinigen">Doppelte bereinigen</button> ' : '') + '<button type="button" class="link-btn" data-kr="neu">Aktualisieren</button></span></div>' +
       (KR.meldung ? '<div class="erfolg" role="status" style="margin:8px 12px">' + esc(KR.meldung) + '</div>' : '') + (KR.fehlerAktion ? '<div class="fehlerbox" role="alert" style="margin:8px 12px">' + esc(KR.fehlerAktion) + '</div>' : '') +
-      '<div class="tbl-voll tbl-fix"><table class="tbl kompakt"><thead><tr>' + th('mandant', 'Mandant') + th('nr', 'Nr.') + th('name', 'Name') + th('zahlweg', 'Zahlweg') + th('belege', 'Belege seit 01.07.', true) + th('summe', 'Volumen seit 01.07.', true) + th('letzter', 'Letzter Beleg') + '<th>IBAN</th>' + th('doppelt', 'Mögliche Doppelte') + '</tr></thead><tbody>';
+      '<div class="tbl-voll tbl-fix"><table class="tbl kompakt"><thead><tr>' + th('mandant', 'Mandant') + th('nr', 'Nr.') + th('name', 'Name') + th('zahlweg', 'Zahlweg') + th('belege', 'Belege seit 01.07.', true) + th('summe', 'Volumen seit 01.07.', true) + th('letzter', 'Letzter Beleg') + '<th>IBAN</th>' + th('doppelt', 'Gesperrt / Doppelte') + '</tr></thead><tbody>';
     l.forEach(function (k) {
       var opt = function (w, t) { return '<option value="' + w + '"' + (k.zahlweg === w ? ' selected' : '') + '>' + t + '</option>'; };
-      h += '<tr' + (k.gesperrt ? ' style="opacity:.6"' : (k.doppelt ? ' style="background:var(--color-warning-bg)"' : '')) + '><td><span class="m-badge m-' + esc(k.mandant) + '">' + esc(k.mandant) + '</span></td><td class="zahlen">' + esc(k.nr) + '</td><td>' + esc(k.name) + (k.ort ? '<div class="notiz" style="margin:0">' + esc((k.plz + ' ' + k.ort).trim()) + '</div>' : '') + '</td>' +
-        '<td><select class="auswahl" data-kr="weg" data-m="' + esc(k.mandant) + '" data-nr="' + esc(k.nr) + '" aria-label="Zahlweg für ' + esc(k.name) + '">' + opt('', 'offen') + opt('lastschrift', 'Lastschrift') + opt('ueberweisung', 'Überweisung') + '</select></td>' +
+      var ed = KR.edit && KR.edit.m === k.mandant && KR.edit.nr === k.nr ? KR.edit : null, sp = KR.sperr && KR.sperr.m === k.mandant && KR.sperr.nr === k.nr ? KR.sperr : null, istK = (k.art || 'kreditor') === 'kreditor';
+      h += '<tr' + (k.gesperrt ? ' style="opacity:.6"' : (k.doppelt ? ' style="background:var(--color-warning-bg)"' : '')) + '><td><span class="m-badge m-' + esc(k.mandant) + '">' + esc(k.mandant) + '</span></td><td class="zahlen">' + esc(k.nr) + '</td><td>' + (ed ? '<input class="eingabe-klein" style="width:100%" data-kr="edit-name" aria-label="Name" value="' + esc(ed.name) + '"' + (ed.laeuft ? ' disabled' : '') + '><div style="display:flex;gap:8px;margin-top:4px;align-items:center;flex-wrap:wrap"><button type="button" class="btn btn-primary" style="padding:2px 10px" data-kr="edit-speichern"' + (ed.laeuft ? ' disabled' : '') + '>' + (ed.laeuft ? 'Speichere …' : 'In BuchhaltungsButler speichern') + '</button><button type="button" class="link-btn" data-kr="edit-zu">Abbrechen</button></div>' + (ed.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:4px">' + esc(ed.fehler) + '</div>' : '') : esc(k.name) + (k.ort ? '<div class="notiz" style="margin:0">' + esc((k.plz + ' ' + k.ort).trim()) + '</div>' : '') + (istK ? '<div><button type="button" class="link-btn" style="font-size:12px" data-kr="edit-start" data-m="' + esc(k.mandant) + '" data-nr="' + esc(k.nr) + '">Name oder IBAN ändern</button></div>' : '')) + '</td>' +
+        '<td>' + (istK ? '<select class="auswahl" data-kr="weg" data-m="' + esc(k.mandant) + '" data-nr="' + esc(k.nr) + '" aria-label="Zahlweg für ' + esc(k.name) + '">' + opt('', 'offen') + opt('lastschrift', 'Lastschrift') + opt('ueberweisung', 'Überweisung') + '</select>' : '<span class="gedaempft">–</span>') + '</td>' +
         '<td class="rechts zahlen">' + (k.belege ? esc(zahl(k.belege)) : '<span class="gedaempft">0</span>') + '</td><td class="rechts zahlen">' + (k.belege ? esc(formatEuro(k.summe)) : '<span class="gedaempft">–</span>') + '</td><td class="nowrap">' + (k.letzter ? esc(formatDate(k.letzter)) : '') + '</td>' +
-        '<td class="nowrap">' + (k.iban ? esc(k.iban.slice(0, 4) + ' … ' + k.iban.slice(-4)) : '<span class="gedaempft">fehlt</span>') + '</td>' +
-        '<td>' + (k.gesperrt ? '<b>Gesperrt</b> (nicht mehr verwenden), nutze ' + esc(k.ersetzt) + ' <button type="button" class="link-btn" data-kr="entsperren" data-m="' + esc(k.mandant) + '" data-nr="' + esc(k.nr) + '">Sperre aufheben</button>' : (k.doppelt ? '<span class="pflicht">Doppelt?</span> ' + k.doppelt.map(function (t) { return esc(t); }).join('<br>') + (krBester(k) && krBester(k) !== k ? '<div><button type="button" class="btn btn-secondary" style="padding:2px 8px" data-kr="sperren" data-m="' + esc(k.mandant) + '" data-nr="' + esc(k.nr) + '" data-ers="' + esc(krBester(k).nr) + '">Sperren, nutze ' + esc(krBester(k).nr) + '</button></div>' : '<div class="notiz" style="margin:0">' + (krBester(k) === k ? 'behalten: meiste Belege' : 'gleich viele Belege, bitte selbst entscheiden') + '</div>') : '')) + '</td></tr>';
+        '<td class="nowrap">' + (ed ? '<input class="eingabe-klein" style="width:100%" data-kr="edit-iban" aria-label="IBAN" placeholder="DE00 0000 0000 0000 0000 00" value="' + esc(ed.iban.replace(/(.{4})/g, '$1 ').trim()) + '"' + (ed.laeuft ? ' disabled' : '') + '>' : (k.iban ? esc(k.iban.slice(0, 4) + ' … ' + k.iban.slice(-4)) : '<span class="gedaempft">fehlt</span>')) + '</td>' +
+        '<td>' + (istK ? '<label class="text-klein" style="display:flex;gap:6px;align-items:center;white-space:nowrap"><input type="checkbox" data-kr="haken" data-m="' + esc(k.mandant) + '" data-nr="' + esc(k.nr) + '"' + (k.gesperrt ? ' checked' : '') + ' aria-label="' + esc(k.name) + ' sperren, nicht mehr buchen"> gesperrt (nicht mehr buchen)</label>' : '') +
+        (k.gesperrt ? '<div class="notiz" style="margin:2px 0 0">' + (k.ersetzt ? 'Gebucht wird auf ' + esc(krKurz(k.mandant, k.ersetzt)) : 'ohne Ersatz') + ' <button type="button" class="link-btn" data-kr="sperr-start" data-m="' + esc(k.mandant) + '" data-nr="' + esc(k.nr) + '">Ersatz ändern</button></div>' : (k.doppelt ? '<div><span class="pflicht">Doppelt?</span> ' + k.doppelt.map(function (t) { return esc(t); }).join('<br>') + '</div>' + (krBester(k) && krBester(k) !== k ? '<div><button type="button" class="btn btn-secondary" style="padding:2px 8px" data-kr="sperren" data-m="' + esc(k.mandant) + '" data-nr="' + esc(k.nr) + '" data-ers="' + esc(krBester(k).nr) + '">Sperren, nutze ' + esc(krBester(k).nr) + '</button></div>' : '<div class="notiz" style="margin:0">' + (krBester(k) === k ? 'behalten: meiste Belege' : 'gleich viele Belege, bitte selbst entscheiden') + '</div>') : '')) +
+        (sp ? '<div style="margin-top:6px"><label class="text-klein" for="kr-ers" style="display:block">Stattdessen buchen auf (optional):</label><input id="kr-ers" class="eingabe-klein" style="width:100%" list="kr-ersatz" data-kr="sperr-ers" placeholder="Nummer oder Name wählen" value="' + esc(sp.ers) + '"' + (sp.laeuft ? ' disabled' : '') + '><div style="display:flex;gap:8px;margin-top:4px;align-items:center;flex-wrap:wrap"><button type="button" class="btn btn-primary" style="padding:2px 10px" data-kr="sperr-speichern"' + (sp.laeuft ? ' disabled' : '') + '>Speichern</button><button type="button" class="link-btn" data-kr="sperr-zu">Schließen</button></div>' + (sp.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:4px">' + esc(sp.fehler) + '</div>' : '') + '</div>' : '') + '</td></tr>';
     });
-    if (!l.length) h += '<tr><td colspan="9" class="leer">Keine Kreditoren in dieser Ansicht.</td></tr>';
+    if (!l.length) h += '<tr><td colspan="9" class="leer">Keine ' + bez + ' in dieser Ansicht.</td></tr>';
+    if (KR.sperr) h += '<datalist id="kr-ersatz">' + KR.daten.kreditoren.filter(function (x) { return (x.art || 'kreditor') === 'kreditor' && x.mandant === KR.sperr.m && !x.gesperrt && x.nr !== KR.sperr.nr; }).map(function (x) { return '<option value="' + esc(x.nr) + '">' + esc(x.nr + ' ' + x.name) + '</option>'; }).join('') + '</datalist>';
     h += '</tbody></table></div><div class="card-fuss">Stammdaten aus BuchhaltungsButler. Belege und Volumen zählen die gebuchten Eingangsbelege seit dem 01.07.2026' + (KR.daten.stand ? ' (Stand ' + esc(formatDateTime(KR.daten.stand)) + ', täglich 5:30 Uhr gelesen)' : '') + '; Gutschriften mindern das Volumen. Doppelte werden am Namen erkannt, im selben Mandanten. Der Zahlweg gilt für alle Belege des Kreditors in der Belegliste und unter Überweisungen.</div></div></div>';
     el.innerHTML = h;
     if (suchFokus) { var n = el.querySelector('[data-kr="suche"]'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } }
   }
   function bindKR() {
     var p = $('p-kreditoren');
-    p.addEventListener('input', function (e) { var s = e.target.closest('[data-kr="suche"]'); if (s) { KR.suche = s.value; renderKR(); } });
+    p.addEventListener('input', function (e) {
+      var s = e.target.closest('[data-kr="suche"]'); if (s) { KR.suche = s.value; renderKR(); return; }
+      var en = e.target.closest('[data-kr="edit-name"]'); if (en && KR.edit) { KR.edit.name = en.value; return; }
+      var ei = e.target.closest('[data-kr="edit-iban"]'); if (ei && KR.edit) { KR.edit.iban = ei.value; return; }
+      var es = e.target.closest('[data-kr="sperr-ers"]'); if (es && KR.sperr) KR.sperr.ers = es.value;
+    });
     p.addEventListener('change', function (e) {
       var t = e.target.closest('[data-kr]'); if (!t) return; var w = t.getAttribute('data-kr');
       if (w === 'weg') krZahlweg(t.getAttribute('data-m'), t.getAttribute('data-nr'), t.value);
+      else if (w === 'haken') { var hm = t.getAttribute('data-m'), hn = t.getAttribute('data-nr'); if (t.checked) { krSperre(hm, hn, '').then(function (ok) { if (ok) KR.sperr = { m: hm, nr: hn, ers: '', laeuft: false, fehler: '' }; renderKR(); }); } else { krSperre(hm, hn, '', true).then(function () { if (KR.sperr && KR.sperr.nr === hn) KR.sperr = null; renderKR(); }); } }
       else if (w === 'doppelt') { KR.nurDoppelt = t.checked; if (t.checked) KR.sort = { key: 'doppelt', dir: 1 }; renderKR(); }
       else if (w === 'volumen') { KR.nurVolumen = t.checked; renderKR(); }
     });
     p.addEventListener('click', function (e) {
       var b = e.target.closest('button[data-kr]'); if (!b) return; var w = b.getAttribute('data-kr');
       if (w === 'mandant') { KR.mandant = b.getAttribute('data-m'); renderKR(); }
+      else if (w === 'art') { KR.art = b.getAttribute('data-a'); KR.edit = null; KR.sperr = null; KR.nurDoppelt = false; renderKR(); }
+      else if (w === 'edit-start') { var kk = KR.daten.kreditoren.filter(function (x) { return x.mandant === b.getAttribute('data-m') && x.nr === b.getAttribute('data-nr'); })[0]; if (kk) { KR.edit = { m: kk.mandant, nr: kk.nr, name: kk.name, iban: kk.iban || '', laeuft: false, fehler: '' }; KR.meldung = ''; renderKR(); var fn = document.querySelector('#p-kreditoren [data-kr="edit-name"]'); if (fn) fn.focus(); } }
+      else if (w === 'edit-zu') { KR.edit = null; renderKR(); }
+      else if (w === 'edit-speichern') krSpeichern();
+      else if (w === 'sperr-start') { KR.sperr = { m: b.getAttribute('data-m'), nr: b.getAttribute('data-nr'), ers: '', laeuft: false, fehler: '' }; renderKR(); var fe = document.getElementById('kr-ers'); if (fe) fe.focus(); }
+      else if (w === 'sperr-zu') { KR.sperr = null; renderKR(); }
+      else if (w === 'sperr-speichern') krErsatzSpeichern();
       else if (w === 'sort') { var k = b.getAttribute('data-key'); KR.sort = { key: k, dir: KR.sort.key === k ? -KR.sort.dir : (k === 'summe' || k === 'belege' || k === 'letzter' ? -1 : 1) }; renderKR(); }
       else if (w === 'export') krExport();
       else if (w === 'sperren') { krSperre(b.getAttribute('data-m'), b.getAttribute('data-nr'), b.getAttribute('data-ers')).then(renderKR); }
-      else if (w === 'entsperren') { krSperre(b.getAttribute('data-m'), b.getAttribute('data-nr'), '').then(renderKR); }
+      else if (w === 'entsperren') { krSperre(b.getAttribute('data-m'), b.getAttribute('data-nr'), '', true).then(renderKR); }
       else if (w === 'bereinigen') krBereinigen();
       else if (w === 'neu') ladeKR();
     });
