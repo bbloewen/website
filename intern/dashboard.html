@@ -3032,6 +3032,16 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       });
       else if (a && Array.isArray(a.betraege) && a.betraege.length) zl = a.betraege.map(function (x) { return { agent: true, satz: x.steuersatz, netto: num(x.netto), steuer: num(x.steuer), brutto: num(x.brutto) }; });
       else zl = [{ agent: !!a, netto: a ? num(a.netto) : null, steuer: a ? num(a.steuer) : null, brutto: a ? num(a.brutto) : null, hinweisBhb: !!b && !a }];
+      // Entscheidung aus den Rückfragen (bestätigt, noch nicht in BuchhaltungsButler): Kontierung schon in der Zeile zeigen
+      var gp = a && a.geplant && ['bestaetigt', 'korrigiert'].indexOf(a.geplant.status) >= 0 && !blGebucht(r) ? a.geplant : null;
+      if (gp) zl.forEach(function (x) {
+        if (!x.agent) return;
+        x.plan = true; x.konto = gp.sachkonto; x.kname = gp.sachkonto_name; x.gegen = gp.kreditor || ''; x.kst1 = gp.kst1; x.kst1n = gp.kst1_name; x.kst2 = gp.kst2; x.kst2n = gp.kst2_name;
+        if ((x.satz === null || x.satz === undefined || x.satz === '') && gp.vat) { var sv = parseFloat(String(gp.vat)); if (isFinite(sv)) x.satz = sv; }
+      });
+      else if (a && a.geplant && a.geplant.status === 'steuerberater' && !blGebucht(r)) zl.forEach(function (x) { if (x.agent) x.beiStb = true; });
+      if (gp) status += '<div class="notiz" style="margin:4px 0 0"><b>Bereit zu buchen</b></div>';
+      else if (a && a.geplant && a.geplant.status === 'steuerberater' && !blGebucht(r)) status += '<div class="notiz" style="margin:4px 0 0">Wartet auf den Steuerberater</div>';
       var agentLese = '';
       if (a) {
         var zeile = function (l, w) { return w === null || w === undefined || w === '' ? '' : '<div>' + esc(l) + ': ' + esc(w) + '</div>'; };
@@ -3044,7 +3054,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       zl.forEach(function (x, i) {
         var text = (x.text ? '<div>' + esc(x.text) + '</div>' : '') + (x.komm ? '<div class="notiz" style="margin:0">Kommentar: ' + esc(x.komm) + '</div>' : '') +
           (x.bdat && r.datum && String(x.bdat).slice(0, 10) !== String(r.datum).slice(0, 10) ? '<div class="notiz" style="margin:0">gebucht am ' + esc(formatDate(String(x.bdat).slice(0, 10))) + '</div>' : '') +
-          (x.agent && a ? btFeld(a) : '') + (x.agent ? '<div class="notiz" style="margin:0">' + (a && a.buchungstext ? 'Vorschlag Buchungstext, ' : '') + 'vom Agenten gelesen, noch nicht gebucht</div>' : '') + (x.hinweisBhb ? '<div class="notiz" style="margin:0">noch keine Kontierung, nur Beleg in BuchhaltungsButler</div>' : '');
+          (x.agent && a ? btFeld(a) : '') + (x.agent ? '<div class="notiz" style="margin:0">' + (x.plan ? 'Kontierung aus der Rückfrage' + (x.gegen ? '' : ', Kreditor (Gegenkonto) wird beim Buchen aus dem Aussteller bestimmt') + ', noch nicht gebucht' : (a && a.buchungstext ? 'Vorschlag Buchungstext, ' : '') + 'vom Agenten gelesen, noch nicht gebucht') + '</div>' : '') + (x.hinweisBhb ? '<div class="notiz" style="margin:0">noch keine Kontierung, nur Beleg in BuchhaltungsButler</div>' : '');
         h += '<tr>' + (i === 0 ? '<td' + rs + ' class="nowrap">' + datumZelle(r) + '</td><td' + rs + '>' + kopf + agentLese + '<div class="linkreihe">' + links.join('') + '</div>' + loeschKnopf + '</td><td' + rs + '>' + status + '</td><td' + rs + ' class="nowrap zahlen rechts">' + (brutto !== null ? esc(formatEuro(brutto)) : '') + '</td>' : '') +
           '<td>' + text + '</td><td class="nowrap">' + beZahl(x.konto, x.kname ? 'Sachkonto ' + x.konto + ': ' + x.kname : 'Sachkonto ' + x.konto) + '</td><td class="nowrap">' + beZahl(x.gegen, 'Gegenkonto ' + x.gegen + (b && b.gegenpartei ? ': ' + b.gegenpartei : '')) + '</td><td class="nowrap">' + beZahl(x.kst1, x.kst1n ? 'Kostenstelle 1 ' + x.kst1 + ': ' + x.kst1n : 'Kostenstelle 1 ' + x.kst1) + '</td><td class="nowrap">' + beZahl(x.kst2, x.kst2n ? 'Kostenstelle 2 ' + x.kst2 + ': ' + x.kst2n : 'Kostenstelle 2 ' + x.kst2) + '</td>' +
           '<td class="nowrap zahlen rechts">' + (x.satz !== null && x.satz !== undefined && x.satz !== '' ? esc(Number(x.satz).toLocaleString('de-DE') + ' %') : '') + '</td>' +
