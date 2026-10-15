@@ -462,6 +462,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   <section id="p-auslage-neu" role="tabpanel" aria-labelledby="tab-auslage-neu" hidden></section>
   <section id="p-vorschuss-neu" role="tabpanel" aria-labelledby="tab-vorschuss-neu" hidden></section>
   <section id="p-vorschuesse" role="tabpanel" aria-labelledby="tab-vorschuesse" hidden></section>
+  <section id="p-kreditoren" role="tabpanel" aria-labelledby="tab-kreditoren" hidden></section>
 
 </main>
 </div>
@@ -809,7 +810,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
     { id: 'segmentierung', name: 'Segmentierung', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
-    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'rueckfragen', name: 'Rückfragen' }, { id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlung XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung LEV Löwenpark' }, { id: 'ueberweisungen', name: 'Überweisungen' }, { id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }, { id: 'vorschuesse', name: 'Vorschüsse' }] },
+    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'rueckfragen', name: 'Rückfragen' }, { id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlung XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung LEV Löwenpark' }, { id: 'ueberweisungen', name: 'Überweisungen' }, { id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }, { id: 'kreditoren', name: 'Kreditoren' }, { id: 'vorschuesse', name: 'Vorschüsse' }] },
     { id: 'auslagen', name: 'Auslagen', tabs: [{ id: 'auslage-neu', name: 'Auslage einreichen' }, { id: 'vorschuss-neu', name: 'Vorschuss beantragen' }] }
   ];
   var TABS = [];
@@ -875,6 +876,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (t === 'auslage-neu') ladeAU();
     if (t === 'vorschuss-neu') ladeVZ();
     if (t === 'vorschuesse') ladeVW();
+    if (t === 'kreditoren' && !KR.daten && !KR.laedt) ladeKR(); else if (t === 'kreditoren') renderKR();
     if (t === 'kostenstellen') ladeKS();
     if (t === 'sachkonten-xxl') ladeSK('XXL');
     if (t === 'sachkonten-lev') ladeSK('LEV');
@@ -4903,6 +4905,112 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     });
   }
 
+  // ---------- Kreditoren: Gesamtliste mit Volumen seit 01.07., Doppelten, Zahlweg und Export ----------
+  var KR = { daten: null, fehler: null, laedt: false, mandant: 'alle', nurDoppelt: false, nurVolumen: false, suche: '', sort: { key: 'name', dir: 1 }, meldung: '', fehlerAktion: '' };
+  var KR_WEG = { lastschrift: 'Lastschrift', ueberweisung: 'Überweisung' };
+  async function ladeKR() {
+    KR.laedt = true; KR.fehler = null; renderKR();
+    try {
+      var res = await fetch('/webhook/accounting/kreditorenliste'); var d = await res.json();
+      if (!res.ok || !d.ok) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
+      KR.daten = d;
+    } catch (e) { KR.fehler = e.message; }
+    KR.laedt = false; renderKR();
+  }
+  function krNorm(t) { return String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+  function krListe() {
+    var l = (KR.daten ? KR.daten.kreditoren : []).filter(function (k) {
+      if (KR.mandant !== 'alle' && k.mandant !== KR.mandant) return false;
+      if (KR.nurDoppelt && !k.doppelt) return false;
+      if (KR.nurVolumen && !k.belege) return false;
+      var q = krNorm(KR.suche).trim();
+      return !q || krNorm([k.nr, k.name, k.ort, k.iban, k.email].join(' ')).indexOf(q) >= 0;
+    });
+    var s = KR.sort, d = s.dir;
+    l.sort(function (a, b) {
+      var x, y;
+      if (s.key === 'doppelt') { x = (a.gruppe || '~') + ' ' + a.name.toLowerCase(); y = (b.gruppe || '~') + ' ' + b.name.toLowerCase(); }
+      else if (s.key === 'belege' || s.key === 'summe') { x = Number(a[s.key]); y = Number(b[s.key]); }
+      else { x = String(a[s.key] || '').toLowerCase(); y = String(b[s.key] || '').toLowerCase(); }
+      return x < y ? -d : (x > y ? d : (a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1));
+    });
+    return l;
+  }
+  function krCsv(l) {
+    var q = function (v) { v = String(v === null || v === undefined ? '' : v); return /[;"\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+    var z = function (n) { return Number(n).toFixed(2).replace('.', ','); };
+    var kopf = ['Mandant', 'Kreditor-Nr', 'Name', 'Strasse', 'PLZ', 'Ort', 'Land', 'USt-IdNr', 'IBAN', 'BIC', 'Zahlweg', 'Belege seit 01.07.2026', 'Volumen seit 01.07.2026 EUR', 'Letzter Beleg', 'Moegliche Doppelte'];
+    var zeilen = [kopf.join(';')];
+    l.forEach(function (k) { zeilen.push([k.mandant, k.nr, k.name, k.strasse, k.plz, k.ort, k.land, k.ustid, k.iban, k.bic, KR_WEG[k.zahlweg] || '', k.belege, z(k.summe), k.letzter ? formatDate(k.letzter) : '', (k.doppelt || []).join(' / ')].map(q).join(';')); });
+    return '﻿' + zeilen.join('\r\n') + '\r\n';
+  }
+  function krExport() {
+    var l = krListe(), blob = new Blob([krCsv(l)], { type: 'text/csv;charset=utf-8' }), a = document.createElement('a');
+    var tag = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Berlin' });
+    a.href = URL.createObjectURL(blob); a.download = 'kreditoren-' + (KR.mandant === 'alle' ? 'XXL-LEV' : KR.mandant) + '-' + tag + '.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    KR.meldung = l.length + ' Kreditoren exportiert (' + a.download + '). Der Export enthält, was gerade gefiltert und sortiert angezeigt wird.'; renderKR();
+  }
+  async function krZahlweg(mandant, nr, weg) {
+    var k = KR.daten.kreditoren.filter(function (x) { return x.mandant === mandant && x.nr === nr; })[0]; if (!k) return;
+    var alt = k.zahlweg; k.zahlweg = weg; KR.meldung = ''; KR.fehlerAktion = '';
+    try {
+      var res = await fetch('/webhook/accounting/kreditor-zahlweg', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: mandant, nr: nr, zahlweg: weg }) });
+      var d = await res.json().catch(function () { return {}; });
+      if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Speichern fehlgeschlagen');
+      KR.meldung = k.name + ': ' + (KR_WEG[weg] ? KR_WEG[weg] + ' gespeichert.' : 'Zahlweg zurückgesetzt.');
+    } catch (e) { k.zahlweg = alt; KR.fehlerAktion = e.message; }
+    renderKR();
+  }
+  function renderKR() {
+    var el = $('p-kreditoren'); if (!el) return;
+    if (KR.laedt && !KR.daten) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
+    if (KR.fehler && !KR.daten) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(KR.fehler) + '</div>'; return; }
+    if (!KR.daten) { el.innerHTML = ''; return; }
+    var alle = KR.daten.kreditoren, l = krListe();
+    var nDopp = alle.filter(function (k) { return k.doppelt && (KR.mandant === 'alle' || k.mandant === KR.mandant); }).length;
+    var chip = function (m, t) { var n = alle.filter(function (k) { return m === 'alle' || k.mandant === m; }).length; return '<button type="button" class="chip' + (KR.mandant === m ? ' aktiv' : '') + '" data-kr="mandant" data-m="' + m + '" aria-pressed="' + (KR.mandant === m) + '">' + t + ' <span class="notiz" style="display:inline;margin:0">' + esc(zahl(n)) + '</span></button>'; };
+    var th = function (key, text, rechts) { var a = KR.sort.key === key; return '<th' + (rechts ? ' class="rechts"' : '') + ' aria-sort="' + (a ? (KR.sort.dir > 0 ? 'ascending' : 'descending') : 'none') + '"><button type="button" class="link-btn" style="font-weight:600" data-kr="sort" data-key="' + key + '">' + esc(text) + (a ? (KR.sort.dir > 0 ? ' ▲' : ' ▼') : '') + '</button></th>'; };
+    var suchFokus = document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute('data-kr') === 'suche', pos = suchFokus ? document.activeElement.selectionStart : 0;
+    var h = '<div class="stapel"><nav class="chips" aria-label="Mandant"><span class="notiz chips-label">Mandant</span>' + chip('alle', 'Alle') + chip('XXL', 'XXL') + chip('LEV', 'LEV') + '</nav>' +
+      '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Kreditoren · ' + esc(zahl(l.length)) + ' von ' + esc(zahl(alle.length)) + '</span><span>' +
+      '<input type="search" class="eingabe-klein" style="width:200px;flex:none" data-kr="suche" placeholder="Suchen …" aria-label="Kreditoren suchen" value="' + esc(KR.suche) + '"> ' +
+      '<label class="text-klein" style="white-space:nowrap"><input type="checkbox" data-kr="doppelt"' + (KR.nurDoppelt ? ' checked' : '') + '> nur mögliche Doppelte (' + nDopp + ')</label> ' +
+      '<label class="text-klein" style="white-space:nowrap"><input type="checkbox" data-kr="volumen"' + (KR.nurVolumen ? ' checked' : '') + '> nur mit Buchungen seit 01.07.</label> ' +
+      '<button type="button" class="btn btn-secondary" style="padding:4px 10px" data-kr="export">Export für den Steuerberater (CSV)</button> <button type="button" class="link-btn" data-kr="neu">Aktualisieren</button></span></div>' +
+      (KR.meldung ? '<div class="erfolg" role="status" style="margin:8px 12px">' + esc(KR.meldung) + '</div>' : '') + (KR.fehlerAktion ? '<div class="fehlerbox" role="alert" style="margin:8px 12px">' + esc(KR.fehlerAktion) + '</div>' : '') +
+      '<div class="tbl-voll"><table class="tbl kompakt"><thead><tr>' + th('mandant', 'Mandant') + th('nr', 'Nr.') + th('name', 'Name') + th('zahlweg', 'Zahlweg') + th('belege', 'Belege seit 01.07.', true) + th('summe', 'Volumen seit 01.07.', true) + th('letzter', 'Letzter Beleg') + '<th>IBAN</th>' + th('doppelt', 'Mögliche Doppelte') + '</tr></thead><tbody>';
+    l.forEach(function (k) {
+      var opt = function (w, t) { return '<option value="' + w + '"' + (k.zahlweg === w ? ' selected' : '') + '>' + t + '</option>'; };
+      h += '<tr' + (k.doppelt ? ' style="background:var(--color-warning-bg)"' : '') + '><td><span class="m-badge m-' + esc(k.mandant) + '">' + esc(k.mandant) + '</span></td><td class="zahlen">' + esc(k.nr) + '</td><td>' + esc(k.name) + (k.ort ? '<div class="notiz" style="margin:0">' + esc((k.plz + ' ' + k.ort).trim()) + '</div>' : '') + '</td>' +
+        '<td><select class="auswahl" data-kr="weg" data-m="' + esc(k.mandant) + '" data-nr="' + esc(k.nr) + '" aria-label="Zahlweg für ' + esc(k.name) + '">' + opt('', 'offen') + opt('lastschrift', 'Lastschrift') + opt('ueberweisung', 'Überweisung') + '</select></td>' +
+        '<td class="rechts zahlen">' + (k.belege ? esc(zahl(k.belege)) : '<span class="gedaempft">0</span>') + '</td><td class="rechts zahlen">' + (k.belege ? esc(formatEuro(k.summe)) : '<span class="gedaempft">–</span>') + '</td><td class="nowrap">' + (k.letzter ? esc(formatDate(k.letzter)) : '') + '</td>' +
+        '<td class="nowrap">' + (k.iban ? esc(k.iban.slice(0, 4) + ' … ' + k.iban.slice(-4)) : '<span class="gedaempft">fehlt</span>') + '</td>' +
+        '<td>' + (k.doppelt ? '<span class="pflicht">Doppelt?</span> ' + k.doppelt.map(function (t) { return esc(t); }).join('<br>') : '') + '</td></tr>';
+    });
+    if (!l.length) h += '<tr><td colspan="9" class="leer">Keine Kreditoren in dieser Ansicht.</td></tr>';
+    h += '</tbody></table></div><div class="card-fuss">Stammdaten aus BuchhaltungsButler. Belege und Volumen zählen die gebuchten Eingangsbelege seit dem 01.07.2026' + (KR.daten.stand ? ' (Stand ' + esc(formatDateTime(KR.daten.stand)) + ', täglich 5:30 Uhr gelesen)' : '') + '; Gutschriften mindern das Volumen. Doppelte werden am Namen erkannt, im selben Mandanten. Der Zahlweg gilt für alle Belege des Kreditors in der Belegliste und unter Überweisungen.</div></div></div>';
+    el.innerHTML = h;
+    if (suchFokus) { var n = el.querySelector('[data-kr="suche"]'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } }
+  }
+  function bindKR() {
+    var p = $('p-kreditoren');
+    p.addEventListener('input', function (e) { var s = e.target.closest('[data-kr="suche"]'); if (s) { KR.suche = s.value; renderKR(); } });
+    p.addEventListener('change', function (e) {
+      var t = e.target.closest('[data-kr]'); if (!t) return; var w = t.getAttribute('data-kr');
+      if (w === 'weg') krZahlweg(t.getAttribute('data-m'), t.getAttribute('data-nr'), t.value);
+      else if (w === 'doppelt') { KR.nurDoppelt = t.checked; if (t.checked) KR.sort = { key: 'doppelt', dir: 1 }; renderKR(); }
+      else if (w === 'volumen') { KR.nurVolumen = t.checked; renderKR(); }
+    });
+    p.addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-kr]'); if (!b) return; var w = b.getAttribute('data-kr');
+      if (w === 'mandant') { KR.mandant = b.getAttribute('data-m'); renderKR(); }
+      else if (w === 'sort') { var k = b.getAttribute('data-key'); KR.sort = { key: k, dir: KR.sort.key === k ? -KR.sort.dir : (k === 'summe' || k === 'belege' || k === 'letzter' ? -1 : 1) }; renderKR(); }
+      else if (w === 'export') krExport();
+      else if (w === 'neu') ladeKR();
+    });
+  }
+
   // ---------- Start ----------
   try { S.form.erstelltVon = localStorage.getItem('tb_erstelltVon') || ''; } catch (e) {}
   bind();
@@ -4921,6 +5029,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   bindAU();
   bindVZ();
   bindVW();
+  bindKR();
   document.addEventListener('loewen-nutzer', function () {
     if (!darfBereich(bereichVon(S.tab))) setTab(S.tab, false, S.tabArg); else renderNavigation();
     rfZaehlerLaden();
