@@ -2841,7 +2841,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   function leer() { return { daten: null, fehler: null, laedt: false, monat: '', filter: 'alle', suche: '', richtung: 'alle' }; }
   var BL = { XXL: leer(), LEV: leer() };
   var ZA = { XXL: leer(), LEV: leer(), LEVLP: leer() };
-  var BE = { loeschen: null, meldung: '', btEdit: null, holen: false, sel: {}, ueb: null };
+  var BE = { loeschen: null, meldung: '', btEdit: null, holen: false, sel: {}, ueb: null, korr: null };
   function bePanel(id) { return $('p-' + id); }
   function tabVon(map, k) { return Object.keys(map).filter(function (t) { return map[t] === k; })[0]; }
   function monatName(m) { if (m === 'alle') return 'Alle ab Juli 2026'; if (m === 'alt') return 'Vor Juli 2026'; var d = new Date(m + '-15T12:00:00'); return isNaN(d) ? m : d.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' }); }
@@ -3034,6 +3034,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var h = renderPager(z, 'data-art="beleg" data-k="' + k + '"');
     h += '<div class="chips chips-gleich" role="group" aria-label="Art der Belege"><span class="notiz chips-label">Belege</span>' + rk('alle', 'Alle') + rk('eingang', 'Eingangsbelege') + rk('ausgang', 'Ausgangsbelege') + '</div>';
     h += uebLeiste();
+    h += korrPanel();
     var tabKopf = '<div class="tbl-voll tbl-fix"><table class="tbl kompakt fest"><colgroup><col style="width:4%"><col style="width:7%"><col style="width:11%"><col style="width:9%"><col style="width:6%"><col style="width:8%"><col style="width:11%"><col style="width:8%"><col style="width:8%"><col style="width:8%"><col style="width:8%"><col style="width:4%"><col style="width:6%"><col style="width:5%"><col style="width:6%"><col style="width:3%"></colgroup><thead><tr><th><span class="sr-only">Zur Übertragung auswählen</span></th><th style="white-space:normal"><abbr title="Buchungsdatum: danach wird sortiert und nach Monaten geblättert. Das Rechnungsdatum steht beim Beleg, das Eingangsdatum darunter.">Buchungs&shy;datum</abbr></th><th><abbr title="Gegenpartei, Rechnungsnummer, Links und Quelle">Beleg</abbr></th><th><abbr title="Gebucht (Buch-Symbol) und Zahlung zugewiesen (Euro-Symbol)">Status</abbr></th><th class="rechts"><abbr title="Belegbetrag brutto">Beleg €</abbr></th><th class="rechts"><abbr title="Zugeordnete Zahlung (Abbuchung vom Konto, negativ). Bei noch nicht gebuchten Belegen wird sie beim Übertragen nach BuchhaltungsButler zugeordnet und ausgeglichen.">Zahlung €</abbr></th><th><abbr title="Buchungstext aus BuchhaltungsButler, bei noch nicht gebuchten Belegen der Vorschlag des Agenten">Text</abbr></th><th><abbr title="Sachkonto. Die Bezeichnung steht im Tooltip der Nummer.">Sachk.</abbr></th><th><abbr title="Gegenkonto: Kreditor (Eingangsbeleg) oder Debitor (Ausgangsbeleg)">Gegenk.</abbr></th><th><abbr title="Kostenstelle 1. Die Bezeichnung steht im Tooltip der Nummer.">KST1</abbr></th><th><abbr title="Kostenstelle 2 (Zweck). Die Bezeichnung steht im Tooltip der Nummer.">KST2</abbr></th><th class="rechts"><abbr title="Umsatzsteuersatz">USt</abbr></th><th class="rechts"><abbr title="Nettobetrag der Buchungszeile (aus Brutto und Satz gerechnet)">Netto</abbr></th><th class="rechts"><abbr title="Steuerbetrag der Buchungszeile (aus Brutto und Satz gerechnet)">Steuer</abbr></th><th class="rechts"><abbr title="Bruttobetrag der Buchungszeile">Brutto</abbr></th><th><abbr title="Steuerschlüssel: Umsatzsteuer-Kennzeichen der Buchung aus BuchhaltungsButler">Schl.</abbr></th></tr></thead><tbody>';
     h += '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Belege ' + esc(k) + ' · ' + esc(d.monat ? monatName(d.monat) : '') + ' · ' + esc(zahl(zeilen.length)) + ' von ' + esc(zahl((d.belege || []).length)) + '</span><span>' +
       '<input type="search" class="eingabe-klein" style="width:180px;flex:none" data-be="suche" data-k="' + k + '" placeholder="Suchen …" aria-label="Suchen" value="' + esc(z.suche) + '"> ' +
@@ -3072,7 +3073,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       if (a && a.drive_url) links.push('<a href="' + esc(a.drive_url) + '" target="_blank" rel="noopener">Original</a>');
       if (b && bhbBelegLink(b.link, b.dateiname)) links.push('<a href="' + esc(bhbBelegLink(b.link, b.dateiname)) + '" target="_blank" rel="noopener">Beleg in BHB</a>');
       if (a && a.gmail_id && String(a.gmail_id).indexOf('test') !== 0 && String(a.gmail_id).indexOf('bhb:') !== 0) links.push('<a href="https://mail.google.com/mail/?authuser=rechnung@basketball-loewen.com#all/' + esc(a.gmail_id) + '" target="_blank" rel="noopener">Mail</a>');
-      var loeschKnopf = a ? '<div style="margin-top:6px"><button type="button" class="btn-loeschen" data-be="loeschen" data-id="' + a.id + '" title="Entfernt diesen Beleg aus der Liste und die Datei aus Google Drive. Die Mail kommt in den Papierkorb, wenn kein weiterer relevanter Anhang daran hängt. In BuchhaltungsButler ändert sich nichts." aria-label="Beleg löschen: ' + esc(titel) + '">Beleg löschen</button></div>' : '';
+      var loeschLink = a ? '<div style="margin-top:4px"><button type="button" class="link-btn" style="font-size:12px;color:var(--text-muted)" data-be="loeschen" data-id="' + a.id + '" title="Entfernt diesen Beleg aus der Liste und die Datei aus Google Drive. Die Mail kommt in den Papierkorb, wenn kein weiterer relevanter Anhang daran hängt. In BuchhaltungsButler ändert sich nichts." aria-label="Beleg löschen: ' + esc(titel) + '">löschen</button></div>' : '';
       // Buchungszeilen: aus BuchhaltungsButler, sonst die Beträge je Steuersatz, die der Agent gelesen hat.
       var zl = [];
       if (b && (b.buchungen || []).length) zl = b.buchungen.map(function (x) {
@@ -3111,7 +3112,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         var text = (x.text ? '<div>' + esc(x.text) + '</div>' : '') + (x.komm ? '<div class="notiz" style="margin:0">Kommentar: ' + esc(x.komm) + '</div>' : '') +
           (x.bdat && r.datum && String(x.bdat).slice(0, 10) !== String(r.datum).slice(0, 10) ? '<div class="notiz" style="margin:0">gebucht am ' + esc(formatDate(String(x.bdat).slice(0, 10))) + '</div>' : '') +
           (x.agent && a ? btFeld(a) : '') + (x.agent ? '<div class="notiz" style="margin:0">' + (x.plan ? 'Kontierung aus der Rückfrage' + (gp && gp.gebucht_am ? '' : ', noch nicht gebucht') + (x.gunklar ? '. Kreditor nicht eindeutig' + (x.gunklar.length ? ' (' + x.gunklar.map(esc).join(', ') + ')' : ', in BuchhaltungsButler anlegen') + ', bitte in der Buchungsvorschau wählen' : '') : (a && a.buchungstext ? 'Vorschlag Buchungstext, ' : '') + 'vom Agenten gelesen, noch nicht gebucht') + '</div>' : '') + (x.hinweisBhb ? '<div class="notiz" style="margin:0">noch keine Kontierung, nur Beleg in BuchhaltungsButler</div>' : '');
-        h += '<tr>' + (i === 0 ? '<td' + rs + ' class="auswahl-zelle">' + auswahlZelle + '</td><td' + rs + ' class="nowrap">' + datumZelle(r) + '</td><td' + rs + '>' + kopf + agentLese + '<div class="linkreihe">' + links.join('') + '</div>' + loeschKnopf + '</td><td' + rs + '>' + status + '</td><td' + rs + ' class="nowrap zahlen rechts">' + (brutto !== null ? esc(formatEuro(brutto)) : '') + '</td><td' + rs + ' class="rechts">' + beZahlungZelle(r, a, b) + '</td>' : '') +
+        h += '<tr>' + (i === 0 ? '<td' + rs + ' class="auswahl-zelle">' + auswahlZelle + '</td><td' + rs + ' class="nowrap">' + datumZelle(r) + loeschLink + '</td><td' + rs + '>' + kopf + agentLese + '<div class="linkreihe">' + links.join('') + '</div>' + (gp && !gp.gebucht_am && gp.rueckfrage ? '<div style="margin-top:4px"><button type="button" class="link-btn" data-be="korr-start" data-rf="' + gp.rueckfrage + '" data-titel="' + esc(titel) + '">Ändern / mit KI besprechen</button></div>' : '') + '</td><td' + rs + '>' + status + '</td><td' + rs + ' class="nowrap zahlen rechts">' + (brutto !== null ? esc(formatEuro(brutto)) : '') + '</td><td' + rs + ' class="rechts">' + beZahlungZelle(r, a, b) + '</td>' : '') +
           '<td>' + text + '</td><td>' + beKontoName(x.konto, x.kname ? x.kname : '') + '</td><td>' + beKontoName(x.gegen, x.gname ? x.gname : (b && b.gegenpartei ? b.gegenpartei : '')) + '</td><td>' + beKontoName(x.kst1, x.kst1n) + '</td><td>' + beKontoName(x.kst2, x.kst2n) + '</td>' +
           '<td class="nowrap zahlen rechts">' + (x.satz !== null && x.satz !== undefined && x.satz !== '' ? esc(Number(x.satz).toLocaleString('de-DE') + ' %') : '') + '</td>' +
           '<td class="nowrap zahlen rechts">' + eu(x.netto) + '</td><td class="nowrap zahlen rechts">' + eu(x.steuer) + '</td><td class="nowrap zahlen rechts">' + eu(x.brutto) + '</td><td>' + esc(x.schl || '') + '</td>' +
@@ -4415,6 +4416,34 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   }
   // ---------- Einzelne Belege nach BuchhaltungsButler übertragen ----------
   // Auswahl in der Belegliste, erst Vorschau je Beleg, dann nach Bestätigung hochladen und buchen (gleiche Webhooks wie im Rückfragen-Tab).
+  // Ändern / mit KI besprechen: schon entschiedene, noch nicht übertragene Belege (Rückfrage bestätigt). Die Änderung gilt sofort für die Entscheidung.
+  function korrZeile(rf) { var z = null; ['XXL', 'LEV'].forEach(function (k) { if (BL[k] && BL[k].daten) (BL[k].daten.belege || []).forEach(function (r) { if (r.agent && r.agent.geplant && r.agent.geplant.rueckfrage === rf) z = r; }); }); return z; }
+  function korrPanel() {
+    var k = BE.korr; if (!k) return '';
+    var r = korrZeile(k.rf), g = r && r.agent && r.agent.geplant;
+    var aktuell = g ? 'Konto ' + esc(g.sachkonto || '–') + (g.sachkonto_name ? ' ' + esc(g.sachkonto_name) : '') + ' · KST 1 ' + esc(g.kst1 || '–') + (g.kst1_name ? ' ' + esc(g.kst1_name) : '') + ' · KST 2 ' + esc(g.kst2 || '–') + (g.kst2_name ? ' ' + esc(g.kst2_name) : '') + (g.gegenkonto && g.gegenkonto.nummer ? ' · Kreditor ' + esc(g.gegenkonto.nummer + ' ' + (g.gegenkonto.name || '')) : '') : '';
+    var h = '<div class="card pad" role="region" aria-label="Mit der KI besprechen"><div class="fett">Mit der KI besprechen: ' + esc(k.titel) + '</div>' + (aktuell ? '<div class="notiz" style="margin:4px 0 0">Entschieden: ' + aktuell + '</div>' : '') +
+      '<div class="text-klein" style="margin-top:6px">Sag, was geändert werden soll (Kreditor, Konto, Kostenstellen, Umsatzsteuer), oder stell eine Frage. Die Änderung gilt sofort für diesen Beleg. Sagst du etwas, das künftig immer gilt, hält die KI es im Kontenplan fest.</div>';
+    if (k.verlauf.length) h += '<div role="log" aria-label="Gespräch mit der KI" style="margin-top:8px;display:flex;flex-direction:column;gap:6px">' + k.verlauf.map(function (m) { return '<div style="' + (m.von === 'marko' ? 'align-self:flex-end;background:var(--bg-subtle)' : 'align-self:flex-start;border:1px solid var(--border-strong)') + ';border-radius:10px;padding:6px 10px;max-width:92%;white-space:pre-wrap"><span class="notiz" style="display:block;margin:0">' + (m.von === 'marko' ? 'Du' : 'KI' + (m.aenderung ? ' · hat die Entscheidung geändert' : '')) + '</span>' + esc(m.text) + (m.regel ? '<div class="notiz" style="margin:6px 0 0;white-space:normal"><b>Im Kontenplan gespeichert:</b> ' + esc(m.regel) + '</div>' : '') + '</div>'; }).join('') + '</div>';
+    h += '<label class="text-klein" for="korr-text" style="display:block;margin-top:8px">Deine Nachricht</label><textarea id="korr-text" class="eingabe" rows="3" style="width:100%;margin-top:4px" maxlength="2000" data-be="korr-text" placeholder="z. B. Das gehört auf KST 1 57 und KST 2 1604"' + (k.laeuft ? ' disabled' : '') + '>' + esc(k.text) + '</textarea>';
+    if (k.fehler) h += '<div class="fehlerbox" role="alert" style="margin-top:6px">' + esc(k.fehler) + '</div>';
+    return h + '<div style="display:flex;gap:8px;margin-top:8px;align-items:center"><button type="button" class="btn btn-primary" data-be="korr-senden"' + (k.laeuft ? ' disabled' : '') + '>' + (k.laeuft ? 'Die KI antwortet …' : 'An die KI senden') + '</button><button type="button" class="link-btn" data-be="korr-zu">Schließen</button></div></div>';
+  }
+  async function korrSenden() {
+    var k = BE.korr; if (!k || k.laeuft) return;
+    var ta = document.getElementById('korr-text'); if (ta) k.text = ta.value;
+    var text = String(k.text || '').trim(); if (!text) { k.fehler = 'Bitte schreibe oder sprich eine Nachricht an die KI.'; beAlleRender(); return; }
+    k.laeuft = true; k.fehler = ''; beAlleRender();
+    try {
+      var res = await fetch('/webhook/accounting/rueckfrage-korrektur', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: k.rf, text: text }) });
+      var d = await res.json().catch(function () { return {}; });
+      if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Die KI hat gerade nicht geantwortet.');
+      k.verlauf = k.verlauf.concat([{ von: 'marko', text: text }, { von: 'ki', text: d.antwort || '', aenderung: d.aenderung !== false, regel: d.regel ? d.regel.text : '' }]).slice(-8);
+      k.text = '';
+      ['XXL', 'LEV'].forEach(function (m) { if (BL[m] && BL[m].daten) ladeListe('beleg', m, BL[m].daten.monat); });
+    } catch (e) { k.fehler = e.message; }
+    k.laeuft = false; beAlleRender();
+  }
   function uebAnzahl() { return Object.keys(BE.sel).filter(function (i) { return BE.sel[i]; }).length; }
   function uebLeiste() {
     var n = uebAnzahl(), u = BE.ueb;
@@ -4500,6 +4529,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       p.addEventListener('toggle', function (e) { if (e.target && e.target.hasAttribute && e.target.hasAttribute('data-be-uebertragen')) BE.uebertragenAuf = e.target.open; }, true);
       p.addEventListener('input', function (e) {
         var w = e.target.closest('[data-be="bt-wert"]'); if (w) { if (BE.btEdit) BE.btEdit.wert = w.value; return; }
+        var kt = e.target.closest('[data-be="korr-text"]'); if (kt) { if (BE.korr) BE.korr.text = kt.value; return; }
         var s = e.target.closest('[data-be="suche"]'); if (!s) return;
         var st = zustand(s); st.z.suche = s.value; renderAccounting(st.art, st.k);
       });
@@ -4516,6 +4546,13 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         else if (w === 'bt-abbruch') { BE.btEdit = null; beAlleRender(); }
         else if (w === 'bt-speichern') btSpeichern(Number(b.getAttribute('data-id')));
         else if (w === 'zahl-zuordnen' || w === 'zahl-loesen' || w === 'zahl-keine') beZahlungKlick(w, b.getAttribute('data-rf'), b.getAttribute('data-tx'));
+        else if (w === 'korr-start') {
+          var rfk = Number(b.getAttribute('data-rf')), zk = korrZeile(rfk), dl = (zk && zk.agent && zk.agent.geplant && zk.agent.geplant.dialog) || [];
+          BE.korr = { rf: rfk, titel: b.getAttribute('data-titel') || '', verlauf: dl.slice(-6).map(function (m) { return { von: m.von, text: m.text, aenderung: m.aenderung, regel: m.regel }; }), text: '', laeuft: false, fehler: '' };
+          beAlleRender(); window.scrollTo(0, 0); var tk = document.getElementById('korr-text'); if (tk) tk.focus();
+        }
+        else if (w === 'korr-senden') korrSenden();
+        else if (w === 'korr-zu') { BE.korr = null; beAlleRender(); }
         else if (w === 'ueb-start') uebVorschau();
         else if (w === 'ueb-ja') uebBuchen();
         else if (w === 'ueb-leeren') { BE.sel = {}; beAlleRender(); }
