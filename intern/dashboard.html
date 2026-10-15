@@ -3042,6 +3042,13 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       else if (a && a.geplant && a.geplant.status === 'steuerberater' && !blGebucht(r)) zl.forEach(function (x) { if (x.agent) x.beiStb = true; });
       if (gp) status += '<div class="notiz" style="margin:4px 0 0"><b>Bereit zu buchen</b></div>';
       else if (a && a.geplant && a.geplant.status === 'steuerberater' && !blGebucht(r)) status += '<div class="notiz" style="margin:4px 0 0">Wartet auf den Steuerberater</div>';
+      // Zahlweg (Lastschrift, Überweisung, Erstattung, schon bezahlt) und passende Abbuchung vom Konto, vor dem Buchen
+      if (a && a.zahlweg && !blGebucht(r)) {
+        var zw = a.zahlweg, zv = a.zahlungsvorschlag;
+        status += '<div class="notiz" style="margin:4px 0 0"><b>' + esc(zw.text) + '</b></div>';
+        if (zw.art !== 'bezahlt') status += zv ? '<div class="notiz" style="margin:2px 0 0">Zahlung auf dem Konto: ' + esc(formatEuro(zv.betrag)) + ' am ' + esc(formatDate(zv.datum)) + ' an ' + esc(zv.name) + (zv.sicher ? '' : ' (bitte prüfen)') + (zv.anzahl > 1 ? ', ' + zv.anzahl + ' passende' : '') + '. BuchhaltungsButler ordnet sie beim Buchen zu.</div>'
+          : '<div class="notiz" style="margin:2px 0 0">' + (zw.art === 'lastschrift' ? 'Abbuchung noch nicht auf dem Konto' : 'Noch nicht bezahlt, steht unter Überweisungen') + '</div>';
+      }
       var agentLese = '';
       if (a) {
         var zeile = function (l, w) { return w === null || w === undefined || w === '' ? '' : '<div>' + esc(l) + ': ' + esc(w) + '</div>'; };
