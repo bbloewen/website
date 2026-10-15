@@ -88,11 +88,11 @@
 
   .seatplan-cart-total { font-size: 1.4rem; font-weight: 700; padding: 10px 0; }
   #seatplan-cta, #ak-bar { font-size: 1.3rem; padding: 20px; min-height: 64px; }
-  /* Karte / Bar nebeneinander, Stornieren darunter (Marko, 15.10.2026). */
+  /* Bar links, Karte rechts nebeneinander, Stornieren darunter (Marko, 15.10.2026, Reihenfolge getauscht 15.10.). */
   .ak-pay { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
   .ak-pay .btn { flex: 1 1 0; justify-content: center; }
   .ak-pay .ak-storno { flex: 1 1 100%; font-size: 1.1rem; padding: 14px; }
-  .ak-pay[hidden], #ak-bar[hidden], #ak-storno[hidden] { display: none !important; }
+  .ak-pay[hidden], #ak-bar[hidden], #ak-storno[hidden], .ak-pay.ak-gratis #ak-bar { display: none !important; }
   /* Die ".btn"-Klasse aus site.css setzt display explizit (inline-flex o.ae.) - das
      sticht die Browser-Vorgabe fuer [hidden] (sehr niedrige Spezifitaet), der Knopf
      bliebe sonst trotz hidden sichtbar. */
@@ -171,8 +171,8 @@
   <div id="seatplan-cart"></div>
   <div class="seatplan-cart-total" id="ak-gesamt" hidden><span>Gesamt</span><span id="seatplan-total">0,00 €</span></div>
   <div class="ak-pay" id="ak-pay">
-    <button class="btn btn-primary" id="seatplan-cta" disabled hidden>Karte</button>
     <button class="btn btn-outline-orange" id="ak-bar" disabled hidden>Bar</button>
+    <button class="btn btn-primary" id="seatplan-cta" disabled hidden>Karte</button>
     <button class="btn btn-outline-orange ak-storno" id="ak-storno" hidden>Stornieren</button>
   </div>
   <div id="seatplan-occupancy"></div>
@@ -229,8 +229,40 @@ document.addEventListener('DOMContentLoaded', function () {
       Object.keys(p).forEach(function (tarif) { o[tarif] = p[tarif] + ABEND_ZUSCHLAG; });
       out[cat] = o;
     });
+    // Familienpass / Schlemmerblock: 100 % Rabatt, also 0,00 EUR und ohne Abendzuschlag.
+    out['Familienpass'] = { normal: 0 };
     return out;
   }
+
+  // Familienpass / Schlemmerblock (Marko, 15.10.2026): eigene Kategorie unter "+ weitere Kategorie",
+  // 0,00 EUR je Karte. Wie der Rollstuhlplatz eine Pseudo-Zone im Warenkorb des Seat-Pickers; die
+  // Karten gelten in Block A (Kategorie III) und zaehlen auf dessen Kontingent (wie der Familienpass-
+  // Gutschein im Vorverkauf, Item 28). Die Erweiterung haengt nur an DIESER Seite - die oeffentlichen
+  // Seiten laden dieselbe seat-picker.js, ohne die Kategorie "Familienpass" zu kennen.
+  var FAMILIENPASS_ZONE = 'FAMILIENPASS';
+  var FAMILIENPASS_KEY = 'FAMILIENPASS::Familienpass';
+  var FAMILIENPASS_LABEL = 'Familienpass / Schlemmerblock';
+  var origBlockFree = SeatPicker.prototype._blockFreeCount;
+  SeatPicker.prototype._blockFreeCount = function (zoneId) {
+    if (zoneId === FAMILIENPASS_ZONE) return origBlockFree.call(this, 'A', 'Kategorie III');
+    return origBlockFree.apply(this, arguments);
+  };
+  var origCompanions = SeatPicker.prototype._companionSlotsRemaining;
+  SeatPicker.prototype._companionSlotsRemaining = function (excludeBlockKey) {
+    if (excludeBlockKey === FAMILIENPASS_KEY) return 0;   // nie automatisch "Begleitperson"
+    return origCompanions.apply(this, arguments);
+  };
+  var origQuickAdd = SeatPicker.prototype._quickAddBlock;
+  SeatPicker.prototype._quickAddBlock = function (zoneId, qty, category) {
+    if (category === 'Familienpass') {
+      if (!this.prices['Familienpass']) return;
+      var counts = this.blockCounts[FAMILIENPASS_KEY] || {};
+      this._setBlockCount(FAMILIENPASS_KEY, FAMILIENPASS_LABEL, 'Familienpass', this.prices['Familienpass'], 'normal',
+        (counts.normal || 0) + qty, this._blockFreeCount(FAMILIENPASS_ZONE, 'Familienpass'));
+      return;
+    }
+    return origQuickAdd.apply(this, arguments);
+  };
 
   function parseDatumZeit(datum, zeit) {
     var teile = datum.split('.');
@@ -264,10 +296,11 @@ document.addEventListener('DOMContentLoaded', function () {
         var freeCount = picker._blockFreeCount(zoneId, c.category);
         var tile = document.createElement('div');
         tile.className = 'ak-tarif-tile';
+        var istFamilienpass = c.category === 'Familienpass';
         tile.innerHTML =
-          '<span class="ak-tarif-label">' + TARIF_LABEL[tarif] +
+          '<span class="ak-tarif-label">' + (istFamilienpass ? 'Ticket' : TARIF_LABEL[tarif]) +
             (tarif === 'ermaessigt' ? '<br><span class="ak-tarif-hint">' + ERMAESSIGT_HINWEIS + '</span>' : '') +
-            '<br><span class="ak-tarif-price">' + fmtEUR(c.priceInfo[tarif]) + ' € je Ticket</span></span>' +
+            '<br><span class="ak-tarif-price">' + fmtEUR(c.priceInfo[tarif]) + ' € je Ticket' + (istFamilienpass ? ' (100 % Rabatt), gilt in Block A' : '') + '</span></span>' +
           '<div class="ak-stepper">' +
             '<button type="button" data-step="-1" aria-label="weniger">−</button>' +
             '<span class="ak-step-count">' + (c[tarif] || 0) + '</span>' +
@@ -292,7 +325,7 @@ document.addEventListener('DOMContentLoaded', function () {
       // Begleitperson auf dieser Zeile steht, damit sie wieder auf 0 gesetzt werden kann).
       // _companionSlotsRemaining ist dieselbe, bereits geprueft Methode wie im nativen
       // Warenkorb der oeffentlichen Seite.
-      if (c.category !== 'Rollstuhlplatz') {
+      if (c.category !== 'Rollstuhlplatz' && c.category !== 'Familienpass') {
         var begleitFrei = picker._companionSlotsRemaining(blockKey) + (c.begleitung || 0);
         if (begleitFrei > 0) {
           var begleitTile = document.createElement('div');
@@ -329,9 +362,11 @@ document.addEventListener('DOMContentLoaded', function () {
     sel.className = 'ak-add-select';
     sel.innerHTML =
       '<option value="" selected>+ weitere Kategorie</option>' +
-      '<option value="Rollstuhlplatz">Rollstuhlplatz</option>';
+      '<option value="Rollstuhlplatz">Rollstuhlplatz</option>' +
+      '<option value="Familienpass">' + FAMILIENPASS_LABEL + '</option>';
     sel.addEventListener('change', function () {
       if (sel.value === 'Rollstuhlplatz') picker._quickAddBlock(null, 1, 'Rollstuhlplatz');
+      if (sel.value === 'Familienpass') picker._quickAddBlock(null, 1, 'Familienpass');
       sel.value = '';
     });
     host.appendChild(sel);
@@ -357,6 +392,18 @@ document.addEventListener('DOMContentLoaded', function () {
     // die Gesamtzeile erscheint wie der Knopf erst mit dem ersten Ticket (Marko, 01.10.2026).
     document.getElementById('ak-gesamt').hidden = !hatTickets;
     renderTarifPanels();
+    updatePayLabels();
+  }
+
+  // Bei Gesamtbetrag 0 (nur Familienpass/Schlemmerblock) gibt es nichts zu kassieren: "Bar" verschwindet,
+  // "Karte" heisst "Ticket ausgeben (kostenlos)" und loest kein Terminal aus (s. startVerkauf).
+  function updatePayLabels() {
+    var gratis = false;
+    if (picker && cartHatTickets()) {
+      try { gratis = !(picker.getSummary().total > 0); } catch (e) {}
+    }
+    document.getElementById('seatplan-cta').textContent = gratis ? 'Ticket ausgeben (kostenlos)' : 'Karte';
+    document.getElementById('ak-pay').classList.toggle('ak-gratis', gratis);
   }
 
   // Freie Plaetze + Normalpreis direkt auf jeder Kachel der Blockauswahl, dauerhaft
@@ -605,6 +652,8 @@ document.addEventListener('DOMContentLoaded', function () {
     var summary = picker.getSummary();
     if (!summary.lines.length) return;
     bestellLaeuft = true;
+    // Gesamtbetrag 0 (nur Familienpass/Schlemmerblock): kein Terminalvorgang, Bestellung wird direkt angelegt.
+    var gratis = !(summary.total > 0);
 
     var statusEl = document.getElementById('ak-status');
     ctaEl.disabled = true;
@@ -622,7 +671,7 @@ document.addEventListener('DOMContentLoaded', function () {
       gegner: currentGame.gegner,
       lines: summary.lines,
       total: summary.total,
-      zahlart: bar ? 'bar' : 'karte',
+      zahlart: bar ? 'bar' : (gratis ? 'frei' : 'karte'),
       voucher: null,
       notiz: '',
       zahlungPausiert: false
@@ -637,7 +686,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     var inApp = !!(window.OpiBridge && window.OpiBridge.isAvailable());
-    var pay = { state: bar ? 'bar' : (inApp ? 'offen' : 'keine'), message: '', unklar: false };   // offen | ok | fehler | keine | bar
+    var pay = { state: bar ? 'bar' : ((inApp && !gratis) ? 'offen' : 'keine'), message: '', unklar: false };   // offen | ok | fehler | keine | bar
     var order = { state: pay.state === 'offen' ? 'wartet' : 'offen', message: '', paid: false };  // wartet | offen | ok | fehler
 
     function zeigeStatus() {
@@ -658,11 +707,13 @@ document.addEventListener('DOMContentLoaded', function () {
         cls = 'ak-status ak-status-busy';
         text = payOffen
           ? 'Zahlung am Terminal … Das Ticket wird erst nach bestätigter Zahlung angelegt und gedruckt.'
-          : (bar ? 'Barzahlung. ' : inApp ? 'Zahlung bestätigt. ' : '') + 'Ticket wird angelegt …';
+          : (bar ? 'Barzahlung. ' : gratis ? 'Kostenlos (0,00 €). ' : inApp ? 'Zahlung bestätigt. ' : '') + 'Ticket wird angelegt …';
       } else {
         cls = 'ak-status ak-status-ok';
         text = bar
           ? 'Barzahlung vermerkt, Ticket wird gedruckt.'
+          : gratis
+          ? 'Kostenlos (0,00 €), Ticket wird gedruckt.'
           : inApp
           ? 'Zahlung bestätigt, Ticket wird gedruckt.'
           : 'Ticket wird gedruckt. Betrag am Terminal eintippen: ' + fmtEUR(summary.total) +
@@ -745,7 +796,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     zeigeStatus();
-    if (inApp && !bar) {
+    if (inApp && !bar && !gratis) {
       window.OpiBridge.charge(summary.total).then(function () {
         pay.state = 'ok';
         order.state = 'offen';
