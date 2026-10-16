@@ -3424,7 +3424,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   }
   function rfKonto(v, r) {
     if (!v || !v.sachkonto) return '<span class="gedaempft">–</span>';
-    return '<div>' + beKonto(v.sachkonto, v.sachkontoBez) + '</div>' + (v.kreditor ? '<div class="notiz" style="margin:0">Kreditor ' + esc(v.kreditor) + '</div>' : '') + '<div class="notiz" style="margin:0">KST 1 ' + esc(rfK1(v.kst1, v.kst1Bez)) + ' · KST 2 ' + esc(v.kst2Bez || v.kst2 || '–') + esc(rfUst(v, r)) + (v.belegPolitik ? ' · ' + esc(v.belegPolitik) : '') + '</div>';
+    return '<div>' + beKonto(v.sachkonto, v.sachkontoBez) + '</div>' + (v.kreditor ? '<div class="notiz" style="margin:0">Kreditor ' + esc(v.kreditor) + '</div>' : '') + '<div class="notiz" style="margin:0">KST 1 ' + esc(rfK1(v.kst1, v.kst1Bez)) + ' · KST 2 ' + esc(v.kst2Bez || v.kst2 || '–') + esc(rfUst(v, r)) + (v.belegPolitik ? ' · ' + esc(v.belegPolitik) : '') + '</div>' +
+      (Array.isArray(v.teile) && v.teile.length > 1 ? '<div class="notiz" style="margin:0">Aufgeteilt: ' + v.teile.map(function (t) { return esc(t.sachkonto) + (t.bezeichnung ? ' ' + esc(t.bezeichnung) : '') + ' ' + esc(formatEuro(Number(t.brutto))); }).join(' + ') + '</div>' : '');
   }
   function comboText(c) { return c.sachkonto + ' ' + (c.sachkontoBez || '') + ' · KST 1 ' + rfK1(c.kst1, c.kst1Bez) + ' · KST 2 ' + (c.kst2Bez || c.kst2) + (c.vat ? ' · ' + vatText(c.vat) : ''); }
   // Weitere offene Rückfragen desselben Ausstellers im selben Mandanten (Doppelungen ausgenommen). gleich = nur mit demselben Vorschlag.
