@@ -3053,11 +3053,19 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     return Number(r.zahlungen || 0) > 0 || (brutto > 0 && Math.abs(Number(r.bhb.bezahlt || 0)) >= brutto - 0.01);
   }
   // Gebucht, aber noch nicht bezahlt und über das Zahlungsziel hinaus: liefert das Fälligkeitsdatum. Ohne Fälligkeit in der Rechnung gelten 14 Tage nach dem Rechnungsdatum.
+  // Fälligkeit eines Belegs: Datum aus BuchhaltungsButler oder von der Rechnung. Steht dort nur "sofort" oder Ähnliches, gilt der Tag, an dem der Beleg bei uns einging.
+  function blFaelligInfo(r) {
+    var a = r && r.agent, b = r && r.bhb, roh = String((b && b.faellig) || (a && a.faellig) || '').trim();
+    if (/^\d{4}-\d{2}-\d{2}/.test(roh)) return { datum: roh.slice(0, 10), text: '' };
+    if (!roh) return null;
+    var ein = String((a && a.eingang_am) || (r && r.eingang) || (a && a.datum) || (b && b.datum) || (r && r.datum) || '').slice(0, 10);
+    return /^\d{4}-\d{2}-\d{2}$/.test(ein) ? { datum: ein, text: roh.slice(0, 30) } : null;
+  }
   function blUeberfaellig(r) {
     var a = r && r.agent, b = r && r.bhb;
     if (!r || !(blGebucht(r) || (a && a.geplant && a.geplant.gebucht_am)) || blBezahlt(r)) return '';
     if (a && a.zahlung && (a.zahlung.status === 'zugeordnet' || a.zahlung.status === 'auto')) return '';
-    var f = String((b && b.faellig) || (a && a.faellig) || '').slice(0, 10);
+    var fi = blFaelligInfo(r), f = fi ? fi.datum : '';
     if (!f) { var dt = String((b && b.datum) || (a && a.datum) || r.datum || '').slice(0, 10); if (!dt) return ''; var t = new Date(dt + 'T12:00:00'); t.setDate(t.getDate() + 14); f = t.toISOString().slice(0, 10); }
     return f < new Date().toISOString().slice(0, 10) ? f : '';
   }
@@ -3163,7 +3171,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var brutto = b && b.brutto !== null && b.brutto !== undefined ? Number(b.brutto) : (a && a.brutto !== null && a.brutto !== undefined ? Number(a.brutto) : null);
       var kopf = '<div class="fett">' + esc(titel) + '</div><div class="notiz" style="margin:0">' + esc(art + (nummer ? ' · Nr. ' + nummer : '')) + '</div>' +
         (b && b.datum ? '<div class="notiz" style="margin:0">Rechnungsdatum ' + esc(formatDate(String(b.datum).slice(0, 10))) + '</div>' : (a && a.datum ? '<div class="notiz" style="margin:0">Rechnungsdatum ' + esc(formatDate(String(a.datum).slice(0, 10))) + '</div>' : '')) +
-        (function () { var f = String((b && b.faellig) || (a && a.faellig) || '').slice(0, 10); return /^\d{4}-\d{2}-\d{2}$/.test(f) ? '<div class="notiz" style="margin:0">Fällig ' + esc(formatDate(f)) + '</div>' : ''; })() +
+        (function () { var fi = blFaelligInfo(r); return fi ? '<div class="notiz" style="margin:0"' + (fi.text ? ' title="Auf der Rechnung steht: ' + esc(fi.text) + '. Angesetzt ist der Tag, an dem der Beleg bei uns einging."' : '') + '>Fällig ' + esc(formatDate(fi.datum)) + (fi.text ? ' (' + esc(fi.text) + ')' : '') + '</div>' : ''; })() +
         (a ? '<div class="notiz" style="margin:0">' + esc((a.absender || '') + (a.eingang_am ? ' · Mail vom ' + formatDate(String(a.eingang_am).slice(0, 10)) : '')) + '</div>' : '');
       var ik = '', st = [];
       if (b && !blGebucht(r)) {
