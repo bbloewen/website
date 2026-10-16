@@ -2938,7 +2938,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (BL[k] && BL[k].daten) ladeListe('beleg', k, BL[k].daten.monat);
   }
   // Kreditor direkt in der Zeile wählen, wenn BuchhaltungsButler mehrere oder keine eindeutige Zuordnung hat (Marko 16.10.2026)
-  function beKredWahlHtml(kand, gp) {
+  function beKredWahlHtml(kand, gp, neuName) {
     if (!gp || !gp.rueckfrage) return '<div><span class="hinweis-warn" style="white-space:normal">Kreditor wählen</span></div>';
     var k = BE.mandantAktuell, id = 'kw-' + gp.rueckfrage, alle = (RF.kred && RF.kred[k]) || [];
     var knoepfe = (kand || []).map(function (t) { var m = /^\s*([0-9]{5,6})\s+(.*?)(?:\s*\[.*\])?\s*$/.exec(String(t)); return m ? '<div><button type="button" class="link-btn" style="white-space:normal;text-align:left" data-be="kred-wahl" data-k="' + esc(k) + '" data-rf="' + esc(gp.rueckfrage) + '" data-nr="' + esc(m[1]) + '">' + esc(m[2]) + ' (' + esc(m[1]) + ')</button></div>' : ''; }).join('');
@@ -2946,7 +2946,17 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     return '<div style="margin-top:4px"><span class="hinweis-warn" style="white-space:normal">Kreditor wählen</span>' + knoepfe +
       '<input id="' + id + '" class="eingabe-klein" style="width:100%;margin-top:2px" list="' + id + '-l" placeholder="' + (alle.length ? 'Anderer Kreditor, Name oder Nummer …' : 'Kreditoren werden geladen …') + '" aria-label="Kreditor suchen"><datalist id="' + id + '-l">' + opts + '</datalist>' +
       '<div><button type="button" class="link-btn" data-be="kred-wahl" data-k="' + esc(k) + '" data-rf="' + esc(gp.rueckfrage) + '">Diesen Kreditor übernehmen</button></div>' +
+      (neuName ? '<div><button type="button" class="link-btn" style="white-space:normal;text-align:left" data-be="kred-neu" data-k="' + esc(k) + '" data-rf="' + esc(gp.rueckfrage) + '" data-name="' + esc(neuName) + '">Neu anlegen: ' + esc(neuName) + '</button></div>' : '') +
       (kand && kand.length ? '' : '<div class="notiz" style="margin:2px 0 0;white-space:normal">Kein passender Kreditor, ohne Auswahl wird beim Übertragen ein neuer angelegt.</div>') + '</div>';
+  }
+  async function beKredNeu(b) {
+    var k = b.getAttribute('data-k'), rf = b.getAttribute('data-rf'), name = b.getAttribute('data-name');
+    try {
+      var res = await fetch('/webhook/accounting/rueckfrage-kreditor', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: Number(rf), kreditor: name, neu: true }) });
+      var d = await res.json().catch(function () { return {}; });
+      if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Speichern fehlgeschlagen');
+    } catch (e) { window.alert(e.message); }
+    if (BL[k] && BL[k].daten) ladeListe('beleg', k, BL[k].daten.monat);
   }
   async function beKredWahl(b) {
     var k = b.getAttribute('data-k'), rf = b.getAttribute('data-rf'), nr = b.getAttribute('data-nr');
@@ -3273,7 +3283,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
           (x.bdat && r.datum && String(x.bdat).slice(0, 10) !== String(r.datum).slice(0, 10) ? '<div class="notiz" style="margin:0">gebucht am ' + esc(formatDate(String(x.bdat).slice(0, 10))) + '</div>' : '') +
           (x.agent && a ? btFeld(a) : '');
         h += '<tr>' + (i === 0 ? '<td' + rs + ' class="auswahl-zelle">' + auswahlZelle + '</td><td' + rs + '>' + ik + '</td><td' + rs + ' class="nowrap">' + datumZelle(r) + loeschLink + '</td><td' + rs + '>' + kopf + agentLese + '<div class="linkreihe">' + links.join('') + '</div>' + (gp && !gp.gebucht_am && gp.rueckfrage ? '<div style="margin-top:4px"><button type="button" class="link-btn" data-be="korr-start" data-rf="' + gp.rueckfrage + '" data-titel="' + esc(titel) + '">Ändern / mit KI besprechen</button></div>' : '') + '</td><td' + rs + ' class="nowrap zahlen rechts">' + (brutto !== null ? esc(formatEuro(brutto)) : '') + '</td><td' + rs + ' class="rechts">' + beZahlungZelle(r, a, b) + '</td>' : '') +
-          '<td>' + text + '</td><td>' + beKontoName(x.konto, x.kname ? x.kname : '') + '</td><td>' + beKontoName(x.gegen, x.gname ? x.gname : (b && b.gegenpartei ? b.gegenpartei : '')) + (x.gunklar ? beKredWahlHtml(x.gunklar, gp) : '') + '</td><td>' + beKontoName(x.kst1, x.kst1n) + '</td><td>' + beKontoName(x.kst2, x.kst2n) + '</td>' +
+          '<td>' + text + '</td><td>' + beKontoName(x.konto, x.kname ? x.kname : '') + '</td><td>' + beKontoName(x.gegen, x.gname ? x.gname : (b && b.gegenpartei ? b.gegenpartei : '')) + (x.gunklar ? beKredWahlHtml(x.gunklar, gp, (a && String(a.auslage) !== 'true' && a.aussteller) || '') : '') + '</td><td>' + beKontoName(x.kst1, x.kst1n) + '</td><td>' + beKontoName(x.kst2, x.kst2n) + '</td>' +
           '<td class="nowrap zahlen rechts">' + (x.satz !== null && x.satz !== undefined && x.satz !== '' ? esc(Number(x.satz).toLocaleString('de-DE') + ' %') : '') + '</td>' +
           '<td class="nowrap zahlen rechts">' + eu(x.netto) + '</td><td class="nowrap zahlen rechts">' + eu(x.steuer) + '</td><td class="nowrap zahlen rechts">' + eu(x.brutto) + '</td><td>' + esc(x.schl || '') + '</td>' +
           '</tr>';
@@ -4699,6 +4709,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         else if (w === 'ls-an' || w === 'ls-aus') beLastschrift(b, w === 'ls-an');
         else if (w === 'zv-annehmen') beZvAnnehmen(b);
         else if (w === 'kred-wahl') beKredWahl(b);
+        else if (w === 'kred-neu') beKredNeu(b);
         else if (w === 'fe-start') { BE.fe = { k: b.getAttribute('data-k'), fall: b.getAttribute('data-fall'), wert: b.getAttribute('data-wert'), gp: b.getAttribute('data-gp'), betrag: Number(b.getAttribute('data-betrag')), datum: b.getAttribute('data-datum'), nr: b.getAttribute('data-nr'), ein: b.getAttribute('data-ein') === '1' }; renderAccounting('beleg', BE.fe.k); }
         else if (w === 'fe-abbruch') { var kk = BE.fe && BE.fe.k; BE.fe = null; if (kk) renderAccounting('beleg', kk); }
         else if (w === 'fe-speichern') beFaelligSpeichern();
