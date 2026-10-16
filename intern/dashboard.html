@@ -3251,7 +3251,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var gp = a && a.geplant && ['bestaetigt', 'korrigiert'].indexOf(a.geplant.status) >= 0 && !blGebucht(r) ? a.geplant : null;
       if (gp) zl.forEach(function (x) {
         if (!x.agent) return;
-        x.plan = true; x.konto = gp.sachkonto; x.kname = gp.sachkonto_name; var gk = gp.gegenkonto; x.gegen = gk && gk.eindeutig ? (gk.neu ? 'neu' : gk.nummer) : ''; x.gname = gk && gk.name ? gk.name + (gk.neu ? ' (wird beim Übertragen angelegt)' : '') : ''; x.gunklar = gk && !gk.eindeutig ? (gk.kandidaten || []) : null; x.kst1 = gp.kst1; x.kst1n = gp.kst1_name; x.kst2 = gp.kst2; x.kst2n = gp.kst2_name;
+        x.plan = true; x.konto = gp.sachkonto; x.kname = gp.sachkonto_name; var gk = gp.gegenkonto; x.gegen = gk && gk.eindeutig ? (gk.neu ? 'neu' : gk.nummer) : ''; x.gname = gk && gk.name ? gk.name : ''; x.gunklar = gk && !gk.eindeutig ? (gk.kandidaten || []) : null; x.kst1 = gp.kst1; x.kst1n = gp.kst1_name; x.kst2 = gp.kst2; x.kst2n = gp.kst2_name;
         if ((x.satz === null || x.satz === undefined || x.satz === '') && gp.vat) { var sv = parseFloat(String(gp.vat)); if (isFinite(sv)) x.satz = sv; }
       });
       else if (a && a.geplant && a.geplant.status === 'steuerberater' && !blGebucht(r)) zl.forEach(function (x) { if (x.agent) x.beiStb = true; });
