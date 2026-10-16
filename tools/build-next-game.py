@@ -44,7 +44,7 @@ GENERISCHER_LIVESTREAM_URL = "https://sporteurope.tv/basketball-loewen-erfurt"
 
 JS_ANKER = [
     "var GENERISCHER_LIVESTREAM_URL = 'https://sporteurope.tv/basketball-loewen-erfurt';",
-    "var label = g.heim ? (++heimZaehler + '. Heimspiel') : 'Auswärts mit Gebrüll';",
+    "var label = g.heim ? ((heimspiele.indexOf(g) + 1) + '. Heimspiel') : 'Auswärts mit Gebrüll';",
 ]
 
 
@@ -53,6 +53,10 @@ def cutoff_dienstag(d):
     # (getDay(): Sonntag=0 ... Samstag=6) umgerechnet, damit dieselbe Formel
     # wie in js/home-next-game.js gilt.
     js_tag = (d.weekday() + 1) % 7
+    # Dienstag bis Freitag: nur zwei Tage nach dem Spieltag (Marko, 16.10.2026),
+    # gleiche Regel wie cutoffDienstag in js/home-next-game.js.
+    if 2 <= js_tag <= 5:
+        return d + timedelta(days=2)
     tage_bis = (2 - js_tag + 7) % 7
     if tage_bis == 0:
         tage_bis = 7
@@ -253,12 +257,11 @@ def main():
         print("  geschrieben: kein Spiel im Widget")
         return 0
 
-    heim_zaehler = 0
+    heimspiele = [g for g in alle if g["heim"]]
     slides = []
     for i, g in enumerate(slides_daten):
         if g["heim"]:
-            heim_zaehler += 1
-            label = f"{heim_zaehler}. Heimspiel"
+            label = f"{heimspiele.index(g) + 1}. Heimspiel"
         else:
             label = "Auswärts mit Gebrüll"
         slides.append(slide_html(g, i, label, jetzt))

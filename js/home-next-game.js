@@ -26,9 +26,19 @@
   var pad2 = SiteUtils.pad2;
   var gcalStamp = SiteUtils.gcalStamp;
 
+  /* Ab wann ein gespieltes Spiel aus dem Widget verschwindet: Wochenend- und
+     Montagsspiele bleiben bis zum Dienstag danach stehen (Marko, 26.09.2026).
+     Spiele von Dienstag bis Freitag nur zwei Tage nach dem Spieltag -- sonst
+     blieb das Dienstagsspiel in Langen (13.10.) bis zum 20.10. stehen und
+     verdraengte das Heimspiel am 18.10. (Marko, 16.10.2026). */
   function cutoffDienstag(datum) {
     var d = new Date(datum);
-    var tageBis = (2 - d.getDay() + 7) % 7;
+    var tag = d.getDay();
+    if (tag >= 2 && tag <= 5) {
+      d.setDate(d.getDate() + 2);
+      return d;
+    }
+    var tageBis = (2 - tag + 7) % 7;
     d.setDate(d.getDate() + (tageBis === 0 ? 7 : tageBis));
     return d;
   }
@@ -191,9 +201,11 @@
     var slides = (aktuell ? [aktuell] : []).concat(kommende);
     if (!slides.length) { card.style.display = 'none'; return; }
 
-    var heimZaehler = 0;
+    /* Heimspiele zaehlen ueber die ganze Saison, nicht nur innerhalb der Karte
+       (Marko, 16.10.2026: das Spiel am 18.10. ist das zweite, nicht das erste). */
+    var heimspiele = alle.filter(function (x) { return x.heim; });
     var slidesHTML = slides.map(function (g, i) {
-      var label = g.heim ? (++heimZaehler + '. Heimspiel') : 'Auswärts mit Gebrüll';
+      var label = g.heim ? ((heimspiele.indexOf(g) + 1) + '. Heimspiel') : 'Auswärts mit Gebrüll';
       return gameSlideHTML(g, i, label);
     }).join('');
 
