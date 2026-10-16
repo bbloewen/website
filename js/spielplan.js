@@ -280,7 +280,7 @@
     var proBHeimTage = {};
     heim.spiele.forEach(function (s) { proBHeimTage[dateKey(parseDMY(s.datum))] = true; });
     var nbblGames = (saison.nbbl.spiele || []).map(function (s) {
-      var g = toGame(s, s.heim, 'Basketball Löwen NBBL', 'nbbl');
+      var g = toGame(s, s.heim, 'CATL Basketball Löwen Erfurt', 'nbbl');
       if (g.heim && !proBHeimTage[dateKey(g.date)]) g.suedpark = true;
       return g;
     });

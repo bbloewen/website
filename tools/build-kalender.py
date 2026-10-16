@@ -43,7 +43,7 @@ BASE = "https://basketball-loewen.com"
 OUT = REPO / "kalender"
 DAUER = timedelta(hours=2)
 
-LABEL = {"profis": "Basketball Löwen", "damen": "CATL Basketball Löwinnen", "nbbl": "Basketball Löwen NBBL"}
+LABEL = {"profis": "Basketball Löwen", "damen": "CATL Basketball Löwinnen", "nbbl": "CATL Basketball Löwen Erfurt"}
 TEAMNAME = {"profis": "Profis (ProB)", "damen": "Damen (Regionalliga)", "nbbl": "NBBL (U19)"}
 RIETH = "Riethsporthalle, Essener Straße 20, 99089 Erfurt"
 SUEDPARK = "Sporthalle am Südpark, Erfurt"
