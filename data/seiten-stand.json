@@ -198,8 +198,8 @@
       "lastmod": "2026-10-11"
     },
     "news/insta-archiv/loewen-17950472520281852.html": {
-      "hash": "0e48e233474abd4051282fbbfa5a0733c8419a07",
-      "lastmod": "2026-10-15"
+      "hash": "e2973c5f5351a86f7a1370bb14f11450b83d722d",
+      "lastmod": "2026-10-16"
     },
     "news/insta-archiv/loewen-17993913383843106.html": {
       "hash": "3968f362b653f76262eff6f5b79b96cf568bb7c1",
@@ -228,6 +228,10 @@
     "news/insta-archiv/loewen-18099313496551230.html": {
       "hash": "3c9994eb52315249bb79dec3b8fdc1f1d3db021b",
       "lastmod": "2026-10-13"
+    },
+    "news/insta-archiv/loewen-18101653217638343.html": {
+      "hash": "7a7067b1c10cc69fb7ddca6f345e92d1a65a9130",
+      "lastmod": "2026-10-16"
     },
     "news/insta-archiv/loewen-18103301906369687.html": {
       "hash": "2a4455a58d926b02a958214bfe96ea03929a611a",
@@ -302,8 +306,8 @@
       "lastmod": "2026-09-28"
     },
     "news/instagram-archiv.html": {
-      "hash": "93a10ead008b12b4ef82ce4db0265f1a4f3fb35d",
-      "lastmod": "2026-10-15"
+      "hash": "b7955f4824e4867c59b56cc12cb0b9afc4d485bd",
+      "lastmod": "2026-10-16"
     },
     "news/newsletter/index.html": {
       "hash": "4caad0fb0b2a0fd640456d7f98fa89ad0d374cb4",
@@ -414,8 +418,8 @@
       "lastmod": "2026-10-15"
     },
     "saison/profis/gameday/index.html": {
-      "hash": "80148c2ba03c5022848cff5b2ed879e0fab051f1",
-      "lastmod": "2026-10-15"
+      "hash": "4fd4d2126e66e60640f10641a76007d0a9de0229",
+      "lastmod": "2026-10-16"
     },
     "saison/profis/gameday/spieltagsinfo/ausgabe-1/index.html": {
       "hash": "d811a3b583bb7cd635f9e1e17b6d00fc08561e9f",
@@ -502,8 +506,8 @@
       "lastmod": "2026-10-12"
     },
     "trainieren/trainingszeiten.html": {
-      "hash": "134097219d560c2947b7d5d06ce66ddbc18bda15",
-      "lastmod": "2026-10-12"
+      "hash": "a02eeed342ff73209287983e02c5299fced385df",
+      "lastmod": "2026-10-16"
     }
   }
 }
