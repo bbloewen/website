@@ -211,6 +211,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 .ik-warn svg .eur-kreis { fill: var(--color-brand-orange); }
 .ik-warn svg .eur-zeichen { fill: #fff; stroke: none; }
 .ik-aus { color: var(--text-muted); }
+.ik-rot { color: var(--color-error); }
+.ik-rot svg .eur-zeichen { fill: var(--color-error); stroke: none; }
 .ik-aus svg .eur-zeichen { fill: var(--text-muted); stroke: none; }
 .chips { display: flex; gap: 8px; flex-wrap: wrap; }
 .chip { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-strong); border-radius: 999px; padding: 6px 14px; font-size: 14px; cursor: pointer; }
@@ -2948,12 +2950,14 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       euro: '<circle class="eur-kreis" cx="12" cy="12" r="9"/><text class="eur-zeichen" x="12" y="16.4" text-anchor="middle" font-size="12" font-weight="700">€</text>',
       dok: '<path class="fl" d="M7 3.5h7l4 4V20.5H7z"/><path d="M14 3.5v4h4"/><path d="M9.5 12h6M9.5 15.5h6"/>'
     }[form];
-    return '<span class="ik ' + (an ? 'ik-an' : (warn ? 'ik-warn' : 'ik-aus')) + '" role="img" aria-label="' + esc(titel) + '" title="' + esc(titel) + '"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + innen + '</svg></span>';
+    return '<span class="ik ' + (an ? 'ik-an' : (warn === 'rot' ? 'ik-rot' : (warn ? 'ik-warn' : 'ik-aus'))) + '" role="img" aria-label="' + esc(titel) + '" title="' + esc(titel) + '"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + innen + '</svg></span>';
   }
   // Euro-Symbol: grün = Zahlung zugewiesen, orange = Zahlungsdatei erzeugt, noch nicht bezahlt, grau = fehlt noch
   function euroSym(r, an, titelAn, titelAus) {
     if (an) return ikSymbol('euro', true, titelAn);
     if (r && r.zahldatei) return ikSymbol('euro', false, 'Zahlungsdatei erzeugt (' + r.zahldatei + '), noch nicht bezahlt', true);
+    var uef = blUeberfaellig(r);
+    if (uef) return ikSymbol('euro', false, 'Zahlung überfällig seit ' + formatDate(uef), 'rot');
     return ikSymbol('euro', false, titelAus);
   }
   function num(v) { if (v === null || v === undefined || v === '') return null; var n = Number(v); return isFinite(n) ? n : null; }
@@ -2963,6 +2967,15 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (!r.bhb) return false;
     var brutto = Math.abs(Number(r.bhb.brutto || 0));
     return Number(r.zahlungen || 0) > 0 || (brutto > 0 && Math.abs(Number(r.bhb.bezahlt || 0)) >= brutto - 0.01);
+  }
+  // Gebucht, aber noch nicht bezahlt und über das Zahlungsziel hinaus: liefert das Fälligkeitsdatum. Ohne Fälligkeit in der Rechnung gelten 14 Tage nach dem Rechnungsdatum.
+  function blUeberfaellig(r) {
+    var a = r && r.agent, b = r && r.bhb;
+    if (!r || !(blGebucht(r) || (a && a.geplant && a.geplant.gebucht_am)) || blBezahlt(r)) return '';
+    if (a && a.zahlung && (a.zahlung.status === 'zugeordnet' || a.zahlung.status === 'auto')) return '';
+    var f = String((b && b.faellig) || (a && a.faellig) || '').slice(0, 10);
+    if (!f) { var dt = String((b && b.datum) || (a && a.datum) || r.datum || '').slice(0, 10); if (!dt) return ''; var t = new Date(dt + 'T12:00:00'); t.setDate(t.getDate() + 14); f = t.toISOString().slice(0, 10); }
+    return f < new Date().toISOString().slice(0, 10) ? f : '';
   }
   function blRichtung(r) { return r.bhb && /outbound/.test(r.bhb.typ || '') ? 'ausgang' : 'eingang'; }
   function blFilter(r, z, rich) {
