@@ -589,11 +589,13 @@ def seite(liste, jetzt):
     heute = jetzt.date()
     aktuell, kommt = naechstes(liste, jetzt)
     zeit = f", {aktuell['zeit']} Uhr" if aktuell.get("zeit") else ""
-    description = (f"Nächstes Heimspiel der Basketball Löwen Erfurt: gegen {aktuell['gegner']} "
-                   f"am {aktuell['datum']}{zeit} in der Riethsporthalle. Tickets & Dauerkarte.")
+    description = (f"Sport-Events in Erfurt: Heimspiel der Basketball Löwen gegen "
+                   f"{aktuell['gegner']} am {aktuell['datum']}{zeit} in der Riethsporthalle. Tickets & Dauerkarte.")
     if len(description) > 155:
-        description = (f"Heimspiele der Basketball Löwen Erfurt in der Riethsporthalle: "
-                       f"nächster Gegner {aktuell['gegner']} am {aktuell['datum']}. Tickets & Dauerkarte.")
+        # Lange Gegnernamen ("TSG Schöller SI Ravens Reutlingen") sprengen auch die zweite
+        # Fassung -- dann ohne Gegner, damit die Google-Vorschau nicht abschneidet.
+        description = (f"Sport-Events in Erfurt: Heimspiele der Basketball Löwen in der "
+                       f"Riethsporthalle, nächstes Spiel am {aktuell['datum']}. Tickets & Dauerkarte.")
 
     # rstrip, damit der zweite Lauf dasselbe Ergebnis liefert: das \s* der Regex
     # zieht sonst den Zeilenumbruch mit, den die Vorlage selbst schon setzt, und

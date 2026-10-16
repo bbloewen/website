@@ -26,8 +26,8 @@
       "lastmod": "2026-10-11"
     },
     "club/ueber-uns.html": {
-      "hash": "0d81aa8dcc99b7e88470a98f167c427e1f1ccbf7",
-      "lastmod": "2026-10-01"
+      "hash": "751e6e1b0026bc34c27926d39115f06aa4a6566d",
+      "lastmod": "2026-10-16"
     },
     "datenschutz.html": {
       "hash": "895b3b78f25b9ccb2117c6abe427858c02a139d2",
@@ -314,7 +314,7 @@
       "lastmod": "2026-09-20"
     },
     "partner/club-100.html": {
-      "hash": "9bbb8230da6165fe9cce3a4e8c3312f9bfbc6781",
+      "hash": "e10c3d97343a77ab9a36418c04328e6fe00cfae2",
       "lastmod": "2026-10-16"
     },
     "partner/crestcom-einladung.html": {
@@ -338,7 +338,7 @@
       "lastmod": "2026-09-26"
     },
     "partner/sponsoring.html": {
-      "hash": "baa9d6eab1b737aaa09a85fb594c1ee6f8405ddd",
+      "hash": "58799d355a0bd605697a742a6dc97961a4d5bf67",
       "lastmod": "2026-10-16"
     },
     "presse.html": {
@@ -346,27 +346,27 @@
       "lastmod": "2026-09-27"
     },
     "saison/damen.html": {
-      "hash": "ac7257c585034f8adf25dbe1d927171b16941097",
-      "lastmod": "2026-08-26"
+      "hash": "919274653d3ec45903531ec6470cfc7bf65458f0",
+      "lastmod": "2026-10-16"
     },
     "saison/nachwuchs.html": {
-      "hash": "d9d303221ba690598c76411e68cf1db07450db6d",
-      "lastmod": "2026-10-12"
+      "hash": "74748b3008ec0dcdb38898f0d3baace1513e8ea0",
+      "lastmod": "2026-10-16"
     },
     "saison/nbbl.html": {
       "hash": "09c779676f6d2765d5266d79343496ef8785caed",
       "lastmod": "2026-10-12"
     },
     "saison/profis.html": {
-      "hash": "2a3e345e3ecc2bae441174d369ae823d9545f719",
-      "lastmod": "2026-10-13"
+      "hash": "c66963da34cfedebc6622225d03c10f217bfa66f",
+      "lastmod": "2026-10-16"
     },
     "saison/profis/gameday/2026-10-11-bba-ludwigsburg.html": {
-      "hash": "3d1f74a7fdba79183a3ee4e953fbcccb5e4cfc2b",
-      "lastmod": "2026-10-15"
+      "hash": "800dc0861969e52f542785c0494f0fe42839a51b",
+      "lastmod": "2026-10-16"
     },
     "saison/profis/gameday/2026-10-18-tsg-reutlingen-ravens.html": {
-      "hash": "2ddf3a74453cccc88db277c243fbe6d51f1dbcf7",
+      "hash": "fcb960ce211a7256af1ade213a62d7fa63e106ac",
       "lastmod": "2026-10-16"
     },
     "saison/profis/gameday/2026-11-08-culture-city-weimar.html": {
@@ -418,7 +418,7 @@
       "lastmod": "2026-10-16"
     },
     "saison/profis/gameday/index.html": {
-      "hash": "68be82cb7b0d2077790cadb79f91ca6efe38eb97",
+      "hash": "3b54315d5f22e20e03d27828bfa91274a7d72b83",
       "lastmod": "2026-10-16"
     },
     "saison/profis/gameday/spieltagsinfo/ausgabe-1/index.html": {
@@ -430,12 +430,12 @@
       "lastmod": "2026-10-16"
     },
     "saison/spielplan.html": {
-      "hash": "c9159dbdbbdebac164c2f7ef3b8e8fab4e48be4b",
+      "hash": "5e9f16297528e1b8ca45d5246000467fa59bad67",
       "lastmod": "2026-10-16"
     },
     "saison/tabelle.html": {
-      "hash": "80fd40afd3f61fd062089b7e5e7c4e1755590a18",
-      "lastmod": "2026-10-15"
+      "hash": "c8aa3579fc7c25e0bf1c2b1b28c975e2f6fe6703",
+      "lastmod": "2026-10-16"
     },
     "satzung.html": {
       "hash": "abb47c9a7d85d0508e315798cf2cf58b8131c8eb",
@@ -462,12 +462,12 @@
       "lastmod": "2026-10-11"
     },
     "trainieren/feriencamps.html": {
-      "hash": "fca1f1ae2174ad5e078be221ffdef5123b87dded",
-      "lastmod": "2026-10-12"
+      "hash": "07a9f287d42b70412197462551b3ed3e6b0d31ee",
+      "lastmod": "2026-10-16"
     },
     "trainieren/freiplaetze.html": {
-      "hash": "4233b42a94fb04fe99be943a53d5f83aa71c0f66",
-      "lastmod": "2026-10-12"
+      "hash": "e4ea4296b9591a343aa7c01816424adaf824ff21",
+      "lastmod": "2026-10-16"
     },
     "trainieren/freiplatz/loewenpark.html": {
       "hash": "06a4ce12eee8deb853d2f0ddc9a7b230c21cd466",
@@ -494,23 +494,23 @@
       "lastmod": "2026-08-27"
     },
     "trainieren/inklusion.html": {
-      "hash": "15e1eeb3b1de46bbc333d924cc7158e78be337d2",
-      "lastmod": "2026-10-12"
+      "hash": "3fde389620509ffd8d4e8c85ca282f6d9652baf9",
+      "lastmod": "2026-10-16"
     },
     "trainieren/loewenpark.html": {
-      "hash": "a5381f14812ba2f2fbf9c75a315f805d157981a6",
-      "lastmod": "2026-10-01"
+      "hash": "f1a732c461296b2e103c56ce4e76fa47b0768d3c",
+      "lastmod": "2026-10-16"
     },
     "trainieren/schulprogramm.html": {
-      "hash": "2f3b5464e6e1d72c46816cd3bea3a63b0cc57864",
-      "lastmod": "2026-10-12"
+      "hash": "91de539dba39100607522a4acb215572ad0ff235",
+      "lastmod": "2026-10-16"
     },
     "trainieren/sportvernetzt.html": {
       "hash": "19ba03fc4fbde7fcb4c0de8adb7e665cc2354b63",
       "lastmod": "2026-10-12"
     },
     "trainieren/trainingszeiten.html": {
-      "hash": "a02eeed342ff73209287983e02c5299fced385df",
+      "hash": "2161a6f0f2e8e11e400a60043e8b00221f727c7e",
       "lastmod": "2026-10-16"
     }
   }

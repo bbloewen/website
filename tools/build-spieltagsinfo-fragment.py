@@ -116,7 +116,17 @@ def fragment_bauen(seite: Path) -> str:
     inhalt = re.sub(r'<div class="sitebar noprint">.*?</div>\s*', "", inhalt, flags=re.S)
     inhalt = re.sub(r'<footer class="pagefoot noprint">.*?</footer>\s*', "", inhalt, flags=re.S)
 
+    # Die Seite hat ihre eigene H1 (der Gegner im Hero). Die Heft-Ueberschrift wird
+    # deshalb zur H2 -- zwei H1 auf einer Seite sind ein Strukturfehler, und das Heft
+    # ist hier ein Abschnitt, nicht das Dokument.
+    inhalt = re.sub(r'<h1(\s[^>]*)?>', lambda m: '<h2' + (m.group(1) or '') + ' class="sti-h1">', inhalt)
+    inhalt = inhalt.replace("</h1>", "</h2>")
+
     css = css_einsperren(m_css.group(1))
+    # Alle Regeln, die auf h1 zielen, muessen die umbenannte Ueberschrift treffen --
+    # im Heft ist das ".cover h1" (clamp(40px,12vw,64px)). Ohne diese Zeile schrumpft
+    # die Titelzeile auf h2-Groesse.
+    css = re.sub(r'(?<![a-zA-Z0-9_-])h1(?![a-zA-Z0-9_-])', '.sti-h1', css)
     return (f"<style>{css}</style>\n"
             f'<div class="{CONTAINER}">\n{inhalt.strip()}\n</div>\n')
 
