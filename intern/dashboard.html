@@ -211,6 +211,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 .ik-warn svg .eur-kreis { fill: #fff; }
 .ik-warn svg .eur-zeichen { fill: var(--color-brand-orange); stroke: none; }
 .ik-aus { color: var(--text-muted); }
+.ik-gruen { color: var(--color-success); }
+.ik-gruen svg .eur-kreis { fill: #fff; }
+.ik-gruen svg .eur-zeichen { fill: var(--color-success); stroke: none; }
 .ik-rot { color: var(--color-error); }
 .ik-rot svg .eur-zeichen { fill: var(--color-error); stroke: none; }
 .ik-aus svg .eur-zeichen { fill: var(--text-muted); stroke: none; }
@@ -2934,7 +2937,27 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     } catch (e) { window.alert(e.message); }
     if (BL[k] && BL[k].daten) ladeListe('beleg', k, BL[k].daten.monat);
   }
-  function beZahlungZelle(r, a, b) { return beZahlungZelle0(r, a, b) + beLastschriftLink(r, a, b); }
+  // Vorschlag der automatischen Zuordnung (Betrag passt auf den Cent, aber kein sicherer Hinweis): ein Klick ordnet zu und gleicht aus
+  function beVorschlagZuordnen(r) {
+    var zv = r.zv; if (!zv || !zv.length || !r.bhb || blBezahlt(r)) return '';
+    var v = zv[0];
+    return '<div class="notiz" style="margin:4px 0 0;white-space:normal"><b>Vorschlag</b> ' + esc(formatEuro(v.betrag)) + ' vom ' + esc(formatDate(String(v.datum).slice(0, 10))) + (v.name ? ' · ' + esc(String(v.name).replace(/\s+/g, ' ').slice(0, 40)) : '') + (zv.length > 1 ? ' (' + zv.length + ' passende)' : '') +
+      (v.warnung ? '<br><span class="hinweis-warn" style="white-space:normal">' + esc(v.warnung) + '</span>' : '') + '</div>' +
+      '<div><button type="button" class="link-btn" data-be="zv-annehmen" data-k="' + esc(BE.mandantAktuell) + '" data-tx="' + esc(v.transaction_id) + '" data-beleg="' + esc(r.bhb.beleg_id) + '" data-info="' + esc(formatEuro(v.betrag) + ' vom ' + formatDate(String(v.datum).slice(0, 10)) + ' (' + String(v.name || '').replace(/\s+/g, ' ').slice(0, 40) + ')') + '">Zuordnen</button></div>';
+  }
+  async function beZvAnnehmen(b) {
+    var k = b.getAttribute('data-k');
+    if (!window.confirm('Zahlung ' + b.getAttribute('data-info') + ' diesem Beleg zuordnen und in BuchhaltungsButler ausgleichen?')) return;
+    b.disabled = true; b.textContent = 'Ordne zu …';
+    try {
+      var res = await fetch('/webhook/accounting/zahlung-annehmen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: k, transaction_id: Number(b.getAttribute('data-tx')), beleg_id: b.getAttribute('data-beleg') }) });
+      var d = await res.json().catch(function () { return {}; });
+      if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Zuordnen fehlgeschlagen');
+      BE.meldung = 'Zahlung zugeordnet und ausgeglichen.';
+    } catch (e) { window.alert(e.message); }
+    if (BL[k] && BL[k].daten) ladeListe('beleg', k, BL[k].daten.monat);
+  }
+  function beZahlungZelle(r, a, b) { return beZahlungZelle0(r, a, b) + beVorschlagZuordnen(r) + beLastschriftLink(r, a, b); }
   function beZahlungZelle0(r, a, b) {
     if (blGebucht(r)) { var bz = b ? Number(b.bezahlt || 0) : 0; return bz > 0 ? '<span class="zahl-ok">' + esc(formatEuro(-bz)) + '</span>' : '<span class="gedaempft">–</span>'; }
     var z = a && a.zahlung, rf = a && a.geplant && a.geplant.rueckfrage, offen = rf && !(a.geplant && a.geplant.gebucht_am);
@@ -2972,11 +2995,13 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       euro: '<circle class="eur-kreis" cx="12" cy="12" r="9"/><text class="eur-zeichen" x="12" y="16.4" text-anchor="middle" font-size="12" font-weight="700">€</text>',
       dok: '<path class="fl" d="M7 3.5h7l4 4V20.5H7z"/><path d="M14 3.5v4h4"/><path d="M9.5 12h6M9.5 15.5h6"/>'
     }[form];
-    return '<span class="ik ' + (an ? 'ik-an' : (warn === 'rot' ? 'ik-rot' : (warn ? 'ik-warn' : 'ik-aus'))) + '" role="img" aria-label="' + esc(titel) + '" title="' + esc(titel) + '"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + innen + '</svg></span>';
+    return '<span class="ik ' + (an ? 'ik-an' : (warn === 'rot' ? 'ik-rot' : (warn === 'gruen' ? 'ik-gruen' : (warn ? 'ik-warn' : 'ik-aus')))) + '" role="img" aria-label="' + esc(titel) + '" title="' + esc(titel) + '"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + innen + '</svg></span>';
   }
   // Euro-Symbol: grün = Zahlung zugewiesen, orange = Zahlungsdatei erzeugt, noch nicht bezahlt, grau = fehlt noch
   function euroSym(r, an, titelAn, titelAus) {
     if (an) return ikSymbol('euro', true, titelAn);
+    // Lastschrift (am Beleg oder beim Kreditor): der Kreditor zieht ein, deshalb grüne Kontur statt rot, voll grün erst nach dem Einzug
+    if (r && r.lastschrift && (r.lastschrift.am_beleg || r.lastschrift.kreditor) && blRichtung(r) === 'eingang') return ikSymbol('euro', false, 'Lastschrift: wird vom Kreditor eingezogen, noch nicht eingezogen', 'gruen');
     if (r && r.zahldatei) return ikSymbol('euro', false, 'Zahlungsdatei erzeugt (' + r.zahldatei + '), noch nicht bezahlt', true);
     var uef = blUeberfaellig(r);
     if (uef) return ikSymbol('euro', false, 'Zahlung überfällig seit ' + formatDate(uef), 'rot');
@@ -4595,6 +4620,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         if (w === 'neu') { bhbAktualisieren(st.art, st.k); }
         else if (w === 'richtung') { var zz = (BL)[b.getAttribute('data-k')]; zz.richtung = b.getAttribute('data-w'); renderAccounting('beleg', b.getAttribute('data-k')); }
         else if (w === 'ls-an' || w === 'ls-aus') beLastschrift(b, w === 'ls-an');
+        else if (w === 'zv-annehmen') beZvAnnehmen(b);
         else if (w === 'richtung-ueb') { var zu = (BL)[b.getAttribute('data-k')]; zu.richtungUeb = b.getAttribute('data-w'); renderAccounting('beleg', b.getAttribute('data-k')); }
         else if (w === 'monat') { ladeListe(st.art, st.k, b.getAttribute('data-monat')); window.scrollTo(0, 0); }
         else if (w === 'loeschen') { BE.meldung = ''; BE.loeschen = { id: Number(b.getAttribute('data-id')), laeuft: false, fehler: '' }; beAlleRender(); }
