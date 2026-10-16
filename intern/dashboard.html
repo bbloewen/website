@@ -2913,7 +2913,29 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     return esc(formatDate(String(r.datum).slice(0, 10))) + eing;
   }
   // Spalte Zahlung: gebuchte Belege zeigen die in BuchhaltungsButler zugewiesene Zahlung, noch nicht gebuchte die im Dashboard zugeordnete oder vorgeschlagene Abbuchung
-  function beZahlungZelle(r, a, b) {
+  // Lastschrift am Beleg kennzeichnen (nur Eingangsrechnungen mit offener Zahlung): erscheint dann nicht mehr in der Überweisungsliste
+  function beLastschriftLink(r, a, b) {
+    var ls = r.lastschrift; if (!ls || blRichtung(r) !== 'eingang' || blBezahlt(r) || (a && String(a.auslage) === 'true')) return '';
+    if (a && a.zahlung && (a.zahlung.status === 'zugeordnet' || a.zahlung.status === 'auto')) return '';
+    var k = BE.mandantAktuell;
+    if (ls.am_beleg) return '<div class="notiz" style="margin:2px 0 0">Lastschrift</div><div><button type="button" class="link-btn" data-be="ls-aus" data-k="' + esc(k) + '" data-fall="' + esc(ls.fall) + '">zurücknehmen</button></div>';
+    if (ls.kreditor) return '<div class="notiz" style="margin:2px 0 0;white-space:normal">Lastschrift, beim Kreditor so eingestellt</div>';
+    var gp = (b && b.gegenpartei) || (a && a.aussteller) || '', betrag = b && b.brutto !== null && b.brutto !== undefined ? Number(b.brutto) : (a && a.brutto !== null && a.brutto !== undefined ? Number(a.brutto) : 0);
+    var datum = String((b && b.datum) || (a && a.datum) || r.datum || '').slice(0, 10), nr = (b && b.nummer) || (a && a.nummer) || '';
+    return '<div><button type="button" class="link-btn" data-be="ls-an" data-k="' + esc(k) + '" data-fall="' + esc(ls.fall) + '" data-gp="' + esc(gp) + '" data-betrag="' + esc(Math.abs(betrag)) + '" data-datum="' + esc(datum) + '" data-nr="' + esc(nr) + '" title="Die Firma zieht den Betrag selbst ein, es ist nichts zu überweisen. Der Beleg steht dann nicht mehr in der Überweisungsliste.">Lastschrift</button></div>';
+  }
+  async function beLastschrift(b, an) {
+    var k = b.getAttribute('data-k'), fall = b.getAttribute('data-fall'); BE.meldung = '';
+    try {
+      if (an) await uePost('posten-zeile', { mandant: k, fall_id: fall, eingang: true, gegenpartei: b.getAttribute('data-gp'), betrag: Number(b.getAttribute('data-betrag')), datum: b.getAttribute('data-datum'), rechnungsnr: b.getAttribute('data-nr') });
+      var r = await uePost('posten-lastschrift', { mandant: k, fall_id: fall, lastschrift: an });
+      if (!r.ok) throw new Error(r.meldung || 'Nicht gespeichert');
+      BE.meldung = an ? 'Beleg als Lastschrift gekennzeichnet, er steht nicht mehr in der Überweisungsliste.' : 'Lastschrift-Kennzeichnung zurückgenommen.';
+    } catch (e) { window.alert(e.message); }
+    if (BL[k] && BL[k].daten) ladeListe('beleg', k, BL[k].daten.monat);
+  }
+  function beZahlungZelle(r, a, b) { return beZahlungZelle0(r, a, b) + beLastschriftLink(r, a, b); }
+  function beZahlungZelle0(r, a, b) {
     if (blGebucht(r)) { var bz = b ? Number(b.bezahlt || 0) : 0; return bz > 0 ? '<span class="zahl-ok">' + esc(formatEuro(-bz)) + '</span>' : '<span class="gedaempft">–</span>'; }
     var z = a && a.zahlung, rf = a && a.geplant && a.geplant.rueckfrage, offen = rf && !(a.geplant && a.geplant.gebucht_am);
     if (!z) return '<span class="gedaempft">–</span>';
@@ -3031,6 +3053,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     return '<div>' + (a.buchungstext ? esc(a.buchungstext) : '<span class="gedaempft">kein Vorschlag</span>') + ' <button type="button" class="link-btn" data-be="bt-edit" data-id="' + a.id + '" data-zweck="' + esc(a.buchungstext_zweck || '') + '" aria-label="Buchungstext ändern">ändern</button></div>';
   }
   function renderBelegListe(k) {
+    BE.mandantAktuell = k;
     var z = BL[k], d = z.daten, kp = d.kpi || {};
     var anteil = Math.min(100, Math.round(Number(kp.kosten_monat || 0) / BE_BUDGET_USD * 100));
     var bhGes = Number(kp.bhb_stimmt || 0) + Number(kp.bhb_abweichung || 0) + Number(kp.bhb_fehlt || 0);
@@ -4571,6 +4594,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         var w = b.getAttribute('data-be'), st = zustand(b);
         if (w === 'neu') { bhbAktualisieren(st.art, st.k); }
         else if (w === 'richtung') { var zz = (BL)[b.getAttribute('data-k')]; zz.richtung = b.getAttribute('data-w'); renderAccounting('beleg', b.getAttribute('data-k')); }
+        else if (w === 'ls-an' || w === 'ls-aus') beLastschrift(b, w === 'ls-an');
         else if (w === 'richtung-ueb') { var zu = (BL)[b.getAttribute('data-k')]; zu.richtungUeb = b.getAttribute('data-w'); renderAccounting('beleg', b.getAttribute('data-k')); }
         else if (w === 'monat') { ladeListe(st.art, st.k, b.getAttribute('data-monat')); window.scrollTo(0, 0); }
         else if (w === 'loeschen') { BE.meldung = ''; BE.loeschen = { id: Number(b.getAttribute('data-id')), laeuft: false, fehler: '' }; beAlleRender(); }
