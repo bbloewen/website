@@ -3134,8 +3134,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       return h;
     };
     h += zeilenHtml(zeilen.filter(function (r) { return !istUebertragen(r); }), 'Keine Belege in dieser Ansicht.');
-    h += '</tbody></table></div><div class="card-fuss">Ein Eintrag je Beleg: gebuchte Belege aus BuchhaltungsButler (täglich 5:30 Uhr gelesen' + (d.stand ? ', zuletzt ' + esc(formatDateTime(d.stand)) : '') + ') und vom Agenten gelesene Anhänge aus dem Postfach. ' +
-      'Zwei Symbole je Beleg in der Spalte Status: Buch = gebucht, Euro = Zahlung zugewiesen. Alle Hinweise des Agenten stehen im Aufklapp-Link „Agenten-Informationen“ beim Beleg. Grün und gefüllt heißt erledigt, grau mit Kontur heißt fehlt noch. Logos, Signaturen und Terminalbelege tauchen nicht auf. Löschen entfernt Beleg und Drive-Datei und legt die Mail in den Papierkorb, wenn kein weiterer relevanter Anhang daran hängt. Belege ohne erkannten Mandanten stehen in beiden Tabs.</div></div>';
+    h += '</tbody></table></div></div>';
     var uebZeilen = zeilen.filter(istUebertragen);
     if (uebZeilen.length) h += '<details class="card" style="margin-top:16px" data-be-uebertragen' + (BE.uebertragenAuf === false ? '' : ' open') + '><summary class="card-kopf" style="cursor:pointer">Nach BuchhaltungsButler übertragen · ' + esc(zahl(uebZeilen.length)) + (uebZeilen.length === 1 ? ' Beleg' : ' Belege') + '</summary>' + tabKopf + zeilenHtml(uebZeilen, '') + '</tbody></table></div></details>';
     h += kpis;
