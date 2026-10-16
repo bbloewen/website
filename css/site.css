@@ -1420,6 +1420,9 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
    Mitglieder), 5 Spalten auf Desktop, dunkelblau umrandet (Löwen-Logo-Blau)
    statt der orangen/grünen Partner-Ränder. Kein Link, reiner Flip-Hinweis. */
 .partner-wall-businessclub { grid-template-columns: repeat(5, 1fr); }
+/* Echte Mitglieder (seit 16.10.2026: Kotsch Showtechnik) tragen denselben
+   dunkelblauen Rahmen wie die Platzhalter, sind aber verlinkt. */
+.partner-tile-member .partner-tile-front { border: 2px solid var(--color-brand-navy); padding: 14px 18px; }
 .partner-tile-placeholder { cursor: default; }
 .partner-tile-placeholder .partner-tile-front { border: 2px solid var(--color-brand-navy); }
 .partner-tile-placeholder .partner-tile-back .partner-desc { font-size: 13px; }

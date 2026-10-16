@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1791893480" />
+<link rel="stylesheet" href="/css/site.css?v=1792159161" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
@@ -253,7 +253,9 @@
 
   <section class="section bg-subtle">
     <div class="container">
-      <div class="partner-wall partner-wall-businessclub" id="businessclub-wall"></div>
+      <div class="partner-wall partner-wall-businessclub" id="businessclub-wall">
+        <a class="partner-tile partner-tile-member" href="https://kotsch-showtechnik.de/" target="_blank" rel="noopener"><div class="partner-tile-inner"><div class="partner-tile-front"><img src="/assets/logos/Logo_Kotsch-Showtechnik.svg" width="3381" height="695" alt="KOTSCH Showtechnik" loading="lazy" /></div><div class="partner-tile-back"><span class="partner-tag">Club der 100</span><span class="partner-desc">Ton, Licht, LED-Wand und Bühne: Veranstaltungstechnik aus Thüringen.</span></div></div></a>
+      </div>
     </div>
   </section>
 
@@ -422,7 +424,7 @@
         '<div class="partner-tile-back"><span class="partner-desc">Ihr Unternehmen?</span></div>' +
       '</div>' +
     '</div>';
-    document.getElementById('businessclub-wall').innerHTML = tileHTML.repeat(10);
+    document.getElementById('businessclub-wall').insertAdjacentHTML('beforeend', tileHTML.repeat(9));
     if (window.lucide) window.lucide.createIcons();
   })();
 
