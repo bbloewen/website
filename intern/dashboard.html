@@ -3163,6 +3163,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var brutto = b && b.brutto !== null && b.brutto !== undefined ? Number(b.brutto) : (a && a.brutto !== null && a.brutto !== undefined ? Number(a.brutto) : null);
       var kopf = '<div class="fett">' + esc(titel) + '</div><div class="notiz" style="margin:0">' + esc(art + (nummer ? ' · Nr. ' + nummer : '')) + '</div>' +
         (b && b.datum ? '<div class="notiz" style="margin:0">Rechnungsdatum ' + esc(formatDate(String(b.datum).slice(0, 10))) + '</div>' : (a && a.datum ? '<div class="notiz" style="margin:0">Rechnungsdatum ' + esc(formatDate(String(a.datum).slice(0, 10))) + '</div>' : '')) +
+        (function () { var f = String((b && b.faellig) || (a && a.faellig) || '').slice(0, 10); return /^\d{4}-\d{2}-\d{2}$/.test(f) ? '<div class="notiz" style="margin:0">Fällig ' + esc(formatDate(f)) + '</div>' : ''; })() +
         (a ? '<div class="notiz" style="margin:0">' + esc((a.absender || '') + (a.eingang_am ? ' · Mail vom ' + formatDate(String(a.eingang_am).slice(0, 10)) : '')) + '</div>' : '');
       var ik = '', st = [];
       if (b && !blGebucht(r)) {
