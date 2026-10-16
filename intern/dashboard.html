@@ -3172,7 +3172,13 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var kopf = '<div class="fett">' + esc(titel) + '</div><div class="notiz" style="margin:0">' + esc(art + (nummer ? ' · Nr. ' + nummer : '')) + '</div>' +
         (b && b.datum ? '<div class="notiz" style="margin:0">Rechnungsdatum ' + esc(formatDate(String(b.datum).slice(0, 10))) + '</div>' : (a && a.datum ? '<div class="notiz" style="margin:0">Rechnungsdatum ' + esc(formatDate(String(a.datum).slice(0, 10))) + '</div>' : '')) +
         (function () { var fi = blFaelligInfo(r); return fi ? '<div class="notiz" style="margin:0"' + (fi.text ? ' title="Auf der Rechnung steht: ' + esc(fi.text) + '. Angesetzt ist der Tag, an dem der Beleg bei uns einging."' : '') + '>Fällig ' + esc(formatDate(fi.datum)) + (fi.text ? ' (' + esc(fi.text) + ')' : '') + '</div>' : ''; })() +
-        (a ? '<div class="notiz" style="margin:0">' + esc((a.absender || '') + (a.eingang_am ? ' · Mail vom ' + formatDate(String(a.eingang_am).slice(0, 10)) : '')) + '</div>' : '');
+        (function () {
+          if (!a) return '';
+          var echt = a.gmail_id && String(a.gmail_id).indexOf('test') !== 0 && String(a.gmail_id).indexOf('bhb:') !== 0;
+          var abs = a.absender && !/^buchhaltungsbutler$/i.test(String(a.absender).trim()) ? esc(a.absender) : '';
+          var mail = echt ? '<a href="https://mail.google.com/mail/?authuser=rechnung@basketball-loewen.com#all/' + esc(a.gmail_id) + '" target="_blank" rel="noopener">' + (a.eingang_am ? 'Mail vom ' + esc(formatDate(String(a.eingang_am).slice(0, 10))) : 'Mail') + '</a>' : '';
+          return abs || mail ? '<div class="notiz" style="margin:0">' + abs + (abs && mail ? ' · ' : '') + mail + '</div>' : '';
+        })();
       var ik = '', st = [];
       if (b && !blGebucht(r)) {
         // Aus dem Dashboard übertragen: gebucht, auch wenn der tägliche Abgleich die Buchung noch nicht aus BuchhaltungsButler gelesen hat
@@ -3198,7 +3204,6 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var links = [];
       if (a && a.drive_url) links.push('<a href="' + esc(a.drive_url) + '" target="_blank" rel="noopener">Original</a>');
       if (b && bhbBelegLink(b.link, b.dateiname)) links.push('<a href="' + esc(bhbBelegLink(b.link, b.dateiname)) + '" target="_blank" rel="noopener">Beleg in BHB</a>');
-      if (a && a.gmail_id && String(a.gmail_id).indexOf('test') !== 0 && String(a.gmail_id).indexOf('bhb:') !== 0) links.push('<a href="https://mail.google.com/mail/?authuser=rechnung@basketball-loewen.com#all/' + esc(a.gmail_id) + '" target="_blank" rel="noopener">Mail</a>');
       var loeschLink = a ? '<div style="margin-top:4px"><button type="button" class="link-btn" style="font-size:12px;color:var(--text-muted)" data-be="loeschen" data-id="' + a.id + '" title="Entfernt diesen Beleg aus der Liste und die Datei aus Google Drive. Die Mail kommt in den Papierkorb, wenn kein weiterer relevanter Anhang daran hängt. In BuchhaltungsButler ändert sich nichts." aria-label="Beleg löschen: ' + esc(titel) + '">löschen</button></div>' : '';
       // Buchungszeilen: aus BuchhaltungsButler, sonst die Beträge je Steuersatz, die der Agent gelesen hat.
       var zl = [];
