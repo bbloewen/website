@@ -3056,7 +3056,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         (a ? '<div class="notiz" style="margin:0">' + esc((a.absender || '') + (a.eingang_am ? ' · Mail vom ' + formatDate(String(a.eingang_am).slice(0, 10)) : '')) + '</div>' : '');
       var ik = '', st = [];
       if (b && !blGebucht(r)) {
-        ik = '<div class="ikreihe">' + ikSymbol('buch', false, 'In BuchhaltungsButler hochgeladen, noch nicht gebucht') + euroSym(r, blBezahlt(r), 'Zahlung zugewiesen', 'Zahlung fehlt noch') + '</div>';
+        // Aus dem Dashboard übertragen: gebucht, auch wenn der tägliche Abgleich die Buchung noch nicht aus BuchhaltungsButler gelesen hat
+        var uebGebucht = !!(a && a.geplant && a.geplant.gebucht_am);
+        ik = '<div class="ikreihe">' + (uebGebucht ? ikSymbol('buch', true, 'Gebucht: am ' + formatDate(String(a.geplant.gebucht_am).slice(0, 10)) + ' aus dem Dashboard nach BuchhaltungsButler übertragen') : ikSymbol('buch', false, 'In BuchhaltungsButler hochgeladen, noch nicht gebucht')) + euroSym(r, blBezahlt(r) || (uebGebucht && a.zahlung && (a.zahlung.status === 'zugeordnet' || a.zahlung.status === 'auto')), 'Zahlung zugewiesen', 'Zahlung fehlt noch') + '</div>';
       } else if (b) {
         var bez = blBezahlt(r);
         var teil = !bez && Number(b.bezahlt || 0) > 0 ? esc(formatEuro(Number(b.bezahlt))) + ' von ' + esc(formatEuro(Number(b.brutto || 0))) + ' bezahlt' : '';
