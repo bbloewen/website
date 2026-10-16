@@ -259,7 +259,7 @@
     </div>
   </section>
 
-  <section class="section">
+  <section class="section" id="mitmachen" style="scroll-margin-top:96px">
     <div class="container">
       <div class="cta-panel">
         <span class="eyebrow">Mitmachen</span>
@@ -426,6 +426,20 @@
     '</div>';
     document.getElementById('businessclub-wall').insertAdjacentHTML('beforeend', tileHTML.repeat(9));
     if (window.lucide) window.lucide.createIcons();
+  })();
+
+  /* Sprung von der Sponsorenseite (#mitmachen): Das Paket soll mittig im Bild
+     stehen, nicht am oberen Rand unter der Navigation. Nach dem Laden der Bilder
+     noch einmal ausrichten, weil sich die Hoehe darueber verschiebt. */
+  (function () {
+    function zumPaket() {
+      var ziel = document.getElementById('mitmachen');
+      if (ziel && location.hash === '#mitmachen') {
+        ziel.scrollIntoView({ block: 'center', behavior: 'auto' });
+      }
+    }
+    window.addEventListener('load', function () { zumPaket(); setTimeout(zumPaket, 300); });
+    window.addEventListener('hashchange', zumPaket);
   })();
 
   document.querySelectorAll('[data-package]').forEach(function (btn) {
