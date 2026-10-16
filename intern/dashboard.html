@@ -2989,6 +2989,17 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     } catch (e) { window.alert(e.message); }
     if (BL[k] && BL[k].daten) ladeListe('beleg', k, BL[k].daten.monat);
   }
+  async function beFaelligSpeichern() {
+    var f = BE.fe; if (!f) return;
+    var inp = document.querySelector('[data-be="fe-wert"]'), wert = inp ? inp.value : f.wert;
+    try {
+      await uePost('posten-zeile', { mandant: f.k, fall_id: f.fall, eingang: f.ein, gegenpartei: f.gp, betrag: f.betrag, datum: f.datum, rechnungsnr: f.nr });
+      var r = await uePost('posten-faelligkeit', { mandant: f.k, fall_id: f.fall, faelligkeit: wert });
+      if (!r.ok) throw new Error(r.meldung || 'Nicht gespeichert');
+      BE.fe = null; BE.meldung = 'Fälligkeit geändert.';
+    } catch (e) { window.alert(e.message); }
+    if (BL[f.k] && BL[f.k].daten) ladeListe('beleg', f.k, BL[f.k].daten.monat);
+  }
   function beZahlungZelle(r, a, b) { return beZahlungZelle0(r, a, b) + beVorschlagZuordnen(r) + beLastschriftLink(r, a, b); }
   function beZahlungZelle0(r, a, b) {
     if (blGebucht(r)) { var bz = b ? Number(b.bezahlt || 0) : 0; return bz > 0 ? '<span class="zahl-ok">' + esc(formatEuro(-bz)) + '</span>' : '<span class="gedaempft">–</span>'; }
@@ -3053,20 +3064,25 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     return Number(r.zahlungen || 0) > 0 || (brutto > 0 && Math.abs(Number(r.bhb.bezahlt || 0)) >= brutto - 0.01);
   }
   // Gebucht, aber noch nicht bezahlt und über das Zahlungsziel hinaus: liefert das Fälligkeitsdatum. Ohne Fälligkeit in der Rechnung gelten 14 Tage nach dem Rechnungsdatum.
-  // Fälligkeit eines Belegs: Datum aus BuchhaltungsButler oder von der Rechnung. Steht dort nur "sofort" oder Ähnliches, gilt der Tag, an dem der Beleg bei uns einging.
+  // Fälligkeit eines Belegs (Marko 16.10.2026): nachgetragenes Datum (im Board geändert), sonst Datum aus BuchhaltungsButler oder von der Rechnung, sonst der Tag, an dem der Beleg bei uns einging.
+  function blEingangsTag(r) {
+    var a = r && r.agent, b = r && r.bhb;
+    var t = String((a && a.eingang_am) || (r && r.eingang) || (a && a.datum) || (b && b.datum) || (r && r.datum) || '').slice(0, 10);
+    return /^\d{4}-\d{2}-\d{2}$/.test(t) ? t : '';
+  }
   function blFaelligInfo(r) {
     var a = r && r.agent, b = r && r.bhb, roh = String((b && b.faellig) || (a && a.faellig) || '').trim();
-    if (/^\d{4}-\d{2}-\d{2}/.test(roh)) return { datum: roh.slice(0, 10), text: '' };
-    if (!roh) return null;
-    var ein = String((a && a.eingang_am) || (r && r.eingang) || (a && a.datum) || (b && b.datum) || (r && r.datum) || '').slice(0, 10);
-    return /^\d{4}-\d{2}-\d{2}$/.test(ein) ? { datum: ein, text: roh.slice(0, 30) } : null;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(String((r && r.faelligNotiz) || ''))) return { datum: r.faelligNotiz, text: '', quelle: 'nachgetragen' };
+    if (/^\d{4}-\d{2}-\d{2}/.test(roh)) return { datum: roh.slice(0, 10), text: '', quelle: 'beleg' };
+    var ein = blEingangsTag(r); if (!ein) return null;
+    return { datum: ein, text: roh.slice(0, 30), quelle: roh ? 'sofort' : 'eingang' };
   }
   function blUeberfaellig(r) {
     var a = r && r.agent, b = r && r.bhb;
     if (!r || !(blGebucht(r) || (a && a.geplant && a.geplant.gebucht_am)) || blBezahlt(r)) return '';
     if (a && a.zahlung && (a.zahlung.status === 'zugeordnet' || a.zahlung.status === 'auto')) return '';
     var fi = blFaelligInfo(r), f = fi ? fi.datum : '';
-    if (!f) { var dt = String((b && b.datum) || (a && a.datum) || r.datum || '').slice(0, 10); if (!dt) return ''; var t = new Date(dt + 'T12:00:00'); t.setDate(t.getDate() + 14); f = t.toISOString().slice(0, 10); }
+    if (!f) return '';
     return f < new Date().toISOString().slice(0, 10) ? f : '';
   }
   function blRichtung(r) { return r.bhb && /outbound/.test(r.bhb.typ || '') ? 'ausgang' : 'eingang'; }
@@ -3169,16 +3185,24 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var nummer = (b && b.nummer) || (a && a.nummer) || '';
       var art = b ? (/outbound/.test(b.typ || '') ? 'Ausgang' : 'Eingang') : (a && a.typ ? ({ rechnung: 'Rechnung', kassenbon: 'Kassenbon', auslage_foto: 'Auslagenfoto', gutschrift: 'Gutschrift', mahnung: 'Mahnung', angebot: 'Angebot', kontoauszug: 'Kontoauszug', vertrag: 'Vertrag', sonstiges: 'Sonstiges' }[String(a.typ).toLowerCase()] || (String(a.typ).replace(/_/g, ' ').charAt(0).toUpperCase() + String(a.typ).replace(/_/g, ' ').slice(1))) : 'Eingang');
       var brutto = b && b.brutto !== null && b.brutto !== undefined ? Number(b.brutto) : (a && a.brutto !== null && a.brutto !== undefined ? Number(a.brutto) : null);
-      var kopf = '<div class="fett">' + esc(titel) + '</div><div class="notiz" style="margin:0">' + esc(art + (nummer ? ' · Nr. ' + nummer : '')) + '</div>' +
-        (b && b.datum ? '<div class="notiz" style="margin:0">Rechnungsdatum ' + esc(formatDate(String(b.datum).slice(0, 10))) + '</div>' : (a && a.datum ? '<div class="notiz" style="margin:0">Rechnungsdatum ' + esc(formatDate(String(a.datum).slice(0, 10))) + '</div>' : '')) +
-        (function () { var fi = blFaelligInfo(r); return fi ? '<div class="notiz" style="margin:0"' + (fi.text ? ' title="Auf der Rechnung steht: ' + esc(fi.text) + '. Angesetzt ist der Tag, an dem der Beleg bei uns einging."' : '') + '>Fällig ' + esc(formatDate(fi.datum)) + (fi.text ? ' (' + esc(fi.text) + ')' : '') + '</div>' : ''; })() +
-        (function () {
-          if (!a) return '';
-          var echt = a.gmail_id && String(a.gmail_id).indexOf('test') !== 0 && String(a.gmail_id).indexOf('bhb:') !== 0;
-          var abs = a.absender && !/^buchhaltungsbutler$/i.test(String(a.absender).trim()) ? esc(a.absender) : '';
-          var mail = echt ? '<a href="https://mail.google.com/mail/?authuser=rechnung@basketball-loewen.com#all/' + esc(a.gmail_id) + '" target="_blank" rel="noopener">' + (a.eingang_am ? 'Mail vom ' + esc(formatDate(String(a.eingang_am).slice(0, 10))) : 'Mail') + '</a>' : '';
-          return abs || mail ? '<div class="notiz" style="margin:0">' + abs + (abs && mail ? ' · ' : '') + mail + '</div>' : '';
-        })();
+      var richtTxt = blRichtung(r) === 'ausgang' ? 'Ausgang' : 'Eingang';
+      var typTxt = !b && a && a.typ ? art : '';
+      var kz = function (t, extra) { return '<div class="notiz" style="margin:0"' + (extra || '') + '>' + t + '</div>'; };
+      var rechDat = String((b && b.datum) || (a && a.datum) || '').slice(0, 10);
+      var faellZeile = (function () {
+        var fi = blFaelligInfo(r), key = r.lastschrift && r.lastschrift.fall;
+        if (BE.fe && key && BE.fe.fall === key) return '<div class="notiz" style="margin:0">Fällig <input type="date" class="eingabe-klein" style="width:150px" data-be="fe-wert" value="' + esc(BE.fe.wert) + '" aria-label="Fälligkeitsdatum"> <button type="button" class="link-btn" data-be="fe-speichern">Speichern</button> <button type="button" class="link-btn" data-be="fe-abbruch">Abbrechen</button></div>';
+        if (!fi) return kz('Fällig –');
+        var hinweis = fi.quelle === 'sofort' ? ' (' + esc(fi.text) + ')' : (fi.quelle === 'eingang' ? ' (Eingangstag)' : (fi.quelle === 'nachgetragen' ? ' (geändert)' : ''));
+        var tip = fi.quelle === 'sofort' ? 'Auf der Rechnung steht: ' + fi.text + '. Angesetzt ist der Tag, an dem der Beleg bei uns einging.' : (fi.quelle === 'eingang' ? 'Keine Fälligkeit bekannt, es gilt der Tag, an dem der Beleg bei uns einging.' : '');
+        var link = key ? ' <button type="button" class="link-btn" style="font-size:12px" data-be="fe-start" data-k="' + esc(BE.mandantAktuell) + '" data-fall="' + esc(key) + '" data-wert="' + esc(fi.datum) + '" data-gp="' + esc(titel) + '" data-betrag="' + esc(brutto !== null ? Math.abs(brutto) : 0) + '" data-datum="' + esc(rechDat) + '" data-nr="' + esc(nummer) + '" data-ein="' + (blRichtung(r) === 'eingang' ? '1' : '0') + '" title="Fälligkeitsdatum ändern">ändern</button>' : '';
+        return '<div class="notiz" style="margin:0"' + (tip ? ' title="' + esc(tip) + '"' : '') + '>Fällig ' + esc(formatDate(fi.datum)) + hinweis + link + '</div>';
+      })();
+      var mailZeile = (function () {
+        if (!a || !a.gmail_id || String(a.gmail_id).indexOf('test') === 0 || String(a.gmail_id).indexOf('bhb:') === 0) return '';
+        return kz('<a href="https://mail.google.com/mail/?authuser=rechnung@basketball-loewen.com#all/' + esc(a.gmail_id) + '" target="_blank" rel="noopener">' + (a.eingang_am ? 'Mail vom ' + esc(formatDate(String(a.eingang_am).slice(0, 10))) : 'Mail') + '</a>');
+      })();
+      var kopf = '<div class="fett">' + esc(titel) + '</div>' + kz(esc(richtTxt + (typTxt ? ' · ' + typTxt : ''))) + kz('Nr. ' + (nummer ? esc(nummer) : '–')) + kz('Rechnungsdatum ' + (rechDat ? esc(formatDate(rechDat)) : '–')) + faellZeile + mailZeile;
       var ik = '', st = [];
       if (b && !blGebucht(r)) {
         // Aus dem Dashboard übertragen: gebucht, auch wenn der tägliche Abgleich die Buchung noch nicht aus BuchhaltungsButler gelesen hat
@@ -4675,6 +4699,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         else if (w === 'ls-an' || w === 'ls-aus') beLastschrift(b, w === 'ls-an');
         else if (w === 'zv-annehmen') beZvAnnehmen(b);
         else if (w === 'kred-wahl') beKredWahl(b);
+        else if (w === 'fe-start') { BE.fe = { k: b.getAttribute('data-k'), fall: b.getAttribute('data-fall'), wert: b.getAttribute('data-wert'), gp: b.getAttribute('data-gp'), betrag: Number(b.getAttribute('data-betrag')), datum: b.getAttribute('data-datum'), nr: b.getAttribute('data-nr'), ein: b.getAttribute('data-ein') === '1' }; renderAccounting('beleg', BE.fe.k); }
+        else if (w === 'fe-abbruch') { var kk = BE.fe && BE.fe.k; BE.fe = null; if (kk) renderAccounting('beleg', kk); }
+        else if (w === 'fe-speichern') beFaelligSpeichern();
         else if (w === 'zv-ablehnen') beZvAblehnen(b);
         else if (w === 'richtung-ueb') { var zu = (BL)[b.getAttribute('data-k')]; zu.richtungUeb = b.getAttribute('data-w'); renderAccounting('beleg', b.getAttribute('data-k')); }
         else if (w === 'monat') { ladeListe(st.art, st.k, b.getAttribute('data-monat')); window.scrollTo(0, 0); }
