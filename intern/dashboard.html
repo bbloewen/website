@@ -2921,8 +2921,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var ls = r.lastschrift; if (!ls || blRichtung(r) !== 'eingang' || blBezahlt(r) || (a && String(a.auslage) === 'true')) return '';
     if (a && a.zahlung && (a.zahlung.status === 'zugeordnet' || a.zahlung.status === 'auto')) return '';
     var k = BE.mandantAktuell;
-    if (ls.am_beleg) return '<div class="notiz" style="margin:2px 0 0">Lastschrift</div><div><button type="button" class="link-btn" data-be="ls-aus" data-k="' + esc(k) + '" data-fall="' + esc(ls.fall) + '">zurücknehmen</button></div>';
-    if (ls.kreditor) return '<div class="notiz" style="margin:2px 0 0;white-space:normal">Lastschrift, beim Kreditor so eingestellt</div>';
+    // Das Wort "Lastschrift" steht schon anstelle des Betrags (beZahlungZelle), hier nur der unauffällige Link zum Zurücknehmen
+    if (ls.am_beleg) return '<div><button type="button" class="link-btn" style="font-size:12px;color:var(--text-muted)" data-be="ls-aus" data-k="' + esc(k) + '" data-fall="' + esc(ls.fall) + '">zurücknehmen</button></div>';
+    if (ls.kreditor) return '';
     var gp = (b && b.gegenpartei) || (a && a.aussteller) || '', betrag = b && b.brutto !== null && b.brutto !== undefined ? Number(b.brutto) : (a && a.brutto !== null && a.brutto !== undefined ? Number(a.brutto) : 0);
     var datum = String((b && b.datum) || (a && a.datum) || r.datum || '').slice(0, 10), nr = (b && b.nummer) || (a && a.nummer) || '';
     return '<div><button type="button" class="link-btn" data-be="ls-an" data-k="' + esc(k) + '" data-fall="' + esc(ls.fall) + '" data-gp="' + esc(gp) + '" data-betrag="' + esc(Math.abs(betrag)) + '" data-datum="' + esc(datum) + '" data-nr="' + esc(nr) + '" title="Die Firma zieht den Betrag selbst ein, es ist nichts zu überweisen. Der Beleg steht dann nicht mehr in der Überweisungsliste.">Lastschrift</button></div>';
@@ -3010,7 +3011,12 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     } catch (e) { window.alert(e.message); }
     if (BL[f.k] && BL[f.k].daten) ladeListe('beleg', f.k, BL[f.k].daten.monat);
   }
-  function beZahlungZelle(r, a, b) { return beZahlungZelle0(r, a, b) + beVorschlagZuordnen(r) + beLastschriftLink(r, a, b); }
+  function beZahlungZelle(r, a, b) {
+    var basis = beZahlungZelle0(r, a, b), ls = r.lastschrift;
+    // Lastschrift (am Beleg oder beim Kreditor), Zahlung noch nicht zugeordnet: das Wort steht anstelle des Platzhalters für den Betrag
+    if (ls && (ls.am_beleg || ls.kreditor) && blRichtung(r) === 'eingang' && !blBezahlt(r) && !(r.agent && String(r.agent.auslage) === 'true') && basis.indexOf('>–<') >= 0) basis = '<span>Lastschrift</span>';
+    return basis + beVorschlagZuordnen(r) + beLastschriftLink(r, a, b);
+  }
   function beZahlungZelle0(r, a, b) {
     if (blGebucht(r)) { var bz = b ? Number(b.bezahlt || 0) : 0; return bz > 0 ? '<span class="zahl-ok">' + esc(formatEuro(-bz)) + '</span>' : '<span class="gedaempft">–</span>'; }
     var z = a && a.zahlung, rf = a && a.geplant && a.geplant.rueckfrage, offen = rf && !(a.geplant && a.geplant.gebucht_am);
@@ -3249,9 +3255,14 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       else zl = [{ agent: !!a, netto: a ? num(a.netto) : null, steuer: a ? num(a.steuer) : null, brutto: a ? num(a.brutto) : null, hinweisBhb: !!b && !a }];
       // Entscheidung aus den Rückfragen (bestätigt, noch nicht in BuchhaltungsButler): Kontierung schon in der Zeile zeigen
       var gp = a && a.geplant && ['bestaetigt', 'korrigiert'].indexOf(a.geplant.status) >= 0 && !blGebucht(r) ? a.geplant : null;
+      // Aufteilung nach Konto (zum Beispiel Ware und Pfand): je Teil eine Zeile
+      if (gp && Array.isArray(gp.teile) && gp.teile.length > 1 && zl.length === 1 && zl[0].agent) {
+        var z0 = zl[0], satz0 = z0.satz !== null && z0.satz !== undefined && z0.satz !== '' ? z0.satz : (gp.vat ? parseFloat(String(gp.vat)) : null);
+        zl = gp.teile.map(function (t) { var br = num(t.brutto), ne = nettoVon(br, satz0); return { agent: true, satz: satz0, netto: ne, steuer: br !== null && ne !== null ? Math.round((br - ne) * 100) / 100 : null, brutto: br, teil: t }; });
+      }
       if (gp) zl.forEach(function (x) {
         if (!x.agent) return;
-        x.plan = true; x.konto = gp.sachkonto; x.kname = gp.sachkonto_name; var gk = gp.gegenkonto; x.gegen = gk && gk.eindeutig ? (gk.neu ? 'neu' : gk.nummer) : ''; x.gname = gk && gk.name ? gk.name : ''; x.gunklar = gk && !gk.eindeutig ? (gk.kandidaten || []) : null; x.kst1 = gp.kst1; x.kst1n = gp.kst1_name; x.kst2 = gp.kst2; x.kst2n = gp.kst2_name;
+        x.plan = true; x.konto = x.teil ? x.teil.sachkonto : gp.sachkonto; x.kname = x.teil ? x.teil.name : gp.sachkonto_name; var gk = gp.gegenkonto; x.gegen = gk && gk.eindeutig ? (gk.neu ? 'neu' : gk.nummer) : ''; x.gname = gk && gk.name ? gk.name : ''; x.gunklar = gk && !gk.eindeutig ? (gk.kandidaten || []) : null; x.kst1 = gp.kst1; x.kst1n = gp.kst1_name; x.kst2 = gp.kst2; x.kst2n = gp.kst2_name;
         if ((x.satz === null || x.satz === undefined || x.satz === '') && gp.vat) { var sv = parseFloat(String(gp.vat)); if (isFinite(sv)) x.satz = sv; }
       });
       else if (a && a.geplant && a.geplant.status === 'steuerberater' && !blGebucht(r)) zl.forEach(function (x) { if (x.agent) x.beiStb = true; });
