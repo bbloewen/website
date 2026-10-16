@@ -306,7 +306,7 @@
       "lastmod": "2026-09-28"
     },
     "news/instagram-archiv.html": {
-      "hash": "b7955f4824e4867c59b56cc12cb0b9afc4d485bd",
+      "hash": "93a10ead008b12b4ef82ce4db0265f1a4f3fb35d",
       "lastmod": "2026-10-16"
     },
     "news/newsletter/index.html": {
@@ -418,12 +418,16 @@
       "lastmod": "2026-10-16"
     },
     "saison/profis/gameday/index.html": {
-      "hash": "68be82cb7b0d2077790cadb79f91ca6efe38eb97",
+      "hash": "f6203929a2db048aefa369972c5db4eecb23ac1d",
       "lastmod": "2026-10-16"
     },
     "saison/profis/gameday/spieltagsinfo/ausgabe-1/index.html": {
       "hash": "d811a3b583bb7cd635f9e1e17b6d00fc08561e9f",
       "lastmod": "2026-10-15"
+    },
+    "saison/profis/gameday/spieltagsinfo/ausgabe-2/index.html": {
+      "hash": "dfe0cdeda946fe192a24981fa952eee060d4fc82",
+      "lastmod": "2026-10-16"
     },
     "saison/spielplan.html": {
       "hash": "c9159dbdbbdebac164c2f7ef3b8e8fab4e48be4b",
