@@ -9,6 +9,14 @@
       "cover": "01-titel-cover.webp",
       "pdf": "ausgabe-1-spieltagsinfo.pdf",
       "seiten": 28
+    },
+    {
+      "nr": 2,
+      "titel": "Löwen gegen Reutlingen",
+      "beschreibung": "Pinktober in der Riethsporthalle: Kader der Löwen und der Ravens aus Reutlingen, Ligatabelle und Spielplan, der Oberbürgermeister als neues Mitglied, der Half-Court-Shot um ein Trikot und der Baufortschritt am CATL LÖWENPARK.",
+      "cover": "01-titel-cover.webp",
+      "pdf": "ausgabe-2-spieltagsinfo.pdf",
+      "seiten": 26
     }
   ]
 }
