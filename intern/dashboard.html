@@ -2915,6 +2915,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (blGebucht(r)) { var bz = b ? Number(b.bezahlt || 0) : 0; return bz > 0 ? '<span class="zahl-ok">' + esc(formatEuro(-bz)) + '</span>' : '<span class="gedaempft">–</span>'; }
     var z = a && a.zahlung, rf = a && a.geplant && a.geplant.rueckfrage, offen = rf && !(a.geplant && a.geplant.gebucht_am);
     if (!z) return '<span class="gedaempft">–</span>';
+    // Schon übertragen und Zahlung zugeordnet: wie bei den gebuchten Belegen nur der grüne Betrag, Datum und Gegenpartei im Tooltip
+    if (!offen && (z.status === 'zugeordnet' || z.status === 'auto')) return '<span class="zahl-ok" title="' + esc(formatDate(String(z.datum).slice(0, 10)) + (z.name ? ' · ' + z.name : '')) + '">' + esc(formatEuro(z.betrag)) + '</span>';
     var betrag = '<div class="nowrap zahlen ' + (z.status === 'vorschlag' ? 'zahl-vorschlag' : 'zahl-ok') + '">' + esc(formatEuro(z.betrag)) + '</div>' + '<div class="notiz" style="margin:0;white-space:normal">' + esc(formatDate(String(z.datum).slice(0, 10))) + (z.name ? ' · ' + esc(z.name) : '') + '</div>';
     var knopf = function (w, t, extra) { return '<div><button type="button" class="link-btn" data-be="' + w + '" data-rf="' + rf + '"' + (extra || '') + '>' + t + '</button></div>'; };
     if (z.status === 'keine') return '<span class="gedaempft">keine Zahlung zugeordnet</span>' + (offen ? knopf('zahl-loesen', 'wieder vorschlagen') : '');
