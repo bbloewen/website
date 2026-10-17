@@ -3487,7 +3487,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (r.anhang_name && r.bhb_id) links.push('<a href="' + esc(bhbBelegLink('', r.anhang_name)) + '" target="_blank" rel="noopener" title="Öffnet den Beleg in BuchhaltungsButler. Das klappt nur, wenn du dort als ' + esc(r.mandant) + ' angemeldet bist, sonst kommt „Datei existiert nicht“.">Beleg in BHB (' + esc(r.mandant) + ')</a>');
     if (r.bhb_id) links.push('<span class="notiz" style="display:inline;margin:0">BHB-Beleg ' + esc(r.bhb_id) + '</span>');
     links.push('<span class="notiz" style="display:inline;margin:0">' + (r.nur_bhb ? 'liegt in BuchhaltungsButler, noch nicht gebucht' : (r.aus_bhb ? 'aus BuchhaltungsButler geholt und gelesen' : 'aus dem Postfach gelesen')) + '</span>');
-    var h = '<div class="card pad rf-karte rf-' + esc(r.mandant) + '">' + kopf + '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px">' + links.join('') + '</div>';
+    var h = '<div id="rf-karte-' + r.id + '" class="card pad rf-karte rf-' + esc(r.mandant) + '">' + kopf + '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px">' + links.join('') + '</div>';
     if (r.auslage_von) h += '<div class="notiz" style="margin:0 0 8px">' + (r.erstattung ? 'Erstattung gefunden: ' + esc(formatDate(String(r.erstattung.datum).slice(0, 10))) + ', ' + esc(formatEuro(Math.abs(Number(r.erstattung.betrag)))) + '.' : 'Noch keine Erstattung gefunden: Zahlung muss ausgelöst werden.') + '</div>';
     else if (r.auslage) h += '<div class="notiz" style="margin:0 0 8px">Auslage vermutet, Person unklar: der Kreditor ist die Person, die ausgelegt hat.</div>';
     if (v.sachkonto) {
@@ -3498,7 +3498,14 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         ((v.kandidaten || []).length ? '<div class="notiz" style="margin:6px 0 0">Mögliche Konten aus BuchhaltungsButler: ' + v.kandidaten.map(function (c) { return esc(comboText(c)) + (c.n ? ' (' + c.n + '×)' : ''); }).join(' · ') + '</div>' : '') + '</div>';
     }
     h += rfBtZeile(r);
-    if (r.dublette_von && !r.imGruppe) h += '<div class="hinweis-warn" style="margin-top:6px">Mögliche Doppelung: gleicher Aussteller, Betrag und Nummer wie Rückfrage ' + esc(String(r.dublette_von)) + ' (schon entschieden).</div>';
+    if (r.dublette_von && !r.imGruppe) {
+      var dv = ((RF.daten && RF.daten.rueckfragen) || []).filter(function (x) { return x.id === r.dublette_von; })[0], dvTxt = { offen: 'noch offen', bestaetigt: 'bestätigt', korrigiert: 'korrigiert', verworfen: 'erledigt, kein Beleg', steuerberater: 'beim Steuerberater' };
+      var dvL = [];
+      if (dv && dv.drive_url) dvL.push('<a href="' + esc(dv.drive_url) + '" target="_blank" rel="noopener">Original dieser Rückfrage in Drive</a>');
+      if (dv && dv.anhang_name && dv.bhb_id) dvL.push('<a href="' + esc(bhbBelegLink('', dv.anhang_name)) + '" target="_blank" rel="noopener">Beleg in BHB (' + esc(dv.mandant) + ')</a>');
+      if (dv) dvL.push('<button type="button" class="link-btn" data-rf="zeige" data-id="' + dv.id + '">Rückfrage ' + dv.id + ' ansehen</button>');
+      h += '<div class="hinweis-warn" style="margin-top:6px">Mögliche Doppelung: gleicher Aussteller, Betrag und Nummer wie Rückfrage ' + esc(String(r.dublette_von)) + (dv ? ' (' + esc(dvTxt[dv.status] || dv.status) + (dv.status === 'bestaetigt' || dv.status === 'korrigiert' ? ': ' + (dv.entscheidung && dv.entscheidung.sachkonto ? esc(dv.entscheidung.sachkonto + (dv.entscheidung.kreditor ? ', ' + dv.entscheidung.kreditor : '')) : '') : '') + (dv.importiert ? ', importiert ' + esc(formatDate(String(dv.importiert).slice(0, 10))) : '') + ')' : ' (schon entschieden)') + '.' + (dvL.length ? '<div style="margin-top:4px;display:flex;gap:12px;flex-wrap:wrap">' + dvL.join('') + '</div>' : '') + '</div>';
+    }
     (v.hinweise || []).filter(function (x) { var split = (r.betraege || []).map(function (b) { return Number(b.steuersatz); }).filter(function (n, i, ar) { return ar.indexOf(n) === i; }).length > 1; return (!(r.auslage || r.auslage_von) || !/^Auslage/.test(x)) && !(split && /^Die Regel erwartet/.test(x)); }).forEach(function (x) { h += '<div class="hinweis-warn" style="margin-top:6px">' + esc(x) + '</div>'; });
     if (r.hinweis) h += '<details style="margin-top:6px"><summary class="text-klein">Hinweis des Lesers</summary><div class="notiz" style="margin:4px 0 0">' + esc(r.hinweis) + '</div></details>';
     if (ed && ed.modus === 'anders') {
@@ -3737,7 +3744,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     } else if (RF.filter === 'erledigt') {
       var erl = alle.filter(function (r) { return r.status === 'bestaetigt' || r.status === 'korrigiert' || r.status === 'verworfen'; });
       h += '<div class="card"><div class="card-kopf" style="margin:0">Entschieden (letzte 60 Tage)</div><div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Beleg</th><th>Entscheidung</th><th>Konto</th><th>Wer, wann</th></tr></thead><tbody>' +
-        (erl.length ? erl.map(function (r) { return '<tr><td><div class="fett">' + rfTitel(r) + '</div><div class="notiz" style="margin:0">' + esc((r.nummer ? 'Nr. ' + r.nummer + ' · ' : '') + (r.brutto !== null && r.brutto !== undefined ? formatEuro(Number(r.brutto)) : '') + ' · ' + r.mandant) + '</div></td><td>' + esc(stat[r.status] || r.status) + '</td><td>' + (r.status === 'verworfen' ? '' : rfKonto(r.entscheidung)) + '</td><td class="notiz">' + esc((r.entschieden_von || '') + ' · ' + (r.entschieden_am ? formatDateTime(r.entschieden_am) : '')) + '</td></tr>'; }).join('') : '<tr><td colspan="4" class="leer">Noch nichts entschieden.</td></tr>') + '</tbody></table></div></div>';
+        (erl.length ? erl.map(function (r) { return '<tr id="rf-ent-' + r.id + '"><td><div class="fett">' + rfTitel(r) + '</div><div class="notiz" style="margin:0">' + esc((r.nummer ? 'Nr. ' + r.nummer + ' · ' : '') + (r.brutto !== null && r.brutto !== undefined ? formatEuro(Number(r.brutto)) : '') + ' · ' + r.mandant) + '</div></td><td>' + esc(stat[r.status] || r.status) + '</td><td>' + (r.status === 'verworfen' ? '' : rfKonto(r.entscheidung)) + '</td><td class="notiz">' + esc((r.entschieden_von || '') + ' · ' + (r.entschieden_am ? formatDateTime(r.entschieden_am) : '')) + '</td></tr>'; }).join('') : '<tr><td colspan="4" class="leer">Noch nichts entschieden.</td></tr>') + '</tbody></table></div></div>';
     } else {
       var w = (RF.daten.wissen || []).filter(function (x) { return RF.mandant === 'alle' || x.mandant === RF.mandant; });
       h += '<div class="card"><div class="card-kopf" style="margin:0">Gelerntes Wissen je Falltyp (Mandant, Aussteller, Zweck)</div><div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Mandant</th><th>Aussteller</th><th>Zweck</th><th>Konto</th><th>KST 1</th><th>KST 2</th><th class="rechts"><abbr title="Wie oft ohne Korrektur bestätigt">Bestätigt</abbr></th><th class="rechts"><abbr title="Wie oft korrigiert">Korrigiert</abbr></th><th>Stand</th></tr></thead><tbody>' +
@@ -3840,6 +3847,10 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
           RF.edit = null; RF.meldung = dz.meldung; RF.meldungLink = dz.entwurf_link || ''; RF.meldungLinkFuer = RF.meldung;
           await ladeRF();
         } catch (ezz) { ez.laeuft = false; ez.fehler = ezz.message; renderRF(); }
+      }
+      else if (w === 'zeige') {
+        var zr = ((RF.daten && RF.daten.rueckfragen) || []).filter(function (x) { return x.id === id; })[0];
+        if (zr) { RF.filter = zr.status === 'offen' ? 'offen' : 'erledigt'; RF.mandant = 'alle'; renderRF(); var ze = document.getElementById(zr.status === 'offen' ? 'rf-karte-' + id : 'rf-ent-' + id); if (ze) { ze.scrollIntoView({ block: 'center', behavior: 'smooth' }); ze.style.outline = '3px solid var(--color-brand-orange, #E77005)'; setTimeout(function () { ze.style.outline = ''; }, 3500); } }
       }
       else if (w === 'dup-hier') { if (window.confirm('Diese Rückfrage als Doppelung erledigen? Der Beleg wird nur hier im Board entfernt, in BuchhaltungsButler passiert nichts.')) { RF.meldung = ''; RF.edit = null; rfAntwort(id, { aktion: 'verworfen', notiz: 'Doppelung, nur im Board entfernt' }); } }
       else if (w === 'dup-bhb') {
