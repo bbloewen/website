@@ -256,14 +256,6 @@
       "liganame": "Mitteldeutsche Liga mU15",
       "spiele": [
         {
-          "datum": "2026-10-17",
-          "zeit": "12:00",
-          "heim": false,
-          "gegner": "Dresden Titans",
-          "ergebnis": null,
-          "abgesagt": false
-        },
-        {
           "datum": "2026-11-14",
           "zeit": "15:00",
           "heim": false,
@@ -276,6 +268,14 @@
           "zeit": "14:00",
           "heim": true,
           "gegner": "NINERS Chemnitz",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2026-11-22",
+          "zeit": "09:30",
+          "heim": false,
+          "gegner": "Dresden Titans",
           "ergebnis": null,
           "abgesagt": false
         },
