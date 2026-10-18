@@ -3040,7 +3040,8 @@ a.training-group-header:hover { color: var(--color-brand-orange); }
 .spiel-viertel { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
 .spiel-viertel th, .spiel-viertel td { padding: 8px 10px; text-align: center; border-top: 1px solid rgba(255,255,255,.18); }
 .spiel-viertel thead th { border-top: 0; font-weight: 600; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: rgba(255,255,255,.7); }
-.spiel-viertel tbody th { text-align: left; font-weight: 600; white-space: nowrap; }
+.spiel-viertel tbody th { text-align: left; font-weight: 600; }
+.spiel-viertel tbody th:first-child { width: 36%; } /* lange Vereinsnamen brechen um, die Viertel bleiben sichtbar */
 .spiel-ergebnis-hinweis { margin: 14px 0 0; text-align: center; font-size: 14px; color: rgba(255,255,255,.75); }
 .spiel-ergebnis-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 18px; }
 .spiel-viertel .v-kurz { display: none; }
@@ -3053,7 +3054,6 @@ a.training-group-header:hover { color: var(--color-brand-orange); }
   .spiel-ergebnis-team:last-child { text-align: center; }
   .spiel-viertel .v-lang { display: none; }
   .spiel-viertel .v-kurz { display: inline; }
-  .spiel-viertel tbody th { white-space: normal; }
   .spiel-viertel th, .spiel-viertel td { padding: 8px 6px; }
 }
 
