@@ -16,21 +16,21 @@
     "vip-erm": 495
   },
   "stand": {
-    "verbleibendeHeimspiele": 13,
-    "zuBezahlendeSpiele": 12
+    "verbleibendeHeimspiele": 12,
+    "zuBezahlendeSpiele": 11
   },
   "preise": {
-    "kat1": 192,
-    "kat1-erm": 168,
-    "kat2": 144,
-    "kat2-erm": 107,
-    "kat3": 126,
-    "kat3-erm": 96,
-    "kat3-kind": 60,
-    "fanblock": 126,
-    "fanblock-erm": 96,
-    "rollstuhl": 96,
-    "vip": 1191,
-    "vip-erm": 457
+    "kat1": 176,
+    "kat1-erm": 154,
+    "kat2": 132,
+    "kat2-erm": 98,
+    "kat3": 116,
+    "kat3-erm": 88,
+    "kat3-kind": 55,
+    "fanblock": 116,
+    "fanblock-erm": 88,
+    "rollstuhl": 88,
+    "vip": 1092,
+    "vip-erm": 419
   }
 }

@@ -54,7 +54,7 @@
       "lastmod": "2026-09-18"
     },
     "index.html": {
-      "hash": "901210ac97ed8a7ad6704658f67f6a8f350e5beb",
+      "hash": "d212ed91ebe84fa172261027614dd29ecbafde4c",
       "lastmod": "2026-10-18"
     },
     "kontakt.html": {
@@ -70,12 +70,12 @@
       "lastmod": "2026-08-08"
     },
     "news/aktuelles.html": {
-      "hash": "11cc8c43a70d3dca20fbb1078b2d25bf81779174",
-      "lastmod": "2026-10-13"
+      "hash": "be3a36bf18c2096a3730e7733f92d49711cba1ef",
+      "lastmod": "2026-10-18"
     },
     "news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html": {
-      "hash": "a4f27d4f359ae3cd07775a8756a1262a0606f308",
-      "lastmod": "2026-10-13"
+      "hash": "63ca9a10a24777b1455aa76b048e01aa72cfe89b",
+      "lastmod": "2026-10-18"
     },
     "news/artikel/2025-04-29_profis_achtelfinale-aus.html": {
       "hash": "c38eb425968ac35de960a97abce9a1fde0a3192a",
@@ -182,8 +182,12 @@
       "lastmod": "2026-10-18"
     },
     "news/artikel/2026-10-13_profis_spielbericht-tv-langen.html": {
-      "hash": "1c9e0a26316a0775892a6da61895d87d4afdeabb",
-      "lastmod": "2026-10-13"
+      "hash": "ac7e75da0a7a6e5736432aa68390ec3f950c875d",
+      "lastmod": "2026-10-18"
+    },
+    "news/artikel/2026-10-18_profis_vorbericht-reutlingen.html": {
+      "hash": "dc36b92890a20eaee8d504e1db14c8b75e272aea",
+      "lastmod": "2026-10-18"
     },
     "news/insta-archiv/loewen-17884318188501699.html": {
       "hash": "002ceedc7cd86f481a402263912e80b5362dbb93",
@@ -358,8 +362,8 @@
       "lastmod": "2026-10-16"
     },
     "saison/profis.html": {
-      "hash": "c66963da34cfedebc6622225d03c10f217bfa66f",
-      "lastmod": "2026-10-16"
+      "hash": "7cda7e2f6eeb8be658a6386d9e638c3895b5d1e6",
+      "lastmod": "2026-10-18"
     },
     "saison/profis/gameday/2026-10-11-bba-ludwigsburg.html": {
       "hash": "800dc0861969e52f542785c0494f0fe42839a51b",
@@ -418,7 +422,7 @@
       "lastmod": "2026-10-16"
     },
     "saison/profis/gameday/index.html": {
-      "hash": "ca4b10ea6c87f1c35a10c5630417c5d87bb0f161",
+      "hash": "3b8b669fad5bd8cb9cb09544840a7205b8f6339d",
       "lastmod": "2026-10-18"
     },
     "saison/profis/gameday/spieltagsinfo/ausgabe-1/index.html": {
@@ -446,8 +450,8 @@
       "lastmod": "2026-10-09"
     },
     "tickets/dauerkarte.html": {
-      "hash": "6a135c076d4ba32ee6e851eddee4945f45b8fd3a",
-      "lastmod": "2026-10-15"
+      "hash": "6ca21a5504489800460eaaf1c506d3c2c9118c06",
+      "lastmod": "2026-10-18"
     },
     "tickets/familienpass.html": {
       "hash": "ade8e9e7aacfd66252695d89d793dec03e9ff7d1",
