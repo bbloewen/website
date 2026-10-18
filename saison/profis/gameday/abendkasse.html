@@ -174,6 +174,16 @@
   .ak-mehr[hidden] { display: none !important; }
   #ak-familie:empty { display: none; }
   #ak-status-hinweis[hidden] { display: none !important; }
+  /* Gutschein einloesen (Marko, 18.10.2026): Code wird getippt, der Server prueft und rechnet den Preis */
+  #ak-gutschein { margin: 14px 0 6px; display: flex; flex-direction: column; gap: 10px; }
+  #ak-gutschein[hidden], #ak-gutschein [hidden] { display: none !important; }
+  .ak-gutschein-btn { width: 100%; font-size: 1.2rem; padding: 16px; }
+  .ak-gutschein-form { display: flex; gap: 10px; flex-wrap: wrap; }
+  .ak-gutschein-form input { flex: 1 1 240px; font-size: 1.3rem; padding: 14px 16px; min-height: 56px; border: 2px solid #00122d; border-radius: 10px; text-transform: uppercase; background: #fff; color: #00122d; }
+  .ak-gutschein-form .btn { font-size: 1.2rem; padding: 14px 20px; min-height: 56px; }
+  .ak-gutschein-info { display: flex; justify-content: space-between; align-items: center; gap: 12px; background: #e8f4ee; border: 2px solid #1f6a43; border-radius: 10px; padding: 12px 16px; font-size: 1.15rem; color: #00122d; }
+  .ak-gutschein-info button { font-size: 1rem; padding: 10px 14px; min-height: 44px; }
+  .ak-gutschein-fehler { color: #b3392c; font-size: 1.1rem; margin: 0; }
 </style>
 </head>
 <body>
@@ -191,6 +201,19 @@
   <div id="seatplan-cart"></div>
   <button type="button" class="btn btn-outline-orange ak-mehr" id="ak-mehr" hidden>+ Weitere Plätze wählen</button>
   <div id="ak-familie"></div>
+  <div id="ak-gutschein" hidden>
+    <button type="button" class="btn btn-outline-orange ak-gutschein-btn" id="ak-gutschein-btn">Gutschein einlösen</button>
+    <div class="ak-gutschein-form" id="ak-gutschein-form" hidden>
+      <input type="text" id="ak-gutschein-code" autocapitalize="characters" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Gutscheincode" aria-label="Gutscheincode">
+      <button type="button" class="btn btn-primary" id="ak-gutschein-ok">Einlösen</button>
+      <button type="button" class="btn btn-outline-orange" id="ak-gutschein-abbruch">Abbrechen</button>
+    </div>
+    <div class="ak-gutschein-info" id="ak-gutschein-info" hidden>
+      <span id="ak-gutschein-text"></span>
+      <button type="button" class="btn btn-outline-orange" id="ak-gutschein-weg">Entfernen</button>
+    </div>
+    <p class="ak-gutschein-fehler" id="ak-gutschein-fehler" role="alert" hidden></p>
+  </div>
   <div class="seatplan-cart-total" id="ak-gesamt" hidden><span>Gesamt</span><span id="seatplan-total">0,00 €</span></div>
   <div class="ak-pay" id="ak-pay">
     <button class="btn btn-outline-orange" id="ak-bar" disabled hidden>Bar</button>
@@ -301,6 +324,139 @@ document.addEventListener('DOMContentLoaded', function () {
 
   var picker = null;
   var currentGame = null;
+
+  // ---- Gutschein (Marko, 18.10.2026) ------------------------------------------------------------
+  // Der Code wird getippt. Preis und Rabatt rechnet NUR der Server (Aktion "preis" am Abendkassen-Webhook, prueft den
+  // Code gegen pretix: Artikel/Kontingent, Spiel, Nutzungen). Die Seite zeigt und kassiert genau diesen Betrag und
+  // fragt ihn unmittelbar vor dem Kassieren noch einmal frisch ab.
+  var gutschein = null;          // { code, total, discount, covered, remainingAfter } laut Server
+  var gutscheinFormOffen = false;
+  var gutscheinSeq = 0;
+  var gutscheinTimer = null;
+
+  function effektivGesamt(summary) {
+    return gutschein ? gutschein.total : summary.total;
+  }
+
+  function preisAbfragen(code) {
+    var summary = picker.getSummary();
+    var cartPreis = {
+      productType: 'abendkasse',
+      pretixEventSlug: 'saison2627',
+      pretixSubeventId: currentGame.subeventId,
+      lines: summary.lines,
+      zahlart: 'karte',
+      voucher: code || null
+    };
+    return fetch('https://ticketing.basketball-loewen.com/webhook/abendkasse-bestellung', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Kassen-Token': (window.OpiBridge && window.OpiBridge.token()) || '' },
+      body: JSON.stringify({ action: 'preis', cart: cartPreis, buyer: {} })
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) {
+        if (r.ok && j && j.ok) return j;
+        return { ok: false, error: (j && j.error) || ('Serverfehler (' + r.status + ')') };
+      });
+    }).catch(function () {
+      return { ok: false, error: 'Keine Verbindung zum Server.' };
+    });
+  }
+
+  function zeigeGutscheinFehler(text) {
+    var el = document.getElementById('ak-gutschein-fehler');
+    el.textContent = text || '';
+    el.hidden = !text;
+  }
+
+  function renderGutschein() {
+    var wrap = document.getElementById('ak-gutschein');
+    var hat = !!picker && (sitzwahl ? seatsHatTickets() : cartHatTickets());
+    wrap.hidden = !hat;
+    if (!hat) return;
+    document.getElementById('ak-gutschein-btn').hidden = !!gutschein || gutscheinFormOffen;
+    document.getElementById('ak-gutschein-form').hidden = !gutscheinFormOffen || !!gutschein;
+    var info = document.getElementById('ak-gutschein-info');
+    info.hidden = !gutschein;
+    if (gutschein) {
+      document.getElementById('ak-gutschein-text').textContent =
+        'Gutschein ' + gutschein.code + ': −' + fmtEUR(gutschein.discount) + ' €' +
+        (gutschein.remainingAfter > 0 ? ' · danach noch ' + gutschein.remainingAfter + '× einlösbar' : '');
+    }
+    // Gesamtzeile: mit Gutschein der Betrag laut Server, sonst der Betrag des Warenkorbs.
+    document.getElementById('seatplan-total').textContent = fmtEUR(effektivGesamt(picker.getSummary())) + ' €';
+    updatePayLabels();
+  }
+
+  // Warenkorb hat sich geaendert: Gutschein neu rechnen (der Rabatt haengt an den Zeilen). Gilt er nicht mehr,
+  // wird er entfernt und das gesagt.
+  function gutscheinNachfuehren() {
+    renderGutschein();
+    if (!gutschein) return;
+    clearTimeout(gutscheinTimer);
+    var seq = ++gutscheinSeq;
+    gutscheinTimer = setTimeout(function () {
+      if (!gutschein || !picker) return;
+      preisAbfragen(gutschein.code).then(function (r) {
+        if (seq !== gutscheinSeq) return;
+        if (r.ok) { gutschein = r; zeigeGutscheinFehler(''); }
+        else { gutschein = null; zeigeGutscheinFehler('Der Gutschein gilt für diese Auswahl nicht mehr: ' + r.error); }
+        renderGutschein();
+      });
+    }, 350);
+  }
+
+  // Unmittelbar vor dem Kassieren: Gutschein noch einmal beim Server pruefen (Nutzungen, Gueltigkeit).
+  function gutscheinFrisch() {
+    if (!gutschein) return Promise.resolve(true);
+    return preisAbfragen(gutschein.code).then(function (r) {
+      if (r.ok) { gutschein = r; renderGutschein(); return true; }
+      gutschein = null;
+      zeigeGutscheinFehler(r.error);
+      renderGutschein();
+      var statusEl = document.getElementById('ak-status');
+      statusEl.className = 'ak-status ak-status-error';
+      statusEl.textContent = 'Gutschein nicht mehr gültig: ' + r.error + ' Es wurde nichts kassiert, der Betrag gilt ohne Gutschein.';
+      return false;
+    });
+  }
+
+  document.getElementById('ak-gutschein-btn').addEventListener('click', function () {
+    gutscheinFormOffen = true;
+    zeigeGutscheinFehler('');
+    renderGutschein();
+    document.getElementById('ak-gutschein-code').focus();
+  });
+  document.getElementById('ak-gutschein-abbruch').addEventListener('click', function () {
+    gutscheinFormOffen = false;
+    document.getElementById('ak-gutschein-code').value = '';
+    zeigeGutscheinFehler('');
+    renderGutschein();
+  });
+  document.getElementById('ak-gutschein-weg').addEventListener('click', function () {
+    gutschein = null; gutscheinSeq++;
+    zeigeGutscheinFehler('');
+    renderGutschein();
+  });
+  function gutscheinEinloesen() {
+    var codeEl = document.getElementById('ak-gutschein-code');
+    var code = codeEl.value.replace(/\s+/g, '').toUpperCase();
+    if (!code || !picker || bestellLaeuft) return;
+    var okBtn = document.getElementById('ak-gutschein-ok');
+    okBtn.disabled = true;
+    zeigeGutscheinFehler('');
+    preisAbfragen(code).then(function (r) {
+      okBtn.disabled = false;
+      if (!r.ok) { zeigeGutscheinFehler(r.error); return; }
+      gutschein = { code: code, total: r.total, discount: r.discount, covered: r.covered, remainingAfter: r.remainingAfter };
+      gutscheinFormOffen = false;
+      codeEl.value = '';
+      renderGutschein();
+    });
+  }
+  document.getElementById('ak-gutschein-ok').addEventListener('click', gutscheinEinloesen);
+  document.getElementById('ak-gutschein-code').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); gutscheinEinloesen(); }
+  });
 
   // Sitzwahl ist Standard (Marko, 18.10.2026); ?sitzwahl=0 holt die alte Blockwahl zurueck.
   var sitzwahl = !/[?&]sitzwahl=0/.test(location.search);
@@ -454,6 +610,7 @@ document.addEventListener('DOMContentLoaded', function () {
       document.getElementById('ak-gesamt').hidden = !hat;
       renderFamilie();
       updatePayLabels();
+      gutscheinNachfuehren();
       return;
     }
     // Genau ein Block pro Abendkassen-Verkauf (Marko, 01.10.2026: "unrealistisch, dass
@@ -472,6 +629,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('ak-gesamt').hidden = !hatTickets;
     renderTarifPanels();
     updatePayLabels();
+    gutscheinNachfuehren();
   }
 
   // Bei Gesamtbetrag 0 (nur Familienpass/Schlemmerblock) gibt es nichts zu kassieren: "Bar" verschwindet,
@@ -479,7 +637,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function updatePayLabels() {
     var gratis = false;
     if (picker && (sitzwahl ? seatsHatTickets() : cartHatTickets())) {
-      try { gratis = !(picker.getSummary().total > 0); } catch (e) {}
+      try { gratis = !(effektivGesamt(picker.getSummary()) > 0); } catch (e) {}
     }
     document.getElementById('seatplan-cta').textContent = gratis ? 'Ticket ausgeben (kostenlos)' : 'Karte';
     document.getElementById('ak-pay').classList.toggle('ak-gratis', gratis);
@@ -653,6 +811,10 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('ak-mehr').hidden = true;
     document.getElementById('seatplan-status-note').hidden = true;
     familienQty = 0; planOffen = false; letzteAnzahl = 0;
+    gutschein = null; gutscheinFormOffen = false; gutscheinSeq++;
+    document.getElementById('ak-gutschein').hidden = true;
+    document.getElementById('ak-gutschein-code').value = '';
+    zeigeGutscheinFehler('');
 
     picker = new SeatPicker(document.getElementById('seatplan-root'), {
       mode: sitzwahl ? 'seats' : 'blocks',
@@ -789,8 +951,9 @@ document.addEventListener('DOMContentLoaded', function () {
     var summary = picker.getSummary();
     if (!summary.lines.length) return;
     bestellLaeuft = true;
-    // Gesamtbetrag 0 (nur Familienpass/Schlemmerblock): kein Terminalvorgang, Bestellung wird direkt angelegt.
-    var gratis = !(summary.total > 0);
+    // Gesamtbetrag 0 (nur Familienpass/Schlemmerblock oder 100-%-Gutschein): kein Terminalvorgang, Bestellung wird direkt angelegt.
+    var gesamt = effektivGesamt(summary);
+    var gratis = !(gesamt > 0);
 
     var statusEl = document.getElementById('ak-status');
     ctaEl.disabled = true;
@@ -807,9 +970,9 @@ document.addEventListener('DOMContentLoaded', function () {
       spielDatum: currentGame.datum,
       gegner: currentGame.gegner,
       lines: summary.lines,
-      total: summary.total,
+      total: gesamt,
       zahlart: bar ? 'bar' : (gratis ? 'frei' : 'karte'),
-      voucher: null,
+      voucher: gutschein ? gutschein.code : null,
       notiz: '',
       zahlungPausiert: false
     };
@@ -853,7 +1016,7 @@ document.addEventListener('DOMContentLoaded', function () {
           ? 'Kostenlos (0,00 €), Ticket wird gedruckt.'
           : inApp
           ? 'Zahlung bestätigt, Ticket wird gedruckt.'
-          : 'Ticket wird gedruckt. Betrag am Terminal eintippen: ' + fmtEUR(summary.total) +
+          : 'Ticket wird gedruckt. Betrag am Terminal eintippen: ' + fmtEUR(gesamt) +
             ' € – erst nach bestätigter Zahlung aushändigen.';
       }
       statusEl.className = cls;
@@ -934,7 +1097,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     zeigeStatus();
     if (inApp && !bar && !gratis) {
-      window.OpiBridge.charge(summary.total).then(function () {
+      window.OpiBridge.charge(gesamt).then(function () {
         pay.state = 'ok';
         order.state = 'offen';
         zeigeStatus();
@@ -950,7 +1113,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  ctaEl.addEventListener('click', function () { startVerkauf(false); });
+  ctaEl.addEventListener('click', function () {
+    if (bestellLaeuft) return;
+    gutscheinFrisch().then(function (ok) { if (ok) startVerkauf(false); });
+  });
 
   document.getElementById('ak-mehr').addEventListener('click', function () {
     planOffen = !planOffen;
@@ -965,7 +1131,11 @@ document.addEventListener('DOMContentLoaded', function () {
     if (bestellLaeuft || !picker) return;
     var summary = picker.getSummary();
     if (!summary.lines.length) return;
-    if (window.confirm('Barzahlung: ' + fmtEUR(summary.total) + ' €\n\nBar kassiert? Das Ticket wird angelegt und gedruckt.')) startVerkauf(true);
+    gutscheinFrisch().then(function (ok) {
+      if (!ok) return;
+      var betrag = effektivGesamt(picker.getSummary());
+      if (window.confirm('Barzahlung: ' + fmtEUR(betrag) + ' €\n\nBar kassiert? Das Ticket wird angelegt und gedruckt.')) startVerkauf(true);
+    });
   });
 
   // Stornieren: Auswahl verwerfen und von vorn beginnen (nur vor der Zahlung sichtbar).
