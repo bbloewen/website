@@ -272,6 +272,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 .seg-neu { border-style: dashed; display: flex; align-items: center; justify-content: center; min-height: 104px; color: var(--text-secondary); font-weight: 500; }
 .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: var(--radius-full); background: var(--bg-subtle); color: var(--text-secondary); border: 1px solid var(--border); }
 .badge-optin { background: var(--color-blue-50); color: var(--color-brand-blue); border-color: transparent; }
+.badge-ferien { background: var(--color-warning-bg); color: var(--color-warning-text); border-color: transparent; margin-left: 6px; vertical-align: middle; }
 .block { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; background: var(--bg-subtle); }
 .block-kopf { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
 .oder { text-align: center; font-size: 12px; font-weight: 600; letter-spacing: .08em; color: var(--color-brand-orange-text); margin: 8px 0; }
@@ -763,6 +764,28 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   }
 
   // ---------- Formatierer (unverändert aus der Alpine-Fassung) ----------
+  // Thüringer Schulferien (Quelle: Bildungsministerium Thüringen laut kalenderpedia.de, Stand Oktober 2026); bis einschließlich.
+  // Ein Kennzeichen „Ferien“ steht in den Auswertungen neben jedem Spieltag, der in diese Zeiträume fällt (Marko, 18.10.2026).
+  var FERIEN = [
+    { n: 'Herbstferien', von: '2026-10-12', bis: '2026-10-24' },
+    { n: 'Weihnachtsferien', von: '2026-12-23', bis: '2027-01-02' },
+    { n: 'Winterferien', von: '2027-02-01', bis: '2027-02-06' },
+    { n: 'Osterferien', von: '2027-03-22', bis: '2027-04-03' },
+    { n: 'Schulfreier Tag (Brückentag)', von: '2027-05-07', bis: '2027-05-07' }
+  ];
+  function ferienZeitraum(iso) {
+    var d = String(iso || '').slice(0, 10);
+    for (var i = 0; i < FERIEN.length; i++) if (d >= FERIEN[i].von && d <= FERIEN[i].bis) return FERIEN[i];
+    return null;
+  }
+  function ferienText(f) {
+    var a = f.von.split('-'), b = f.bis.split('-');
+    return f.n + ' Thüringen' + (f.von === f.bis ? ' (' + b[2] + '.' + b[1] + '.' + b[0] + ')' : ' (' + a[2] + '.' + a[1] + '. bis ' + b[2] + '.' + b[1] + '.' + b[0] + ')');
+  }
+  function ferienBadge(iso) {
+    var f = ferienZeitraum(iso); if (!f) return '';
+    return '<span class="badge badge-ferien" title="' + esc(ferienText(f)) + '">Ferien</span>';
+  }
   function formatDate(iso) {
     if (!iso) return '';
     var d = new Date(iso);
@@ -1222,7 +1245,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var tk = sumBy(rows, 'tickets');
       var erloes = sumBy(rows, 'totalPrice');
       var nw = g.nachwuchsOrders != null;
-      h += '<div class="card scroll-x"><div class="card-kopf"><div style="font-weight:500">' + esc(g.name) + '</div><div class="unter">' + esc(formatDate(g.dateFrom)) + '</div></div>' +
+      h += '<div class="card scroll-x"><div class="card-kopf"><div style="font-weight:500">' + esc(g.name) + '</div><div class="unter">' + esc(formatDate(g.dateFrom)) + ferienBadge(g.dateFrom) + '</div></div>' +
         '<table class="tbl"><thead><tr><th>Typ</th><th>Kategorie</th><th>Orders</th><th>Tickets</th><th>Gesamtpreis</th><th>Ø Erlös je Ticket</th></tr></thead><tbody>';
       // Zwischensumme je Typ (Abendkasse/Einzelticket), wenn das Spiel beide Typen hat (11.10.2026, Marko)
       var typen = [];
@@ -1298,7 +1321,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var h = '<div class="stapel-klein"><p class="text-klein text-sek" style="margin:0">Auslastung je Heimspiel: wie voll es echt ist, und höchstens wie voll es durch noch offene Gutscheine werden kann (je Block nie mehr als die freien Plätze).</p>';
     (S.stats.byGame || []).forEach(function (g) {
       h += '<div class="card pad">' +
-        '<div class="zeile-titel" style="margin-bottom:4px"><div style="font-weight:500">' + esc(g.name) + '</div><div class="notiz" style="margin:0">' + esc(formatDate(g.dateFrom) + ' · ' + zahl(g.capacityTotal || g.capacity) + ' Plätze') + '</div></div>' +
+        '<div class="zeile-titel" style="margin-bottom:4px"><div style="font-weight:500">' + esc(g.name) + '</div><div class="notiz" style="margin:0">' + esc(formatDate(g.dateFrom) + ' · ' + zahl(g.capacityTotal || g.capacity) + ' Plätze') + ferienBadge(g.dateFrom) + '</div></div>' +
         '<div class="grid sm-2" style="margin:8px 0 12px">' +
           '<div><div class="kpi-label">Zuschauer gebucht</div><div class="kpi">' + esc(zahl(g.spectators || 0)) + '</div>' +
           '<div class="notiz" style="margin:2px 0 0">' + esc('Personen mit gültiger Karte, die für die Hallendurchsage zählen' + ((g.spectators || 0) > (g.occupiedTotal || 0) ? ' (inkl. ' + zahl((g.spectators || 0) - (g.occupiedTotal || 0)) + ' Karten ohne Blockplatz, z. B. Trainer-Stehplatz)' : '') + '.') + '</div></div>' +
@@ -1353,7 +1376,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     h += '<div class="card scroll-x"><div class="card-kopf">Pro Spiel</div><table class="tbl"><thead><tr>' +
       '<th>Spiel</th><th>Termin</th><th>Sitzplätze</th><th>Anzahl Gutscheine</th><th>Anzahl mögliche Einlösungen</th><th>Eingelöst</th><th>Echt belegt</th><th>Höchstens mit offenen Gutscheinen</th></tr></thead><tbody>';
     games.forEach(function (g) {
-      h += '<tr><td>' + esc(g.name) + '</td><td class="text-sek">' + esc(formatDate(g.dateFrom)) + '</td><td>' + esc(g.capacity) + '</td><td>' + esc(g.issued) + '</td><td>' + esc(g.potential) + '</td><td>' + esc(g.redeemedVouchers) + '</td><td>' + esc(pct(g.pctBelegt)) + '</td><td>' + esc(pct(g.pctMax)) + '</td></tr>';
+      h += '<tr><td>' + esc(g.name) + '</td><td class="text-sek">' + esc(formatDate(g.dateFrom)) + ferienBadge(g.dateFrom) + '</td><td>' + esc(g.capacity) + '</td><td>' + esc(g.issued) + '</td><td>' + esc(g.potential) + '</td><td>' + esc(g.redeemedVouchers) + '</td><td>' + esc(pct(g.pctBelegt)) + '</td><td>' + esc(pct(g.pctMax)) + '</td></tr>';
     });
     if (games.length === 0) h += '<tr><td colspan="8" class="leer">Keine spielgebundenen Gutscheine.</td></tr>';
     else h += '<tr class="summe"><td>Summe</td><td></td><td>' + esc(sumBy(games, 'capacity')) + '</td><td>' + esc(sumBy(games, 'issued')) + '</td><td>' + esc(sumBy(games, 'potential')) + '</td><td>' + esc(sumBy(games, 'redeemedVouchers')) + '</td><td></td><td></td></tr>';
@@ -4209,7 +4232,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (!zeilen.length) h += '<tr><td colspan="15" class="leer">Noch keine Spieltage.</td></tr>';
     zeilen.forEach(function (z) {
       var fest = z.gespeichert && z.gespeichert.festgehalten_am;
-      h += '<tr><td><div style="font-weight:500">' + esc(formatDate(z.datum)) + '</div><div class="notiz" style="margin:0">' + esc(z.gegner) + '</div></td>' +
+      h += '<tr><td><div style="font-weight:500">' + esc(formatDate(z.datum)) + ferienBadge(z.datum) + '</div><div class="notiz" style="margin:0">' + esc(z.gegner) + '</div></td>' +
         AW_SPALTEN.map(function (c) { return c.k === 'FREI' ? '<td data-aw-frei="' + esc(z.key) + '">' + (awFrei(z) === null ? '–' : esc(zahl(awFrei(z)))) + awPzSpan('FREI', z.key) + '</td>' : feld(z, c.k); }).join('') +
         '<td data-aw-ges="' + esc(z.key) + '">' + esc(formatEuro(awEinnahmen(z))) + '</td>' +
         '<td data-aw-je="' + esc(z.key) + '">' + awJeText(z) + '</td>' +
@@ -4282,7 +4305,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (!AS.daten) { el.innerHTML = ''; return; }
     if (!AS.daten.length) { el.innerHTML = '<div class="card pad">Noch keine Ausschank-Verkäufe.</div>'; return; }
     var t = AS.daten.filter(function (x) { return x.tag === AS.tag; })[0] || AS.daten[0];
-    var chip = function (x) { return '<button type="button" class="chip' + (x.tag === t.tag ? ' aktiv' : '') + '" data-as-tag="' + esc(x.tag) + '" aria-pressed="' + (x.tag === t.tag) + '">' + esc(formatDate(x.tag)) + ' · ' + esc(zahl(x.belege)) + ' Belege</button>'; };
+    var chip = function (x) { return '<button type="button" class="chip' + (x.tag === t.tag ? ' aktiv' : '') + '" data-as-tag="' + esc(x.tag) + '" aria-pressed="' + (x.tag === t.tag) + '">' + esc(formatDate(x.tag)) + ' · ' + esc(zahl(x.belege)) + ' Belege' + (ferienZeitraum(x.tag) ? ' · Ferien' : '') + '</button>'; };
     var h = '<div class="stapel"><nav class="chips" aria-label="Tag wählen"><span class="notiz chips-label">Tag</span>' + AS.daten.map(chip).join('') + '</nav>';
     var pf = t.pfand || {};
     h += '<div class="grid sm-4">' +
