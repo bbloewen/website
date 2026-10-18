@@ -52,6 +52,10 @@ DAUERKARTE = REPO / "tickets" / "dauerkarte.html"
 # (WISSENSWERTES_HTML) muessen beim Umschalten mitgezogen werden.
 SITZWAHL_STANDARD = False
 
+# True: der Kaufbereich auf dem Hub zeigt nur einen Pausen-Hinweis (Marko, 18.10.2026, waehrend des Umbaus
+# auf Sitzwahl). Das Hub-Skript und die Spieltagsseiten bauen sonst unveraendert weiter.
+KAUF_PAUSIERT = True
+
 # Die Dauerkarten-Preisbox in der Spalte neben den weiteren Heimspielen. Bewusst
 # eine Auswahl, nicht die volle Liste -- die ganze Preistabelle steht auf
 # tickets/dauerkarte.html, hierher gehoert nur der Anreiss.
@@ -328,9 +332,9 @@ WISSENSWERTES_HTML = """      <span class="eyebrow" style="display:block;margin-
         <div class="info-tile info-tile-row info-tile-row-divided">
           <div class="info-tile-row-head">
             <div class="tile-icon"><i data-lucide="armchair"></i></div>
-            <h3 class="t-h4">Vorteile</h3>
+            <h3 class="t-h4">@@SITZ_TITEL@@</h3>
           </div>
-          <p class="t-body-sm">Einen <strong>festen Sitzplatz</strong> gibt es ab dieser Saison nicht mehr beim Einzelticket — nur noch mit der Dauerkarte. Beim Einzelticket wählst du frei innerhalb deines gebuchten Blocks, pro Spiel neu.</p>
+          <p class="t-body-sm">@@SITZ_TEXT@@</p>
         </div>
         <div class="info-tile info-tile-row info-tile-row-divided">
           <div class="info-tile-row-head">
@@ -363,6 +367,21 @@ WISSENSWERTES_HTML = """      <span class="eyebrow" style="display:block;margin-
         </div>
       </div>"""
 
+# Der Kachel-Text zur Platzwahl haengt davon ab, ob das Einzelticket mit Sitzwahl verkauft wird (SITZWAHL_STANDARD).
+SITZ_KACHEL = {
+    True: ("Dein Sitzplatz",
+           'Beim Einzelticket suchst du dir deinen <strong>Sitzplatz</strong> selbst aus: Block antippen, freie Plätze wählen, fertig. '
+           'Dein Platz steht auf dem Ticket und ist für dich reserviert. Wer die ganze Saison auf demselben Platz sitzen möchte, nimmt die '
+           '<a href="/tickets/dauerkarte.html">Dauerkarte</a>. Stehplätze haben keinen festen Platz.'),
+    False: ("Vorteile",
+            'Einen <strong>festen Sitzplatz</strong> gibt es ab dieser Saison nicht mehr beim Einzelticket — nur noch mit der Dauerkarte. '
+            'Beim Einzelticket wählst du frei innerhalb deines gebuchten Blocks, pro Spiel neu.'),
+}
+WISSENSWERTES_HTML = (WISSENSWERTES_HTML
+                      .replace("@@SITZ_TITEL@@", SITZ_KACHEL[SITZWAHL_STANDARD][0])
+                      .replace("@@SITZ_TEXT@@", SITZ_KACHEL[SITZWAHL_STANDARD][1]))
+
+
 
 def kauf_bereich(aktuell, kommt, heute):
     """Der Ticketkauf für das nächste Heimspiel -- seit 27.08.2026 (Marko)
@@ -385,6 +404,15 @@ def kauf_bereich(aktuell, kommt, heute):
     """
     if not kommt:
         return ""
+    if KAUF_PAUSIERT:
+        return """  <section class="section">
+    <div class="container container-narrow">
+      <span class="eyebrow" style="display:block;margin-bottom:16px">Tickets</span>
+      <h2 class="t-h2">Ticketkauf kurz pausiert</h2>
+      <p class="t-body mt-3">Wir bauen gerade die Sitzplatzwahl für Einzeltickets um und schalten den Verkauf in Kürze wieder frei. Schau gern später noch einmal vorbei. Die <a href="/tickets/dauerkarte.html">Dauerkarte</a> ist weiter bestellbar. Fragen beantwortet dir <a href="mailto:tickets@basketball-loewen.com">tickets@basketball-loewen.com</a>.</p>
+    </div>
+  </section>
+"""
     if not aktuell.get("ticketUrl"):
         return """  <section class="section">
     <div class="container container-narrow">
