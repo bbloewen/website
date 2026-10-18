@@ -2029,6 +2029,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .hero-photo.hero-u19 { --hero-photo-url: url('/assets/img/team-nbbl-hero.webp'); background-position: center 55%; }
 
 /* Hero-Varianten für einzelne News-Artikel mit echtem Pressefoto */
+.hero-photo.hero-news-spielbericht-reutlingen { --hero-photo-url: url('/assets/img/news/spielbericht-reutlingen.webp'); background-position: center center; }
 .hero-photo.hero-news-vorbericht-reutlingen { --hero-photo-url: url('/assets/img/news/vorbericht-reutlingen.webp'); background-position: center center; }
 .hero-photo.hero-news-spielbericht-tv-langen { --hero-photo-url: url('/assets/img/news/spielbericht-tv-langen.webp'); background-position: center 40%; }
 .hero-photo.hero-news-spielbericht-bba-ludwigsburg { --hero-photo-url: url('/assets/img/news/spielbericht-bba-ludwigsburg.webp'); background-position: center 30%; }
