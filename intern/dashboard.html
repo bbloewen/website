@@ -767,19 +767,31 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   // Thüringer Schulferien (Quelle: Bildungsministerium Thüringen laut kalenderpedia.de, Stand Oktober 2026); bis einschließlich.
   // Ein Kennzeichen „Ferien“ steht in den Auswertungen neben jedem Spieltag, der in diese Zeiträume fällt (Marko, 18.10.2026).
   var FERIEN = [
-    { n: 'Herbstferien', von: '2026-10-12', bis: '2026-10-24' },
-    { n: 'Weihnachtsferien', von: '2026-12-23', bis: '2027-01-02' },
-    { n: 'Winterferien', von: '2027-02-01', bis: '2027-02-06' },
-    { n: 'Osterferien', von: '2027-03-22', bis: '2027-04-03' },
+    { n: 'Herbstferien', von: '2026-10-12', bis: '2026-10-24', we: true },
+    { n: 'Weihnachtsferien', von: '2026-12-23', bis: '2027-01-02', we: true },
+    { n: 'Winterferien', von: '2027-02-01', bis: '2027-02-06', we: true },
+    { n: 'Osterferien', von: '2027-03-22', bis: '2027-04-03', we: true },
     { n: 'Schulfreier Tag (Brückentag)', von: '2027-05-07', bis: '2027-05-07' }
   ];
+  // Das Wochenende (Sa+So) direkt vor Ferienbeginn zählt mit, weil viele Familien schon dann wegfahren (Marko, 18.10.2026).
+  function ferienWochenende(f) {
+    var t = new Date(f.von + 'T00:00:00Z'); t.setUTCDate(t.getUTCDate() - 1);
+    while (t.getUTCDay() !== 0) t.setUTCDate(t.getUTCDate() - 1);
+    var so = t.toISOString().slice(0, 10); t.setUTCDate(t.getUTCDate() - 1);
+    return [t.toISOString().slice(0, 10), so];
+  }
   function ferienZeitraum(iso) {
     var d = String(iso || '').slice(0, 10);
-    for (var i = 0; i < FERIEN.length; i++) if (d >= FERIEN[i].von && d <= FERIEN[i].bis) return FERIEN[i];
+    for (var i = 0; i < FERIEN.length; i++) {
+      var f = FERIEN[i];
+      if (d >= f.von && d <= f.bis) return f;
+      if (f.we) { var w = ferienWochenende(f); if (d === w[0] || d === w[1]) return { n: 'Wochenende vor den ' + f.n, von: f.von, bis: f.bis, vor: true }; }
+    }
     return null;
   }
   function ferienText(f) {
     var a = f.von.split('-'), b = f.bis.split('-');
+    if (f.vor) return f.n + ' Thüringen (Ferien ab ' + a[2] + '.' + a[1] + '.)';
     return f.n + ' Thüringen' + (f.von === f.bis ? ' (' + b[2] + '.' + b[1] + '.' + b[0] + ')' : ' (' + a[2] + '.' + a[1] + '. bis ' + b[2] + '.' + b[1] + '.' + b[0] + ')');
   }
   function ferienBadge(iso) {
