@@ -155,6 +155,25 @@
   @keyframes ak-hier-puls { from { transform: scale(.6); opacity: 1; } to { transform: scale(1.5); opacity: 0; } }
   @media (prefers-reduced-motion: reduce) { .ak-hier::after { animation: none; } }
   @media (max-width: 700px) { .ak-hier-text { display: none; } }
+
+  /* Sitzwahl (Marko, 18.10.2026): Der Seat-Picker laeuft im Modus "seats" wie bei der Dauerkarte und
+     dem Einzelticket im Vorverkauf. Warenkorb des Pickers wird hier gross gezeigt, die eigenen
+     Tarif-Kacheln der Blockwahl entfallen. */
+  body.ak-seats #seatplan-cart { display: block; margin: 4px 0 8px; }
+  body.ak-seats #ak-tarif-panels { display: none; }
+  body.ak-seats .seatplan-voucher-row, body.ak-seats .seatplan-notiz-row { display: none; }
+  body.ak-seats .seatplan-cart-empty { display: none; }
+  body.ak-seats .seatplan-cart-item { font-size: 1.15rem; padding: 14px 16px; align-items: center; gap: 12px; }
+  body.ak-seats .seatplan-cart-item .t-caption { font-size: .9rem; }
+  body.ak-seats .seatplan-tarif-select { font-size: 1.1rem; padding: 10px 12px; margin-top: 8px; max-width: 100%; }
+  body.ak-seats .seatplan-cart-item-right { font-size: 1.15rem; }
+  body.ak-seats .seatplan-cart-item-right button[data-remove] { font-size: 1rem; padding: 12px 14px; min-height: 48px; }
+  body.ak-seats .seatplan-stepper button { width: 52px; height: 52px; font-size: 1.6rem; border-radius: 50%; }
+  body.ak-seats .seatplan-stepper strong { font-size: 1.4rem; min-width: 28px; text-align: center; }
+  .ak-mehr { width: 100%; font-size: 1.2rem; padding: 16px; margin: 4px 0 12px; }
+  .ak-mehr[hidden] { display: none !important; }
+  #ak-familie:empty { display: none; }
+  #ak-status-hinweis[hidden] { display: none !important; }
 </style>
 </head>
 <body>
@@ -168,7 +187,10 @@
 
   <div id="ak-tarif-panels"></div>
 
+  <p id="seatplan-status-note" class="t-caption" hidden style="margin:10px 0 0;color:#b3392c;font-size:1.05rem"></p>
   <div id="seatplan-cart"></div>
+  <button type="button" class="btn btn-outline-orange ak-mehr" id="ak-mehr" hidden>+ Weitere Plätze wählen</button>
+  <div id="ak-familie"></div>
   <div class="seatplan-cart-total" id="ak-gesamt" hidden><span>Gesamt</span><span id="seatplan-total">0,00 €</span></div>
   <div class="ak-pay" id="ak-pay">
     <button class="btn btn-outline-orange" id="ak-bar" disabled hidden>Bar</button>
@@ -181,6 +203,13 @@
   <button class="btn btn-primary ak-naechster" id="ak-erneut">Ticket erneut anlegen</button>
   <button class="btn btn-outline-orange ak-naechster" id="ak-naechster">Nächster Verkauf</button>
   <div class="ak-diag-row"><button type="button" class="ak-diag" id="ak-diag" aria-label="Kassen-Einstellungen"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="7" x2="21" y2="7"/><circle cx="9" cy="7" r="2.2" fill="var(--bg-page,#fff)"/><line x1="3" y1="17" x2="21" y2="17"/><circle cx="15" cy="17" r="2.2" fill="var(--bg-page,#fff)"/></svg></button></div>
+</div>
+
+<!-- Sitzdetail eines Blocks (Sitzwahl), wie im Game Hub -->
+<div class="modal-backdrop" id="seatplan-detail-backdrop">
+  <div class="modal-box modal-box-blockplan" role="dialog" aria-modal="true" aria-label="Sitzplatz-Detail">
+    <div id="seatplan-detail-root"></div>
+  </div>
 </div>
 
 <script src="/js/seat-picker.js?v=1792353117"></script>
@@ -272,6 +301,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
   var picker = null;
   var currentGame = null;
+
+  // Sitzwahl ist Standard (Marko, 18.10.2026); ?sitzwahl=0 holt die alte Blockwahl zurueck.
+  var sitzwahl = !/[?&]sitzwahl=0/.test(location.search);
+  document.body.classList.toggle('ak-seats', sitzwahl);
+  var familienQty = 0;      // Familienpass / Schlemmerblock: eigene Zeile ohne Sitz (Sitzwahl-Modus)
+  var planOffen = false;    // Sitzwahl: Plan trotz gewaehlter Plaetze wieder anzeigen
+  var letzteAnzahl = 0;
 
   // Grosse Tarif-Kacheln je bereits gewaehltem Block, statt der kleinen Dropdown-Zeilen
   // im nativen Warenkorb (Marko, 01.10.2026, Punkt 4: "in der Groesse, wie vorher 'Block
@@ -376,7 +412,50 @@ document.addEventListener('DOMContentLoaded', function () {
     return !!document.querySelector('#seatplan-cart .seatplan-cart-item');
   }
 
+  function seatsHatTickets() {
+    return !!picker && (Object.keys(picker.selected).length > 0 || (picker._standingEnabled() && picker.standingQty > 0) || familienQty > 0);
+  }
+
+  function renderFamilie() {
+    var host = document.getElementById('ak-familie');
+    if (!sitzwahl || !picker || !picker.prices['Familienpass']) { host.innerHTML = ''; return; }
+    var frei = picker._blockFreeCount(FAMILIENPASS_ZONE, 'Familienpass');
+    host.innerHTML =
+      '<div class="ak-tarif-tile">' +
+        '<span class="ak-tarif-label">' + FAMILIENPASS_LABEL +
+          '<br><span class="ak-tarif-price">0,00 € je Karte (100 % Rabatt), gilt in Block A, ohne festen Platz</span></span>' +
+        '<div class="ak-stepper">' +
+          '<button type="button" data-fam="-1" aria-label="weniger">−</button>' +
+          '<span class="ak-step-count">' + familienQty + '</span>' +
+          '<button type="button" data-fam="1" aria-label="mehr">+</button>' +
+        '</div>' +
+      '</div>';
+    host.querySelectorAll('[data-fam]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        familienQty = Math.max(0, Math.min(Math.max(0, frei), familienQty + parseInt(btn.dataset.fam, 10)));
+        picker._renderCart();   // loest den Warenkorb-Beobachter aus -> syncSichtbarkeit
+      });
+    });
+  }
+
   function syncSichtbarkeit() {
+    if (sitzwahl) {
+      var hat = seatsHatTickets();
+      var anzahl = Object.keys(picker.selected).length + (picker._standingEnabled() ? picker.standingQty : 0) + familienQty;
+      if (anzahl !== letzteAnzahl) { letzteAnzahl = anzahl; planOffen = false; }
+      var planZeigen = !hat || planOffen;
+      document.getElementById('ak-blockwahl').classList.toggle('ak-hidden', !planZeigen);
+      var mehr = document.getElementById('ak-mehr');
+      mehr.hidden = !hat;
+      mehr.textContent = planOffen ? 'Zurück zur Übersicht' : '+ Weitere Plätze wählen';
+      document.getElementById('seatplan-cta').hidden = !hat;
+      // Der Picker sperrt den Knopf, solange keine Sitze gewaehlt sind; Familienpass allein genuegt aber.
+      if (hat && familienQty > 0) document.getElementById('seatplan-cta').disabled = false;
+      document.getElementById('ak-gesamt').hidden = !hat;
+      renderFamilie();
+      updatePayLabels();
+      return;
+    }
     // Genau ein Block pro Abendkassen-Verkauf (Marko, 01.10.2026: "unrealistisch, dass
     // jemand Sitzplaetze in zwei verschiedenen Bloecken bestellen will") - ist einmal ein
     // Ticket im Warenkorb, bleibt die Blockauswahl verborgen; ein neuer Verkauf faengt
@@ -399,7 +478,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // "Karte" heisst "Ticket ausgeben (kostenlos)" und loest kein Terminal aus (s. startVerkauf).
   function updatePayLabels() {
     var gratis = false;
-    if (picker && cartHatTickets()) {
+    if (picker && (sitzwahl ? seatsHatTickets() : cartHatTickets())) {
       try { gratis = !(picker.getSummary().total > 0); } catch (e) {}
     }
     document.getElementById('seatplan-cta').textContent = gratis ? 'Ticket ausgeben (kostenlos)' : 'Karte';
@@ -570,9 +649,14 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('ak-erneut').style.display = 'none';
     document.getElementById('ak-tarif-panels').innerHTML = '';
     document.getElementById('ak-blockwahl').classList.remove('ak-hidden');
+    document.getElementById('ak-familie').innerHTML = '';
+    document.getElementById('ak-mehr').hidden = true;
+    document.getElementById('seatplan-status-note').hidden = true;
+    familienQty = 0; planOffen = false; letzteAnzahl = 0;
 
     picker = new SeatPicker(document.getElementById('seatplan-root'), {
-      mode: 'blocks',
+      mode: sitzwahl ? 'seats' : 'blocks',
+      einzelticket: sitzwahl,
       headline: 'Block wählen',
       nachwuchsBeitrag: false,
       planUrl: '/assets/seating/riethsporthalle-seatingplan.json',
@@ -591,8 +675,23 @@ document.addEventListener('DOMContentLoaded', function () {
       standingBookable: game.stehplatzBuchbar !== false,
       cartEl: document.getElementById('seatplan-cart'),
       totalEl: document.getElementById('seatplan-total'),
-      ctaEl: document.getElementById('seatplan-cta')
+      ctaEl: document.getElementById('seatplan-cta'),
+      detailBackdropEl: sitzwahl ? document.getElementById('seatplan-detail-backdrop') : null,
+      detailRootEl: sitzwahl ? document.getElementById('seatplan-detail-root') : null,
+      statusNoteEl: document.getElementById('seatplan-status-note')
     });
+    if (sitzwahl) {
+      // Familienpass / Schlemmerblock hat keinen Sitz und steht nicht im Picker-Zustand: als eigene Zeile anhaengen.
+      var origSummary = picker.getSummary.bind(picker);
+      picker.getSummary = function () {
+        var sum = origSummary();
+        if (familienQty > 0) {
+          sum.lines.push({ label: FAMILIENPASS_LABEL, qty: familienQty, unitPrice: 0, lineTotal: 0, type: 'block',
+            zoneLabel: 'Block A', category: 'Familienpass', zoneId: 'FAMILIENPASS', tarif: 'normal' });
+        }
+        return sum;
+      };
+    }
 
     // Beobachtet den (unsichtbaren) nativen Warenkorb: dort schreibt SeatPicker bei JEDER
     // Mengenaenderung hinein (auch ueber unsere eigenen Stepper, da die am selben
@@ -647,7 +746,45 @@ document.addEventListener('DOMContentLoaded', function () {
   // gedruckt, die Order bekommt den Kommentar BARZAHLUNG. Kartenzahlung in der Kassen-App: ERST
   // bezahlen, DANN Bestellung anlegen und drucken (Marko, 15.10.2026) - so entsteht bei einer
   // gescheiterten Zahlung weder ein Ticket noch eine Geisterbestellung in pretix.
+  // Sitzwahl: vor dem Kassieren pruefen, ob die gewaehlten Plaetze noch frei sind (ein Platz kann
+  // zwischenzeitlich online verkauft worden sein). Sonst wuerde bei Kartenzahlung erst kassiert und
+  // dann die Bestellung abgelehnt.
   function startVerkauf(bar) {
+    if (bestellLaeuft) return;
+    if (!sitzwahl) { startVerkaufJetzt(bar); return; }
+    var summary = picker.getSummary();
+    var guids = summary.lines.filter(function (l) { return l.seatGuid; }).map(function (l) { return l.seatGuid; });
+    if (!guids.length) { startVerkaufJetzt(bar); return; }
+    var statusEl = document.getElementById('ak-status');
+    bestellLaeuft = true;
+    ctaEl.disabled = true;
+    syncPay();
+    statusEl.className = 'ak-status ak-status-busy';
+    statusEl.textContent = 'Plätze werden geprüft …';
+    fetch(picker.seatStatusUrl, { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .catch(function () { return null; })
+      .then(function (st) {
+        bestellLaeuft = false;
+        var vergeben = new Set(st && Array.isArray(st.takenSeatGuids) ? st.takenSeatGuids : []);
+        var belegt = guids.filter(function (g) { return vergeben.has(g); });
+        if (belegt.length) {
+          statusEl.className = 'ak-status ak-status-error';
+          statusEl.textContent = (belegt.length === 1 ? 'Ein Platz wurde' : belegt.length + ' Plätze wurden') +
+            ' gerade verkauft. Es wurde nichts kassiert. Bitte Plätze neu wählen.';
+          naechsterEl.textContent = 'Plätze neu wählen';
+          naechsterEl.style.display = 'block';
+          return;
+        }
+        statusEl.className = 'ak-status';
+        statusEl.textContent = '';
+        ctaEl.disabled = false;
+        syncPay();
+        startVerkaufJetzt(bar);
+      });
+  }
+
+  function startVerkaufJetzt(bar) {
     if (bestellLaeuft) return;
     var summary = picker.getSummary();
     if (!summary.lines.length) return;
@@ -814,6 +951,14 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   ctaEl.addEventListener('click', function () { startVerkauf(false); });
+
+  document.getElementById('ak-mehr').addEventListener('click', function () {
+    planOffen = !planOffen;
+    syncSichtbarkeit();
+  });
+  var detailBackdrop = document.getElementById('seatplan-detail-backdrop');
+  detailBackdrop.addEventListener('click', function (e) { if (e.target === detailBackdrop && picker) picker.closeDetail(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && picker) picker.closeDetail(); });
 
   // Bar: eigener Knopf; die Rueckfrage bleibt, damit ein Fehltipp nicht ohne Zahlung ein Ticket druckt.
   barEl.addEventListener('click', function () {
