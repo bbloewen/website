@@ -270,6 +270,15 @@ def einzelticket_preise():
         block = hub.split("Die weiteren Heimspiele")[0]
         werte = sorted(float(f"{a.replace('.', '')}.{b}") for a, b in PREIS_ROW_RE.findall(block))
         if not werte:
+            # Ist beim naechsten Heimspiel der Vorverkauf noch nicht offen (nach dem
+            # Spielende springt der Hub auf das naechste Spiel, z. B. am 18.10.2026
+            # auf Weimar), zeigt der Hub keine Preisliste. Die Preise stehen dann
+            # trotzdem fest, und zwar in PREISLISTE_HTML in build-gameday-hub.py --
+            # dieselbe Quelle, aus der der Hub sie sonst schreibt.
+            quelle = (REPO / "tools" / "build-gameday-hub.py").read_text(encoding="utf-8")
+            liste = quelle.split("PREISLISTE_HTML = ", 1)[-1].split('"""')[1] if "PREISLISTE_HTML = " in quelle else ""
+            werte = sorted(float(f"{a.replace('.', '')}.{b}") for a, b in PREIS_ROW_RE.findall(liste))
+        if not werte:
             raise SystemExit("Keine Preiszeilen auf dem Game-Day-Hub gefunden -- "
                              "Preistabelle umgebaut? einzelticket_preise() nachziehen.")
         _PREISE_CACHE = (werte[0], werte[-1], len(werte))
