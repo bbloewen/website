@@ -50,11 +50,11 @@ DAUERKARTE = REPO / "tickets" / "dauerkarte.html"
 # Einzelticket mit Sitzwahl (Marko, 18.10.2026). False: nur mit ?sitzwahl=1 sichtbar (Testphase),
 # True: fuer alle, ?sitzwahl=0 holt die alte Blockwahl zurueck. Die Texte im Kaufbereich
 # (WISSENSWERTES_HTML) muessen beim Umschalten mitgezogen werden.
-SITZWAHL_STANDARD = False
+SITZWAHL_STANDARD = True
 
 # True: der Kaufbereich auf dem Hub zeigt nur einen Pausen-Hinweis (Marko, 18.10.2026, waehrend des Umbaus
 # auf Sitzwahl). Das Hub-Skript und die Spieltagsseiten bauen sonst unveraendert weiter.
-KAUF_PAUSIERT = True
+KAUF_PAUSIERT = False
 
 # Die Dauerkarten-Preisbox in der Spalte neben den weiteren Heimspielen. Bewusst
 # eine Auswahl, nicht die volle Liste -- die ganze Preistabelle steht auf
