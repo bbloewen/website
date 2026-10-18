@@ -47,6 +47,11 @@ QUELLE = REPO / "data" / "heimspiele.json"
 ZIEL = REPO / "saison" / "profis" / "gameday" / "index.html"
 DAUERKARTE = REPO / "tickets" / "dauerkarte.html"
 
+# Einzelticket mit Sitzwahl (Marko, 18.10.2026). False: nur mit ?sitzwahl=1 sichtbar (Testphase),
+# True: fuer alle, ?sitzwahl=0 holt die alte Blockwahl zurueck. Die Texte im Kaufbereich
+# (WISSENSWERTES_HTML) muessen beim Umschalten mitgezogen werden.
+SITZWAHL_STANDARD = False
+
 # Die Dauerkarten-Preisbox in der Spalte neben den weiteren Heimspielen. Bewusst
 # eine Auswahl, nicht die volle Liste -- die ganze Preistabelle steht auf
 # tickets/dauerkarte.html, hierher gehoert nur der Anreiss.
@@ -411,6 +416,8 @@ def kauf_bereich(aktuell, kommt, heute):
           </div>
           <div class="buy-thumb-col">
             <div id="seatplan-root"></div>
+            <!-- Nur bei Sitzwahl: erscheint, wenn die nachgeladene Belegung einen gewählten Platz als vergeben meldet. -->
+            <p id="seatplan-status-note" class="t-caption" hidden style="margin:10px 0 0;color:#b3392c"></p>
           </div>
           <div class="buy-cart-col">
             <h3 class="t-h4 mb-1">Deine Auswahl</h3>
@@ -423,6 +430,13 @@ def kauf_bereich(aktuell, kommt, heute):
 {WISSENSWERTES_HTML}
     </div>
   </section>
+
+  <!-- Detailansicht eines Blocks bei Sitzwahl, bewusst AUSSERHALB der Section (Stacking-Context, s. tickets/dauerkarte.html). -->
+  <div class="modal-backdrop" id="seatplan-detail-backdrop">
+    <div class="modal-box modal-box-blockplan" role="dialog" aria-modal="true" aria-label="Sitzplatz-Detail">
+      <div id="seatplan-detail-root"></div>
+    </div>
+  </div>
 
   <section class="section bg-subtle">
     <div class="container container-narrow">
@@ -437,13 +451,19 @@ def kauf_bereich(aktuell, kommt, heute):
   </section>
 
   <script src="/js/voucher-utils.js?v=1786873000"></script>
-  <script src="/js/seat-picker.js?v=1792096856"></script>
+  <script src="/js/seat-picker.js?v=1792353117"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {{
       var game = {game_json};
       var eventLabel = 'Basketball Löwen Erfurt – ' + game.gegner + ', {esc(lang_datum(aktuell))}';
+      /* Einzelticket mit Sitzwahl (Marko, 18.10.2026): zunaechst nur mit ?sitzwahl=1 erreichbar,
+         damit Bestellung, Mail und Ticket vor der Freigabe echt getestet werden koennen.
+         SITZWAHL_STANDARD (tools/build-gameday-hub.py) schaltet es fuer alle um, ?sitzwahl=0 holt
+         die alte Blockwahl zurueck. */
+      var sitzwahl = {'true' if SITZWAHL_STANDARD else 'false'} ? !/[?&]sitzwahl=0/.test(location.search) : /[?&]sitzwahl=1/.test(location.search);
       var picker = new SeatPicker(document.getElementById('seatplan-root'), {{
-        mode: 'blocks',
+        mode: sitzwahl ? 'seats' : 'blocks',
+        einzelticket: sitzwahl,
         nachwuchsBeitrag: true,
         nachwuchsAmount: 2,
         planUrl: '/assets/seating/riethsporthalle-seatingplan.json?v=1786585000',
@@ -471,8 +491,16 @@ def kauf_bereich(aktuell, kommt, heute):
         standingBookable: game.stehplatzBuchbar !== false,
         cartEl: document.getElementById('seatplan-cart'),
         totalEl: document.getElementById('seatplan-total'),
-        ctaEl: document.getElementById('seatplan-cta')
+        ctaEl: document.getElementById('seatplan-cta'),
+        detailBackdropEl: sitzwahl ? document.getElementById('seatplan-detail-backdrop') : null,
+        detailRootEl: sitzwahl ? document.getElementById('seatplan-detail-root') : null,
+        statusNoteEl: document.getElementById('seatplan-status-note')
       }});
+      if (sitzwahl) {{
+        var detailBackdrop = document.getElementById('seatplan-detail-backdrop');
+        detailBackdrop.addEventListener('click', function (e) {{ if (e.target === detailBackdrop) picker.closeDetail(); }});
+        document.addEventListener('keydown', function (e) {{ if (e.key === 'Escape') picker.closeDetail(); }});
+      }}
 
       document.getElementById('seatplan-cta').addEventListener('click', function () {{
         var summary = picker.getSummary();

@@ -229,6 +229,12 @@
     // Nicht buchbar kann pro Spiel gesetzt werden (Website-seitig, pretix bleibt aktiv) —
     // dann: Preisliste durchgestrichen, Grafik nicht anklickbar, Dropdown ohne Option.
     this.standingBookable = opts.standingBookable !== false;
+    /* Einzelticket mit echter Sitzwahl (Marko, 18.10.2026): laeuft im Modus "seats" wie die
+       Dauerkarte, liefert aber Zeilen im Format des Einzelticket-Workflows (type 'block', qty 1,
+       zusaetzlich seatGuid), damit Preisberechnung, Gutscheine und Betragspruefung dort
+       unveraendert bleiben. Stehplaetze haben keinen Sitz und laufen ueber standingQty. */
+    this.einzelticket = !!opts.einzelticket;
+    this.standingQty = 0;
     this.pretixEvent = opts.pretixEvent || null; // Event-Slug fuer die Gutschein-Pruefung (z.B. "saison2627")
     // pretix-Item-ID -> unsere Kategorie-Bezeichnung, z.B. {9:"VIP",7:"Kategorie I",8:"Kategorie II"} —
     // nur so kann ein an ein bestimmtes Produkt gebundener Gutschein (require item) der richtigen
@@ -530,6 +536,7 @@
         self.takenSeatGuids = new Set(Array.isArray(status.takenSeatGuids) ? status.takenSeatGuids : []);
         if (typeof status.standingAvailable === 'number') {
           self.standingAvailable = status.standingAvailable;
+          if (self.standingQty > self.standingAvailable) self.standingQty = self.standingAvailable;
           var stehplatzCounts = self.blockCounts.STEHPLATZ;
           if (stehplatzCounts && stehplatzCounts.normal > self.standingAvailable) {
             stehplatzCounts.normal = self.standingAvailable;
@@ -2312,7 +2319,7 @@
             btn.disabled = true;
           } else {
             btn.addEventListener('click', function () {
-              self._toggleSeat(btn, seat.seat_guid, zone.name, rowLabel, seat.seat_number, seatCategory, seatPriceInfo);
+              self._toggleSeat(btn, seat.seat_guid, zone.name, rowLabel, seat.seat_number, seatCategory, seatPriceInfo, zone.zone_id);
             });
           }
           // label_before_seat (z.B. Block A Reihe 1, wegen des neuen Rollstuhlplatzes am
@@ -2514,7 +2521,7 @@
      selected) wird erst bei „Übernehmen" geschrieben; dadurch verändert Antippen die
      Seite hinter dem Overlay nicht mehr (das war das „Bild springt im Hintergrund",
      Feedback 30.07.2026) — es gibt schlicht nichts mehr, das dort mitwachsen könnte. */
-  SeatPicker.prototype._toggleSeat = function (btn, guid, zoneLabel, rowLabel, seatNumber, category, priceInfo) {
+  SeatPicker.prototype._toggleSeat = function (btn, guid, zoneLabel, rowLabel, seatNumber, category, priceInfo, zoneId) {
     var seats = this._activeSeats();
     if (seats[guid]) {
       delete seats[guid];
@@ -2540,7 +2547,7 @@
         if (wheelchairCount > usedCount) tarif = 'begleitung';
       }
       seats[guid] = {
-        zoneLabel: zoneLabel, rowLabel: rowLabel, seatNumber: seatNumber,
+        zoneId: zoneId, zoneLabel: zoneLabel, rowLabel: rowLabel, seatNumber: seatNumber,
         category: category, tarif: tarif, price: this._dkTarifPrice(priceInfo, tarif), priceInfo: priceInfo
       };
       btn.classList.add('selected');
@@ -2729,8 +2736,10 @@
 
     var self = this;
     var guids = Object.keys(this.selected);
-    if (guids.length === 0) {
+    var standingQty = this._standingEnabled() ? this.standingQty : 0;
+    if (guids.length === 0 && standingQty === 0) {
       this.cartEl.innerHTML = '<div class="seatplan-cart-empty">Noch keine Plätze ausgewählt.</div>';
+      this._appendStandingRow();
       this.ctaEl.disabled = true;
     } else {
       this.cartEl.innerHTML = '';
@@ -2787,6 +2796,7 @@
         self.cartEl.appendChild(row);
       });
 
+      this._appendStandingRow();
       this._appendNachwuchsRow();
       this._appendVoucherRow();
       this._appendNotizRow();
@@ -2890,9 +2900,41 @@
     }
 
     var total = guids.reduce(function (sum, guid) { return sum + self.selected[guid].price; }, 0);
-    total += this._nachwuchsAmountFor(guids.length > 0);
+    total += standingQty * this.standingPrice;
+    total += this._nachwuchsAmountFor(guids.length > 0 || standingQty > 0);
     total -= this._voucherDiscount(total);
     this.totalEl.textContent = fmtEUR(total) + ' €';
+  };
+
+  /* Stehplaetze im Einzelticket mit Sitzwahl: kein Sitz, nur eine Menge (wie im Modus
+     "blocks" ueber die Pseudo-Zone STEHPLATZ, hier als eigene Zeile unter den Sitzen). */
+  SeatPicker.prototype._standingEnabled = function () {
+    return this.einzelticket && !!this.standing && this.standingPrice > 0 && this.standingBookable;
+  };
+
+  SeatPicker.prototype._appendStandingRow = function () {
+    if (!this._standingEnabled()) return;
+    var self = this;
+    var free = typeof this.standingAvailable === 'number' ? this.standingAvailable : this.standing.capacity;
+    var max = Math.max(0, Math.min(free, 20));
+    var row = document.createElement('div');
+    row.className = 'seatplan-cart-item seatplan-standing-row';
+    row.innerHTML =
+      '<div>Stehplatz<br><span class="t-caption">' + fmtEUR(this.standingPrice) + ' € je Ticket' +
+      (free <= 0 ? ' · aktuell ausverkauft' : '') + '</span></div>' +
+      '<div class="seatplan-cart-item-right"><span class="seatplan-stepper">' +
+        '<button type="button" data-standing-step="-1" aria-label="Ein Stehplatz weniger"' + (this.standingQty <= 0 ? ' disabled' : '') + '>−</button>' +
+        '<strong aria-live="polite">' + this.standingQty + '</strong>' +
+        '<button type="button" data-standing-step="1" aria-label="Ein Stehplatz mehr"' + (this.standingQty >= max ? ' disabled' : '') + '>+</button>' +
+      '</span></div>';
+    this.cartEl.appendChild(row);
+    row.querySelectorAll('[data-standing-step]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var next = self.standingQty + parseInt(this.dataset.standingStep, 10);
+        self.standingQty = Math.max(0, Math.min(max, next));
+        self._renderCart();
+      });
+    });
   };
 
   /* Direkte Block+Anzahl-Wahl im Warenkorb selbst — Alternative zum Antippen im Bild
@@ -3155,6 +3197,17 @@
 
     Object.keys(this.selected).forEach(function (guid) {
       var s = self.selected[guid];
+      if (self.einzelticket) {
+        // Format der Einzelticket-Bestellung (type 'block', qty 1) plus gewaehlter Sitz.
+        lines.push({
+          label: s.zoneLabel + ' · Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber + ' · ' + (DK_TARIF_LABELS[s.tarif] || 'Normalpreis'),
+          qty: 1, unitPrice: s.price, lineTotal: s.price,
+          type: 'block', zoneLabel: s.zoneLabel, category: s.category, zoneId: s.zoneId, tarif: s.tarif,
+          seatGuid: guid, rowLabel: s.rowLabel, seatNumber: s.seatNumber
+        });
+        total += s.price;
+        return;
+      }
       lines.push({
         label: s.zoneLabel + ' · Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber + ' · ' + (DK_TARIF_LABELS[s.tarif] || 'Normalpreis'),
         qty: 1, unitPrice: s.price, lineTotal: s.price,
@@ -3173,6 +3226,14 @@
       });
       total += s.price;
     });
+    if (this._standingEnabled() && this.standingQty > 0) {
+      var stLine = this.standingQty * this.standingPrice;
+      lines.push({
+        label: 'Stehplatz · Normalpreis', qty: this.standingQty, unitPrice: this.standingPrice, lineTotal: stLine,
+        type: 'block', zoneLabel: 'Stehplatz', category: 'Stehplatz', zoneId: 'STEHPLATZ', tarif: 'normal'
+      });
+      total += stLine;
+    }
     var nwAmount = this._nachwuchsAmountFor(lines.length > 0);
     if (nwAmount > 0) {
       lines.push({ label: 'Unterstützung für den Nachwuchs', qty: 1, unitPrice: nwAmount, lineTotal: nwAmount, type: 'nachwuchs' });
