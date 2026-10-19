@@ -23,7 +23,16 @@
       "maMax": 20,
       "kontingent": 200,
       "anmeldeschluss": "2026-11-06T14:00",
-      "einlassVorlaufMinuten": 60
+      "einlassVorlaufMinuten": 60,
+      "empfaenger": {
+        "cc": [
+          "heiko.kuehnst@stbkuehnst.de",
+          "andre.grenzdoerffer@basketball-loewen.com"
+        ],
+        "bcc": [
+          "marko.fliege@basketball-loewen.com"
+        ]
+      }
     },
     {
       "slug": "crestcom",
@@ -46,7 +55,16 @@
       "maMax": 50,
       "kontingent": 300,
       "anmeldeschluss": "2026-10-16T14:00",
-      "einlassVorlaufMinuten": 60
+      "einlassVorlaufMinuten": 60,
+      "empfaenger": {
+        "cc": [
+          "wolfgang.struensee@basketball-loewen.com"
+        ],
+        "bcc": [
+          "marko.fliege@basketball-loewen.com"
+        ]
+      }
     }
-  ]
+  ],
+  "empfaengerHinweis": "empfaenger.cc bekommt jede Anmeldung in Kopie (der einladende Partner und wer intern mitlesen soll), empfaenger.bcc still. Die Mail selbst geht immer an tickets@basketball-loewen.com. n8n liest diese Datei live, damit Kontingent, Anmeldeschluss, Spanne und Empfänger nur hier stehen — dasselbe Muster wie bei data/dauerkarte-preise.json."
 }
