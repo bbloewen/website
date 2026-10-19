@@ -182,14 +182,6 @@ def pruefe_intern(texte, partials):
     return tot, waisen
 
 
-# Rechtstexte bleiben aussen vor: Dort stehen Namen als Tatsachenangabe (wer
-# laedt ein, wer verarbeitet Daten), nicht als Erwaehnung, die man anklicken
-# koennen muesste. Ein Werbelink in der Datenschutzerklaerung waere falsch --
-# aufgefallen am 19.10.2026, als die Einladungsseite zur Vorlage wurde und
-# "Heiko Kuehnst Steuerberater" in Abschnitt 6 der Datenschutzerklaerung landete.
-OHNE_KONSISTENZ = {"datenschutz.html", "impressum.html", "agb.html"}
-
-
 def pruefe_konsistenz(texte):
     paare = namensliste(texte)
     funde = defaultdict(list)
@@ -198,7 +190,7 @@ def pruefe_konsistenz(texte):
         intern = INTERNE_SEITE.get(name)
         muster = re.compile(r"\b" + re.escape(name) + r"\b")
         for rel, text in texte.items():
-            if rel.startswith("news/insta-archiv/") or rel in OHNE_KONSISTENZ:
+            if rel.startswith("news/insta-archiv/"):
                 continue
             sichtbar = fliesstext(text)
             for verbindung in KEIN_VERWEIS:

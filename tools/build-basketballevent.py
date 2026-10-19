@@ -41,6 +41,12 @@ Header, Footer und der SEO-Block werden wie bei den Spieltagsseiten aus der
 bestehenden Datei uebernommen, damit dieses Skript nicht zunichtemacht, was
 build-partials.py und build-head-meta.py danach eintragen.
 
+Die Datenschutzerklaerung fasst dieses Skript NICHT an. Abschnitt 6 und 7 dort
+sind bewusst allgemein formuliert — welcher Partner einlaedt, zu welchem Spiel
+und wie gross das Kontingent ist, legen wir fest und ist keine Frage des
+Datenschutzes (Marko, 19.10.2026). Eine kurze Fassung, die den jeweiligen
+Partner und das Kontingent nannte, ist deshalb wieder entfallen.
+
 Aufruf:
   python3 tools/build-basketballevent.py
   python3 tools/build-basketballevent.py --check
@@ -995,54 +1001,6 @@ def skript_umfrage(aktion):
 </script>"""
 
 
-DATENSCHUTZ = REPO / "datenschutz.html"
-
-
-def pflege_datenschutz(aktion, spiel, zeit, nur_pruefen=False):
-    """Haelt die drei veraenderlichen Angaben in der Datenschutzerklaerung aktuell.
-
-    Die Abschnitte 6 und 7 der Datenschutzerklaerung nennen den einladenden
-    Partner, den Spieltag (davon haengt die Loeschfrist ab) und die Groesse des
-    Kontingents. Bis zum 19.10.2026 standen dort crestcom, der 18. Oktober und
-    300 Tickets fest im Text — bei der zweiten Aktion waere das schlicht falsch
-    gewesen, und es faellt niemandem auf, weil die Seite selten gelesen wird.
-    Darum tragen genau diese drei Stellen Marker, die hier gefuellt werden:
-
-      <!--FE:partner-->…<!--/FE:partner-->        Name des Sponsors
-      <!--FE:spieltag-->…<!--/FE:spieltag-->      Tag des Heimspiels (zweimal)
-      <!--FE:kontingent-->…<!--/FE:kontingent-->  Zahl der Tickets
-
-    Alles andere an der Datenschutzerklaerung bleibt Handarbeit."""
-    text = DATENSCHUTZ.read_text(encoding="utf-8")
-    werte = {
-        "partner": html.escape(aktion["sponsor"]["name"]),
-        "spieltag": lang_datum(spiel),
-        "kontingent": f"{aktion['kontingent']} Tickets",
-    }
-    neu = text
-    for name, wert in werte.items():
-        neu = re.sub(
-            r"(<!--FE:" + name + r"-->).*?(<!--/FE:" + name + r"-->)",
-            lambda m, w=wert: m.group(1) + w + m.group(2),
-            neu, flags=re.S,
-        )
-    if neu == text:
-        return False
-    if not nur_pruefen:
-        DATENSCHUTZ.write_text(neu, encoding="utf-8")
-    return True
-
-
-MONATE = ["Januar", "Februar", "März", "April", "Mai", "Juni",
-          "Juli", "August", "September", "Oktober", "November", "Dezember"]
-
-
-def lang_datum(spiel):
-    """"8. November 2026" — so, wie die Datenschutzerklaerung Daten schreibt."""
-    d = datetime.strptime(spiel["datum"], "%d.%m.%Y")
-    return f"{d.day}. {MONATE[d.month - 1]} {d.year}"
-
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true")
@@ -1066,13 +1024,8 @@ def main():
         pfad.write_text(neu, encoding="utf-8")
         print(f"  geschrieben: {pfad.relative_to(REPO)}")
 
-    if pflege_datenschutz(aktion, spiel, zeit, nur_pruefen=args.check):
-        geschrieben += 1
-        print(f"  {'zu ändern' if args.check else 'nachgezogen'}: datenschutz.html "
-              f"(Partner, Spieltag, Kontingent)")
-
     print(f"  Aktion „{aktion['slug']}“ ({aktion['sponsor']['name']}), Spiel {spiel['datum']} "
-          f"gegen {spiel['gegner']} — {geschrieben} Datei(en) "
+          f"gegen {spiel['gegner']} — {geschrieben} von 2 Seiten "
           f"{'zu ändern' if args.check else 'geschrieben'}")
     return 1 if (args.check and geschrieben) else 0
 
