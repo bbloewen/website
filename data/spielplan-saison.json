@@ -20,10 +20,10 @@
   ],
   "damen": {
     "spiele": [
-      { "datum": "27.09.2026", "zeit": "15:00", "gegner": "Post SV Nürnberg", "heim": true },
-      { "datum": "03.10.2026", "zeit": "16:00", "gegner": "TB 1888 Erlangen", "heim": false, "ort": "Erlangen" },
-      { "datum": "11.10.2026", "zeit": "13:00", "gegner": "BC Dresden", "heim": true },
-      { "datum": "17.10.2026", "gegner": "DJK Don Bosco Bamberg", "heim": false, "ort": "Bamberg" },
+      { "datum": "27.09.2026", "zeit": "15:00", "gegner": "Post SV Nürnberg", "heim": true, "ergebnis": "42 : 99" },
+      { "datum": "03.10.2026", "zeit": "16:00", "gegner": "TB 1888 Erlangen", "heim": false, "ort": "Erlangen", "ergebnis": "0 : 20" },
+      { "datum": "11.10.2026", "zeit": "13:00", "gegner": "BC Dresden", "heim": true, "ergebnis": "54 : 77" },
+      { "datum": "18.10.2026", "zeit": "14:00", "gegner": "DJK Don Bosco Bamberg", "heim": false, "ort": "Bamberg", "ergebnis": "57 : 54" },
       { "datum": "24.10.2026", "zeit": "17:00", "gegner": "Leipzig Lakers", "heim": true },
       { "datum": "31.10.2026", "zeit": "17:00", "gegner": "TG 48 Würzburg 2", "heim": true },
       { "datum": "07.11.2026", "zeit": "17:15", "gegner": "BG Litzendorf", "heim": false, "ort": "Litzendorf" },
@@ -35,7 +35,7 @@
       { "datum": "12.12.2026", "zeit": "14:45", "gegner": "TG 48 Würzburg 2", "heim": false, "ort": "Würzburg" },
       { "datum": "09.01.2027", "zeit": "18:00", "gegner": "BG Litzendorf", "heim": true }
     ],
-    "hinweis": "Kompletter Spielplan am 13.08.2026 gegen den offiziellen DBB-Spielplan (basketball-bund.net, Liga-ID 52497, Regionalliga Südost/RLSO) abgeglichen und korrigiert — u.a. Datum Spieltag 1 (27.09. statt 26.09.), mehrere Anwurfzeiten sowie Spieltag 12 (06.12., Auswärtsspiel bei Leipzig Lakers statt fälschlich als Heimspiel geführt). Das bisherige 15. 'Spiel' gegen Culture City Weimar am 17.04.2027 existierte nicht im echten Spielplan (Kopierfehler aus der Profis-Auswärtsliste) und wurde entfernt — die Damen-Saison hat 14 Spiele (7 Gegner, Hin- und Rückrunde). Spieltag 4 (17.10., bei DJK Don Bosco Bamberg) hat laut DBB noch keine Anwurfzeit."
+    "hinweis": "Kompletter Spielplan am 13.08.2026 gegen den offiziellen DBB-Spielplan (basketball-bund.net, Liga-ID 52497, Regionalliga Südost/RLSO) abgeglichen und korrigiert — u.a. Datum Spieltag 1 (27.09. statt 26.09.), mehrere Anwurfzeiten sowie Spieltag 12 (06.12., Auswärtsspiel bei Leipzig Lakers statt fälschlich als Heimspiel geführt). Das bisherige 15. 'Spiel' gegen Culture City Weimar am 17.04.2027 existierte nicht im echten Spielplan (Kopierfehler aus der Profis-Auswärtsliste) und wurde entfernt — die Damen-Saison hat 14 Spiele (7 Gegner, Hin- und Rückrunde). Spieltag 4 (bei DJK Don Bosco Bamberg) war zuerst für den 17.10. ohne Anwurfzeit eingetragen, laut DBB (Stand 19.10.2026) wurde er am Sonntag, 18.10.2026 um 14:00 Uhr gespielt. Ergebnisse am 19.10.2026 aus dem DBB-Spielplan nachgetragen, in der Reihenfolge der Ansetzung (Heimteam zuerst, wie bei allen Spielen dieser Datei): Löwinnen – Nürnberg 42 : 99, Erlangen – Löwinnen 0 : 20 (vom DBB mit 0:20 gewertet, Löwinnen gewinnen), Löwinnen – Dresden 54 : 77, Bamberg – Löwinnen 57 : 54."
   },
   "nbbl": {
     "spiele": [
