@@ -857,7 +857,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
     { id: 'segmentierung', name: 'Segmentierung', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
-    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'rueckfragen', name: 'Rückfragen' }, { id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlung XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung LEV Löwenpark' }, { id: 'ueberweisungen', name: 'Überweisungen' }, { id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }, { id: 'kreditoren', name: 'Kreditoren / Debitoren' }, { id: 'vorschuesse', name: 'Vorschüsse' }] },
+    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlung XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung LEV Löwenpark' }, { id: 'ueberweisungen', name: 'Überweisungen' }, { id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }, { id: 'kreditoren', name: 'Kreditoren / Debitoren' }, { id: 'vorschuesse', name: 'Vorschüsse' }, { id: 'rueckfragen', name: 'Rückfragen', versteckt: true }] },
     { id: 'auslagen', name: 'Auslagen', tabs: [{ id: 'auslage-neu', name: 'Auslage einreichen' }, { id: 'vorschuss-neu', name: 'Vorschuss beantragen' }] }
   ];
   var TABS = [];
@@ -887,6 +887,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     $('bereich-titel').textContent = b.name;
     var t = '';
     b.tabs.forEach(function (x) {
+      if (x.versteckt && x.id !== S.tab) return;
       var aktiv = x.id === S.tab;
       var badge = x.id === 'rueckfragen' && RF.daten && RF.daten.zaehler && RF.daten.zaehler.offen ? ' (' + RF.daten.zaehler.offen + ')' : (x.id === 'vorschuesse' && VW.daten && vwOffen() ? ' (' + vwOffen() + ')' : '');
       t += '<button class="tab" role="tab" id="tab-' + x.id + '" data-tab="' + x.id + '" aria-controls="p-' + x.id + '" aria-selected="' + aktiv + '" tabindex="' + (aktiv ? 0 : -1) + '">' + esc(x.name + badge) + '</button>';
@@ -3355,7 +3356,21 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         if (fremd.length && !erklaert) betragHinweis = '<div class="hinweis-warn" style="margin-top:6px;white-space:normal"><b>Betrag prüfen:</b> Gelesen ist ' + esc(formatEuro(Math.abs(brutto))) + ', im Beleg stehen auch ' + fremd.map(function (v) { return esc(formatEuro(v)); }).join(', ') + '.</div>';
       }
       var mandantWahl = '';
-      if (a && !a.geplant && !b && a.status === 'erkannt' && a.urteil !== 'muell') mandantWahl = '<div class="notiz" style="margin:4px 0 0">Der Agent kann diesen Beleg nicht allein kontieren. Er steht unter Rückfragen › „Zu prüfen“, dort Mandant wählen bzw. zur Kontierung geben.</div>';
+      var aktBtn = function (t, attrs, titel) { return '<button type="button" class="link-btn" style="font-size:12px"' + attrs + (titel ? ' title="' + esc(titel) + '"' : '') + '>' + t + '</button>'; };
+      if (a && !b && a.status === 'erkannt' && a.urteil !== 'muell' && !blGebucht(r)) {
+        var mBek = ['XXL', 'LEV'].indexOf(String(a.mandant || '')) >= 0, anderer = a.mandant === 'XXL' ? 'LEV' : (a.mandant === 'LEV' ? 'XXL' : '');
+        var mBtn = function (m, t, wechseln) { return aktBtn(t, ' data-be="mandant-setzen" data-id="' + a.id + '" data-m="' + m + '"' + (wechseln ? ' data-wechseln="1"' : '')); };
+        var zeilen2 = [];
+        if (!a.geplant) zeilen2.push(mBek ? 'Noch keine Rückfrage: ' + mBtn(a.mandant, 'Zur Kontierung geben (' + esc(a.mandant) + ')') : 'Mandant nicht erkannt: ' + mBtn('XXL', 'XXL') + ' · ' + mBtn('LEV', 'LEV') + ' (der Vorschlag entsteht danach in etwa einer Minute)');
+        if (mBek && anderer) zeilen2.push(mBtn(anderer, 'Gehört zu ' + anderer + ', dorthin verschieben', true));
+        if (zeilen2.length) mandantWahl = '<div class="notiz" style="margin:4px 0 0">' + zeilen2.join('<br>') + '</div>';
+      }
+      if (gp && gp.rueckfrage && !gp.gebucht_am && !b) {
+        mandantWahl += '<div class="notiz" style="margin:4px 0 0">' +
+          aktBtn('Steuerberater fragen', ' data-be="rf-akt" data-akt="steuerberater" data-rf="' + gp.rueckfrage + '"', 'Gibt den Beleg mit einem Hinweis an den Steuerberater') + ' · ' +
+          aktBtn('Doppelt, entfernen', ' data-be="rf-akt" data-akt="duplikat" data-rf="' + gp.rueckfrage + '"', 'Erledigt den Beleg als Doppelung') + ' · ' +
+          aktBtn('Kein Beleg, ignorieren', ' data-be="rf-akt" data-akt="verworfen" data-rf="' + gp.rueckfrage + '"', 'Erledigt ohne Buchung und ohne etwas zu lernen') + '</div>';
+      }
       var agLink = ag && !(agGeb && agFest) ? '<div style="margin-top:4px"><button type="button" class="link-btn" data-be="ag-edit" data-bid="' + esc(b.beleg_id) + '" data-titel="' + esc(titel) + '">Kontierung ändern</button></div>' : '';
       var auswahlZelle = agWahl ? '<input type="checkbox" data-be-sel="' + esc(agKey) + '" data-titel="' + esc(titel) + '"' + (BE.sel[agKey] ? ' checked' : '') + ' aria-label="' + (agGeb ? 'Zum Aktualisieren in BuchhaltungsButler auswählen: ' : 'Zur Übertragung nach BuchhaltungsButler auswählen: ') + esc(titel) + '">' : gp && gp.sachkonto && !gp.gebucht_am && gp.rueckfrage ? '<input type="checkbox" data-be-sel="' + gp.rueckfrage + '" data-titel="' + esc(titel) + '"' + (BE.sel[gp.rueckfrage] ? ' checked' : '') + ' aria-label="Zur Übertragung nach BuchhaltungsButler auswählen' + (gpBereit ? '' : ' (übernimmt den Vorschlag)') + ': ' + esc(titel) + '"' + (gpBereit ? '' : ' title="Beim Übertragen wird der Vorschlag als Entscheidung übernommen. Zum Ändern vorher „Ändern / mit KI besprechen“."') + '>' : '';
       // Zahlweg (Lastschrift, Überweisung, Erstattung, schon bezahlt) und passende Abbuchung vom Konto, vor dem Buchen
@@ -5004,7 +5019,27 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         else if (w === 'korr-zu') { BE.korr = null; beAlleRender(); }
         else if (w === 'konto-anlegen') kontoAnlegenUndWeiter(b.getAttribute('data-nr'));
         else if (w === 'rf-passt') { var pid = Number(b.getAttribute('data-rf')); b.disabled = true; fetch('/webhook/accounting/rueckfrage-antwort', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: pid, aktion: 'bestaetigen' }) }).then(function (res) { return res.json().catch(function () { return {}; }).then(function (d) { if (!res.ok || d.ok === false) throw new Error(d.message || d.meldung || d.fehler || 'Nicht übernommen'); }); }).then(function () { ['XXL', 'LEV'].forEach(function (m) { if (BL[m] && BL[m].daten) ladeListe('beleg', m, BL[m].daten.monat); }); if (typeof ladeRF === 'function') ladeRF(); }).catch(function (er) { b.disabled = false; BE.meldung = 'Der Vorschlag wurde nicht übernommen: ' + er.message; beAlleRender(); }); }
-        else if (w === 'mandant-setzen') { b.disabled = true; fetch('/webhook/accounting/beleg-mandant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: Number(b.getAttribute('data-id')), mandant: b.getAttribute('data-m'), kontieren: true }) }).then(function (res) { return res.json().catch(function () { return {}; }); }).then(function (d) { BE.meldung = d.meldung || ''; beAlleRender(); setTimeout(function () { ['XXL', 'LEV'].forEach(function (m) { if (BL[m] && BL[m].daten) ladeListe('beleg', m, BL[m].daten.monat); }); if (typeof ladeRF === 'function') ladeRF(); }, 45000); }).catch(function (er) { b.disabled = false; BE.meldung = er.message; beAlleRender(); }); }
+        else if (w === 'mandant-setzen') {
+          var wechseln = b.getAttribute('data-wechseln') === '1';
+          if (wechseln && !window.confirm('Den Beleg zu ' + b.getAttribute('data-m') + ' verschieben? Der bisherige Vorschlag entfällt, danach wird neu kontiert.')) return;
+          b.disabled = true;
+          fetch('/webhook/accounting/beleg-mandant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: Number(b.getAttribute('data-id')), mandant: b.getAttribute('data-m'), kontieren: true, wechseln: wechseln }) }).then(function (res) { return res.json().catch(function () { return {}; }); }).then(function (d) {
+            BE.meldung = d.meldung || ''; beAlleRender();
+            var neuLaden = function () { ['XXL', 'LEV'].forEach(function (m) { if (BL[m] && BL[m].daten) ladeListe('beleg', m, BL[m].daten.monat); }); };
+            setTimeout(neuLaden, 3000); setTimeout(neuLaden, 60000);
+          });
+        }
+        else if (w === 'rf-akt') {
+          var akt = b.getAttribute('data-akt'), rid = Number(b.getAttribute('data-rf')), nutz = { aktion: akt, id: rid };
+          if (akt === 'steuerberater') { var hin = window.prompt('Hinweis an den Steuerberater (optional): Was ist unklar?', ''); if (hin === null) return; nutz.notiz = hin; }
+          else if (akt === 'duplikat') { if (!window.confirm('Diesen Beleg als Doppelung erledigen? Er verschwindet aus der Liste, in BuchhaltungsButler wird nichts gelöscht.')) return; }
+          else if (akt === 'verworfen') { if (!window.confirm('Als „kein Beleg“ erledigen, ohne Buchung?')) return; }
+          b.disabled = true;
+          fetch('/webhook/accounting/rueckfrage-antwort', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(nutz) }).then(function (res) { return res.json().catch(function () { return {}; }).then(function (d) { if (!res.ok || d.ok === false) throw new Error(d.message || d.meldung || d.fehler || 'Nicht gespeichert'); }); }).then(function () {
+            BE.meldung = { steuerberater: 'An den Steuerberater weitergegeben.', duplikat: 'Als Doppelung erledigt.', verworfen: 'Als „kein Beleg“ erledigt.' }[akt] || ''; beAlleRender();
+            ['XXL', 'LEV'].forEach(function (m) { if (BL[m] && BL[m].daten) ladeListe('beleg', m, BL[m].daten.monat); }); if (typeof ladeRF === 'function') ladeRF();
+          }).catch(function (er) { b.disabled = false; BE.meldung = 'Nicht gespeichert: ' + er.message; beAlleRender(); });
+        }
         else if (w === 'ag-edit') agStart(b.getAttribute('data-bid'), b.getAttribute('data-titel'));
         else if (w === 'ag-zeile') { if (BE.agEd) { agLies(); BE.agEd.teile.push({ sachkonto: '', brutto: '', vat: '19_vat', kst1: '', kst2: '' }); beAlleRender(); } }
         else if (w === 'ag-weg') { if (BE.agEd) { agLies(); BE.agEd.teile.splice(Number(b.getAttribute('data-i')), 1); beAlleRender(); } }
