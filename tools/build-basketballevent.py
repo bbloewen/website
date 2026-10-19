@@ -773,9 +773,14 @@ def baue_einladung(aktion, spiel, zeit):
     ansprache = html.escape(s.get("ansprache", "Kunde"))
     vip_wort = "zwei" if aktion["vipTickets"] == 2 else str(aktion["vipTickets"])
 
-    description = (f"Firmenevent in Erfurt: {name} lädt Sie zum Basketball-Heimspiel am "
-                   f"{zeit['datum']} ein. VIP-Ticket für die Geschäftsführung, Plätze für bis zu "
-                   f"{aktion['maMax']} Mitarbeitende.")
+    # Unter 160 Zeichen bleiben, sonst schneidet Google ab (Ahrefs-Crawl 19.10.2026
+    # meldete 175). Der Sponsorname ist der einzige lange, veränderliche Teil —
+    # passt er nicht, tritt die kurze Fassung ohne Namen an seine Stelle.
+    description = (f"Firmenevent in Erfurt: {name} lädt Sie zum Heimspiel der Basketball Löwen "
+                   f"am {zeit['datum']} ein. VIP-Tickets und Plätze für Ihr Team.")
+    if len(description) > 158:
+        description = (f"Firmenevent in Erfurt: Zum Heimspiel der Basketball Löwen am "
+                       f"{zeit['datum']} eingeladen. VIP-Tickets und Plätze für Ihr Team.")
     lead = (f"Als {ansprache} von {name} erleben Sie und Ihre Mitarbeitenden das Heimspiel der "
             f"Basketball Löwen Erfurt: {vip_wort} VIP-Tickets für Geschäftsführung und Begleitung, "
             f"Plätze für bis zu {aktion['maMax']} Mitarbeitende, dazu Regelkunde und Meet &amp; Greet "
@@ -847,7 +852,7 @@ def baue_einladung(aktion, spiel, zeit):
   </section>"""
 
     kopf = KOPF.format(
-        titel="Firmenevent Erfurt: Basketball live — Basketball Löwen Erfurt",
+        titel="Firmenevent Erfurt: Basketball live — Basketball Löwen",
         description=html.escape(description, quote=True),
         robots="",
         css_version=css_version(),
