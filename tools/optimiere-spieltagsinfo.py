@@ -397,7 +397,12 @@ def main():
     # "Spieltagsinfo Ausgabe N" und war mit 91 Zeichen in der Google-Vorschau abgeschnitten.
     beschreibung = (f"Heimspiel am {args.titel_datum} in der Riethsporthalle: Spieltagsinfo mit "
                     f"Kader der Basketball Löwen Erfurt, Tabelle, Spielplan und Neues aus dem Verein.")
+    # Lange Gegnernamen sprengen die 60 Zeichen, die Google anzeigt (Ahrefs-Crawl
+    # 19.10.2026: Ausgabe 2 lag bei 76). Dann faellt der Gegner weg -- das Heft
+    # gehoert ohnehin zur Spieltagsseite, auf der er steht.
     titel = f"Spieltagsinfo {n}: Heimspiel in Erfurt gegen {args.gegner}"
+    if len(titel) > 60:
+        titel = f"Spieltagsinfo {n}: Heimspiel in Erfurt"
 
     css = re.search(r"<style>.*?</style>", html, re.S).group(0)
     css = css.replace("</style>", ZUSATZ_CSS + "</style>")

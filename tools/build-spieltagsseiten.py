@@ -705,6 +705,13 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
     # Lange Vereinsnamen (z. B. "TSG Schöller SI Ravens Reutlingen", 33 Zeichen) bekommen eine kleinere
     # Hero-Schrift, damit die Ueberschrift auch mobil in einer Zeile bleibt (Marko, 13.10.2026).
     h1_groesse = "clamp(17px,3.6vw,42px)" if len(game["gegner"]) > 28 else "clamp(20px,5vw,56px)"
+    # Der Seitentitel traegt bei kurzen Gegnernamen den Vereinsnamen mit; bei langen
+    # ("TSG Schöller SI Ravens Reutlingen") sprengt das die 60 Zeichen, die Google
+    # anzeigt (Ahrefs-Crawl 19.10.2026: sechs Spieltagsseiten zwischen 61 und 73).
+    # Dann die kurze Form, die das Zielwort "Heimspiel in Erfurt" behaelt.
+    seitentitel = f"Heimspiel in Erfurt: Basketball Löwen – {gegner}"
+    if len(seitentitel) > 60:
+        seitentitel = f"Heimspiel in Erfurt gegen {gegner}"
     url = f"https://basketball-loewen.com/saison/profis/gameday/{game['seiteSlug']}.html"
 
     if phase == "danach":
@@ -803,7 +810,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="format-detection" content="telephone=no" />
-<title>Heimspiel in Erfurt: Basketball Löwen – {gegner}</title>
+<title>{seitentitel}</title>
 <meta name="description" content="{html.escape(description)}" />
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png" />

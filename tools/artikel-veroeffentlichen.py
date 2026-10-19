@@ -65,7 +65,7 @@ import re
 import sys
 from pathlib import Path
 
-from seo_common import REPO, esc
+from seo_common import REPO, esc, seitentitel
 
 VORLAGE = REPO / "tools" / "vorlagen" / "news-artikel.html.vorlage"
 NEWS_JSON = REPO / "data" / "news.json"
@@ -249,15 +249,16 @@ def cache_buster_abgleichen(seite):
 
 def seite_bauen(a):
     seite = VORLAGE.read_text(encoding="utf-8")
-    titel = a.get("seitentitel") or a["titel"]
-    # Markensuffix nur, wenn der Titel den Vereinsnamen nicht ohnehin schon traegt.
-    # Sonst stand er doppelt drin ("… Basketball Löwen Erfurt feiern ersten Saisonsieg
-    # — Basketball Löwen Erfurt", 97 Zeichen) und die Google-Vorschau schnitt ab.
-    seitentitel = titel if "Basketball Löwen" in titel else f"{titel} — Basketball Löwen Erfurt"
-    if len(seitentitel) > 65:
-        print(f"  Hinweis: Seitentitel {len(seitentitel)} Zeichen, Google zeigt rund 60 — "
-              f"in Notion kuerzen: {seitentitel}")
-    seite = seite.replace("__TITLE__", esc(seitentitel))
+    # Ein in Notion gepflegtes Feld "seitentitel" gewinnt immer -- das ist eine
+    # redaktionelle Entscheidung. Sonst leitet seo_common.seitentitel() aus der
+    # Ueberschrift einen Titel ab, der in die Google-Vorschau passt (Ahrefs-Crawl
+    # 19.10.2026: sechs Artikel lagen zwischen 61 und 100 Zeichen).
+    gepflegt = a.get("seitentitel")
+    titel = gepflegt if gepflegt else seitentitel(a["titel"])
+    if len(titel) > 60:
+        print(f"  Hinweis: Seitentitel {len(titel)} Zeichen, Google zeigt rund 60 — "
+              f"in Notion ein kuerzeres Feld \"seitentitel\" pflegen: {titel}")
+    seite = seite.replace("__TITLE__", esc(titel))
     seite = seite.replace("__DESCRIPTION__", esc(typografie(a["beschreibung"])))
     seite = seite.replace("__MAIN__", main_block(a))
     if a["status"] == "pruefung":

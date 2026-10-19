@@ -149,6 +149,68 @@ def veroeffentlicht(artikel):
 # unentdeckte Abweichung: & statt &amp; im href-Attribut, technisch ungültiges
 # HTML. Eine Quelle, ein Fix.
 
+
+# --------------------------------------------------------------------- Titel
+
+MARKE = "Basketball Löwen"
+MARKE_LANG = "Basketball Löwen Erfurt"
+TITEL_GRENZE = 60
+
+# Ein Doppelpunkt zwischen Ziffern trennt keinen Satz, sondern ein Ergebnis
+# ("71:94", "17:00"). Gesucht ist der erste Doppelpunkt, der wirklich einen
+# Vorspann abtrennt.
+_ECHTER_DOPPELPUNKT = re.compile(r"(?<!\d):(?!\d)")
+# Ein bereits angehängtes Markensuffix wird abgeschnitten, bevor neu angesetzt wird --
+# sonst stünde der Vereinsname doppelt im Titel.
+SUFFIX_ENDE_RE = re.compile(r"\s*[—–-]\s*Basketball L(?:ö|oe)wen(?:\s+Erfurt)?\s*$")
+
+
+def seitentitel(titel, grenze=TITEL_GRENZE):
+    """Aus der Artikelüberschrift einen Seitentitel machen, der in die Google-
+    Vorschau passt.
+
+    Hintergrund (Ahrefs-Crawl 19.10.2026): 24 Seiten trugen einen <title> über
+    60 Zeichen, die längsten mit 100 und 99 — die vollständige Artikelüberschrift
+    plus Vereinsname. Google schneidet dort ab, oft mitten im Wort, und schreibt
+    den Titel teilweise selbst um. Die Überschrift im Artikel bleibt unberührt;
+    nur der <title> wird gekürzt.
+
+    Vier Fassungen werden der Reihe nach probiert, die erste passende gewinnt:
+
+      1. Überschrift + "— Basketball Löwen Erfurt"
+      2. Überschrift + "— Basketball Löwen"            (kürzeres Suffix)
+      3. Überschrift allein, wenn sie den Vereinsnamen schon trägt
+      4. der Vorspann vor dem Doppelpunkt (ab 15 Zeichen) + "— Basketball Löwen"
+
+    Fassung 4 trägt die Spielberichte: Dort steht die Kernaussage fast immer vor
+    einem Doppelpunkt ("71:94 gegen Tabellenführer Reutlingen: …"). Ein
+    Doppelpunkt zwischen Ziffern zählt nicht, der trennt ein Ergebnis.
+
+    Passt keine Fassung, bleibt die erste stehen: ein etwas langer Titel ist
+    besser als ein verstümmelter. Der Aufrufer kann das über die Länge prüfen.
+    """
+    titel = (titel or "").strip()
+    basis = SUFFIX_ENDE_RE.sub("", titel).strip(" —–-") or titel
+
+    kandidaten = []
+    if MARKE in basis:
+        kandidaten.append(basis)
+    else:
+        kandidaten.append(f"{basis} — {MARKE_LANG}")
+        kandidaten.append(f"{basis} — {MARKE}")
+
+    m = _ECHTER_DOPPELPUNKT.search(basis)
+    if m:
+        vorspann = basis[:m.start()].strip(" —–-")
+        if len(vorspann) >= 15:
+            kandidaten.append(vorspann if MARKE in vorspann else f"{vorspann} — {MARKE}")
+
+    for k in kandidaten:
+        if len(k) <= grenze:
+            return k
+    # Nichts passt: die kürzeste Fassung nehmen, nicht die erste.
+    return min(kandidaten, key=len)
+
 def esc(text):
     """Text -> HTML-sicherer Text (kein Attribut-Kontext, keine '-Maskierung)."""
     return (str(text).replace("&", "&amp;").replace("<", "&lt;")
