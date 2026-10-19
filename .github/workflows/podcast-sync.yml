@@ -1,0 +1,70 @@
+# Holt die Folgen des Podcasts "Tip-Off" aus dem Podigee-Feed und baut den Podcast-Bereich auf
+# news/aktuelles.html neu (Cover, data/podcast.json, Bereich und Kachel in der Seitenleiste).
+#
+# Warum ein eigener Lauf: Der Podcast erscheint alle zwei Wochen (Freitag, laut Florian Gut am
+# 07.10.2026). Neue Folgen sollen ohne Handarbeit auf der Seite stehen. Der Feed ist die Quelle,
+# aus der auch Spotify und Apple Podcasts ihre Folgen beziehen (Marko, 19.10.2026).
+#
+# Der Artikel zu einer Folge steht von Hand in data/podcast-artikel.json (Folgennummer -> Adresse).
+# Solange dort nichts steht, zeigt die Karte nur Spotify und Apple, keinen Artikel-Link.
+#
+# Zeitplan: werktags 07:10 und 15:10 UTC (kurz nach dem Hochladen am Freitag und am Folgetag),
+# dazu manuell ueber "Run workflow".
+
+name: Podcast Tip-Off synchronisieren
+
+on:
+  schedule:
+    - cron: '10 7,15 * * 1-5'
+  push:
+    branches: [main]
+    paths:
+      - data/podcast-artikel.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: podcast-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    # Ohne diese Grenze wuerde der eigene Commit den Lauf erneut ausloesen.
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # build-sitemap.py liest lastmod aus der Commit-Historie.
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Feed lesen, Podcast-Bereich bauen
+        run: |
+          pip install --quiet --disable-pip-version-check pillow
+          python3 tools/podcast-sync.py
+          python3 tools/build-podcast.py
+          python3 tools/build-bildmasse.py
+          python3 tools/build-head-meta.py
+          python3 tools/build-sitemap.py
+
+      - name: Aenderungen committen
+        run: |
+          if git diff --quiet && [ -z "$(git ls-files --others --exclude-standard)" ]; then
+            echo "Nichts nachzuziehen."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Neue Cover liegen als untracked Dateien unter assets/img/podcast/, daher add -A auf die
+          # Pfade des Podcasts und -u fuer alles, was die Nachbau-Skripte sonst anfassen.
+          git add -A assets/img/podcast data/podcast.json news/aktuelles.html
+          git add -u
+          git commit -m "Podcast Tip-Off: Folgenliste und Cover nachgezogen (Feed)"
+          git pull --rebase --autostash
+          git push

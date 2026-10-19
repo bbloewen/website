@@ -201,6 +201,7 @@ def spielpanel(spiel, zeit, gegner):
 def formular(aktion, zeit):
     s = aktion["sponsor"]
     kurz = html.escape(s["kurz"])
+    vip_wort_gross = "Zwei" if aktion["vipTickets"] == 2 else str(aktion["vipTickets"])
     return f"""      <div class="cc-form-card" id="anmeldung">
         <div class="cc-state" id="cc-state-zu" hidden>
           <h2 class="t-h4">Die Anmeldung ist geschlossen</h2>
@@ -242,21 +243,35 @@ def formular(aktion, zeit):
             <label for="cc-ap-tel">Telefon</label>
             <input type="tel" id="cc-ap-tel" name="ap_telefon" autocomplete="tel" />
           </div>
-          <div class="field-checkbox cc-same">
-            <input type="checkbox" id="cc-gf-same" name="gf_same" />
-            <label for="cc-gf-same">Der Ansprechpartner ist die Geschäftsführung</label>
+          <!-- Beides einzeln abwählbar (Marko, 19.10.2026): Bei der crestcom-Aktion
+               verlangte das Formular immer VIP UND Mitarbeitende. VST wollte nur die
+               zwei VIP-Karten, Pfaudler nur Plätze für drei Mitarbeitende — beide
+               Anmeldungen mussten von Hand nachgearbeitet werden. -->
+          <div class="field-checkbox cc-wahl">
+            <input type="checkbox" id="cc-will-vip" name="will_vip" checked />
+            <label for="cc-will-vip">{vip_wort_gross} VIP-Tickets für die Geschäftsführung und eine Begleitung</label>
           </div>
-          <div class="cc-row" id="cc-gf-row">
-            <div class="field">
-              <label for="cc-gf-name">Geschäftsführung *</label>
-              <input type="text" id="cc-gf-name" name="gf_name" required />
+          <div id="cc-vip-block">
+            <div class="field-checkbox cc-same">
+              <input type="checkbox" id="cc-gf-same" name="gf_same" />
+              <label for="cc-gf-same">Der Ansprechpartner ist die Geschäftsführung</label>
             </div>
-            <div class="field">
-              <label for="cc-gf-mail">E-Mail Geschäftsführung</label>
-              <input type="email" id="cc-gf-mail" name="gf_email" />
+            <div class="cc-row" id="cc-gf-row">
+              <div class="field">
+                <label for="cc-gf-name">Geschäftsführung *</label>
+                <input type="text" id="cc-gf-name" name="gf_name" required />
+              </div>
+              <div class="field">
+                <label for="cc-gf-mail">E-Mail Geschäftsführung</label>
+                <input type="email" id="cc-gf-mail" name="gf_email" />
+              </div>
             </div>
           </div>
-          <div class="cc-row cc-row-ma">
+          <div class="field-checkbox cc-wahl">
+            <input type="checkbox" id="cc-will-ma" name="will_ma" checked />
+            <label for="cc-will-ma">Tickets für Mitarbeitende in Block {aktion['block']}</label>
+          </div>
+          <div class="cc-row cc-row-ma" id="cc-ma-block">
             <div class="field">
               <label for="cc-ma">Mitarbeitende ({aktion['maMin']} bis {aktion['maMax']}) *</label>
               <div class="cc-stepper">
@@ -265,8 +280,8 @@ def formular(aktion, zeit):
                 <button type="button" class="cc-step" id="cc-plus" aria-label="Eine Person mehr">+</button>
               </div>
             </div>
-            <p class="cc-summary" id="cc-summary" aria-live="polite"></p>
           </div>
+          <p class="cc-summary" id="cc-summary" aria-live="polite"></p>
 
           <div class="field-checkbox cc-consent">
             <input type="checkbox" id="cc-datenschutz" name="datenschutz" required />
@@ -431,13 +446,42 @@ def skript_einladung(aktion, spiel, zeit):
   var umfrage = (params.get('u') || '').replace(/[^a-z0-9]/gi, '').slice(0, 20);
   document.getElementById('cc-umfrage').value = umfrage;
 
-  function zeigeSumme() {{
-    var n = parseInt(maInput.value, 10);
-    var ok = n >= MA_MIN && n <= maMax;
-    summary.textContent = ok
-      ? 'Ihre Auswahl: {aktion['vipTickets']} VIP-Tickets + ' + n + ' Tickets Block {aktion['block']} = ' + (n + {aktion['vipTickets']}) + ' Tickets'
-      : 'Bitte wählen Sie zwischen ' + MA_MIN + ' und ' + maMax + ' Mitarbeitenden.';
+  // Beides ist einzeln abwählbar, mindestens eines muss bleiben.
+  var willVip = document.getElementById('cc-will-vip');
+  var willMa = document.getElementById('cc-will-ma');
+  var vipBlock = document.getElementById('cc-vip-block');
+  var maBlock = document.getElementById('cc-ma-block');
+
+  function anzahlMa() {{
+    return willMa.checked ? (parseInt(maInput.value, 10) || 0) : 0;
   }}
+
+  function zeigeSumme() {{
+    var n = anzahlMa();
+    var teile = [];
+    if (willVip.checked) teile.push('{aktion['vipTickets']} VIP-Tickets');
+    if (willMa.checked) teile.push(n + ' Tickets Block {aktion['block']}');
+    if (!teile.length) {{
+      summary.textContent = 'Bitte wählen Sie VIP-Tickets, Tickets für Mitarbeitende oder beides.';
+      return;
+    }}
+    if (willMa.checked && !(n >= MA_MIN && n <= maMax)) {{
+      summary.textContent = 'Bitte wählen Sie zwischen ' + MA_MIN + ' und ' + maMax + ' Mitarbeitenden.';
+      return;
+    }}
+    var gesamt = n + (willVip.checked ? {aktion['vipTickets']} : 0);
+    summary.textContent = 'Ihre Auswahl: ' + teile.join(' + ') + ' = ' + gesamt + ' Tickets';
+  }}
+
+  function zeigeFelder() {{
+    vipBlock.hidden = !willVip.checked;
+    form.gf_name.required = willVip.checked && !form.gf_same.checked;
+    maBlock.hidden = !willMa.checked;
+    maInput.required = willMa.checked;
+    zeigeSumme();
+  }}
+  willVip.addEventListener('change', zeigeFelder);
+  willMa.addEventListener('change', zeigeFelder);
 
   function setze(wert) {{
     var n = parseInt(wert, 10);
@@ -451,13 +495,13 @@ def skript_einladung(aktion, spiel, zeit):
   var gfRow = document.getElementById('cc-gf-row');
   form.gf_same.addEventListener('change', function () {{
     gfRow.hidden = form.gf_same.checked;
-    form.gf_name.required = !form.gf_same.checked;
+    form.gf_name.required = willVip.checked && !form.gf_same.checked;
   }});
   document.getElementById('cc-minus').addEventListener('click', function () {{ setze((parseInt(maInput.value, 10) || MA_MIN) - 1); }});
   document.getElementById('cc-plus').addEventListener('click', function () {{ setze((parseInt(maInput.value, 10) || MA_MIN - 1) + 1); }});
   maInput.addEventListener('input', zeigeSumme);
   maInput.addEventListener('change', function () {{ setze(maInput.value); }});
-  zeigeSumme();
+  zeigeFelder();
 
   function zustand(id) {{
     document.getElementById(id).hidden = false;
@@ -469,7 +513,7 @@ def skript_einladung(aktion, spiel, zeit):
     if (!s || s.ok !== true) return;
     if (!s.offen) {{ zustand('cc-state-zu'); return; }}
     if (s.voll) {{ zustand('cc-state-voll'); return; }}
-    maMax = Math.min({aktion['maMax']}, s.rest - {aktion['vipTickets']});
+    maMax = Math.min({aktion['maMax']}, s.rest - (willVip.checked ? {aktion['vipTickets']} : 0));
     maInput.max = maMax;
     setze(maInput.value);
   }}).catch(function () {{ /* Formular bleibt offen, der Server prüft beim Absenden erneut */ }});
@@ -490,15 +534,20 @@ def skript_einladung(aktion, spiel, zeit):
     e.preventDefault();
     errorBox.classList.remove('visible');
 
+    if (!willVip.checked && !willMa.checked) {{
+      meldung('Bitte wählen Sie VIP-Tickets, Tickets für Mitarbeitende oder beides.');
+      return;
+    }}
+
     var fehlt = [];
     if (!form.firma.value.trim()) fehlt.push(FELDNAMEN.firma);
     if (!form.ansprechpartner.value.trim()) fehlt.push(FELDNAMEN.ansprechpartner);
     if (!MAILMUSTER.test(form.ap_email.value.trim())) fehlt.push(FELDNAMEN.ap_email);
     var gfGleich = form.gf_same.checked;
-    if (!gfGleich && !form.gf_name.value.trim()) fehlt.push(FELDNAMEN.gf_name);
-    if (!gfGleich && form.gf_email.value.trim() && !MAILMUSTER.test(form.gf_email.value.trim())) fehlt.push(FELDNAMEN.gf_email);
-    var n = parseInt(maInput.value, 10);
-    if (!(n >= MA_MIN && n <= maMax)) fehlt.push(FELDNAMEN.mitarbeitende);
+    if (willVip.checked && !gfGleich && !form.gf_name.value.trim()) fehlt.push(FELDNAMEN.gf_name);
+    if (willVip.checked && !gfGleich && form.gf_email.value.trim() && !MAILMUSTER.test(form.gf_email.value.trim())) fehlt.push(FELDNAMEN.gf_email);
+    var n = anzahlMa();
+    if (willMa.checked && !(n >= MA_MIN && n <= maMax)) fehlt.push(FELDNAMEN.mitarbeitende);
     if (!form.datenschutz.checked) fehlt.push(FELDNAMEN.datenschutz);
     if (fehlt.length) {{ meldung('Bitte prüfen Sie: ' + fehlt.join(', ') + '.'); return; }}
 
@@ -512,8 +561,9 @@ def skript_einladung(aktion, spiel, zeit):
       ansprechpartner: form.ansprechpartner.value.trim(),
       ap_email: form.ap_email.value.trim(),
       ap_telefon: form.ap_telefon.value.trim(),
-      gf_name: gfGleich ? form.ansprechpartner.value.trim() : form.gf_name.value.trim(),
-      gf_email: gfGleich ? form.ap_email.value.trim() : form.gf_email.value.trim(),
+      vip: willVip.checked,
+      gf_name: willVip.checked ? (gfGleich ? form.ansprechpartner.value.trim() : form.gf_name.value.trim()) : '',
+      gf_email: willVip.checked ? (gfGleich ? form.ap_email.value.trim() : form.gf_email.value.trim()) : '',
       mitarbeitende: n,
       anmerkung: '',
       datenschutz: true,

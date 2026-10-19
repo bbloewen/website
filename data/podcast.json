@@ -1,0 +1,51 @@
+{
+  "hinweis": "Automatisch erzeugt von tools/podcast-sync.py aus dem Podigee-Feed. Nicht von Hand aendern. Der Artikel zu einer Folge steht in data/podcast-artikel.json.",
+  "feed": "https://tip-off.podigee.io/feed/mp3",
+  "spotify": "https://open.spotify.com/show/3PlQclLrCA1G5sBTSCMl16",
+  "apple": "https://podcasts.apple.com/us/podcast/tip-off-der-podcast-der-basketball-l%C3%B6wen-erfurt/id6818511703",
+  "folgen": [
+    {
+      "nr": 2,
+      "titel": "Henning Harnisch: Vom Europameister zum Nachwuchssport-Pionier und sein Blick auf Erfurt",
+      "datum": "2026-10-15",
+      "minuten": 104,
+      "kurztext": "Neunfacher Deutscher Meister, Europameister 1993 und bei Olympia 1992 Gegenspieler von Michael Jordan und dem Dream Team: In der zweiten Folge Tip-Off sprechen Henning Harnisch, Johannes Wiese und Florian Gut darüber, wie aus dem Jungen aus Marburg „Flying Henning“ wurde und warum er heute dafür kämpft, dass jedes Kind in den Sport kommt. Dazu: drei Spiele in zehn Tagen und Derek Emelifeonwus Verletzung.",
+      "zusatz": "",
+      "themen": [
+        "Leverkusen, Ludwigsburg, Langen: drei Spiele, ein Sieg und was jetzt besser werden muss",
+        "Wie es um Derek steht",
+        "Welchen 90er-Star Florian ohne Budgetgrenze holen würde",
+        "Wie Henning über eine Schul-AG zum Basketball kam",
+        "Wie es war, gegen das Dream Team zu spielen",
+        "Warum er für eine Buchhändlerlehre die Nationalmannschaft absagte",
+        "Warum er mit 30 aufhörte, statt nach Bologna zu wechseln",
+        "Wie Florian und Henning sich kennengelernt haben",
+        "Was SPORT VERNETZT ist und warum die Löwen dabei sind",
+        "Warum Henning Erfurt einen Leuchtturm nennt",
+        "Was Eltern tun können",
+        "Das Basketballmuseum 28.15 und was die DDR mit dem Frauenbasketball gemacht hat"
+      ],
+      "podigee": "https://tip-off.podigee.io/2-2-henning-harnisch-vom-europameister-zum-nachwuchssport-pionier-und-sein-blick-auf-erfurt",
+      "bild": "/assets/img/podcast/folge-2.webp"
+    },
+    {
+      "nr": 1,
+      "titel": "Ohne Büro, Parkett und Körbe: Wie die Löwen entstanden sind mit Urgestein Tobi Bode",
+      "datum": "2026-10-02",
+      "minuten": 96,
+      "kurztext": "Wie entsteht ein Verein ohne Büro, Parkett und Körbe? In der ersten Folge Tip-Off sprechen Urgestein Tobi Bode, Johannes Wiese und Florian Gut darüber, wie die Basketball Löwen Erfurt 2018 an den Start gingen. Dazu: der Saisonauftakt in Rhöndorf, ein neuer Kader und Musa Abras Wechsel nach Bamberg.",
+      "zusatz": "",
+      "themen": [
+        "Wo das Spiel in Rhöndorf gekippt ist",
+        "Warum der neue Kader so anders aussieht als die letzten",
+        "Was Musa Abra nach Bamberg führt",
+        "Ein Foto vom Petersberg und wer darauf zu sehen ist",
+        "Wie die Körbe in die Riethsporthalle kamen",
+        "Tobis Basketballkarriere, wie er die ersten Jahre der Basketball Löwen erlebt hat und was er heute so treibt",
+        "Woher die Löwen ihren Namen haben"
+      ],
+      "podigee": "https://tip-off.podigee.io/1-tip-off-ep1",
+      "bild": "/assets/img/podcast/folge-1.webp"
+    }
+  ]
+}
