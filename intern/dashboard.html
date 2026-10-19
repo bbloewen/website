@@ -3365,6 +3365,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         if (mBek && anderer) zeilen2.push(mBtn(anderer, 'Gehört zu ' + anderer + ', dorthin verschieben', true));
         if (zeilen2.length) mandantWahl = '<div class="notiz" style="margin:4px 0 0">' + zeilen2.join('<br>') + '</div>';
       }
+      // Löschen immer sichtbar: Beleg aus dem Postfach (Liste, Drive, Mail) bzw. Beleg in BuchhaltungsButler, solange dort nichts gebucht ist
+      var loeschBtns = [];
+      if (a && !b && a.id && !blGebucht(r)) loeschBtns.push(aktBtn('Beleg löschen', ' data-be="loeschen" data-id="' + a.id + '"', 'Entfernt den Beleg aus der Liste und die Datei aus Drive; die Mail kommt in den Papierkorb'));
+      if (b && b.beleg_id && !(b.buchungen && b.buchungen.length)) loeschBtns.push(aktBtn('In BuchhaltungsButler löschen', ' data-be="bhb-loeschen" data-bid="' + esc(String(b.beleg_id)) + '"', 'Markiert den Beleg ' + esc(String(b.beleg_id)) + ' dort als gelöscht (wiederherstellbar). Nur möglich, solange nichts gebucht ist.'));
+      if (loeschBtns.length) mandantWahl += '<div class="notiz" style="margin:4px 0 0">' + loeschBtns.join(' · ') + '</div>';
       if (gp && gp.rueckfrage && !gp.gebucht_am && !b) {
         mandantWahl += '<div class="notiz" style="margin:4px 0 0">' +
           aktBtn('Steuerberater fragen', ' data-be="rf-akt" data-akt="steuerberater" data-rf="' + gp.rueckfrage + '"', 'Gibt den Beleg mit einem Hinweis an den Steuerberater') + ' · ' +
@@ -5003,7 +5008,16 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         else if (w === 'zv-ablehnen') beZvAblehnen(b);
         else if (w === 'richtung-ueb') { var zu = (BL)[b.getAttribute('data-k')]; zu.richtungUeb = b.getAttribute('data-w'); renderAccounting('beleg', b.getAttribute('data-k')); }
         else if (w === 'monat') { ladeListe(st.art, st.k, b.getAttribute('data-monat')); window.scrollTo(0, 0); }
-        else if (w === 'loeschen') { BE.meldung = ''; BE.loeschen = { id: Number(b.getAttribute('data-id')), laeuft: false, fehler: '' }; beAlleRender(); }
+        else if (w === 'loeschen') { BE.meldung = ''; BE.loeschen = { id: Number(b.getAttribute('data-id')), laeuft: false, fehler: '' }; beAlleRender(); var lb = document.querySelector('[data-be="loeschen-ja"]'); if (lb) lb.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+        else if (w === 'bhb-loeschen') {
+          var bid = b.getAttribute('data-bid');
+          if (!window.confirm('Beleg ' + bid + ' in BuchhaltungsButler löschen? Er wird dort als gelöscht markiert und lässt sich wiederherstellen.')) return;
+          b.disabled = true;
+          fetch('/webhook/accounting/bhb-beleg-loeschen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: BE.mandantAktuell, beleg_id: bid }) }).then(function (res) { return res.json().catch(function () { return {}; }).then(function (d) { return { ok: res.ok && d.ok !== false, d: d }; }); }).then(function (x) {
+            BE.meldung = x.d.meldung || (x.ok ? 'Gelöscht.' : 'Nicht gelöscht.'); beAlleRender();
+            if (x.ok) ['XXL', 'LEV'].forEach(function (m) { if (BL[m] && BL[m].daten) ladeListe('beleg', m, BL[m].daten.monat); }); else b.disabled = false;
+          }).catch(function (er) { b.disabled = false; BE.meldung = 'Nicht gelöscht: ' + er.message; beAlleRender(); });
+        }
         else if (w === 'loeschen-nein') { BE.loeschen = null; beAlleRender(); }
         else if (w === 'loeschen-ja') beLoeschen(Number(b.getAttribute('data-id')), b.getAttribute('data-aktion'));
         else if (w === 'bt-edit') { BE.meldung = ''; BE.btEdit = { id: Number(b.getAttribute('data-id')), wert: b.getAttribute('data-zweck') || '', standard: false, laeuft: false, fehler: '', fokus: false }; beAlleRender(); }
