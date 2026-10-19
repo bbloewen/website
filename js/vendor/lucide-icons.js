@@ -1,5 +1,5 @@
 /* Erzeugt von tools/build-lucide-icons.py — nicht von Hand ändern.
-   Enthält nur die 86 Symbole, die im Repo wirklich vorkommen, aus
+   Enthält nur die 85 Symbole, die im Repo wirklich vorkommen, aus
    lucide-static 1.34.0. Ersetzt die 410 KB grosse Gesamtbibliothek von
    unpkg; Begründung im Kopf des Skripts. */
 (function () {
@@ -88,8 +88,7 @@
   "video": "<path d=\"m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5\"/> <rect x=\"2\" y=\"6\" width=\"14\" height=\"12\" rx=\"2\"/>",
   "wallet": "<path d=\"M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1\"/> <path d=\"M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4\"/>",
   "wrench": "<path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z\"/>",
-  "x": "<path d=\"M18 6 6 18\"/> <path d=\"m6 6 12 12\"/>",
-  "zoom-in": "<circle cx=\"11\" cy=\"11\" r=\"8\"/> <line x1=\"21\" x2=\"16.65\" y1=\"21\" y2=\"16.65\"/> <line x1=\"11\" x2=\"11\" y1=\"8\" y2=\"14\"/> <line x1=\"8\" x2=\"14\" y1=\"11\" y2=\"11\"/>"
+  "x": "<path d=\"M18 6 6 18\"/> <path d=\"m6 6 12 12\"/>"
 };
 
   var ATTRS = 'xmlns="http://www.w3.org/2000/svg" width="24" height="24"'

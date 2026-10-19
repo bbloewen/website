@@ -41,6 +41,24 @@
 <meta name="twitter:image" content="https://basketball-loewen.com/assets/img/share/og-default.jpg" />
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Start","item":"https://basketball-loewen.com/"},{"@type":"ListItem","position":2,"name":"Saison","item":"https://basketball-loewen.com/saison/profis.html"},{"@type":"ListItem","position":3,"name":"Damenbasketball in Erfurt — die CATL Basketball Löwinnen","item":"https://basketball-loewen.com/saison/damen.html"}]}]}</script>
 <!-- SEO:auto END -->
+<style>
+/* Kader und Trainerteam als schlichte Liste (19.10.2026): nur Nummer, Name, Position, keine Foto-/Steckbrief-Platzhalter. */
+.kader-liste { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.kader-liste-trainer { grid-template-columns: repeat(auto-fit, minmax(270px, 330px)); justify-content: center; }
+.kader-zeile { display: flex; align-items: center; gap: 14px; background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 18px; }
+.kader-nr { flex: 0 0 auto; min-width: 2.2ch; text-align: center; font-weight: var(--weight-extrabold); font-size: 22px; color: var(--color-orange-600, #d96a00); font-variant-numeric: tabular-nums; }
+.kader-name { flex: 1 1 auto; font-weight: var(--weight-bold); color: var(--text-primary); }
+.kader-pos { flex: 0 0 auto; font-size: 14px; color: var(--text-secondary); }
+.kader-pos-lang { font-size: 13px; }
+@media (max-width: 899px) { .kader-liste { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 599px) { .kader-liste, .kader-liste-trainer { grid-template-columns: 1fr; } }
+.damen-galerie { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.damen-galerie li { margin: 0; border-radius: var(--radius-lg); overflow: hidden; background: #e8ecf1; }
+.damen-galerie img { display: block; width: 100%; height: 100%; aspect-ratio: 2 / 3; object-fit: cover; }
+.damen-galerie-breit { grid-column: 1 / -1; }
+.damen-galerie-breit img { aspect-ratio: 21 / 9; object-position: center 35%; }
+@media (max-width: 899px) { .damen-galerie { grid-template-columns: repeat(2, 1fr); } }
+</style>
 </head>
 <body data-nav-group="saison">
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
@@ -80,7 +98,7 @@
           <button class="nav-link" data-page-group="saison">Saison &amp; Teams <i data-lucide="chevron-down" class="chev icon-14"></i></button>
           <div class="dropdown-panel">
             <a href="/saison/profis.html">Profis</a>
-            <!-- Damen vorübergehend aus der Navigation ausgeblendet -->
+            <a href="/saison/damen.html">Damen</a>
             <a href="/saison/nbbl.html">NBBL</a>
             <a href="/saison/nachwuchs.html">Nachwuchs</a>
             <a href="/saison/spielplan.html">Spielplan</a>
@@ -185,7 +203,7 @@
       <button class="drawer-nav-link" data-drawer-toggle>Saison &amp; Teams <i data-lucide="chevron-down" class="chev icon-16"></i></button>
       <div class="drawer-sub-panel">
         <a href="/saison/profis.html">Profis</a>
-        <!-- Damen vorübergehend aus der Navigation ausgeblendet -->
+        <a href="/saison/damen.html">Damen</a>
         <a href="/saison/nbbl.html">NBBL</a>
         <a href="/saison/nachwuchs.html">Nachwuchs</a>
         <a href="/saison/spielplan.html">Spielplan</a>
@@ -262,7 +280,7 @@
         <div>
           <span class="eyebrow">Über das Team</span>
           <h2 class="t-h2">Kampfgeist Saison für Saison.</h2>
-          <p class="t-body mt-4">Die Basketball Löwinnen Erfurt treten in der Saison 2026/2027 in der Regionalliga Südost an. Das Team steht unter Leitung von Head Coach Yaqub Mohammad, unterstützt von Co-Coach Lilly Feistkorn, die selbst im Kader steht, und Athletiktrainerin Patricia Polifka.</p>
+          <p class="t-body mt-4">Die Basketball Löwinnen Erfurt treten in der Saison 2026/2027 in der Regionalliga Südost an. Das Team steht unter Leitung von Head Coach Wilhelm Sonnenberg, unterstützt von Co-Trainerin Sylvia Folsche.</p>
           <div style="margin-top:24px; display:flex; gap:14px; flex-wrap:wrap;">
             <a class="btn btn-primary" href="/saison/tabelle.html">Zur Tabelle</a>
             <a class="btn btn-ghost" href="/saison/spielplan.html?team=damen">Zum Spielplan</a>
@@ -270,9 +288,8 @@
           </div>
         </div>
         <div style="display:flex;justify-content:center">
-          <button type="button" id="teamfoto-open" class="teamfoto-placeholder" aria-label="Teamfoto vergrößern (Platzhalter, aktuelles Foto folgt)">
-            <img loading="lazy" src="/assets/img/team-damen.webp" width="1920" height="1280" alt=""  />
-            <span class="teamfoto-placeholder-note"><i data-lucide="zoom-in" class="icon-16"></i> Teamfoto folgt</span>
+          <button type="button" id="teamfoto-open" class="teamfoto-placeholder is-real" aria-label="Teamfoto vergrößern" style="max-width:none;width:100%">
+            <img loading="lazy" src="/assets/img/team-damen.webp" width="1920" height="1280" alt="Teamfoto der CATL Basketball Löwinnen Erfurt"  />
           </button>
         </div>
       </div>
@@ -283,357 +300,53 @@
     <div class="container">
       <div class="section-head">
         <div class="head-text">
+          <span class="eyebrow">Eindrücke</span>
+          <h2 class="t-h2">Die Löwinnen in Aktion.</h2>
+        </div>
+      </div>
+      <ul class="damen-galerie">
+        <li><img loading="lazy" src="/assets/img/team-damen-spiel-1.webp" width="1000" height="1500" alt="Die Löwinnen klatschen sich nach dem Spiel gegen Post SV Nürnberg ab" /></li>
+        <li><img loading="lazy" src="/assets/img/team-damen-spiel-2.webp" width="1000" height="1500" alt="Die Löwinnen vor dem Heimspiel gegen Post SV Nürnberg in der Riethsporthalle" /></li>
+        <li><img loading="lazy" src="/assets/img/team-damen-spiel-3.webp" width="1000" height="1500" alt="Löwinnen-Spielerin Nummer 11 beim Wurf gegen Post SV Nürnberg" /></li>
+        <li><img loading="lazy" src="/assets/img/team-damen-spiel-4.webp" width="1000" height="1500" alt="Die Löwinnen im Angriff gegen Post SV Nürnberg" /></li>
+        <li class="damen-galerie-breit"><img loading="lazy" src="/assets/img/team-damen-spiel-5.webp" width="1800" height="1200" alt="Auszeit der Löwinnen: Trainerteam bespricht sich mit dem Team" /></li>
+      </ul>
+      <p class="t-caption" style="margin-top:12px;color:var(--text-muted)">Fotos vom Heimspiel gegen Post SV Nürnberg am 27.09.2026.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div class="head-text">
           <span class="eyebrow">Kader</span>
           <h2 class="t-h2">Die Mannschaft der Saison 2026/2027</h2>
         </div>
       </div>
-      <div class="panini-grid">
-        <div class="panini-wrap" data-step="0">
-          <div class="panini-card">
-            <div class="panini-card-photo">
-              <span class="panini-card-number">0</span>
-              <div class="panini-photo-frame panini-photo-frame-0"><i data-lucide="user" class="icon-30"></i></div>
-              <div class="panini-photo-frame panini-photo-frame-1"><i data-lucide="image" class="icon-22"></i><span>Actionfoto folgt</span></div>
-              <div class="panini-photo-frame panini-photo-frame-2">
-                <ul class="panini-steckbrief">
-                  <li>Alter: ?</li>
-                  <li>Größe: 1,73 m</li>
-                  <li>Gewicht: ?</li>
-                  <li>Spannweite: ?</li>
-                  <li>Schuhgröße: ?</li>
-                </ul>
-              </div>
-              <span class="panini-card-badge">0</span>
-            </div>
-            <div class="panini-card-info"><div class="panini-card-name">Nora Kirschstein</div><div class="panini-card-meta">SF · 1,73 m</div></div>
-          </div>
-        </div>
-        <div class="panini-wrap" data-step="0">
-          <div class="panini-card">
-            <div class="panini-card-photo">
-              <span class="panini-card-number">2</span>
-              <div class="panini-photo-frame panini-photo-frame-0"><i data-lucide="user" class="icon-30"></i></div>
-              <div class="panini-photo-frame panini-photo-frame-1"><i data-lucide="image" class="icon-22"></i><span>Actionfoto folgt</span></div>
-              <div class="panini-photo-frame panini-photo-frame-2">
-                <ul class="panini-steckbrief">
-                  <li>Alter: ?</li>
-                  <li>Größe: 1,67 m</li>
-                  <li>Gewicht: ?</li>
-                  <li>Spannweite: ?</li>
-                  <li>Schuhgröße: ?</li>
-                </ul>
-              </div>
-              <span class="panini-card-badge">2</span>
-            </div>
-            <div class="panini-card-info"><div class="panini-card-name">Jennifer Petry</div><div class="panini-card-meta">PG · 1,67 m</div></div>
-          </div>
-        </div>
-        <div class="panini-wrap" data-step="0">
-          <div class="panini-card">
-            <div class="panini-card-photo">
-              <span class="panini-card-number">3</span>
-              <div class="panini-photo-frame panini-photo-frame-0"><i data-lucide="user" class="icon-30"></i></div>
-              <div class="panini-photo-frame panini-photo-frame-1"><i data-lucide="image" class="icon-22"></i><span>Actionfoto folgt</span></div>
-              <div class="panini-photo-frame panini-photo-frame-2">
-                <ul class="panini-steckbrief">
-                  <li>Alter: ?</li>
-                  <li>Größe: 1,79 m</li>
-                  <li>Gewicht: ?</li>
-                  <li>Spannweite: ?</li>
-                  <li>Schuhgröße: ?</li>
-                </ul>
-              </div>
-              <span class="panini-card-badge">3</span>
-            </div>
-            <div class="panini-card-info"><div class="panini-card-name">Lilly Feistkorn</div><div class="panini-card-meta">SF · 1,79 m</div></div>
-          </div>
-        </div>
-        <div class="panini-wrap" data-step="0">
-          <div class="panini-card">
-            <div class="panini-card-photo">
-              <span class="panini-card-number">5</span>
-              <div class="panini-photo-frame panini-photo-frame-0"><i data-lucide="user" class="icon-30"></i></div>
-              <div class="panini-photo-frame panini-photo-frame-1"><i data-lucide="image" class="icon-22"></i><span>Actionfoto folgt</span></div>
-              <div class="panini-photo-frame panini-photo-frame-2">
-                <ul class="panini-steckbrief">
-                  <li>Alter: ?</li>
-                  <li>Größe: 1,70 m</li>
-                  <li>Gewicht: ?</li>
-                  <li>Spannweite: ?</li>
-                  <li>Schuhgröße: ?</li>
-                </ul>
-              </div>
-              <span class="panini-card-badge">5</span>
-            </div>
-            <div class="panini-card-info"><div class="panini-card-name">Josefine Kurz</div><div class="panini-card-meta">PG · 1,70 m</div></div>
-          </div>
-        </div>
-        <div class="panini-wrap" data-step="0">
-          <div class="panini-card">
-            <div class="panini-card-photo">
-              <span class="panini-card-number">6</span>
-              <div class="panini-photo-frame panini-photo-frame-0"><i data-lucide="user" class="icon-30"></i></div>
-              <div class="panini-photo-frame panini-photo-frame-1"><i data-lucide="image" class="icon-22"></i><span>Actionfoto folgt</span></div>
-              <div class="panini-photo-frame panini-photo-frame-2">
-                <ul class="panini-steckbrief">
-                  <li>Alter: ?</li>
-                  <li>Größe: 1,69 m</li>
-                  <li>Gewicht: ?</li>
-                  <li>Spannweite: ?</li>
-                  <li>Schuhgröße: ?</li>
-                </ul>
-              </div>
-              <span class="panini-card-badge">6</span>
-            </div>
-            <div class="panini-card-info"><div class="panini-card-name">Ina Elsner</div><div class="panini-card-meta">PG/SF · 1,69 m</div></div>
-          </div>
-        </div>
-        <div class="panini-wrap" data-step="0">
-          <div class="panini-card">
-            <div class="panini-card-photo">
-              <span class="panini-card-number">8</span>
-              <div class="panini-photo-frame panini-photo-frame-0"><i data-lucide="user" class="icon-30"></i></div>
-              <div class="panini-photo-frame panini-photo-frame-1"><i data-lucide="image" class="icon-22"></i><span>Actionfoto folgt</span></div>
-              <div class="panini-photo-frame panini-photo-frame-2">
-                <ul class="panini-steckbrief">
-                  <li>Alter: ?</li>
-                  <li>Größe: 1,73 m</li>
-                  <li>Gewicht: ?</li>
-                  <li>Spannweite: ?</li>
-                  <li>Schuhgröße: ?</li>
-                </ul>
-              </div>
-              <span class="panini-card-badge">8</span>
-            </div>
-            <div class="panini-card-info"><div class="panini-card-name">Miriam Haselmann</div><div class="panini-card-meta">SF · 1,73 m</div></div>
-          </div>
-        </div>
-        <div class="panini-wrap" data-step="0">
-          <div class="panini-card">
-            <div class="panini-card-photo">
-              <span class="panini-card-number">9</span>
-              <div class="panini-photo-frame panini-photo-frame-0"><i data-lucide="user" class="icon-30"></i></div>
-              <div class="panini-photo-frame panini-photo-frame-1"><i data-lucide="image" class="icon-22"></i><span>Actionfoto folgt</span></div>
-              <div class="panini-photo-frame panini-photo-frame-2">
-                <ul class="panini-steckbrief">
-                  <li>Alter: ?</li>
-                  <li>Größe: 1,71 m</li>
-                  <li>Gewicht: ?</li>
-                  <li>Spannweite: ?</li>
-                  <li>Schuhgröße: ?</li>
-                </ul>
-              </div>
-              <span class="panini-card-badge">9</span>
-            </div>
-            <div class="panini-card-info"><div class="panini-card-name">Ronja Klein</div><div class="panini-card-meta">SF · 1,71 m</div></div>
-          </div>
-        </div>
-        <div class="panini-wrap" data-step="0">
-          <div class="panini-card">
-            <div class="panini-card-photo">
-              <span class="panini-card-number">10</span>
-              <div class="panini-photo-frame panini-photo-frame-0"><i data-lucide="user" class="icon-30"></i></div>
-              <div class="panini-photo-frame panini-photo-frame-1"><i data-lucide="image" class="icon-22"></i><span>Actionfoto folgt</span></div>
-              <div class="panini-photo-frame panini-photo-frame-2">
-                <ul class="panini-steckbrief">
-                  <li>Alter: ?</li>
-                  <li>Größe: 1,80 m</li>
-                  <li>Gewicht: ?</li>
-                  <li>Spannweite: ?</li>
-                  <li>Schuhgröße: ?</li>
-                </ul>
-              </div>
-              <span class="panini-card-badge">10</span>
-            </div>
-            <div class="panini-card-info"><div class="panini-card-name">Theresia Piszczan</div><div class="panini-card-meta">C · 1,80 m</div></div>
-          </div>
-        </div>
-        <div class="panini-wrap" data-step="0">
-          <div class="panini-card">
-            <div class="panini-card-photo">
-              <span class="panini-card-number">11</span>
-              <div class="panini-photo-frame panini-photo-frame-0"><i data-lucide="user" class="icon-30"></i></div>
-              <div class="panini-photo-frame panini-photo-frame-1"><i data-lucide="image" class="icon-22"></i><span>Actionfoto folgt</span></div>
-              <div class="panini-photo-frame panini-photo-frame-2">
-                <ul class="panini-steckbrief">
-                  <li>Alter: ?</li>
-                  <li>Größe: 1,79 m</li>
-                  <li>Gewicht: ?</li>
-                  <li>Spannweite: ?</li>
-                  <li>Schuhgröße: ?</li>
-                </ul>
-              </div>
-              <span class="panini-card-badge">11</span>
-            </div>
-            <div class="panini-card-info"><div class="panini-card-name">Lilly Lukow</div><div class="panini-card-meta">SF · 1,79 m</div></div>
-          </div>
-        </div>
-        <div class="panini-wrap" data-step="0">
-          <div class="panini-card">
-            <div class="panini-card-photo">
-              <span class="panini-card-number">12</span>
-              <div class="panini-photo-frame panini-photo-frame-0"><i data-lucide="user" class="icon-30"></i></div>
-              <div class="panini-photo-frame panini-photo-frame-1"><i data-lucide="image" class="icon-22"></i><span>Actionfoto folgt</span></div>
-              <div class="panini-photo-frame panini-photo-frame-2">
-                <ul class="panini-steckbrief">
-                  <li>Alter: ?</li>
-                  <li>Größe: 1,80 m</li>
-                  <li>Gewicht: ?</li>
-                  <li>Spannweite: ?</li>
-                  <li>Schuhgröße: ?</li>
-                </ul>
-              </div>
-              <span class="panini-card-badge">12</span>
-            </div>
-            <div class="panini-card-info"><div class="panini-card-name">Antonieta Schönau</div><div class="panini-card-meta">PF/C · 1,80 m</div></div>
-          </div>
-        </div>
-        <div class="panini-wrap" data-step="0">
-          <div class="panini-card">
-            <div class="panini-card-photo">
-              <span class="panini-card-number">13</span>
-              <div class="panini-photo-frame panini-photo-frame-0"><i data-lucide="user" class="icon-30"></i></div>
-              <div class="panini-photo-frame panini-photo-frame-1"><i data-lucide="image" class="icon-22"></i><span>Actionfoto folgt</span></div>
-              <div class="panini-photo-frame panini-photo-frame-2">
-                <ul class="panini-steckbrief">
-                  <li>Alter: ?</li>
-                  <li>Größe: 1,74 m</li>
-                  <li>Gewicht: ?</li>
-                  <li>Spannweite: ?</li>
-                  <li>Schuhgröße: ?</li>
-                </ul>
-              </div>
-              <span class="panini-card-badge">13</span>
-            </div>
-            <div class="panini-card-info"><div class="panini-card-name">Anna Metzdorf</div><div class="panini-card-meta">PF/C · 1,74 m</div></div>
-          </div>
-        </div>
-        <div class="panini-wrap" data-step="0">
-          <div class="panini-card">
-            <div class="panini-card-photo">
-              <span class="panini-card-number">14</span>
-              <div class="panini-photo-frame panini-photo-frame-0"><i data-lucide="user" class="icon-30"></i></div>
-              <div class="panini-photo-frame panini-photo-frame-1"><i data-lucide="image" class="icon-22"></i><span>Actionfoto folgt</span></div>
-              <div class="panini-photo-frame panini-photo-frame-2">
-                <ul class="panini-steckbrief">
-                  <li>Alter: ?</li>
-                  <li>Größe: 1,78 m</li>
-                  <li>Gewicht: ?</li>
-                  <li>Spannweite: ?</li>
-                  <li>Schuhgröße: ?</li>
-                </ul>
-              </div>
-              <span class="panini-card-badge">14</span>
-            </div>
-            <div class="panini-card-info"><div class="panini-card-name">Constanze Sakriß</div><div class="panini-card-meta">C · 1,78 m</div></div>
-          </div>
-        </div>
-        <div class="panini-wrap" data-step="0">
-          <div class="panini-card">
-            <div class="panini-card-photo">
-              <span class="panini-card-number">15</span>
-              <div class="panini-photo-frame panini-photo-frame-0"><i data-lucide="user" class="icon-30"></i></div>
-              <div class="panini-photo-frame panini-photo-frame-1"><i data-lucide="image" class="icon-22"></i><span>Actionfoto folgt</span></div>
-              <div class="panini-photo-frame panini-photo-frame-2">
-                <ul class="panini-steckbrief">
-                  <li>Alter: ?</li>
-                  <li>Größe: 1,80 m</li>
-                  <li>Gewicht: ?</li>
-                  <li>Spannweite: ?</li>
-                  <li>Schuhgröße: ?</li>
-                </ul>
-              </div>
-              <span class="panini-card-badge">15</span>
-            </div>
-            <div class="panini-card-info"><div class="panini-card-name">Johanna Baum</div><div class="panini-card-meta">PF/C · 1,80 m</div></div>
-          </div>
-        </div>
-        <div class="panini-wrap" data-step="0">
-          <div class="panini-card">
-            <div class="panini-card-photo">
-              <span class="panini-card-number">21</span>
-              <div class="panini-photo-frame panini-photo-frame-0"><i data-lucide="user" class="icon-30"></i></div>
-              <div class="panini-photo-frame panini-photo-frame-1"><i data-lucide="image" class="icon-22"></i><span>Actionfoto folgt</span></div>
-              <div class="panini-photo-frame panini-photo-frame-2">
-                <ul class="panini-steckbrief">
-                  <li>Alter: ?</li>
-                  <li>Größe: 1,86 m</li>
-                  <li>Gewicht: ?</li>
-                  <li>Spannweite: ?</li>
-                  <li>Schuhgröße: ?</li>
-                </ul>
-              </div>
-              <span class="panini-card-badge">21</span>
-            </div>
-            <div class="panini-card-info"><div class="panini-card-name">Jill Brand</div><div class="panini-card-meta">SF/PF · 1,86 m</div></div>
-          </div>
-        </div>
-        <div class="panini-wrap" data-step="0">
-          <div class="panini-card">
-            <div class="panini-card-photo">
-              <span class="panini-card-number">22</span>
-              <div class="panini-photo-frame panini-photo-frame-0"><i data-lucide="user" class="icon-30"></i></div>
-              <div class="panini-photo-frame panini-photo-frame-1"><i data-lucide="image" class="icon-22"></i><span>Actionfoto folgt</span></div>
-              <div class="panini-photo-frame panini-photo-frame-2">
-                <ul class="panini-steckbrief">
-                  <li>Alter: ?</li>
-                  <li>Größe: 1,80 m</li>
-                  <li>Gewicht: ?</li>
-                  <li>Spannweite: ?</li>
-                  <li>Schuhgröße: ?</li>
-                </ul>
-              </div>
-              <span class="panini-card-badge">22</span>
-            </div>
-            <div class="panini-card-info"><div class="panini-card-name">Victoria Baum</div><div class="panini-card-meta">PF/C · 1,80 m</div></div>
-          </div>
-        </div>
-        <div class="panini-wrap" data-step="0">
-          <div class="panini-card">
-            <div class="panini-card-photo">
-              <span class="panini-card-number">76</span>
-              <div class="panini-photo-frame panini-photo-frame-0"><i data-lucide="user" class="icon-30"></i></div>
-              <div class="panini-photo-frame panini-photo-frame-1"><i data-lucide="image" class="icon-22"></i><span>Actionfoto folgt</span></div>
-              <div class="panini-photo-frame panini-photo-frame-2">
-                <ul class="panini-steckbrief">
-                  <li>Alter: ?</li>
-                  <li>Größe: 1,73 m</li>
-                  <li>Gewicht: ?</li>
-                  <li>Spannweite: ?</li>
-                  <li>Schuhgröße: ?</li>
-                </ul>
-              </div>
-              <span class="panini-card-badge">76</span>
-            </div>
-            <div class="panini-card-info"><div class="panini-card-name">Amy Striehn</div><div class="panini-card-meta">SF · 1,73 m</div></div>
-          </div>
-        </div>
-        <div class="panini-wrap" data-step="0">
-          <div class="panini-card">
-            <div class="panini-card-photo">
-              <span class="panini-card-number">90</span>
-              <div class="panini-photo-frame panini-photo-frame-0"><i data-lucide="user" class="icon-30"></i></div>
-              <div class="panini-photo-frame panini-photo-frame-1"><i data-lucide="image" class="icon-22"></i><span>Actionfoto folgt</span></div>
-              <div class="panini-photo-frame panini-photo-frame-2">
-                <ul class="panini-steckbrief">
-                  <li>Alter: ?</li>
-                  <li>Größe: 1,74 m</li>
-                  <li>Gewicht: ?</li>
-                  <li>Spannweite: ?</li>
-                  <li>Schuhgröße: ?</li>
-                </ul>
-              </div>
-              <span class="panini-card-badge">90</span>
-            </div>
-            <div class="panini-card-info"><div class="panini-card-name">Juliane Krüger</div><div class="panini-card-meta">SF · 1,74 m</div></div>
-          </div>
-        </div>
-      </div>
+      <ul class="kader-liste">
+        <li class="kader-zeile"><span class="kader-nr">0</span><span class="kader-name">Nora Kirschstein</span><span class="kader-pos">SF</span></li>
+        <li class="kader-zeile"><span class="kader-nr">2</span><span class="kader-name">Jennifer Petry</span><span class="kader-pos">PG</span></li>
+        <li class="kader-zeile"><span class="kader-nr">3</span><span class="kader-name">Lilly Feistkorn</span><span class="kader-pos">SF</span></li>
+        <li class="kader-zeile"><span class="kader-nr">5</span><span class="kader-name">Josefine Kurz</span><span class="kader-pos">PG</span></li>
+        <li class="kader-zeile"><span class="kader-nr">6</span><span class="kader-name">Ina Elsner</span><span class="kader-pos">PG/SF</span></li>
+        <li class="kader-zeile"><span class="kader-nr">8</span><span class="kader-name">Miriam Haselmann</span><span class="kader-pos">SF</span></li>
+        <li class="kader-zeile"><span class="kader-nr">9</span><span class="kader-name">Ronja Klein</span><span class="kader-pos">SF</span></li>
+        <li class="kader-zeile"><span class="kader-nr">10</span><span class="kader-name">Theresia Piszczan</span><span class="kader-pos">C</span></li>
+        <li class="kader-zeile"><span class="kader-nr">11</span><span class="kader-name">Lilly Lukow</span><span class="kader-pos">SF</span></li>
+        <li class="kader-zeile"><span class="kader-nr">12</span><span class="kader-name">Antonieta Schönau</span><span class="kader-pos">PF/C</span></li>
+        <li class="kader-zeile"><span class="kader-nr">13</span><span class="kader-name">Anna Metzdorf</span><span class="kader-pos">PF/C</span></li>
+        <li class="kader-zeile"><span class="kader-nr">14</span><span class="kader-name">Constanze Sakriß</span><span class="kader-pos">C</span></li>
+        <li class="kader-zeile"><span class="kader-nr">15</span><span class="kader-name">Johanna Baum</span><span class="kader-pos">PF/C</span></li>
+        <li class="kader-zeile"><span class="kader-nr">21</span><span class="kader-name">Jill Brand</span><span class="kader-pos">SF/PF</span></li>
+        <li class="kader-zeile"><span class="kader-nr">22</span><span class="kader-name">Victoria Baum</span><span class="kader-pos">PF/C</span></li>
+        <li class="kader-zeile"><span class="kader-nr">76</span><span class="kader-name">Amy Striehn</span><span class="kader-pos">SF</span></li>
+        <li class="kader-zeile"><span class="kader-nr">90</span><span class="kader-name">Juliane Krüger</span><span class="kader-pos">SF</span></li>
+      </ul>
     </div>
   </section>
 
 
-  <section class="section">
+  <section class="section bg-subtle">
     <div class="container">
       <div class="section-head">
         <div class="head-text">
@@ -641,28 +354,18 @@
           <h2 class="t-h2">Die Köpfe hinter dem Team</h2>
         </div>
       </div>
-      <div class="panini-grid panini-grid-coaches">
-        <div class="panini-card">
-          <div class="panini-card-photo"><i data-lucide="user" class="icon-30"></i></div>
-          <div class="panini-card-info"><div class="panini-card-name">Yaqub Mohammad</div><div class="panini-card-meta">Head Coach</div></div>
-        </div>
-        <div class="panini-card">
-          <div class="panini-card-photo"><i data-lucide="user" class="icon-30"></i></div>
-          <div class="panini-card-info"><div class="panini-card-name">Lilly Feistkorn</div><div class="panini-card-meta">Co-Coach</div></div>
-        </div>
-        <div class="panini-card">
-          <div class="panini-card-photo"><i data-lucide="user" class="icon-30"></i></div>
-          <div class="panini-card-info"><div class="panini-card-name">Patricia Polifka</div><div class="panini-card-meta">Athletiktrainerin</div></div>
-        </div>
-      </div>
+      <ul class="kader-liste kader-liste-trainer">
+        <li class="kader-zeile"><span class="kader-name">Wilhelm Sonnenberg</span><span class="kader-pos kader-pos-lang">Head Coach</span></li>
+        <li class="kader-zeile"><span class="kader-name">Sylvia Folsche</span><span class="kader-pos kader-pos-lang">Co-Trainerin</span></li>
+      </ul>
     </div>
   </section>
-  <section class="section bg-subtle">
+  <section class="section">
     <div class="container">
       <div class="cta-panel">
         <span class="eyebrow">Saison 2026/2027</span>
-        <h2 class="t-h2">Aktuell Platz 7 in der Regionalliga Südost.</h2>
-        <p>Alle Tabellenstände und den kompletten Spielplan findest du auf den jeweiligen Übersichtsseiten.</p>
+        <h2 class="t-h2">Tabelle und Spielplan der Löwinnen.</h2>
+        <p>Alle Tabellenstände und den kompletten Spielplan der Regionalliga Südost findest du auf den jeweiligen Übersichtsseiten.</p>
         <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
           <a class="btn btn-primary" href="/saison/tabelle.html">Zur Tabelle</a>
           <a class="btn btn-ghost" href="/saison/spielplan.html?team=damen">Zum Spielplan</a>
@@ -675,8 +378,8 @@
   <div class="modal-backdrop" id="teamfoto-modal">
     <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="teamfoto-title" style="max-width:min(90vw,640px);padding:0;overflow:hidden">
       <button type="button" class="modal-close" data-teamfoto-close aria-label="Schließen" style="background:rgba(0,18,45,.55);color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:1"><i data-lucide="x" class="icon-18"></i></button>
-      <img loading="lazy" src="/assets/img/team-damen.webp" width="1920" height="1280" alt="" style="width:100%;display:block;filter:blur(8px);transform:scale(1.06)"  />
-      <p class="t-body-sm" id="teamfoto-title" style="padding:16px 20px;margin:0;color:var(--text-secondary);text-align:center">Aktuelles Teamfoto folgt in Kürze.</p>
+      <img loading="lazy" src="/assets/img/team-damen.webp" width="1920" height="1280" alt="Teamfoto der CATL Basketball Löwinnen Erfurt" style="width:100%;display:block" />
+      <p class="t-body-sm" id="teamfoto-title" style="padding:16px 20px;margin:0;color:var(--text-secondary);text-align:center">Die CATL Basketball Löwinnen Erfurt</p>
     </div>
   </div>
 </main>
@@ -823,20 +526,6 @@
 <script src="/js/include.js?v=1787854261"></script>
 <script>
   (function () {
-    document.querySelectorAll('.panini-wrap').forEach(function (wrap) {
-      wrap.setAttribute('role', 'button');
-      wrap.setAttribute('tabindex', '0');
-      function advance() {
-        var frameCount = wrap.querySelectorAll('.panini-photo-frame').length;
-        var step = (parseInt(wrap.getAttribute('data-step'), 10) + 1) % frameCount;
-        wrap.setAttribute('data-step', String(step));
-      }
-      wrap.addEventListener('click', advance);
-      wrap.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); advance(); }
-      });
-    });
-
     var modal = document.getElementById('teamfoto-modal');
     document.getElementById('teamfoto-open').addEventListener('click', function () {
       modal.classList.add('open');

@@ -29,9 +29,8 @@
     "tint": "orange",
     "kurztext": "Unser Damenteam — Saison 25/ 26 in der Regionalliga Südost.",
     "trainer": [
-      { "name": "Yaqub Mohammad", "rolle": "Head Coach" },
-      { "name": "Lilly Feistkorn", "rolle": "Co-Coach" },
-      { "name": "Patricia Polifka", "rolle": "Athletiktrainerin" }
+      { "name": "Wilhelm Sonnenberg", "rolle": "Head Coach" },
+      { "name": "Sylvia Folsche", "rolle": "Co-Trainerin" }
     ],
     "kader": [
       { "nr": 0, "name": "Nora Kirschstein", "position": "SF", "groesse": "173 cm" },
