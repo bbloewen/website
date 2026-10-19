@@ -30,7 +30,7 @@
       "lastmod": "2026-10-16"
     },
     "datenschutz.html": {
-      "hash": "83cb79e15156b2ff7e7a0769e6038d6560688df4",
+      "hash": "e03e4e501f017ff91496347747ca438e14f881f8",
       "lastmod": "2026-10-19"
     },
     "familienpass.html": {
@@ -328,6 +328,10 @@
     "news/newsletter/index.html": {
       "hash": "4caad0fb0b2a0fd640456d7f98fa89ad0d374cb4",
       "lastmod": "2026-09-20"
+    },
+    "news/podcast.html": {
+      "hash": "d83cf427614cfadeffdd4a02bd41e31c2b6b2e93",
+      "lastmod": "2026-10-19"
     },
     "partner/basketballevent-einladung.html": {
       "hash": "2515cbb7632c5621e1ffab684957f8e2a6654540",
