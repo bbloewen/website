@@ -33,6 +33,10 @@
       "hash": "895b3b78f25b9ccb2117c6abe427858c02a139d2",
       "lastmod": "2026-10-13"
     },
+    "familienpass.html": {
+      "hash": "d64210d50e1cf1f2a0272af1f1b76591b12419b6",
+      "lastmod": "2026-10-19"
+    },
     "fans/community-events.html": {
       "hash": "5dd95941320aae5252b7fb53415a3bec418d1905",
       "lastmod": "2026-10-18"
@@ -426,7 +430,7 @@
       "lastmod": "2026-10-16"
     },
     "saison/profis/gameday/index.html": {
-      "hash": "ce7b596fd922548dc8c116235d6d271e4b255b3c",
+      "hash": "4bf9f48f0b96a22d7835ca93943f4f66abe41567",
       "lastmod": "2026-10-19"
     },
     "saison/profis/gameday/spieltagsinfo/ausgabe-1/index.html": {
@@ -457,10 +461,6 @@
       "hash": "6ca21a5504489800460eaaf1c506d3c2c9118c06",
       "lastmod": "2026-10-18"
     },
-    "tickets/familienpass.html": {
-      "hash": "ade8e9e7aacfd66252695d89d793dec03e9ff7d1",
-      "lastmod": "2026-09-07"
-    },
     "trainieren/baskidball.html": {
       "hash": "c5ab98697116b4f50c1b8309e1de1283636b26e1",
       "lastmod": "2026-10-12"
@@ -470,8 +470,8 @@
       "lastmod": "2026-10-11"
     },
     "trainieren/feriencamps.html": {
-      "hash": "07a9f287d42b70412197462551b3ed3e6b0d31ee",
-      "lastmod": "2026-10-16"
+      "hash": "f37af0387a20010273892d1e0ba287b9cd8605a2",
+      "lastmod": "2026-10-19"
     },
     "trainieren/freiplaetze.html": {
       "hash": "9e4b223550251537535214cbd4670dfc189f2a7c",

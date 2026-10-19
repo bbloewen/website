@@ -46,6 +46,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://basketball-loewen.com/familienpass.html</loc>
+    <lastmod>2026-10-19</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://basketball-loewen.com/fans/community-events.html</loc>
     <lastmod>2026-10-18</lastmod>
     <priority>0.7</priority>
@@ -571,11 +576,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://basketball-loewen.com/tickets/familienpass.html</loc>
-    <lastmod>2026-09-07</lastmod>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://basketball-loewen.com/trainieren/baskidball.html</loc>
     <lastmod>2026-10-12</lastmod>
     <priority>0.7</priority>
@@ -587,7 +587,7 @@
   </url>
   <url>
     <loc>https://basketball-loewen.com/trainieren/feriencamps.html</loc>
-    <lastmod>2026-10-16</lastmod>
+    <lastmod>2026-10-19</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
