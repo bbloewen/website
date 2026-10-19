@@ -3285,6 +3285,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       }
       var links = [];
       if (a && a.drive_url) links.push('<a href="' + esc(a.drive_url) + '" target="_blank" rel="noopener">Original</a>');
+      else if (b && b.drive_url) links.push('<a href="' + esc(b.drive_url) + '" target="_blank" rel="noopener">Original in Drive</a>');
       if (b && bhbBelegLink(b.link, b.dateiname)) links.push('<a href="' + esc(bhbBelegLink(b.link, b.dateiname)) + '" target="_blank" rel="noopener">Beleg in BHB</a>');
       var loeschLink = a ? '<div style="margin-top:4px"><button type="button" class="link-btn" style="font-size:12px;color:var(--text-muted)" data-be="loeschen" data-id="' + a.id + '" title="Entfernt diesen Beleg aus der Liste und die Datei aus Google Drive. Die Mail kommt in den Papierkorb, wenn kein weiterer relevanter Anhang daran hängt. In BuchhaltungsButler ändert sich nichts." aria-label="Beleg löschen: ' + esc(titel) + '">löschen</button></div>' : '';
       // Buchungszeilen: aus BuchhaltungsButler, sonst die Beträge je Steuersatz, die der Agent gelesen hat.
