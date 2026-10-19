@@ -3345,10 +3345,10 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var ag = b && /outbound/.test(b.typ || '') && r.ausgang ? r.ausgang : null, agGeb = blGebucht(r), agFest = !!(b && b.fixiert);
       var agKey = ag ? 'a|' + BE.mandantAktuell + '|' + b.beleg_id : '';
       var agWahl = !!(ag && ag.teile && ag.teile.length && (!agGeb || (ag.gespeichert && ag.geaendert && !agFest)));
-      if (ag && !agGeb && ag.teile && ag.teile.length) {
+      if (ag && ag.teile && ag.teile.length && (!agGeb || (ag.gespeichert && ag.geaendert))) {
         var agSatz = { '19_vat': 19, '7_vat': 7, '0_none': 0 };
         zl = ag.teile.map(function (t) { var br = num(t.brutto), sz = agSatz[t.vat], ne = nettoVon(br, sz); return { agent: true, plan: true, text: ag.buchungstext, konto: t.sachkonto, kname: t.sachkonto_name, gegen: ag.debitor_nr || '', gname: b.gegenpartei, kst1: t.kst1, kst1n: t.kst1_name, kst2: t.kst2, kst2n: t.kst2_name, satz: sz, netto: ne, steuer: br !== null && ne !== null ? Math.round((br - ne) * 100) / 100 : null, brutto: br }; });
-        st.unshift(['Stand', ag.gespeichert ? '<b>Kontierung bestätigt, bereit zu buchen</b>' : '<b>Vorschlag</b>: ' + esc(ag.quelle || '') + '.<br>Mit der Auswahlbox übernehmen oder unter „Kontierung ändern“ anpassen.']);
+        st.unshift(['Stand', agGeb ? '<b>Kontierung geändert</b>, in BuchhaltungsButler noch nicht aktualisiert' + (agFest ? ' (festgeschrieben, nicht änderbar).' : ': mit der Auswahlbox übernehmen.') : ag.gespeichert ? '<b>Kontierung bestätigt, bereit zu buchen</b>' : '<b>Vorschlag</b>: ' + esc(ag.quelle || '') + '.<br>Mit der Auswahlbox übernehmen oder unter „Kontierung ändern“ anpassen.']);
       } else if (ag && !agGeb) st.unshift(['Stand', 'Noch keine Kontierung. Unter „Kontierung ändern“ eintragen.']);
       else if (ag && agGeb && ag.gespeichert && ag.geaendert) st.unshift(['Stand', '<b>Kontierung geändert</b>, in BuchhaltungsButler noch nicht aktualisiert' + (agFest ? ' (festgeschrieben, nicht änderbar)' : '.')]);
       if (gsNeg) zl.forEach(function (x) { ['netto', 'steuer', 'brutto'].forEach(function (k) { if (x[k] !== null && x[k] !== undefined && !isNaN(Number(x[k]))) x[k] = -Math.abs(Number(x[k])); }); });
@@ -3488,7 +3488,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       '<select class="auswahl" data-be="filter" data-k="' + k + '" data-art="zahlung" aria-label="Filter">' + opt('alle', 'Alle Zahlungen') + opt('gebucht', 'Gebucht') + opt('offen', 'Noch offen') + '</select> ' +
       '<button type="button" class="link-btn" data-be="neu" data-k="' + k + '" data-art="zahlung"' + (BE.holen ? ' disabled' : '') + '>' + (BE.holen ? 'Hole aus BuchhaltungsButler …' : 'Aktualisieren') + '</button></span></div>' +
       (BE.meldung ? '<div class="erfolg" role="status" style="margin:8px 12px">' + esc(BE.meldung) + '</div>' : '') +
-      '<div class="tbl-voll tbl-fix"><table class="tbl kompakt"><thead><tr><th><abbr title="Buchungsdatum des Bankumsatzes">Datum</abbr></th><th><abbr title="Gegenpartei und Verwendungszweck">Zahlung</abbr></th><th class="rechts"><abbr title="Betrag des Umsatzes, Ausgaben mit Minus">Betrag</abbr></th><th><abbr title="Beleg zugeordnet oder beleglos (Dokument-Symbol) und gebucht (Buch-Symbol)">Status</abbr></th><th><abbr title="Zugeordneter Beleg mit Sachkonto und Kostenstellen, bei beleglosen Zahlungen das Konto der Buchung">Beleg, Konto</abbr></th></tr></thead><tbody>';
+      '<div class="tbl-voll tbl-fix"><table class="tbl kompakt"><thead><tr><th><abbr title="Beleg zugeordnet oder beleglos (Dokument-Symbol) und gebucht (Buch-Symbol)">Status</abbr></th><th><abbr title="Buchungsdatum des Bankumsatzes">Datum</abbr></th><th><abbr title="Gegenpartei und Verwendungszweck">Zahlung</abbr></th><th class="rechts"><abbr title="Betrag des Umsatzes, Ausgaben mit Minus">Betrag</abbr></th><th><abbr title="Zugeordneter Beleg mit Sachkonto und Kostenstellen, bei beleglosen Zahlungen das Konto der Buchung">Beleg, Konto</abbr></th></tr></thead><tbody>';
     zeilen.forEach(function (p) {
       var bu = p.buchungen || [], belege = p.belege || [];
       var gebucht = bu.length > 0;
@@ -3506,9 +3506,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       else if (zugeordnet) detail = bu.map(function (x) { return '<div><span class="fett">' + esc(x.beleg_gegenpartei || '') + '</span>' + (x.beleg_nummer ? ' · Nr. ' + esc(x.beleg_nummer) : '') + '<div class="notiz" style="margin:0">Beleg liegt vor dem Importzeitraum (vor dem 01.07.2026)</div></div>'; }).join('');
       else if (gebucht) detail = bu.map(function (x) { return '<div>' + beKonten(x) + (x.text ? '<div class="notiz" style="margin:0">' + esc(x.text) + '</div>' : '') + '</div>'; }).join('');
       var betrag = Number(p.betrag || 0);
-      h += '<tr><td class="nowrap">' + esc(p.datum ? formatDate(String(p.datum).slice(0, 10)) : '') + '</td>' +
+      h += '<tr><td>' + status + '</td><td class="nowrap">' + esc(p.datum ? formatDate(String(p.datum).slice(0, 10)) : '') + '</td>' +
         '<td><div class="fett">' + esc(String(p.gegenpartei || '–').replace(/\s*\n\s*/g, ' ')) + '</div><div class="notiz" style="margin:0">' + esc(String(p.zweck || '').replace(/\s*\n\s*/g, ' ').slice(0, 160)) + '</div>' + (function () { var sr = zahlungRegel(p); return sr ? '<div class="' + (sr.verstoss ? 'hinweis-warn' : 'notiz') + '" style="margin:4px 0 0"><b>Regel Steuerberater (' + esc(sr.n) + ')' + (sr.verstoss ? ', bisher falsch gebucht' : '') + ':</b> ' + esc(sr.h) + '</div>' : ''; })() + '</td>' +
-        '<td class="nowrap zahlen rechts' + (betrag < 0 ? '' : ' gut') + '">' + esc(formatEuro(betrag)) + '</td><td>' + status + '</td><td>' + detail + '</td></tr>';
+        '<td class="nowrap zahlen rechts' + (betrag < 0 ? '' : ' gut') + '">' + esc(formatEuro(betrag)) + '</td><td>' + detail + '</td></tr>';
     });
     if (!zeilen.length) h += '<tr><td colspan="5" class="leer">Keine Zahlungen in dieser Ansicht.</td></tr>';
     h += '</tbody></table></div><div class="card-fuss">Bankumsätze aus BuchhaltungsButler (nur lesend, täglich 5:30 Uhr' + (d.stand ? ', zuletzt ' + esc(formatDateTime(d.stand)) : '') + '). Zwei Symbole je Zahlung: Dokument = Beleg zugeordnet oder ausdrücklich beleglos, Buch = gebucht. Grün und gefüllt heißt erledigt, grau mit Kontur heißt fehlt noch; beides hängt an einer bestätigten Buchung (mit Beleg oder beleglos, dann mit Konto). Unbestätigte (blaue) Zahlungen gelten als offen, BuchhaltungsButler gibt sie nicht heraus.' +
@@ -4888,11 +4888,41 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     beAlleRender(); var f = document.querySelector('[data-ag="sachkonto"]'); if (f) { f.scrollIntoView({ block: 'center', behavior: 'smooth' }); f.focus(); }
   }
   // ---- Ausgangsbelege wie Eingangsbelege bedienen (Marko 19.10.2026): Buchungstext direkt ändern, mit der KI besprechen, Änderung gilt sofort ----
-  async function agSpeichernDirekt(e) {
+  async function agSpeichernEinmal(e) {
     var res = await fetch('/webhook/accounting/ausgang-speichern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: e.k, beleg_id: e.bid, teile: e.teile, buchungstext: e.text, debitor_nr: e.debitor_nr, debitor_neu: e.debitor_neu }) });
     var d = await res.json().catch(function () { return {}; });
     if (!res.ok || !d.ok) return { ok: false, probleme: d.probleme && d.probleme.length ? d.probleme : [d.message || d.fehler || 'Nicht gespeichert.'], anlegen: d.konto_anlegen || null };
     return { ok: true };
+  }
+  // Fehlende Konten (aus dem Kontenplan des Steuerberaters) und Kostenstellen (aus dem Kostenstellenplan) legt das System selbst in BuchhaltungsButler an und speichert dann noch einmal
+  async function agFehlendesAnlegen(e, sp) {
+    var neu = false;
+    if (sp.anlegen && sp.anlegen.nummer) {
+      var rk = await fetch('/webhook/accounting/konto-anlegen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: e.k, nummer: sp.anlegen.nummer }) });
+      var dk = await rk.json().catch(function () { return {}; });
+      if (!rk.ok || !dk.ok) throw new Error(dk.meldung || dk.message || dk.fehler || ('Das Konto ' + sp.anlegen.nummer + ' konnte nicht angelegt werden.'));
+      neu = true;
+    }
+    var kst = [];
+    (sp.probleme || []).forEach(function (t) { var m = /Kostenstelle ([12]) (\S+) gibt es in BuchhaltungsButler nicht/.exec(String(t)); if (m && !kst.some(function (x) { return x.ebene === m[1] && x.code === m[2]; })) kst.push({ ebene: m[1], code: m[2] }); });
+    for (var i = 0; i < kst.length; i++) {
+      var rs = await fetch('/webhook/accounting/kostenstelle-anlegen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: e.k, ebene: kst[i].ebene, code: kst[i].code }) });
+      var ds = await rs.json().catch(function () { return {}; });
+      if (!rs.ok || !ds.ok) throw new Error(ds.meldung || ds.message || ds.fehler || ('Die Kostenstelle ' + kst[i].code + ' konnte nicht angelegt werden.'));
+      neu = true;
+    }
+    return neu;
+  }
+  async function agSpeichernDirekt(e) {
+    var sp = null;
+    for (var versuch = 0; versuch < 4; versuch++) {
+      sp = await agSpeichernEinmal(e);
+      if (sp.ok) return sp;
+      var neu = false;
+      try { neu = await agFehlendesAnlegen(e, sp); } catch (x) { return { ok: false, probleme: [x.message], anlegen: null }; }
+      if (!neu) return sp;
+    }
+    return sp;
   }
   function agNachladen() { ['XXL', 'LEV'].forEach(function (m) { if (BL[m] && BL[m].daten) ladeListe('beleg', m, BL[m].daten.monat); }); }
   function agTextFeld(b, titel, text) {
@@ -4904,6 +4934,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     }
     return ' <button type="button" class="link-btn" style="font-size:12px" data-be="agt-edit" data-bid="' + esc(String(b.beleg_id)) + '" data-titel="' + esc(titel) + '" data-wert="' + esc(text || '') + '" aria-label="Buchungstext ändern">ändern</button>';
   }
+  function agVerlaufLesen(k, bid) { try { return JSON.parse(localStorage.getItem('agki|' + k + '|' + bid) || '[]') || []; } catch (e) { return []; } }
+  function agVerlaufSchreiben(k, bid, v) { try { localStorage.setItem('agki|' + k + '|' + bid, JSON.stringify(v)); } catch (e) {} }
   function agKiPanel() {
     var q = BE.agKi; if (!q) return '';
     var h = '<div class="card pad" role="region" aria-label="Mit der KI besprechen"><div class="fett">Mit der KI besprechen: ' + esc(q.titel) + '</div>' +
@@ -4941,7 +4973,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         antwort += ' Gespeichert.';
         agNachladen();
       }
-      q.verlauf = q.verlauf.concat([{ von: 'marko', text: text }, { von: 'ki', text: antwort }]).slice(-8); q.text = '';
+      q.verlauf = q.verlauf.concat([{ von: 'marko', text: text }, { von: 'ki', text: antwort }]).slice(-8); q.text = ''; agVerlaufSchreiben(q.k, q.bid, q.verlauf);
     } catch (x) { q.fehler = x.message; }
     q.laeuft = false; beAlleRender();
   }
@@ -4996,11 +5028,10 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var e = BE.agEd; if (!e || e.laeuft) return;
     agLies(); e.laeuft = true; e.fehler = []; e.anlegen = null; beAlleRender();
     try {
-      var res = await fetch('/webhook/accounting/ausgang-speichern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: e.k, beleg_id: e.bid, teile: e.teile, buchungstext: e.text, debitor_nr: e.debitor_nr, debitor_neu: e.debitor_neu }) });
-      var d = await res.json().catch(function () { return {}; });
-      if (!res.ok || !d.ok) { e.fehler = d.probleme && d.probleme.length ? d.probleme : [d.message || d.fehler || 'Nicht gespeichert.']; e.anlegen = d.konto_anlegen || null; e.laeuft = false; beAlleRender(); return; }
+      var sp = await agSpeichernDirekt(e);
+      if (!sp.ok) { e.fehler = sp.probleme; e.anlegen = sp.anlegen; e.laeuft = false; beAlleRender(); return; }
       BE.agEd = null;
-      if (BL[e.k] && BL[e.k].daten) ladeListe('beleg', e.k, BL[e.k].daten.monat);
+      agNachladen();
       beAlleRender();
     } catch (x) { e.fehler = [x.message]; e.laeuft = false; beAlleRender(); }
   }
@@ -5219,7 +5250,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
             BE.agTe = null; BE.meldung = 'Buchungstext gespeichert.'; beAlleRender(); agNachladen();
           }).catch(function (er) { ed2.laeuft = false; ed2.fehler = er.message; beAlleRender(); });
         }
-        else if (w === 'agki-start') { BE.agKi = { k: BE.mandantAktuell, bid: b.getAttribute('data-bid'), titel: b.getAttribute('data-titel') || '', verlauf: [], text: '', laeuft: false, fehler: '', anlegen: null }; beAlleRender(); var kf2 = document.getElementById('agki-text'); if (kf2) { kf2.scrollIntoView({ block: 'center', behavior: 'smooth' }); kf2.focus(); } }
+        else if (w === 'agki-start') { BE.agKi = { k: BE.mandantAktuell, bid: b.getAttribute('data-bid'), titel: b.getAttribute('data-titel') || '', verlauf: agVerlaufLesen(BE.mandantAktuell, b.getAttribute('data-bid')), text: '', laeuft: false, fehler: '', anlegen: null }; beAlleRender(); var kf2 = document.getElementById('agki-text'); if (kf2) { kf2.scrollIntoView({ block: 'center', behavior: 'smooth' }); kf2.focus(); } }
         else if (w === 'agki-senden') agKiSenden();
         else if (w === 'agki-zu') { BE.agKi = null; beAlleRender(); }
         else if (w === 'agki-konto') agKiKonto(b.getAttribute('data-nr'));
@@ -5966,7 +5997,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261019212821';
+  var BUILD = '20261019215225';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
