@@ -94,4 +94,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "News-Artikel aus der Mediaplanung gebaut"
-          git push
+          # Laeuft gleichzeitig spieltagsseiten-nachbauen.yml und pusht zuerst,
+          # wird dieser Push abgelehnt (18.10. und 19.10.2026 passiert). Dann
+          # die fremden Commits darunterlegen und erneut pushen. Gibt es einen
+          # echten Konflikt, bricht der Lauf ab und bleibt rot.
+          for versuch in 1 2 3 4; do
+            git push && exit 0
+            echo "Push abgelehnt (Versuch $versuch), hole Aenderungen und versuche es erneut."
+            git pull --rebase origin main || { git rebase --abort 2>/dev/null; exit 1; }
+          done
+          exit 1

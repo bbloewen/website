@@ -16,6 +16,18 @@
     {
       "datum": "18.10.2026",
       "kategorie": "Spielbericht",
+      "tint": "tint-blue",
+      "icon": "newspaper",
+      "titel": "71:94 gegen Tabellenführer Reutlingen: Basketball Löwen Erfurt halten bis ins Schlussviertel dagegen",
+      "kurztext": "Basketball Löwen Erfurt unterliegen Tabellenführer Reutlingen 71:94. Nach drei Vierteln stand es 60:66, Jacob Hadi erzielt 17 Punkte.",
+      "url": "/news/artikel/2026-10-18_profis_spielbericht-reutlingen.html",
+      "bild": "/assets/img/news/spielbericht-reutlingen.webp",
+      "topNews": false,
+      "team": "profis"
+    },
+    {
+      "datum": "18.10.2026",
+      "kategorie": "Spielbericht",
       "tint": "tint-orange",
       "icon": "calendar",
       "titel": "Basketball Löwen Erfurt empfangen den Tabellenführer aus Reutlingen",
