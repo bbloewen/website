@@ -24,10 +24,10 @@
     ]
   },
   "damen": {
-    "name": "Basketball Löwinnen Erfurt",
+    "name": "CATL Basketball Löwinnen",
     "liga": "Regionalliga Südost",
     "tint": "orange",
-    "kurztext": "Unser Damenteam — Saison 25/ 26 in der Regionalliga Südost.",
+    "kurztext": "Unser Damenteam — Saison 2026/27 in der Regionalliga Südost.",
     "trainer": [
       { "name": "Wilhelm Sonnenberg", "rolle": "Head Coach" },
       { "name": "Silvio Fulsche", "rolle": "Co-Trainer" }

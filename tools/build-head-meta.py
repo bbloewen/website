@@ -56,7 +56,7 @@ ORG = {
     # Als alternateName der Organisation haette er Google weiter einen Namen
     # gelehrt, den der Verein nicht mehr fuehrt. CATL ist Namensgeber nur noch
     # fuer Damen, U19 und den CATL LOEWENPARK.
-    "alternateName": ["Basketball Löwen e.V.", "Basketball Löwen", "Basketball Löwinnen Erfurt"],
+    "alternateName": ["Basketball Löwen e.V.", "Basketball Löwen", "CATL Basketball Löwinnen"],
     "sport": "Basketball",
     "foundingDate": "2018",
     "url": BASE,
