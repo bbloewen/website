@@ -10,7 +10,7 @@
   "block": "F",
   "kategorie": "Kategorie 2",
   "vipTickets": 2,
-  "maMin": 5,
+  "maMin": 1,
   "maMax": 20,
   "kontingent": 200,
   "anmeldeschluss": "2026-11-06T14:00:00+01:00",

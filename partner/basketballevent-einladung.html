@@ -355,10 +355,10 @@ window.goatcounter = { path: function (p) {
           </div>
           <div class="cc-row cc-row-ma" id="cc-ma-block">
             <div class="field">
-              <label for="cc-ma">Mitarbeitende (5 bis 20) *</label>
+              <label for="cc-ma">Mitarbeitende (1 bis 20) *</label>
               <div class="cc-stepper">
                 <button type="button" class="cc-step" id="cc-minus" aria-label="Eine Person weniger">−</button>
-                <input type="number" id="cc-ma" name="mitarbeitende" min="5" max="20" step="1" value="5" inputmode="numeric" required />
+                <input type="number" id="cc-ma" name="mitarbeitende" min="1" max="20" step="1" value="1" inputmode="numeric" required />
                 <button type="button" class="cc-step" id="cc-plus" aria-label="Eine Person mehr">+</button>
               </div>
             </div>
@@ -485,7 +485,7 @@ window.goatcounter = { path: function (p) {
         </details>
         <details>
           <summary>Wie viele Tickets können wir anfordern?</summary>
-          <p class="t-body">Zwei VIP-Tickets für die Geschäftsführung und eine Begleitung, dazu 5 bis 20 Tickets für Mitarbeitende in Block F (Kategorie 2). Insgesamt gibt es für die Aktion 200 Tickets.</p>
+          <p class="t-body">Zwei VIP-Tickets für die Geschäftsführung und eine Begleitung, dazu 1 bis 20 Tickets für Mitarbeitende in Block F (Kategorie 2). Insgesamt gibt es für die Aktion 200 Tickets.</p>
         </details>
         <details>
           <summary>Wie bekommen wir die Tickets?</summary>
@@ -682,7 +682,7 @@ window.goatcounter = { path: function (p) {
   var API = 'https://ticketing.basketball-loewen.com/webhook/';
   var AKTION = 'kuehnst';
   var SEITE = 'https://basketball-loewen.com/partner/basketballevent-umfrage.html';
-  var MA_MIN = 5;
+  var MA_MIN = 1;
   var form = document.getElementById('cc-form');
   var maInput = document.getElementById('cc-ma');
   var summary = document.getElementById('cc-summary');

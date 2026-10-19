@@ -439,7 +439,7 @@ window.goatcounter = { path: function (p) {
 (function () {
   var API = 'https://ticketing.basketball-loewen.com/webhook/';
   var AKTION = 'kuehnst';
-  var MA_MIN = 5;
+  var MA_MIN = 1;
   var MA_MAX = 20;
   var params = new URLSearchParams(location.search);
   var id = (params.get('u') || '').replace(/[^a-z0-9]/gi, '').slice(0, 20);
