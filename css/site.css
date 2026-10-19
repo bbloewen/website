@@ -2810,6 +2810,10 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
   text-transform: uppercase; letter-spacing: .04em; color: var(--color-brand-orange); margin-bottom: 1px;
 }
 .panini-steckbrief li:first-child { font-weight: var(--weight-bold); font-size: 1.08em; }
+/* Vorheriger Verein ist verlinkt: Die Standard-Linkfarbe (dunkelblau) verschwand auf dem
+   dunklen Steckbrief-Hintergrund, der Verein war praktisch nicht lesbar (Website-Feedback 12.10.2026). */
+.panini-steckbrief a { color: #fff; text-decoration: underline; text-underline-offset: 2px; }
+.panini-steckbrief a:hover { color: var(--color-brand-orange); }
 .panini-wrap[data-step="1"] .panini-photo-frame-0,
 .panini-wrap[data-step="2"] .panini-photo-frame-0 { opacity: 0; }
 .panini-wrap[data-step="1"] .panini-photo-frame-1 { opacity: 1; }
