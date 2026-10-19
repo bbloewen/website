@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var vereinLabel = {
     'bc-erfurt': 'BC Erfurt',
     'usv-erfurt': 'USV Erfurt',
-    'loewinnen': 'Basketball Löwen',
+    'loewinnen': 'CATL Basketball Löwinnen',
     'loewen': 'Basketball Löwen'
   };
   var vereinBadgeClass = {

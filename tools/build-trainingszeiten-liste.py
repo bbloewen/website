@@ -44,7 +44,7 @@ ENDE = f"<!--/TRAINING:{CONTAINER}-->"
 # Gleiche Beschriftung wie vereinLabel in js/trainingszeiten.js.
 VEREIN = {
     "loewen": "Basketball Löwen",
-    "loewinnen": "Basketball Löwinnen",
+    "loewinnen": "CATL Basketball Löwinnen",
     "bc-erfurt": "BC Erfurt",
     "usv-erfurt": "USV Erfurt",
     "big-gotha": "BIG Gotha",
