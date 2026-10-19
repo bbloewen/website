@@ -616,15 +616,13 @@
           line = (p.caption || '').split('\n')[0].trim();
           if (line.length > 90) line = line.slice(0, 89).trim() + '…';
         }
-        // Statische Archivseite statt der früheren dynamischen Detailseite --
-        // nur die Archivseite ist indexierbar. Vorschaubild aus der im Repo
-        // gesicherten Kopie, weil Beholds URLs mit dem Feed-Abgang verfallen.
-        var url = p.persistedUrl || p.permalink;
-        var img = p.persistedUrl
-          ? p.persistedUrl.replace('/news/insta-archiv/', '/assets/img/insta/').replace('.html', '.jpg')
-          : p.image;
-        // onerror-Rückfall, damit eine fehlende Bildkopie kein kaputtes Bildsymbol zeigt
-        return '<a class="insta-sidebar-item" href="' + url + '"><img loading="lazy" src="' + img + '" alt="" onerror="this.onerror=null;this.src=\'/assets/img/share/og-default.jpg\'" /><span>' + line + '</span></a>';
+        // Der Link führt zum Beitrag auf Instagram, das Bild kommt aus dem
+        // Behold-Feed. Die früheren Archivseiten samt gesicherter Bildkopie
+        // sind seit 19.10.2026 gelöscht (Marko).
+        var url = p.permalink;
+        var img = p.image;
+        // onerror-Rückfall, damit ein verfallenes Feed-Bild kein kaputtes Bildsymbol zeigt
+        return '<a class="insta-sidebar-item" href="' + url + '" target="_blank" rel="noopener"><img loading="lazy" src="' + img + '" alt="" onerror="this.onerror=null;this.src=\'/assets/img/share/og-default.jpg\'" /><span>' + line + '</span></a>';
       }).join('');
       if (window.lucide) { lucide.createIcons(); }
     })

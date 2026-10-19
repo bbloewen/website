@@ -36,7 +36,6 @@ SITEMAP = REPO / "sitemap.xml"
 # priority: erste passende Regel gewinnt
 PRIORITY_RULES = [
     (lambda p: p == "", "1.0"),                          # Startseite
-    (lambda p: p.startswith("news/insta-archiv/"), "0.5"),  # gespiegelte Insta-Posts
 ]
 DEFAULT_PRIORITY = "0.7"
 

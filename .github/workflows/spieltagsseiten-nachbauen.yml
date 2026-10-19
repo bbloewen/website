@@ -80,11 +80,7 @@ jobs:
           python3 tools/build-gameday-hub.py
           python3 tools/build-kalender.py
           python3 tools/build-next-game.py
-          # --auch-insta: Der n8n-Workflow legt neue Insta-Archivseiten nur mit leeren
-          # Platzhaltern an, gefuellt werden sie hier. Ohne das Flag standen am
-          # 12.10.2026 fuenfzehn Archivseiten ohne Navigation live. news/insta-archiv/
-          # steht deshalb unten mit in der git-add-Liste.
-          python3 tools/build-partials.py --auch-insta
+          python3 tools/build-partials.py
           python3 tools/build-head-meta.py
           python3 tools/build-sitemap.py
 
@@ -98,7 +94,7 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add saison/profis/gameday/ kalender/ data/heimspiele.json data/dauerkarte-preise.json tickets/dauerkarte.html saison/spielplan.html index.html sitemap.xml data/seiten-stand.json news/insta-archiv/
+          git add saison/profis/gameday/ kalender/ data/heimspiele.json data/dauerkarte-preise.json tickets/dauerkarte.html saison/spielplan.html index.html sitemap.xml data/seiten-stand.json
           git diff --cached --quiet && { echo "Nichts nachzuziehen."; exit 0; }
           git commit -m "Spieltagsseiten und Startseiten-Widget: Phase/Sitemap nachgezogen"
           git push

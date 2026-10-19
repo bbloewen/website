@@ -5,10 +5,8 @@ Alles landet in einem markierten Block direkt vor </head>. Der Block wird bei
 jedem Lauf komplett neu geschrieben — das Skript ist damit beliebig oft
 wiederholbar und die Angaben können nicht auseinanderlaufen.
 
-Nicht angetastet werden die Seiten unter news/insta-archiv/: die erzeugt der
-n8n-Workflow "Website: News - Social Instagram abrufen" (GpAS0ONrenHrcTwS)
-täglich neu und würde einen hier eingefügten Block beim nächsten Lauf
-überschreiben. Deren head-Angaben stehen in der Workflow-Vorlage.
+Bis zum 19.10.2026 blieben die Seiten unter news/insta-archiv/ ausgespart, weil
+sie dem n8n-Workflow gehörten. Sie sind gelöscht, die Ausnahme ist entfallen.
 
 Warum statisch und nicht per include.js: Facebook, WhatsApp und Instagram
 führen beim Erzeugen der Link-Vorschau kein JavaScript aus. Open-Graph-Tags
@@ -33,7 +31,7 @@ START = "<!-- SEO:auto START (tools/build-head-meta.py — nicht von Hand änder
 END = "<!-- SEO:auto END -->"
 BLOCK_RE = re.compile(re.escape(START) + r".*?" + re.escape(END) + r"\n?", re.S)
 
-SKIP_PREFIXES = ("news/insta-archiv/",)
+SKIP_PREFIXES = ()
 
 SITE_NAME = "Basketball Löwen Erfurt"
 DEFAULT_IMAGE = BASE + "assets/img/share/og-default.jpg"
@@ -715,9 +713,9 @@ def main():
 
     for p in problems:
         print(f"  ACHTUNG {p}", file=sys.stderr)
+    uebersprungen = f", {len(skipped)} übersprungen" if skipped else ""
     print(f"  {len(changed)} Seiten {'zu ändern' if args.check else 'geschrieben'}, "
-          f"{len(unchanged)} unverändert, {len(skipped)} übersprungen "
-          f"(news/insta-archiv, gehört dem n8n-Workflow)")
+          f"{len(unchanged)} unverändert{uebersprungen}")
     return 1 if (args.check and changed) else 0
 
 

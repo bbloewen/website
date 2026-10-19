@@ -24,8 +24,6 @@ Drei Prüfungen:
 
 Bewusst nicht gemeldet:
 
-  * news/insta-archiv/ — diese Seiten schreibt der n8n-Workflow aus seiner
-    eigenen Vorlage, Änderungen im Repo wären beim nächsten Beitrag wieder weg.
   * Nennungen innerhalb eines Ankertexts — die sind ja verlinkt.
   * Namen mit eigener Unterseite (INTERNE_SEITE): ein interner Link dorthin
     zählt genauso wie der externe. "SPORT VERNETZT" steht so in jeder
@@ -190,8 +188,6 @@ def pruefe_konsistenz(texte):
         intern = INTERNE_SEITE.get(name)
         muster = re.compile(r"\b" + re.escape(name) + r"\b")
         for rel, text in texte.items():
-            if rel.startswith("news/insta-archiv/"):
-                continue
             sichtbar = fliesstext(text)
             for verbindung in KEIN_VERWEIS:
                 if name in verbindung:

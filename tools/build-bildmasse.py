@@ -43,14 +43,12 @@ from seo_common import BASE, REPO, tracked_html
 # deshalb mitbehandelt werden, sonst kommen Bilder ohne Maße zurück.
 EXTRA = ["partials/header.html", "partials/footer.html"]
 
-# news/insta-archiv/ gehört dem n8n-Workflow "Website: News - Social Instagram
-# abrufen" (GpAS0ONrenHrcTwS), genau wie in build-head-meta.py ausgenommen.
-# Ohne diese Ausnahme schrieb dieses Skript hier Maße in frisch archivierte
-# Insta-Seiten, bevor der "Freiplaetze nachbauen"-Lauf sie committen konnte -
-# git add listet dort nur die eigenen generierten Dateien, also blieb die
-# Aenderung ungestaged liegen und `git commit` scheiterte mit "no changes
-# added to commit" (Fund 28.09.2026, Lauf 36412278780).
-SKIP_PREFIXES = ("news/insta-archiv/",)
+# Die Insta-Archivseiten unter news/insta-archiv/ wurden am 19.10.2026 geloescht
+# (Marko: seit wir genug eigene News schreiben, reicht der Feed in der Seitenspalte;
+# die 30 duennen Seiten machten ein Viertel des Google-Index aus und rankten
+# stellenweise statt der echten Inhaltsseiten). Die Ausnahmen, die sie hier frueher
+# aussparten, sind damit entfallen.
+SKIP_PREFIXES = ()
 
 IMG = re.compile(r"<img\b[^>]*>", re.I)
 SRC = re.compile(r'\bsrc="([^"]+)"')

@@ -20,13 +20,8 @@ for s in build-lucide-icons build-galerie-thumbs build-galerie-html build-dauerk
          build-basketballevent build-partner-wall build-fanshop build-trainingszeiten-liste build-nachwuchs-spielplan-liste build-home-news \
          build-next-game build-team-news build-newsletter-archiv build-freundeskreis \
          build-spielplan-liste build-kalender build-news-list build-podcast build-article-nav build-freiplaetze \
-         build-community-events build-instagram-archiv build-pressefotos build-partials build-bildmasse \
+         build-community-events build-pressefotos build-partials build-bildmasse \
          build-head-meta build-sitemap; do
   printf '%s\n' "$s"
-  if [ "$s" = "build-partials" ]; then
-    # Kompletter Lauf: Header/Footer auch in die Insta-Archivseiten schreiben.
-    python3 "tools/$s.py" $F --auch-insta
-  else
-    python3 "tools/$s.py" $F
-  fi
+  python3 "tools/$s.py" $F
 done

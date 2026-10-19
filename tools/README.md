@@ -18,7 +18,6 @@ Canonical dürfen nie auseinanderlaufen.
 | `<title>` oder `<meta name="description">` einer Seite | `build-head-meta.py` |
 | `data/news.json` (Artikel ergänzt/geändert) | `build-news-list.py` |
 | `data/freiplaetze.json` (Platz ergänzt/geändert) | `build-freiplatz-seiten.py`, `build-freiplaetze.py` |
-| Neue Insta-Archivseite unter `news/insta-archiv/` | `build-instagram-archiv.py` |
 | Neues Artikel-Hero in `assets/img/news/` | `build-share-images.py`, dann `build-head-meta.py` |
 | `data/heimspiele.json` (Spieltermine, neues Spiel, Vorverkauf gestartet) | `build-spieltagsseiten.py`, `build-gameday-hub.py`, `build-spielplan-liste.py`, dann `build-head-meta.py` |
 | `data/freiplaetze.json` (Platz ergänzt, Koordinaten geändert) | `build-freiplatz-qr.py` |
@@ -30,7 +29,6 @@ Alles auf einmal, in dieser Reihenfolge:
 python3 tools/build-spieltagsseiten.py && \
 python3 tools/build-gameday-hub.py && \
 python3 tools/build-partials.py && \
-python3 tools/build-instagram-archiv.py && \
 python3 tools/build-news-list.py && \
 python3 tools/build-spielplan-liste.py && \
 python3 tools/build-freiplatz-seiten.py && \
@@ -90,7 +88,7 @@ ist nur für Crawler ohne JavaScript da und kann daher nicht falsch werden, nur
 älter.
 
 **`build-head-meta.py`** — pflegt Canonical, Open Graph, Twitter Cards und JSON-LD
-in einem markierten Block vor `</head>`. `news/insta-archiv/` bleibt ausgespart,
+in einem markierten Block vor `</head>`.
 diese Seiten gehören dem n8n-Workflow `GpAS0ONrenHrcTwS`.
 
 **`build-share-images.py`** — erzeugt die Share-Bilder 1200×630 unter
@@ -106,16 +104,6 @@ Mit `--aufkleber` kommt die A6-Druckvorlage dazu, mit `--event <slug>
 --event-name "..."` ein A3-Schild für den mobilen Korb bei Straßenfesten.
 Plätze mit eingeschränktem Zugang bekommen bewusst keinen Spiel-Code.
 
-**`build-instagram-archiv.py`** — schreibt die Übersichtsliste statisch in
-`news/instagram-archiv.html`. Quelle ist der Ordner `news/insta-archiv/` selbst,
-nicht `data/instagram-loewen.json`/`data/instagram-loewenpark.json` — die
-Feed-Dateien kennen nur die aktuellen Behold-Posts, während auf der Platte auch
-längst aus dem Feed gefallene Archivseiten liegen. Titel und Datum liest das
-Skript aus dem `<h1>` bzw. der Datumszeile jeder Archivseite; das Vorschaubild
-ist `assets/img/insta/<Dateiname>.jpg`, wenn vorhanden, sonst das `og:image` der
-Seite. Liest die Archivseiten nur — sie gehören weiterhin dem n8n-Workflow
-`GpAS0ONrenHrcTwS`.
-
 **`build-spieltagsseiten.py`** — erzeugt/pflegt eine Seite je Heimspiel unter
 `saison/profis/gameday/<seiteSlug>.html` (Marko, 25.08.2026: "eine Adresse für den
 ganzen Lebenszyklus" — vorher Ankündigung, danach Ergebnis+Bericht, dieselbe
@@ -129,9 +117,15 @@ bestehenden Datei ausgelesen und unverändert wieder eingesetzt — das Skript
 eingebettet, dieselbe Komponente, die vorher in der nie verlinkten
 `tickets/einzelticket.html` lief (gelöscht).
 
-**`fix-insta-archiv-legacy.py`** — zieht Insta-Archivseiten nach, die aus dem
-Behold-Feed gefallen sind. Der n8n-Workflow kennt nur die letzten 20 Posts je
-Account und fasst ältere Seiten nie wieder an. Läuft nur bei Bedarf.
+**Entfallen am 19.10.2026: das Instagram-Archiv.** `build-instagram-archiv.py`,
+`fix-insta-archiv-legacy.py`, die 30 Seiten unter `news/insta-archiv/`, die
+Übersicht `news/instagram-archiv.html` und der Bildcache `assets/img/insta/`
+sind gelöscht. Grund: Die Seiten trugen je rund 65 Wörter, machten ein Viertel
+der indexierbaren Seiten aus und rankten stellenweise statt der echten
+Inhaltsseiten. Der n8n-Workflow `GpAS0ONrenHrcTwS` schreibt weiterhin
+`data/instagram-loewen.json` und `data/instagram-loewenpark.json` für die
+Feed-Boxen auf Startseite, Aktuelles und LÖWENPARK-Seite; die verlinken jetzt
+direkt auf Instagram.
 
 **`build-freiplaetze.py`** — schreibt die Freiplatz-Liste statisch in
 `trainieren/freiplaetze.html`. Die sechs Plätze wurden vorher ausschließlich im
@@ -301,7 +295,7 @@ Der Konsistenz-Teil braucht keine gepflegte Namensliste: er zieht die Namen aus
 Adresse zeigt. Wer einen neuen Partner irgendwo einmal verlinkt, bringt ihn
 damit automatisch in die Prüfung ein.
 
-Bewusst nicht gemeldet: `news/insta-archiv/` (gehört dem n8n-Workflow),
+Bewusst nicht gemeldet:
 Nennungen innerhalb eines Ankertexts, in JavaScript zusammengesetzte Adressen,
 und Namen mit eigener Unterseite, wenn intern dorthin verlinkt wird
 (`INTERNE_SEITE` im Skript — sonst wäre „SPORT VERNETZT" aus der Navigation ein

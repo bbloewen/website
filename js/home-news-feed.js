@@ -66,23 +66,18 @@ document.addEventListener('DOMContentLoaded', function () {
           date: new Date(p.timestamp),
           dateLabel: null,
           // Diese Posts stehen alle noch im laufenden Feed -- Beholds Live-URL
-          // (p.image) ist also gueltig. Die gesicherte Kopie unter
-          // assets/img/insta/ existiert erst nach dem Archivieren (sobald der
-          // Post aus dem Feed faellt); vorher lief der Pfad hierher ins Leere
-          // und zeigte fuer fast jeden Post denselben Platzhalter (Feedback
-          // Marko 25.08.2026). Rueckfall auf die Kopie nur, falls p.image
-          // ausnahmsweise fehlt.
-          image: p.image
-            || (p.persistedUrl ? p.persistedUrl.replace('/news/insta-archiv/', '/assets/img/insta/').replace('.html', '.jpg') : ''),
+          // (p.image) ist also gueltig. Die frueher im Repo gesicherte Kopie
+          // unter assets/img/insta/ gibt es nicht mehr; sie gehoerte zu den
+          // Archivseiten, die am 19.10.2026 geloescht wurden.
+          image: p.image || '',
           // titel kommt fertig gekürzt aus dem Workflow (Vorspann abgeschnitten,
           // Unicode-Fettschrift aufgelöst, Handpflege berücksichtigt). Der
           // Rückfall auf die Caption greift nur, solange ein Feed noch ohne
           // titel-Feld ausgeliefert wird.
           headline: p.titel || firstLine(p.caption, 70),
           teaser: firstLine(p.beschreibung || p.caption.split('\n').slice(1).join(' ').trim(), 110) || 'Jetzt ansehen.',
-          // Ohne Archivseite direkt zu Instagram, nicht auf die entfernte
-          // dynamische Detailseite.
-          url: p.persistedUrl || p.permalink,
+          // Immer direkt zu Instagram -- eigene Seiten je Post gibt es nicht mehr.
+          url: p.permalink,
           external: true,
           badge: badge
         };

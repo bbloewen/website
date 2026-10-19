@@ -37,28 +37,14 @@ PARTIALS = {
     "footer": REPO / "partials" / "footer.html",
 }
 
-# news/insta-archiv/ gehört dem n8n-Workflow "Website: News - Social Instagram
-# abrufen" und wird von build-head-meta.py deshalb schon ausgenommen. Dieses
-# Skript lief bisher ungefiltert über tracked_html() und schrieb Header/Footer
-# auch in frisch archivierte Insta-Seiten - genau die Luecke, an der
-# build-bildmasse.py den "Freiplaetze nachbauen"-Lauf am 28.09.2026 scheitern
-# liess (dort committet der Workflow nur seine eigene Dateiliste, die
-# insta-archiv-Aenderung blieb ungestaged, `git commit` fand nichts und
-# schlug fehl). spieltagsseiten-nachbauen.yml, das dieses Skript aufruft, hat
-# zwar eine zweite `git diff --cached --quiet`-Bremse und ist deshalb nicht
-# abgestuerzt - unnoetig angefasst wurden die Insta-Seiten trotzdem.
+# Die Insta-Archivseiten unter news/insta-archiv/ wurden am 19.10.2026 geloescht
+# (Marko: seit wir genug eigene News schreiben, reicht der Feed in der Seitenspalte;
+# die 30 duennen Seiten machten ein Viertel des Google-Index aus und rankten
+# stellenweise statt der echten Inhaltsseiten). Die Ausnahmen, die sie hier frueher
+# aussparten, sind damit entfallen.
 # Spieltagsinfo-Ausgaben sind eigenstaendige Lese-Seiten (Titelbild-Kopf, eigene
 # Leiste und eigener Fuss, kein Site-Header): tools/optimiere-spieltagsinfo.py.
-# Seit dem 28.09.2026 blieben die Insta-Seiten dadurch allerdings ganz ohne Header
-# und Footer: Der n8n-Workflow legt nur die leeren Platzhalter an, gefuellt hat sie
-# bis dahin dieses Skript. Am 12.10.2026 standen 15 von 27 Archivseiten ohne
-# Navigation live, die uebrigen 12 mit einem eingefrorenen Stand (noch "Waid-Loewen").
-# Deshalb jetzt: in den gezielten GitHub-Laeufen weiter ueberspringen, im kompletten
-# Lauf (tools/bauen.sh, --auch-insta) mitnehmen. bauen.sh laeuft lokal und in
-# news-veroeffentlichen.yml, und das committet mit `git add -A` -- dort kann keine
-# Datei ungestaged liegen bleiben.
 SKIP_IMMER = ("saison/profis/gameday/spieltagsinfo/ausgabe-",)
-SKIP_OHNE_FLAG = ("news/insta-archiv/",)
 
 
 def block(name, inhalt):
@@ -89,15 +75,13 @@ def apply_partial(text, name, inhalt):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true")
-    ap.add_argument("--auch-insta", action="store_true",
-                    help="Header/Footer auch in news/insta-archiv/ schreiben (kompletter Lauf)")
     args = ap.parse_args()
 
     inhalte = {n: p.read_text(encoding="utf-8") for n, p in PARTIALS.items()}
     geaendert, unveraendert, probleme = [], [], []
 
     for rel in tracked_html():
-        ueberspringen = SKIP_IMMER if args.auch_insta else SKIP_IMMER + SKIP_OHNE_FLAG
+        ueberspringen = SKIP_IMMER
         if rel.startswith(ueberspringen):
             continue
         pfad = REPO / rel

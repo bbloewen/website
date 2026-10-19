@@ -326,7 +326,6 @@
             </div>
           </div>
           <div class="info-tile" style="text-align:center">
-            <a class="card-link" href="/news/instagram-archiv.html">Alle Beiträge im Archiv <i data-lucide="arrow-right" class="icon-14"></i></a>
           </div>
         </aside>
         <div class="aktuelles-newsletter card" style="padding:28px;text-align:center">
@@ -531,15 +530,13 @@
 
   // Diese Posts stehen alle noch im laufenden Feed -- Beholds Live-URL (p.image)
   // ist also gueltig und immer aktuell. Die gesicherte Kopie unter
-  // assets/img/insta/ existiert erst, sobald ein Post aus dem Feed faellt und
-  // archiviert wird; bis dahin haette der Pfad hierher gezeigt und waere ins
-  // Leere gelaufen (onerror-Rueckfall auf dasselbe Platzhalterbild fuer fast
-  // jeden Post, Feedback Marko 25.08.2026). Rueckfall auf die Kopie bleibt fuer
-  // den (aktuell nie eintretenden) Fall, dass p.image mal fehlt.
+  // Das Bild kommt direkt aus dem Behold-Feed. Die frueher im Repo gesicherte
+  // Kopie unter assets/img/insta/ gibt es nicht mehr -- sie war nur fuer die
+  // Archivseiten noetig, und die sind seit 19.10.2026 geloescht. Die Boxen
+  // zeigen ohnehin nur Posts, die aktuell im Feed stehen, deren Behold-URL
+  // also gueltig ist.
   function instaImage(p) {
-    if (p.image) return p.image;
-    if (!p.persistedUrl) return '/assets/img/share/og-default.jpg';
-    return p.persistedUrl.replace('/news/insta-archiv/', '/assets/img/insta/').replace('.html', '.jpg');
+    return p.image || '/assets/img/share/og-default.jpg';
   }
 
   function renderInstaSidebar(containerId, feedData) {
@@ -548,14 +545,15 @@
       .slice(0, 10);
     var container = document.getElementById(containerId);
     container.innerHTML = posts.map(function (p) {
-      // Auf die statische Archivseite verlinken, nicht auf die frühere
-      // dynamische Detailseite: nur die Archivseite ist indexierbar. Fehlt sie
-      // (Post ohne Archivseite), führt der Link direkt zu Instagram statt ins Leere.
-      var url = p.persistedUrl || p.permalink;
-      // onerror-Rückfall, damit eine fehlende Bildkopie kein kaputtes Bildsymbol zeigt
+      // Der Link führt zum Beitrag auf Instagram. Bis 19.10.2026 zeigte er auf
+      // eine eigene Archivseite je Post; die sind gelöscht, weil wir inzwischen
+      // genug eigene News schreiben und die 30 dünnen Seiten im Google-Index
+      // mit den echten Inhaltsseiten konkurrierten (Marko).
+      var url = p.permalink;
+      // onerror-Rückfall, damit ein verfallenes Feed-Bild kein kaputtes Bildsymbol zeigt
       // titel kommt fertig gekürzt aus dem Workflow; Rückfall nur für Feeds ohne titel-Feld
       var text = p.titel || firstLine(p.caption, 90);
-      return '<a class="insta-sidebar-item" href="' + url + '"><img loading="lazy" src="' + instaImage(p) + '" alt="" onerror="this.onerror=null;this.src=\'/assets/img/share/og-default.jpg\'" /><span>' + text + '</span></a>';
+      return '<a class="insta-sidebar-item" href="' + url + '" target="_blank" rel="noopener"><img loading="lazy" src="' + instaImage(p) + '" alt="" onerror="this.onerror=null;this.src=\'/assets/img/share/og-default.jpg\'" /><span>' + text + '</span></a>';
     }).join('');
   }
 
