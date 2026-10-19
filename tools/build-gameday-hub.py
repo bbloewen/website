@@ -370,8 +370,9 @@ WISSENSWERTES_HTML = """      <span class="eyebrow" style="display:block;margin-
 # Der Kachel-Text zur Platzwahl haengt davon ab, ob das Einzelticket mit Sitzwahl verkauft wird (SITZWAHL_STANDARD).
 SITZ_KACHEL = {
     True: ("Dein Sitzplatz",
-           'Beim Einzelticket suchst du dir deinen <strong>Sitzplatz</strong> selbst aus: Block antippen, freie Plätze wählen, fertig. '
-           'Dein Platz steht auf dem Ticket und ist für dich reserviert. Wer die ganze Saison auf demselben Platz sitzen möchte, nimmt die '
+           'In den besten Bereichen suchst du dir deinen <strong>Sitzplatz</strong> selbst aus: Block B, Block E, Courtside (CS), Fanblock und VIP. '
+           'Block antippen, freie Plätze wählen, fertig. Dein Platz steht auf dem Ticket und ist für dich reserviert. '
+           'In allen anderen Blöcken wählst du frei innerhalb deines gebuchten Blocks. Wer die ganze Saison auf demselben Platz sitzen möchte, nimmt die '
            '<a href="/tickets/dauerkarte.html">Dauerkarte</a>. Stehplätze haben keinen festen Platz.'),
     False: ("Vorteile",
             'Einen <strong>festen Sitzplatz</strong> gibt es ab dieser Saison nicht mehr beim Einzelticket — nur noch mit der Dauerkarte. '
@@ -479,7 +480,7 @@ def kauf_bereich(aktuell, kommt, heute):
   </section>
 
   <script src="/js/voucher-utils.js?v=1786873000"></script>
-  <script src="/js/seat-picker.js?v=1792353117"></script>
+  <script src="/js/seat-picker.js?v=1792395620"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {{
       var game = {game_json};
@@ -490,8 +491,12 @@ def kauf_bereich(aktuell, kommt, heute):
          die alte Blockwahl zurueck. */
       var sitzwahl = {'true' if SITZWAHL_STANDARD else 'false'} ? !/[?&]sitzwahl=0/.test(location.search) : /[?&]sitzwahl=1/.test(location.search);
       var picker = new SeatPicker(document.getElementById('seatplan-root'), {{
-        mode: sitzwahl ? 'seats' : 'blocks',
-        einzelticket: sitzwahl,
+        mode: 'blocks',
+        /* Mischmodell (Marko, 19.10.2026): Sitzwahl nur in B, E, Courtside (CS), Fanblock und VIP, alle anderen
+           Bereiche bleiben freie Platzwahl im Block. */
+        seatZone: sitzwahl ? function (zoneId, category) {{
+          return category === 'Fanblock' || category === 'VIP' || category === 'C unten' || zoneId === 'B' || zoneId === 'E';
+        }} : null,
         nachwuchsBeitrag: true,
         nachwuchsAmount: 2,
         planUrl: '/assets/seating/riethsporthalle-seatingplan.json?v=1786585000',

@@ -315,7 +315,7 @@
             <div class="tile-icon"><i data-lucide="armchair"></i></div>
             <h3 class="t-h4">Dein Sitzplatz</h3>
           </div>
-          <p class="t-body-sm">Beim Einzelticket suchst du dir deinen <strong>Sitzplatz</strong> selbst aus: Block antippen, freie Plätze wählen, fertig. Dein Platz steht auf dem Ticket und ist für dich reserviert. Wer die ganze Saison auf demselben Platz sitzen möchte, nimmt die <a href="/tickets/dauerkarte.html">Dauerkarte</a>. Stehplätze haben keinen festen Platz.</p>
+          <p class="t-body-sm">In den besten Bereichen suchst du dir deinen <strong>Sitzplatz</strong> selbst aus: Block B, Block E, Courtside (CS), Fanblock und VIP. Block antippen, freie Plätze wählen, fertig. Dein Platz steht auf dem Ticket und ist für dich reserviert. In allen anderen Blöcken wählst du frei innerhalb deines gebuchten Blocks. Wer die ganze Saison auf demselben Platz sitzen möchte, nimmt die <a href="/tickets/dauerkarte.html">Dauerkarte</a>. Stehplätze haben keinen festen Platz.</p>
         </div>
         <div class="info-tile info-tile-row info-tile-row-divided">
           <div class="info-tile-row-head">
@@ -370,7 +370,7 @@
   </section>
 
   <script src="/js/voucher-utils.js?v=1786873000"></script>
-  <script src="/js/seat-picker.js?v=1792353117"></script>
+  <script src="/js/seat-picker.js?v=1792395620"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       var game = {"gegner": "Culture City Weimar", "datum": "08.11.2026", "zeit": "17:00", "subeventId": 16, "stehplatzBuchbar": false, "zahlungPausiert": false};
@@ -381,8 +381,12 @@
          die alte Blockwahl zurueck. */
       var sitzwahl = true ? !/[?&]sitzwahl=0/.test(location.search) : /[?&]sitzwahl=1/.test(location.search);
       var picker = new SeatPicker(document.getElementById('seatplan-root'), {
-        mode: sitzwahl ? 'seats' : 'blocks',
-        einzelticket: sitzwahl,
+        mode: 'blocks',
+        /* Mischmodell (Marko, 19.10.2026): Sitzwahl nur in B, E, Courtside (CS), Fanblock und VIP, alle anderen
+           Bereiche bleiben freie Platzwahl im Block. */
+        seatZone: sitzwahl ? function (zoneId, category) {
+          return category === 'Fanblock' || category === 'VIP' || category === 'C unten' || zoneId === 'B' || zoneId === 'E';
+        } : null,
         nachwuchsBeitrag: true,
         nachwuchsAmount: 2,
         planUrl: '/assets/seating/riethsporthalle-seatingplan.json?v=1786585000',
@@ -445,7 +449,7 @@
   <section class="section section-dark">
     <div class="container">
       <div class="spiel-band">
-        <div class="spiel-band-media"><a href="/saison/profis/gameday/spieltagsinfo/ausgabe-2/" tabindex="-1" aria-hidden="true"><img loading="lazy" decoding="async" src="/assets/spieltagsinfo/ausgabe-2/vorschau.webp" alt="" /></a></div>
+        <div class="spiel-band-media"><a href="/saison/profis/gameday/spieltagsinfo/ausgabe-2/" tabindex="-1" aria-hidden="true"><img loading="lazy" decoding="async" src="/assets/spieltagsinfo/ausgabe-2/vorschau.webp" width="480" height="320" alt="" /></a></div>
         <div class="spiel-band-body">
           <span class="eyebrow">Spieltagsinfo · Ausgabe 2 · Saison 2026/27</span>
           <h2 class="t-h2">Die aktuelle Spieltagsinfo</h2>

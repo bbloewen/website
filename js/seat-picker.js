@@ -234,6 +234,11 @@
        zusaetzlich seatGuid), damit Preisberechnung, Gutscheine und Betragspruefung dort
        unveraendert bleiben. Stehplaetze haben keinen Sitz und laufen ueber standingQty. */
     this.einzelticket = !!opts.einzelticket;
+    /* Mischmodell (Marko, 19.10.2026): Modus "blocks" (freie Platzwahl im Block) plus Sitzwahl nur in den
+       Bereichen, fuer die opts.seatZone(zoneId, category) true liefert (B, E, CS, Fanblock, VIP). Diese Kacheln
+       oeffnen das Sitzdetail wie im Modus "seats", alle anderen bleiben Block + Anzahl. */
+    this.seatZoneFn = typeof opts.seatZone === 'function' ? opts.seatZone : null;
+    this.mixed = this.mode === 'blocks' && !!this.seatZoneFn && !opts.readonly;
     this.standingQty = 0;
     this.pretixEvent = opts.pretixEvent || null; // Event-Slug fuer die Gutschein-Pruefung (z.B. "saison2627")
     // pretix-Item-ID -> unsere Kategorie-Bezeichnung, z.B. {9:"VIP",7:"Kategorie I",8:"Kategorie II"} —
@@ -329,7 +334,8 @@
           if (c[t] > 0 && tarifOk(t)) units.push({ qty: c[t], unitPrice: blockTarifPrice(c.priceInfo, t) });
         });
       });
-    } else {
+    }
+    if (this.mode !== 'blocks' || this.mixed) {
       Object.keys(this.selected).forEach(function (guid) {
         var s = self.selected[guid];
         if (!allUnits && categories.indexOf(s.category) === -1) return;
@@ -554,7 +560,7 @@
      bekannt war. Kommt sie an und ist der Platz schon weg, fliegt er aus der Auswahl —
      lieber ein sichtbarer Hinweis als eine Bestellung, die im Checkout scheitert. */
   SeatPicker.prototype._dropTakenSelections = function () {
-    if (this.mode !== 'seats') return;
+    if (this.mode !== 'seats' && !this.mixed) return;
     var self = this;
     var entfernt = [];
     Object.keys(this.selected).forEach(function (guid) {
@@ -865,6 +871,10 @@
     this.root.querySelectorAll('.seatplan-mobile-tile[data-zone], .seatplan-mobile-standing[data-zone]').forEach(function (btn) {
       btn.addEventListener('click', function (e) {
         var key = btn.dataset.zone;
+        if (self.mixed) {
+          var mk = splitZoneKey(key);
+          if (self._isSeatZone(mk.zoneId, mk.category)) { self._openZoneDetail(mk.zoneId, mk.category); return; }
+        }
         if (self.mode === 'blocks') {
           // Jede kaufbare Kategorie hat jetzt ihre eigene Kachel (data-zone bereits
           // der zusammengesetzte Schlüssel "zoneId::category", bzw. nur "zoneId" bei
@@ -1165,6 +1175,16 @@
      (09.08.2026) sind das eigenständige, separat anzeigbare Bereiche, keine gemeinsame
      Block-Detailansicht mehr. Schlüssel-Format wie überall: "zoneId" bei genau einer
      kaufbaren Kategorie, sonst "zoneId::category" (s. splitZoneKey). */
+  SeatPicker.prototype._isSeatZone = function (zoneId, category) {
+    if (!this.mixed || zoneId === 'STEHPLATZ' || zoneId === 'ROLLSTUHL') return false;
+    var cat = category;
+    if (!cat) {
+      var pc = this._purchasableCategories(zoneId);
+      cat = pc.length === 1 ? pc[0].category : null;
+    }
+    return !!this.seatZoneFn(zoneId, cat);
+  };
+
   SeatPicker.prototype._zoneRing = function () {
     var self = this;
     var ring = [];
@@ -1172,9 +1192,11 @@
       var purchasable = self._purchasableCategories(id);
       if (!purchasable.length) return;
       if (purchasable.length === 1) {
-        ring.push(id);
+        if (!self.mixed || self._isSeatZone(id, purchasable[0].category)) ring.push(id);
       } else {
-        purchasable.forEach(function (p) { ring.push(id + '::' + p.category); });
+        purchasable.forEach(function (p) {
+          if (!self.mixed || self._isSeatZone(id, p.category)) ring.push(id + '::' + p.category);
+        });
       }
     });
     return ring;
@@ -2126,7 +2148,7 @@
      wie „Abbrechen": die Vormerkung wird verworfen, nicht stillschweigend übernommen —
      ein Klick daneben oder ESC ist kein bewusstes Bestätigen. */
   SeatPicker.prototype.closeDetail = function () {
-    if (this.mode === 'seats' && this.mobileZoneId) {
+    if ((this.mode === 'seats' || this.mixed) && this.mobileZoneId) {
       this.pendingSeats = null;
       this.mobileZoneId = null;
       this.mobileCategory = null;
@@ -2139,7 +2161,7 @@
      wechseln, Modus "blocks" bleibt immer in der Übersicht (freie Platzwahl, kein
      Sitzdetail nötig). */
   SeatPicker.prototype._render = function () {
-    if (this.mode === 'seats' && this.mobileZoneId) {
+    if ((this.mode === 'seats' || this.mixed) && this.mobileZoneId) {
       this._renderMobileZoneDetail();
     } else {
       if (this.detailBackdropEl) this.detailBackdropEl.classList.remove('open');
@@ -2168,7 +2190,7 @@
 
     var wrap = document.createElement('div');
     wrap.className = 'seatplan-block';
-    var blockMode = this.mode === 'blocks';
+    var blockMode = this.mode === 'blocks' && !this.mixed;
     var leading = isLeadingEdge(zone);
 
     var gridWrap = document.createElement('div');
@@ -2559,6 +2581,7 @@
      standardmäßig aktiviert, mit Opt-out-Checkbox. Wird nur angezeigt, wenn der
      Warenkorb nicht leer ist. Gemeinsam für "seats"- und "blocks"-Modus. */
   SeatPicker.prototype._appendNachwuchsRow = function () {
+    if (this._skipExtras) return;
     var self = this;
     if (!this.nachwuchsBeitrag || this._voucherIsFullComp()) return;
     var nwRow = document.createElement('label');
@@ -2614,6 +2637,7 @@
      ist. Die Prüfung läuft serverseitig (VOUCHER_CHECK_URL, echte pretix-Daten),
      deshalb async mit kurzem Lade-Zustand statt eines sofortigen Ergebnisses. */
   SeatPicker.prototype._appendVoucherRow = function () {
+    if (this._skipExtras) return;
     var self = this;
     var wrap = document.createElement('div');
     wrap.className = 'seatplan-voucher-row';
@@ -2718,6 +2742,7 @@
      mitgegeben und dort im Notiz-Feld vorausgefüllt. Gemeinsam für "seats"-
      und "blocks"-Modus, wie Nachwuchsbeitrag und Gutschein. */
   SeatPicker.prototype._appendNotizRow = function () {
+    if (this._skipExtras) return;
     var self = this;
     var wrap = document.createElement('div');
     wrap.className = 'seatplan-notiz-row';
@@ -2732,8 +2757,68 @@
 
   SeatPicker.prototype._renderCart = function () {
     if (this.readonly) return;
+    if (this.mixed) { this._renderCartMixed(); return; }
     if (this.mode === 'blocks') { this._renderCartBlocks(); return; }
+    this._renderCartSeats();
+  };
 
+  /* Mischmodell: Warenkorb aus den Blockzeilen (freie Platzwahl) UND den gewaehlten Sitzen. Die beiden
+     bestehenden Renderer schreiben je in einen eigenen Behaelter, danach wird zusammengesetzt - so bleibt
+     die gesamte Tarif-/Begleitpersonen-/Kapazitaetslogik beider Modi unveraendert. */
+  SeatPicker.prototype._renderCartMixed = function () {
+    var self = this;
+    var real = { cart: this.cartEl, total: this.totalEl, cta: this.ctaEl };
+    var blocksBox = document.createElement('div');
+    var seatsBox = document.createElement('div');
+    var dummyTotal = document.createElement('span');
+    var dummyCta = document.createElement('button');
+    this._skipExtras = true;
+    this.totalEl = dummyTotal;
+    this.ctaEl = dummyCta;
+    try {
+      this.cartEl = blocksBox; this._renderCartBlocks();
+      this.cartEl = seatsBox; this._renderCartSeats();
+    } finally {
+      this._skipExtras = false;
+      this.cartEl = real.cart; this.totalEl = real.total; this.ctaEl = real.cta;
+    }
+    var nSeats = Object.keys(this.selected).length;
+    var blockTotal = 0, nBlocks = 0;
+    Object.keys(this.blockCounts).forEach(function (key) {
+      var c = self.blockCounts[key];
+      BLOCK_TARIFS.forEach(function (t) {
+        var n = c[t] || 0;
+        if (!n) return;
+        nBlocks += n;
+        blockTotal += n * blockTarifPrice(c.priceInfo, t);
+      });
+    });
+    var seatTotal = Object.keys(this.selected).reduce(function (sum, g) { return sum + self.selected[g].price; }, 0);
+    var any = nBlocks + nSeats > 0;
+
+    this.cartEl.innerHTML = '';
+    var emptyShown = false;
+    [blocksBox, seatsBox].forEach(function (box) {
+      Array.prototype.slice.call(box.children).forEach(function (el) {
+        if (el.classList.contains('seatplan-cart-empty')) {
+          if (!any && !emptyShown) { emptyShown = true; self.cartEl.appendChild(el); }
+          return;
+        }
+        self.cartEl.appendChild(el);
+      });
+    });
+    if (any) {
+      this._appendNachwuchsRow();
+      this._appendVoucherRow();
+      this._appendNotizRow();
+    }
+    this.ctaEl.disabled = !any;
+    var total = blockTotal + seatTotal + this._nachwuchsAmountFor(any);
+    total -= this._voucherDiscount(total);
+    this.totalEl.textContent = fmtEUR(total) + ' €';
+  };
+
+  SeatPicker.prototype._renderCartSeats = function () {
     var self = this;
     var guids = Object.keys(this.selected);
     var standingQty = this._standingEnabled() ? this.standingQty : 0;
@@ -2909,7 +2994,7 @@
   /* Stehplaetze im Einzelticket mit Sitzwahl: kein Sitz, nur eine Menge (wie im Modus
      "blocks" ueber die Pseudo-Zone STEHPLATZ, hier als eigene Zeile unter den Sitzen). */
   SeatPicker.prototype._standingEnabled = function () {
-    return this.einzelticket && !!this.standing && this.standingPrice > 0 && this.standingBookable;
+    return !this.mixed && this.einzelticket && !!this.standing && this.standingPrice > 0 && this.standingBookable;
   };
 
   SeatPicker.prototype._appendStandingRow = function () {
@@ -2960,6 +3045,7 @@
       // Block C: Kategorie II/C unten je einer; Block D/E/F genau einer).
       var multi = purchasable.length > 1;
       purchasable.forEach(function (p) {
+        if (self._isSeatZone(id, p.category)) return;   // Sitzwahl-Bereiche nur ueber den Sitzplan
         var key = multi ? id + '::' + p.category : id;
         entries.push({ value: key, label: optionLabel(id, p, multi) });
       });
@@ -3186,6 +3272,18 @@
       // durch denselben Loop oben mit — kein eigener Line-Typ, der Bestell-Workflow
       // behandelt sie als ganz normale Kategorie (s. #222, Marko: "nichts Eigenes
       // erfinden ... integriert sich hundertprozentig in den Bestellworkflow").
+      if (this.mixed) {
+        Object.keys(this.selected).forEach(function (guid) {
+          var s = self.selected[guid];
+          lines.push({
+            label: s.zoneLabel + ' · Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber + ' · ' + (DK_TARIF_LABELS[s.tarif] || 'Normalpreis'),
+            qty: 1, unitPrice: s.price, lineTotal: s.price,
+            type: 'block', zoneLabel: s.zoneLabel, category: s.category, zoneId: s.zoneId, tarif: s.tarif,
+            seatGuid: guid, rowLabel: s.rowLabel, seatNumber: s.seatNumber
+          });
+          total += s.price;
+        });
+      }
       var ticketCount = lines.reduce(function (sum, l) { return sum + l.qty; }, 0);
       var nachwuchsAmount = this._nachwuchsAmountFor(ticketCount > 0);
       if (nachwuchsAmount > 0) {

@@ -160,7 +160,8 @@
      dem Einzelticket im Vorverkauf. Warenkorb des Pickers wird hier gross gezeigt, die eigenen
      Tarif-Kacheln der Blockwahl entfallen. */
   body.ak-seats #seatplan-cart { display: block; margin: 4px 0 8px; }
-  body.ak-seats #ak-tarif-panels { display: none; }
+  /* Block-Zeilen (freie Platzwahl) zeigt die Seite ueber die grossen Tarif-Kacheln, im Picker-Warenkorb bleiben nur die gewaehlten Sitze. */
+  body.ak-seats .seatplan-cart-item:has([data-cart-step]), body.ak-seats .seatplan-direct-add-row { display: none; }
   body.ak-seats .seatplan-voucher-row, body.ak-seats .seatplan-notiz-row { display: none; }
   body.ak-seats .seatplan-cart-empty { display: none; }
   body.ak-seats .seatplan-cart-item { font-size: 1.15rem; padding: 14px 16px; align-items: center; gap: 12px; }
@@ -172,7 +173,6 @@
   body.ak-seats .seatplan-stepper strong { font-size: 1.4rem; min-width: 28px; text-align: center; }
   .ak-mehr { width: 100%; font-size: 1.2rem; padding: 16px; margin: 4px 0 12px; }
   .ak-mehr[hidden] { display: none !important; }
-  #ak-familie:empty { display: none; }
   #ak-status-hinweis[hidden] { display: none !important; }
   /* Gutschein einloesen (Marko, 18.10.2026): Code wird getippt, der Server prueft und rechnet den Preis */
   #ak-gutschein { margin: 14px 0 6px; display: flex; flex-direction: column; gap: 10px; }
@@ -200,7 +200,6 @@
   <p id="seatplan-status-note" class="t-caption" hidden style="margin:10px 0 0;color:#b3392c;font-size:1.05rem"></p>
   <div id="seatplan-cart"></div>
   <button type="button" class="btn btn-outline-orange ak-mehr" id="ak-mehr" hidden>+ Weitere Plätze wählen</button>
-  <div id="ak-familie"></div>
   <div id="ak-gutschein" hidden>
     <button type="button" class="btn btn-outline-orange ak-gutschein-btn" id="ak-gutschein-btn">Gutschein einlösen</button>
     <div class="ak-gutschein-form" id="ak-gutschein-form" hidden>
@@ -235,7 +234,7 @@
   </div>
 </div>
 
-<script src="/js/seat-picker.js?v=1792353117"></script>
+<script src="/js/seat-picker.js?v=1792395620"></script>
 <script src="opi-bridge.js?v=7"></script>
 <script>
   (function () {
@@ -461,7 +460,6 @@ document.addEventListener('DOMContentLoaded', function () {
   // Sitzwahl ist Standard (Marko, 18.10.2026); ?sitzwahl=0 holt die alte Blockwahl zurueck.
   var sitzwahl = !/[?&]sitzwahl=0/.test(location.search);
   document.body.classList.toggle('ak-seats', sitzwahl);
-  var familienQty = 0;      // Familienpass / Schlemmerblock: eigene Zeile ohne Sitz (Sitzwahl-Modus)
   var planOffen = false;    // Sitzwahl: Plan trotz gewaehlter Plaetze wieder anzeigen
   var letzteAnzahl = 0;
 
@@ -541,7 +539,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
       host.appendChild(panel);
     });
-    if (Object.keys(picker.blockCounts).length) renderAddKategorie(host);
+    if (sitzwahl || Object.keys(picker.blockCounts).length) renderAddKategorie(host);
   }
 
   // "+ weitere Kategorie"-Dropdown (Marko, 01.10.2026: Rollstuhlplatz gehoert auf die
@@ -568,36 +566,13 @@ document.addEventListener('DOMContentLoaded', function () {
     return !!document.querySelector('#seatplan-cart .seatplan-cart-item');
   }
 
-  function seatsHatTickets() {
-    return !!picker && (Object.keys(picker.selected).length > 0 || (picker._standingEnabled() && picker.standingQty > 0) || familienQty > 0);
-  }
-
-  function renderFamilie() {
-    var host = document.getElementById('ak-familie');
-    if (!sitzwahl || !picker || !picker.prices['Familienpass']) { host.innerHTML = ''; return; }
-    var frei = picker._blockFreeCount(FAMILIENPASS_ZONE, 'Familienpass');
-    host.innerHTML =
-      '<div class="ak-tarif-tile">' +
-        '<span class="ak-tarif-label">' + FAMILIENPASS_LABEL +
-          '<br><span class="ak-tarif-price">0,00 € je Karte (100 % Rabatt), gilt in Block A, ohne festen Platz</span></span>' +
-        '<div class="ak-stepper">' +
-          '<button type="button" data-fam="-1" aria-label="weniger">−</button>' +
-          '<span class="ak-step-count">' + familienQty + '</span>' +
-          '<button type="button" data-fam="1" aria-label="mehr">+</button>' +
-        '</div>' +
-      '</div>';
-    host.querySelectorAll('[data-fam]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        familienQty = Math.max(0, Math.min(Math.max(0, frei), familienQty + parseInt(btn.dataset.fam, 10)));
-        picker._renderCart();   // loest den Warenkorb-Beobachter aus -> syncSichtbarkeit
-      });
-    });
-  }
-
   function syncSichtbarkeit() {
     if (sitzwahl) {
-      var hat = seatsHatTickets();
-      var anzahl = Object.keys(picker.selected).length + (picker._standingEnabled() ? picker.standingQty : 0) + familienQty;
+      // Mischmodell: Sitzwahl in B/E/CS/Fanblock/VIP (Picker-Warenkorb), freie Platzwahl in den uebrigen
+      // Bloecken ueber die grossen Tarif-Kacheln. Nach der Auswahl verschwindet der Plan, "+ Weitere Plaetze"
+      // holt ihn zurueck.
+      var hat = cartHatTickets();
+      var anzahl = document.querySelectorAll('#seatplan-cart .seatplan-cart-item').length;
       if (anzahl !== letzteAnzahl) { letzteAnzahl = anzahl; planOffen = false; }
       var planZeigen = !hat || planOffen;
       document.getElementById('ak-blockwahl').classList.toggle('ak-hidden', !planZeigen);
@@ -605,12 +580,9 @@ document.addEventListener('DOMContentLoaded', function () {
       mehr.hidden = !hat;
       mehr.textContent = planOffen ? 'Zurück zur Übersicht' : '+ Weitere Plätze wählen';
       document.getElementById('seatplan-cta').hidden = !hat;
-      // Der Picker sperrt den Knopf, solange keine Sitze gewaehlt sind; Familienpass allein genuegt aber.
-      if (hat && familienQty > 0) document.getElementById('seatplan-cta').disabled = false;
       document.getElementById('ak-gesamt').hidden = !hat;
-      renderFamilie();
+      renderTarifPanels();
       updatePayLabels();
-      gutscheinNachfuehren();
       return;
     }
     // Genau ein Block pro Abendkassen-Verkauf (Marko, 01.10.2026: "unrealistisch, dass
@@ -636,7 +608,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // "Karte" heisst "Ticket ausgeben (kostenlos)" und loest kein Terminal aus (s. startVerkauf).
   function updatePayLabels() {
     var gratis = false;
-    if (picker && (sitzwahl ? seatsHatTickets() : cartHatTickets())) {
+    if (picker && cartHatTickets()) {
       try { gratis = !(effektivGesamt(picker.getSummary()) > 0); } catch (e) {}
     }
     document.getElementById('seatplan-cta').textContent = gratis ? 'Ticket ausgeben (kostenlos)' : 'Karte';
@@ -807,18 +779,20 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('ak-erneut').style.display = 'none';
     document.getElementById('ak-tarif-panels').innerHTML = '';
     document.getElementById('ak-blockwahl').classList.remove('ak-hidden');
-    document.getElementById('ak-familie').innerHTML = '';
     document.getElementById('ak-mehr').hidden = true;
     document.getElementById('seatplan-status-note').hidden = true;
-    familienQty = 0; planOffen = false; letzteAnzahl = 0;
+    planOffen = false; letzteAnzahl = 0;
     gutschein = null; gutscheinFormOffen = false; gutscheinSeq++;
     document.getElementById('ak-gutschein').hidden = true;
     document.getElementById('ak-gutschein-code').value = '';
     zeigeGutscheinFehler('');
 
     picker = new SeatPicker(document.getElementById('seatplan-root'), {
-      mode: sitzwahl ? 'seats' : 'blocks',
-      einzelticket: sitzwahl,
+      mode: 'blocks',
+      // Mischmodell (Marko, 19.10.2026): Sitzwahl nur in B, E, Courtside (CS), Fanblock und VIP.
+      seatZone: sitzwahl ? function (zoneId, category) {
+        return category === 'Fanblock' || category === 'VIP' || category === 'C unten' || zoneId === 'B' || zoneId === 'E';
+      } : null,
       headline: 'Block wählen',
       nachwuchsBeitrag: false,
       planUrl: '/assets/seating/riethsporthalle-seatingplan.json',
@@ -842,19 +816,6 @@ document.addEventListener('DOMContentLoaded', function () {
       detailRootEl: sitzwahl ? document.getElementById('seatplan-detail-root') : null,
       statusNoteEl: document.getElementById('seatplan-status-note')
     });
-    if (sitzwahl) {
-      // Familienpass / Schlemmerblock hat keinen Sitz und steht nicht im Picker-Zustand: als eigene Zeile anhaengen.
-      var origSummary = picker.getSummary.bind(picker);
-      picker.getSummary = function () {
-        var sum = origSummary();
-        if (familienQty > 0) {
-          sum.lines.push({ label: FAMILIENPASS_LABEL, qty: familienQty, unitPrice: 0, lineTotal: 0, type: 'block',
-            zoneLabel: 'Block A', category: 'Familienpass', zoneId: 'FAMILIENPASS', tarif: 'normal' });
-        }
-        return sum;
-      };
-    }
-
     // Beobachtet den (unsichtbaren) nativen Warenkorb: dort schreibt SeatPicker bei JEDER
     // Mengenaenderung hinein (auch ueber unsere eigenen Stepper, da die am selben
     // picker-Zustand haengen) - daraus leiten wir Sichtbarkeit + die grossen Kacheln ab,
