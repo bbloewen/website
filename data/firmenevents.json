@@ -1,0 +1,52 @@
+{
+  "hinweis": "Firmenevent-Einladungen: Ein Sponsor lädt seine Kunden oder Mandanten zu einem Heimspiel ein und trägt die Kosten. tools/build-basketballevent.py baut daraus partner/basketballevent-einladung.html (Landingpage mit Anmeldeformular und Team-Umfrage) und partner/basketballevent-umfrage.html (Abstimmungsseite). Die Adresse bleibt über alle Aktionen gleich, damit der Link wiederverwendbar ist (Marko, 19.10.2026). Genau eine Aktion hat 'aktiv': true — die steht auf der Seite. Abgelaufene Aktionen bleiben als Beleg stehen, was wann galt. Die Spieldaten (Gegner, Datum, Uhrzeit, Spieltagsseite) kommen über 'spiel' aus data/heimspiele.json und werden hier NICHT doppelt gepflegt. Das Backend liegt in n8n: die fünf Webhooks firmenevent-kontingent, firmenevent-anmeldung, firmenevent-umfrage-erstellen, firmenevent-umfrage-stimme und firmenevent-umfrage-ergebnis bekommen 'aktion' (= slug) mitgeschickt und entscheiden daran über Kontingent, Anmeldeschluss und Empfänger.",
+  "logoHinweis": "logoHoehe in Pixeln. Eine breite Wortmarke (crestcom, 7:1) trägt bei 28, ein kompaktes oder quadratisches Logo (Heiko Kühnst, 1,4:1) braucht 46, sonst ist der Schriftzug darunter nicht mehr lesbar. Ab 40 setzt der Generator zusätzlich die Klasse .cc-sponsor-hoch, die der Pille mehr Luft gibt.",
+  "aktionen": [
+    {
+      "slug": "kuehnst",
+      "aktiv": true,
+      "sponsor": {
+        "name": "Heiko Kühnst Steuerberater",
+        "kurz": "Heiko Kühnst",
+        "logo": "/assets/logos/Logo_Steuerkanzlei-Kuehnst.webp",
+        "logoHoehe": 46,
+        "logoAlt": "Heiko Kühnst Steuerberater",
+        "website": "https://www.stb-kuehnst.de/",
+        "ansprache": "Mandant",
+        "anspracheMehrzahl": "Mandanten"
+      },
+      "spiel": "2026-11-08",
+      "block": "F",
+      "kategorie": "Kategorie 2",
+      "vipTickets": 2,
+      "maMin": 5,
+      "maMax": 20,
+      "kontingent": 200,
+      "anmeldeschluss": "2026-11-06T14:00",
+      "einlassVorlaufMinuten": 60
+    },
+    {
+      "slug": "crestcom",
+      "aktiv": false,
+      "sponsor": {
+        "name": "crestcom",
+        "kurz": "crestcom",
+        "logo": "/assets/logos/Logo_Crestcom.webp",
+        "logoHoehe": 28,
+        "logoAlt": "crestcom",
+        "website": "http://crestcomleadership.com/de/agent/fuehrungsschule-thueringen/",
+        "ansprache": "Kunde",
+        "anspracheMehrzahl": "Kunden"
+      },
+      "spiel": "2026-10-18",
+      "block": "F",
+      "kategorie": "Kategorie 2",
+      "vipTickets": 2,
+      "maMin": 10,
+      "maMax": 50,
+      "kontingent": 300,
+      "anmeldeschluss": "2026-10-16T14:00",
+      "einlassVorlaufMinuten": 60
+    }
+  ]
+}

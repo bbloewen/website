@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="format-detection" content="telephone=no" />
 <title>Wer kommt mit? Team-Umfrage — Basketball Löwen Erfurt</title>
-<meta name="description" content="Team-Umfrage zur Einladung von crestcom: Wer kommt am 18.10.2026 mit zum Heimspiel der Basketball Löwen Erfurt?" />
+<meta name="description" content="Team-Umfrage zur Einladung von Heiko Kühnst Steuerberater: Wer kommt am 08.11.2026 mit zum Heimspiel der Basketball Löwen Erfurt?" />
 <meta name="robots" content="noindex, follow" />
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png" />
@@ -13,7 +13,19 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1792421228" />
+<link rel="stylesheet" href="/css/site.css?v=1792426719" />
+<!-- Klickmessung je Aktion (Marko, 19.10.2026): Die Adresse der Seite bleibt ueber alle
+     Sponsorenaktionen gleich, darum wuerde GoatCounter sonst alle Aufrufe in einen Topf
+     werfen. Diese Funktion haengt den Marker aus ?ref= an den gemeldeten Pfad; fehlt er,
+     steht der Schluessel der laufenden Aktion da. In der Statistik erscheinen dadurch
+     Zeilen wie "/partner/basketballevent-einladung.html?ref=kuehnst". Muss vor dem
+     GoatCounter-Skript stehen, sonst ist der Treffer schon gezaehlt. -->
+<script>
+window.goatcounter = { path: function (p) {
+  var r = (new URLSearchParams(location.search).get('ref') || 'kuehnst').replace(/[^a-z0-9_-]/gi, '').slice(0, 32);
+  return r ? p + '?ref=' + r : p;
+} };
+</script>
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
@@ -24,7 +36,6 @@
      loeschen, in allen Seiten. -->
 <script src="https://analytics.ahrefs.com/analytics.js" data-key="5TVH543YAI/GzTMbTLbbbg" async></script>
 <!--/ANALYTICS:ahrefs-->
-
 </head>
 <body data-nav-group="partner">
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
@@ -242,18 +253,18 @@
             <ul class="cc-names" id="cc-names"></ul>
           </div>
           <p class="t-body-sm" id="cc-admin-hint" style="margin:0 0 16px"></p>
-          <a class="btn btn-primary btn-lg btn-block" id="cc-admin-go" href="/partner/crestcom-einladung.html#anmeldung">Jetzt anmelden</a>
+          <a class="btn btn-primary btn-lg btn-block" id="cc-admin-go" href="/partner/basketballevent-einladung.html#anmeldung">Jetzt anmelden</a>
           <button type="button" class="btn btn-link" id="cc-refresh" style="margin-top:8px">Ergebnis aktualisieren</button>
         </div>
 
         <div class="cc-vote-card" id="cc-vote-card">
-          <span class="eyebrow">Einladung von crestcom</span>
+          <span class="eyebrow">Einladung von Heiko Kühnst Steuerberater</span>
           <h1 class="t-h2">Hey, wer hat Lust mitzukommen?</h1>
-          <p class="t-body">Unser Unternehmen ist von crestcom zum Heimspiel der Basketball Löwen Erfurt eingeladen. Bitte sagen Sie kurz zu oder ab.</p>
+          <p class="t-body">Unser Unternehmen ist von <a href="https://www.stb-kuehnst.de/" target="_blank" rel="noopener">Heiko Kühnst Steuerberater</a> zum Heimspiel der Basketball Löwen Erfurt eingeladen. Bitte sagen Sie kurz zu oder ab.</p>
           <div class="cc-vote-facts">
-            <span>Sonntag, 18.10.2026 · 17:00 Uhr</span>
-            <span>Riethsporthalle Erfurt, Essener Straße 20</span>
-            <span>Basketball Löwen Erfurt gegen TSG Schöller SI Ravens Reutlingen</span>
+            <span>Sonntag, 08.11.2026 · 17:00 Uhr</span>
+            <span>Riethsporthalle Erfurt, Essener Straße 20, 99089 Erfurt</span>
+            <span>Basketball Löwen Erfurt gegen Culture City Weimar</span>
           </div>
 
           <div id="cc-vote-form">
@@ -283,7 +294,6 @@
     </div>
   </section>
 </main>
-
 <div id="site-footer-placeholder"><!--PARTIAL:footer-->
 <footer class="site-footer">
   <div class="container">
@@ -428,11 +438,13 @@
 <script>
 (function () {
   var API = 'https://ticketing.basketball-loewen.com/webhook/';
+  var AKTION = 'kuehnst';
+  var MA_MIN = 5;
+  var MA_MAX = 20;
   var params = new URLSearchParams(location.search);
   var id = (params.get('u') || '').replace(/[^a-z0-9]/gi, '').slice(0, 20);
   var token = (params.get('k') || '').replace(/[^a-z0-9]/gi, '').slice(0, 40);
   var geladen = Date.now();
-  var card = document.getElementById('cc-vote-card');
   var voteForm = document.getElementById('cc-vote-form');
   var unknown = document.getElementById('cc-vote-unknown');
   var errorBox = document.getElementById('cc-vote-error');
@@ -441,7 +453,7 @@
   if (!id) { zeigeUnbekannt(); return; }
 
   function ergebnis() {
-    fetch(API + 'crestcom-umfrage-ergebnis?id=' + encodeURIComponent(id) + '&k=' + encodeURIComponent(token))
+    fetch(API + 'firmenevent-umfrage-ergebnis?aktion=' + encodeURIComponent(AKTION) + '&id=' + encodeURIComponent(id) + '&k=' + encodeURIComponent(token))
       .then(function (r) { return r.json(); }).then(function (e) {
         if (!e.exists) { zeigeUnbekannt(); return; }
         if (!e.admin) return;
@@ -455,12 +467,14 @@
         var go = document.getElementById('cc-admin-go');
         var hint = document.getElementById('cc-admin-hint');
         if (ja >= 1) {
-          var ma = Math.max(10, Math.min(50, ja));
-          go.href = '/partner/crestcom-einladung.html?ma=' + ma + '&u=' + encodeURIComponent(id) + '#anmeldung';
-          go.textContent = ja >= 10 ? 'Mit ' + ma + ' Mitarbeitenden anmelden' : 'Jetzt anmelden';
-          hint.textContent = ja < 10 ? 'Für die Anmeldung gelten mindestens 10 Mitarbeitende. Die Zahl lässt sich im Formular anpassen.' : 'Die Zahl der Zusagen übernehmen wir ins Formular. Sie können sie dort noch ändern.';
+          var ma = Math.max(MA_MIN, Math.min(MA_MAX, ja));
+          go.href = '/partner/basketballevent-einladung.html?ma=' + ma + '&u=' + encodeURIComponent(id) + '#anmeldung';
+          go.textContent = ja >= MA_MIN ? 'Mit ' + ma + ' Mitarbeitenden anmelden' : 'Jetzt anmelden';
+          hint.textContent = ja < MA_MIN
+            ? 'Für die Anmeldung gelten mindestens ' + MA_MIN + ' Mitarbeitende. Die Zahl lässt sich im Formular anpassen.'
+            : 'Die Zahl der Zusagen übernehmen wir ins Formular. Sie können sie dort noch ändern.';
         } else {
-          go.href = '/partner/crestcom-einladung.html?u=' + encodeURIComponent(id) + '#anmeldung';
+          go.href = '/partner/basketballevent-einladung.html?u=' + encodeURIComponent(id) + '#anmeldung';
           go.textContent = 'Zur Anmeldung';
           hint.textContent = 'Noch keine Zusagen. Teilen Sie den Link der Umfrage noch einmal im Team.';
         }
@@ -479,8 +493,11 @@
       : 'Ihre Absage ist angekommen. Danke für die schnelle Rückmeldung.';
   }
 
+  // Der Schluessel traegt die Aktion, damit eine Stimme aus einer frueheren
+  // Aktion die neue Abstimmung nicht als "schon abgestimmt" ausblendet.
+  var SPEICHER = 'feStimme_' + AKTION + '_' + id;
   try {
-    var frueher = localStorage.getItem('ccStimme_' + id);
+    var frueher = localStorage.getItem(SPEICHER);
     if (frueher) fertig(frueher);
   } catch (err) { /* ohne Speicher einfach abstimmen lassen */ }
 
@@ -490,10 +507,11 @@
       var antwort = btn.getAttribute('data-antwort');
       errorBox.classList.remove('visible');
       Array.prototype.forEach.call(buttons, function (b) { b.disabled = true; });
-      fetch(API + 'crestcom-umfrage-stimme', {
+      fetch(API + 'firmenevent-umfrage-stimme', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          aktion: AKTION,
           umfrage: id,
           name: document.getElementById('cc-vote-name').value.trim(),
           antwort: antwort,
@@ -502,7 +520,7 @@
         })
       }).then(function (r) { return r.json(); }).then(function (a) {
         if (a.ok) {
-          try { localStorage.setItem('ccStimme_' + id, antwort); } catch (err) { /* egal */ }
+          try { localStorage.setItem(SPEICHER, antwort); } catch (err) { /* egal */ }
           fertig(antwort);
           ergebnis();
           return;

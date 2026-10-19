@@ -3166,13 +3166,17 @@ a.training-group-header:hover { color: var(--color-brand-orange); }
 /* Das Menue ragt aus der Spielplan-Karte heraus */
 .fixture-day.card { overflow: visible; }
 
-/* ---------- Landing Page crestcom-Einladung (partner/crestcom-einladung.html, crestcom-umfrage.html) ---------- */
+/* ---------- Landing Page Firmenevent (partner/basketballevent-einladung.html,
+   partner/basketballevent-umfrage.html, gebaut von tools/build-basketballevent.py).
+   Das Praefix .cc- stammt aus der ersten Fassung (crestcom-Einladung 10/2026) und ist
+   geblieben, damit nicht 100 Selektoren umgeschrieben werden muessen; es heisst heute
+   schlicht "company". Die Seite traegt jede weitere Sponsorenaktion. ---------- */
 .icon-24 { width: 24px; height: 24px; }
 .icon-18 { width: 18px; height: 18px; }
 
 /* Hero: Formular direkt im Hero, daher nicht sticky wie die anderen Heroes */
-.hero-photo.hero-crestcom {
-  --hero-photo-url: url('/assets/img/crestcom-einladung-hero.webp');
+.hero-photo.hero-firmenevent {
+  --hero-photo-url: url('/assets/img/heimspiel-hero.webp');
   position: relative; top: auto;
   background-position: center 40%; min-height: 0; display: block;
   padding: clamp(28px, 3.4vw, 44px) 0 clamp(36px, 4vw, 56px);
@@ -3188,13 +3192,20 @@ a.training-group-header:hover { color: var(--color-brand-orange); }
 @media (max-width: 980px) {
   .cc-hero-grid { grid-template-columns: 1fr; grid-template-areas: "intro" "form" "match"; }
 }
-.hero-photo.hero-crestcom h1 { white-space: normal; max-width: 24ch; font-size: clamp(30px, 3.8vw, 50px); line-height: 1.2; margin-top: 18px; }
-.hero-photo.hero-crestcom p.lead { font-size: clamp(16px, 1.5vw, 19px); max-width: 54ch; margin-bottom: 0; }
+.hero-photo.hero-firmenevent h1 { white-space: normal; max-width: 24ch; font-size: clamp(30px, 3.8vw, 50px); line-height: 1.2; margin-top: 18px; }
+.hero-photo.hero-firmenevent p.lead { font-size: clamp(16px, 1.5vw, 19px); max-width: 54ch; margin-bottom: 0; }
 
 .cc-sponsor { display: inline-flex; align-items: center; gap: 14px; background: #fff; border-radius: 999px; padding: 8px 22px 8px 20px; text-decoration: none; box-shadow: 0 6px 20px rgba(0, 18, 45, .25); }
 .cc-sponsor-label { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; font-weight: var(--weight-semibold); color: var(--text-muted); white-space: nowrap; }
-.cc-sponsor img { height: 28px; width: auto; max-width: none; display: block; flex-shrink: 0; }
-@media (max-width: 420px) { .cc-sponsor { gap: 10px; padding: 8px 16px; } .cc-sponsor-label { font-size: 11px; letter-spacing: .04em; } .cc-sponsor img { height: 22px; } }
+/* Die Logohoehe haengt am Zuschnitt des Logos: eine Wortmarke wie crestcom (7:1) traegt bei
+   28px, ein kompaktes Logo wie das von Heiko Kuehnst (1,4:1) waere dann nur 40px breit und
+   nicht mehr lesbar. Die Hoehe steht deshalb je Aktion in data/firmenevents.json und kommt
+   als --cc-logo-hoehe am Element an (Marko, 19.10.2026). */
+.cc-sponsor { --cc-logo-hoehe: 28px; }
+.cc-sponsor img { height: var(--cc-logo-hoehe); width: auto; max-width: none; display: block; flex-shrink: 0; }
+/* Hohe Logos brauchen in der Pille etwas mehr Luft nach oben und unten. */
+.cc-sponsor.cc-sponsor-hoch { padding: 10px 24px 10px 22px; }
+@media (max-width: 420px) { .cc-sponsor { gap: 10px; padding: 8px 16px; } .cc-sponsor.cc-sponsor-hoch { padding: 9px 18px; } .cc-sponsor-label { font-size: 11px; letter-spacing: .04em; } .cc-sponsor img { height: calc(var(--cc-logo-hoehe) * .8); } }
 
 /* Spielinfo als ruhiges Glas-Panel statt vier Kacheln */
 .cc-match { background: rgba(0, 18, 45, .72); border: 1px solid rgba(255, 255, 255, .2); border-radius: var(--radius-lg); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); width: 100%; max-width: 560px; }
