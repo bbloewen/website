@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://basketball-loewen.com/</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-10-19</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
@@ -87,12 +87,12 @@
   </url>
   <url>
     <loc>https://basketball-loewen.com/news/aktuelles.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-10-19</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://basketball-loewen.com/news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-10-19</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -231,8 +231,13 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://basketball-loewen.com/news/artikel/2026-10-18_profis_spielbericht-reutlingen.html</loc>
+    <lastmod>2026-10-19</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://basketball-loewen.com/news/artikel/2026-10-18_profis_vorbericht-reutlingen.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-10-19</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -452,12 +457,12 @@
   </url>
   <url>
     <loc>https://basketball-loewen.com/saison/profis.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-10-19</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://basketball-loewen.com/saison/profis/gameday/</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-10-19</lastmod>
     <priority>0.7</priority>
   </url>
   <url>

@@ -54,8 +54,8 @@
       "lastmod": "2026-09-18"
     },
     "index.html": {
-      "hash": "b710d1d18f7a404f736f40278a755a836294430a",
-      "lastmod": "2026-10-18"
+      "hash": "578c0767682cdfd8f6e3ca22d6ba0c9a12c9182d",
+      "lastmod": "2026-10-19"
     },
     "kontakt.html": {
       "hash": "01033561eccfc4a2b4f1d577c86430b3bd5cd886",
@@ -70,12 +70,12 @@
       "lastmod": "2026-08-08"
     },
     "news/aktuelles.html": {
-      "hash": "7ddffd89ef1a32854426762091a6b56f59f8be23",
-      "lastmod": "2026-10-18"
+      "hash": "b8448a1b0fa1625bbb17c02b94a1605f6a7b2aa3",
+      "lastmod": "2026-10-19"
     },
     "news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html": {
-      "hash": "63ca9a10a24777b1455aa76b048e01aa72cfe89b",
-      "lastmod": "2026-10-18"
+      "hash": "f84ec0b9456b82276e157fe64e1cf0525faff9c5",
+      "lastmod": "2026-10-19"
     },
     "news/artikel/2025-04-29_profis_achtelfinale-aus.html": {
       "hash": "c38eb425968ac35de960a97abce9a1fde0a3192a",
@@ -185,9 +185,13 @@
       "hash": "ac7e75da0a7a6e5736432aa68390ec3f950c875d",
       "lastmod": "2026-10-18"
     },
+    "news/artikel/2026-10-18_profis_spielbericht-reutlingen.html": {
+      "hash": "5337a65e3bbe57516482129c28fefe66ef2f3a11",
+      "lastmod": "2026-10-19"
+    },
     "news/artikel/2026-10-18_profis_vorbericht-reutlingen.html": {
-      "hash": "cc13996ad96305c291f4cd45d18b7633529fff9f",
-      "lastmod": "2026-10-18"
+      "hash": "c87b86c3a7498dc504f24645a5ae49e04c4f5910",
+      "lastmod": "2026-10-19"
     },
     "news/insta-archiv/loewen-17884318188501699.html": {
       "hash": "002ceedc7cd86f481a402263912e80b5362dbb93",
@@ -362,15 +366,15 @@
       "lastmod": "2026-10-16"
     },
     "saison/profis.html": {
-      "hash": "0546a85f023b4607f3929ec38437f5efb1d6f82d",
-      "lastmod": "2026-10-18"
+      "hash": "855ce0e2880f9e03f8d2d4ebd6e54a1802c6cefe",
+      "lastmod": "2026-10-19"
     },
     "saison/profis/gameday/2026-10-11-bba-ludwigsburg.html": {
       "hash": "800dc0861969e52f542785c0494f0fe42839a51b",
       "lastmod": "2026-10-16"
     },
     "saison/profis/gameday/2026-10-18-tsg-reutlingen-ravens.html": {
-      "hash": "620115c5c898a01c6c9656faec5ec5c1292b2733",
+      "hash": "97c3dcca0068529376cfcfe4af8cdad061639772",
       "lastmod": "2026-10-19"
     },
     "saison/profis/gameday/2026-11-08-culture-city-weimar.html": {
@@ -422,8 +426,8 @@
       "lastmod": "2026-10-16"
     },
     "saison/profis/gameday/index.html": {
-      "hash": "6f1bbe17cbe8409b41dbcc68b9c9ff79492f2583",
-      "lastmod": "2026-10-18"
+      "hash": "981d91a5e6337d742d15268de2ee49224eade245",
+      "lastmod": "2026-10-19"
     },
     "saison/profis/gameday/spieltagsinfo/ausgabe-1/index.html": {
       "hash": "d811a3b583bb7cd635f9e1e17b6d00fc08561e9f",
