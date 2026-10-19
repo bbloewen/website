@@ -2994,6 +2994,18 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       (neuName ? '<div><button type="button" class="link-btn" style="white-space:normal;text-align:left" data-be="kred-neu" data-k="' + esc(k) + '" data-rf="' + esc(gp.rueckfrage) + '" data-name="' + esc(neuName) + '">Neu anlegen: ' + esc(neuName) + '</button></div>' : '') +
       (kand && kand.length ? '' : '<div class="notiz" style="margin:2px 0 0;white-space:normal">Kein passender Kreditor, ohne Auswahl wird beim Übertragen ein neuer angelegt.</div>') + '</div>';
   }
+  // Kreditor jederzeit änderbar (auch wenn BuchhaltungsButler einen eindeutigen gefunden hat): vorhandenen wählen oder neuen anlegen lassen
+  function beKredEditHtml(gp, aktuell) {
+    var k = BE.mandantAktuell, rf = gp.rueckfrage;
+    if (!(BE.kredEdit && BE.kredEdit[rf])) return '<div class="notiz" style="margin:2px 0 0"><button type="button" class="link-btn" style="font-size:12px" data-be="kred-edit" data-k="' + esc(k) + '" data-rf="' + esc(rf) + '">Kreditor ändern oder neu anlegen</button></div>';
+    var alle = ((RF.kred && RF.kred[k]) || []).filter(function (kr) { return (kr.art || 'kreditor') !== 'debitor'; });
+    var id = 'kw-' + rf, opts = alle.map(function (kr) { return '<option value="' + esc(kr.nr + ' ' + kr.name) + '"></option>'; }).join('');
+    return '<div class="rf-box" style="margin-top:4px"><div class="text-klein">Kreditor' + (aktuell ? ' (jetzt: ' + esc(aktuell) + ')' : '') + '</div>' +
+      '<input id="' + id + '" class="eingabe-klein" style="width:100%;margin-top:2px" list="' + id + '-l" placeholder="' + (alle.length ? 'Vorhandenen wählen: Name oder Nummer …' : 'Kreditoren werden geladen …') + '" aria-label="Kreditor suchen"><datalist id="' + id + '-l">' + opts + '</datalist>' +
+      '<div><button type="button" class="link-btn" data-be="kred-wahl" data-k="' + esc(k) + '" data-rf="' + esc(rf) + '">Diesen Kreditor übernehmen</button></div>' +
+      '<label class="text-klein" for="kn-' + esc(rf) + '" style="display:block;margin-top:6px">oder neuen Kreditor anlegen (beim Übertragen)</label><input id="kn-' + esc(rf) + '" class="eingabe-klein" style="width:100%;margin-top:2px" maxlength="100" placeholder="Name des neuen Kreditors">' +
+      '<div><button type="button" class="link-btn" data-be="kred-neu-eingabe" data-k="' + esc(k) + '" data-rf="' + esc(rf) + '">Neu anlegen</button> <button type="button" class="link-btn" data-be="kred-edit" data-k="' + esc(k) + '" data-rf="' + esc(rf) + '">Schließen</button></div></div>';
+  }
   async function beKredNeu(b) {
     var k = b.getAttribute('data-k'), rf = b.getAttribute('data-rf'), name = b.getAttribute('data-name');
     try {
@@ -3398,7 +3410,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
           (x.bdat && r.datum && String(x.bdat).slice(0, 10) !== String(r.datum).slice(0, 10) ? '<div class="notiz" style="margin:0">gebucht am ' + esc(formatDate(String(x.bdat).slice(0, 10))) + '</div>' : '') +
           (x.agent && a ? btFeld(a) : '');
         h += '<tr>' + (i === 0 ? '<td' + rs + ' class="auswahl-zelle">' + auswahlZelle + '</td><td' + rs + '>' + ik + '</td><td' + rs + ' class="nowrap">' + datumZelle(r) + dateiLinks + loeschLink + '</td><td' + rs + '>' + kopf + dupHinweis + betragHinweis + agentLese + (gp && !gp.gebucht_am && gp.rueckfrage ? '<div style="margin-top:4px"><button type="button" class="link-btn" data-be="korr-start" data-rf="' + gp.rueckfrage + '" data-titel="' + esc(titel) + '">Ändern / mit KI besprechen</button>' + (!gpBereit && gp.rueckfrage ? ' <button type="button" class="link-btn" data-be="rf-passt" data-rf="' + gp.rueckfrage + '" title="Übernimmt den Vorschlag als Entscheidung, danach erscheint die Auswahlbox zum Übertragen.">Passt so, übernehmen</button>' : '') + '</div>' : '') + agLink + mandantWahl + '</td><td' + rs + ' class="nowrap zahlen rechts">' + (brutto !== null ? esc(formatEuro(brutto)) : '') + (gp && gp.rueckfrage && !gp.gebucht_am ? '<div><button type="button" class="link-btn" style="font-size:12px" data-be="korr-start" data-rf="' + gp.rueckfrage + '" data-titel="' + esc(titel) + '" data-text="Der Betrag stimmt nicht. Richtig ist: ">Betrag ändern</button></div>' : '') + '</td><td' + rs + ' class="rechts">' + beZahlungZelle(r, a, b) + '</td>' : '') +
-          '<td>' + text + '</td><td>' + beKontoName(x.konto, x.kname ? x.kname : '') + '</td><td>' + beKontoName(x.gegen, x.gname ? x.gname : (b && b.gegenpartei ? b.gegenpartei : '')) + (x.gunklar ? beKredWahlHtml(x.gunklar, gp, (a && String(a.auslage) !== 'true' && a.aussteller) || '') : '') + '</td><td>' + beKontoName(x.kst1, x.kst1n) + '</td><td>' + beKontoName(x.kst2, x.kst2n) + '</td>' +
+          '<td>' + text + '</td><td>' + beKontoName(x.konto, x.kname ? x.kname : '') + '</td><td>' + beKontoName(x.gegen, x.gname ? x.gname : (b && b.gegenpartei ? b.gegenpartei : '')) + (x.gunklar ? beKredWahlHtml(x.gunklar, gp, (a && String(a.auslage) !== 'true' && a.aussteller) || '') : '') + (!x.gunklar && gp && gp.rueckfrage && !gp.gebucht_am && !b && x.agent ? beKredEditHtml(gp, x.gname || '') : '') + '</td><td>' + beKontoName(x.kst1, x.kst1n) + '</td><td>' + beKontoName(x.kst2, x.kst2n) + '</td>' +
           '<td class="nowrap zahlen rechts">' + (x.satz !== null && x.satz !== undefined && x.satz !== '' ? esc(Number(x.satz).toLocaleString('de-DE') + ' %') : '') + '</td>' +
           '<td class="nowrap zahlen rechts">' + eu(x.netto) + '</td><td class="nowrap zahlen rechts">' + eu(x.steuer) + '</td><td class="nowrap zahlen rechts">' + eu(x.brutto) + '</td><td>' + esc(x.schl || '') + '</td>' +
           '</tr>';
@@ -4839,6 +4851,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var alt = bu.length ? String(bu[0].text || '') : '';
     if (alt && alt.slice(-suffix.length) === suffix) alt = alt.slice(0, -suffix.length);
     BE.agEd = { k: k, bid: String(bid), titel: titel || b.gegenpartei || '', teile: teile, text: ag.gespeichert ? (ag.buchungstext || '') : (alt || ag.buchungstext || b.nummer || ''), debitor_nr: ag.debitor_nr || (bu[0] && bu[0].gegenkonto) || '', debitor_neu: !!ag.debitor_neu, laeuft: false, fehler: [], anlegen: null };
+    if (RF.kred && !RF.kred[k]) ladeKreditoren(k).then(beAlleRender);
     beAlleRender(); var f = document.querySelector('[data-ag="sachkonto"]'); if (f) { f.scrollIntoView({ block: 'center', behavior: 'smooth' }); f.focus(); }
   }
   function agLies() {
@@ -4847,7 +4860,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     felder.forEach(function (el) {
       var w = el.getAttribute('data-ag'), i = el.getAttribute('data-i');
       if (i !== null && i !== '') { if (e.teile[Number(i)]) e.teile[Number(i)][w] = el.value; }
-      else if (w === 'text') e.text = el.value; else if (w === 'debitor_nr') e.debitor_nr = el.value;
+      else if (w === 'text') e.text = el.value; else if (w === 'debitor_nr') { var dm = /^\s*([0-9]{5,6})/.exec(el.value); e.debitor_nr = dm ? dm[1] : String(el.value || '').trim(); } else if (w === 'debitor_neu') e.debitor_neu = el.checked;
     });
   }
   function agPanel() {
@@ -4866,7 +4879,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     });
     h += '</tbody></table></div><div style="margin-top:6px"><button type="button" class="link-btn" data-be="ag-zeile"' + (e.laeuft ? ' disabled' : '') + '>Zeile hinzufügen</button></div>';
     h += '<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:8px"><label class="text-klein">Buchungstext<br><input class="eingabe" style="width:380px;max-width:100%" maxlength="128" data-ag="text" value="' + esc(e.text) + '"' + (e.laeuft ? ' disabled' : '') + '></label>' +
-      '<label class="text-klein">Debitor-Nr. (leer = automatisch)<br><input class="eingabe-klein" style="width:130px" inputmode="numeric" data-ag="debitor_nr" value="' + esc(e.debitor_nr) + '"' + (e.laeuft ? ' disabled' : '') + '></label></div>';
+      '<label class="text-klein">Debitor wählen (Name oder Nr., leer = automatisch)<br><input class="eingabe-klein" style="width:260px" list="ag-deb-l" data-ag="debitor_nr" value="' + esc(e.debitor_nr) + '"' + (e.laeuft ? ' disabled' : '') + '><datalist id="ag-deb-l">' + (((RF.kred && RF.kred[e.k]) || []).filter(function (kr) { return kr.art === 'debitor'; }).map(function (kr) { return '<option value="' + esc(kr.nr + ' ' + kr.name) + '"></option>'; }).join('')) + '</datalist></label>' +
+      '<label class="text-klein" style="align-self:end"><input type="checkbox" data-ag="debitor_neu"' + (e.debitor_neu ? ' checked' : '') + (e.laeuft ? ' disabled' : '') + '> Neuen Debitor anlegen (Name der Gegenpartei), statt vorhandenen zu nehmen</label></div>';
     h += '<div class="notiz" style="margin:4px 0 0">Standard für Sponsoren: <button type="button" class="link-btn" data-be="ag-text" data-t="Sponsoring - Cash">Cash</button> · <button type="button" class="link-btn" data-be="ag-text" data-t="Sponsoring - Herstellungskosten">Herstellungskosten</button> · <button type="button" class="link-btn" data-be="ag-text" data-t="Sponsoring - Barter">Barter</button>. BuchhaltungsButler hängt den Namen der Gegenpartei selbst an den Buchungstext an.</div>';
     if (e.fehler.length) h += '<div class="fehlerbox" role="alert" style="margin-top:6px"><ul style="margin:0 0 0 18px;padding:0">' + e.fehler.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div>';
     if (e.anlegen) h += '<div style="margin-top:6px"><button type="button" class="btn btn-secondary" data-be="ag-konto-anlegen" data-nr="' + esc(e.anlegen.nummer) + '"' + (e.laeuft ? ' disabled' : '') + '>Konto ' + esc(e.anlegen.nummer) + ' ' + esc(e.anlegen.name) + ' in BuchhaltungsButler anlegen und speichern</button></div>';
@@ -5003,6 +5017,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       });
       p.addEventListener('click', function (e) {
         var b = e.target.closest('[data-be]'); if (!b) return;
+        // Der Mandant gilt für das Panel, in dem geklickt wurde (nicht für das zuletzt im Hintergrund geladene)
+        var pm = BE_MANDANT[String(p.id || '').replace(/^p-/, '')]; if (pm) BE.mandantAktuell = pm;
         var w = b.getAttribute('data-be'), st = zustand(b);
         if (w === 'neu') { bhbAktualisieren(st.art, st.k); }
         else if (w === 'richtung') { var zz = (BL)[b.getAttribute('data-k')]; zz.richtung = b.getAttribute('data-w'); renderAccounting('beleg', b.getAttribute('data-k')); }
@@ -5010,6 +5026,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         else if (w === 'zv-annehmen') beZvAnnehmen(b);
         else if (w === 'kred-wahl') beKredWahl(b);
         else if (w === 'kred-neu') beKredNeu(b);
+        else if (w === 'kred-edit') { var rfe = b.getAttribute('data-rf'); BE.kredEdit = BE.kredEdit || {}; BE.kredEdit[rfe] = !BE.kredEdit[rfe]; var ke = b.getAttribute('data-k'); if (BE.kredEdit[rfe] && ke && RF.kred && !RF.kred[ke]) ladeKreditoren(ke).then(beAlleRender); beAlleRender(); }
+        else if (w === 'kred-neu-eingabe') { var kin = document.getElementById('kn-' + b.getAttribute('data-rf')), nm = kin ? String(kin.value || '').trim() : ''; if (nm.length < 2) { window.alert('Bitte den Namen des neuen Kreditors eintragen.'); return; } b.setAttribute('data-name', nm); beKredNeu(b); }
         else if (w === 'fe-start') { BE.fe = { k: b.getAttribute('data-k'), fall: b.getAttribute('data-fall'), wert: b.getAttribute('data-wert'), gp: b.getAttribute('data-gp'), betrag: Number(b.getAttribute('data-betrag')), datum: b.getAttribute('data-datum'), nr: b.getAttribute('data-nr'), ein: b.getAttribute('data-ein') === '1' }; renderAccounting('beleg', BE.fe.k); }
         else if (w === 'fe-abbruch') { var kk = BE.fe && BE.fe.k; BE.fe = null; if (kk) renderAccounting('beleg', kk); }
         else if (w === 'fe-speichern') beFaelligSpeichern();
