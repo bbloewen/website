@@ -3243,6 +3243,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var nummer = (b && b.nummer) || (a && a.nummer) || '';
       var art = b ? (/outbound/.test(b.typ || '') ? 'Ausgang' : 'Eingang') : (a && a.typ ? ({ rechnung: 'Rechnung', kassenbon: 'Kassenbon', auslage_foto: 'Auslagenfoto', gutschrift: 'Gutschrift', mahnung: 'Mahnung', angebot: 'Angebot', kontoauszug: 'Kontoauszug', vertrag: 'Vertrag', sonstiges: 'Sonstiges' }[String(a.typ).toLowerCase()] || (String(a.typ).replace(/_/g, ' ').charAt(0).toUpperCase() + String(a.typ).replace(/_/g, ' ').slice(1))) : 'Eingang');
       var brutto = b && b.brutto !== null && b.brutto !== undefined ? Number(b.brutto) : (a && a.brutto !== null && a.brutto !== undefined ? Number(a.brutto) : null);
+      // Eine Gutschrift ist ein Minusbetrag: BHB liefert ihn mit Vorzeichen, ein noch nicht in BHB liegender Beleg wird nach seinem Typ negativ gezeigt
+      var gsNeg = b ? Number(b.brutto) < 0 : !!(a && String(a.typ || '').toLowerCase() === 'gutschrift');
+      if (gsNeg && brutto !== null) brutto = -Math.abs(brutto);
       var richtTxt = blRichtung(r) === 'ausgang' ? 'Ausgang' : 'Eingang';
       var typTxt = !b && a && a.typ ? art : '';
       var kz = function (t, extra) { return '<div class="notiz" style="margin:0"' + (extra || '') + '>' + t + '</div>'; };
@@ -3327,6 +3330,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         st.unshift(['Stand', ag.gespeichert ? '<b>Kontierung bestätigt, bereit zu buchen</b>' : '<b>Vorschlag</b>: ' + esc(ag.quelle || '') + '.<br>Mit der Auswahlbox übernehmen oder unter „Kontierung ändern“ anpassen.']);
       } else if (ag && !agGeb) st.unshift(['Stand', 'Noch keine Kontierung. Unter „Kontierung ändern“ eintragen.']);
       else if (ag && agGeb && ag.gespeichert && ag.geaendert) st.unshift(['Stand', '<b>Kontierung geändert</b>, in BuchhaltungsButler noch nicht aktualisiert' + (agFest ? ' (festgeschrieben, nicht änderbar)' : '.')]);
+      if (gsNeg) zl.forEach(function (x) { ['netto', 'steuer', 'brutto'].forEach(function (k) { if (x[k] !== null && x[k] !== undefined && !isNaN(Number(x[k]))) x[k] = -Math.abs(Number(x[k])); }); });
       var mandantWahl = '';
       if (a && !a.geplant && a.status === 'erkannt') {
         var mBek = ['XXL', 'LEV'].indexOf(String(a.mandant || '')) >= 0;
