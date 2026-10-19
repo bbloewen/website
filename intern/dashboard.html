@@ -3368,7 +3368,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         })[0];
         if (!partner) return;
         var pb = partner.bhb, pa = partner.agent;
-        ausglHinweis = '<div class="hinweis-warn" style="margin:0 0 4px;white-space:normal"><b>Gegenbeleg:</b> hebt sich auf mit ' + esc((pb && pb.nummer) || (pa && pa.nummer) || 'Beleg') + ' (' + esc(formatEuro(Math.abs(brutto))) + ', ' + (brutto < 0 ? 'Original' : 'Storno') + '). Keine Zahlung offen. In BuchhaltungsButler bei den offenen Posten gegeneinander ausgleichen.</div>';
+        ausglHinweis = '<div class="notiz" style="margin:0">hebt sich auf mit ' + esc((pb && pb.nummer) || (pa && pa.nummer) || 'Beleg') + '</div>';
       })();
       var dupHinweis = '';
       (function () {
@@ -5860,6 +5860,24 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   document.addEventListener('focusout', weg);
   document.addEventListener('scroll', weg, true);
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') weg(); });
+})();
+</script>
+<script>
+// Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
+(function () {
+  var BUILD = '20261019211219';
+  if (BUILD.indexOf('__') === 0) return;
+  function pruefe() {
+    fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
+      var m = /var BUILD = '([^']+)'/.exec(t); if (!m || m[1] === BUILD || document.getElementById('neue-fassung')) return;
+      var d = document.createElement('div'); d.id = 'neue-fassung'; d.setAttribute('role', 'status');
+      d.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:9998;background:#0028AA;color:#fff;padding:10px 16px;text-align:center';
+      d.innerHTML = 'Es gibt eine neuere Fassung des Dashboards. <button type="button" style="margin-left:8px;padding:4px 12px;cursor:pointer">Jetzt neu laden</button>';
+      d.querySelector('button').addEventListener('click', function () { location.reload(); });
+      document.body.appendChild(d);
+    }).catch(function () {});
+  }
+  setTimeout(pruefe, 15000); setInterval(pruefe, 90000);
 })();
 </script>
 </body>
