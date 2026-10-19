@@ -71,6 +71,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://basketball-loewen.com/foerderer/</loc>
+    <lastmod>2026-10-19</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://basketball-loewen.com/impressum.html</loc>
     <lastmod>2026-09-18</lastmod>
     <priority>0.7</priority>
@@ -427,7 +432,7 @@
   </url>
   <url>
     <loc>https://basketball-loewen.com/partner/investoren.html</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-10-19</lastmod>
     <priority>0.7</priority>
   </url>
   <url>

@@ -301,11 +301,18 @@
     "keywords": "Club der 100 Business Club"
   },
   {
-    "title": "Investoren",
+    "title": "Förderer",
+    "url": "/foerderer/",
+    "category": "Partner",
+    "description": "Förderer der Basketball Löwen Erfurt werden: Sponsoring, Löwen-Club der 100, Gesellschafter oder Freundeskreis.",
+    "keywords": "Förderer Unterstützer unterstützen Sponsoring Club der 100 Gesellschafter Freundeskreis Spende Partner werden"
+  },
+  {
+    "title": "Gesellschafter",
     "url": "/partner/investoren.html",
     "category": "Partner",
-    "description": "Investitionsmöglichkeiten bei den Basketball Löwen Erfurt.",
-    "keywords": "Investor Investieren Beteiligung Anteile Gesellschafter Kapital"
+    "description": "Gesellschafter der Basketball Löwen Erfurt werden: Beteiligung an der XXL Baskets GmbH und nächste Investitionsrunde.",
+    "keywords": "Investor Investoren Investieren Beteiligung Anteile Gesellschafter Kapital"
   },
   {
     "title": "Freundeskreis",
