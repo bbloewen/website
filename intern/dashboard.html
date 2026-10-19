@@ -3155,7 +3155,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (f === 'eingang' && r.bhb) return false;
     if (f === 'pruefen' && !(a && (a.status === 'fehler' || (a.status === 'erkannt' && a.urteil === 'pruefen')))) return false;
     var s = String(z.suche || '').trim().toLowerCase(); if (!s) return true;
-    var heu = [r.bhb && r.bhb.gegenpartei, r.bhb && r.bhb.nummer, a && a.aussteller, a && a.nummer, a && a.anhang_name, a && a.absender]
+    var brS = r.bhb && r.bhb.brutto !== null && r.bhb.brutto !== undefined ? Math.abs(Number(r.bhb.brutto)) : (a && a.brutto !== null && a.brutto !== undefined ? Math.abs(Number(a.brutto)) : null);
+    var heu = [r.bhb && r.bhb.gegenpartei, r.bhb && r.bhb.nummer, r.bhb && r.bhb.beleg_id, a && a.aussteller, a && a.nummer, a && a.anhang_name, a && a.absender, a && a.buchungstext_zweck, a && a.zweck, a && a.hinweis, brS !== null ? brS.toFixed(2).replace('.', ',') : '', brS !== null ? formatEuro(brS) : '']
       .concat(((r.bhb && r.bhb.buchungen) || []).map(function (x) { return [x.sachkonto, x.sachkonto_name, x.kst1_name, x.kst2_name, x.text].join(' '); })).join(' ').toLowerCase();
     return heu.indexOf(s) >= 0;
   }
@@ -3227,11 +3228,12 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       return '<div class="chips chips-gleich" role="group" aria-label="' + bez + '"><span class="notiz chips-label">Belege</span>' + kn('alle', 'Alle') + kn('eingang', 'Eingangsrechnungen') + kn('ausgang', 'Ausgangsrechnungen') + '</div>';
     };
     var h = renderPager(z, 'data-art="beleg" data-k="' + k + '"');
+    h += '<div class="card pad"><label class="text-klein" for="be-suche-' + k + '" style="display:block;margin-bottom:4px">Beleg suchen (' + esc(d.monat ? monatName(d.monat) : '') + ', gebucht und nicht gebucht)</label><input id="be-suche-' + k + '" type="search" class="eingabe" style="width:100%" data-be="suche" data-k="' + k + '" placeholder="z. B. 2. Basketball-Bundesliga, Rechnungsnummer, Betrag, Buchungstext …" value="' + esc(z.suche) + '">' +
+      (String(z.suche || '').trim() ? '<div class="notiz" style="margin:6px 0 0">' + esc(zahl(zeilen.length)) + ' noch nicht gebucht · ' + esc(zahl(uebZeilen.length)) + ' in BuchhaltungsButler gebucht. Die Suche gilt für den gewählten Monat, einen anderen Monat oben wählen.</div>' : '') + '</div>';
     h += chipLeiste(obenAlle, z.richtung, 'richtung', 'Art der Belege');
     h += uebLeiste();
     var tabKopf = '<div class="tbl-voll tbl-fix"><table class="tbl kompakt fest"><colgroup><col style="width:3%"><col style="width:5%"><col style="width:7%"><col style="width:16%"><col style="width:6%"><col style="width:8%"><col style="width:11%"><col style="width:8%"><col style="width:8%"><col style="width:8%"><col style="width:8%"><col style="width:4%"><col style="width:6%"><col style="width:5%"><col style="width:6%"><col style="width:3%"></colgroup><thead><tr><th><span class="sr-only">Zur Übertragung auswählen</span></th><th><abbr title="Gebucht (Buch-Symbol) und Zahlung zugewiesen (Euro-Symbol)">Status</abbr></th><th style="white-space:normal"><abbr title="Buchungsdatum: danach wird sortiert und nach Monaten geblättert. Das Rechnungsdatum steht beim Beleg, das Eingangsdatum darunter.">Buchungs&shy;datum</abbr></th><th><abbr title="Gegenpartei, Rechnungsnummer, Links und Quelle">Beleg</abbr></th><th class="rechts"><abbr title="Belegbetrag brutto">Beleg €</abbr></th><th class="rechts"><abbr title="Zugeordnete Zahlung (Abbuchung vom Konto, negativ). Bei noch nicht gebuchten Belegen wird sie beim Übertragen nach BuchhaltungsButler zugeordnet und ausgeglichen.">Zahlung €</abbr></th><th><abbr title="Buchungstext aus BuchhaltungsButler, bei noch nicht gebuchten Belegen der Vorschlag des Agenten">Text</abbr></th><th><abbr title="Sachkonto. Die Bezeichnung steht im Tooltip der Nummer.">Sachk.</abbr></th><th><abbr title="Gegenkonto: Kreditor (Eingangsbeleg) oder Debitor (Ausgangsbeleg)">Gegenk.</abbr></th><th><abbr title="Kostenstelle 1. Die Bezeichnung steht im Tooltip der Nummer.">KST1</abbr></th><th><abbr title="Kostenstelle 2 (Zweck). Die Bezeichnung steht im Tooltip der Nummer.">KST2</abbr></th><th class="rechts"><abbr title="Umsatzsteuersatz">USt</abbr></th><th class="rechts"><abbr title="Nettobetrag der Buchungszeile (aus Brutto und Satz gerechnet)">Netto</abbr></th><th class="rechts"><abbr title="Steuerbetrag der Buchungszeile (aus Brutto und Satz gerechnet)">Steuer</abbr></th><th class="rechts"><abbr title="Bruttobetrag der Buchungszeile">Brutto</abbr></th><th><abbr title="Steuerschlüssel: Umsatzsteuer-Kennzeichen der Buchung aus BuchhaltungsButler">Schl.</abbr></th></tr></thead><tbody>';
     h += '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Belege ' + esc(k) + ' · ' + esc(d.monat ? monatName(d.monat) : '') + ' · ' + esc(zahl(zeilen.length)) + (zeilen.length === obenAlle.length ? '' : ' von ' + esc(zahl(obenAlle.length))) + ' noch nicht gebucht</span><span>' +
-      '<input type="search" class="eingabe-klein" style="width:180px;flex:none" data-be="suche" data-k="' + k + '" placeholder="Suchen …" aria-label="Suchen" value="' + esc(z.suche) + '"> ' +
       '<select class="auswahl" data-be="filter" data-k="' + k + '" aria-label="Filter">' + opt('alle', 'Alle Belege') + opt('bezahlt', 'Gebucht und bezahlt') + opt('offen', 'Gebucht, Zahlung offen') + opt('ungebucht', 'Noch nicht gebucht') + opt('eingang', 'Nur im Eingang, nicht in BHB') + opt('pruefen', 'Agent: zur Prüfung') + '</select> ' +
       '<button type="button" class="link-btn" data-be="neu" data-k="' + k + '"' + (BE.holen ? ' disabled' : '') + '>' + (BE.holen ? 'Hole aus BuchhaltungsButler …' : 'Aktualisieren') + '</button></span></div>' +
       (BE.meldung ? '<div class="erfolg" role="status" style="margin:8px 12px">' + esc(BE.meldung) + '</div>' : '') +
@@ -3410,7 +3412,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     };
     h += zeilenHtml(zeilen, 'Keine Belege in dieser Ansicht.');
     h += '</tbody></table></div></div>';
-    if (untenAlle.length) h += '<details class="card" style="margin-top:16px" data-be-uebertragen' + (BE.uebertragenAuf === false ? '' : ' open') + '><summary class="card-kopf" style="cursor:pointer">In BuchhaltungsButler gebucht · ' + esc(zahl(uebZeilen.length)) + (uebZeilen.length === 1 ? ' Beleg' : ' Belege') + '</summary>' + chipLeiste(untenAlle, z.richtungUeb, 'richtung-ueb', 'Art der gebuchten Belege') + tabKopf + zeilenHtml(uebZeilen, 'Keine Belege in dieser Ansicht.') + '</tbody></table></div></details>';
+    if (untenAlle.length) h += '<details class="card" style="margin-top:16px" data-be-uebertragen' + (BE.uebertragenAuf === false && !String(z.suche || '').trim() ? '' : ' open') + '><summary class="card-kopf" style="cursor:pointer">In BuchhaltungsButler gebucht · ' + esc(zahl(uebZeilen.length)) + (uebZeilen.length === 1 ? ' Beleg' : ' Belege') + '</summary>' + chipLeiste(untenAlle, z.richtungUeb, 'richtung-ueb', 'Art der gebuchten Belege') + tabKopf + zeilenHtml(uebZeilen, 'Keine Belege in dieser Ansicht.') + '</tbody></table></div></details>';
     h += kpis;
     return h;
   }
@@ -4595,7 +4597,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var zweck = '<input type="text" class="eingabe-klein" style="width:100%;min-width:190px" maxlength="120" data-ue="zweck" data-key="' + esc(p.key) + '" value="' + esc(p.zweckBasis) + '" aria-label="Verwendungszweck Beleg ' + esc(p.fallId) + '"' + (p.inDatei ? ' disabled' : '') + '>' + (p.teilAnzahl ? '<div class="notiz" style="margin:0">+ · ' + p.teilIndex + '. von ' + p.teilAnzahl + '. Zahlungen</div>' : '');
     var faellig = '<input type="date" class="eingabe-klein" style="width:130px;flex:none" data-ue="faellig" data-key="' + esc(p.key) + '" value="' + esc(p.faellig) + '" aria-label="Fälligkeit Beleg ' + esc(p.fallId) + '"' + (p.inDatei ? ' disabled' : '') + '>' + (p.faellig ? '' : '<div class="notiz" style="margin:0">ohne Angabe: sofort</div>') + (p.faelligQuelle === 'bhb' ? '<div class="notiz" style="margin:0">laut Rechnung</div>' : '');
     var ls = p.inDatei ? '' : '<div><button type="button" class="link-btn" data-ue="lastschrift" data-key="' + esc(p.key) + '" title="Die Firma zieht den Betrag selbst ein, es ist nichts zu überweisen">Lastschrift</button></div>';
-    return '<tr><td>' + chk + ls + '</td><td>' + beleg + '</td><td>' + empf + '</td><td>' + zweck + '</td><td>' + faellig + '</td><td style="text-align:right;white-space:nowrap"><div style="font-weight:500">' + esc(formatEuro(p.betrag)) + '</div>' + vText + '</td><td>' + bank + '</td></tr>';
+    return '<tr><td>' + chk + ls + '</td><td>' + beleg + '</td><td>' + empf + '</td><td>' + zweck + '</td><td>' + faellig + '</td><td style="text-align:right;white-space:nowrap"><div style="font-weight:500">' + esc(formatEuro(p.betrag)) + '</div>' + (p.abzug ? '<div class="notiz" style="margin:0" title="Die Gutschrift mindert die Zahlung, überwiesen wird nur der Rest.">Rechnung ' + esc(formatEuro(p.betragBeleg)) + '<br>− Gutschrift ' + esc(p.gutschrift) + ' ' + esc(formatEuro(p.abzug)) + '</div>' : '') + vText + '</td><td>' + bank + '</td></tr>';
   }
   function renderUE() {
     var el = $('p-ueberweisungen'); if (!el) return;
@@ -4630,6 +4632,15 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       else h += '<button type="button" class="link-btn" data-ue="datei" data-konto="' + k + '">Zahlungsdatei erzeugen</button>';
       h += '</span></div></div>';
     });
+    var gsl = d.gutschriften || [];
+    if (gsl.length) {
+      h += '<div class="card scroll-x"><div class="card-kopf zeile-titel" style="margin:0"><span>Gutschriften von Lieferanten · ' + esc(zahl(gsl.length)) + ' (werden mit offenen Rechnungen desselben Lieferanten verrechnet, nie überzahlt)</span></div><table class="tbl kompakt"><thead><tr><th>Gutschrift</th><th>Lieferant</th><th>Betrag</th><th>Verrechnet</th><th>Mit Rechnung</th></tr></thead><tbody>';
+      gsl.forEach(function (g) {
+        var rest = Number(g.rest || 0), vr = Number(g.verrechnet || 0), voll = rest <= 0.005;
+        h += '<tr><td>' + (g.link ? '<a href="' + esc(g.link) + '" target="_blank" rel="noopener">' + esc(g.rechnungsnr || ('Beleg ' + g.fallId)) + '</a>' : esc(g.rechnungsnr || ('Beleg ' + g.fallId))) + '<div class="notiz" style="margin:0">Beleg ' + esc(g.fallId) + ' · ' + esc(formatDate(g.datum)) + '</div></td><td>' + esc(g.gegenpartei || '–') + '</td><td style="text-align:right">−' + esc(formatEuro(Math.abs(Number(g.betrag)))) + '</td><td style="text-align:right">' + (vr > 0 ? esc(formatEuro(vr)) : '–') + (!voll && vr > 0 ? '<div class="notiz" style="margin:0">Rest ' + esc(formatEuro(rest)) + '</div>' : '') + '</td><td>' + ((g.mit || []).length ? esc((g.mit || []).join(', ')) : '<span class="notiz" style="margin:0">keine offene Rechnung desselben Lieferanten, Gutschrift bleibt stehen</span>') + '</td></tr>';
+      });
+      h += '</tbody></table></div>';
+    }
     var lsl = d.lastschriften || [];
     if (lsl.length) {
       h += '<div class="card scroll-x"><div class="card-kopf zeile-titel" style="margin:0"><span>Als Lastschrift gekennzeichnet · ' + esc(zahl(lsl.length)) + ' (werden von der Firma eingezogen, nicht überwiesen)</span></div><table class="tbl kompakt"><tbody>';
