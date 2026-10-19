@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1792159161" />
+<link rel="stylesheet" href="/css/site.css?v=1792391658" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
@@ -270,6 +270,7 @@
           <span class="eyebrow">Über unser Profi-Team</span>
           <h2 class="t-h2">Hungriger Kader</h2>
           <p class="t-body mt-4">Unsere Profimannschaft tritt weiterhin in der BARMER 2. Basketball Bundesliga ProB an. Nach einer durchwachsenen Saison 2025/2026 (8 gewonnene Spiele, 16 verlorene, Platz 12 und damit die Playoffs verpasst) greifen wir mit einer neu formierten Mannschaft wieder an. Dabei setzen wir weiter konsequent auf eigenen Nachwuchs aus unseren Partnervereinen <a href="https://bcerfurt.de/" target="_blank" rel="noopener">BC Erfurt</a>, <a href="https://usv-erfurt-basketball.de/" target="_blank" rel="noopener">USV Erfurt</a> und <a href="https://www.big-gotha.de/" target="_blank" rel="noopener">BiG Gotha</a>.</p>
+          <p class="t-body mt-4">Die Kaderstatistik der Liga zum Saisonstart: 16 Spieler, im Schnitt 21,1 Jahre alt, 1,95&nbsp;m groß und 92&nbsp;kg schwer. Neun Spieler sind U22. Beim Alter liegen wir damit auf Platz&nbsp;7 von 15 Teams der Staffel (Liga-Schnitt: 21,6 Jahre). 14 Spieler (87,5&nbsp;%) sind Deutsche, deutlich mehr als im Liga-Schnitt (78&nbsp;%). Alle Zahlen im Vergleich stehen unten bei den Saisonplatzierungen.</p>
           <div style="margin-top:24px; display:flex; gap:14px; flex-wrap:wrap;">
             <a class="btn btn-primary" href="/saison/tabelle.html">Zur Tabelle</a>
             <a class="btn btn-ghost" href="/saison/spielplan.html?team=profis">Zum Spielplan</a>
@@ -416,7 +417,20 @@
             <div class="season-card"><span class="season-label">2023/24</span><span class="season-place">5.</span><span class="season-note">Playoff Runde 1</span></div>
             <div class="season-card"><span class="season-label">2024/25</span><span class="season-place">6.</span><span class="season-note">Playoff Runde 1</span></div>
             <div class="season-card"><span class="season-label">2025/26</span><span class="season-place">12.</span><span class="season-note">Playoffs verpasst</span></div>
+            <div class="season-card"><span class="season-label">2026/27</span><span class="season-place">–</span><span class="season-note">Saison läuft</span><button type="button" class="season-chip" id="kader-chip" aria-expanded="false" aria-controls="kader-pop">Kader</button></div>
           </div>
+        </div>
+        <div class="season-pop" id="kader-pop" role="region" aria-label="Kaderstatistik 2026/27" hidden>
+          <span class="season-pop-title">Kaderstatistik 2026/27 im Liga-Vergleich</span>
+          <dl>
+            <dt>Spieler</dt><dd>16<small>Liga-Schnitt 14,9</small></dd>
+            <dt>Ø-Alter</dt><dd>21,1 Jahre<small>Platz 7 von 15 (1 = jüngstes Team), Liga-Schnitt 21,6</small></dd>
+            <dt>Ø-Größe</dt><dd>1,95&nbsp;m<small>Liga-Schnitt 1,97&nbsp;m</small></dd>
+            <dt>Ø-Gewicht</dt><dd>92&nbsp;kg<small>Liga-Schnitt 91,5&nbsp;kg</small></dd>
+            <dt>Deutsche</dt><dd>14 (87,5&nbsp;%), 2 international<small>Liga-Schnitt 78&nbsp;% Deutsche</small></dd>
+            <dt>U22</dt><dd>9 von 16<small>Liga-Schnitt 55&nbsp;% der Kader</small></dd>
+          </dl>
+          <p class="season-pop-src">Quelle: Teamseiten der 2. Basketball Bundesliga, abgerufen am 19.10.2026 (Stand der Löwen-Seite: 12.10.2026). Liga-Schnitt: ungewichtetes Mittel der 15 Teams der Staffel.</p>
         </div>
         <div class="season-strip-fade-left" aria-hidden="true"></div>
       </div>
@@ -575,6 +589,29 @@
 <script src="/js/team-news.js?v=1789585539"></script>
 <script src="/js/player-age.js?v=1785398309"></script>
 <script src="/js/history-timeline.js?v=1786331000"></script>
+<script>
+/* Kader-Chip bei den Saisonplatzierungen: Klick oder Tastatur schaltet das Tooltip um (bleibt dann stehen), Mouseover zeigt es vorübergehend (nur mit Maus). */
+(function () {
+  var chip = document.getElementById('kader-chip'), pop = document.getElementById('kader-pop');
+  if (!chip || !pop) return;
+  var fest = false, timer;
+  function zeigen(an) { pop.hidden = !an; chip.setAttribute('aria-expanded', an ? 'true' : 'false'); if (!an) fest = false; }
+  chip.addEventListener('click', function (e) {
+    e.stopPropagation();
+    if (pop.hidden) { zeigen(true); fest = true; }
+    else if (!fest) { fest = true; }
+    else { zeigen(false); }
+  });
+  if (window.matchMedia && window.matchMedia('(hover: hover)').matches) {
+    [chip, pop].forEach(function (el) {
+      el.addEventListener('mouseenter', function () { clearTimeout(timer); if (pop.hidden) zeigen(true); });
+      el.addEventListener('mouseleave', function () { timer = setTimeout(function () { if (!fest) zeigen(false); }, 250); });
+    });
+  }
+  document.addEventListener('click', function (e) { if (!pop.hidden && !pop.contains(e.target)) zeigen(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') zeigen(false); });
+})();
+</script>
 <script>
   (function () {
     document.querySelectorAll('.panini-wrap').forEach(function (wrap) {
