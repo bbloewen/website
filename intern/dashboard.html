@@ -1424,13 +1424,21 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (/ - Dauer$/.test(n)) return 'Dauer';
     return '';
   }
+  // Block D ist der Gästeblock: Gutscheine dafür (Freikarten oder Rabatte) schickt nur Kim an das gegnerische Team (Marko, 19.10.2026).
+  // Allen anderen bietet das Formular Block D nicht an; die Gutschein-Kontingente der Sponsoren schließen ihn ebenfalls aus.
+  function darfBlockD() {
+    var n = window.LOEWEN_NUTZER; if (!n) return false;
+    return /^kim\.mauermann@/i.test(String(n.email || ''));
+  }
+  function istBlockD(name) { return /^Block D\b/.test(String(name || '')); }
+  function formularItems() { return (S.formular.items || []).filter(function (it) { return darfBlockD() || !istBlockD(it && it.name); }); }
   function itemKategorien() {
     var set = {};
-    (S.formular.items || []).forEach(function (it) { set[itemKategorie(it)] = true; });
+    formularItems().forEach(function (it) { set[itemKategorie(it)] = true; });
     return Object.keys(set).sort();
   }
   function filteredItems() {
-    return (S.formular.items || []).filter(function (it) {
+    return formularItems().filter(function (it) {
       if (S.itemFilterKategorie && itemKategorie(it) !== S.itemFilterKategorie) return false;
       if (S.itemFilterTyp && itemTyp(it) !== S.itemFilterTyp) return false;
       return true;
@@ -1438,7 +1446,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   }
   function kontingentOptions() {
     if (S.form.subeventIds.length !== 1) return [];
-    return (S.formular.quotasBySubevent || {})[S.form.subeventIds[0]] || [];
+    return ((S.formular.quotasBySubevent || {})[S.form.subeventIds[0]] || []).filter(function (opt) { return darfBlockD() || !istBlockD(opt && opt.category); });
   }
   function existingTags() {
     if (!S.stats || !S.stats.byTag) return [];
