@@ -3407,7 +3407,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
           aktBtn('Doppelt, entfernen', ' data-be="rf-akt" data-akt="duplikat" data-rf="' + gp.rueckfrage + '"', 'Erledigt den Beleg als Doppelung') + ' · ' +
           aktBtn('Kein Beleg, ignorieren', ' data-be="rf-akt" data-akt="verworfen" data-rf="' + gp.rueckfrage + '"', 'Erledigt ohne Buchung und ohne etwas zu lernen') + '</div>';
       }
-      var agLink = ag && !(agGeb && agFest) ? '<div style="margin-top:4px"><button type="button" class="link-btn" data-be="ag-edit" data-bid="' + esc(b.beleg_id) + '" data-titel="' + esc(titel) + '">Kontierung ändern</button></div>' : '';
+      var agLink = ag && !(agGeb && agFest) ? '<div style="margin-top:4px"><button type="button" class="link-btn" data-be="ag-edit" data-bid="' + esc(b.beleg_id) + '" data-titel="' + esc(titel) + '">Kontierung ändern</button> · <button type="button" class="link-btn" data-be="ag-edit" data-ki="1" data-bid="' + esc(b.beleg_id) + '" data-titel="' + esc(titel) + '">Mit KI besprechen</button></div>' : '';
       var auswahlZelle = agWahl ? '<input type="checkbox" data-be-sel="' + esc(agKey) + '" data-titel="' + esc(titel) + '"' + (BE.sel[agKey] ? ' checked' : '') + ' aria-label="' + (agGeb ? 'Zum Aktualisieren in BuchhaltungsButler auswählen: ' : 'Zur Übertragung nach BuchhaltungsButler auswählen: ') + esc(titel) + '">' : gp && gp.sachkonto && !gp.gebucht_am && gp.rueckfrage ? '<input type="checkbox" data-be-sel="' + gp.rueckfrage + '" data-titel="' + esc(titel) + '"' + (BE.sel[gp.rueckfrage] ? ' checked' : '') + ' aria-label="Zur Übertragung nach BuchhaltungsButler auswählen' + (gpBereit ? '' : ' (übernimmt den Vorschlag)') + ': ' + esc(titel) + '"' + (gpBereit ? '' : ' title="Beim Übertragen wird der Vorschlag als Entscheidung übernommen. Zum Ändern vorher „Ändern / mit KI besprechen“."') + '>' : '';
       // Zahlweg (Lastschrift, Überweisung, Erstattung, schon bezahlt) und passende Abbuchung vom Konto, vor dem Buchen
       if (a && a.zahlweg && !blGebucht(r)) {
@@ -5123,7 +5123,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
             ['XXL', 'LEV'].forEach(function (m) { if (BL[m] && BL[m].daten) ladeListe('beleg', m, BL[m].daten.monat); }); if (typeof ladeRF === 'function') ladeRF();
           }).catch(function (er) { b.disabled = false; BE.meldung = 'Nicht gespeichert: ' + er.message; beAlleRender(); });
         }
-        else if (w === 'ag-edit') agStart(b.getAttribute('data-bid'), b.getAttribute('data-titel'));
+        else if (w === 'ag-edit') { agStart(b.getAttribute('data-bid'), b.getAttribute('data-titel')); if (b.getAttribute('data-ki') === '1') { var kf = document.getElementById('ag-ki-text'); if (kf) { kf.scrollIntoView({ block: 'center', behavior: 'smooth' }); kf.focus(); } } }
         else if (w === 'ag-ki') {
           var ek = BE.agEd; if (!ek || ek.kiLaeuft) return; agLies();
           if (String(ek.kiText || '').trim().length < 3) { ek.fehler = ['Bitte schreibe oder sprich, was anders sein soll.']; beAlleRender(); return; }
@@ -5134,6 +5134,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
             var vs = d.vorschlag || {};
             ek.teile.forEach(function (t) { if (vs.sachkonto) t.sachkonto = vs.sachkonto; if (vs.vat) t.vat = vs.vat; if (vs.kst1) t.kst1 = vs.kst1; if (vs.kst2) t.kst2 = vs.kst2; });
             if (vs.buchungstext) ek.text = vs.buchungstext;
+            if (vs.debitor_nr) { ek.debitor_nr = vs.debitor_nr; ek.debitor_neu = false; }
             ek.kiAntwort = d.antwort || ''; ek.kiText = ''; ek.nichtLesen = true; beAlleRender(); ek.nichtLesen = false;
           }).catch(function (er) { ek.kiLaeuft = false; ek.fehler = [er.message]; beAlleRender(); });
         }
@@ -5865,7 +5866,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261019211219';
+  var BUILD = '20261019211739';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
