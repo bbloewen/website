@@ -3327,9 +3327,14 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         st.unshift(['Stand', ag.gespeichert ? '<b>Kontierung bestätigt, bereit zu buchen</b>' : '<b>Vorschlag</b>: ' + esc(ag.quelle || '') + '.<br>Mit der Auswahlbox übernehmen oder unter „Kontierung ändern“ anpassen.']);
       } else if (ag && !agGeb) st.unshift(['Stand', 'Noch keine Kontierung. Unter „Kontierung ändern“ eintragen.']);
       else if (ag && agGeb && ag.gespeichert && ag.geaendert) st.unshift(['Stand', '<b>Kontierung geändert</b>, in BuchhaltungsButler noch nicht aktualisiert' + (agFest ? ' (festgeschrieben, nicht änderbar)' : '.')]);
-      var mandantWahl = a && !a.geplant && ['XXL', 'LEV'].indexOf(String(a.mandant || '')) < 0 && a.status === 'erkannt' ? '<div class="notiz" style="margin:4px 0 0">Mandant nicht erkannt: <button type="button" class="link-btn" data-be="mandant-setzen" data-id="' + a.id + '" data-m="XXL">XXL</button> · <button type="button" class="link-btn" data-be="mandant-setzen" data-id="' + a.id + '" data-m="LEV">LEV</button> (die Rückfrage entsteht danach innerhalb von 10 Minuten)</div>' : '';
+      var mandantWahl = '';
+      if (a && !a.geplant && a.status === 'erkannt') {
+        var mBek = ['XXL', 'LEV'].indexOf(String(a.mandant || '')) >= 0;
+        var mBtn = function (m, t) { return '<button type="button" class="link-btn" data-be="mandant-setzen" data-id="' + a.id + '" data-m="' + m + '">' + t + '</button>'; };
+        mandantWahl = '<div class="notiz" style="margin:4px 0 0">' + (mBek ? 'Noch keine Rückfrage: ' + mBtn(a.mandant, 'Zur Kontierung geben (' + esc(a.mandant) + ')') : 'Mandant nicht erkannt: ' + mBtn('XXL', 'XXL') + ' · ' + mBtn('LEV', 'LEV')) + ' (der Vorschlag entsteht danach in wenigen Minuten)</div>';
+      }
       var agLink = ag && !(agGeb && agFest) ? '<div style="margin-top:4px"><button type="button" class="link-btn" data-be="ag-edit" data-bid="' + esc(b.beleg_id) + '" data-titel="' + esc(titel) + '">Kontierung ändern</button></div>' : '';
-      var auswahlZelle = agWahl ? '<input type="checkbox" data-be-sel="' + esc(agKey) + '" data-titel="' + esc(titel) + '"' + (BE.sel[agKey] ? ' checked' : '') + ' aria-label="' + (agGeb ? 'Zum Aktualisieren in BuchhaltungsButler auswählen: ' : 'Zur Übertragung nach BuchhaltungsButler auswählen: ') + esc(titel) + '">' : gp && gpBereit && !gp.gebucht_am && gp.rueckfrage ? '<input type="checkbox" data-be-sel="' + gp.rueckfrage + '" data-titel="' + esc(titel) + '"' + (BE.sel[gp.rueckfrage] ? ' checked' : '') + ' aria-label="Zur Übertragung nach BuchhaltungsButler auswählen: ' + esc(titel) + '">' : '';
+      var auswahlZelle = agWahl ? '<input type="checkbox" data-be-sel="' + esc(agKey) + '" data-titel="' + esc(titel) + '"' + (BE.sel[agKey] ? ' checked' : '') + ' aria-label="' + (agGeb ? 'Zum Aktualisieren in BuchhaltungsButler auswählen: ' : 'Zur Übertragung nach BuchhaltungsButler auswählen: ') + esc(titel) + '">' : gp && gp.sachkonto && !gp.gebucht_am && gp.rueckfrage ? '<input type="checkbox" data-be-sel="' + gp.rueckfrage + '" data-titel="' + esc(titel) + '"' + (BE.sel[gp.rueckfrage] ? ' checked' : '') + ' aria-label="Zur Übertragung nach BuchhaltungsButler auswählen' + (gpBereit ? '' : ' (übernimmt den Vorschlag)') + ': ' + esc(titel) + '"' + (gpBereit ? '' : ' title="Beim Übertragen wird der Vorschlag als Entscheidung übernommen. Zum Ändern vorher „Ändern / mit KI besprechen“."') + '>' : '';
       // Zahlweg (Lastschrift, Überweisung, Erstattung, schon bezahlt) und passende Abbuchung vom Konto, vor dem Buchen
       if (a && a.zahlweg && !blGebucht(r)) {
         var zw = a.zahlweg;
@@ -4819,8 +4824,21 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var zr = zeilen.filter(function (r) { return r.agent && r.agent.geplant && r.agent.geplant.rueckfrage === ids[zi] && r.agent.zahlung && r.agent.zahlung.status === 'auto'; })[0];
       if (zr) { try { await beZahlung(ids[zi], 'zuordnen', zr.agent.zahlung.id, true); } catch (e) { BE.ueb.items[zi].meldung = 'Zahlung konnte nicht zugeordnet werden: ' + e.message; } }
     }
+    // Wer eine Rückfrage anhakt, deren Vorschlag noch nicht bestätigt ist, übernimmt ihn damit: erst bestätigen, dann prüfen und buchen
+    for (var bi = 0; bi < BE.ueb.items.length; bi++) {
+      var bit = BE.ueb.items[bi]; if (bit.ausgang) continue;
+      var br = zeilen.filter(function (r) { return r.agent && r.agent.geplant && r.agent.geplant.rueckfrage === bit.id; })[0];
+      if (br && br.agent.geplant.status !== 'bestaetigt' && br.agent.geplant.status !== 'korrigiert') {
+        try {
+          var bres = await fetch('/webhook/accounting/rueckfrage-antwort', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: bit.id, aktion: 'bestaetigen' }) });
+          var bd = await bres.json().catch(function () { return {}; });
+          if (!bres.ok || bd.ok === false) { bit.status = 'problem'; bit.probleme = ['Der Vorschlag konnte nicht übernommen werden: ' + (bd.message || bd.meldung || bd.fehler || 'Fehler')]; bit.uebersprungen = true; }
+        } catch (be) { bit.status = 'problem'; bit.probleme = [be.message]; bit.uebersprungen = true; }
+      }
+    }
     for (var i = 0; i < BE.ueb.items.length; i++) {
       var it = BE.ueb.items[i];
+      if (it.uebersprungen) continue;
       try {
         var res = it.ausgang ? await fetch('/webhook/accounting/ausgang-buchen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: it.ausgang.mandant, beleg_id: it.ausgang.beleg_id, trocken: true }) }) : await fetch('/webhook/accounting/beleg-vorschau?id=' + it.id);
         var d = await res.json();
@@ -4902,7 +4920,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         else if (w === 'korr-zu') { BE.korr = null; beAlleRender(); }
         else if (w === 'konto-anlegen') kontoAnlegenUndWeiter(b.getAttribute('data-nr'));
         else if (w === 'rf-passt') { var pid = Number(b.getAttribute('data-rf')); b.disabled = true; fetch('/webhook/accounting/rueckfrage-antwort', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: pid, aktion: 'bestaetigen' }) }).then(function (res) { return res.json().catch(function () { return {}; }).then(function (d) { if (!res.ok || d.ok === false) throw new Error(d.message || d.meldung || d.fehler || 'Nicht übernommen'); }); }).then(function () { ['XXL', 'LEV'].forEach(function (m) { if (BL[m] && BL[m].daten) ladeListe('beleg', m, BL[m].daten.monat); }); if (typeof ladeRF === 'function') ladeRF(); }).catch(function (er) { b.disabled = false; BE.meldung = 'Der Vorschlag wurde nicht übernommen: ' + er.message; beAlleRender(); }); }
-        else if (w === 'mandant-setzen') { b.disabled = true; fetch('/webhook/accounting/beleg-mandant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: Number(b.getAttribute('data-id')), mandant: b.getAttribute('data-m') }) }).then(function (res) { return res.json().catch(function () { return {}; }); }).then(function (d) { BE.meldung = d.meldung || ''; beAlleRender(); }).catch(function (er) { b.disabled = false; BE.meldung = er.message; beAlleRender(); }); }
+        else if (w === 'mandant-setzen') { b.disabled = true; fetch('/webhook/accounting/beleg-mandant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: Number(b.getAttribute('data-id')), mandant: b.getAttribute('data-m'), kontieren: true }) }).then(function (res) { return res.json().catch(function () { return {}; }); }).then(function (d) { BE.meldung = d.meldung || ''; beAlleRender(); setTimeout(function () { ['XXL', 'LEV'].forEach(function (m) { if (BL[m] && BL[m].daten) ladeListe('beleg', m, BL[m].daten.monat); }); if (typeof ladeRF === 'function') ladeRF(); }, 45000); }).catch(function (er) { b.disabled = false; BE.meldung = er.message; beAlleRender(); }); }
         else if (w === 'ag-edit') agStart(b.getAttribute('data-bid'), b.getAttribute('data-titel'));
         else if (w === 'ag-zeile') { if (BE.agEd) { agLies(); BE.agEd.teile.push({ sachkonto: '', brutto: '', vat: '19_vat', kst1: '', kst2: '' }); beAlleRender(); } }
         else if (w === 'ag-weg') { if (BE.agEd) { agLies(); BE.agEd.teile.splice(Number(b.getAttribute('data-i')), 1); beAlleRender(); } }
