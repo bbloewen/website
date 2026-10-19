@@ -1,0 +1,37 @@
+{
+  "hinweis": "Gerechnet von tools/build-basketballevent.py aus data/firmenevents.json und data/heimspiele.json — nicht von Hand ändern. n8n liest diese Datei.",
+  "slug": "kuehnst",
+  "sponsor": {
+    "name": "Heiko Kühnst Steuerberater",
+    "kurz": "Heiko Kühnst",
+    "ansprache": "Mandant",
+    "website": "https://www.stb-kuehnst.de/"
+  },
+  "block": "F",
+  "kategorie": "Kategorie 2",
+  "vipTickets": 2,
+  "maMin": 5,
+  "maMax": 20,
+  "kontingent": 200,
+  "anmeldeschluss": "2026-11-06T14:00:00+01:00",
+  "anmeldeschlussText": "Freitag, 06.11.2026, 14:00 Uhr",
+  "empfaenger": {
+    "cc": [
+      "heiko.kuehnst@stbkuehnst.de",
+      "andre.grenzdoerffer@basketball-loewen.com"
+    ],
+    "bcc": [
+      "marko.fliege@basketball-loewen.com"
+    ]
+  },
+  "seite": "https://basketball-loewen.com/partner/basketballevent-einladung.html",
+  "spiel": {
+    "datum": "08.11.2026",
+    "wochentag": "Sonntag",
+    "zeit": "17:00",
+    "einlass": "16:00",
+    "gegner": "Culture City Weimar",
+    "lang": "Sonntag, 08.11.2026, 17:00 Uhr",
+    "seite": "https://basketball-loewen.com/saison/profis/gameday/2026-11-08-culture-city-weimar.html"
+  }
+}

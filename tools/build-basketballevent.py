@@ -58,6 +58,7 @@ import json
 import re
 import sys
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
@@ -65,6 +66,8 @@ AKTIONEN_DATEI = REPO / "data" / "firmenevents.json"
 HEIMSPIELE_DATEI = REPO / "data" / "heimspiele.json"
 EINLADUNG = REPO / "partner" / "basketballevent-einladung.html"
 UMFRAGE = REPO / "partner" / "basketballevent-umfrage.html"
+AKTIV_DATEI = REPO / "data" / "firmenevent-aktiv.json"
+BERLIN = ZoneInfo("Europe/Berlin")
 
 BASIS = "https://basketball-loewen.com"
 EINLADUNG_URL = f"{BASIS}/partner/basketballevent-einladung.html"
@@ -1001,6 +1004,56 @@ def skript_umfrage(aktion):
 </script>"""
 
 
+def schreibe_aktiv(aktion, spiel, zeit):
+    """Schreibt data/firmenevent-aktiv.json — die Fassung, die n8n liest.
+
+    Warum eine abgeleitete Datei und nicht firmenevents.json selbst: n8n braucht
+    genau eine Aktion mit bereits aufgeloestem Spiel (Gegner, Datum, Uhrzeit,
+    Einlass) und einem Anmeldeschluss mit Zeitzone. Das aus zwei Dateien
+    zusammenzusuchen und Datumslogik in einem Code-Knoten nachzubauen waere
+    genau die Doppelpflege, die wir hier vermeiden wollen. Dasselbe Muster wie
+    bei data/dauerkarte-preise.json: eine gepflegte Quelle, eine gerechnete
+    Datei, die die Automatisierung abruft.
+
+    Gelesen wird sie vom Workflow "Website: Firmenevent-Einladung - Anmeldung
+    verarbeiten" ueber https://basketball-loewen.com/data/firmenevent-aktiv.json.
+    """
+    schluss = datetime.fromisoformat(aktion["anmeldeschluss"]).replace(tzinfo=BERLIN)
+    inhalt = {
+        "hinweis": ("Gerechnet von tools/build-basketballevent.py aus data/firmenevents.json und "
+                    "data/heimspiele.json — nicht von Hand ändern. n8n liest diese Datei."),
+        "slug": aktion["slug"],
+        "sponsor": {
+            "name": aktion["sponsor"]["name"],
+            "kurz": aktion["sponsor"]["kurz"],
+            "ansprache": aktion["sponsor"].get("ansprache", "Kunde"),
+            "website": aktion["sponsor"]["website"],
+        },
+        "block": aktion["block"],
+        "kategorie": aktion["kategorie"],
+        "vipTickets": aktion["vipTickets"],
+        "maMin": aktion["maMin"],
+        "maMax": aktion["maMax"],
+        "kontingent": aktion["kontingent"],
+        "anmeldeschluss": schluss.isoformat(),
+        "anmeldeschlussText": zeit["schluss_lang"],
+        "empfaenger": aktion.get("empfaenger", {"cc": [], "bcc": []}),
+        "seite": EINLADUNG_URL,
+        "spiel": {
+            "datum": zeit["datum"],
+            "wochentag": zeit["wochentag"],
+            "zeit": zeit["zeit"],
+            "einlass": zeit["einlass"],
+            "gegner": spiel["gegner"],
+            "lang": f"{zeit['wochentag']}, {zeit['datum']}, {zeit['zeit']} Uhr",
+            "seite": f"{BASIS}/saison/profis/gameday/{spiel['seiteSlug']}.html",
+        },
+    }
+    neu = json.dumps(inhalt, ensure_ascii=False, indent=2) + "\n"
+    alt = AKTIV_DATEI.read_text(encoding="utf-8") if AKTIV_DATEI.exists() else None
+    return neu, alt
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true")
@@ -1010,9 +1063,11 @@ def main():
     aktion["_seiteSlug"] = spiel["seiteSlug"]
     zeit = datum_teile(spiel, aktion)
 
+    aktiv_neu, aktiv_alt = schreibe_aktiv(aktion, spiel, zeit)
     geschrieben = 0
     for pfad, neu in ((EINLADUNG, baue_einladung(aktion, spiel, zeit)),
-                      (UMFRAGE, baue_umfrage(aktion, spiel, zeit))):
+                      (UMFRAGE, baue_umfrage(aktion, spiel, zeit)),
+                      (AKTIV_DATEI, aktiv_neu)):
         alt = pfad.read_text(encoding="utf-8") if pfad.exists() else None
         if alt == neu:
             continue
@@ -1025,7 +1080,7 @@ def main():
         print(f"  geschrieben: {pfad.relative_to(REPO)}")
 
     print(f"  Aktion „{aktion['slug']}“ ({aktion['sponsor']['name']}), Spiel {spiel['datum']} "
-          f"gegen {spiel['gegner']} — {geschrieben} von 2 Seiten "
+          f"gegen {spiel['gegner']} — {geschrieben} von 3 Dateien "
           f"{'zu ändern' if args.check else 'geschrieben'}")
     return 1 if (args.check and geschrieben) else 0
 
