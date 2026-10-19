@@ -526,7 +526,8 @@ def skript_einladung(aktion, spiel, zeit):
   var FELDNAMEN = {{
     firma: 'Firma', ansprechpartner: 'Ansprechpartner', ap_email: 'E-Mail des Ansprechpartners',
     gf_name: 'Geschäftsführung', gf_email: 'E-Mail der Geschäftsführung',
-    mitarbeitende: 'Anzahl Mitarbeitende', datenschutz: 'Einverständnis zum Datenschutz'
+    mitarbeitende: 'Anzahl Mitarbeitende', datenschutz: 'Einverständnis zum Datenschutz',
+    auswahl: 'die Auswahl (VIP-Tickets oder Tickets für Mitarbeitende)'
   }};
   var MAILMUSTER = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]{{2,}}$/;
 
