@@ -3500,7 +3500,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   function ohneGegenpartei(t, gp) { return String(t || '').split(/\s+-\s+/).filter(function (seg, i, a) { return i === 0 || i < a.length - 1 || seg.trim().toLowerCase() !== String(gp || '').trim().toLowerCase().replace(/\s*\n\s*/g, ' '); }).join(' - ').trim(); }
   function zbgFeld(p, k) {
     var bu = p.buchungen || [], belege = p.belege || [];
-    if (!bu.length || p.plan || p.uebertragen) return '';
+    if (!bu.length || p.plan) return '';
+    if (p.uebertragen) { var tu = ((((p.belege || [])[0] || {}).konten || [])[0] || {}).text || (bu[0] || {}).text || ''; return tu ? '<div class="notiz" style="margin:2px 0 0;white-space:normal">Buchungstext: „' + esc(ohneGegenpartei(tu, ((p.belege || [])[0] || {}).gegenpartei || p.gegenpartei)) + '“ · ändern, sobald BuchhaltungsButler nachgelesen ist (nachts oder „Aktualisieren“)</div>' : ''; }
     var b0 = belege[0], text = b0 && (b0.konten || [])[0] && b0.konten[0].text ? ohneGegenpartei(b0.konten[0].text, b0.gegenpartei) : ohneGegenpartei((bu[0] || {}).text, (bu[0] || {}).beleg_gegenpartei || p.gegenpartei);
     var ed = BE.zbg && BE.zbg.tx === Number(p.transaction_id) && BE.zbg.k === k ? BE.zbg : null;
     if (!ed) return '<div class="notiz" style="margin:2px 0 0;white-space:normal">Buchungstext: „' + esc(text) + '“ · <button type="button" class="link-btn" style="font-size:12px" data-be="zbg-edit" data-tx="' + esc(String(p.transaction_id)) + '" data-k="' + esc(k) + '">ändern</button></div>';
@@ -3515,6 +3516,55 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       '<label class="text-klein" style="display:block;margin-top:4px"><input type="checkbox" data-be="zbg-std"' + (ed.standard ? ' checked' : '') + '> Als Standardtext für künftige Belege von ' + esc(String(v.gegenpartei || p.gegenpartei || '').replace(/\s*\n\s*/g, ' ')) + ' merken</label>' +
       '<div style="display:flex;gap:8px;margin-top:4px;align-items:center"><button type="button" class="btn btn-secondary" style="padding:4px 10px" data-be="zbg-weiter">Ändern …</button><button type="button" class="link-btn" data-be="zbg-abbruch">Abbrechen</button></div>' +
       (ed.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:4px;white-space:normal">' + esc(ed.fehler) + '</div>' : '') + '</div>';
+  }
+  // Offene wiederkehrende Zahlung: Buchungstext-Vorschlag wie beim Übertragen (Standardtext des Kreditors oder Text der Vorbild-Zahlung, dazu Datum und Kurzname)
+  function kurzname(n) { return String(n || '').split(/[,\n]/)[0].split('(')[0].replace(/\s+(GmbH|AG|SE|oHG|UG|KG|mbH|e\. ?K\.|&|Co\.?)(\s.*)?$/i, '').trim(); }
+  function wkvZweck(p, wkv) {
+    var st = wkv.standard || [], vt = ohneGegenpartei(((wkv.zeilen || [])[0] || {}).text, wkv.kreditor_name);
+    if (st.length === 1) return st[0];
+    var tr = st.filter(function (x) { return vt.toLowerCase().indexOf(String(x).toLowerCase()) >= 0; }); if (tr.length === 1) return tr[0];
+    var kn = kurzname(wkv.kreditor_name), esc2 = function (x) { return String(x || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); };
+    vt = vt.replace(/EIGENBELEG-[0-9-]+/gi, '').replace(new RegExp(esc2(wkv.kreditor_name), 'ig'), '').replace(kn ? new RegExp(esc2(kn), 'ig') : /$^/, '');
+    var z = vt.replace(/(bis\s+)?((0[1-9]|1[0-2])(-(0[1-9]|1[0-2]))?[\/.]20\d\d|\d{2}\.\d{2}\.\d{4})/gi, '').replace(/\b(beitrags|kunden|vertrags|rechnungs)?-?nr\.?\s*[0-9]+/gi, '').replace(/\b[0-9]{5,}\b/g, '');
+    if (kn) z = z.replace(new RegExp('\\s*' + kn.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*$', 'i'), '');
+    z = z.replace(/^[\s\/-]+|[\s\/-]+$/g, '').replace(/\s+/g, ' ').trim();
+    if (z.replace(/[^a-zäöüß]/gi, '').length < 4) z = String(((wkv.zeilen || [])[0] || {}).konto_name || '').trim();
+    return z.length > 45 ? z.slice(0, 46).replace(/\s+\S*$/, '') : z;
+  }
+  function wkvText(p, zweck, wkv) { var d = String(p.datum || '').slice(0, 10), t = String(zweck || '').trim(), kn = kurzname(wkv.kreditor_name); if (!t) return ''; if (d && t.length + 11 <= 60) t += ' ' + d.slice(8, 10) + '.' + d.slice(5, 7) + '.' + d.slice(0, 4); if (kn && t.toLowerCase().indexOf(kn.toLowerCase()) < 0 && t.length + 1 + kn.length <= 60) t += ' ' + kn; return t.slice(0, 60); }
+  function wkvFeld(p, k, wkv) {
+    if (!wkv) return '';
+    var ed = BE.zwv && BE.zwv.tx === Number(p.transaction_id) && BE.zwv.k === k ? BE.zwv : null, zweck = wkvZweck(p, wkv);
+    if (!ed) return '<div class="notiz" style="margin:2px 0 0;white-space:normal">Buchungstext (Vorschlag): „' + esc(wkvText(p, zweck, wkv)) + '“ · <button type="button" class="link-btn" style="font-size:12px" data-be="zwv-edit" data-tx="' + esc(String(p.transaction_id)) + '" data-k="' + esc(k) + '">ändern</button></div>';
+    return '<div class="btedit" style="margin-top:4px"><label class="text-klein" for="zwv-wert" style="display:block">Buchungstext (Standardtext; Datum und Kreditor werden angehängt wie bei Belegen)</label><input id="zwv-wert" class="eingabe-klein" style="width:100%" maxlength="45" data-be="zwv-wert" value="' + esc(ed.wert) + '">' +
+      '<label class="text-klein" style="display:block;margin-top:4px"><input type="checkbox" data-be="zwv-std"' + (ed.standard ? ' checked' : '') + '> Als Standardtext für künftige Belege von ' + esc(wkv.kreditor_name || '') + ' merken</label>' +
+      '<div class="notiz" style="margin:2px 0 0;white-space:normal">Speichern legt die Buchung wie vorgeschlagen an (Kreditor ' + esc(wkv.kreditor) + ', Konto ' + esc((wkv.zeilen || []).map(function (x) { return x.konto; }).join(', ')) + '); übertragen wird mit dem Haken.</div>' +
+      '<div style="display:flex;gap:8px;margin-top:4px;align-items:center"><button type="button" class="btn btn-primary" style="padding:4px 10px" data-be="zwv-speichern"' + (ed.laeuft ? ' disabled' : '') + '>' + (ed.laeuft ? 'Speichere …' : 'Speichern') + '</button><button type="button" class="link-btn" data-be="zwv-abbruch">Abbrechen</button></div>' +
+      (ed.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:4px;white-space:normal">' + esc(ed.fehler) + '</div>' : '') + '</div>';
+  }
+  async function zwvSpeichern() {
+    var ed = BE.zwv; if (!ed || ed.laeuft) return;
+    var zd = ZA[ed.k] && ZA[ed.k].daten, p = zd && (zd.zahlungen || []).filter(function (x) { return Number(x.transaction_id) === ed.tx; })[0], wkv = p && p.wk_vorschlag;
+    if (!wkv) return;
+    var wert = String(ed.wert || '').trim(); if (wert.length < 2) { ed.fehler = 'Bitte einen Text eingeben.'; beAlleRender(); return; }
+    var betrag = Math.abs(Number(p.betrag)), zl = wkv.zeilen || [];
+    if (zl.some(function (x) { return !x.vat; })) { ed.fehler = 'Das Vorbild ist mit einem Sonder-Steuerschlüssel gebucht. Bitte über „Ändern / mit KI besprechen“ festlegen.'; beAlleRender(); return; }
+    var summe = zl.reduce(function (s2, x) { return s2 + Math.abs(Number(x.betrag || 0)); }, 0);
+    if (zl.length > 1 && Math.abs(summe - betrag) > 0.01) { ed.fehler = 'Das Vorbild hat mehrere Zeilen mit anderem Betrag. Bitte über „Ändern / mit KI besprechen“ aufteilen.'; beAlleRender(); return; }
+    ed.laeuft = true; ed.fehler = ''; beAlleRender();
+    try {
+      var zeilen = zl.map(function (x) { return { sachkonto: x.konto, betrag: zl.length === 1 ? betrag : Math.abs(Number(x.betrag)), vat: x.vat, kst1: x.kst1 || '', kst2: x.kst2 || '', text: wert }; });
+      var res = await fetch('/webhook/accounting/zahlung-speichern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: ed.k === 'XXL' ? 'XXL' : 'LEV', transaction_id: ed.tx, zeilen: zeilen, dialog: [], weg: 'wiederkehrend', kreditor: wkv.kreditor, zweck: wert }) });
+      var d = await res.json().catch(function () { return {}; });
+      if (!res.ok || d.ok === false) throw new Error((d.probleme || []).join(' ') || d.meldung || 'Nicht gespeichert.');
+      if (ed.standard) {
+        var rs = await fetch('/webhook/accounting/buchungstext-aendern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ aktion: 'regel_neu', aussteller: wkv.kreditor_name || p.gegenpartei, zweck: wert }) });
+        var ds = await rs.json().catch(function () { return {}; });
+        if (!rs.ok || !ds.ok) throw new Error('Gespeichert, aber nicht als Standardtext: ' + (ds.message || ds.fehler || 'Fehler'));
+      }
+      BE.zwv = null; ladeListe('zahlung', ed.k, zd.monat);
+    } catch (x) { ed.laeuft = false; ed.fehler = x.message; }
+    beAlleRender();
   }
   async function zbgLaden(k, tx) {
     BE.zbg = { k: k, tx: tx, wert: '', standard: false, laedt: true, schritt: 'eingabe', vorschau: null, probleme: [], fehler: '' }; beAlleRender();
@@ -3793,7 +3843,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var betrag = Number(p.betrag || 0);
       // Haken und Symbole teilen sich die ersten beiden Spalten, der Status steht darunter über beide (bricht nicht um)
       return '<tr><td colspan="2"><div style="display:flex;gap:8px;align-items:center">' + (wahl ? '<div style="min-width:18px">' + wahl + '</div>' : '<div style="min-width:18px"></div>') + symbole + '</div><div class="notiz" style="margin:2px 0 0;white-space:nowrap"' + (p.autonom ? ' title="Automatisch gebucht, gelernt aus den bestätigten Zahlungen vom ' + esc((p.autonom.vorbild || []).map(function (v) { return formatDate(v.datum); }).join(' und ')) + '. Zum Ändern: Ändern / mit KI besprechen."' : '') + '>' + esc(statusText) + '</div></td><td class="nowrap">' + esc(p.datum ? formatDate(String(p.datum).slice(0, 10)) : '') + '</td>' +
-        '<td><div class="fett">' + esc(String(p.gegenpartei || '–').replace(/\s*\n\s*/g, ' ')) + '</div><div class="notiz" style="margin:0">' + esc(String(p.zweck || '').replace(/\s*\n\s*/g, ' ').slice(0, 160)) + '</div>' + zbtFeld(p, k) + zbgFeld(p, k) + (p.plan && p.plan.quelle === 'autonom' && p.plan.meldung ? '<div class="hinweis-warn" style="margin:4px 0 0;white-space:normal">' + esc(p.plan.meldung) + '</div>' : '') + (p.autonom ? '<div class="notiz" style="margin:2px 0 0">Automatisch gebucht wie die Zahlungen vom ' + esc((p.autonom.vorbild || []).map(function (v) { return formatDate(v.datum); }).join(' und ')) + '</div>' : '') + '<div><button type="button" class="link-btn" style="font-size:12px" data-be="zk-start" data-tx="' + esc(String(p.transaction_id)) + '" data-k="' + esc(k) + '">Ändern / mit KI besprechen</button></div>' + (function () {
+        '<td><div class="fett">' + esc(String(p.gegenpartei || '–').replace(/\s*\n\s*/g, ' ')) + '</div><div class="notiz" style="margin:0">' + esc(String(p.zweck || '').replace(/\s*\n\s*/g, ' ').slice(0, 160)) + '</div>' + zbtFeld(p, k) + zbgFeld(p, k) + wkvFeld(p, k, wkv) + (vs.length && !vs[0].teile && vs[0].text ? '<div class="notiz" style="margin:2px 0 0;white-space:normal">Buchungstext (aus dem Beleg): „' + esc(ohneGegenpartei(vs[0].text, vs[0].gegenpartei)) + '“ · ändern im Belegbereich</div>' : '') + (p.plan && p.plan.quelle === 'autonom' && p.plan.meldung ? '<div class="hinweis-warn" style="margin:4px 0 0;white-space:normal">' + esc(p.plan.meldung) + '</div>' : '') + (p.autonom ? '<div class="notiz" style="margin:2px 0 0">Automatisch gebucht wie die Zahlungen vom ' + esc((p.autonom.vorbild || []).map(function (v) { return formatDate(v.datum); }).join(' und ')) + '</div>' : '') + '<div><button type="button" class="link-btn" style="font-size:12px" data-be="zk-start" data-tx="' + esc(String(p.transaction_id)) + '" data-k="' + esc(k) + '">Ändern / mit KI besprechen</button></div>' + (function () {
           if (unten) return '';
           var sr = zahlungRegel(p); if (!sr) return '';
           var h2 = '<div class="' + (sr.verstoss ? 'hinweis-warn' : 'notiz') + '" style="margin:4px 0 0;white-space:normal"><b>Regel Steuerberater (' + esc(sr.n) + ')' + (sr.verstoss ? ', so bisher nicht richtig gebucht' : '') + ':</b> ' + esc(sr.h) + '</div>';
@@ -5459,6 +5509,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       });
       p.addEventListener('toggle', function (e) { if (e.target && e.target.hasAttribute && e.target.hasAttribute('data-be-uebertragen')) BE.uebertragenAuf = e.target.open; }, true);
       p.addEventListener('change', function (e) {
+        var zvs = e.target.closest('[data-be="zwv-std"]'); if (zvs) { if (BE.zwv) BE.zwv.standard = zvs.checked; return; }
         var zgs = e.target.closest('[data-be="zbg-std"]'); if (zgs) { if (BE.zbg) BE.zbg.standard = zgs.checked; return; }
         var zbs = e.target.closest('[data-be="zbt-std"]'); if (zbs) { if (BE.zbt) BE.zbt.standard = zbs.checked; return; }
         var wks = e.target.closest('[data-be="zs-wk-std"]'); if (wks) { if (BE.zue && BE.zue.items[BE.zue.idx || 0]) BE.zue.items[BE.zue.idx || 0].wkStd = wks.checked; return; }
@@ -5473,6 +5524,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         var at = e.target.closest('[data-be="agt-wert"]'); if (at) { if (BE.agTe) BE.agTe.wert = at.value; return; }
         var ak = e.target.closest('[data-be="agki-text"]'); if (ak) { if (BE.agKi) BE.agKi.text = ak.value; return; }
         var zkt = e.target.closest('[data-be="zk-text"]'); if (zkt) { if (BE.zk) BE.zk.text = zkt.value; return; }
+        var zvw = e.target.closest('[data-be="zwv-wert"]'); if (zvw) { if (BE.zwv) BE.zwv.wert = zvw.value; return; }
         var zgw = e.target.closest('[data-be="zbg-wert"]'); if (zgw) { if (BE.zbg) BE.zbg.wert = zgw.value; return; }
         var zbw = e.target.closest('[data-be="zbt-wert"]'); if (zbw) { if (BE.zbt) BE.zbt.wert = zbw.value; return; }
         var wkt = e.target.closest('[data-be="zs-wk-zweck"]'); if (wkt) { if (BE.zue && BE.zue.items[BE.zue.idx || 0]) BE.zue.items[BE.zue.idx || 0].wkZweck = wkt.value; return; }
@@ -5571,6 +5623,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         else if (w === 'zk-senden') zkSenden();
         else if (w === 'zbt-edit') { var bk = b.getAttribute('data-k'), bd = ZA[bk] && ZA[bk].daten, bp = bd && (bd.zahlungen || []).filter(function (x) { return Number(x.transaction_id) === Number(b.getAttribute('data-tx')); })[0]; if (!bp || !bp.plan) return; BE.zbt = { k: bk, tx: Number(bp.transaction_id), wert: bp.plan.zweck || String((bp.plan.zeilen[0] || {}).text || '').replace(/\s+\d{2}\.\d{2}\.\d{4}.*$/, ''), standard: false, laeuft: false, fehler: '' }; beAlleRender(); var zi = document.getElementById('zbt-wert'); if (zi) zi.focus(); }
         else if (w === 'zbt-speichern') zbtSpeichern();
+        else if (w === 'zwv-edit') { var vk = b.getAttribute('data-k'), vd = ZA[vk] && ZA[vk].daten, vp = vd && (vd.zahlungen || []).filter(function (x) { return Number(x.transaction_id) === Number(b.getAttribute('data-tx')); })[0]; if (!vp || !vp.wk_vorschlag) return; BE.zwv = { k: vk, tx: Number(vp.transaction_id), wert: wkvZweck(vp, vp.wk_vorschlag), standard: false, laeuft: false, fehler: '' }; beAlleRender(); var vi = document.getElementById('zwv-wert'); if (vi) vi.focus(); }
+        else if (w === 'zwv-speichern') zwvSpeichern();
+        else if (w === 'zwv-abbruch') { BE.zwv = null; beAlleRender(); }
         else if (w === 'zbg-edit') zbgLaden(b.getAttribute('data-k'), Number(b.getAttribute('data-tx')));
         else if (w === 'zbg-weiter') { if (!BE.zbg) return; if (String(BE.zbg.wert || '').trim().length < 2) { BE.zbg.fehler = 'Bitte einen Text eingeben.'; beAlleRender(); return; } if (String(BE.zbg.wert).trim() === String((BE.zbg.vorschau || {}).alt || '').trim() && !BE.zbg.standard) { BE.zbg.fehler = 'Der Text ist unverändert.'; beAlleRender(); return; } BE.zbg.fehler = ''; BE.zbg.schritt = 'bestaetigen'; beAlleRender(); }
         else if (w === 'zbg-zurueck') { if (BE.zbg) { BE.zbg.schritt = 'eingabe'; BE.zbg.fehler = ''; } beAlleRender(); }
@@ -6373,7 +6428,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261020121002';
+  var BUILD = '20261020122517';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
