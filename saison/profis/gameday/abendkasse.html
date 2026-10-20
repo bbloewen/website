@@ -8,7 +8,7 @@
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="stylesheet" href="/css/colors_and_type.css" />
 <link rel="stylesheet" href="/css/site.css" />
-<link rel="stylesheet" href="/css/seat-picker.css" />
+<link rel="stylesheet" href="/css/seat-picker.css?v=1792495207" />
 <style>
   /* Nur auf dieser Seite: grossflaechige Bedienung ohne Gefummel, lesbar ohne Brille
      (Marko, 30.09.-01.10.2026) - seat-picker.css/js selbst bleiben unangetastet, damit
@@ -234,7 +234,7 @@
   </div>
 </div>
 
-<script src="/js/seat-picker.js?v=1792494646"></script>
+<script src="/js/seat-picker.js?v=1792495207"></script>
 <script src="opi-bridge.js?v=7"></script>
 <script>
   (function () {
@@ -636,10 +636,12 @@ document.addEventListener('DOMContentLoaded', function () {
   // Zustandslos: die Farben kommen aus denselben CSS-Variablen wie im SeatPicker, nicht aus dem
   // aktuellen Kachel-Zustand - sonst wuerde ein zweiter Durchlauf auf demselben DOM wieder zurueck tauschen.
   function farbenBestimmen() {
-    var kat2 = { bg: cssFarbe('--seatplan-cat-kat2', '#D9DEE3'), border: cssFarbe('--seatplan-cat-kat2-border', '#B9C1C8') };
-    var kat3 = { bg: cssFarbe('--seatplan-cat-kat3', 'rgba(42,157,143,.55)'), border: cssFarbe('--seatplan-cat-kat3-border', 'rgba(42,157,143,.9)') };
+    // Seit 20.10.2026 liefert seat-picker.css die Farben selbst richtig (Kat. II gruen, Kat. III grau);
+    // grau = Kategorie III, gruen = Kategorie II (inkl. CS).
+    var kat2 = { bg: cssFarbe('--seatplan-cat-kat2', 'rgba(42,157,143,.55)'), border: cssFarbe('--seatplan-cat-kat2-border', 'rgba(42,157,143,.9)') };
+    var kat3 = { bg: cssFarbe('--seatplan-cat-kat3', '#D9DEE3'), border: cssFarbe('--seatplan-cat-kat3-border', '#B9C1C8') };
     var kat1 = { bg: cssFarbe('--seatplan-cat-kat1', ''), border: cssFarbe('--seatplan-cat-kat1-border', '') };
-    return { grau: kat2, gruen: kat3, kat1: kat1 };
+    return { grau: kat3, gruen: kat2, kat1: kat1 };
   }
   function farbenTauschen() {
     if (!picker) return;

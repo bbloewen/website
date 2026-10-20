@@ -8,10 +8,12 @@
 :root {
   --seatplan-cat-kat1: rgba(232, 119, 34, .55);
   --seatplan-cat-kat1-border: rgba(232, 119, 34, .9);
-  --seatplan-cat-kat2: #D9DEE3;
-  --seatplan-cat-kat2-border: #B9C1C8;
-  --seatplan-cat-kat3: rgba(42, 157, 143, .55);
-  --seatplan-cat-kat3-border: rgba(42, 157, 143, .9);
+  /* Farben (Marko, 05.10.2026 für die Abendkasse, 20.10.2026 überall): Kategorie II grün, Kategorie III grau.
+     Block F ist seit 20.10.2026 Kategorie III und damit grau wie Block A. */
+  --seatplan-cat-kat2: rgba(42, 157, 143, .55);
+  --seatplan-cat-kat2-border: rgba(42, 157, 143, .9);
+  --seatplan-cat-kat3: #D9DEE3;
+  --seatplan-cat-kat3-border: #B9C1C8;
   --seatplan-cat-fanblock: rgba(244, 163, 0, .55);
   --seatplan-cat-fanblock-border: rgba(244, 163, 0, .9);
   --seatplan-cat-vip: rgba(179, 57, 44, .55);
