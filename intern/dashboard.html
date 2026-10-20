@@ -3462,11 +3462,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var typ = null;
     if (/kfz-steuer|kraftfahrzeugsteuer/.test(t)) typ = { n: 'Kfz-Steuer', h: 'Direkt auf Kfz-Steuern (45100), Kennzeichen in den Buchungstext, kein Beleg nötig.' };
     else if (!/basketball|bundesliga/.test(t) && /barmer|aok|techniker|\btk\b|salus|\bbkk\b|knappschaft|\bikk\b|\bdak\b|kkh|hkk|debeka|krankenkasse|ersatzkasse|beitragsnachweis|gkv/.test(t)) typ = { n: 'Krankenkasse', h: 'Direkt buchen: Beitrag auf Verbindlichkeiten soziale Sicherheit (17420), Erstattung auf 15200, Belegfeld 1 mit Jahr und Monat. Nicht über Debitor oder Kreditor.' };
-    else if (/finanzamt|bundeskasse|steuernummer|lohnsteuer|umsatzsteuer|\bust\b/.test(t)) typ = { n: 'Finanzamt', h: 'Nie über Debitor oder Kreditor, sonst löst eine Erstattung automatisch Umsatzsteuer aus. Lohnsteuer auf 17410, Belegfeld 1 mit Jahr und Monat; im Buchungstext angeben, was bezahlt wurde.' };
+    else if (/finanzamt|bundeskasse|steuernummer|lohnsteuer|umsatzsteuer|\bust\b/.test(t)) typ = { n: 'Finanzamt', h: 'Nie über Debitor oder Kreditor, sonst löst eine Erstattung automatisch Umsatzsteuer aus. Lohnsteuer auf 17410, Umsatzsteuer auf 17890 (Umsatzsteuer laufendes Jahr), Belegfeld 1 mit Jahr und Monat; im Buchungstext angeben, was bezahlt wurde.' };
     else if (/\blohn\b|gehalt|vergütung|netto.*(lohn|gehalt)/.test(t)) typ = { n: 'Lohn', h: 'Nettolohn auf 17400, nie über Kreditor, Belegfeld 1 mit Jahr und Monat (zum Beispiel 202609).' };
     else if (/kontoführung|kontoabschluss|abrechnung.*(entgelt|konto)|bankgebühr|entgelt|kontopauschale|überziehungszins/.test(t)) typ = { n: 'Bankgebühren', h: 'Direkt auf Bankgebühren (49700) buchen, nicht über Kreditor; prüfen, ob die Bank Vorsteuer mit abbucht.' };
-    else if (/kartenzahlung|girocard|ec-karte|\bvisa\b|mastercard/.test(t)) typ = { n: 'EC-Karte', h: 'Mit Firmen-EC-Karte bezahlt: Beleg auf den Kreditor Sparkasse. Fehlt der Beleg, auf durchlaufende Posten, nie auf den Kreditor einer Person.' };
-    if (!typ) return eigenbeleg ? { n: 'Eigenbeleg', h: 'Eigenbelege sind nur in engen Grenzen zulässig (ungefähr fünfmal im Jahr). Beleg anfordern oder auf durchlaufende Posten.', verstoss: true } : null;
+    else if (/kartenzahlung|girocard|ec-karte|\bvisa\b|mastercard/.test(t)) typ = { n: 'EC-Karte', h: 'Mit Firmen-EC-Karte bezahlt: Beleg auf den Kreditor Sparkasse. Fehlt der Beleg, auf durchlaufende Posten (15900), nie auf den Kreditor einer Person.' };
+    if (!typ) return eigenbeleg ? { n: 'Eigenbeleg', h: 'Eigenbelege sind nur in engen Grenzen zulässig (ungefähr fünfmal im Jahr). Beleg anfordern oder auf durchlaufende Posten (15900).', verstoss: true } : null;
     typ.verstoss = (typ.n !== 'EC-Karte' && personenkonto) || eigenbeleg;
     return typ;
   }
@@ -3484,10 +3484,10 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   async function zkSenden() {
     var q = BE.zk; if (!q || q.laeuft) return;
     var ta = document.getElementById('zk-text'); if (ta) q.text = ta.value;
-    var text = String(q.text || '').trim(); if (text.length < 3) { q.fehler = 'Bitte schreibe oder sprich, was anders sein soll.'; beAlleRender(); return; }
+    var text = String(q.text || '').trim(); if (!text) { q.fehler = 'Bitte schreibe oder sprich, was anders sein soll.'; beAlleRender(); return; }
     q.laeuft = true; q.fehler = ''; beAlleRender();
     try {
-      var res = await fetch('/webhook/accounting/zahlung-korrektur', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: q.mandant, transaction_id: q.tx, text: text, aktuell: { zeilen: q.zeilen }, regel: q.regel }) });
+      var res = await fetch('/webhook/accounting/zahlung-korrektur', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: q.mandant, transaction_id: q.tx, text: text, aktuell: { zeilen: q.zeilen }, regel: q.regel, dialog: q.verlauf.slice(-12) }) });
       var d = await res.json().catch(function () { return {}; });
       if (!d.ok) throw new Error(d.meldung || d.message || 'Die KI hat gerade nicht geantwortet.');
       var antwort = d.antwort || '';
@@ -3682,7 +3682,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       (BE.meldung ? '<div class="erfolg" role="status" style="margin:8px 12px">' + esc(BE.meldung) + '</div>' : '') +
       '<div class="notiz" style="margin:6px 12px;display:flex;gap:14px;flex-wrap:wrap;align-items:center">' + ikSymbol('dok', true, 'Beleg zugeordnet') + ' Beleg zugeordnet ' + ikSymbol('dok', false, 'Eigenbeleg', 'eigen') + ' Eigenbeleg ' + ikSymbol('dok', false, 'wiederkehrend, kein Beleg nötig', 'blau') + ' wiederkehrend, kein Beleg nötig ' + ikSymbol('dok', false, 'beleglos', 'grau') + ' beleglos ' + ikSymbol('dok', false, 'offen') + ' offen</div>' +
       '<div class="tbl-voll tbl-fix"><table class="tbl kompakt fest">' + kopf + '<tbody>' + (offenZ.length ? offenZ.map(function (p) { return zeile(p, false); }).join('') : '<tr><td colspan="10" class="leer">Keine offenen Zahlungen in dieser Ansicht.</td></tr>') + '</tbody></table></div>' +
-      (d.stand ? '<div class="card-fuss">Stand der BuchhaltungsButler-Daten: ' + esc(formatDateTime(d.stand)) + (Number(kp.ohne_konto || 0) ? ' · ' + esc(zahl(kp.ohne_konto)) + ' Umsätze sind keinem Bankkonto zugeordnet.' : '') + '</div>' : '') + '</div>';
+      (Number(kp.ohne_konto || 0) ? '<div class="card-fuss">' + esc(zahl(kp.ohne_konto)) + ' Umsätze sind keinem Bankkonto zugeordnet.</div>' : '') + '</div>';
     h += '<details class="card" style="margin-top:16px" open><summary class="card-kopf" style="cursor:pointer">In BuchhaltungsButler gebucht · ' + esc(zahl(gebuchtZ.length)) + '</summary><div class="tbl-voll tbl-fix"><table class="tbl kompakt fest">' + kopf + '<tbody>' + (gebuchtZ.length ? gebuchtZ.map(function (p) { return zeile(p, true); }).join('') : '<tr><td colspan="10" class="leer">Keine gebuchten Zahlungen in dieser Ansicht.</td></tr>') + '</tbody></table></div></details>';
     return h;
   }
@@ -6203,7 +6203,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261019230242';
+  var BUILD = '20261020073444';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
