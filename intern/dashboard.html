@@ -2913,7 +2913,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     } catch (e) { z.fehler = e.message; }
     z.laedt = false; renderAccounting(art, k);
   }
-  function renderAccounting(art, k) {
+  function renderAccounting(art, k) { ohneSprung(function () { renderAccountingRoh(art, k); }); }
+  function renderAccountingRoh(art, k) {
     var id = tabVon(art === 'beleg' ? BE_MANDANT : ZA_KONTO, k);
     var el = bePanel(id); if (!el) return;
     var z = art === 'beleg' ? BL[k] : ZA[k];
@@ -3740,13 +3741,13 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
           var ds2 = await rs2.json().catch(function () { return {}; });
           if (!rs2.ok || !ds2.ok) { it.status = 'fehler'; it.meldung = 'Standardtext nicht gespeichert: ' + (ds2.message || ds2.fehler || 'Fehler') + '. Es wurde nichts gebucht.'; u.phase = 'schritt'; beAlleRender(); return; }
         }
-        var r2 = await fetch('/webhook/accounting/zahlung-wiederkehrend', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: u.mandant, transaction_id: it.tx, ausfuehren: ausf, zweck: ausf && wkZweck ? wkZweck : undefined }) });
+        var r2 = await fetch('/webhook/accounting/zahlung-wiederkehrend', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: u.mandant, transaction_id: it.tx, ausfuehren: ausf, zweck: ausf && wkZweck ? wkZweck : undefined, beleg_id: it.beleg_vorhanden || undefined }) });
         var d2 = await r2.json().catch(function () { return {}; });
         if (!ausf) {
           it.vorschauDaten = d2;
           if (d2.ok) { it.status = 'vorschau'; it.bereitZumBuchen = true; it.meldung = 'Bitte prüfen, dann „Ja, so anlegen und buchen“.'; }
           else { it.status = 'fehler'; it.meldung = (d2.probleme || []).join(' ') || d2.meldung || d2.message || 'Keine Vorschau möglich.'; }
-        } else if (!r2.ok || d2.ok === false) { it.status = 'fehler'; it.meldung = d2.meldung || d2.message || 'Nicht gebucht.'; it.bereitZumBuchen = false; }
+        } else if (!r2.ok || d2.ok === false) { it.status = 'fehler'; it.meldung = d2.meldung || d2.message || 'Nicht gebucht.'; it.bereitZumBuchen = false; if (d2.beleg_id) it.beleg_vorhanden = d2.beleg_id; }
         else { it.status = 'gebucht'; it.meldung = d2.meldung || 'Gebucht. Bitte in BuchhaltungsButler prüfen.'; delete BE.zsel[it.key]; u.idx = idx + 1; }
       }
     } catch (e) { it.status = 'fehler'; it.meldung = e.message; }
@@ -5494,7 +5495,18 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     ['XXL', 'LEV'].forEach(function (k) { if (BL[k] && BL[k].daten) ladeListe('beleg', k, BL[k].daten.monat); });
     if (typeof ladeRF === 'function') ladeRF();
   }
-  function beAlleRender() { if (BE.agEd && !BE.agEd.nichtLesen) agLies(); renderAccounting('beleg', 'XXL'); renderAccounting('beleg', 'LEV'); Object.keys(ZA).forEach(function (kk) { if (ZA[kk] && ZA[kk].daten) renderAccounting('zahlung', kk); }); }
+  // Neuaufbau ohne Springen: Scrollposition, Fokus und Cursor bleiben, wo sie waren (Marko 20.10.2026)
+  function ohneSprung(fn) {
+    var sy = window.scrollY, sx = window.scrollX, ae = document.activeElement, aid = ae && ae.id, sel = null;
+    try { if (ae && typeof ae.selectionStart === 'number') sel = [ae.selectionStart, ae.selectionEnd]; } catch (x) {}
+    var hoehe = document.body.style.minHeight; document.body.style.minHeight = document.documentElement.scrollHeight + 'px';
+    try { fn(); } finally {
+      document.body.style.minHeight = hoehe;
+      if (aid && document.activeElement !== document.getElementById(aid)) { var neu = document.getElementById(aid); if (neu && neu.focus) { try { neu.focus({ preventScroll: true }); if (sel && typeof neu.setSelectionRange === 'function') neu.setSelectionRange(sel[0], sel[1]); } catch (x) {} } }
+      if (window.scrollY !== sy || window.scrollX !== sx) window.scrollTo(sx, sy);
+    }
+  }
+  function beAlleRender() { ohneSprung(function () { if (BE.agEd && !BE.agEd.nichtLesen) agLies(); renderAccounting('beleg', 'XXL'); renderAccounting('beleg', 'LEV'); Object.keys(ZA).forEach(function (kk) { if (ZA[kk] && ZA[kk].daten) renderAccounting('zahlung', kk); }); }); }
   function bindBelege() {
     var ids = Object.keys(BE_MANDANT).concat(Object.keys(ZA_KONTO));
     ids.forEach(function (id) {
@@ -6428,7 +6440,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261020122517';
+  var BUILD = '20261020142600';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
