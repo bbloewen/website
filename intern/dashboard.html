@@ -3876,7 +3876,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var abweichung = gebucht && zugeordnet && !bhbBezahlt;
       var wkBeleg = zugeordnet && eigen && (p.wiederkehrend === true || !ersatz);
       var dokTitel = !gebucht ? 'Kein Beleg zugeordnet und nicht gebucht' : (zugeordnet ? (wkBeleg ? (p.wiederkehrend === true ? 'Wiederkehrende Zahlung: Beleg ohne Datei über den Kreditor' : 'Beleg ohne Datei, bewusst so angelegt') : (eigen ? 'Eigenbeleg ohne Datei zugeordnet' : 'Beleg zugeordnet')) : (wiederk ? 'Wiederkehrende Zahlung ohne Beleg gebucht: gehört als Beleg ohne Datei über den Kreditor' : 'Beleglos gebucht'));
-      var statusText = p.plan ? (p.plan.quelle === 'autonom' ? 'automatisch, nicht gebucht' : 'geändert, noch nicht in BHB') : p.autonom ? 'automatisch gebucht' : abweichung ? 'in BHB nicht bezahlt' : !gebucht ? (p.eb ? 'Beleg im Dashboard' : vs.length ? 'Vorschlag' : (wkv ? 'Vorschlag wiederkehrend' : 'offen')) : (zugeordnet ? (wkBeleg ? (p.wiederkehrend === true ? 'wiederkehrend' : 'ohne Datei') : (eigen ? 'Eigenbeleg' : 'Beleg')) : (wiederk ? 'wiederkehrend, falsch gebucht' : 'beleglos'));
+      var statusText = p.plan ? (p.plan.quelle === 'autonom' ? 'automatisch, nicht gebucht' : p.plan.quelle === 'ki' ? 'Vorschlag KI, noch nicht gebucht' : 'geändert, noch nicht in BHB') : p.autonom ? 'automatisch gebucht' : abweichung ? 'in BHB nicht bezahlt' : !gebucht ? (p.eb ? 'Beleg im Dashboard' : vs.length ? 'Vorschlag' : (wkv ? 'Vorschlag wiederkehrend' : 'offen')) : (zugeordnet ? (wkBeleg ? (p.wiederkehrend === true ? 'wiederkehrend' : 'ohne Datei') : (eigen ? 'Eigenbeleg' : 'Beleg')) : (wiederk ? 'wiederkehrend, falsch gebucht' : 'beleglos'));
       var euroTitel = abweichung ? 'Zahlung ist gebucht, aber in BuchhaltungsButler ist der Beleg nicht vollständig bezahlt: ' + belege.map(function (b) { return (b.nummer || b.beleg_id) + ' bezahlt ' + formatEuro(Math.abs(Number(b.bezahlt || 0))) + ' von ' + formatEuro(Math.abs(Number(b.betrag || 0))); }).join(', ') : ausgeglichen ? 'Rechnung ausgeglichen: Zahlung ist dem Beleg zugeordnet, gebucht und der Beleg ist in BuchhaltungsButler bezahlt' : (vs.length ? 'Vorschlag: passender unbezahlter Beleg gefunden' : (gebucht ? 'Direkt gebucht, kein Beleg auszugleichen' : 'Noch nichts ausgeglichen'));
       var dokSym = !gebucht ? ikSymbol('dok', false, dokTitel) : (zugeordnet ? (wkBeleg ? ikSymbol('dok', false, dokTitel, 'blau') : (eigen ? ikSymbol('dok', false, dokTitel, 'eigen') : ikSymbol('dok', true, dokTitel))) : ikSymbol('dok', false, dokTitel, 'grau'));
       var symbole = '<div class="ikreihe">' + dokSym + ikSymbol('euro', ausgeglichen, euroTitel, abweichung ? 'warn' : (!ausgeglichen && (vs.length || wkv) ? 'gruen' : null)) + ikSymbol('buch', gebucht, gebucht ? 'In BuchhaltungsButler verbucht (Buchung der Zahlung bestätigt)' : 'In BuchhaltungsButler noch nicht verbucht') + '</div>';
@@ -6510,7 +6510,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261020152724';
+  var BUILD = '20261020154222';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
