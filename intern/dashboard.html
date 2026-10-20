@@ -3655,7 +3655,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       // Konto, KST 1, KST 2: je Buchungszeile, mit Herkunft (Beleg oder Zahlung) wie in BuchhaltungsButler
       var lz = [];
       belege.forEach(function (b) { (b.konten || []).forEach(function (x) { lz.push({ quelle: 'Beleg', konto: x.konto, konto_name: x.name, kst1: x.kst1, kst1_name: x.kst1_name, kst2: x.kst2, kst2_name: x.kst2_name }); }); });
-      if (p.plan && Array.isArray(p.plan.zeilen)) { lz = []; p.plan.zeilen.forEach(function (x) { lz.push({ quelle: 'Plan', konto: x.sachkonto, konto_name: x.sachkonto_name, kst1: x.kst1, kst2: x.kst2, text: x.text }); }); }
+      if (p.plan && Array.isArray(p.plan.zeilen)) { lz = []; p.plan.zeilen.forEach(function (x) { lz.push({ quelle: 'Plan', konto: x.sachkonto, konto_name: x.sachkonto_name, kst1: x.kst1, kst1_name: x.kst1_name, kst2: x.kst2, kst2_name: x.kst2_name, text: x.text }); }); }
       else bu.forEach(function (x) { lz.push({ quelle: 'Zahlung', konto: x.konto, konto_name: x.konto_name, kst1: x.kst1, kst1_name: x.kst1_name, kst2: x.kst2, kst2_name: x.kst2_name, text: x.text }); });
       var zeilenDiv = function (inhalt, titel) { return '<div style="min-height:1.4em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + esc(titel || '') + '">' + inhalt + '</div>'; };
       var ueberZelle = lz.map(function (l) { if (l.quelle === 'Plan') return zeilenDiv('<span class="gut">neu, Zahlung</span>', 'Mit der KI besprochen, noch nicht in BuchhaltungsButler'); var t = l.quelle === 'Beleg' ? 'Beleg' : (/^[0-9]{6}$/.test(String(l.konto || '')) ? 'Zahlung, Ausgleich' : 'Zahlung, direkt'); return zeilenDiv(esc(t), l.quelle === 'Beleg' ? 'Aufwand über den Beleg gebucht' : (/^[0-9]{6}$/.test(String(l.konto || '')) ? 'Zahlung gleicht den Beleg über den Kreditor aus' : 'Direkt über die Zahlung gebucht, ohne Beleg')); }).join('');
@@ -6203,7 +6203,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261020073444';
+  var BUILD = '20261020080333';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
