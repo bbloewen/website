@@ -3724,6 +3724,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     return v ? Object.assign(basis, { art: 'zuordnen', beleg_id: t[1], nummer: v.nummer, vorschlag: v, verrechnung: !!v.teile }) : null;
   }
   var ZS_ART = { beleg: 'Auslage-Beleg aus dem Dashboard wird mit dieser Zahlung nach BuchhaltungsButler übertragen: Beleg über den Kreditor der Person, Zahlung ausgeglichen', aktualisieren: 'die mit der KI besprochene Buchung wird in BuchhaltungsButler gebucht (eine bisherige Buchung wird vorher zurückgenommen)', zuordnen: 'wird dem vorgeschlagenen Beleg zugeordnet, der Ausgleich über den Kreditor gebucht', wk: 'wiederkehrende Zahlung: Beleg ohne Datei anlegen, wie die Vorbild-Zahlung über den Kreditor buchen, zuordnen und ausgleichen', regel: 'Neu buchen nach der Regel des Steuerberaters', ohne: 'kein Vorschlag vorhanden' };
+  // Vorschau beim Übertragen eines Auslage-Belegs mit Zahlung (beleg-vorschau): Hinweise und Probleme des Buchungsplans
+  function zsBelegVorschauHtml(v) {
+    if (!v) return '';
+    return (v.hinweise || []).map(function (t) { return '<div class="notiz" style="margin:2px 0 0;white-space:normal">' + esc(t) + '</div>'; }).join('') + (v.probleme || []).map(function (t) { return '<div class="hinweis-warn" style="margin-top:4px;white-space:normal">' + esc(t) + '</div>'; }).join('');
+  }
   function zsVorschauHtml(v) {
     if (!v || !v.vorschau) return '';
     var x = v.vorschau;
@@ -3750,7 +3755,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var idx = u.idx || 0, ges = u.items.length, it0 = u.items[idx];
       h += '<div class="rf-box" style="margin-top:8px" role="region" aria-label="Übertragung der Zahlungen"><div class="fett">Übertragung nach BuchhaltungsButler, Schritt für Schritt</div><div class="notiz" style="margin:2px 0 0">Es wird immer nur eine Zahlung übertragen. Danach kannst du das Ergebnis in BuchhaltungsButler prüfen und die nächste freigeben.</div>' + u.items.map(function (it, n) {
         return '<div style="margin-top:8px"><div class="zeile-titel"><span>' + (n + 1) + '. ' + esc(formatDate(String(it.datum).slice(0, 10))) + ' · ' + esc(formatEuro(it.betrag)) + ' · ' + esc(it.gegenpartei || '') + '<div class="notiz" style="margin:0">' + esc(it.art === 'zuordnen' ? (it.verrechnung ? 'Verrechnung: wird ' + it.nummer + ' zugeordnet, ein Ausgleich über den Kreditor mit je einer Zeile' : 'wird Beleg ' + (it.nummer || it.beleg_id) + ' zugeordnet und der Ausgleich über den Kreditor gebucht') : ZS_ART[it.art]) + '</div></span><span class="' + (it.status === 'fehler' ? 'pflicht' : '') + '">' + esc(stText[it.status] || it.status) + '</span></div>' +
-          zsVorschauHtml(it.vorschauDaten) + (it.art === 'wk' && it.status === 'vorschau' && n === idx ? zsWkText(it) : '') + (it.meldung ? '<div class="' + (it.status === 'gebucht' ? 'erfolg' : (it.status === 'vorschau' ? 'notiz' : 'fehlerbox')) + '" role="status" style="margin-top:4px;white-space:normal">' + esc(it.meldung) + '</div>' : '') + '</div>';
+          (it.art === 'beleg' ? zsBelegVorschauHtml(it.vorschauDaten) : zsVorschauHtml(it.vorschauDaten)) + (it.art === 'wk' && it.status === 'vorschau' && n === idx ? zsWkText(it) : '') + (it.meldung ? '<div class="' + (it.status === 'gebucht' ? 'erfolg' : (it.status === 'vorschau' ? 'notiz' : 'fehlerbox')) + '" role="status" style="margin-top:4px;white-space:normal">' + esc(it.meldung) + '</div>' : '') + '</div>';
       }).join('');
       var knopf = '';
       if (it0 && u.phase !== 'laeuft') {
@@ -6525,7 +6530,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261020195724';
+  var BUILD = '20261020205341';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
