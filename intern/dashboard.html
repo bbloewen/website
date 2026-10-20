@@ -3487,12 +3487,53 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       '<div style="margin-top:8px"><button type="button" class="btn btn-primary" data-be="zk-uebertragen">So übertragen …</button> <span class="notiz" style="margin:0">' + (q.weg === 'wiederkehrend' ? 'zeigt zuerst die Vorschau mit Buchungstext' : 'fragt vor dem Buchen noch einmal nach') + '</span></div></div>';
   }
   // Buchungstext einer geplanten Zahlungsbuchung: Standardtext ändern (Datum und Kurzname hängt das System an), mit Haken als Standardtext merken
+  // Auswahlfenster für den Buchungstext: Standardtexte und bisher verwendete Texte der Gegenpartei, Datum und Monat auf diese Zahlung angepasst
+  function btOhneGp(t, gp) { var a = String(t || ''), b = ''; for (var i = 0; i < 4; i++) { b = ohneGegenpartei(a, gp); if (b === a) break; a = b; } return a; }
+  function btAnpassen(t, p) {
+    var d = String(p.datum || '').slice(0, 10), mm = d.slice(5, 7), jj = d.slice(0, 4), tag = d ? d.slice(8, 10) + '.' + mm + '.' + jj : '';
+    t = String(t || '');
+    if (d) t = t.replace(/\b(0?[1-9]|1[0-2])\/(20\d\d)\b/g, mm + '/' + jj).replace(/\b\d{1,2}\.\d{1,2}\.20\d\d\b/g, tag);
+    return t.replace(/\s+/g, ' ').trim();
+  }
+  function btZweckForm(t) { return String(t || '').replace(/\s*\b\d{1,2}\.\d{1,2}\.20\d\d\b/g, '').replace(/\s+/g, ' ').trim(); }
+  function btKandidaten(p, ziel) {
+    var roh = (p.bt_vorschlaege || []).map(function (v) { return { text: v.text, art: v.art === 'Standardtext' ? 'Standardtext' : 'bisher bei dieser Gegenpartei' }; });
+    var zw = String(p.zweck || '').replace(/\s*\n\s*/g, ' ').replace(/\s+DATUM\s.*$/i, '').trim();
+    if (zw) roh.push({ text: zw.slice(0, 60), art: 'Verwendungszweck der Zahlung' });
+    var gp = String(p.gegenpartei || '').replace(/\s*\n\s*/g, ' '), gesehen = {}, aus = [];
+    roh.forEach(function (v) {
+      var t = btZweckForm(btAnpassen(btOhneGp(v.text, gp), p));
+      if (ziel !== 'zbg') t = t.slice(0, 45); else t = wkvText(p, t, { kreditor_name: gp });
+      if (!t || gesehen[t.toLowerCase()]) return;
+      gesehen[t.toLowerCase()] = true; aus.push({ text: t, art: v.art });
+    });
+    return aus;
+  }
+  function btPopupSchliessen() { var o = document.getElementById('bt-popup'); if (o && o.parentNode) o.parentNode.removeChild(o); if (BT_POPUP.zurueck && BT_POPUP.zurueck.focus) BT_POPUP.zurueck.focus(); BT_POPUP.zurueck = null; }
+  var BT_POPUP = { zurueck: null };
+  function btPopupOeffnen(p, ziel, ausloeser) {
+    btPopupSchliessen(); BT_POPUP.zurueck = ausloeser || null;
+    var liste = btKandidaten(p, ziel);
+    var o = document.createElement('div'); o.id = 'bt-popup'; o.setAttribute('style', 'position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px');
+    var h = '<div role="dialog" aria-modal="true" aria-labelledby="bt-popup-titel" style="background:var(--bg,#fff);color:var(--text,inherit);border-radius:10px;padding:16px;max-width:560px;width:100%;max-height:80vh;overflow:auto;box-shadow:0 8px 30px rgba(0,0,0,.3)">' +
+      '<div id="bt-popup-titel" class="fett" style="margin-bottom:4px">Buchungstext wählen</div><div class="notiz" style="margin:0 0 8px">' + esc(String(p.gegenpartei || '').replace(/\s*\n\s*/g, ' ')) + ' · ' + esc(formatEuro(Number(p.betrag || 0))) + '</div>';
+    h += liste.length ? liste.map(function (v, i) { return '<div><button type="button" class="btn btn-secondary" style="width:100%;text-align:left;margin:3px 0;padding:6px 10px;white-space:normal" data-bt-wahl="' + i + '"><span class="fett">' + esc(v.text) + '</span><br><span class="notiz" style="margin:0">' + esc(v.art) + '</span></button></div>'; }).join('') : '<div class="notiz">Keine früheren Texte dieser Gegenpartei gefunden. Bitte den Text selbst eingeben.</div>';
+    h += '<div style="margin-top:8px"><button type="button" class="link-btn" data-bt-zu="1">Schließen</button></div></div>';
+    o.innerHTML = h; document.body.appendChild(o);
+    o.addEventListener('click', function (e) {
+      var w = e.target.closest('[data-bt-wahl]');
+      if (w) { var i2 = document.getElementById(ziel + '-wert'), v = liste[Number(w.getAttribute('data-bt-wahl'))]; if (i2 && v) { i2.value = v.text; i2.dispatchEvent(new Event('input', { bubbles: true })); } BT_POPUP.zurueck = i2 || BT_POPUP.zurueck; btPopupSchliessen(); return; }
+      if (e.target === o || e.target.closest('[data-bt-zu]')) btPopupSchliessen();
+    });
+    o.addEventListener('keydown', function (e) { if (e.key === 'Escape') btPopupSchliessen(); });
+    var erst = o.querySelector('button'); if (erst) erst.focus();
+  }
   function zbtFeld(p, k) {
     var pl = p.plan; if (!pl || !Array.isArray(pl.zeilen) || !pl.zeilen.length) return '';
     var ed = BE.zbt && BE.zbt.tx === Number(p.transaction_id) ? BE.zbt : null;
     var aus = pl.weg === 'wiederkehrend' ? (pl.kreditor_name || p.gegenpartei) : p.gegenpartei;
     if (!ed) return '<div class="notiz" style="margin:2px 0 0;white-space:normal">Buchungstext: „' + esc(pl.zeilen[0].text || '') + '“ · <button type="button" class="link-btn" style="font-size:12px" data-be="zbt-edit" data-tx="' + esc(String(p.transaction_id)) + '" data-k="' + esc(k) + '">ändern</button></div>';
-    return '<div class="btedit" style="margin-top:4px"><label class="text-klein" for="zbt-wert" style="display:block">Buchungstext (Standardtext; Datum und Gegenpartei werden angehängt wie bei Belegen)</label><input id="zbt-wert" class="eingabe-klein" style="width:100%" maxlength="45" data-be="zbt-wert" value="' + esc(ed.wert) + '">' +
+    return '<div class="btedit" style="margin-top:4px"><label class="text-klein" for="zbt-wert" style="display:block">Buchungstext (Standardtext; Datum und Gegenpartei werden angehängt wie bei Belegen)</label><input id="zbt-wert" class="eingabe-klein" style="width:100%" maxlength="45" data-be="zbt-wert" value="' + esc(ed.wert) + '"><div><button type="button" class="link-btn" style="font-size:12px" data-be="bt-popup" data-ziel="zbt" data-tx="' + esc(String(p.transaction_id)) + '" data-k="' + esc(k) + '">Vorschläge …</button></div>' +
       '<label class="text-klein" style="display:block;margin-top:4px"><input type="checkbox" data-be="zbt-std"' + (ed.standard ? ' checked' : '') + '> Als Standardtext für künftige Belege von ' + esc(String(aus || 'dieser Gegenpartei').replace(/\s*\n\s*/g, ' ')) + ' merken</label>' +
       '<div style="display:flex;gap:8px;margin-top:4px;align-items:center"><button type="button" class="btn btn-primary" style="padding:4px 10px" data-be="zbt-speichern"' + (ed.laeuft ? ' disabled' : '') + '>' + (ed.laeuft ? 'Speichere …' : 'Speichern') + '</button><button type="button" class="link-btn" data-be="zbt-abbruch">Abbrechen</button></div>' +
       (ed.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:4px">' + esc(ed.fehler) + '</div>' : '') + '</div>';
@@ -3513,7 +3554,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       '<ol class="notiz" style="margin:4px 0 0 18px">' + (v.schritte || []).map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ol><div class="notiz" style="margin:2px 0 0">Konten, Kostenstellen und Steuer bleiben gleich. Scheitert ein Schritt, wird der alte Stand wieder gebucht.</div>' +
       '<div style="display:flex;gap:8px;margin-top:6px;align-items:center"><button type="button" class="btn btn-primary" style="padding:4px 10px" data-be="zbg-ja"' + (ed.laeuft ? ' disabled' : '') + '>' + (ed.laeuft ? 'Ändere in BuchhaltungsButler …' : 'Ja, ändern') + '</button><button type="button" class="link-btn" data-be="zbg-zurueck"' + (ed.laeuft ? ' disabled' : '') + '>Zurück</button></div>' +
       (ed.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:4px;white-space:normal">' + esc(ed.fehler) + '</div>' : '') + '</div>';
-    return h + '<label class="text-klein" for="zbg-wert" style="display:block">Buchungstext' + (v.art === 'beleg' ? ' (Beleg und Zahlung)' : '') + ', höchstens 60 Zeichen; BuchhaltungsButler hängt die Gegenpartei an</label><input id="zbg-wert" class="eingabe-klein" style="width:100%" maxlength="60" data-be="zbg-wert" value="' + esc(ed.wert) + '">' +
+    return h + '<label class="text-klein" for="zbg-wert" style="display:block">Buchungstext' + (v.art === 'beleg' ? ' (Beleg und Zahlung)' : '') + ', höchstens 60 Zeichen; BuchhaltungsButler hängt die Gegenpartei an</label><input id="zbg-wert" class="eingabe-klein" style="width:100%" maxlength="60" data-be="zbg-wert" value="' + esc(ed.wert) + '"><div><button type="button" class="link-btn" style="font-size:12px" data-be="bt-popup" data-ziel="zbg" data-tx="' + esc(String(p.transaction_id)) + '" data-k="' + esc(k) + '">Vorschläge …</button></div>' +
       '<label class="text-klein" style="display:block;margin-top:4px"><input type="checkbox" data-be="zbg-std"' + (ed.standard ? ' checked' : '') + '> Als Standardtext für künftige Belege von ' + esc(String(v.gegenpartei || p.gegenpartei || '').replace(/\s*\n\s*/g, ' ')) + ' merken</label>' +
       '<div style="display:flex;gap:8px;margin-top:4px;align-items:center"><button type="button" class="btn btn-secondary" style="padding:4px 10px" data-be="zbg-weiter">Ändern …</button><button type="button" class="link-btn" data-be="zbg-abbruch">Abbrechen</button></div>' +
       (ed.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:4px;white-space:normal">' + esc(ed.fehler) + '</div>' : '') + '</div>';
@@ -3537,7 +3578,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (!wkv) return '';
     var ed = BE.zwv && BE.zwv.tx === Number(p.transaction_id) && BE.zwv.k === k ? BE.zwv : null, zweck = wkvZweck(p, wkv);
     if (!ed) return '<div class="notiz" style="margin:2px 0 0;white-space:normal">Buchungstext (Vorschlag): „' + esc(wkvText(p, zweck, wkv)) + '“ · <button type="button" class="link-btn" style="font-size:12px" data-be="zwv-edit" data-tx="' + esc(String(p.transaction_id)) + '" data-k="' + esc(k) + '">ändern</button></div>';
-    return '<div class="btedit" style="margin-top:4px"><label class="text-klein" for="zwv-wert" style="display:block">Buchungstext (Standardtext; Datum und Kreditor werden angehängt wie bei Belegen)</label><input id="zwv-wert" class="eingabe-klein" style="width:100%" maxlength="45" data-be="zwv-wert" value="' + esc(ed.wert) + '">' +
+    return '<div class="btedit" style="margin-top:4px"><label class="text-klein" for="zwv-wert" style="display:block">Buchungstext (Standardtext; Datum und Kreditor werden angehängt wie bei Belegen)</label><input id="zwv-wert" class="eingabe-klein" style="width:100%" maxlength="45" data-be="zwv-wert" value="' + esc(ed.wert) + '"><div><button type="button" class="link-btn" style="font-size:12px" data-be="bt-popup" data-ziel="zwv" data-tx="' + esc(String(p.transaction_id)) + '" data-k="' + esc(k) + '">Vorschläge …</button></div>' +
       '<label class="text-klein" style="display:block;margin-top:4px"><input type="checkbox" data-be="zwv-std"' + (ed.standard ? ' checked' : '') + '> Als Standardtext für künftige Belege von ' + esc(wkv.kreditor_name || '') + ' merken</label>' +
       '<div class="notiz" style="margin:2px 0 0;white-space:normal">Speichern legt die Buchung wie vorgeschlagen an (Kreditor ' + esc(wkv.kreditor) + ', Konto ' + esc((wkv.zeilen || []).map(function (x) { return x.konto; }).join(', ')) + '); übertragen wird mit dem Haken.</div>' +
       '<div style="display:flex;gap:8px;margin-top:4px;align-items:center"><button type="button" class="btn btn-primary" style="padding:4px 10px" data-be="zwv-speichern"' + (ed.laeuft ? ' disabled' : '') + '>' + (ed.laeuft ? 'Speichere …' : 'Speichern') + '</button><button type="button" class="link-btn" data-be="zwv-abbruch">Abbrechen</button></div>' +
@@ -5645,6 +5686,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         else if (w === 'zwv-edit') { var vk = b.getAttribute('data-k'), vd = ZA[vk] && ZA[vk].daten, vp = vd && (vd.zahlungen || []).filter(function (x) { return Number(x.transaction_id) === Number(b.getAttribute('data-tx')); })[0]; if (!vp || !vp.wk_vorschlag) return; BE.zwv = { k: vk, tx: Number(vp.transaction_id), wert: wkvZweck(vp, vp.wk_vorschlag), standard: false, laeuft: false, fehler: '' }; beAlleRender(); var vi = document.getElementById('zwv-wert'); if (vi) vi.focus(); }
         else if (w === 'zwv-speichern') zwvSpeichern();
         else if (w === 'zwv-abbruch') { BE.zwv = null; beAlleRender(); }
+        else if (w === 'bt-popup') { var pk = b.getAttribute('data-k'), pd = ZA[pk] && ZA[pk].daten, pp = pd && (pd.zahlungen || []).filter(function (x) { return Number(x.transaction_id) === Number(b.getAttribute('data-tx')); })[0]; if (pp) btPopupOeffnen(pp, b.getAttribute('data-ziel'), b); }
         else if (w === 'zbg-edit') zbgLaden(b.getAttribute('data-k'), Number(b.getAttribute('data-tx')));
         else if (w === 'zbg-weiter') { if (!BE.zbg) return; if (String(BE.zbg.wert || '').trim().length < 2) { BE.zbg.fehler = 'Bitte einen Text eingeben.'; beAlleRender(); return; } if (String(BE.zbg.wert).trim() === String((BE.zbg.vorschau || {}).alt || '').trim() && !BE.zbg.standard) { BE.zbg.fehler = 'Der Text ist unverändert.'; beAlleRender(); return; } BE.zbg.fehler = ''; BE.zbg.schritt = 'bestaetigen'; beAlleRender(); }
         else if (w === 'zbg-zurueck') { if (BE.zbg) { BE.zbg.schritt = 'eingabe'; BE.zbg.fehler = ''; } beAlleRender(); }
@@ -6447,7 +6489,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261020151012';
+  var BUILD = '20261020152016';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
