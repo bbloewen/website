@@ -3485,6 +3485,37 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       q.zeilen.map(function (x) { return '<div class="notiz" style="margin:2px 0 0;white-space:normal">' + nm(x.sachkonto, x.sachkonto_name) + ' · KST 1 ' + nm(x.kst1, x.kst1_name) + ' · KST 2 ' + nm(x.kst2, x.kst2_name) + ' · ' + esc(formatEuro(Number(x.betrag))) + ' · „' + esc(x.text || '') + '“</div>'; }).join('') +
       '<div style="margin-top:8px"><button type="button" class="btn btn-primary" data-be="zk-uebertragen">So übertragen …</button> <span class="notiz" style="margin:0">' + (q.weg === 'wiederkehrend' ? 'zeigt zuerst die Vorschau mit Buchungstext' : 'fragt vor dem Buchen noch einmal nach') + '</span></div></div>';
   }
+  // Buchungstext einer geplanten Zahlungsbuchung: Standardtext ändern (Datum und Kurzname hängt das System an), mit Haken als Standardtext merken
+  function zbtFeld(p, k) {
+    var pl = p.plan; if (!pl || !Array.isArray(pl.zeilen) || !pl.zeilen.length) return '';
+    var ed = BE.zbt && BE.zbt.tx === Number(p.transaction_id) ? BE.zbt : null;
+    var aus = pl.weg === 'wiederkehrend' ? (pl.kreditor_name || p.gegenpartei) : p.gegenpartei;
+    if (!ed) return '<div class="notiz" style="margin:2px 0 0;white-space:normal">Buchungstext: „' + esc(pl.zeilen[0].text || '') + '“ · <button type="button" class="link-btn" style="font-size:12px" data-be="zbt-edit" data-tx="' + esc(String(p.transaction_id)) + '" data-k="' + esc(k) + '">ändern</button></div>';
+    return '<div class="btedit" style="margin-top:4px"><label class="text-klein" for="zbt-wert" style="display:block">Buchungstext (Standardtext; Datum und Gegenpartei werden angehängt wie bei Belegen)</label><input id="zbt-wert" class="eingabe-klein" style="width:100%" maxlength="45" data-be="zbt-wert" value="' + esc(ed.wert) + '">' +
+      '<label class="text-klein" style="display:block;margin-top:4px"><input type="checkbox" data-be="zbt-std"' + (ed.standard ? ' checked' : '') + '> Als Standardtext für künftige Belege von ' + esc(String(aus || 'dieser Gegenpartei').replace(/\s*\n\s*/g, ' ')) + ' merken</label>' +
+      '<div style="display:flex;gap:8px;margin-top:4px;align-items:center"><button type="button" class="btn btn-primary" style="padding:4px 10px" data-be="zbt-speichern"' + (ed.laeuft ? ' disabled' : '') + '>' + (ed.laeuft ? 'Speichere …' : 'Speichern') + '</button><button type="button" class="link-btn" data-be="zbt-abbruch">Abbrechen</button></div>' +
+      (ed.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:4px">' + esc(ed.fehler) + '</div>' : '') + '</div>';
+  }
+  async function zbtSpeichern() {
+    var ed = BE.zbt; if (!ed || ed.laeuft) return;
+    var zd = ZA[ed.k] && ZA[ed.k].daten, p = zd && (zd.zahlungen || []).filter(function (x) { return Number(x.transaction_id) === ed.tx; })[0];
+    if (!p || !p.plan) return;
+    var wert = String(ed.wert || '').trim(); if (wert.length < 2) { ed.fehler = 'Bitte einen Text eingeben.'; beAlleRender(); return; }
+    ed.laeuft = true; ed.fehler = ''; beAlleRender();
+    try {
+      var m = ed.k === 'XXL' ? 'XXL' : 'LEV';
+      var res = await fetch('/webhook/accounting/zahlung-speichern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: m, transaction_id: ed.tx, zeilen: p.plan.zeilen, dialog: p.plan.dialog || [], weg: p.plan.weg || 'direkt', kreditor: p.plan.kreditor || null, zweck: wert }) });
+      var d = await res.json().catch(function () { return {}; });
+      if (!res.ok || d.ok === false) throw new Error((d.probleme || []).join(' ') || d.meldung || 'Nicht gespeichert.');
+      if (ed.standard) {
+        var rs = await fetch('/webhook/accounting/buchungstext-aendern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ aktion: 'regel_neu', aussteller: String((p.plan.weg === 'wiederkehrend' ? p.plan.kreditor_name : '') || p.gegenpartei || '').replace(/\s*\n\s*/g, ' '), zweck: wert }) });
+        var ds = await rs.json().catch(function () { return {}; });
+        if (!rs.ok || !ds.ok) throw new Error('Text gespeichert, aber nicht als Standardtext: ' + (ds.message || ds.fehler || 'Fehler'));
+      }
+      BE.zbt = null; ladeListe('zahlung', ed.k, zd.monat);
+    } catch (x) { ed.laeuft = false; ed.fehler = x.message; }
+    beAlleRender();
+  }
   function zkPanel(k) {
     var q = BE.zk; if (!q || q.k !== k) return '';
     var h = '<div class="card pad" role="region" aria-label="Zahlung mit der KI besprechen"><div class="fett">Mit der KI besprechen: ' + esc(q.titel) + '</div>' +
@@ -3510,7 +3541,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         var e = { k: q.mandant };
         var sp = null;
         for (var versuch = 0; versuch < 4; versuch++) {
-          var rs = await fetch('/webhook/accounting/zahlung-speichern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: q.mandant, transaction_id: q.tx, zeilen: d.zeilen, dialog: verlauf, weg: d.weg || 'direkt', kreditor: d.kreditor || null }) });
+          var rs = await fetch('/webhook/accounting/zahlung-speichern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: q.mandant, transaction_id: q.tx, zeilen: d.zeilen, dialog: verlauf, weg: d.weg || 'direkt', kreditor: d.kreditor || null, zweck: d.zweck || '' }) });
           var ds = await rs.json().catch(function () { return {}; });
           sp = (!rs.ok || !ds.ok) ? { ok: false, probleme: ds.probleme && ds.probleme.length ? ds.probleme : [ds.meldung || ds.message || 'Nicht gespeichert.'], anlegen: ds.konto_anlegen || null } : { ok: true };
           if (sp.ok) break;
@@ -3702,7 +3733,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var betrag = Number(p.betrag || 0);
       // Haken und Symbole teilen sich die ersten beiden Spalten, der Status steht darunter über beide (bricht nicht um)
       return '<tr><td colspan="2"><div style="display:flex;gap:8px;align-items:center">' + (wahl ? '<div style="min-width:18px">' + wahl + '</div>' : '<div style="min-width:18px"></div>') + symbole + '</div><div class="notiz" style="margin:2px 0 0;white-space:nowrap"' + (p.autonom ? ' title="Automatisch gebucht, gelernt aus den bestätigten Zahlungen vom ' + esc((p.autonom.vorbild || []).map(function (v) { return formatDate(v.datum); }).join(' und ')) + '. Zum Ändern: Ändern / mit KI besprechen."' : '') + '>' + esc(statusText) + '</div></td><td class="nowrap">' + esc(p.datum ? formatDate(String(p.datum).slice(0, 10)) : '') + '</td>' +
-        '<td><div class="fett">' + esc(String(p.gegenpartei || '–').replace(/\s*\n\s*/g, ' ')) + '</div><div class="notiz" style="margin:0">' + esc(String(p.zweck || '').replace(/\s*\n\s*/g, ' ').slice(0, 160)) + '</div>' + (p.plan && p.plan.quelle === 'autonom' && p.plan.meldung ? '<div class="hinweis-warn" style="margin:4px 0 0;white-space:normal">' + esc(p.plan.meldung) + '</div>' : '') + (p.autonom ? '<div class="notiz" style="margin:2px 0 0">Automatisch gebucht wie die Zahlungen vom ' + esc((p.autonom.vorbild || []).map(function (v) { return formatDate(v.datum); }).join(' und ')) + '</div>' : '') + '<div><button type="button" class="link-btn" style="font-size:12px" data-be="zk-start" data-tx="' + esc(String(p.transaction_id)) + '" data-k="' + esc(k) + '">Ändern / mit KI besprechen</button></div>' + (function () {
+        '<td><div class="fett">' + esc(String(p.gegenpartei || '–').replace(/\s*\n\s*/g, ' ')) + '</div><div class="notiz" style="margin:0">' + esc(String(p.zweck || '').replace(/\s*\n\s*/g, ' ').slice(0, 160)) + '</div>' + zbtFeld(p, k) + (p.plan && p.plan.quelle === 'autonom' && p.plan.meldung ? '<div class="hinweis-warn" style="margin:4px 0 0;white-space:normal">' + esc(p.plan.meldung) + '</div>' : '') + (p.autonom ? '<div class="notiz" style="margin:2px 0 0">Automatisch gebucht wie die Zahlungen vom ' + esc((p.autonom.vorbild || []).map(function (v) { return formatDate(v.datum); }).join(' und ')) + '</div>' : '') + '<div><button type="button" class="link-btn" style="font-size:12px" data-be="zk-start" data-tx="' + esc(String(p.transaction_id)) + '" data-k="' + esc(k) + '">Ändern / mit KI besprechen</button></div>' + (function () {
           if (unten) return '';
           var sr = zahlungRegel(p); if (!sr) return '';
           var h2 = '<div class="' + (sr.verstoss ? 'hinweis-warn' : 'notiz') + '" style="margin:4px 0 0;white-space:normal"><b>Regel Steuerberater (' + esc(sr.n) + ')' + (sr.verstoss ? ', so bisher nicht richtig gebucht' : '') + ':</b> ' + esc(sr.h) + '</div>';
@@ -5146,6 +5177,13 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     return ' <button type="button" class="link-btn" style="font-size:12px" data-be="agt-edit" data-bid="' + esc(String(b.beleg_id)) + '" data-titel="' + esc(titel) + '" data-wert="' + esc(text || '') + '" aria-label="Buchungstext ändern">ändern</button>';
   }
   function agVerlaufLesen(k, bid) { try { return JSON.parse(localStorage.getItem('agki|' + k + '|' + bid) || '[]') || []; } catch (e) { return []; } }
+  // Gespräch vom Server (ki_dialog): gilt auf jedem Gerät; der Browser-Speicher ist nur noch Rückfall
+  function agVerlaufVomServer(q) {
+    if (!q) return;
+    fetch('/webhook/accounting/ausgang-korrektur', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: q.k, beleg_id: q.bid, nur_lesen: true }) })
+      .then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (d) { if (BE.agKi === q && d && Array.isArray(d.dialog) && d.dialog.length >= q.verlauf.length) { q.verlauf = d.dialog.slice(-20); beAlleRender(); } }).catch(function () {});
+  }
   function agVerlaufSchreiben(k, bid, v) { try { localStorage.setItem('agki|' + k + '|' + bid, JSON.stringify(v)); } catch (e) {} }
   function agKiPanel() {
     var q = BE.agKi; if (!q) return '';
@@ -5161,11 +5199,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var q = BE.agKi; if (!q || q.laeuft) return;
     var ta = document.getElementById('agki-text'); if (ta) q.text = ta.value;
     var text = String(q.text || '').trim();
-    if (text.length < 3) { q.fehler = 'Bitte schreibe oder sprich, was anders sein soll.'; q.anlegen = null; beAlleRender(); return; }
+    if (!text) { q.fehler = 'Bitte schreibe oder sprich, was anders sein soll.'; q.anlegen = null; beAlleRender(); return; }
     q.laeuft = true; q.fehler = ''; q.anlegen = null; beAlleRender();
     try {
       var e = agBauen(q.k, q.bid, q.titel); if (!e) throw new Error('Der Beleg steht nicht mehr in der Liste.');
-      var res = await fetch('/webhook/accounting/ausgang-korrektur', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: q.k, beleg_id: q.bid, text: text, aktuell: { text: e.text, teile: e.teile } }) });
+      var res = await fetch('/webhook/accounting/ausgang-korrektur', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: q.k, beleg_id: q.bid, text: text, aktuell: { text: e.text, teile: e.teile }, dialog: q.verlauf.slice(-12) }) });
       var d = await res.json().catch(function () { return {}; });
       if (!d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Die KI hat gerade nicht geantwortet.');
       var vs = d.vorschlag || {}, geaendert = false;
@@ -5184,7 +5222,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         antwort += ' Gespeichert.';
         agNachladen();
       }
-      q.verlauf = q.verlauf.concat([{ von: 'marko', text: text }, { von: 'ki', text: antwort }]).slice(-8); q.text = ''; agVerlaufSchreiben(q.k, q.bid, q.verlauf);
+      q.verlauf = q.verlauf.concat([{ von: 'marko', text: text }, { von: 'ki', text: antwort }]).slice(-20); q.text = ''; agVerlaufSchreiben(q.k, q.bid, q.verlauf);
     } catch (x) { q.fehler = x.message; }
     q.laeuft = false; beAlleRender();
   }
@@ -5361,6 +5399,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       });
       p.addEventListener('toggle', function (e) { if (e.target && e.target.hasAttribute && e.target.hasAttribute('data-be-uebertragen')) BE.uebertragenAuf = e.target.open; }, true);
       p.addEventListener('change', function (e) {
+        var zbs = e.target.closest('[data-be="zbt-std"]'); if (zbs) { if (BE.zbt) BE.zbt.standard = zbs.checked; return; }
         var wks = e.target.closest('[data-be="zs-wk-std"]'); if (wks) { if (BE.zue && BE.zue.items[BE.zue.idx || 0]) BE.zue.items[BE.zue.idx || 0].wkStd = wks.checked; return; }
         var c = e.target.closest('[data-zs]'); if (!c) return;
         BE.zsel = BE.zsel || {}; var key = c.getAttribute('data-zs');
@@ -5373,6 +5412,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         var at = e.target.closest('[data-be="agt-wert"]'); if (at) { if (BE.agTe) BE.agTe.wert = at.value; return; }
         var ak = e.target.closest('[data-be="agki-text"]'); if (ak) { if (BE.agKi) BE.agKi.text = ak.value; return; }
         var zkt = e.target.closest('[data-be="zk-text"]'); if (zkt) { if (BE.zk) BE.zk.text = zkt.value; return; }
+        var zbw = e.target.closest('[data-be="zbt-wert"]'); if (zbw) { if (BE.zbt) BE.zbt.wert = zbw.value; return; }
         var wkt = e.target.closest('[data-be="zs-wk-zweck"]'); if (wkt) { if (BE.zue && BE.zue.items[BE.zue.idx || 0]) BE.zue.items[BE.zue.idx || 0].wkZweck = wkt.value; return; }
         var s = e.target.closest('[data-be="suche"]'); if (!s) return;
         var st = zustand(s); st.z.suche = s.value; renderAccounting(st.art, st.k);
@@ -5467,6 +5507,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
           beAlleRender(); var zt = document.getElementById('zk-text'); if (zt) { zt.scrollIntoView({ block: 'center', behavior: 'smooth' }); zt.focus(); }
         }
         else if (w === 'zk-senden') zkSenden();
+        else if (w === 'zbt-edit') { var bk = b.getAttribute('data-k'), bd = ZA[bk] && ZA[bk].daten, bp = bd && (bd.zahlungen || []).filter(function (x) { return Number(x.transaction_id) === Number(b.getAttribute('data-tx')); })[0]; if (!bp || !bp.plan) return; BE.zbt = { k: bk, tx: Number(bp.transaction_id), wert: bp.plan.zweck || String((bp.plan.zeilen[0] || {}).text || '').replace(/\s+\d{2}\.\d{2}\.\d{4}.*$/, ''), standard: false, laeuft: false, fehler: '' }; beAlleRender(); var zi = document.getElementById('zbt-wert'); if (zi) zi.focus(); }
+        else if (w === 'zbt-speichern') zbtSpeichern();
+        else if (w === 'zbt-abbruch') { BE.zbt = null; beAlleRender(); }
         else if (w === 'zk-uebertragen') {
           // Übertragung genau dieser Zahlung starten, Schritt für Schritt wie über den Haken
           var uq = BE.zk; if (!uq) return;
@@ -5516,7 +5559,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
             BE.agTe = null; BE.meldung = 'Buchungstext gespeichert.'; beAlleRender(); agNachladen();
           }).catch(function (er) { ed2.laeuft = false; ed2.fehler = er.message; beAlleRender(); });
         }
-        else if (w === 'agki-start') { BE.agKi = { k: BE.mandantAktuell, bid: b.getAttribute('data-bid'), titel: b.getAttribute('data-titel') || '', verlauf: agVerlaufLesen(BE.mandantAktuell, b.getAttribute('data-bid')), text: '', laeuft: false, fehler: '', anlegen: null }; beAlleRender(); var kf2 = document.getElementById('agki-text'); if (kf2) { kf2.scrollIntoView({ block: 'center', behavior: 'smooth' }); kf2.focus(); } }
+        else if (w === 'agki-start') { BE.agKi = { k: BE.mandantAktuell, bid: b.getAttribute('data-bid'), titel: b.getAttribute('data-titel') || '', verlauf: agVerlaufLesen(BE.mandantAktuell, b.getAttribute('data-bid')), text: '', laeuft: false, fehler: '', anlegen: null }; beAlleRender(); agVerlaufVomServer(BE.agKi); var kf2 = document.getElementById('agki-text'); if (kf2) { kf2.scrollIntoView({ block: 'center', behavior: 'smooth' }); kf2.focus(); } }
         else if (w === 'agki-senden') agKiSenden();
         else if (w === 'agki-zu') { BE.agKi = null; beAlleRender(); }
         else if (w === 'agki-konto') agKiKonto(b.getAttribute('data-nr'));
@@ -6263,7 +6306,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261020105436';
+  var BUILD = '20261020111045';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
