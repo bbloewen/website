@@ -3552,14 +3552,14 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       (x.zeilen || []).map(function (z) { return '<div class="notiz" style="margin:0">' + esc(z.sachkonto + ' · KST 1 ' + (z.kst1 || '–') + ' · KST 2 ' + (z.kst2 || '–') + ' · ' + z.vat + ' · ' + formatEuro(z.betrag) + ' · „' + z.text + '“') + '</div>'; }).join('') +
       (v.hinweise || []).map(function (t) { return '<div class="hinweis-warn" style="margin-top:4px">' + esc(t) + '</div>'; }).join('');
   }
-  // Buchungstext der wiederkehrenden Zahlung in der Vorschau: ändern, als Standardtext je Gegenpartei und Kennung merken (Zeitraum wird angehängt)
+  // Buchungstext der wiederkehrenden Zahlung wie am Beleg: Standardtext (Zweck) ändern, Datum und Aussteller hängt das System an; mit Haken Standardtext des Ausstellers für künftige Belege
   function zsWkText(it) {
     var bt = (it.vorschauDaten && it.vorschauDaten.vorschau && it.vorschauDaten.vorschau.buchungstext) || {};
-    var wert = it.wkText != null ? it.wkText : (bt.text || '');
-    var qt = { 'von dir': 'von dir', 'Standardtext': 'Standardtext', 'wie Vorbild': 'wie die Vorbild-Zahlung', 'mit der KI besprochen': 'mit der KI besprochen' };
-    return '<div style="margin-top:6px"><label class="text-klein" for="zs-wk-text" style="display:block">Buchungstext (höchstens 60 Zeichen)</label><input id="zs-wk-text" class="eingabe-klein" style="width:100%" maxlength="60" data-be="zs-wk-text" value="' + esc(wert) + '">' +
-      '<div class="notiz" style="margin:2px 0 0;white-space:normal">Herkunft: ' + esc(qt[bt.quelle] || bt.quelle || '–') + (bt.standard ? ' · Standardtext „' + esc(bt.standard) + '“, Zeitraum ' + esc(bt.zeitraum || '') + ' angehängt' : '') + '</div>' +
-      '<label class="text-klein" style="display:block;margin-top:4px"><input type="checkbox" data-be="zs-wk-std"' + (it.wkStd ? ' checked' : '') + '> Als Standardtext für ' + esc(bt.gegenpartei || 'diese Gegenpartei') + (bt.kennung ? ' (Nr. ' + esc(bt.kennung) + ')' : '') + ' merken; der Zeitraum (' + esc(bt.zeitraum || 'MM/JJJJ') + ') wird künftig automatisch angehängt</label></div>';
+    var wert = it.wkZweck != null ? it.wkZweck : (bt.zweck || '');
+    var qt = { 'von dir': 'von dir', 'Standardtext': 'Standardtext des Ausstellers', 'wie Vorbild': 'wie die Vorbild-Zahlung', 'mit der KI besprochen': 'mit der KI besprochen' };
+    return '<div class="btedit" style="margin-top:6px"><label class="text-klein" for="zs-wk-zweck" style="display:block">Buchungstext (Standardtext; Datum und Aussteller werden angehängt wie bei Belegen)</label><input id="zs-wk-zweck" class="eingabe-klein" style="width:100%" maxlength="45" data-be="zs-wk-zweck" value="' + esc(wert) + '">' +
+      '<div class="notiz" style="margin:2px 0 0;white-space:normal">Bisher: „' + esc(bt.text || '') + '“ · Herkunft: ' + esc(qt[bt.quelle] || bt.quelle || '–') + '</div>' +
+      '<label class="text-klein" style="display:block;margin-top:4px"><input type="checkbox" data-be="zs-wk-std"' + (it.wkStd ? ' checked' : '') + '> Als Standardtext für künftige Belege von ' + esc(bt.aussteller || 'diesem Aussteller') + ' merken</label></div>';
   }
   function zsLeiste(k, d) {
     var gew = Object.keys(BE.zsel || {}).filter(function (x) { return BE.zsel[x]; }).filter(function (x) { return !!zsInfo(d, x); });
@@ -3608,13 +3608,13 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       } else if (it.art === 'wk') {
         var ausf = warVorschau && it.vorschauDaten && it.vorschauDaten.ok === true && it.bereitZumBuchen === true;
         var btv = (it.vorschauDaten && it.vorschauDaten.vorschau && it.vorschauDaten.vorschau.buchungstext) || {};
-        var wkText = it.wkText != null ? String(it.wkText).trim() : '';
+        var wkZweck = it.wkZweck != null ? String(it.wkZweck).trim() : '';
         if (ausf && it.wkStd) {
-          var rs2 = await fetch('/webhook/accounting/wk-buchungstext', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ aktion: 'speichern', mandant: u.mandant, gegenpartei: btv.gegenpartei || it.gegenpartei, kennung: btv.kennung || '', text: wkText || btv.text || '' }) });
+          var rs2 = await fetch('/webhook/accounting/buchungstext-aendern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ aktion: 'regel_neu', aussteller: btv.aussteller || it.gegenpartei, zweck: wkZweck || btv.zweck || '' }) });
           var ds2 = await rs2.json().catch(function () { return {}; });
-          if (!rs2.ok || ds2.ok === false) { it.status = 'fehler'; it.meldung = 'Standardtext nicht gespeichert: ' + (ds2.meldung || 'Fehler') + '. Es wurde nichts gebucht.'; u.phase = 'schritt'; beAlleRender(); return; }
+          if (!rs2.ok || !ds2.ok) { it.status = 'fehler'; it.meldung = 'Standardtext nicht gespeichert: ' + (ds2.message || ds2.fehler || 'Fehler') + '. Es wurde nichts gebucht.'; u.phase = 'schritt'; beAlleRender(); return; }
         }
-        var r2 = await fetch('/webhook/accounting/zahlung-wiederkehrend', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: u.mandant, transaction_id: it.tx, ausfuehren: ausf, text: ausf && wkText ? wkText : undefined }) });
+        var r2 = await fetch('/webhook/accounting/zahlung-wiederkehrend', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: u.mandant, transaction_id: it.tx, ausfuehren: ausf, zweck: ausf && wkZweck ? wkZweck : undefined }) });
         var d2 = await r2.json().catch(function () { return {}; });
         if (!ausf) {
           it.vorschauDaten = d2;
@@ -4931,7 +4931,6 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var d = await res.json();
       if (!res.ok) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
       BT.daten = d;
-      try { var rw = await fetch('/webhook/accounting/wk-buchungstext', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ aktion: 'liste' }) }); var dw = await rw.json(); BT.wk = dw.liste || []; } catch (x) { BT.wk = BT.wk || []; }
     } catch (e) { BT.fehler = e.message; }
     BT.laedt = false; renderBT();
   }
@@ -4945,31 +4944,6 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       BT.loeschen = null;
       await ladeBT(); ladeListe('beleg', 'XXL'); ladeListe('beleg', 'LEV');
     } catch (e) { BT.fehlerAktion = e.message; renderBT(); }
-  }
-  async function btWk(daten, meldung) {
-    BT.fehlerAktion = ''; BT.meldung = '';
-    try {
-      var res = await fetch('/webhook/accounting/wk-buchungstext', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(daten) });
-      var d = await res.json();
-      if (!res.ok || d.ok === false) throw new Error(d.meldung || d.message || 'Speichern fehlgeschlagen');
-      BT.wk = d.liste || []; BT.meldung = meldung; BT.loeschen = null;
-    } catch (e) { BT.fehlerAktion = e.message; }
-    renderBT();
-  }
-  function btWkKarte() {
-    var liste = BT.wk || [];
-    var h = '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Standardtexte für wiederkehrende Zahlungen · ' + esc(zahl(liste.length)) + ' Texte</span></div>' +
-      '<div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Mandant</th><th>Gegenpartei</th><th><abbr title="Beitrags- oder Kundennummer aus dem Verwendungszweck; leer = gilt für alle Zahlungen der Gegenpartei">Nr.</abbr></th><th><abbr title="Höchstens 50 Zeichen; der Zeitraum aus dem Verwendungszweck (z. B. 10-12/2026) wird beim Buchen angehängt">Standardtext</abbr></th><th></th></tr></thead><tbody>';
-    liste.forEach(function (r) {
-      var key = 'wk|' + r.mandant + '|' + r.schluessel + '|' + r.kennung, loe = BT.loeschen === key;
-      h += '<tr><td>' + esc(r.mandant) + '</td><td>' + esc(r.gegenpartei) + '</td><td class="zahlen">' + esc(r.kennung || 'alle') + '</td>' +
-        '<td><input class="eingabe-klein" style="width:100%" maxlength="50" data-bt="wk-wert" aria-label="Standardtext für ' + esc(r.gegenpartei) + '" value="' + esc(r.text) + '"></td>' +
-        '<td style="white-space:nowrap" data-m="' + esc(r.mandant) + '" data-gp="' + esc(r.gegenpartei) + '" data-schluessel="' + esc(r.schluessel) + '" data-kennung="' + esc(r.kennung) + '">' +
-        (loe ? '<span class="notiz" style="margin:0">Wirklich löschen?</span> <button type="button" class="btn-gefahr" data-bt="wk-loeschen-ja">Löschen</button> <button type="button" class="link-btn" data-bt="loeschen-nein">Abbrechen</button>'
-          : '<button type="button" class="btn btn-secondary" style="padding:4px 10px" data-bt="wk-speichern">Speichern</button> <button type="button" class="link-btn" data-bt="loeschen" data-key="' + esc(key) + '">Löschen</button>') + '</td></tr>';
-    });
-    if (!liste.length) h += '<tr><td colspan="5" class="leer">Noch keine Texte. Du legst sie in der Vorschau einer wiederkehrenden Zahlung an („Als Standardtext merken“).</td></tr>';
-    return h + '</tbody></table></div><div class="card-fuss">Gilt für künftige Übertragungen wiederkehrender Zahlungen. Bereits gebuchte Zahlungen bleiben unverändert.</div></div>';
   }
   function renderBT() {
     var el = $('p-buchungstexte'); if (!el) return;
@@ -4998,7 +4972,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
           : '<button type="button" class="btn btn-secondary" style="padding:4px 10px" data-bt="speichern">Speichern</button> <button type="button" class="link-btn" data-bt="loeschen" data-key="' + esc(key) + '">Löschen</button>') + '</td></tr>';
     });
     if (!regeln.length) h += '<tr><td colspan="5" class="leer">Keine Texte.</td></tr>';
-    h += '</tbody></table></div><div class="card-fuss">Eine Änderung hier gilt nur für künftig gelesene Belege, bisherige Belege behalten ihren Text. Einen Text nur für einen Beleg änderst du direkt in der Beleg-Liste am Buchungstext. Ändern, löschen oder neu anlegen setzt die Quelle auf „von Marko festgelegt“.</div></div>' + btWkKarte() + '</div>';
+    h += '</tbody></table></div><div class="card-fuss">Eine Änderung hier gilt nur für künftig gelesene Belege, bisherige Belege behalten ihren Text. Einen Text nur für einen Beleg änderst du direkt in der Beleg-Liste am Buchungstext. Ändern, löschen oder neu anlegen setzt die Quelle auf „von Marko festgelegt“.</div></div></div>';
     el.innerHTML = h;
     if (fokus) { var n = el.querySelector('[data-bt="suche"]'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } }
   }
@@ -5013,8 +4987,6 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       else if (w === 'speichern') { var i = zeile.querySelector('[data-bt="wert"]'); btRegel({ aktion: 'regel_aendern', schluessel: i.getAttribute('data-schluessel'), alt: i.getAttribute('data-alt'), zweck: i.value }, 'Standardtext geändert, gilt für künftige Belege. Bisherige Belege bleiben unverändert.'); }
       else if (w === 'loeschen') { BT.loeschen = b.getAttribute('data-key'); renderBT(); }
       else if (w === 'loeschen-nein') { BT.loeschen = null; renderBT(); }
-      else if (w === 'wk-speichern') { var wz = b.closest('td'); btWk({ aktion: 'speichern', mandant: wz.getAttribute('data-m'), gegenpartei: wz.getAttribute('data-gp'), kennung: wz.getAttribute('data-kennung'), text: zeile.querySelector('[data-bt="wk-wert"]').value }, 'Standardtext gespeichert, gilt für künftige Übertragungen.'); }
-      else if (w === 'wk-loeschen-ja') { var wl = b.closest('td'); btWk({ aktion: 'loeschen', mandant: wl.getAttribute('data-m'), schluessel: wl.getAttribute('data-schluessel'), kennung: wl.getAttribute('data-kennung') }, 'Standardtext gelöscht.'); }
       else if (w === 'loeschen-ja') btRegel({ aktion: 'regel_loeschen', schluessel: b.getAttribute('data-schluessel'), alt: b.getAttribute('data-alt') }, 'Standardtext gelöscht.');
     });
   }
@@ -5395,7 +5367,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         var at = e.target.closest('[data-be="agt-wert"]'); if (at) { if (BE.agTe) BE.agTe.wert = at.value; return; }
         var ak = e.target.closest('[data-be="agki-text"]'); if (ak) { if (BE.agKi) BE.agKi.text = ak.value; return; }
         var zkt = e.target.closest('[data-be="zk-text"]'); if (zkt) { if (BE.zk) BE.zk.text = zkt.value; return; }
-        var wkt = e.target.closest('[data-be="zs-wk-text"]'); if (wkt) { if (BE.zue && BE.zue.items[BE.zue.idx || 0]) BE.zue.items[BE.zue.idx || 0].wkText = wkt.value; return; }
+        var wkt = e.target.closest('[data-be="zs-wk-zweck"]'); if (wkt) { if (BE.zue && BE.zue.items[BE.zue.idx || 0]) BE.zue.items[BE.zue.idx || 0].wkZweck = wkt.value; return; }
         var s = e.target.closest('[data-be="suche"]'); if (!s) return;
         var st = zustand(s); st.z.suche = s.value; renderAccounting(st.art, st.k);
       });
@@ -6285,7 +6257,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261020094334';
+  var BUILD = '20261020101358';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
