@@ -507,7 +507,7 @@
 <script src="/js/nav.js?v=1791838361"></script>
 <script src="/js/include.js?v=1787854261"></script>
 <script src="/js/voucher-utils.js?v=1786873000"></script>
-<script src="/js/seat-picker.js?v=1792395620"></script>
+<script src="/js/seat-picker.js?v=1792494646"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     /* Preisbox zeigt bewusst den Normalpreis (data-base) statisch an. Der
@@ -544,7 +544,7 @@
     var picker = new SeatPicker(document.getElementById('seatplan-root'), {
       nachwuchsBeitrag: true,
       nachwuchsAmount: 2,
-      planUrl: '/assets/seating/riethsporthalle-seatingplan.json?v=1786585000',
+      planUrl: '/assets/seating/riethsporthalle-seatingplan.json?v=1792494646',
       // Webhook-URL ohne Workflow-ID im Pfad! Das n8n-MCP-Tool liefert die
       // Produktions-URL fälschlich als .../webhook/<workflow-id>/<pfad> zurück, was
       // 404 ergibt (n8n-Bug, laut Support in 2.33.0 behoben, Ticket #35063).
@@ -577,7 +577,7 @@
       // nicht 'Kategorie II' (sonst matcht kein echter Block-CS-Sitz gegen diesen Eintrag).
       pretixItemCategoryMap: {
         41: 'Kategorie I', 44: 'Kategorie I',
-        43: 'Kategorie II', 45: 'Kategorie II', 42: 'Kategorie II', 46: 'C unten',
+        43: 'Kategorie II', 45: 'Kategorie III', 42: 'Kategorie II', 46: 'C unten',
         47: 'VIP',
         37: 'Kategorie III', 38: 'Fanblock', 39: 'Rollstuhlplatz'
       },

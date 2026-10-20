@@ -127,7 +127,7 @@ jedem Kontingent-/Item-Neuaufbau (s. Merksatz oben).
 | Block CS (K2) — zweites Kat.2-Kontingent, „C oben" | 32 | 46 | 53 | 12,00 € / 8,50 € |
 | Block D (K2) | 29 | 43 | 48 | 12,00 € / 8,50 € |
 | Block E (K1) | 33 | 41 | 52 | 16,00 € / 14,00 € |
-| Block F (K2) | 30 | 45 | 51 | 12,00 € / 8,50 € |
+| Block F (K3, seit 20.10.2026) | 30 | 45 | 51 | 10,50 € / 8,00 € |
 | Fanblock | 27 | 38 | 54 | 10,50 € / 8,00 € |
 | VIP | 40 | 47 | 58 | 119,00 € (Dauer 1.290,00 €/495,00 € erm.) |
 | Rollstuhlplatz | 34 | 39 | 57 | 8,00 € (Dauer 104,00 €) |
@@ -1277,3 +1277,12 @@ Heiko Kühnst lädt seine Mandanten zum Heimspiel am 08.11.2026 gegen Culture Ci
 - **Untergrenze auf 1 (Marko, 19.10.2026):** `maMin` der Kühnst-Aktion steht auf 1, die Spanne lautet also 1 bis 20. Damit geht auch eine einzelne Karte, und der Fall Pfaudler (3 Mitarbeitende ohne VIP) wäre kein Sonderfall mehr. Geprüft: ein Ticket ohne VIP wird angenommen. Die Rückfallliste in den Code-Knoten, die nur bei nicht erreichbarer `firmenevent-aktiv.json` greift, ist bewusst weit gefasst (1 bis 50) statt auf die laufende Aktion gesetzt — ein zu enger Notnagel würde im Störfall richtige Anmeldungen abweisen.
 - **Testzeilen entfernt (19.10.2026, Marko: „die alten Testzeilen kannst du auch löschen"):** Gelöscht sind alle eigenen Testeinträge dieses Tages und die aus der crestcom-Phase — vier Anmeldungen (`TESTFIRMA GmbH`, `TESTFIRMA 2`, `TESTFIRMA 3`, `Beispiel GmbH (Testanmeldung zur Ansicht)`, alle `quelle=test`, alle von 80.187.119.108), vier Umfragen (`92n3gqtt`, `mdhse5ee`, `4ce52pfu`, `9eguu78y`) und alle sechs Stimmen (Namen „Testperson A/B", „Test", „Test 2"). Stand danach: **13 Anmeldungen, 5 Umfragen, 0 Stimmen** — alles echte crestcom-Daten.
 - **Fünf Umfragen stehen bewusst noch:** `gg46yf2q`, `wznuzucz` (IP wie LINDIG), `mvuxu29z` (IP wie VST), `vj3a9utv` (IP wie RSB) und `h4kbatnm`. Sie kommen von fremden IP-Adressen und tragen keine Testnamen, sind also echte Team-Umfragen von Kunden. Sie fallen unter die Löschung, die im Januar 2027 besprochen wird (Aufgaben-Tracker, fällig 11.01.2027).
+
+## Block F auf Kategorie 3 (20.10.2026, Marko)
+- **Entscheidung:** Block F wird für Einzeltickets, Dauerkarten und Abendkasse wie Kategorie III (Block A) bepreist. Einzel 10,50 € / ermäßigt 8,00 €, Abendkasse 12,50 € / 10,00 €, Dauerkarte 116 € / 88 € (Stand 20.10.). Kategorie II besteht damit aus Block C, D und C unten. Der Kinder-Tarif (7–14) bleibt nur in Block A. Bestehende Bestellungen behalten ihren Preis (3 Dauerkarten in F hatten den Kat.-II-Preis bezahlt).
+- **Website:** Sitzplan-Generator `assets/seating/gen_seatplan.py` setzt die Sitze von Block F auf `Kategorie III` (Website-Plan `riethsporthalle-seatingplan.json`). Der Pretix-Plan (`….pretix.json`) behält für F `Kategorie II` (`PRETIX_KATEGORIE_BLEIBT`), weil daran die Zuordnung Sitzkategorie → Produkt hängt. `seat-picker.js`: neue Funktion `zonePriceInfo` entfernt den Kinder-Tarif außerhalb von Block A. Item→Kategorie-Karten (`tickets/checkout.html`, `tickets/dauerkarte.html`, `tools/build-gameday-hub.py` und damit `gameday/index.html`): Items 30 und 45 jetzt `Kategorie III`. Cache-Nummer für Skript und Plan `1792494646`.
+- **pretix:** Items 30/45/51 heißen "Block F (K3) - Einzel/Dauer/Abend"; Standardpreise Einzel 10,50/8,00, Abend 12,50/10,00, Dauer 116/88 (der Workflow `Tgrxrv7iFW5WP8nd` führt Dauer ab jetzt mit den Kat.-III-Schlüsseln).
+- **n8n:** `BmpBkKdzzSZaBnZE` "Gutschein-Rabatt berechnen" (Item 30 → Kategorie III), `QxPE1ikMJWL0fyB7` "Rabatt berechnen" (Item 45 → Kategorie III), `zNGWzRFz3ebzsDkD` Ticket-Mail (Labels "F Kat. III" für Items 30 und 51), `Tgrxrv7iFW5WP8nd` (Dauer-Preisschlüssel). Die serverseitigen Preistabellen rechnen nach der vom Seitenskript gesendeten Kategorie und brauchten keine Änderung. Alte, noch im Browser zwischengespeicherte Seiten senden weiter `Kategorie II` mit dem alten Preis und werden bis zum Neuladen akzeptiert.
+- **Test (lokal, Abendkasse):** Block F zeigt "Kat. III, ab 12,50 €" in der Kategorie-III-Farbe, Normalpreis 12,50 € und ermäßigt 10,00 €, keine Kinder-Zeile; Block A zeigt weiter die Kinder-Zeile (7,00 €).
+- **Preisliste:** `~/Downloads/Preisliste Abendkasse 2627 (Block F Kat. 3).pdf` (Kat. 2: Block C und D, Kat. 3: Block A und F).
+

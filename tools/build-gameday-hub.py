@@ -302,7 +302,7 @@ def halle():
 PRETIX_ITEM_CATEGORY_MAP = {
     23: "Stehplatz", 24: "Kategorie I", 25: "Kategorie II",
     27: "Fanblock", 28: "Kategorie III",
-    29: "Kategorie II", 30: "Kategorie II", 31: "Kategorie II", 32: "C unten",
+    29: "Kategorie II", 30: "Kategorie III", 31: "Kategorie II", 32: "C unten",
     33: "Kategorie I", 34: "Rollstuhlplatz", 35: "Kategorie I", 40: "VIP",
 }
 
@@ -480,7 +480,7 @@ def kauf_bereich(aktuell, kommt, heute):
   </section>
 
   <script src="/js/voucher-utils.js?v=1786873000"></script>
-  <script src="/js/seat-picker.js?v=1792395620"></script>
+  <script src="/js/seat-picker.js?v=1792494646"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {{
       var game = {game_json};
@@ -499,7 +499,7 @@ def kauf_bereich(aktuell, kommt, heute):
         }} : null,
         nachwuchsBeitrag: true,
         nachwuchsAmount: 2,
-        planUrl: '/assets/seating/riethsporthalle-seatingplan.json?v=1786585000',
+        planUrl: '/assets/seating/riethsporthalle-seatingplan.json?v=1792494646',
         seatStatusUrl: {('"https://ticketing.basketball-loewen.com/webhook/einzelticket-sitzplatz-status?subevent=' + str(aktuell["subeventId"]) + '"') if aktuell.get("subeventId") else "null"},
         pretixEvent: 'saison2627',
         pretixItemCategoryMap: {json.dumps(PRETIX_ITEM_CATEGORY_MAP)},

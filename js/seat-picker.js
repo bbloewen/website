@@ -168,6 +168,14 @@
   /* "Begleitperson" hat pauschal 0 EUR, unabhaengig davon, was priceInfo fuer die
      jeweilige Kategorie sonst hergibt (priceInfo kennt diesen Tarif gar nicht) —
      zentrale Stelle statt an jeder priceInfo[tarif]-Lesestelle einzeln abzufangen. */
+  /* Der Kinder-Tarif (7–14) gilt nur in Block A: Block F ist seit 20.10.2026 ebenfalls Kategorie III, hat aber
+     kein Kinder-Produkt in pretix. Preisinfo der Kategorie deshalb für andere Blöcke ohne "kind" liefern. */
+  function zonePriceInfo(priceInfo, zoneId) {
+    if (!priceInfo || priceInfo.kind === undefined || zoneId === 'A') return priceInfo;
+    var copy = {};
+    Object.keys(priceInfo).forEach(function (k) { if (k !== 'kind') copy[k] = priceInfo[k]; });
+    return copy;
+  }
   function blockTarifPrice(priceInfo, tarif) {
     if (tarif === 'begleitung') return 0;
     return tarif === 'ermaessigt_begleit' ? priceInfo.ermaessigt : priceInfo[tarif];
@@ -1130,7 +1138,7 @@
     if (!chosen) return;
     category = chosen.category;
     var total = this._blockFreeCount(zoneId, category);
-    var priceInfo = this.prices[category] || { normal: 0 };
+    var priceInfo = zonePriceInfo(this.prices[category], zoneId) || { normal: 0 };
     var blockKey = zoneId + '::' + category;
     var counts = this.blockCounts[blockKey] || {};
     var zoneLabel = zone.name + ' - ' + chosen.label;
@@ -2221,7 +2229,7 @@
 
     groups.forEach(function (group, gIdx) {
       var category = group.category;
-      var priceInfo = self.prices[category] || { normal: 0 };
+      var priceInfo = zonePriceInfo(self.prices[category], zone.zone_id) || { normal: 0 };
       var freeCount = 0;
 
       group.rows.forEach(function (row, rIdx) {

@@ -237,7 +237,7 @@ def build_zone(zone_id, name, row_specs, position, break_before=None, align_edge
 # - Block D (Gästeblock/Gästefans in the plan): unlocked for public sale as Kategorie II
 #   (the plan itself marks it VIP/"nicht buchbar", overridden deliberately).
 # - Block E: Kategorie I (matches plan).
-# - Block F: Kategorie II (matches plan).
+# - Block F: Kategorie III (Marko, 20.10.2026: Preis wie Block A; vorher Kategorie II).
 # - Blocks A/C: front rows are VIP/"nicht buchbar" in the plan, unlocked to Kategorie II
 #   throughout (no VIP product in A/C) — everything stays bookable, no permanent
 #   non-bookable state (a future per-game block is a separate concern, not modeled here).
@@ -340,14 +340,14 @@ block_E = [
     # bestehende Segmentgrenzen, jetzt über segment_gap_seats statt der kleinen
     # Dekorlücke).
 block_F = [
-    (14, [4, 3, 14, 7], KAT2, {"align_target_seat": 23, "segment_gap_seats": {1: 0, 2: 1, 3: 1}}),
-    (13, [2, 20, 2], KAT2, {"align_target_seat": 22, "segment_align": {"1": {"row": "14", "seat": 1}, "23": {"row": "14", "seat": 27}}}),
-    (12, [2, 20, 2], KAT2, {"align_target_seat": 22, "segment_align": {"1": {"row": "14", "seat": 1}, "23": {"row": "14", "seat": 27}}}),
-    (11, [2, 20, 2], KAT2, {"align_target_seat": 22, "segment_align": {"1": {"row": "14", "seat": 1}, "23": {"row": "14", "seat": 27}}}),
-    (10, [20], KAT2, {"align_reference_seat": True}),
-    (9, [20], KAT2),
-    (8, [20], KAT2),
-    (7, [20], KAT2),
+    (14, [4, 3, 14, 7], KAT3, {"align_target_seat": 23, "segment_gap_seats": {1: 0, 2: 1, 3: 1}}),
+    (13, [2, 20, 2], KAT3, {"align_target_seat": 22, "segment_align": {"1": {"row": "14", "seat": 1}, "23": {"row": "14", "seat": 27}}}),
+    (12, [2, 20, 2], KAT3, {"align_target_seat": 22, "segment_align": {"1": {"row": "14", "seat": 1}, "23": {"row": "14", "seat": 27}}}),
+    (11, [2, 20, 2], KAT3, {"align_target_seat": 22, "segment_align": {"1": {"row": "14", "seat": 1}, "23": {"row": "14", "seat": 27}}}),
+    (10, [20], KAT3, {"align_reference_seat": True}),
+    (9, [20], KAT3),
+    (8, [20], KAT3),
+    (7, [20], KAT3),
     # Reihe 6 (Marko, mehrfach nachgeschärft): die bisherigen 10 Rollstuhlplätze werden
     # normale Sitze, NUMMERIERT 1-10 (nicht 6-15!) — davor (physisch links) kommen 5 NEUE
     # Rollstuhlplätze (unnummeriert dargestellt, s. site-weite Regel), physisch zuerst
@@ -366,7 +366,7 @@ block_F = [
     # Rollstuhlplatz und dem ersten normalen Sitz (segment_gap_seats vor Segment 1-5) —
     # ergibt rechnerisch genau die passende Gesamtbreite, kein trailing_gap_units mehr
     # nötig.
-    (6, [1, 1, 1, 1, 1, 10], KAT2, {
+    (6, [1, 1, 1, 1, 1, 10], KAT3, {
         "wheelchair_seats": [1, 2, 3, 4, 5],
         "segment_gap_seats": {1: 1, 2: 1, 3: 1, 4: 1, 5: 1},
         "renumber_seats": {
@@ -607,17 +607,25 @@ with open(out_path, "w") as f:
 # ein Allowlist-Rebuild statt einer Pop-Liste. seat_guid/uuid bleiben unveraendert, damit beide
 # Dateien dieselben Sitze referenzieren. "standing" kennt Pretix ebenfalls nicht (nur seatbasierte
 # Zonen) und entfaellt komplett.
-def pretix_seat(seat):
-    return {k: seat[k] for k in ("seat_number", "seat_guid", "uuid", "position", "category")}
+# Block F gilt seit 20.10.2026 auf der Website als Kategorie III (Preis wie Block A). Im Pretix-Plan bleibt
+# die Sitzkategorie "Kategorie II", weil daran die Zuordnung Sitzkategorie -> Produkt (SeatCategoryMapping)
+# hängt; der Preis kommt aus den Items, nicht aus der Sitzkategorie.
+PRETIX_KATEGORIE_BLEIBT = {"F": KAT2}
 
-def pretix_row(row):
+def pretix_seat(seat, zone_id=None):
+    d = {k: seat[k] for k in ("seat_number", "seat_guid", "uuid", "position", "category")}
+    if zone_id in PRETIX_KATEGORIE_BLEIBT:
+        d["category"] = PRETIX_KATEGORIE_BLEIBT[zone_id]
+    return d
+
+def pretix_row(row, zone_id=None):
     return {k: row[k] for k in ("uuid", "position", "row_number", "row_number_position") if k in row} | {
-        "seats": [pretix_seat(s) for s in row["seats"]]
+        "seats": [pretix_seat(s, zone_id) for s in row["seats"]]
     }
 
 def pretix_zone(zone):
     return {k: zone[k] for k in ("zone_id", "uuid", "name", "position") if k in zone} | {
-        "rows": [pretix_row(r) for r in zone["rows"]]
+        "rows": [pretix_row(r, zone.get("zone_id")) for r in zone["rows"]]
     }
 
 pretix_plan = {
