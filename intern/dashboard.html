@@ -3895,7 +3895,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       else if (gebucht && wiederk) { var wkKred = bu.filter(function (x) { return /^[0-9]{6}$/.test(String(x.konto || '')); })[0]; belegZelle = '<div><span class="fett">' + esc(wkKred ? (wkKred.konto_name || wkKred.konto) : String(p.gegenpartei || '').replace(/\s*\n\s*/g, ' ')) + '</span><div class="notiz" style="margin:0">Wiederkehrende Zahlung, ohne Beleg gebucht</div></div>'; }
       else if (gebucht) belegZelle = '<div class="notiz" style="margin:0">beleglos gebucht</div>';
       if (p.eb && !gebucht) belegZelle = '<div><div class="fett">' + esc(p.eb.aussteller || '') + '</div>' + (p.eb.nummer ? '<div class="notiz" style="margin:0">Nr. ' + esc(p.eb.nummer) + '</div>' : '') +
-        '<div class="notiz" style="margin:0;white-space:normal">Auslage von ' + esc(p.eb.person || '') + ' · ' + (p.eb.drive_url ? '<a href="' + esc(p.eb.drive_url) + '" target="_blank" rel="noopener">Original in Drive</a>' : 'ohne Datei') + '</div>' +
+        '<div class="notiz" style="margin:0;white-space:normal"><b>Betrag laut Beleg ' + esc(formatEuro(Number(p.eb.betrag || 0))) + '</b>' + (Math.abs(Math.abs(Number(p.eb.betrag || 0)) - Math.abs(Number(p.betrag || 0))) < 0.01 ? ' (gleich der Zahlung)' : ' <span class="hinweis-warn">weicht von der Zahlung ' + esc(formatEuro(Math.abs(Number(p.betrag || 0)))) + ' ab</span>') + '</div><div class="notiz" style="margin:0;white-space:normal">Auslage von ' + esc(p.eb.person || '') + ' · ' + (p.eb.drive_url ? '<a href="' + esc(p.eb.drive_url) + '" target="_blank" rel="noopener">Original in Drive</a>' : 'ohne Datei') + '</div>' +
         '<div class="notiz" style="margin:0;white-space:normal">Beleg im Dashboard, noch nicht in BuchhaltungsButler. Die Zahlung wird mit dem Beleg übertragen (Belegbereich).</div>' +
         (p.eb.text ? '<div class="notiz" style="margin:2px 0 0;white-space:normal">Buchungstext (aus dem Beleg): „' + esc(p.eb.text) + '“ · ändern im Belegbereich</div>' : '') + '</div>';
       if (wkv) belegZelle += '<div><span class="gut">Vorschlag wiederkehrend:</span><div class="fett">' + esc(wkv.kreditor_name || wkv.kreditor) + '</div><div class="notiz" style="margin:0">Beleg ohne Datei über Kreditor ' + esc(wkv.kreditor) + ', wie die Zahlung vom ' + esc(formatDate(String(wkv.vorbild_datum).slice(0, 10))) + (Math.abs(Math.abs(Number(wkv.vorbild_betrag)) - Math.abs(Number(p.betrag))) > 0.01 ? ' (damals ' + esc(formatEuro(Math.abs(Number(wkv.vorbild_betrag)))) + ')' : '') + '</div></div>';
@@ -5569,7 +5569,10 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var sy = window.scrollY, sx = window.scrollX, ae = document.activeElement, aid = ae && ae.id, sel = null;
     try { if (ae && typeof ae.selectionStart === 'number') sel = [ae.selectionStart, ae.selectionEnd]; } catch (x) {}
     var hoehe = document.body.style.minHeight; document.body.style.minHeight = document.documentElement.scrollHeight + 'px';
+    // Tabellen mit eigener Rollleiste (.tbl-voll) behalten ihre Stellung: sonst springt die Liste beim Setzen eines Hakens ganz nach oben
+    var innen = {}; Array.prototype.forEach.call(document.querySelectorAll('.tbl-voll'), function (el, i) { var pa = el.closest('[id]'); innen[(pa ? pa.id : '') + '#' + i] = [el.scrollTop, el.scrollLeft]; });
     try { fn(); } finally {
+      Array.prototype.forEach.call(document.querySelectorAll('.tbl-voll'), function (el, i) { var pa = el.closest('[id]'), v = innen[(pa ? pa.id : '') + '#' + i]; if (v) { el.scrollTop = v[0]; el.scrollLeft = v[1]; } });
       document.body.style.minHeight = hoehe;
       if (aid && document.activeElement !== document.getElementById(aid)) { var neu = document.getElementById(aid); if (neu && neu.focus) { try { neu.focus({ preventScroll: true }); if (sel && typeof neu.setSelectionRange === 'function') neu.setSelectionRange(sel[0], sel[1]); } catch (x) {} } }
       if (window.scrollY !== sy || window.scrollX !== sx) window.scrollTo(sx, sy);
@@ -6510,7 +6513,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261020154222';
+  var BUILD = '20261020155242';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
