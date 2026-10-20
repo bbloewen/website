@@ -334,7 +334,7 @@ WISSENSWERTES_HTML = """      <span class="eyebrow" style="display:block;margin-
             <div class="tile-icon"><i data-lucide="armchair"></i></div>
             <h3 class="t-h4">@@SITZ_TITEL@@</h3>
           </div>
-          <p class="t-body-sm">@@SITZ_TEXT@@</p>
+@@SITZ_TEXT@@
         </div>
         <div class="info-tile info-tile-row info-tile-row-divided">
           <div class="info-tile-row-head">
@@ -370,13 +370,17 @@ WISSENSWERTES_HTML = """      <span class="eyebrow" style="display:block;margin-
 # Der Kachel-Text zur Platzwahl haengt davon ab, ob das Einzelticket mit Sitzwahl verkauft wird (SITZWAHL_STANDARD).
 SITZ_KACHEL = {
     True: ("Dein Sitzplatz",
-           'In den besten Bereichen suchst du dir deinen <strong>Sitzplatz</strong> selbst aus: Block B, Block E, Courtside (CS), Fanblock und VIP. '
-           'Block antippen, freie Plätze wählen, fertig. Dein Platz steht auf dem Ticket und ist für dich reserviert. '
+           '<p class="t-body-sm"><strong>Wir haben euch gehört, liebe Fans!</strong> Das ist neu:</p>'
+           '<ul class="t-body-sm" style="margin:8px 0 12px 18px;padding:0;list-style:disc">'
+           '<li>In Block B und Block E gibt es wieder feste Sitzplätze. Das gilt auch für Courtside (CS), den Fanblock und VIP.</li>'
+           '<li>Block F ist jetzt Kategorie 3.</li>'
+           '<li>In Block A gibt es zusätzlich den familienfreundlichen Kinderrabatt für Kinder von 7 bis 14 Jahren.</li></ul>'
+           '<p class="t-body-sm">So geht es: Block antippen, freie Plätze wählen, fertig. Dein Platz steht auf dem Ticket und ist für dich reserviert. '
            'In allen anderen Blöcken wählst du frei innerhalb deines gebuchten Blocks. Wer die ganze Saison auf demselben Platz sitzen möchte, nimmt die '
-           '<a href="/tickets/dauerkarte.html">Dauerkarte</a>. Stehplätze haben keinen festen Platz.'),
+           '<a href="/tickets/dauerkarte.html">Dauerkarte</a>. Stehplätze haben keinen festen Platz.</p>'),
     False: ("Vorteile",
-            'Einen <strong>festen Sitzplatz</strong> gibt es ab dieser Saison nicht mehr beim Einzelticket — nur noch mit der Dauerkarte. '
-            'Beim Einzelticket wählst du frei innerhalb deines gebuchten Blocks, pro Spiel neu.'),
+            '<p class="t-body-sm">Einen <strong>festen Sitzplatz</strong> gibt es ab dieser Saison nicht mehr beim Einzelticket — nur noch mit der Dauerkarte. '
+            'Beim Einzelticket wählst du frei innerhalb deines gebuchten Blocks, pro Spiel neu.</p>'),
 }
 WISSENSWERTES_HTML = (WISSENSWERTES_HTML
                       .replace("@@SITZ_TITEL@@", SITZ_KACHEL[SITZWAHL_STANDARD][0])
