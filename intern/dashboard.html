@@ -3476,11 +3476,20 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   }
   // ---- Zahlungen: Vorschläge auswählen und nach BuchhaltungsButler übertragen (Zahlung dem Beleg zuordnen, Ausgleich über den Kreditor buchen) ----
   // ---- Zahlungen mit der KI besprechen: neue Buchung direkt über die Zahlung, gespeichert als Plan, übertragen über den Haken oben ----
+  // Gespeicherter Plan der Zahlung, wie er übertragen wird
+  function zkPlanHtml(q) {
+    if (!q.gespeichert || !Array.isArray(q.zeilen) || !q.zeilen.length) return '';
+    var nm = function (nr, name) { return nr ? esc(nr) + (name ? ' ' + esc(name) : '') : '–'; };
+    return '<div class="rf-box" style="margin-top:8px" role="region" aria-label="Geplante Buchung"><div class="fett">So wird gebucht' + (q.weg === 'wiederkehrend' ? ': wiederkehrend, Beleg ohne Datei über Kreditor ' + nm(q.kreditor, q.kreditor_name) + ', die Zahlung gleicht ihn aus' : ': direkt über die Zahlung') + '</div>' +
+      q.zeilen.map(function (x) { return '<div class="notiz" style="margin:2px 0 0;white-space:normal">' + nm(x.sachkonto, x.sachkonto_name) + ' · KST 1 ' + nm(x.kst1, x.kst1_name) + ' · KST 2 ' + nm(x.kst2, x.kst2_name) + ' · ' + esc(formatEuro(Number(x.betrag))) + ' · „' + esc(x.text || '') + '“</div>'; }).join('') +
+      '<div style="margin-top:8px"><button type="button" class="btn btn-primary" data-be="zk-uebertragen">So übertragen …</button> <span class="notiz" style="margin:0">' + (q.weg === 'wiederkehrend' ? 'zeigt zuerst die Vorschau mit Buchungstext' : 'fragt vor dem Buchen noch einmal nach') + '</span></div></div>';
+  }
   function zkPanel(k) {
     var q = BE.zk; if (!q || q.k !== k) return '';
     var h = '<div class="card pad" role="region" aria-label="Zahlung mit der KI besprechen"><div class="fett">Mit der KI besprechen: ' + esc(q.titel) + '</div>' +
       '<div class="text-klein" style="margin-top:6px">Sag, wie die Zahlung gebucht werden soll (Konto, Steuer, Kostenstellen, Text) oder stell eine Frage. Die Regeln des Steuerberaters kennt die KI. Eine Änderung wird gespeichert und mit dem Haken oben in BuchhaltungsButler übertragen.</div>';
     if (q.verlauf.length) h += '<div role="log" aria-label="Gespräch mit der KI" style="margin-top:8px;display:flex;flex-direction:column;gap:6px">' + q.verlauf.map(function (m, i) { return '<div style="' + (m.von === 'marko' ? 'align-self:flex-end;background:var(--bg-subtle)' : 'align-self:flex-start;border:1px solid var(--border-strong)') + ';border-radius:10px;padding:6px 10px;max-width:92%;white-space:pre-wrap">' + esc(m.text) + (m.regel ? '<div class="notiz" style="margin:4px 0 0;white-space:normal">' + (m.regel.zurueck ? 'Zurückgenommen: ' + esc(m.regel.text) : '<span class="gut">Im Kontenplan festgehalten:</span> ' + esc(m.regel.text) + ' · <button type="button" class="link-btn" data-be="zk-regel-zurueck" data-i="' + i + '">Rückgängig</button>') + '</div>' : '') + '</div>'; }).join('') + '</div>';
+    h += zkPlanHtml(q);
     h += '<label class="text-klein" for="zk-text" style="display:block;margin-top:8px">Deine Nachricht</label><textarea id="zk-text" class="eingabe" rows="3" style="width:100%;margin-top:4px" maxlength="2000" data-be="zk-text" placeholder="z. B. Das ist die Lohnsteuer September, bitte nach der Regel buchen"' + (q.laeuft ? ' disabled' : '') + '>' + esc(q.text) + '</textarea>';
     if (q.fehler) h += '<div class="fehlerbox" role="alert" style="margin-top:6px;white-space:normal">' + esc(q.fehler) + '</div>';
     return h + '<div style="display:flex;gap:8px;margin-top:8px;align-items:center"><button type="button" class="btn btn-primary" data-be="zk-senden"' + (q.laeuft ? ' disabled' : '') + '>' + (q.laeuft ? 'Die KI antwortet …' : 'An die KI senden') + '</button><button type="button" class="link-btn" data-be="zk-zu">Schließen</button></div></div>';
@@ -3500,15 +3509,14 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         var e = { k: q.mandant };
         var sp = null;
         for (var versuch = 0; versuch < 4; versuch++) {
-          var rs = await fetch('/webhook/accounting/zahlung-speichern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: q.mandant, transaction_id: q.tx, zeilen: d.zeilen, dialog: verlauf }) });
+          var rs = await fetch('/webhook/accounting/zahlung-speichern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: q.mandant, transaction_id: q.tx, zeilen: d.zeilen, dialog: verlauf, weg: d.weg || 'direkt', kreditor: d.kreditor || null }) });
           var ds = await rs.json().catch(function () { return {}; });
           sp = (!rs.ok || !ds.ok) ? { ok: false, probleme: ds.probleme && ds.probleme.length ? ds.probleme : [ds.meldung || ds.message || 'Nicht gespeichert.'], anlegen: ds.konto_anlegen || null } : { ok: true };
           if (sp.ok) break;
           var neu = await agFehlendesAnlegen(e, sp); if (!neu) break;
         }
         if (!sp.ok) { q.fehler = sp.probleme.join(' '); q.laeuft = false; beAlleRender(); return; }
-        verlauf[verlauf.length - 1].text += ' Gespeichert: die Zahlung steht oben, mit dem Haken in BuchhaltungsButler aktualisieren.';
-        q.zeilen = d.zeilen;
+        q.zeilen = d.zeilen; q.weg = d.weg || 'direkt'; q.kreditor = d.kreditor || null; q.kreditor_name = d.kreditor_name || ''; q.gespeichert = true;
         Object.keys(ZA).forEach(function (kk) { if (ZA[kk] && ZA[kk].daten) ladeListe('zahlung', kk, ZA[kk].daten.monat); });
       }
       q.verlauf = verlauf; q.text = '';
@@ -3531,7 +3539,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var t = key.split('|'), p = ((d && d.zahlungen) || []).filter(function (x) { return String(x.transaction_id) === t[0]; })[0];
     if (!p) return null;
     var basis = { tx: Number(t[0]), key: key, zahlung: p, datum: p.datum, betrag: Number(p.betrag), gegenpartei: p.gegenpartei };
-    if (t[1] === 'plan') return p.plan ? Object.assign(basis, { art: 'aktualisieren' }) : null;
+    if (t[1] === 'plan') return p.plan ? Object.assign(basis, { art: p.plan.weg === 'wiederkehrend' ? 'wk' : 'aktualisieren' }) : null;
     if (t[1] === 'auto') { var srw = (p.buchungen || []).length ? zahlungRegel(p) : null; return Object.assign(basis, { art: (p.buchungen || []).length ? (srw && srw.n === 'Wiederkehrend' ? 'wk' : 'regel') : (Number(p.betrag) < 0 ? 'wk' : 'ohne') }); }
     var v = zsVorschlaege(p).filter(function (y) { return String(y.beleg_id) === t[1]; })[0];
     return v ? Object.assign(basis, { art: 'zuordnen', beleg_id: t[1], nummer: v.nummer, vorschlag: v, verrechnung: !!v.teile }) : null;
@@ -3544,6 +3552,15 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       (x.zeilen || []).map(function (z) { return '<div class="notiz" style="margin:0">' + esc(z.sachkonto + ' · KST 1 ' + (z.kst1 || '–') + ' · KST 2 ' + (z.kst2 || '–') + ' · ' + z.vat + ' · ' + formatEuro(z.betrag) + ' · „' + z.text + '“') + '</div>'; }).join('') +
       (v.hinweise || []).map(function (t) { return '<div class="hinweis-warn" style="margin-top:4px">' + esc(t) + '</div>'; }).join('');
   }
+  // Buchungstext der wiederkehrenden Zahlung in der Vorschau: ändern, als Standardtext je Gegenpartei und Kennung merken (Zeitraum wird angehängt)
+  function zsWkText(it) {
+    var bt = (it.vorschauDaten && it.vorschauDaten.vorschau && it.vorschauDaten.vorschau.buchungstext) || {};
+    var wert = it.wkText != null ? it.wkText : (bt.text || '');
+    var qt = { 'von dir': 'von dir', 'Standardtext': 'Standardtext', 'wie Vorbild': 'wie die Vorbild-Zahlung', 'mit der KI besprochen': 'mit der KI besprochen' };
+    return '<div style="margin-top:6px"><label class="text-klein" for="zs-wk-text" style="display:block">Buchungstext (höchstens 60 Zeichen)</label><input id="zs-wk-text" class="eingabe-klein" style="width:100%" maxlength="60" data-be="zs-wk-text" value="' + esc(wert) + '">' +
+      '<div class="notiz" style="margin:2px 0 0;white-space:normal">Herkunft: ' + esc(qt[bt.quelle] || bt.quelle || '–') + (bt.standard ? ' · Standardtext „' + esc(bt.standard) + '“, Zeitraum ' + esc(bt.zeitraum || '') + ' angehängt' : '') + '</div>' +
+      '<label class="text-klein" style="display:block;margin-top:4px"><input type="checkbox" data-be="zs-wk-std"' + (it.wkStd ? ' checked' : '') + '> Als Standardtext für ' + esc(bt.gegenpartei || 'diese Gegenpartei') + (bt.kennung ? ' (Nr. ' + esc(bt.kennung) + ')' : '') + ' merken; der Zeitraum (' + esc(bt.zeitraum || 'MM/JJJJ') + ') wird künftig automatisch angehängt</label></div>';
+  }
   function zsLeiste(k, d) {
     var gew = Object.keys(BE.zsel || {}).filter(function (x) { return BE.zsel[x]; }).filter(function (x) { return !!zsInfo(d, x); });
     var u = BE.zue && BE.zue.k === k ? BE.zue : null;
@@ -3554,7 +3571,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var idx = u.idx || 0, ges = u.items.length, it0 = u.items[idx];
       h += '<div class="rf-box" style="margin-top:8px" role="region" aria-label="Übertragung der Zahlungen"><div class="fett">Übertragung nach BuchhaltungsButler, Schritt für Schritt</div><div class="notiz" style="margin:2px 0 0">Es wird immer nur eine Zahlung übertragen. Danach kannst du das Ergebnis in BuchhaltungsButler prüfen und die nächste freigeben.</div>' + u.items.map(function (it, n) {
         return '<div style="margin-top:8px"><div class="zeile-titel"><span>' + (n + 1) + '. ' + esc(formatDate(String(it.datum).slice(0, 10))) + ' · ' + esc(formatEuro(it.betrag)) + ' · ' + esc(it.gegenpartei || '') + '<div class="notiz" style="margin:0">' + esc(it.art === 'zuordnen' ? (it.verrechnung ? 'Verrechnung: wird ' + it.nummer + ' zugeordnet, ein Ausgleich über den Kreditor mit je einer Zeile' : 'wird Beleg ' + (it.nummer || it.beleg_id) + ' zugeordnet und der Ausgleich über den Kreditor gebucht') : ZS_ART[it.art]) + '</div></span><span class="' + (it.status === 'fehler' ? 'pflicht' : '') + '">' + esc(stText[it.status] || it.status) + '</span></div>' +
-          zsVorschauHtml(it.vorschauDaten) + (it.meldung ? '<div class="' + (it.status === 'gebucht' ? 'erfolg' : (it.status === 'vorschau' ? 'notiz' : 'fehlerbox')) + '" role="status" style="margin-top:4px;white-space:normal">' + esc(it.meldung) + '</div>' : '') + '</div>';
+          zsVorschauHtml(it.vorschauDaten) + (it.art === 'wk' && it.status === 'vorschau' && n === idx ? zsWkText(it) : '') + (it.meldung ? '<div class="' + (it.status === 'gebucht' ? 'erfolg' : (it.status === 'vorschau' ? 'notiz' : 'fehlerbox')) + '" role="status" style="margin-top:4px;white-space:normal">' + esc(it.meldung) + '</div>' : '') + '</div>';
       }).join('');
       var knopf = '';
       if (it0 && u.phase !== 'laeuft') {
@@ -3590,7 +3607,14 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         else { it.status = 'gebucht'; it.meldung = d3.meldung || 'In BuchhaltungsButler aktualisiert. Bitte dort prüfen.'; delete BE.zsel[it.key]; u.idx = idx + 1; }
       } else if (it.art === 'wk') {
         var ausf = warVorschau && it.vorschauDaten && it.vorschauDaten.ok === true && it.bereitZumBuchen === true;
-        var r2 = await fetch('/webhook/accounting/zahlung-wiederkehrend', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: u.mandant, transaction_id: it.tx, ausfuehren: ausf }) });
+        var btv = (it.vorschauDaten && it.vorschauDaten.vorschau && it.vorschauDaten.vorschau.buchungstext) || {};
+        var wkText = it.wkText != null ? String(it.wkText).trim() : '';
+        if (ausf && it.wkStd) {
+          var rs2 = await fetch('/webhook/accounting/wk-buchungstext', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ aktion: 'speichern', mandant: u.mandant, gegenpartei: btv.gegenpartei || it.gegenpartei, kennung: btv.kennung || '', text: wkText || btv.text || '' }) });
+          var ds2 = await rs2.json().catch(function () { return {}; });
+          if (!rs2.ok || ds2.ok === false) { it.status = 'fehler'; it.meldung = 'Standardtext nicht gespeichert: ' + (ds2.meldung || 'Fehler') + '. Es wurde nichts gebucht.'; u.phase = 'schritt'; beAlleRender(); return; }
+        }
+        var r2 = await fetch('/webhook/accounting/zahlung-wiederkehrend', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mandant: u.mandant, transaction_id: it.tx, ausfuehren: ausf, text: ausf && wkText ? wkText : undefined }) });
         var d2 = await r2.json().catch(function () { return {}; });
         if (!ausf) {
           it.vorschauDaten = d2;
@@ -3625,7 +3649,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     });
     h += zsLeiste(k, d);
     var th = function (t, tip, c) { return '<th' + (c ? ' class="' + c + '"' : '') + '>' + (tip ? '<abbr title="' + esc(tip) + '">' + t + '</abbr>' : t) + '</th>'; };
-    var kopf = '<colgroup><col style="width:3%"><col style="width:6%"><col style="width:7%"><col style="width:19%"><col style="width:7%"><col style="width:13%"><col style="width:8%"><col style="width:15%"><col style="width:11%"><col style="width:11%"></colgroup><thead><tr>' + th('Wahl', 'Vorschlag zum Übertragen nach BuchhaltungsButler auswählen') + th('Status', 'Dokument = Belegart (grün Beleg, orange Eigenbeleg, blau wiederkehrend ohne Beleg, grau beleglos), Euro = Rechnung ausgeglichen und in BuchhaltungsButler bezahlt (grün umrandet: Vorschlag liegt vor, orange: Abweichung zu BuchhaltungsButler), Buch = in BuchhaltungsButler verbucht') + th('Datum', 'Buchungsdatum des Bankumsatzes') + th('Zahlung', 'Gegenpartei und Verwendungszweck') + th('Betrag', 'Betrag des Umsatzes, Ausgaben mit Minus', 'rechts') + th('Beleg', 'Zugeordneter Beleg mit Original in Drive und Beleg in BuchhaltungsButler') + th('Gebucht über', 'Beleg: Aufwand über den Beleg gebucht. Zahlung: Ausgleich über den Kreditor oder direkt über die Zahlung gebucht') + th('Konto', 'Sachkonto bzw. Kreditor der Buchungszeile') + th('KST 1') + th('KST 2') + '</tr></thead>';
+    var kopf = '<colgroup><col style="width:3%"><col style="width:8%"><col style="width:7%"><col style="width:17%"><col style="width:7%"><col style="width:13%"><col style="width:8%"><col style="width:15%"><col style="width:11%"><col style="width:11%"></colgroup><thead><tr>' + th('Wahl', 'Vorschlag zum Übertragen nach BuchhaltungsButler auswählen') + th('Status', 'Dokument = Belegart (grün Beleg, orange Eigenbeleg, blau wiederkehrend ohne Beleg, grau beleglos), Euro = Rechnung ausgeglichen und in BuchhaltungsButler bezahlt (grün umrandet: Vorschlag liegt vor, orange: Abweichung zu BuchhaltungsButler), Buch = in BuchhaltungsButler verbucht') + th('Datum', 'Buchungsdatum des Bankumsatzes') + th('Zahlung', 'Gegenpartei und Verwendungszweck') + th('Betrag', 'Betrag des Umsatzes, Ausgaben mit Minus', 'rechts') + th('Beleg', 'Zugeordneter Beleg mit Original in Drive und Beleg in BuchhaltungsButler') + th('Gebucht über', 'Beleg: Aufwand über den Beleg gebucht. Zahlung: Ausgleich über den Kreditor oder direkt über die Zahlung gebucht') + th('Konto', 'Sachkonto bzw. Kreditor der Buchungszeile') + th('KST 1') + th('KST 2') + '</tr></thead>';
     var teilZelle = function (zeilenListe, feld) { return zeilenListe.map(function (l) { return '<div style="min-height:1.4em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + esc((l[feld] || '') + ' ' + (l[feld + '_name'] || '')) + '">' + (l[feld] ? beKonto(l[feld], l[feld + '_name']) : '<span class="notiz" style="display:inline;margin:0">–</span>') + '</div>'; }).join(''); };
     // Im Dashboard übertragen, BuchhaltungsButler wird erst nachts zurückgelesen: die übertragene Buchung gilt schon als gebucht
     zeilen.forEach(function (p) { var dg = p.dashboard_gebucht; if (dg && !(p.buchungen || []).length && Array.isArray(dg.zeilen)) p.buchungen = dg.zeilen.map(function (x) { return { konto: x.sachkonto, konto_name: x.sachkonto_name, kst1: x.kst1, kst1_name: x.kst1_name, kst2: x.kst2, kst2_name: x.kst2_name, text: x.text, betrag: x.betrag }; }); });
@@ -3645,7 +3669,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var statusText = p.plan ? 'geändert, noch nicht in BHB' : abweichung ? 'in BHB nicht bezahlt' : !gebucht ? (vs.length ? 'Vorschlag' : 'offen') : (zugeordnet ? (wkBeleg ? 'wiederkehrend' : (eigen ? 'Eigenbeleg' : 'Beleg')) : (wiederk ? 'wiederkehrend, falsch gebucht' : 'beleglos'));
       var euroTitel = abweichung ? 'Zahlung ist gebucht, aber in BuchhaltungsButler ist der Beleg nicht vollständig bezahlt: ' + belege.map(function (b) { return (b.nummer || b.beleg_id) + ' bezahlt ' + formatEuro(Math.abs(Number(b.bezahlt || 0))) + ' von ' + formatEuro(Math.abs(Number(b.betrag || 0))); }).join(', ') : ausgeglichen ? 'Rechnung ausgeglichen: Zahlung ist dem Beleg zugeordnet, gebucht und der Beleg ist in BuchhaltungsButler bezahlt' : (vs.length ? 'Vorschlag: passender unbezahlter Beleg gefunden' : (gebucht ? 'Direkt gebucht, kein Beleg auszugleichen' : 'Noch nichts ausgeglichen'));
       var dokSym = !gebucht ? ikSymbol('dok', false, dokTitel) : (zugeordnet ? (wkBeleg ? ikSymbol('dok', false, dokTitel, 'blau') : (eigen ? ikSymbol('dok', false, dokTitel, 'eigen') : ikSymbol('dok', true, dokTitel))) : ikSymbol('dok', false, dokTitel, 'grau'));
-      var status = '<div class="ikreihe">' + dokSym + ikSymbol('euro', ausgeglichen, euroTitel, abweichung ? 'warn' : (!ausgeglichen && vs.length ? 'gruen' : null)) + ikSymbol('buch', gebucht, gebucht ? 'In BuchhaltungsButler verbucht (Buchung der Zahlung bestätigt)' : 'In BuchhaltungsButler noch nicht verbucht') + '</div><div class="notiz" style="margin:2px 0 0">' + esc(statusText) + '</div>';
+      var symbole = '<div class="ikreihe">' + dokSym + ikSymbol('euro', ausgeglichen, euroTitel, abweichung ? 'warn' : (!ausgeglichen && vs.length ? 'gruen' : null)) + ikSymbol('buch', gebucht, gebucht ? 'In BuchhaltungsButler verbucht (Buchung der Zahlung bestätigt)' : 'In BuchhaltungsButler noch nicht verbucht') + '</div>';
       var planKey = p.transaction_id + '|plan';
       var wahl = unten ? '' : p.plan ? '<div><input type="checkbox" data-zs="' + esc(planKey) + '"' + (BE.zsel && BE.zsel[planKey] ? ' checked' : '') + ' aria-label="Geänderte Buchung in BuchhaltungsButler aktualisieren: ' + esc(String(p.gegenpartei || '')) + '"></div>' : !vs.length ? '<div><input type="checkbox" data-zs="' + esc(p.transaction_id + '|auto') + '"' + (BE.zsel && BE.zsel[p.transaction_id + '|auto'] ? ' checked' : '') + ' aria-label="Zahlung auswählen: ' + esc(String(p.betrag)) + ' ' + esc(String(p.gegenpartei || '')) + '"></div>' : vs.map(function (v) { var key = p.transaction_id + '|' + v.beleg_id; return '<div><input type="checkbox" data-zs="' + esc(key) + '"' + (BE.zsel && BE.zsel[key] ? ' checked' : '') + (v.art === 'mehrdeutig' && vs.length > 1 ? ' title="Mehrere mögliche Belege: genau einen wählen"' : '') + ' aria-label="Vorschlag übernehmen: Zahlung ' + esc(String(p.betrag)) + ' an ' + esc(String(p.gegenpartei || '')) + (v.teile ? ' verrechnen mit ' : ' zu Beleg ') + esc(String(v.nummer || v.beleg_id)) + '"></div>'; }).join('');
       // Beleg-Spalte: echter Beleg mit Original in Drive, Eigenbeleg, beleglos
@@ -3655,9 +3679,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         if (b.drive_url) links.push('<a href="' + esc(b.drive_url) + '" target="_blank" rel="noopener">Original in Drive</a>');
         if (b.link) links.push('<a href="' + esc(b.link) + '" target="_blank" rel="noopener">in BHB</a>');
         if (wkBeleg) return '<div><span class="fett">' + esc(b.gegenpartei || '') + '</span><div class="notiz" style="margin:0">Wiederkehrende Zahlung' + (b.link ? ' · <a href="' + esc(b.link) + '" target="_blank" rel="noopener">in BHB</a>' : '') + '</div></div>';
-        return '<div><span class="fett">' + esc(b.gegenpartei || '') + '</span>' + (b.nummer ? ' · Nr. ' + esc(b.nummer) : '') + '<div class="notiz" style="margin:0">' + (links.length ? links.join(' · ') : 'Eigenbeleg ohne Datei') + '</div></div>';
+        return '<div><div class="fett">' + esc(b.gegenpartei || '') + '</div>' + (b.nummer ? '<div class="notiz" style="margin:0">Nr. ' + esc(b.nummer) + '</div>' : '') + '<div class="notiz" style="margin:0">' + (links.length ? links.join(' · ') : 'Eigenbeleg ohne Datei') + '</div></div>';
       }).join('');
-      else if (zugeordnet) belegZelle = bu.map(function (x) { return '<div><span class="fett">' + esc(x.beleg_gegenpartei || '') + '</span>' + (x.beleg_nummer ? ' · Nr. ' + esc(x.beleg_nummer) : '') + '<div class="notiz" style="margin:0">Beleg liegt vor dem Importzeitraum (vor dem 01.07.2026)</div></div>'; }).join('');
+      else if (zugeordnet) belegZelle = bu.map(function (x) { return '<div><div class="fett">' + esc(x.beleg_gegenpartei || '') + '</div>' + (x.beleg_nummer ? '<div class="notiz" style="margin:0">Nr. ' + esc(x.beleg_nummer) + '</div>' : '') + '<div class="notiz" style="margin:0">Beleg liegt vor dem Importzeitraum (vor dem 01.07.2026)</div></div>'; }).join('');
       else if (gebucht && wiederk) { var wkKred = bu.filter(function (x) { return /^[0-9]{6}$/.test(String(x.konto || '')); })[0]; belegZelle = '<div><span class="fett">' + esc(wkKred ? (wkKred.konto_name || wkKred.konto) : String(p.gegenpartei || '').replace(/\s*\n\s*/g, ' ')) + '</span><div class="notiz" style="margin:0">Wiederkehrende Zahlung, ohne Beleg gebucht</div></div>'; }
       else if (gebucht) belegZelle = '<div class="notiz" style="margin:0">beleglos gebucht</div>';
       if (vs.length) belegZelle += vs.map(function (v) { if (v.teile) return '<div style="margin-top:4px"><span class="gut">Vorschlag Verrechnung:</span> ' + v.teile.map(function (x) { return (Number(x.betrag) < 0 ? 'Gutschrift ' : 'Rechnung ') + esc(String(x.nummer || x.beleg_id)) + ' ' + esc(formatEuro(Number(x.betrag))); }).join(' + ') + ' von ' + esc(v.gegenpartei || '') + '<div class="notiz" style="margin:0">' + esc(String(v.evidenz || '').replace(/^Verrechnung: [^,]*,?\s*/, '') || 'Summe passt') + ' · Rechnung und Gutschrift werden zugeordnet und in einem Ausgleich über den Kreditor verrechnet' + (v.status === 'fehler' && v.meldung ? ' · letzter Versuch: ' + esc(v.meldung) : '') + '</div></div>'; return '<div style="margin-top:4px"><span class="gut">Vorschlag:</span> Beleg ' + esc(String(v.nummer || v.beleg_id)) + ' von ' + esc(v.gegenpartei || '') + ', ' + esc(formatEuro(Number(v.betrag))) + (v.datum ? ' vom ' + esc(formatDate(String(v.datum).slice(0, 10))) : '') + '<div class="notiz" style="margin:0">' + (v.art === 'mehrdeutig' ? 'mehrere Belege passen, bitte einen wählen' : 'Betrag passt' + (v.evidenz ? ', ' + esc(v.evidenz) : '')) + ' · wird zugeordnet, der Ausgleich über den Kreditor gebucht' + (v.status === 'fehler' && v.meldung ? ' · letzter Versuch: ' + esc(v.meldung) : '') + '</div></div>'; }).join('');
@@ -3670,7 +3694,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var ueberZelle = lz.map(function (l) { if (l.quelle === 'Plan') return zeilenDiv('<span class="gut">neu</span>', 'Mit der KI besprochen, noch nicht in BuchhaltungsButler'); var t = l.quelle === 'Beleg' ? 'Beleg' : (/^[0-9]{6}$/.test(String(l.konto || '')) ? 'Ausgleich' : 'Zahlung'); return zeilenDiv(esc(t), l.quelle === 'Beleg' ? 'Aufwand über den Beleg gebucht' : (/^[0-9]{6}$/.test(String(l.konto || '')) ? 'Zahlung gleicht den Beleg über den Kreditor aus' : 'Direkt über die Zahlung gebucht, ohne Beleg')); }).join('');
       var kontoZelle = lz.map(function (l) { return zeilenDiv(l.konto ? beKonto(l.konto, l.konto_name) : '–', (l.konto || '') + ' ' + (l.konto_name || '') + (l.text ? ' · ' + l.text : '')); }).join('');
       var betrag = Number(p.betrag || 0);
-      return '<tr><td>' + wahl + '</td><td>' + status + '</td><td class="nowrap">' + esc(p.datum ? formatDate(String(p.datum).slice(0, 10)) : '') + '</td>' +
+      // Haken und Symbole teilen sich die ersten beiden Spalten, der Status steht darunter über beide (bricht nicht um)
+      return '<tr><td colspan="2"><div style="display:flex;gap:8px;align-items:center">' + (wahl ? '<div style="min-width:18px">' + wahl + '</div>' : '<div style="min-width:18px"></div>') + symbole + '</div><div class="notiz" style="margin:2px 0 0;white-space:nowrap">' + esc(statusText) + '</div></td><td class="nowrap">' + esc(p.datum ? formatDate(String(p.datum).slice(0, 10)) : '') + '</td>' +
         '<td><div class="fett">' + esc(String(p.gegenpartei || '–').replace(/\s*\n\s*/g, ' ')) + '</div><div class="notiz" style="margin:0">' + esc(String(p.zweck || '').replace(/\s*\n\s*/g, ' ').slice(0, 160)) + '</div><div><button type="button" class="link-btn" style="font-size:12px" data-be="zk-start" data-tx="' + esc(String(p.transaction_id)) + '" data-k="' + esc(k) + '">Ändern / mit KI besprechen</button></div>' + (function () {
           if (unten) return '';
           var sr = zahlungRegel(p); if (!sr) return '';
@@ -4906,6 +4931,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var d = await res.json();
       if (!res.ok) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
       BT.daten = d;
+      try { var rw = await fetch('/webhook/accounting/wk-buchungstext', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ aktion: 'liste' }) }); var dw = await rw.json(); BT.wk = dw.liste || []; } catch (x) { BT.wk = BT.wk || []; }
     } catch (e) { BT.fehler = e.message; }
     BT.laedt = false; renderBT();
   }
@@ -4919,6 +4945,31 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       BT.loeschen = null;
       await ladeBT(); ladeListe('beleg', 'XXL'); ladeListe('beleg', 'LEV');
     } catch (e) { BT.fehlerAktion = e.message; renderBT(); }
+  }
+  async function btWk(daten, meldung) {
+    BT.fehlerAktion = ''; BT.meldung = '';
+    try {
+      var res = await fetch('/webhook/accounting/wk-buchungstext', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(daten) });
+      var d = await res.json();
+      if (!res.ok || d.ok === false) throw new Error(d.meldung || d.message || 'Speichern fehlgeschlagen');
+      BT.wk = d.liste || []; BT.meldung = meldung; BT.loeschen = null;
+    } catch (e) { BT.fehlerAktion = e.message; }
+    renderBT();
+  }
+  function btWkKarte() {
+    var liste = BT.wk || [];
+    var h = '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Standardtexte für wiederkehrende Zahlungen · ' + esc(zahl(liste.length)) + ' Texte</span></div>' +
+      '<div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Mandant</th><th>Gegenpartei</th><th><abbr title="Beitrags- oder Kundennummer aus dem Verwendungszweck; leer = gilt für alle Zahlungen der Gegenpartei">Nr.</abbr></th><th><abbr title="Höchstens 50 Zeichen; der Zeitraum aus dem Verwendungszweck (z. B. 10-12/2026) wird beim Buchen angehängt">Standardtext</abbr></th><th></th></tr></thead><tbody>';
+    liste.forEach(function (r) {
+      var key = 'wk|' + r.mandant + '|' + r.schluessel + '|' + r.kennung, loe = BT.loeschen === key;
+      h += '<tr><td>' + esc(r.mandant) + '</td><td>' + esc(r.gegenpartei) + '</td><td class="zahlen">' + esc(r.kennung || 'alle') + '</td>' +
+        '<td><input class="eingabe-klein" style="width:100%" maxlength="50" data-bt="wk-wert" aria-label="Standardtext für ' + esc(r.gegenpartei) + '" value="' + esc(r.text) + '"></td>' +
+        '<td style="white-space:nowrap" data-m="' + esc(r.mandant) + '" data-gp="' + esc(r.gegenpartei) + '" data-schluessel="' + esc(r.schluessel) + '" data-kennung="' + esc(r.kennung) + '">' +
+        (loe ? '<span class="notiz" style="margin:0">Wirklich löschen?</span> <button type="button" class="btn-gefahr" data-bt="wk-loeschen-ja">Löschen</button> <button type="button" class="link-btn" data-bt="loeschen-nein">Abbrechen</button>'
+          : '<button type="button" class="btn btn-secondary" style="padding:4px 10px" data-bt="wk-speichern">Speichern</button> <button type="button" class="link-btn" data-bt="loeschen" data-key="' + esc(key) + '">Löschen</button>') + '</td></tr>';
+    });
+    if (!liste.length) h += '<tr><td colspan="5" class="leer">Noch keine Texte. Du legst sie in der Vorschau einer wiederkehrenden Zahlung an („Als Standardtext merken“).</td></tr>';
+    return h + '</tbody></table></div><div class="card-fuss">Gilt für künftige Übertragungen wiederkehrender Zahlungen. Bereits gebuchte Zahlungen bleiben unverändert.</div></div>';
   }
   function renderBT() {
     var el = $('p-buchungstexte'); if (!el) return;
@@ -4947,7 +4998,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
           : '<button type="button" class="btn btn-secondary" style="padding:4px 10px" data-bt="speichern">Speichern</button> <button type="button" class="link-btn" data-bt="loeschen" data-key="' + esc(key) + '">Löschen</button>') + '</td></tr>';
     });
     if (!regeln.length) h += '<tr><td colspan="5" class="leer">Keine Texte.</td></tr>';
-    h += '</tbody></table></div><div class="card-fuss">Eine Änderung hier gilt nur für künftig gelesene Belege, bisherige Belege behalten ihren Text. Einen Text nur für einen Beleg änderst du direkt in der Beleg-Liste am Buchungstext. Ändern, löschen oder neu anlegen setzt die Quelle auf „von Marko festgelegt“.</div></div></div>';
+    h += '</tbody></table></div><div class="card-fuss">Eine Änderung hier gilt nur für künftig gelesene Belege, bisherige Belege behalten ihren Text. Einen Text nur für einen Beleg änderst du direkt in der Beleg-Liste am Buchungstext. Ändern, löschen oder neu anlegen setzt die Quelle auf „von Marko festgelegt“.</div></div>' + btWkKarte() + '</div>';
     el.innerHTML = h;
     if (fokus) { var n = el.querySelector('[data-bt="suche"]'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } }
   }
@@ -4962,6 +5013,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       else if (w === 'speichern') { var i = zeile.querySelector('[data-bt="wert"]'); btRegel({ aktion: 'regel_aendern', schluessel: i.getAttribute('data-schluessel'), alt: i.getAttribute('data-alt'), zweck: i.value }, 'Standardtext geändert, gilt für künftige Belege. Bisherige Belege bleiben unverändert.'); }
       else if (w === 'loeschen') { BT.loeschen = b.getAttribute('data-key'); renderBT(); }
       else if (w === 'loeschen-nein') { BT.loeschen = null; renderBT(); }
+      else if (w === 'wk-speichern') { var wz = b.closest('td'); btWk({ aktion: 'speichern', mandant: wz.getAttribute('data-m'), gegenpartei: wz.getAttribute('data-gp'), kennung: wz.getAttribute('data-kennung'), text: zeile.querySelector('[data-bt="wk-wert"]').value }, 'Standardtext gespeichert, gilt für künftige Übertragungen.'); }
+      else if (w === 'wk-loeschen-ja') { var wl = b.closest('td'); btWk({ aktion: 'loeschen', mandant: wl.getAttribute('data-m'), schluessel: wl.getAttribute('data-schluessel'), kennung: wl.getAttribute('data-kennung') }, 'Standardtext gelöscht.'); }
       else if (w === 'loeschen-ja') btRegel({ aktion: 'regel_loeschen', schluessel: b.getAttribute('data-schluessel'), alt: b.getAttribute('data-alt') }, 'Standardtext gelöscht.');
     });
   }
@@ -5330,6 +5383,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       });
       p.addEventListener('toggle', function (e) { if (e.target && e.target.hasAttribute && e.target.hasAttribute('data-be-uebertragen')) BE.uebertragenAuf = e.target.open; }, true);
       p.addEventListener('change', function (e) {
+        var wks = e.target.closest('[data-be="zs-wk-std"]'); if (wks) { if (BE.zue && BE.zue.items[BE.zue.idx || 0]) BE.zue.items[BE.zue.idx || 0].wkStd = wks.checked; return; }
         var c = e.target.closest('[data-zs]'); if (!c) return;
         BE.zsel = BE.zsel || {}; var key = c.getAttribute('data-zs');
         if (c.checked) Object.keys(BE.zsel).forEach(function (x) { if (x.split('|')[0] === key.split('|')[0]) delete BE.zsel[x]; }); // je Zahlung nur ein Beleg
@@ -5341,6 +5395,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         var at = e.target.closest('[data-be="agt-wert"]'); if (at) { if (BE.agTe) BE.agTe.wert = at.value; return; }
         var ak = e.target.closest('[data-be="agki-text"]'); if (ak) { if (BE.agKi) BE.agKi.text = ak.value; return; }
         var zkt = e.target.closest('[data-be="zk-text"]'); if (zkt) { if (BE.zk) BE.zk.text = zkt.value; return; }
+        var wkt = e.target.closest('[data-be="zs-wk-text"]'); if (wkt) { if (BE.zue && BE.zue.items[BE.zue.idx || 0]) BE.zue.items[BE.zue.idx || 0].wkText = wkt.value; return; }
         var s = e.target.closest('[data-be="suche"]'); if (!s) return;
         var st = zustand(s); st.z.suche = s.value; renderAccounting(st.art, st.k);
       });
@@ -5430,10 +5485,20 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
           var zp2 = zd2 && (zd2.zahlungen || []).filter(function (x) { return Number(x.transaction_id) === ztx; })[0]; if (!zp2) return;
           var vl = (zp2.plan && zp2.plan.dialog) || []; if (!vl.length) { try { vl = JSON.parse(localStorage.getItem('zk|' + (zkk === 'XXL' ? 'XXL' : 'LEV') + '|' + ztx) || '[]') || []; } catch (x) { vl = []; } }
           var srz = zahlungRegel(zp2);
-          BE.zk = { k: zkk, mandant: zkk === 'XXL' ? 'XXL' : 'LEV', tx: ztx, titel: formatDate(String(zp2.datum).slice(0, 10)) + ' · ' + formatEuro(Number(zp2.betrag)) + ' · ' + (zp2.gegenpartei || ''), zeilen: zp2.plan ? zp2.plan.zeilen : null, regel: srz ? srz.n + ': ' + srz.h : '', verlauf: vl, text: '', laeuft: false, fehler: '' };
+          BE.zk = { k: zkk, mandant: zkk === 'XXL' ? 'XXL' : 'LEV', tx: ztx, titel: formatDate(String(zp2.datum).slice(0, 10)) + ' · ' + formatEuro(Number(zp2.betrag)) + ' · ' + (zp2.gegenpartei || ''), zeilen: zp2.plan ? zp2.plan.zeilen : null, gespeichert: !!zp2.plan, weg: zp2.plan ? zp2.plan.weg : null, kreditor: zp2.plan ? zp2.plan.kreditor : null, kreditor_name: zp2.plan ? zp2.plan.kreditor_name : '', regel: srz ? srz.n + ': ' + srz.h : '', verlauf: vl, text: '', laeuft: false, fehler: '' };
           beAlleRender(); var zt = document.getElementById('zk-text'); if (zt) { zt.scrollIntoView({ block: 'center', behavior: 'smooth' }); zt.focus(); }
         }
         else if (w === 'zk-senden') zkSenden();
+        else if (w === 'zk-uebertragen') {
+          // Übertragung genau dieser Zahlung starten, Schritt für Schritt wie über den Haken
+          var uq = BE.zk; if (!uq) return;
+          var ud = ZA[uq.k] && ZA[uq.k].daten, up = ud && (ud.zahlungen || []).filter(function (x) { return Number(x.transaction_id) === uq.tx; })[0];
+          BE.zsel = {}; BE.zsel[uq.tx + '|plan'] = true;
+          BE.zue = { k: uq.k, mandant: uq.mandant, phase: 'bereit', idx: 0, items: [{ tx: uq.tx, key: uq.tx + '|plan', art: uq.weg === 'wiederkehrend' ? 'wk' : 'aktualisieren', nummer: '', datum: up ? up.datum : '', betrag: up ? Number(up.betrag) : 0, gegenpartei: up ? up.gegenpartei : '', status: 'bereit', meldung: '' }] };
+          BE.zk = null; beAlleRender();
+          var leiste = document.querySelector('[aria-label="Übertragung der Zahlungen"]'); if (leiste) leiste.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          if (BE.zue.items[0].art === 'wk') zsBuchen();
+        }
         else if (w === 'zk-regel-zurueck') {
           var zq = BE.zk, zm = zq && zq.verlauf[Number(b.getAttribute('data-i'))]; if (!zm || !zm.regel || zm.regel.zurueck) return;
           b.disabled = true;
@@ -6220,7 +6285,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261020091158';
+  var BUILD = '20261020094334';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
