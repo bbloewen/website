@@ -3623,6 +3623,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var th = function (t, tip, c) { return '<th' + (c ? ' class="' + c + '"' : '') + '>' + (tip ? '<abbr title="' + esc(tip) + '">' + t + '</abbr>' : t) + '</th>'; };
     var kopf = '<colgroup><col style="width:3%"><col style="width:6%"><col style="width:7%"><col style="width:19%"><col style="width:7%"><col style="width:13%"><col style="width:8%"><col style="width:15%"><col style="width:11%"><col style="width:11%"></colgroup><thead><tr>' + th('Wahl', 'Vorschlag zum Übertragen nach BuchhaltungsButler auswählen') + th('Status', 'Dokument = Belegart (grün Beleg, orange Eigenbeleg, blau wiederkehrend ohne Beleg, grau beleglos), Euro = Rechnung ausgeglichen und in BuchhaltungsButler bezahlt (grün umrandet: Vorschlag liegt vor, orange: Abweichung zu BuchhaltungsButler), Buch = in BuchhaltungsButler verbucht') + th('Datum', 'Buchungsdatum des Bankumsatzes') + th('Zahlung', 'Gegenpartei und Verwendungszweck') + th('Betrag', 'Betrag des Umsatzes, Ausgaben mit Minus', 'rechts') + th('Beleg', 'Zugeordneter Beleg mit Original in Drive und Beleg in BuchhaltungsButler') + th('Gebucht über', 'Beleg: Aufwand über den Beleg gebucht. Zahlung: Ausgleich über den Kreditor oder direkt über die Zahlung gebucht') + th('Konto', 'Sachkonto bzw. Kreditor der Buchungszeile') + th('KST 1') + th('KST 2') + '</tr></thead>';
     var teilZelle = function (zeilenListe, feld) { return zeilenListe.map(function (l) { return '<div style="min-height:1.4em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + esc((l[feld] || '') + ' ' + (l[feld + '_name'] || '')) + '">' + (l[feld] ? beKonto(l[feld], l[feld + '_name']) : '<span class="notiz" style="display:inline;margin:0">–</span>') + '</div>'; }).join(''); };
+    // Im Dashboard übertragen, BuchhaltungsButler wird erst nachts zurückgelesen: die übertragene Buchung gilt schon als gebucht
+    zeilen.forEach(function (p) { var dg = p.dashboard_gebucht; if (dg && !(p.buchungen || []).length && Array.isArray(dg.zeilen)) p.buchungen = dg.zeilen.map(function (x) { return { konto: x.sachkonto, konto_name: x.sachkonto_name, kst1: x.kst1, kst1_name: x.kst1_name, kst2: x.kst2, kst2_name: x.kst2_name, text: x.text, betrag: x.betrag }; }); });
     var zeile = function (p, unten) {
       var bu = p.buchungen || [], belege = p.belege || [];
       var gebucht = bu.length > 0;
@@ -6203,7 +6205,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261020080333';
+  var BUILD = '20261020081822';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
