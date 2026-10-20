@@ -3500,7 +3500,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   function ohneGegenpartei(t, gp) { return String(t || '').split(/\s+-\s+/).filter(function (seg, i, a) { return i === 0 || i < a.length - 1 || seg.trim().toLowerCase() !== String(gp || '').trim().toLowerCase().replace(/\s*\n\s*/g, ' '); }).join(' - ').trim(); }
   function zbgFeld(p, k) {
     var bu = p.buchungen || [], belege = p.belege || [];
-    if (!bu.length || p.plan || p.dashboard_gebucht) return '';
+    if (!bu.length || p.plan || p.uebertragen) return '';
     var b0 = belege[0], text = b0 && (b0.konten || [])[0] && b0.konten[0].text ? ohneGegenpartei(b0.konten[0].text, b0.gegenpartei) : ohneGegenpartei((bu[0] || {}).text, (bu[0] || {}).beleg_gegenpartei || p.gegenpartei);
     var ed = BE.zbg && BE.zbg.tx === Number(p.transaction_id) && BE.zbg.k === k ? BE.zbg : null;
     if (!ed) return '<div class="notiz" style="margin:2px 0 0;white-space:normal">Buchungstext: „' + esc(text) + '“ · <button type="button" class="link-btn" style="font-size:12px" data-be="zbg-edit" data-tx="' + esc(String(p.transaction_id)) + '" data-k="' + esc(k) + '">ändern</button></div>';
@@ -3729,7 +3729,22 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var kopf = '<colgroup><col style="width:3%"><col style="width:8%"><col style="width:7%"><col style="width:17%"><col style="width:7%"><col style="width:13%"><col style="width:8%"><col style="width:15%"><col style="width:11%"><col style="width:11%"></colgroup><thead><tr>' + th('Wahl', 'Vorschlag zum Übertragen nach BuchhaltungsButler auswählen') + th('Status', 'Dokument = Belegart (grün Beleg, orange Eigenbeleg, blau wiederkehrend ohne Beleg, grau beleglos), Euro = Rechnung ausgeglichen und in BuchhaltungsButler bezahlt (grün umrandet: Vorschlag liegt vor, orange: Abweichung zu BuchhaltungsButler), Buch = in BuchhaltungsButler verbucht') + th('Datum', 'Buchungsdatum des Bankumsatzes') + th('Zahlung', 'Gegenpartei und Verwendungszweck') + th('Betrag', 'Betrag des Umsatzes, Ausgaben mit Minus', 'rechts') + th('Beleg', 'Zugeordneter Beleg mit Original in Drive und Beleg in BuchhaltungsButler') + th('Gebucht über', 'Beleg: Aufwand über den Beleg gebucht. Zahlung: Ausgleich über den Kreditor oder direkt über die Zahlung gebucht') + th('Konto', 'Sachkonto bzw. Kreditor der Buchungszeile') + th('KST 1') + th('KST 2') + '</tr></thead>';
     var teilZelle = function (zeilenListe, feld) { return zeilenListe.map(function (l) { return '<div style="min-height:1.4em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + esc((l[feld] || '') + ' ' + (l[feld + '_name'] || '')) + '">' + (l[feld] ? beKonto(l[feld], l[feld + '_name']) : '<span class="notiz" style="display:inline;margin:0">–</span>') + '</div>'; }).join(''); };
     // Im Dashboard übertragen, BuchhaltungsButler wird erst nachts zurückgelesen: die übertragene Buchung gilt schon als gebucht
-    zeilen.forEach(function (p) { var dg = p.dashboard_gebucht; if (dg && !(p.buchungen || []).length && Array.isArray(dg.zeilen)) p.buchungen = dg.zeilen.map(function (x) { return { konto: x.sachkonto, konto_name: x.sachkonto_name, kst1: x.kst1, kst1_name: x.kst1_name, kst2: x.kst2, kst2_name: x.kst2_name, text: x.text, betrag: x.betrag }; }); });
+    // Wiederkehrend über den Kreditor: Beleg ohne Datei und Ausgleich; Beleg zugeordnet: der angenommene Beleg (alles bis BHB nachgelesen ist)
+    zeilen.forEach(function (p) {
+      if ((p.buchungen || []).length) return;
+      var dg = p.dashboard_gebucht, dz = p.dashboard_zugeordnet;
+      var konten = function (z) { return (z || []).map(function (x) { return { konto: x.sachkonto || x.konto, name: x.sachkonto_name || x.name, kst1: x.kst1, kst1_name: x.kst1_name, kst2: x.kst2, kst2_name: x.kst2_name, text: x.text }; }); };
+      if (dg && Array.isArray(dg.zeilen) && dg.weg === 'wiederkehrend') {
+        p.belege = [{ beleg_id: dg.beleg_id || '', gegenpartei: dg.kreditor_name || p.gegenpartei, nummer: dg.beleg_nummer || '', link: null, konten: konten(dg.zeilen) }];
+        p.buchungen = [{ konto: dg.kreditor, konto_name: dg.kreditor_name, beleg_ids: dg.beleg_id || 'neu', text: (dg.zeilen[0] || {}).text }];
+        p.wiederkehrend = true; p.uebertragen = true;
+      } else if (dg && Array.isArray(dg.zeilen)) {
+        p.buchungen = dg.zeilen.map(function (x) { return { konto: x.sachkonto, konto_name: x.sachkonto_name, kst1: x.kst1, kst1_name: x.kst1_name, kst2: x.kst2, kst2_name: x.kst2_name, text: x.text, betrag: x.betrag }; }); p.uebertragen = true;
+      } else if (Array.isArray(dz) && dz.length) {
+        p.belege = dz.map(function (b) { return { beleg_id: b.beleg_id, gegenpartei: b.gegenpartei, nummer: b.nummer, link: b.link || null, konten: konten(b.konten) }; });
+        p.buchungen = [{ konto: dz[0].partner || '', beleg_ids: dz.map(function (b) { return b.beleg_id; }).join(','), text: ((dz[0].konten || [])[0] || {}).text || '' }]; p.uebertragen = true;
+      }
+    });
     var zeile = function (p, unten) {
       var bu = p.buchungen || [], belege = p.belege || [];
       var gebucht = bu.length > 0;
@@ -6358,7 +6373,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261020115113';
+  var BUILD = '20261020121002';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
