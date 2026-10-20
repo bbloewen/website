@@ -3707,12 +3707,13 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var t = key.split('|'), p = ((d && d.zahlungen) || []).filter(function (x) { return String(x.transaction_id) === t[0]; })[0];
     if (!p) return null;
     var basis = { tx: Number(t[0]), key: key, zahlung: p, datum: p.datum, betrag: Number(p.betrag), gegenpartei: p.gegenpartei };
+    if (t[1] === 'eb') return p.eb ? Object.assign(basis, { art: 'beleg', rueckfrage: p.eb.rueckfrage, ebStatus: p.eb.status, nummer: p.eb.aussteller }) : null;
     if (t[1] === 'plan') return p.plan ? Object.assign(basis, { art: p.plan.weg === 'wiederkehrend' ? 'wk' : 'aktualisieren' }) : null;
     if (t[1] === 'auto') { var srw = (p.buchungen || []).length ? zahlungRegel(p) : null; return Object.assign(basis, { art: (p.buchungen || []).length ? (srw && srw.n === 'Wiederkehrend' ? 'wk' : 'regel') : (Number(p.betrag) < 0 ? 'wk' : 'ohne') }); }
     var v = zsVorschlaege(p).filter(function (y) { return String(y.beleg_id) === t[1]; })[0];
     return v ? Object.assign(basis, { art: 'zuordnen', beleg_id: t[1], nummer: v.nummer, vorschlag: v, verrechnung: !!v.teile }) : null;
   }
-  var ZS_ART = { aktualisieren: 'die mit der KI besprochene Buchung wird in BuchhaltungsButler gebucht (eine bisherige Buchung wird vorher zurückgenommen)', zuordnen: 'wird dem vorgeschlagenen Beleg zugeordnet, der Ausgleich über den Kreditor gebucht', wk: 'wiederkehrende Zahlung: Beleg ohne Datei anlegen, wie die Vorbild-Zahlung über den Kreditor buchen, zuordnen und ausgleichen', regel: 'Neu buchen nach der Regel des Steuerberaters', ohne: 'kein Vorschlag vorhanden' };
+  var ZS_ART = { beleg: 'Auslage-Beleg aus dem Dashboard wird mit dieser Zahlung nach BuchhaltungsButler übertragen: Beleg über den Kreditor der Person, Zahlung ausgeglichen', aktualisieren: 'die mit der KI besprochene Buchung wird in BuchhaltungsButler gebucht (eine bisherige Buchung wird vorher zurückgenommen)', zuordnen: 'wird dem vorgeschlagenen Beleg zugeordnet, der Ausgleich über den Kreditor gebucht', wk: 'wiederkehrende Zahlung: Beleg ohne Datei anlegen, wie die Vorbild-Zahlung über den Kreditor buchen, zuordnen und ausgleichen', regel: 'Neu buchen nach der Regel des Steuerberaters', ohne: 'kein Vorschlag vorhanden' };
   function zsVorschauHtml(v) {
     if (!v || !v.vorschau) return '';
     var x = v.vorschau;
@@ -3743,8 +3744,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       }).join('');
       var knopf = '';
       if (it0 && u.phase !== 'laeuft') {
-        if (it0.status === 'fehler') knopf = (it0.art === 'zuordnen' || it0.art === 'wk' || it0.art === 'aktualisieren' ? '<button type="button" class="btn btn-secondary" data-be="zs-ja">Noch einmal versuchen</button> ' : '') + '<button type="button" class="btn btn-secondary" data-be="zs-weiter">Überspringen, weiter mit der nächsten</button>';
-        else if (it0.art === 'wk' && it0.status !== 'vorschau') knopf = '<button type="button" class="btn btn-primary" data-be="zs-ja">Vorschau für Zahlung ' + (idx + 1) + ' von ' + ges + ' laden</button>';
+        if (it0.status === 'fehler') knopf = (it0.art === 'zuordnen' || it0.art === 'wk' || it0.art === 'beleg' || it0.art === 'aktualisieren' ? '<button type="button" class="btn btn-secondary" data-be="zs-ja">Noch einmal versuchen</button> ' : '') + '<button type="button" class="btn btn-secondary" data-be="zs-weiter">Überspringen, weiter mit der nächsten</button>';
+        else if ((it0.art === 'wk' || it0.art === 'beleg') && it0.status !== 'vorschau') knopf = '<button type="button" class="btn btn-primary" data-be="zs-ja">Vorschau für Zahlung ' + (idx + 1) + ' von ' + ges + ' laden</button>';
+        else if (it0.art === 'beleg') knopf = '<button type="button" class="btn btn-primary" data-be="zs-ja">Ja, Beleg mit Zahlung übertragen</button> <button type="button" class="link-btn" data-be="zs-weiter">Überspringen</button>';
         else if (it0.art === 'wk') knopf = '<button type="button" class="btn btn-primary" data-be="zs-ja">Ja, so anlegen und buchen</button> <button type="button" class="link-btn" data-be="zs-weiter">Überspringen</button>';
         else knopf = '<button type="button" class="btn btn-primary" data-be="zs-ja">' + (idx === 0 ? 'Ja, Zahlung 1 von ' + ges + ' übertragen' : 'Ergebnis geprüft: Zahlung ' + (idx + 1) + ' von ' + ges + ' übertragen') + '</button>';
       }
@@ -3773,6 +3775,25 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         var d3 = await r3.json().catch(function () { return {}; });
         if (!r3.ok || d3.ok === false) { it.status = 'fehler'; it.meldung = d3.meldung || d3.message || 'Nicht aktualisiert.'; }
         else { it.status = 'gebucht'; it.meldung = d3.meldung || 'In BuchhaltungsButler aktualisiert. Bitte dort prüfen.'; delete BE.zsel[it.key]; u.idx = idx + 1; }
+      } else if (it.art === 'beleg') {
+        if (!(warVorschau && it.bereitZumBuchen === true)) {
+          if (it.ebStatus === 'offen') { // ein noch nicht bestätigter Vorschlag wird mit dem Anhaken übernommen
+            var rb = await fetch('/webhook/accounting/rueckfrage-antwort', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: it.rueckfrage, aktion: 'bestaetigen' }) });
+            var db = await rb.json().catch(function () { return {}; });
+            if (!rb.ok || db.ok === false) { it.status = 'fehler'; it.meldung = 'Der Vorschlag konnte nicht übernommen werden: ' + (db.message || db.meldung || db.fehler || 'Fehler'); u.phase = 'schritt'; beAlleRender(); return; }
+            it.ebStatus = 'bestaetigt';
+          }
+          var rv = await fetch('/webhook/accounting/beleg-vorschau?id=' + it.rueckfrage);
+          var dv = await rv.json().catch(function () { return {}; });
+          it.vorschauDaten = dv;
+          if (rv.ok && dv.ok) { it.status = 'vorschau'; it.bereitZumBuchen = true; it.meldung = 'Bitte prüfen' + ((dv.schritte || []).length ? ': ' + dv.schritte.join(' → ') : '') + '. Dann „Ja, Beleg mit Zahlung übertragen“.'; }
+          else { it.status = 'fehler'; it.meldung = (dv.probleme || []).join(' ') || dv.message || dv.meldung || 'Keine Vorschau möglich.'; }
+        } else {
+          var rg = await fetch('/webhook/accounting/beleg-buchen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: it.rueckfrage }) });
+          var dg2 = await rg.json().catch(function () { return {}; });
+          if (!rg.ok || !dg2.ok) { it.status = 'fehler'; it.meldung = (dg2.meldung || (dg2.probleme || []).join(' ') || dg2.message || dg2.fehler || 'Nicht gebucht.'); it.bereitZumBuchen = false; }
+          else { it.status = 'gebucht'; it.meldung = 'Gebucht: ' + (dg2.schritte || []).join(', ') + '. Bitte in BuchhaltungsButler prüfen.'; delete BE.zsel[it.key]; u.idx = idx + 1; }
+        }
       } else if (it.art === 'wk') {
         var ausf = warVorschau && it.vorschauDaten && it.vorschauDaten.ok === true && it.bereitZumBuchen === true;
         var btv = (it.vorschauDaten && it.vorschauDaten.vorschau && it.vorschauDaten.vorschau.buchungstext) || {};
@@ -3860,7 +3881,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var dokSym = !gebucht ? ikSymbol('dok', false, dokTitel) : (zugeordnet ? (wkBeleg ? ikSymbol('dok', false, dokTitel, 'blau') : (eigen ? ikSymbol('dok', false, dokTitel, 'eigen') : ikSymbol('dok', true, dokTitel))) : ikSymbol('dok', false, dokTitel, 'grau'));
       var symbole = '<div class="ikreihe">' + dokSym + ikSymbol('euro', ausgeglichen, euroTitel, abweichung ? 'warn' : (!ausgeglichen && (vs.length || wkv) ? 'gruen' : null)) + ikSymbol('buch', gebucht, gebucht ? 'In BuchhaltungsButler verbucht (Buchung der Zahlung bestätigt)' : 'In BuchhaltungsButler noch nicht verbucht') + '</div>';
       var planKey = p.transaction_id + '|plan';
-      var wahl = (unten || p.eb) ? '' : p.plan ? '<div><input type="checkbox" data-zs="' + esc(planKey) + '"' + (BE.zsel && BE.zsel[planKey] ? ' checked' : '') + ' aria-label="Geänderte Buchung in BuchhaltungsButler aktualisieren: ' + esc(String(p.gegenpartei || '')) + '"></div>' : !vs.length ? '<div><input type="checkbox" data-zs="' + esc(p.transaction_id + '|auto') + '"' + (BE.zsel && BE.zsel[p.transaction_id + '|auto'] ? ' checked' : '') + ' aria-label="Zahlung auswählen: ' + esc(String(p.betrag)) + ' ' + esc(String(p.gegenpartei || '')) + '"></div>' : vs.map(function (v) { var key = p.transaction_id + '|' + v.beleg_id; return '<div><input type="checkbox" data-zs="' + esc(key) + '"' + (BE.zsel && BE.zsel[key] ? ' checked' : '') + (v.art === 'mehrdeutig' && vs.length > 1 ? ' title="Mehrere mögliche Belege: genau einen wählen"' : '') + ' aria-label="Vorschlag übernehmen: Zahlung ' + esc(String(p.betrag)) + ' an ' + esc(String(p.gegenpartei || '')) + (v.teile ? ' verrechnen mit ' : ' zu Beleg ') + esc(String(v.nummer || v.beleg_id)) + '"></div>'; }).join('');
+      var wahl = unten ? '' : p.eb ? '<div><input type="checkbox" data-zs="' + esc(p.transaction_id + '|eb') + '"' + (BE.zsel && BE.zsel[p.transaction_id + '|eb'] ? ' checked' : '') + ' aria-label="Beleg mit Zahlung nach BuchhaltungsButler übertragen: ' + esc(String(p.eb.aussteller || p.gegenpartei || '')) + '"></div>' : p.plan ? '<div><input type="checkbox" data-zs="' + esc(planKey) + '"' + (BE.zsel && BE.zsel[planKey] ? ' checked' : '') + ' aria-label="Geänderte Buchung in BuchhaltungsButler aktualisieren: ' + esc(String(p.gegenpartei || '')) + '"></div>' : !vs.length ? '<div><input type="checkbox" data-zs="' + esc(p.transaction_id + '|auto') + '"' + (BE.zsel && BE.zsel[p.transaction_id + '|auto'] ? ' checked' : '') + ' aria-label="Zahlung auswählen: ' + esc(String(p.betrag)) + ' ' + esc(String(p.gegenpartei || '')) + '"></div>' : vs.map(function (v) { var key = p.transaction_id + '|' + v.beleg_id; return '<div><input type="checkbox" data-zs="' + esc(key) + '"' + (BE.zsel && BE.zsel[key] ? ' checked' : '') + (v.art === 'mehrdeutig' && vs.length > 1 ? ' title="Mehrere mögliche Belege: genau einen wählen"' : '') + ' aria-label="Vorschlag übernehmen: Zahlung ' + esc(String(p.betrag)) + ' an ' + esc(String(p.gegenpartei || '')) + (v.teile ? ' verrechnen mit ' : ' zu Beleg ') + esc(String(v.nummer || v.beleg_id)) + '"></div>'; }).join('');
       // Beleg-Spalte: echter Beleg mit Original in Drive, Eigenbeleg, beleglos
       var belegZelle = '';
       if (belege.length) belegZelle = belege.map(function (b) {
@@ -5725,7 +5746,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         else if (w === 'zs-start') {
           var zk = b.getAttribute('data-k'), zd = ZA[zk] && ZA[zk].daten; if (!zd) return;
           var zi = Object.keys(BE.zsel || {}).filter(function (x) { return BE.zsel[x]; }).map(function (x) { return zsInfo(zd, x); }).filter(Boolean);
-          BE.zue = { k: zk, mandant: zk === 'XXL' ? 'XXL' : 'LEV', phase: 'bereit', idx: 0, items: zi.map(function (x) { return { tx: x.tx, key: x.key, art: x.art, beleg_id: x.beleg_id, nummer: x.nummer, verrechnung: !!x.verrechnung, datum: x.datum, betrag: x.betrag, gegenpartei: x.gegenpartei, status: 'bereit', meldung: '' }; }) };
+          BE.zue = { k: zk, mandant: zk === 'XXL' ? 'XXL' : 'LEV', phase: 'bereit', idx: 0, items: zi.map(function (x) { return { tx: x.tx, key: x.key, art: x.art, rueckfrage: x.rueckfrage, ebStatus: x.ebStatus, beleg_id: x.beleg_id, nummer: x.nummer, verrechnung: !!x.verrechnung, datum: x.datum, betrag: x.betrag, gegenpartei: x.gegenpartei, status: 'bereit', meldung: '' }; }) };
           beAlleRender();
         }
         else if (w === 'zs-ja') zsBuchen();
@@ -6489,7 +6510,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261020152016';
+  var BUILD = '20261020152724';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
