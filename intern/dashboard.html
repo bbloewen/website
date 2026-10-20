@@ -3464,7 +3464,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var typ = null;
     if (/kfz-steuer|kraftfahrzeugsteuer/.test(t)) typ = { n: 'Kfz-Steuer', h: 'Direkt auf Kfz-Steuern (45100), Kennzeichen in den Buchungstext, kein Beleg nötig.' };
     else if (!/basketball|bundesliga/.test(t) && /barmer|aok|techniker|\btk\b|salus|\bbkk\b|knappschaft|\bikk\b|\bdak\b|kkh|hkk|debeka|krankenkasse|ersatzkasse|beitragsnachweis|gkv/.test(t)) typ = { n: 'Krankenkasse', h: 'Direkt buchen: Beitrag auf Verbindlichkeiten soziale Sicherheit (17420), Erstattung auf 15200, Belegfeld 1 mit Jahr und Monat. Nicht über Debitor oder Kreditor.' };
-    else if (/finanzamt|bundeskasse|steuernummer|lohnsteuer|umsatzsteuer|\bust\b/.test(t)) typ = { n: 'Finanzamt', h: 'Nie über Debitor oder Kreditor, sonst löst eine Erstattung automatisch Umsatzsteuer aus. Lohnsteuer auf 17410, Umsatzsteuer auf 17890 (Umsatzsteuer laufendes Jahr), Belegfeld 1 mit Jahr und Monat; im Buchungstext angeben, was bezahlt wurde.' };
+    else if (/finanzamt|bundeskasse/.test(String(p.gegenpartei || '').toLowerCase()) || (/steuernummer|steuernr|lohnsteuer|lohnst\.?|umsatzsteuer|ums\.st/.test(String(p.zweck || '').toLowerCase()) && !/payone|paypal|campai|pretix|sparkasse/.test(String(p.gegenpartei || '').toLowerCase()))) typ = { n: 'Finanzamt', h: 'Nie über Debitor oder Kreditor, sonst löst eine Erstattung automatisch Umsatzsteuer aus. Lohnsteuer auf 17410, Umsatzsteuer auf 17890 (Umsatzsteuer laufendes Jahr), Belegfeld 1 mit Jahr und Monat; im Buchungstext angeben, was bezahlt wurde.' };
     else if (/\blohn\b|gehalt|vergütung|netto.*(lohn|gehalt)/.test(t)) typ = { n: 'Lohn', h: 'Nettolohn auf 17400, nie über Kreditor, Belegfeld 1 mit Jahr und Monat (zum Beispiel 202609).' };
     else if (/kontoführung|kontoabschluss|abrechnung.*(entgelt|konto)|bankgebühr|entgelt|kontopauschale|überziehungszins/.test(t)) typ = { n: 'Bankgebühren', h: 'Direkt auf Bankgebühren (49700) buchen, nicht über Kreditor; prüfen, ob die Bank Vorsteuer mit abbucht.' };
     else if (/kartenzahlung|girocard|ec-karte|\bvisa\b|mastercard/.test(t)) typ = { n: 'EC-Karte', h: 'Mit Firmen-EC-Karte bezahlt: Beleg auf den Kreditor Sparkasse. Fehlt der Beleg, auf durchlaufende Posten (15900), nie auf den Kreditor einer Person.' };
@@ -6530,7 +6530,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261020205341';
+  var BUILD = '20261020214719';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
