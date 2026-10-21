@@ -6348,7 +6348,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   }
 
   // ---------- Ausgangsrechnungen: offen und bezahlt, darunter die erwarteten Zahlungen nach Fälligkeitsmonat (aus BuchhaltungsButler) ----------
-  var AG = { daten: { XXL: null, LEV: null }, laedt: {}, fehler: {}, holen: false, meldung: '', zu: {} };
+  var AG = { daten: { XXL: null, LEV: null }, plan: { XXL: null, LEV: null }, planFehler: {}, laedt: {}, fehler: {}, holen: false, meldung: '', zu: {} };
   async function ladeAG(m, still) {
     if (!still) { AG.laedt[m] = true; AG.fehler[m] = ''; renderAG(m); }
     try {
@@ -6358,6 +6358,17 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       AG.daten[m] = d;
     } catch (e) { AG.fehler[m] = e.message; }
     AG.laedt[m] = false; renderAG(m);
+    ladeAGPlan(m);
+  }
+  // Was noch gestellt werden muss: Rechnungsplan in Notion (Status Offen und Bedingt) und Verträge ohne Plan-Zeile
+  async function ladeAGPlan(m) {
+    try {
+      var res = await fetch('/webhook/accounting/rechnungsplan?mandant=' + m);
+      var d = await res.json();
+      if (!res.ok || !d.ok) throw new Error(d.message || d.fehler || 'Rechnungsplan nicht geladen');
+      AG.plan[m] = d; AG.planFehler[m] = '';
+    } catch (e) { AG.planFehler[m] = e.message; }
+    renderAG(m);
   }
   function agMonat(k) { return k ? monatName(k) : 'Ohne Fälligkeit'; }
   function agQuartal(q) { var t = String(q || '').split('-Q'); return 'Q' + t[1] + ' ' + t[0]; }
@@ -6382,7 +6393,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       kpi('Rechnungen gesamt', sm.netto, sm.betrag, zahl(sm.anzahl) + ' Rechnungen seit ' + formatDate(d.seit)) + '</div>' +
       '<div style="margin:0 12px 14px" role="img" aria-label="' + pct + ' Prozent bezahlt"><div style="height:10px;border-radius:5px;background:var(--bg-subtle);overflow:hidden"><div style="height:10px;width:' + pct + '%;background:var(--color-success)"></div></div><div class="notiz" style="margin:4px 0 0">' + pct + ' % des Nettobetrags seit ' + esc(formatDate(d.seit)) + ' ist bezahlt</div></div></div>';
     // Quartalskacheln: gestellt, bezahlt, offen (nach Rechnungsdatum) und was davon im Quartal fällig ist
-    var qs = d.quartale || [];
+    var plan = AG.plan[m], pq = {};
+    ((plan && plan.quartale) || []).forEach(function (x) { pq[x.q] = x; });
+    var qs = (d.quartale || []).slice(), qvorh = {}; qs.forEach(function (x) { qvorh[x.q] = true; });
+    Object.keys(pq).forEach(function (k) { if (k !== 'ohne' && !qvorh[k]) qs.push({ q: k, anzahl: 0, betrag: 0, netto: 0, bezahlt: 0, bezahlt_netto: 0, offen: 0, offen_netto: 0, faellig_offen: 0, faellig_offen_netto: 0 }); });
+    qs.sort(function (a, b) { return String(a.q).localeCompare(String(b.q)); });
     if (qs.length) {
       h += '<div><div class="fett" style="margin:0 0 6px">Nach Quartalen <span class="notiz" style="margin:0">(gestellt nach Rechnungsdatum, netto und brutto)</span></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px">';
       qs.forEach(function (q) {
@@ -6393,10 +6408,37 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
           zeile('davon bezahlt', q.bezahlt_netto, q.bezahlt, 'success') +
           zeile('davon noch offen', q.offen_netto, q.offen, q.offen > 0 ? 'warning' : '') +
           (q.faellig_offen !== 0 ? zeile('Offen, fällig in diesem Quartal', q.faellig_offen_netto, q.faellig_offen) : '') +
+          (pq[q.q] && pq[q.q].anzahl ? zeile('Noch zu stellen (Rechnungsplan) · ' + zahl(pq[q.q].anzahl) + (pq[q.q].anzahl === 1 ? ' Rechnung' : ' Rechnungen'), pq[q.q].netto, pq[q.q].brutto, 'warning') : '') +
+          (pq[q.q] && pq[q.q].barter_anzahl ? '<div class="notiz" style="margin:6px 0 0">Dazu Barter ohne Geldfluss: ' + esc(formatEuro(pq[q.q].barter_netto)) + ' netto</div>' : '') +
+          (pq[q.q] && pq[q.q].bedingt_anzahl ? '<div class="notiz" style="margin:2px 0 0">Dazu bedingt (z. B. Playoff-Bonus): ' + esc(formatEuro(pq[q.q].bedingt_netto)) + ' netto</div>' : '') +
           '<div style="height:6px;border-radius:3px;background:var(--bg-subtle);overflow:hidden;margin-top:10px" role="img" aria-label="' + qp + ' Prozent bezahlt"><div style="height:6px;width:' + qp + '%;background:var(--color-success)"></div></div></div>';
       });
       h += '</div></div>';
     }
+    if (AG.planFehler[m]) h += '<div class="fehlerbox" role="alert">Rechnungsplan aus Notion nicht geladen: ' + esc(AG.planFehler[m]) + '</div>';
+    if (plan) {
+      var cashZ = plan.zeilen.filter(function (z) { return z.status !== 'Bedingt' && z.typ !== 'Barter'; });
+      var sumN = cashZ.reduce(function (t, z) { return t + z.netto; }, 0), sumB = cashZ.reduce(function (t, z) { return t + z.brutto; }, 0);
+      h += '<div class="card scroll-x"><div class="card-kopf zeile-titel" style="margin:0"><span>' + '<button type="button" class="link-btn" data-ag="zu" data-m="' + m + '" data-key="plan" aria-expanded="' + (!AG.zu[m + 'plan']) + '">' + (AG.zu[m + 'plan'] ? '▸ ' : '▾ ') + 'Noch zu stellen laut Rechnungsplan (Notion)</button>' + ' · ' + esc(zahl(cashZ.length)) + ' Rechnungen · ' + esc(formatEuro(sumN)) + ' netto · ' + esc(formatEuro(sumB)) + ' brutto</span></div>';
+      if (!AG.zu[m + 'plan']) {
+        h += '<table class="tbl kompakt"><thead><tr><th>Quartal / Position</th><th>Art</th><th>Auslösetermin</th><th style="text-align:right">Netto</th><th style="text-align:right">Brutto</th></tr></thead><tbody>';
+        var letztes = null;
+        plan.zeilen.forEach(function (z) {
+          if (z.quartal !== letztes) { letztes = z.quartal; var pqq = pq[z.quartal]; h += '<tr class="abschnitt-zeile"><td colspan="5">' + esc(z.quartal ? agQuartal(z.quartal) : 'Ohne Datum') + (pqq ? ' · zu stellen ' + esc(formatEuro(pqq.netto)) + ' netto, ' + esc(formatEuro(pqq.brutto)) + ' brutto' : '') + '</td></tr>'; }
+          var art = z.status === 'Bedingt' ? 'bedingt' : (z.typ === 'Barter' ? 'Barter, kein Geldfluss' : 'Cash');
+          h += '<tr><td><a href="' + esc(z.url) + '" target="_blank" rel="noopener">' + esc(z.position) + '</a>' + (z.leistung ? '<div class="notiz" style="margin:0">' + esc(z.leistung) + '</div>' : '') + '</td><td' + (art !== 'Cash' ? ' class="notiz"' : '') + '>' + esc(art) + '</td><td>' + (z.datum ? esc(formatDate(String(z.datum).slice(0, 10))) : '–') + '</td><td class="nowrap zahlen rechts">' + esc(formatEuro(z.netto)) + '</td><td class="nowrap zahlen rechts">' + esc(formatEuro(z.brutto)) + '</td></tr>';
+        });
+        h += '</tbody></table><div class="card-fuss">Aus der Notion-Tabelle „Rechnungsplan“ (Status Offen und Bedingt). Der Auslösetermin ist das Rechnungsdatum, die Zahlung kommt rund 14 Tage später. Barter und bedingte Posten (zum Beispiel Playoff-Bonus) zählen nicht zum erwarteten Geld. Fehlt in Notion der Umsatzsteuersatz, rechne ich mit 19 %.</div>';
+      }
+      h += '</div>';
+      if ((plan.ohne_plan || []).length) {
+        h += '<div class="card pad"><div class="fett">Vertrag unterschrieben, aber keine Zeile im Rechnungsplan</div><div class="notiz" style="margin:0 0 6px">Diese Beträge fehlen oben, bis sie im Rechnungsplan angelegt sind.</div>';
+        plan.ohne_plan.forEach(function (f) {
+          h += '<div style="margin:6px 0"><a href="' + esc(f.url) + '" target="_blank" rel="noopener" class="fett">' + esc(f.firma) + '</a> · ' + esc(formatEuro(f.netto)) + ' netto laut Notion' + (f.bedingungen ? '<div class="notiz" style="margin:0">' + esc(f.bedingungen) + '</div>' : '') + (f.naechster ? '<div class="notiz" style="margin:0">Nächster Schritt: ' + esc(f.naechster) + '</div>' : '') + '</div>';
+        });
+        h += '</div>';
+      }
+    } else if (!AG.planFehler[m]) h += '<div class="notiz">Lade Rechnungsplan aus Notion …</div>';
     var monate = d.monate || [], kum = 0;
     h += '<div class="card scroll-x"><div class="card-kopf zeile-titel" style="margin:0"><span>Erwartete Zahlungen nach Fälligkeit</span></div>';
     if (!monate.length) h += '<div class="card-fuss">Keine offenen Ausgangsrechnungen.</div>';
@@ -6759,7 +6801,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261021172206';
+  var BUILD = '20261021173638';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
