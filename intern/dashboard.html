@@ -6038,7 +6038,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   var AU = { ich: null, fehler: null, laedt: false, dateien: [], senden: false, fertig: '', fehlerForm: '', f: null, vorschuesse: [], lesen: { laeuft: false, meldung: '', warnung: '', vorbelegt: {}, von: null }, beruehrt: {} };
   var AU_BILD = new WeakMap();
   function auHeute() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
-  function auLeer(alt) { return { mandant: alt ? alt.mandant : '', zahlung: alt ? alt.zahlung : 'privat', zahler: 'ich', zahlerFrei: '', vorschuss: '', lieferant: '', datum: auHeute(), betrag: '', s19: false, s7: false, s0: false, unklar: false, anlass: '', bewirtete: '', notiz: '', iban: '' }; }
+  function auLeer(alt) { return { mandant: alt ? alt.mandant : '', zahlung: alt ? alt.zahlung : 'privat', zahler: 'ich', zahlerFrei: '', vorschuss: '', lieferant: '', datum: auHeute(), betrag: '', s19: false, s7: false, s0: false, unklar: false, anlass: '', bewirtete: '', notiz: '', iban: '', bic: '', bicNoetig: false }; }
   function auEuro(n) { return Number(n).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
   async function ladeAU() {
     if (AU.ich || AU.laedt) return;
@@ -6056,6 +6056,14 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     try { var res = await fetch('/webhook/auslagen/vorschuesse'); var d = await res.json(); if (res.ok && d.ok) { AU.vorschuesse = d.vorschuesse || []; VZ.liste = AU.vorschuesse; renderAU(); renderVZ(); } } catch (e) {}
   }
   function auBrauchtIban() { var f = AU.f; if (!f || f.zahlung !== 'privat') return false; if (f.zahler === 'ich') return !(AU.ich && AU.ich.iban_da); return true; }
+  // Konten im Ausland (IBAN nicht mit DE): die BIC wird abgefragt und mit gespeichert
+  function auBrauchtBic() {
+    var f = AU.f; if (!f || f.zahlung !== 'privat') return false;
+    if (f.bicNoetig) return true;
+    if (f.zahler === 'ich' && AU.ich && AU.ich.iban_da) return !!(AU.ich.iban_ausland && !AU.ich.bic_da);
+    var i = String(f.iban || '').replace(/\s+/g, '').toUpperCase();
+    return /^[A-Z]{2}/.test(i) && i.slice(0, 2) !== 'DE';
+  }
   function auZahlerEintrag() { var f = AU.f; if (f.zahler === 'ich') return null; return (AU.ich.darf_fuer || [])[Number(f.zahler.slice(1))] || null; }
   function auBetrag(t) { var s = String(t || '').trim().replace(/\s|€/g, ''); if (/^\d{1,3}(\.\d{3})+(,\d{1,2})?$/.test(s)) s = s.replace(/\./g, ''); s = s.replace(',', '.'); var n = Number(s); return /^\d+(\.\d{1,2})?$/.test(s) && n > 0 ? n : 0; }
   function auIstPdf(d) { return d.type === 'application/pdf' || /\.pdf$/i.test(d.name); }
@@ -6072,6 +6080,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (f.anlass.trim().length < 3) return 'Bitte den Anlass angeben, zum Beispiel Spielerverpflegung.';
     if (/bewirtung/i.test(f.anlass) && f.bewirtete.trim().length < 3) return 'Bei Bewirtung Externe bitte die bewirteten Personen und den Anlass eintragen.';
     if (auBrauchtIban() && !f.iban.trim()) return 'Bitte die IBAN eintragen, auf die ausgezahlt werden soll.';
+    if (auBrauchtBic() && !/^[A-Za-z0-9]{8}([A-Za-z0-9]{3})?$/.test(String(f.bic || '').replace(/\s+/g, ''))) return 'Für ein Konto im Ausland bitte auch die BIC eintragen (8 oder 11 Zeichen).';
     if (AU.dateien.some(auIstPdf) && AU.dateien.length > 1) return 'Entweder eine PDF-Datei oder ein bis mehrere Fotos, nicht beides gemischt.';
     return '';
   }
@@ -6161,7 +6170,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       if (ze) gez = ze.frei ? { name: f.zahlerFrei.trim() } : { name: ze.name, email: ze.email };
       var body = { mandant: f.mandant, zahlung: f.zahlung, gezahlt_von: gez, vorschuss_id: f.zahlung === 'privat' && f.vorschuss ? Number(f.vorschuss) : 0, lieferant: f.lieferant.trim(), datum: f.datum, betrag: String(auBetrag(f.betrag)),
         steuersaetze: [f.s19 ? '19' : '', f.s7 ? '7' : '', f.s0 ? '0' : ''].filter(Boolean), steuersatz_unklar: !!f.unklar && !f.s19 && !f.s7 && !f.s0,
-        anlass: f.anlass.trim(), bewirtete: /bewirtung/i.test(f.anlass) ? f.bewirtete.trim() : '', notiz: f.notiz.trim(), iban: auBrauchtIban() ? f.iban.trim() : '',
+        anlass: f.anlass.trim(), bewirtete: /bewirtung/i.test(f.anlass) ? f.bewirtete.trim() : '', notiz: f.notiz.trim(), iban: auBrauchtIban() ? f.iban.trim() : '', bic: auBrauchtBic() ? String(f.bic || '').replace(/\s+/g, '').toUpperCase() : '',
         datei: { mime: 'application/pdf', b64: auBytesZuBase64(pdf) } };
       var res = await fetch('/webhook/auslagen/einreichen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       var d = await res.json().catch(function () { return {}; });
@@ -6169,7 +6178,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       AU.fertig = 'Eingereicht: ' + f.lieferant.trim() + ', ' + auEuro(auBetrag(f.betrag)) + ' €. Der Beleg ist in der Buchhaltung angekommen.';
       AU.f = auLeer(f); AU.dateien = []; AU.beruehrt = {}; AU.lesen = { laeuft: false, meldung: '', warnung: '', vorbelegt: {}, von: null };
       ladeVorschuesseAU();
-    } catch (e) { AU.fehlerForm = e.message; }
+    } catch (e) { AU.fehlerForm = e.message; if (/BIC/.test(e.message)) AU.f.bicNoetig = true; }
     AU.senden = false; renderAU();
   }
   function renderAU() {
@@ -6215,6 +6224,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       } else h += '<div class="text-klein"><span style="font-weight:600">Ausgelegt von:</span> ' + esc(ich.name) + '</div>';
       if (f.zahler === 'ich' && ich.iban_da) h += '<div class="text-klein"><span style="font-weight:600">Auszahlung auf:</span> ' + esc(ich.iban_maske) + ' <span class="gedaempft">(aus den Stammdaten)</span></div>';
       if (auBrauchtIban()) h += feld('iban', 'IBAN für die Auszahlung', text('iban', 'text', 'DE00 0000 0000 0000 0000 00'), f.zahler === 'ich' ? 'Für dich ist noch keine IBAN hinterlegt.' : 'Nur nötig, wenn für diese Person noch keine IBAN hinterlegt ist.');
+      if (auBrauchtBic()) h += feld('bic', 'BIC für die Auszahlung (Konto im Ausland)', text('bic', 'text', 'z. B. SWEDSESSXXX'), 'Bei Konten im Ausland brauchen wir zur IBAN auch die BIC. Sie wird mit gespeichert.');
       var ov = auOffeneVorschuesse();
       if (ov.length) {
         var vo = '<option value="">Nein, kein Vorschuss</option>';
@@ -6230,6 +6240,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   }
   function bindAU() {
     var p = $('p-auslage-neu');
+    // Beim Verlassen des IBAN-Feldes: braucht es jetzt (oder nicht mehr) die BIC? Erst beim Verlassen neu zeichnen, sonst springt der Cursor weg.
+    p.addEventListener('change', function (e) { var n = e.target.getAttribute('data-au'); if (n === 'iban' && AU.f && auBrauchtBic() !== !!p.querySelector('#au-bic')) renderAU(); });
     p.addEventListener('input', function (e) { var n = e.target.getAttribute('data-au'); if (!n || !AU.f) return; AU.f[n] = e.target.value; AU.beruehrt[n] = 1; if (AU.lesen.vorbelegt[n]) { delete AU.lesen.vorbelegt[n]; } if (n === 'anlass') { var b = /bewirtung/i.test(AU.f.anlass); if (b !== !!p.querySelector('#au-bewirtete')) renderAU(); } });
     p.addEventListener('change', function (e) {
       var t = e.target, r = t.getAttribute('data-au-radio'), hk = t.getAttribute('data-au-haken'), w = t.getAttribute('data-au-wahl');
@@ -6636,7 +6648,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261021153827';
+  var BUILD = '20261021154917';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
