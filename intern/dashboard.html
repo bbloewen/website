@@ -486,6 +486,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   <section id="p-sachkonten-lev" role="tabpanel" aria-labelledby="tab-sachkonten-lev" hidden></section>
   <section id="p-auslage-neu" role="tabpanel" aria-labelledby="tab-auslage-neu" hidden></section>
   <section id="p-vorschuss-neu" role="tabpanel" aria-labelledby="tab-vorschuss-neu" hidden></section>
+  <section id="p-auslage-protokoll" role="tabpanel" aria-labelledby="tab-auslage-protokoll" hidden></section>
   <section id="p-kreditoren" role="tabpanel" aria-labelledby="tab-kreditoren" hidden></section>
   <section id="p-zugriffe" role="tabpanel" aria-labelledby="tab-zugriffe" hidden></section>
 
@@ -872,7 +873,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlungen XXL' }, { id: 'ueberweisungen-xxl', name: 'Überweisungen XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlungen LEV' }, { id: 'ueberweisungen-lev', name: 'Überweisungen LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlungen Löwenpark' }, { id: 'ueberweisungen-lev-lp', name: 'Überweisungen Löwenpark' }, { id: 'ausgang-xxl', name: 'Ausgangsrechnungen XXL' }, { id: 'ausgang-lev', name: 'Ausgangsrechnungen LEV' }, { id: 'rueckfragen', name: 'Rückfragen', versteckt: true }] },
     { id: 'administration', name: 'Administration', unter: true, tabs: [{ id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }, { id: 'kreditoren', name: 'Kreditoren / Debitoren' }] },
     { id: 'zugriffe', name: 'Zugriffe', unter: true, tabs: [{ id: 'zugriffe', name: 'Zugriffe' }] },
-    { id: 'auslagen', name: 'Auslagen', tabs: [{ id: 'auslage-neu', name: 'Auslage einreichen' }, { id: 'vorschuss-neu', name: 'Vorschuss beantragen' }] }
+    { id: 'auslagen', name: 'Auslagen', tabs: [{ id: 'auslage-neu', name: 'Auslage einreichen' }, { id: 'vorschuss-neu', name: 'Vorschuss beantragen' }, { id: 'auslage-protokoll', name: 'Protokoll', recht: 'accounting' }] }
   ];
   var VW_PANEL = { 'zahlung-xxl': { el: 'p-vw-xxl', mandant: 'XXL' }, 'zahlung-lev': { el: 'p-vw-lev', mandant: 'LEV' } }; // Vorschüsse stehen oben in den Zahlungen, nicht bei Löwenpark
   var AG_TAB = { 'ausgang-xxl': 'XXL', 'ausgang-lev': 'LEV' };
@@ -892,6 +893,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (!n) return true;
     var r = n.bereiche || [], l = n.lesen || [];
     return r.indexOf('alles') >= 0 || r.indexOf(RECHT_ID[b.id]) >= 0 || l.indexOf(RECHT_ID[b.id]) >= 0;
+  }
+  // Einzelner Tab nur mit einem bestimmten Recht (lesend genügt), z. B. das Auslagen-Protokoll
+  function darfRecht(r) {
+    var n = window.LOEWEN_NUTZER; if (!n) return true;
+    return (n.bereiche || []).indexOf('alles') >= 0 || (n.bereiche || []).indexOf(r) >= 0 || (n.lesen || []).indexOf(r) >= 0;
   }
   // Nur Lesezugriff: der Bereich ist sichtbar, geändert wird im Gateway abgelehnt
   function nurLesen(b) {
@@ -913,6 +919,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var t = '';
     b.tabs.forEach(function (x) {
       if (x.versteckt && x.id !== S.tab) return;
+      if (x.recht && !darfRecht(x.recht)) return;
       var aktiv = x.id === S.tab;
       var vwM = { 'zahlung-xxl': 'XXL', 'zahlung-lev': 'LEV' }[x.id];
       var badge = x.id === 'rueckfragen' && RF.daten && RF.daten.zaehler && RF.daten.zaehler.offen ? ' (' + RF.daten.zaehler.offen + ')' : (vwM && VW.daten && vwOffen(vwM) ? ' (' + vwOffen(vwM) + ' Vorschüsse)' : '');
@@ -952,6 +959,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (t === 'buchungstexte') ladeBT();
     if (t === 'auslage-neu') ladeAU();
     if (t === 'vorschuss-neu') ladeVZ();
+    if (t === 'auslage-protokoll') ladeAP();
     if (VW_PANEL[t]) ladeVW();
     if (AG_TAB[t]) ladeAG(AG_TAB[t]);
     if (t === 'kreditoren' && !KR.daten && !KR.laedt) ladeKR(); else if (t === 'kreditoren') renderKR();
@@ -4711,6 +4719,47 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   }
   // ---------- Administration: Zugriffe (wer war wann im Dashboard; Tabelle zugriffsprotokoll aus crm-db) ----------
   // Das Gateway schreibt jede Anmeldung mit und je Person und Bereich höchstens alle 15 Minuten einen Besuch. Einzelne Klicks werden nicht gespeichert.
+  // ---------- Auslagen: Protokoll (wer hat wann welche Auslage in welcher Höhe eingereicht) ----------
+  var AP = { daten: null, fehler: null, laedt: false, mandant: '' };
+  var AP_STATUS = { offen: 'Offen', bestaetigt: 'Freigegeben', korrigiert: 'Freigegeben', steuerberater: 'Beim Steuerberater', verworfen: 'Verworfen' };
+  async function ladeAP() {
+    AP.laedt = true; AP.fehler = null; renderAP();
+    try {
+      var res = await fetch('/webhook/auslagen/protokoll');
+      var d = await res.json();
+      if (!res.ok || !d.ok) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
+      AP.daten = d;
+    } catch (e) { AP.fehler = e.message; }
+    AP.laedt = false; renderAP();
+  }
+  function renderAP() {
+    var el = $('p-auslage-protokoll'); if (!el) return;
+    if (AP.laedt && !AP.daten) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
+    if (AP.fehler && !AP.daten) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(AP.fehler) + '</div>'; return; }
+    if (!AP.daten) { el.innerHTML = ''; return; }
+    var alle = AP.daten.zeilen || [];
+    var zeilen = alle.filter(function (z) { return !AP.mandant || z.mandant === AP.mandant; });
+    var summe = zeilen.reduce(function (a, z) { return a + (Number(z.betrag) || 0); }, 0);
+    var chip = function (m, text) { return '<button type="button" class="chip' + (AP.mandant === m ? ' aktiv' : '') + '" data-ap="mandant" data-m="' + m + '" aria-pressed="' + (AP.mandant === m) + '">' + text + '</button>'; };
+    var h = '<div class="stapel"><div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Eingereichte Auslagen · ' + esc(zahl(zeilen.length)) + ' Einträge · ' + esc(formatEuro(summe)) + '</span><span><nav class="chips" aria-label="Mandant wählen" style="display:inline-flex">' + chip('', 'Alle') + chip('XXL', 'XXL') + chip('LEV', 'LEV') + '</nav> <button type="button" class="link-btn" data-ap="neu">Aktualisieren</button></span></div>' +
+      '<div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Eingereicht am</th><th>Eingereicht von</th><th>Auslage von</th><th>Mandant</th><th>Lieferant</th><th>Anlass</th><th>Belegdatum</th><th class="zahlen">Betrag</th><th>Status</th></tr></thead><tbody>';
+    zeilen.forEach(function (z) {
+      var status = z.gebucht ? 'Gebucht' : (AP_STATUS[z.status] || (z.rueckfrage ? z.status : 'Noch nicht geprüft'));
+      h += '<tr><td>' + esc(formatDate(String(z.eingereicht || '').slice(0, 10))) + '<div class="notiz" style="margin:0">' + esc(String(z.eingereicht || '').slice(11, 16)) + (z.formular ? ' · Formular' : ' · E-Mail') + '</div></td><td>' + esc(z.von) + '</td><td>' + esc(z.fuer || z.von) + '</td><td>' + esc(z.mandant || '–') + '</td><td>' + esc(z.lieferant) + '</td><td>' + esc(z.anlass) + '</td><td>' + esc(z.belegdatum ? formatDate(String(z.belegdatum).slice(0, 10)) : '–') + '</td><td class="zahlen">' + (z.betrag == null ? '–' : esc(formatEuro(z.betrag))) + '</td><td>' + esc(status) + '</td></tr>';
+    });
+    if (!zeilen.length) h += '<tr><td colspan="9" class="leer">Noch keine Auslagen eingereicht.</td></tr>';
+    h += '</tbody></table></div><div class="card-fuss">Alle Auslagen, die per Formular oder E-Mail eingegangen sind (ohne Belege, die nur aus BuchhaltungsButler übernommen wurden). „Auslage von“ ist die Person, die das Geld zurückbekommt.</div></div></div>';
+    el.innerHTML = h;
+  }
+  function bindAP() {
+    var p = $('p-auslage-protokoll'); if (!p) return;
+    p.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-ap]'); if (!b) return;
+      var w = b.getAttribute('data-ap');
+      if (w === 'mandant') { AP.mandant = b.getAttribute('data-m') || ''; renderAP(); }
+      else if (w === 'neu') ladeAP();
+    });
+  }
   var ZG = { daten: null, fehler: null, laedt: false, tage: 14 };
   var ZG_BEREICH = { ticketing: 'Spieltag', gutscheine: 'Gutscheine', website: 'Website', crm: 'Segmentierung', accounting: 'Accounting', auslagen: 'Auslagen', zugriffe: 'Zugriffe' };
   async function ladeZG() {
@@ -6844,6 +6893,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   bindBT();
   bindKS();
   bindZG();
+  bindAP();
   bindAW();
   bindAS();
   bindUE();
@@ -6904,7 +6954,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261021211930';
+  var BUILD = '20261021213443';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
