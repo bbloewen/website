@@ -6360,6 +6360,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     AG.laedt[m] = false; renderAG(m);
   }
   function agMonat(k) { return k ? monatName(k) : 'Ohne Fälligkeit'; }
+  function agQuartal(q) { var t = String(q || '').split('-Q'); return 'Q' + t[1] + ' ' + t[0]; }
+  var AG_Q_MONATE = { '1': 'Januar bis März', '2': 'April bis Juni', '3': 'Juli bis September', '4': 'Oktober bis Dezember' };
   function renderAG(m) {
     var el = $('p-ausgang-' + m.toLowerCase()); if (!el) return;
     var d = AG.daten[m];
@@ -6367,34 +6369,51 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (AG.fehler[m] && !d) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(AG.fehler[m]) + '</div>'; return; }
     if (!d) { el.innerHTML = ''; return; }
     var sm = d.summe || {}, heute = new Date().toISOString().slice(0, 10);
-    var pct = sm.betrag > 0 ? Math.max(0, Math.min(100, Math.round(sm.bezahlt / sm.betrag * 100))) : 0;
-    var kpi = function (titel, wert, unter, farbe) { return '<div style="min-width:170px"><div class="notiz" style="margin:0">' + esc(titel) + '</div><div class="fett" style="font-size:22px' + (farbe ? ';color:var(--color-' + farbe + ')' : '') + '">' + esc(wert) + '</div><div class="notiz" style="margin:0">' + esc(unter) + '</div></div>'; };
+    var pct = sm.netto > 0 ? Math.max(0, Math.min(100, Math.round(sm.bezahlt_netto / sm.netto * 100))) : 0;
+    // Netto groß, Brutto darunter, damit klar ist, was gemeint ist
+    var kpi = function (titel, netto, brutto, unter, farbe) { return '<div style="min-width:190px"><div class="notiz" style="margin:0">' + esc(titel) + '</div><div class="fett" style="font-size:22px' + (farbe ? ';color:var(--color-' + farbe + ')' : '') + '">' + esc(formatEuro(netto)) + ' <span class="notiz" style="margin:0;font-size:12px">netto</span></div><div class="notiz" style="margin:0">' + esc(formatEuro(brutto)) + ' brutto</div><div class="notiz" style="margin:0">' + esc(unter) + '</div></div>'; };
     var stand = d.stand ? 'Stand der BuchhaltungsButler-Daten ' + formatDate(String(d.stand).slice(0, 10)) + ', ' + new Date(d.stand).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr' : '';
     var h = '<div class="stapel">' + (AG.meldung ? '<div class="notiz" role="status">' + esc(AG.meldung) + '</div>' : '');
-    h += '<div class="card pad"><div class="card-kopf zeile-titel" style="margin:0"><span>Ausgangsrechnungen ' + esc(m) + ' · Übersicht</span><span class="notiz" style="margin:0">' + esc(stand) + '</span></div>' +
+    h += '<div class="card pad"><div class="card-kopf zeile-titel" style="margin:0"><span>Ausgangsrechnungen ' + esc(m) + ' · Übersicht <span class="notiz" style="margin:0">(Beträge netto, darunter brutto)</span></span><span class="notiz" style="margin:0">' + esc(stand) + '</span></div>' +
       '<div style="display:flex;flex-wrap:wrap;gap:28px;margin:14px 12px">' +
-      kpi('Noch offen', formatEuro(sm.offen), zahl(sm.anzahl_offen) + (sm.anzahl_offen === 1 ? ' Rechnung' : ' Rechnungen'), sm.offen > 0 ? 'warning' : '') +
-      kpi('davon überfällig', formatEuro(sm.ueberfaellig), 'Fälligkeit liegt in der Vergangenheit', sm.ueberfaellig > 0 ? 'error' : '') +
-      kpi('Bereits bezahlt', formatEuro(sm.bezahlt), 'seit ' + formatDate(d.seit), 'success') +
-      kpi('Rechnungen gesamt', formatEuro(sm.betrag), zahl(sm.anzahl) + ' Rechnungen seit ' + formatDate(d.seit)) + '</div>' +
-      '<div style="margin:0 12px 14px" role="img" aria-label="' + pct + ' Prozent bezahlt"><div style="height:10px;border-radius:5px;background:var(--bg-subtle);overflow:hidden"><div style="height:10px;width:' + pct + '%;background:var(--color-success)"></div></div><div class="notiz" style="margin:4px 0 0">' + pct + ' % des Rechnungsbetrags seit ' + esc(formatDate(d.seit)) + ' ist bezahlt</div></div></div>';
+      kpi('Noch offen', sm.offen_netto, sm.offen, zahl(sm.anzahl_offen) + (sm.anzahl_offen === 1 ? ' Rechnung' : ' Rechnungen'), sm.offen > 0 ? 'warning' : '') +
+      kpi('davon überfällig', sm.ueberfaellig_netto, sm.ueberfaellig, 'Fälligkeit liegt in der Vergangenheit', sm.ueberfaellig > 0 ? 'error' : '') +
+      kpi('Bereits bezahlt', sm.bezahlt_netto, sm.bezahlt, 'seit ' + formatDate(d.seit), 'success') +
+      kpi('Rechnungen gesamt', sm.netto, sm.betrag, zahl(sm.anzahl) + ' Rechnungen seit ' + formatDate(d.seit)) + '</div>' +
+      '<div style="margin:0 12px 14px" role="img" aria-label="' + pct + ' Prozent bezahlt"><div style="height:10px;border-radius:5px;background:var(--bg-subtle);overflow:hidden"><div style="height:10px;width:' + pct + '%;background:var(--color-success)"></div></div><div class="notiz" style="margin:4px 0 0">' + pct + ' % des Nettobetrags seit ' + esc(formatDate(d.seit)) + ' ist bezahlt</div></div></div>';
+    // Quartalskacheln: gestellt, bezahlt, offen (nach Rechnungsdatum) und was davon im Quartal fällig ist
+    var qs = d.quartale || [];
+    if (qs.length) {
+      h += '<div><div class="fett" style="margin:0 0 6px">Nach Quartalen <span class="notiz" style="margin:0">(gestellt nach Rechnungsdatum, netto und brutto)</span></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px">';
+      qs.forEach(function (q) {
+        var qp = q.netto > 0 ? Math.max(0, Math.min(100, Math.round(q.bezahlt_netto / q.netto * 100))) : 0, nr = String(q.q).split('-Q')[1];
+        var zeile = function (titel, netto, brutto, farbe) { return '<div style="display:flex;justify-content:space-between;gap:8px;margin-top:6px"><span class="notiz" style="margin:0">' + esc(titel) + '</span><span style="text-align:right"><span class="fett"' + (farbe ? ' style="color:var(--color-' + farbe + ')"' : '') + '>' + esc(formatEuro(netto)) + '</span> <span class="notiz" style="margin:0">netto</span><br><span class="notiz" style="margin:0">' + esc(formatEuro(brutto)) + ' brutto</span></span></div>'; };
+        h += '<div class="card pad" style="margin:0"><div class="fett">' + esc(agQuartal(q.q)) + '</div><div class="notiz" style="margin:0">' + esc(AG_Q_MONATE[nr] || '') + '</div>' +
+          zeile('Gestellt · ' + zahl(q.anzahl) + (q.anzahl === 1 ? ' Rechnung' : ' Rechnungen'), q.netto, q.betrag) +
+          zeile('davon bezahlt', q.bezahlt_netto, q.bezahlt, 'success') +
+          zeile('davon noch offen', q.offen_netto, q.offen, q.offen > 0 ? 'warning' : '') +
+          (q.faellig_offen !== 0 ? zeile('Offen, fällig in diesem Quartal', q.faellig_offen_netto, q.faellig_offen) : '') +
+          '<div style="height:6px;border-radius:3px;background:var(--bg-subtle);overflow:hidden;margin-top:10px" role="img" aria-label="' + qp + ' Prozent bezahlt"><div style="height:6px;width:' + qp + '%;background:var(--color-success)"></div></div></div>';
+      });
+      h += '</div></div>';
+    }
     var monate = d.monate || [], kum = 0;
     h += '<div class="card scroll-x"><div class="card-kopf zeile-titel" style="margin:0"><span>Erwartete Zahlungen nach Fälligkeit</span></div>';
     if (!monate.length) h += '<div class="card-fuss">Keine offenen Ausgangsrechnungen.</div>';
     else {
-      h += '<table class="tbl kompakt"><thead><tr><th>Fälligkeit / Rechnung</th><th>Kunde</th><th>Rechnungsdatum</th><th>Fällig</th><th style="text-align:right">Rechnungsbetrag</th><th style="text-align:right">Offen</th><th style="text-align:right">Offen kumuliert</th></tr></thead><tbody>';
+      h += '<table class="tbl kompakt"><thead><tr><th>Fälligkeit / Rechnung</th><th>Kunde</th><th>Rechnungsdatum</th><th>Fällig</th><th style="text-align:right">Rechnung netto</th><th style="text-align:right">Rechnung brutto</th><th style="text-align:right">Offen netto</th><th style="text-align:right">Offen brutto</th><th style="text-align:right">Offen netto kumuliert</th></tr></thead><tbody>';
       monate.forEach(function (mo) {
-        var key = mo.monat || 'ohne', zu = !!AG.zu[m + key]; kum += Number(mo.offen) || 0;
-        h += '<tr class="abschnitt-zeile"><td colspan="5">' + '<button type="button" class="link-btn" data-ag="zu" data-m="' + m + '" data-key="' + esc(key) + '" aria-expanded="' + (!zu) + '">' + (zu ? '▸ ' : '▾ ') + esc(agMonat(mo.monat)) + '</button> · ' + esc(zahl(mo.anzahl)) + (mo.anzahl === 1 ? ' Rechnung' : ' Rechnungen') + (mo.ueberfaellig > 0 ? ' · <span style="color:var(--color-error)">überfällig ' + esc(formatEuro(mo.ueberfaellig)) + '</span>' : '') + '</td><td class="nowrap zahlen rechts fett">' + esc(formatEuro(mo.offen)) + '</td><td class="nowrap zahlen rechts notiz">' + esc(formatEuro(kum)) + '</td></tr>';
+        var key = mo.monat || 'ohne', zu = !!AG.zu[m + key]; kum += Number(mo.offen_netto) || 0;
+        h += '<tr class="abschnitt-zeile"><td colspan="6">' + '<button type="button" class="link-btn" data-ag="zu" data-m="' + m + '" data-key="' + esc(key) + '" aria-expanded="' + (!zu) + '">' + (zu ? '▸ ' : '▾ ') + esc(agMonat(mo.monat)) + '</button> · ' + esc(zahl(mo.anzahl)) + (mo.anzahl === 1 ? ' Rechnung' : ' Rechnungen') + (mo.ueberfaellig > 0 ? ' · <span style="color:var(--color-error)">überfällig ' + esc(formatEuro(mo.ueberfaellig_netto)) + ' netto</span>' : '') + '</td><td class="nowrap zahlen rechts fett">' + esc(formatEuro(mo.offen_netto)) + '</td><td class="nowrap zahlen rechts fett">' + esc(formatEuro(mo.offen)) + '</td><td class="nowrap zahlen rechts notiz">' + esc(formatEuro(kum)) + '</td></tr>';
         if (!zu) (mo.posten || []).forEach(function (p) {
           var ueber = p.faellig && String(p.faellig).slice(0, 10) < heute;
-          h += '<tr><td>' + esc(p.nummer || ('Beleg ' + p.beleg_id)) + '<div class="notiz" style="margin:0">Beleg ' + esc(p.beleg_id) + '</div></td><td>' + esc(p.gegenpartei || '–') + '</td><td>' + esc(formatDate(String(p.datum || '').slice(0, 10))) + '</td><td' + (ueber ? ' style="color:var(--color-error)"' : '') + '>' + (p.faellig ? esc(formatDate(String(p.faellig).slice(0, 10))) + (ueber ? ' (überfällig)' : '') : '–') + '</td><td class="nowrap zahlen rechts">' + esc(formatEuro(p.betrag)) + '</td><td class="nowrap zahlen rechts">' + esc(formatEuro(p.offen)) + '</td><td></td></tr>';
+          h += '<tr><td>' + esc(p.nummer || ('Beleg ' + p.beleg_id)) + '<div class="notiz" style="margin:0">Beleg ' + esc(p.beleg_id) + '</div></td><td>' + esc(p.gegenpartei || '–') + '</td><td>' + esc(formatDate(String(p.datum || '').slice(0, 10))) + '</td><td' + (ueber ? ' style="color:var(--color-error)"' : '') + '>' + (p.faellig ? esc(formatDate(String(p.faellig).slice(0, 10))) + (ueber ? ' (überfällig)' : '') : '–') + '</td><td class="nowrap zahlen rechts">' + esc(formatEuro(p.netto)) + '</td><td class="nowrap zahlen rechts">' + esc(formatEuro(p.betrag)) + '</td><td class="nowrap zahlen rechts">' + esc(formatEuro(p.offen_netto)) + '</td><td class="nowrap zahlen rechts">' + esc(formatEuro(p.offen)) + '</td><td></td></tr>';
         });
       });
-      h += '</tbody><tfoot><tr class="gesamtsumme"><td colspan="5" style="text-align:right" class="fett">Summe offen · ' + esc(zahl(sm.anzahl_offen)) + ' Rechnungen</td><td class="nowrap zahlen rechts fett">' + esc(formatEuro(sm.offen)) + '</td><td></td></tr></tfoot></table>';
+      h += '</tbody><tfoot><tr class="gesamtsumme"><td colspan="6" style="text-align:right" class="fett">Summe offen · ' + esc(zahl(sm.anzahl_offen)) + ' Rechnungen</td><td class="nowrap zahlen rechts fett">' + esc(formatEuro(sm.offen_netto)) + '</td><td class="nowrap zahlen rechts fett">' + esc(formatEuro(sm.offen)) + '</td><td></td></tr></tfoot></table>';
     }
     h += '</div><div><button type="button" class="link-btn" data-ag="neu" data-m="' + m + '">Aktualisieren</button> <button type="button" class="link-btn" data-ag="abgleichen" data-m="' + m + '"' + (AG.holen ? ' disabled' : '') + '>' + (AG.holen ? 'gleiche ab …' : 'Mit BuchhaltungsButler abgleichen') + '</button></div>' +
-      '<div class="notiz">Quelle ist BuchhaltungsButler (Ausgangsbelege). Offen ist der Rechnungsbetrag abzüglich der zugeordneten Zahlungen, Gutschriften mindern ihn. Eigenbelege für Einlagen, Kapitalerhöhung und Agio sind nicht eingerechnet. Sammeleinzüge und Rechnungen ohne Fälligkeitsdatum stehen unter „Ohne Fälligkeit“.</div></div>';
+      '<div class="notiz">Quelle ist BuchhaltungsButler (Ausgangsrechnungen). Netto ist der Betrag ohne Umsatzsteuer, so wie die Rechnungen gebucht sind. Offen ist der Rechnungsbetrag abzüglich der zugeordneten Zahlungen, Gutschriften mindern ihn. Nicht eingerechnet sind Spenden, Mitgliedsbeiträge, Sammeleinzüge, PAYONE-Tagesbelege, Kapitalerhöhungen, Agio und andere Eigenbelege. Rechnungen ohne Fälligkeitsdatum stehen unter „Ohne Fälligkeit“.</div></div>';
     el.innerHTML = h;
   }
   async function agAbgleichen(m) {
@@ -6740,7 +6759,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261021170906';
+  var BUILD = '20261021172206';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
