@@ -67,6 +67,7 @@ body.breit .wrap { max-width: none; }
 .bereiche li + li { margin-top: 2px; }
 .bereich { display: block; width: 100%; text-align: left; background: none; border: 0; border-radius: var(--radius-sm); padding: 9px 10px; font-size: 14px; font-weight: 500; color: var(--text-secondary); cursor: pointer; border-left: 3px solid transparent; }
 .bereich:hover { background: var(--bg-subtle); color: var(--text-primary); }
+.bereich-unter .bereich { padding-left: 26px; font-size: 13px; font-weight: 400; }
 .bereich[aria-current="page"] { background: var(--color-orange-50); color: var(--text-primary); border-left-color: var(--color-brand-orange); }
 .spalte { flex: 1; min-width: 0; }
 .kopf { background: var(--bg-card); border-bottom: 1px solid var(--border); }
@@ -467,18 +468,21 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   <section id="p-versand" role="tabpanel" aria-labelledby="tab-versand" hidden></section>
   <section id="p-belege-xxl" role="tabpanel" aria-labelledby="tab-belege-xxl" hidden></section>
   <section id="p-belege-lev" role="tabpanel" aria-labelledby="tab-belege-lev" hidden></section>
+  <section id="p-vw-xxl" aria-label="Vorschüsse XXL" hidden></section>
   <section id="p-zahlung-xxl" role="tabpanel" aria-labelledby="tab-zahlung-xxl" hidden></section>
+  <section id="p-vw-lev" aria-label="Vorschüsse LEV" hidden></section>
   <section id="p-zahlung-lev" role="tabpanel" aria-labelledby="tab-zahlung-lev" hidden></section>
   <section id="p-zahlung-lev-lp" role="tabpanel" aria-labelledby="tab-zahlung-lev-lp" hidden></section>
   <section id="p-rueckfragen" role="tabpanel" aria-labelledby="tab-rueckfragen" hidden></section>
   <section id="p-buchungstexte" role="tabpanel" aria-labelledby="tab-buchungstexte" hidden></section>
-  <section id="p-ueberweisungen" role="tabpanel" aria-labelledby="tab-ueberweisungen" hidden></section>
+  <section id="p-ueberweisungen-xxl" role="tabpanel" aria-labelledby="tab-ueberweisungen-xxl" hidden></section>
+  <section id="p-ueberweisungen-lev" role="tabpanel" aria-labelledby="tab-ueberweisungen-lev" hidden></section>
+  <section id="p-ueberweisungen-lev-lp" role="tabpanel" aria-labelledby="tab-ueberweisungen-lev-lp" hidden></section>
   <section id="p-kostenstellen" role="tabpanel" aria-labelledby="tab-kostenstellen" hidden></section>
   <section id="p-sachkonten-xxl" role="tabpanel" aria-labelledby="tab-sachkonten-xxl" hidden></section>
   <section id="p-sachkonten-lev" role="tabpanel" aria-labelledby="tab-sachkonten-lev" hidden></section>
   <section id="p-auslage-neu" role="tabpanel" aria-labelledby="tab-auslage-neu" hidden></section>
   <section id="p-vorschuss-neu" role="tabpanel" aria-labelledby="tab-vorschuss-neu" hidden></section>
-  <section id="p-vorschuesse" role="tabpanel" aria-labelledby="tab-vorschuesse" hidden></section>
   <section id="p-kreditoren" role="tabpanel" aria-labelledby="tab-kreditoren" hidden></section>
 
 </main>
@@ -861,9 +865,12 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
     { id: 'segmentierung', name: 'Segmentierung', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
-    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlung XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung LEV Löwenpark' }, { id: 'ueberweisungen', name: 'Überweisungen' }, { id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }, { id: 'kreditoren', name: 'Kreditoren / Debitoren' }, { id: 'vorschuesse', name: 'Vorschüsse' }, { id: 'rueckfragen', name: 'Rückfragen', versteckt: true }] },
+    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlungen XXL' }, { id: 'ueberweisungen-xxl', name: 'Überweisungen XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlungen LEV' }, { id: 'ueberweisungen-lev', name: 'Überweisungen LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlungen Löwenpark' }, { id: 'ueberweisungen-lev-lp', name: 'Überweisungen Löwenpark' }, { id: 'rueckfragen', name: 'Rückfragen', versteckt: true }] },
+    { id: 'administration', name: 'Administration', unter: true, tabs: [{ id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }, { id: 'kreditoren', name: 'Kreditoren / Debitoren' }] },
     { id: 'auslagen', name: 'Auslagen', tabs: [{ id: 'auslage-neu', name: 'Auslage einreichen' }, { id: 'vorschuss-neu', name: 'Vorschuss beantragen' }] }
   ];
+  var VW_PANEL = { 'zahlung-xxl': { el: 'p-vw-xxl', mandant: 'XXL' }, 'zahlung-lev': { el: 'p-vw-lev', mandant: 'LEV' } }; // Vorschüsse stehen oben in den Zahlungen, nicht bei Löwenpark
+  var UE_TAB = { 'ueberweisungen-xxl': { mandant: 'XXL', konto: 'XXL' }, 'ueberweisungen-lev': { mandant: 'LEV', konto: 'LEV-GIRO' }, 'ueberweisungen-lev-lp': { mandant: 'LEV', konto: 'LEV-LOEWENPARK' } };
   var TABS = [];
   BEREICHE.forEach(function (b) { b.tabs.forEach(function (t) { TABS.push(t.id); }); });
   var letzterTab = {}; // je Bereich zuletzt offener Tab
@@ -873,7 +880,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 
   // Welche Bereiche eine Person sieht, kommt aus der Rechte-Tabelle (crm-db). Hier wird nur ausgeblendet,
   // entschieden wird im Gateway.
-  var RECHT_ID = { ticketing: 'ticketing', gutscheine: 'gutscheine', website: 'website', segmentierung: 'crm', accounting: 'accounting', auslagen: 'auslagen' };
+  var RECHT_ID = { ticketing: 'ticketing', gutscheine: 'gutscheine', website: 'website', segmentierung: 'crm', accounting: 'accounting', administration: 'accounting', auslagen: 'auslagen' };
   function darfBereich(b) {
     var n = window.LOEWEN_NUTZER;
     if (!n) return true;
@@ -885,7 +892,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var b = bereichVon(S.tab);
     var h = '';
     BEREICHE.filter(darfBereich).forEach(function (x) {
-      h += '<li><button type="button" class="bereich" data-bereich="' + x.id + '"' + (x === b ? ' aria-current="page"' : '') + '>' + esc(x.name) + '</button></li>';
+      h += '<li' + (x.unter ? ' class="bereich-unter"' : '') + '><button type="button" class="bereich" data-bereich="' + x.id + '"' + (x === b ? ' aria-current="page"' : '') + '>' + esc(x.name) + '</button></li>';
     });
     $('bereiche').innerHTML = h;
     $('bereich-titel').textContent = b.name;
@@ -893,7 +900,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     b.tabs.forEach(function (x) {
       if (x.versteckt && x.id !== S.tab) return;
       var aktiv = x.id === S.tab;
-      var badge = x.id === 'rueckfragen' && RF.daten && RF.daten.zaehler && RF.daten.zaehler.offen ? ' (' + RF.daten.zaehler.offen + ')' : (x.id === 'vorschuesse' && VW.daten && vwOffen() ? ' (' + vwOffen() + ')' : '');
+      var vwM = { 'zahlung-xxl': 'XXL', 'zahlung-lev': 'LEV' }[x.id];
+      var badge = x.id === 'rueckfragen' && RF.daten && RF.daten.zaehler && RF.daten.zaehler.offen ? ' (' + RF.daten.zaehler.offen + ')' : (vwM && VW.daten && vwOffen(vwM) ? ' (' + vwOffen(vwM) + ' Vorschüsse)' : '');
       t += '<button class="tab" role="tab" id="tab-' + x.id + '" data-tab="' + x.id + '" aria-controls="p-' + x.id + '" aria-selected="' + aktiv + '" tabindex="' + (aktiv ? 0 : -1) + '">' + esc(x.name + badge) + '</button>';
     });
     var tl = $('tabs');
@@ -905,13 +913,16 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   function teileHash(h) { var i = h.indexOf('/'); return i === -1 ? { tab: h, arg: '' } : { tab: h.slice(0, i), arg: h.slice(i + 1) }; }
   function setTab(t, fokus, arg) {
     if (t === 'belege') t = 'belege-xxl'; // alte Adresse
+    if (t === 'ueberweisungen') t = 'ueberweisungen-xxl'; // alte Adresse
+    if (t === 'vorschuesse') t = 'zahlung-xxl'; // Vorschüsse stehen jetzt in den Zahlungen
     if (TABS.indexOf(t) === -1) t = 'erstellen';
     if (!darfBereich(bereichVon(t))) { var erlaubt = BEREICHE.filter(darfBereich)[0]; if (erlaubt) t = erlaubt.tabs[0].id; }
     S.tab = t; S.tabArg = arg || '';
     letzterTab[bereichVon(t).id] = t;
     renderNavigation();
-    document.body.classList.toggle('breit', bereichVon(t).id === 'accounting' || t === 'auswertung');
+    document.body.classList.toggle('breit', ['accounting', 'administration'].indexOf(bereichVon(t).id) >= 0 || t === 'auswertung');
     TABS.forEach(function (name) { $('p-' + name).hidden = name !== t; });
+    Object.keys(VW_PANEL).forEach(function (name) { $(VW_PANEL[name].el).hidden = name !== t; });
     if (fokus) $('tab-' + t).focus();
     // Jeder Tab hat eine eigene Adresse, z. B. …/board#kontakte
     try { history.replaceState(null, '', '#' + t + (S.tabArg ? '/' + S.tabArg : '')); } catch (e) {}
@@ -927,13 +938,13 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (t === 'buchungstexte') ladeBT();
     if (t === 'auslage-neu') ladeAU();
     if (t === 'vorschuss-neu') ladeVZ();
-    if (t === 'vorschuesse') ladeVW();
+    if (VW_PANEL[t]) ladeVW();
     if (t === 'kreditoren' && !KR.daten && !KR.laedt) ladeKR(); else if (t === 'kreditoren') renderKR();
     if (t === 'kostenstellen') ladeKS();
     if (t === 'sachkonten-xxl') ladeSK('XXL');
     if (t === 'sachkonten-lev') ladeSK('LEV');
     if (t === 'rueckfragen') ladeRF();
-    if (t === 'ueberweisungen') ladeUE();
+    if (UE_TAB[t]) { UE.tab = t; UE.mandant = UE_TAB[t].mandant; ladeUE(); }
     // SEO laedt erst, wenn der Tab zum ersten Mal geoeffnet wird: die
     // Sheets-Abfrage dauert laenger als die pretix-Aufrufe und wird beim
     // taeglichen Gutschein-Anlegen gar nicht gebraucht.
@@ -4958,7 +4969,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   // Port der Zahlungsfunktion des alten Buchungsagent-Boards. Die Posten leitet der Webhook accounting/offene-posten ab
   // (gebucht, aber ohne zugeordnete Zahlung, ab 01.07.2026), die Zahlungsdatei erzeugt n8n und schickt sie per Mail an Marko.
   // Das Dashboard löst nie eine Zahlung aus. Fremde IBANs kommen nur gekürzt in die Seite.
-  var UE = { mandant: 'XXL', daten: { XXL: null, LEV: null }, laedt: false, fehler: '', meldung: '', fehlerAktion: '', auswahl: {}, bereit: '', arbeitet: '', holen: false, zu: {}, zeilenMsg: {}, bicNoetig: {}, ibanEntwurf: {} };
+  var UE = { mandant: 'XXL', daten: { XXL: null, LEV: null }, laedt: false, fehler: '', meldung: '', fehlerAktion: '', auswahl: {}, bereit: '', arbeitet: '', holen: false, zu: {}, zeilenMsg: {}, bicNoetig: {}, ibanEntwurf: {}, tab: 'ueberweisungen-xxl' };
   // Einklappen: welche Bereiche zu sind, merkt sich der Browser (nur Komfort, ohne Speicher sind alle offen)
   function ueZuLaden() { try { return JSON.parse(localStorage.getItem('ueZu') || '{}') || {}; } catch (e) { return {}; } }
   function ueZuSpeichern() { try { localStorage.setItem('ueZu', JSON.stringify(UE.zu)); } catch (e) {} }
@@ -5160,17 +5171,16 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     renderUE();
   }
   function renderUE() {
-    var el = $('p-ueberweisungen'); if (!el) return;
+    var el = $('p-' + UE.tab); if (!el) return;
     var d = UE.daten[UE.mandant];
     if (UE.laedt && !d) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
     if (UE.fehler && !d) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(UE.fehler) + '</div>'; return; }
     if (!d) { el.innerHTML = ''; return; }
-    var chip = function (m) { return '<button type="button" class="chip' + (UE.mandant === m ? ' aktiv' : '') + '" data-ue="mandant" data-m="' + m + '" aria-pressed="' + (UE.mandant === m) + '">' + m + '</button>'; };
     var stand = d.stand ? 'Stand der BuchhaltungsButler-Daten ' + formatDate(String(d.stand).slice(0, 10)) + ', ' + new Date(d.stand).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr' : '';
-    var h = '<div class="stapel"><nav class="chips" aria-label="Mandant wählen"><span class="notiz chips-label">Mandant</span>' + chip('XXL') + chip('LEV') + '</nav>';
+    var h = '<div class="stapel">';
     if (UE.meldung) h += '<div class="notiz" role="status">' + esc(UE.meldung) + '</div>';
     if (UE.fehlerAktion) h += '<div class="fehlerbox" role="alert">' + esc(UE.fehlerAktion) + '</div>';
-    var konten = Object.keys(UE_KONTEN).filter(function (k) { return UE.mandant === 'XXL' ? k === 'XXL' : k !== 'XXL'; });
+    var konten = [UE_TAB[UE.tab].konto];
     h += '<div style="display:flex;gap:12px"><button type="button" class="link-btn" data-ue="alle-zu">Alles einklappen (nur offene Posten zeigen)</button><button type="button" class="link-btn" data-ue="alle-auf">Alles aufklappen</button></div>';
     h += ueKontostaende(d, konten);
     konten.forEach(function (k) {
@@ -5199,7 +5209,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       h += '</tbody><tfoot><tr class="gesamtsumme"><td colspan="5" style="text-align:right" class="fett">Summe ' + esc(UE_KONTEN[k]) + ' · ' + esc(zahl(liste.length)) + ' Posten' + (dabei.length ? ' · angehakt ' + esc(zahl(dabei.length)) + ' Posten zu ' + esc(formatEuro(summe)) + '' : '') + '</td><td class="nowrap zahlen rechts fett">' + esc(formatEuro(liste.reduce(function (t, p) { return t + p.betrag; }, 0))) + '</td><td></td></tr></tfoot></table></div></div>';
     });
     // Vollständig verrechnete Gutschriften stehen schon bei der Rechnung („− Gutschrift …“), hier nur, was noch übrig ist
-    var gsl = (d.gutschriften || []).filter(function (g) { return Number(g.rest || 0) > 0.005; });
+    var istLP = UE_TAB[UE.tab].konto === 'LEV-LOEWENPARK'; // Gutschriften und Lastschriften gehören zum Mandanten, sie stehen beim Girokonto
+    var gsl = istLP ? [] : (d.gutschriften || []).filter(function (g) { return Number(g.rest || 0) > 0.005; });
     if (gsl.length) {
       h += '<div class="card scroll-x"><div class="card-kopf zeile-titel" style="margin:0"><span>' + ueZuKnopf('gutschriften', 'Gutschriften von Lieferanten') + ' · ' + esc(zahl(gsl.length)) + ' (werden mit offenen Rechnungen desselben Lieferanten verrechnet, nie überzahlt)</span></div>' + (UE.zu.gutschriften ? '' : '<table class="tbl kompakt"><thead><tr><th>Gutschrift</th><th>Lieferant</th><th>Betrag</th><th>Verrechnet</th><th>Mit Rechnung</th></tr></thead><tbody>');
       if (!UE.zu.gutschriften) gsl.forEach(function (g) {
@@ -5208,7 +5219,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       });
       h += (UE.zu.gutschriften ? '' : '</tbody></table>') + '</div>';
     }
-    var lsl = d.lastschriften || [];
+    var lsl = istLP ? [] : (d.lastschriften || []);
     if (lsl.length) {
       h += '<div class="card scroll-x"><div class="card-kopf zeile-titel" style="margin:0"><span>' + ueZuKnopf('lastschriften', 'Als Lastschrift gekennzeichnet') + ' · ' + esc(zahl(lsl.length)) + ' (werden von der Firma eingezogen, nicht überwiesen)</span></div>' + (UE.zu.lastschriften ? '' : '<table class="tbl kompakt"><tbody>');
       if (!UE.zu.lastschriften) lsl.forEach(function (l) {
@@ -5220,9 +5231,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       '<div class="notiz">Offen ist ein gebuchter Beleg ab 01.07.2026 ohne zugeordnete Zahlung. Dazu kommen Belege aus dem Dashboard, die noch nicht in BuchhaltungsButler gebucht sind (Rechnungen per Überweisung und Auslagen): sie sind nur vorangehakt, wenn du sie in den Rückfragen bestätigt hast. Zahlst du vor dem Buchen, ordnet BuchhaltungsButler die Zahlung beim Buchen selbst zu. Abgänge auf dem Konto, die zu einem Posten passen, setzen den Haken zurück („wohl schon bezahlt“). Lastschriften stehen nicht in der Liste. Beträge über 100.000 € werden in gleiche Teile geteilt.</div></div>';
     el.innerHTML = h;
   }
-  function bindUE() {
-    var p = $('p-ueberweisungen'); if (!p) return;
-    UE.zu = ueZuLaden();
+  function bindUE() { UE.zu = ueZuLaden(); Object.keys(UE_TAB).forEach(function (tab) { var pp = $('p-' + tab); if (pp) bindUEPanel(pp); }); }
+  function bindUEPanel(p) {
     p.addEventListener('change', function (e) {
       var t = e.target.closest('[data-ue]'); if (!t) return;
       var w = t.getAttribute('data-ue'), post = ueFinden(t.getAttribute('data-key'));
@@ -5247,8 +5257,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         if (w === 'alle-zu') Object.keys(UE_KONTEN).forEach(function (k) { UE.zu['posten-' + k] = false; UE.zu['diese-' + k] = false; UE.zu['spaeter-' + k] = false; });
         ueZuSpeichern(); renderUE(); return;
       }
-      if (w === 'mandant') { UE.mandant = b.getAttribute('data-m'); UE.bereit = ''; UE.meldung = ''; UE.fehlerAktion = ''; if (UE.daten[UE.mandant]) renderUE(); else ladeUE(); }
-      else if (w === 'iban-kreditor') { var pk = ueFinden(b.getAttribute('data-key')), ik = p.querySelector('input[data-ue="iban"][data-key="' + b.getAttribute('data-key') + '"]'), bk = p.querySelector('input[data-ue="bic"][data-key="' + b.getAttribute('data-key') + '"]'); if (pk && ik && String(ik.value).trim()) ueKreditorIban(pk, ik.value, bk ? bk.value : ''); else { UE.zeilenMsg[b.getAttribute('data-key')] = { text: 'Bitte zuerst die IBAN eintragen.', fehler: true }; renderUE(); } }
+      if (w === 'iban-kreditor') { var pk = ueFinden(b.getAttribute('data-key')), ik = p.querySelector('input[data-ue="iban"][data-key="' + b.getAttribute('data-key') + '"]'), bk = p.querySelector('input[data-ue="bic"][data-key="' + b.getAttribute('data-key') + '"]'); if (pk && ik && String(ik.value).trim()) ueKreditorIban(pk, ik.value, bk ? bk.value : ''); else { UE.zeilenMsg[b.getAttribute('data-key')] = { text: 'Bitte zuerst die IBAN eintragen.', fehler: true }; renderUE(); } }
       else if (w === 'iban-speichern') { var pi = ueFinden(b.getAttribute('data-key')), ii = p.querySelector('input[data-ue="iban"][data-key="' + b.getAttribute('data-key') + '"]'); if (pi && ii && String(ii.value).trim()) ueSpeichern(pi, 'iban', ii.value); else { UE.fehlerAktion = 'Bitte zuerst die IBAN eintragen.'; renderUE(); } }
       else if (w === 'ks-speichern') { ueKontostand(b.getAttribute('data-konto')); }
       else if (w === 'liqui-aktualisieren') { ueLiquiAktualisieren(); }
@@ -6345,7 +6354,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     } catch (e) { VW.fehler = e.message; }
     VW.laedt = false; renderVW(); renderNavigation();
   }
-  function vwOffen() { return VW.daten ? VW.daten.vorschuesse.filter(function (v) { return v.status === 'beantragt'; }).length : 0; }
+  function vwOffen(m) { return VW.daten ? VW.daten.vorschuesse.filter(function (v) { return v.status === 'beantragt' && (!m || v.mandant === m); }).length : 0; }
   async function vwAktion(id, aktion, datum) {
     VW.laeuft = id; VW.meldung = ''; VW.fehlerAktion = ''; renderVW();
     try {
@@ -6356,14 +6365,15 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     } catch (e) { VW.fehlerAktion = e.message; }
     VW.laeuft = 0; await ladeVW();
   }
-  function renderVW() {
-    var el = $('p-vorschuesse'); if (!el) return;
+  function renderVW() { Object.keys(VW_PANEL).forEach(function (t) { renderVWPanel($(VW_PANEL[t].el), VW_PANEL[t].mandant); }); }
+  function renderVWPanel(el, m) {
+    if (!el) return;
     if (VW.laedt && !VW.daten) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
     if (VW.fehler && !VW.daten) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(VW.fehler) + '</div>'; return; }
     if (!VW.daten) { el.innerHTML = ''; return; }
-    var heute = auHeute(), liste = VW.daten.vorschuesse;
+    var heute = auHeute(), liste = VW.daten.vorschuesse.filter(function (v) { return v.mandant === m; });
     var h = '<div class="stapel">' + (VW.meldung ? '<div class="erfolg" role="status">' + esc(VW.meldung) + '</div>' : '') + (VW.fehlerAktion ? '<div class="fehlerbox" role="alert">' + esc(VW.fehlerAktion) + '</div>' : '');
-    h += '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Vorschüsse · ' + vwOffen() + ' warten auf Freigabe</span><span><button type="button" class="link-btn" data-vw="neu">Aktualisieren</button></span></div>';
+    h += '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Vorschüsse ' + esc(m) + ' · ' + vwOffen(m) + ' warten auf Freigabe</span><span><button type="button" class="link-btn" data-vw="neu">Aktualisieren</button></span></div>';
     if (!liste.length) h += '<div class="card-fuss">Noch keine Vorschüsse beantragt.</div>';
     else {
       h += '<div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Nr.</th><th>Person</th><th>Maßnahme</th><th class="zahlen">Betrag</th><th>Stand</th><th></th></tr></thead><tbody>';
@@ -6384,14 +6394,17 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     el.innerHTML = h;
   }
   function bindVW() {
-    $('p-vorschuesse').addEventListener('click', function (e) {
+    Object.keys(VW_PANEL).forEach(function (t) { $(VW_PANEL[t].el).addEventListener('click', vwKlick); });
+  }
+  function vwKlick(e) {
+    {
       var b = e.target.closest('[data-vw]'); if (!b) return;
       var a = b.getAttribute('data-vw'), id = Number(b.getAttribute('data-id'));
       if (a === 'neu') ladeVW();
       else if (a === 'ausgezahlt') { var dt = document.getElementById('vw-datum-' + id); vwAktion(id, a, dt && dt.value); }
       else if (a === 'ablehnen') { if (window.confirm('Diesen Vorschuss wirklich ablehnen?')) vwAktion(id, a); }
       else vwAktion(id, a);
-    });
+    }
   }
 
   // ---------- Kreditoren: Gesamtliste mit Volumen seit 01.07., Doppelten, Zahlweg und Export ----------
@@ -6603,7 +6616,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     rfZaehlerLaden();
   });
   // Die Zahl der offenen Rückfragen steht schon im Reiter, bevor er geöffnet wird
-  function rfZaehlerLaden() { if (!RF.daten && !RF.laedt && darfBereich(bereichVon('rueckfragen'))) ladeRF(); if (!VW.daten && !VW.laedt && darfBereich(bereichVon('vorschuesse'))) ladeVW(); }
+  function rfZaehlerLaden() { if (!RF.daten && !RF.laedt && darfBereich(bereichVon('rueckfragen'))) ladeRF(); if (!VW.daten && !VW.laedt && darfBereich(bereichVon('rueckfragen'))) ladeVW(); }
   formInFelder();
   var start = teileHash(location.hash.slice(1));
   setTab(start.tab || S.tab, false, start.arg);
@@ -6648,7 +6661,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261021154917';
+  var BUILD = '20261021163905';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
