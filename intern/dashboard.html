@@ -332,6 +332,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   <div class="wrap kopf-inner">
     <h1 id="bereich-titel"></h1>
     <div class="tabs" role="tablist" id="tabs"></div>
+    <div id="lesen-hinweis" class="notiz" role="status" hidden style="margin:8px 0;padding:8px 12px;border-left:3px solid var(--color-brand-orange);background:var(--bg-subtle)">Hier hast du nur Lesezugriff. Du kannst alles ansehen, Änderungen werden abgelehnt.</div>
   </div>
 </header>
 
@@ -887,8 +888,14 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   function darfBereich(b) {
     var n = window.LOEWEN_NUTZER;
     if (!n) return true;
+    var r = n.bereiche || [], l = n.lesen || [];
+    return r.indexOf('alles') >= 0 || r.indexOf(RECHT_ID[b.id]) >= 0 || l.indexOf(RECHT_ID[b.id]) >= 0;
+  }
+  // Nur Lesezugriff: der Bereich ist sichtbar, geändert wird im Gateway abgelehnt
+  function nurLesen(b) {
+    var n = window.LOEWEN_NUTZER; if (!n || !b) return false;
     var r = n.bereiche || [];
-    return r.indexOf('alles') >= 0 || r.indexOf(RECHT_ID[b.id]) >= 0;
+    return r.indexOf('alles') < 0 && r.indexOf(RECHT_ID[b.id]) < 0 && (n.lesen || []).indexOf(RECHT_ID[b.id]) >= 0;
   }
 
   function renderNavigation() {
@@ -899,6 +906,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     });
     $('bereiche').innerHTML = h;
     $('bereich-titel').textContent = b.name;
+    var lh = $('lesen-hinweis'); if (lh) lh.hidden = !nurLesen(b);
+    document.body.classList.toggle('nur-lesen', nurLesen(b));
     var t = '';
     b.tabs.forEach(function (x) {
       if (x.versteckt && x.id !== S.tab) return;
@@ -6761,7 +6770,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   var start = teileHash(location.hash.slice(1));
   setTab(start.tab || S.tab, false, start.arg);
   // Personen nur mit dem Bereich Auslagen sollen keine Ticket- und Gutschein-Daten anfragen (das Gateway lehnt sie ohnehin ab)
-  function darfRecht(id) { var n = window.LOEWEN_NUTZER; if (!n) return true; var r = n.bereiche || []; return r.indexOf('alles') >= 0 || r.indexOf(id) >= 0; }
+  function darfRecht(id) { var n = window.LOEWEN_NUTZER; if (!n) return true; var r = n.bereiche || []; return r.indexOf('alles') >= 0 || r.indexOf(id) >= 0 || (n.lesen || []).indexOf(id) >= 0; }
   var startGeladen = false;
   function startLaden() {
     if (startGeladen || !window.LOEWEN_NUTZER) return; startGeladen = true;
@@ -6801,7 +6810,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261021173638';
+  var BUILD = '20261021174547';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
