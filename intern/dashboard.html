@@ -478,6 +478,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   <section id="p-ueberweisungen-xxl" role="tabpanel" aria-labelledby="tab-ueberweisungen-xxl" hidden></section>
   <section id="p-ueberweisungen-lev" role="tabpanel" aria-labelledby="tab-ueberweisungen-lev" hidden></section>
   <section id="p-ueberweisungen-lev-lp" role="tabpanel" aria-labelledby="tab-ueberweisungen-lev-lp" hidden></section>
+  <section id="p-ausgang-xxl" role="tabpanel" aria-labelledby="tab-ausgang-xxl" hidden></section>
+  <section id="p-ausgang-lev" role="tabpanel" aria-labelledby="tab-ausgang-lev" hidden></section>
   <section id="p-kostenstellen" role="tabpanel" aria-labelledby="tab-kostenstellen" hidden></section>
   <section id="p-sachkonten-xxl" role="tabpanel" aria-labelledby="tab-sachkonten-xxl" hidden></section>
   <section id="p-sachkonten-lev" role="tabpanel" aria-labelledby="tab-sachkonten-lev" hidden></section>
@@ -865,11 +867,12 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
     { id: 'segmentierung', name: 'Segmentierung', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
-    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlungen XXL' }, { id: 'ueberweisungen-xxl', name: 'Überweisungen XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlungen LEV' }, { id: 'ueberweisungen-lev', name: 'Überweisungen LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlungen Löwenpark' }, { id: 'ueberweisungen-lev-lp', name: 'Überweisungen Löwenpark' }, { id: 'rueckfragen', name: 'Rückfragen', versteckt: true }] },
+    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlungen XXL' }, { id: 'ueberweisungen-xxl', name: 'Überweisungen XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlungen LEV' }, { id: 'ueberweisungen-lev', name: 'Überweisungen LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlungen Löwenpark' }, { id: 'ueberweisungen-lev-lp', name: 'Überweisungen Löwenpark' }, { id: 'ausgang-xxl', name: 'Ausgangsrechnungen XXL' }, { id: 'ausgang-lev', name: 'Ausgangsrechnungen LEV' }, { id: 'rueckfragen', name: 'Rückfragen', versteckt: true }] },
     { id: 'administration', name: 'Administration', unter: true, tabs: [{ id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }, { id: 'kreditoren', name: 'Kreditoren / Debitoren' }] },
     { id: 'auslagen', name: 'Auslagen', tabs: [{ id: 'auslage-neu', name: 'Auslage einreichen' }, { id: 'vorschuss-neu', name: 'Vorschuss beantragen' }] }
   ];
   var VW_PANEL = { 'zahlung-xxl': { el: 'p-vw-xxl', mandant: 'XXL' }, 'zahlung-lev': { el: 'p-vw-lev', mandant: 'LEV' } }; // Vorschüsse stehen oben in den Zahlungen, nicht bei Löwenpark
+  var AG_TAB = { 'ausgang-xxl': 'XXL', 'ausgang-lev': 'LEV' };
   var UE_TAB = { 'ueberweisungen-xxl': { mandant: 'XXL', konto: 'XXL' }, 'ueberweisungen-lev': { mandant: 'LEV', konto: 'LEV-GIRO' }, 'ueberweisungen-lev-lp': { mandant: 'LEV', konto: 'LEV-LOEWENPARK' } };
   var TABS = [];
   BEREICHE.forEach(function (b) { b.tabs.forEach(function (t) { TABS.push(t.id); }); });
@@ -939,6 +942,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (t === 'auslage-neu') ladeAU();
     if (t === 'vorschuss-neu') ladeVZ();
     if (VW_PANEL[t]) ladeVW();
+    if (AG_TAB[t]) ladeAG(AG_TAB[t]);
     if (t === 'kreditoren' && !KR.daten && !KR.laedt) ladeKR(); else if (t === 'kreditoren') renderKR();
     if (t === 'kostenstellen') ladeKS();
     if (t === 'sachkonten-xxl') ladeSK('XXL');
@@ -6343,6 +6347,80 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     p.addEventListener('click', function (e) { var b = e.target.closest('[data-vz-aktion]'); if (b && b.getAttribute('data-vz-aktion') === 'senden') vzSenden(); });
   }
 
+  // ---------- Ausgangsrechnungen: offen und bezahlt, darunter die erwarteten Zahlungen nach Fälligkeitsmonat (aus BuchhaltungsButler) ----------
+  var AG = { daten: { XXL: null, LEV: null }, laedt: {}, fehler: {}, holen: false, meldung: '', zu: {} };
+  async function ladeAG(m, still) {
+    if (!still) { AG.laedt[m] = true; AG.fehler[m] = ''; renderAG(m); }
+    try {
+      var res = await fetch('/webhook/accounting/ausgangsrechnungen?mandant=' + m);
+      var d = await res.json();
+      if (!res.ok || !d.ok) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
+      AG.daten[m] = d;
+    } catch (e) { AG.fehler[m] = e.message; }
+    AG.laedt[m] = false; renderAG(m);
+  }
+  function agMonat(k) { return k ? monatName(k) : 'Ohne Fälligkeit'; }
+  function renderAG(m) {
+    var el = $('p-ausgang-' + m.toLowerCase()); if (!el) return;
+    var d = AG.daten[m];
+    if (AG.laedt[m] && !d) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
+    if (AG.fehler[m] && !d) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(AG.fehler[m]) + '</div>'; return; }
+    if (!d) { el.innerHTML = ''; return; }
+    var sm = d.summe || {}, heute = new Date().toISOString().slice(0, 10);
+    var pct = sm.betrag > 0 ? Math.max(0, Math.min(100, Math.round(sm.bezahlt / sm.betrag * 100))) : 0;
+    var kpi = function (titel, wert, unter, farbe) { return '<div style="min-width:170px"><div class="notiz" style="margin:0">' + esc(titel) + '</div><div class="fett" style="font-size:22px' + (farbe ? ';color:var(--color-' + farbe + ')' : '') + '">' + esc(wert) + '</div><div class="notiz" style="margin:0">' + esc(unter) + '</div></div>'; };
+    var stand = d.stand ? 'Stand der BuchhaltungsButler-Daten ' + formatDate(String(d.stand).slice(0, 10)) + ', ' + new Date(d.stand).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr' : '';
+    var h = '<div class="stapel">' + (AG.meldung ? '<div class="notiz" role="status">' + esc(AG.meldung) + '</div>' : '');
+    h += '<div class="card pad"><div class="card-kopf zeile-titel" style="margin:0"><span>Ausgangsrechnungen ' + esc(m) + ' · Übersicht</span><span class="notiz" style="margin:0">' + esc(stand) + '</span></div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:28px;margin:14px 12px">' +
+      kpi('Noch offen', formatEuro(sm.offen), zahl(sm.anzahl_offen) + (sm.anzahl_offen === 1 ? ' Rechnung' : ' Rechnungen'), sm.offen > 0 ? 'warning' : '') +
+      kpi('davon überfällig', formatEuro(sm.ueberfaellig), 'Fälligkeit liegt in der Vergangenheit', sm.ueberfaellig > 0 ? 'error' : '') +
+      kpi('Bereits bezahlt', formatEuro(sm.bezahlt), 'seit ' + formatDate(d.seit), 'success') +
+      kpi('Rechnungen gesamt', formatEuro(sm.betrag), zahl(sm.anzahl) + ' Rechnungen seit ' + formatDate(d.seit)) + '</div>' +
+      '<div style="margin:0 12px 14px" role="img" aria-label="' + pct + ' Prozent bezahlt"><div style="height:10px;border-radius:5px;background:var(--bg-subtle);overflow:hidden"><div style="height:10px;width:' + pct + '%;background:var(--color-success)"></div></div><div class="notiz" style="margin:4px 0 0">' + pct + ' % des Rechnungsbetrags seit ' + esc(formatDate(d.seit)) + ' ist bezahlt</div></div></div>';
+    var monate = d.monate || [], kum = 0;
+    h += '<div class="card scroll-x"><div class="card-kopf zeile-titel" style="margin:0"><span>Erwartete Zahlungen nach Fälligkeit</span></div>';
+    if (!monate.length) h += '<div class="card-fuss">Keine offenen Ausgangsrechnungen.</div>';
+    else {
+      h += '<table class="tbl kompakt"><thead><tr><th>Fälligkeit / Rechnung</th><th>Kunde</th><th>Rechnungsdatum</th><th>Fällig</th><th style="text-align:right">Rechnungsbetrag</th><th style="text-align:right">Offen</th><th style="text-align:right">Offen kumuliert</th></tr></thead><tbody>';
+      monate.forEach(function (mo) {
+        var key = mo.monat || 'ohne', zu = !!AG.zu[m + key]; kum += Number(mo.offen) || 0;
+        h += '<tr class="abschnitt-zeile"><td colspan="5">' + '<button type="button" class="link-btn" data-ag="zu" data-m="' + m + '" data-key="' + esc(key) + '" aria-expanded="' + (!zu) + '">' + (zu ? '▸ ' : '▾ ') + esc(agMonat(mo.monat)) + '</button> · ' + esc(zahl(mo.anzahl)) + (mo.anzahl === 1 ? ' Rechnung' : ' Rechnungen') + (mo.ueberfaellig > 0 ? ' · <span style="color:var(--color-error)">überfällig ' + esc(formatEuro(mo.ueberfaellig)) + '</span>' : '') + '</td><td class="nowrap zahlen rechts fett">' + esc(formatEuro(mo.offen)) + '</td><td class="nowrap zahlen rechts notiz">' + esc(formatEuro(kum)) + '</td></tr>';
+        if (!zu) (mo.posten || []).forEach(function (p) {
+          var ueber = p.faellig && String(p.faellig).slice(0, 10) < heute;
+          h += '<tr><td>' + esc(p.nummer || ('Beleg ' + p.beleg_id)) + '<div class="notiz" style="margin:0">Beleg ' + esc(p.beleg_id) + '</div></td><td>' + esc(p.gegenpartei || '–') + '</td><td>' + esc(formatDate(String(p.datum || '').slice(0, 10))) + '</td><td' + (ueber ? ' style="color:var(--color-error)"' : '') + '>' + (p.faellig ? esc(formatDate(String(p.faellig).slice(0, 10))) + (ueber ? ' (überfällig)' : '') : '–') + '</td><td class="nowrap zahlen rechts">' + esc(formatEuro(p.betrag)) + '</td><td class="nowrap zahlen rechts">' + esc(formatEuro(p.offen)) + '</td><td></td></tr>';
+        });
+      });
+      h += '</tbody><tfoot><tr class="gesamtsumme"><td colspan="5" style="text-align:right" class="fett">Summe offen · ' + esc(zahl(sm.anzahl_offen)) + ' Rechnungen</td><td class="nowrap zahlen rechts fett">' + esc(formatEuro(sm.offen)) + '</td><td></td></tr></tfoot></table>';
+    }
+    h += '</div><div><button type="button" class="link-btn" data-ag="neu" data-m="' + m + '">Aktualisieren</button> <button type="button" class="link-btn" data-ag="abgleichen" data-m="' + m + '"' + (AG.holen ? ' disabled' : '') + '>' + (AG.holen ? 'gleiche ab …' : 'Mit BuchhaltungsButler abgleichen') + '</button></div>' +
+      '<div class="notiz">Quelle ist BuchhaltungsButler (Ausgangsbelege). Offen ist der Rechnungsbetrag abzüglich der zugeordneten Zahlungen, Gutschriften mindern ihn. Eigenbelege für Einlagen, Kapitalerhöhung und Agio sind nicht eingerechnet. Sammeleinzüge und Rechnungen ohne Fälligkeitsdatum stehen unter „Ohne Fälligkeit“.</div></div>';
+    el.innerHTML = h;
+  }
+  async function agAbgleichen(m) {
+    if (AG.holen) return;
+    AG.holen = true; AG.meldung = ''; renderAG(m);
+    try {
+      var res = await fetch('/webhook/accounting/aktualisieren', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+      var d = await res.json();
+      if (!res.ok || !d.ok) throw new Error(d.message || d.fehler || 'Aktualisierung fehlgeschlagen');
+      AG.meldung = 'Mit BuchhaltungsButler abgeglichen.';
+    } catch (e) { AG.meldung = 'Abgleich nicht gelungen: ' + e.message; }
+    AG.holen = false; await ladeAG(m, true);
+  }
+  function bindAG() {
+    Object.keys(AG_TAB).forEach(function (t) {
+      var p = $('p-' + t); if (!p) return;
+      p.addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-ag]'); if (!b) return;
+        var w = b.getAttribute('data-ag'), m = b.getAttribute('data-m');
+        if (w === 'zu') { AG.zu[m + b.getAttribute('data-key')] = !AG.zu[m + b.getAttribute('data-key')]; renderAG(m); }
+        else if (w === 'neu') ladeAG(m);
+        else if (w === 'abgleichen') agAbgleichen(m);
+      });
+    });
+  }
+
   // ---------- Vorschüsse verwalten (Accounting) ----------
   var VW = { daten: null, fehler: null, laedt: false, meldung: '', fehlerAktion: '', laeuft: 0 };
   async function ladeVW() {
@@ -6605,6 +6683,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   bindAW();
   bindAS();
   bindUE();
+  bindAG();
   bindSK();
   bindRF();
   bindAU();
@@ -6661,7 +6740,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261021163905';
+  var BUILD = '20261021170906';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
