@@ -5063,7 +5063,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (p.inDatei) bank = '<div class="notiz" style="margin:0">in Datei<br>' + esc(p.inDatei) + '</div>';
     else if (ok) bank = '<div style="font-family:var(--font-mono,monospace);word-break:break-all;min-width:230px">' + esc(p.iban || p.ibanKurz) + '</div>' + (p.ibanQuelle === 'fall' ? '<div class="notiz" style="margin:0">nur für diesen Beleg</div>' : '') + (p.ibanQuelle === 'beleg' ? '<div class="notiz" style="margin:0">IBAN vom Beleg, bitte prüfen</div>' : '') + (p.ibanQuelle === 'auslagenbeleg' ? '<div class="notiz" style="margin:0">IBAN vom Auslagenbeleg</div>' : '') + (p.ibanAbweichung ? '<div class="notiz" style="margin:0;color:var(--color-error)">IBAN am Beleg weicht vom Kreditor ab</div>' : '');
     else bank = '<div class="notiz" style="margin:0;color:var(--color-error)">' + (p.hatIban ? 'IBAN ungültig' : 'IBAN fehlt') + '</div>' +
-      '<input type="text" class="eingabe-klein" style="width:170px;flex:none" placeholder="IBAN nur für diesen Beleg" data-ue="iban" data-key="' + esc(p.key) + '" aria-label="IBAN für Beleg ' + esc(p.fallId) + '">';
+      '<input type="text" class="eingabe-klein" style="width:170px;flex:none" placeholder="IBAN nur für diesen Beleg" data-ue="iban" data-key="' + esc(p.key) + '" aria-label="IBAN für Beleg ' + esc(p.fallId) + '"> <button type="button" class="link-btn" data-ue="iban-speichern" data-key="' + esc(p.key) + '">Speichern</button>';
     var chk = '<input type="checkbox" data-ue="haken" data-key="' + esc(p.key) + '"' + (ueGewaehlt(p) ? ' checked' : '') + (p.inDatei || !ok ? ' disabled' : '') + ' aria-label="Beleg ' + esc(p.fallId) + ' überweisen">';
     var teil = p.teilAnzahl ? '<div class="notiz" style="margin:0">' + p.teilIndex + '. von ' + p.teilAnzahl + '. Zahlungen</div>' : '';
     var dash = '';
@@ -5078,6 +5078,37 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var ls = p.inDatei ? '' : '<div><button type="button" class="link-btn" data-ue="lastschrift" data-key="' + esc(p.key) + '" title="Die Firma zieht den Betrag selbst ein, es ist nichts zu überweisen">Lastschrift</button></div>';
     return '<tr><td>' + chk + ls + '</td><td>' + faellig + '</td><td>' + beleg + vText + '</td><td>' + empf + '</td><td>' + zweck + '</td><td style="text-align:right;white-space:nowrap"><div style="font-weight:500">' + esc(formatEuro(p.betrag)) + '</div>' + (p.abzug ? '<div class="notiz" style="margin:0" title="Die Gutschrift mindert die Zahlung, überwiesen wird nur der Rest.">Rechnung ' + esc(formatEuro(p.betragBeleg)) + '<br>− Gutschrift ' + esc(p.gutschrift) + ' ' + esc(formatEuro(p.abzug)) + '</div>' : '') + '</td><td>' + bank + '</td></tr>';
   }
+  // Kontostand je Konto: Ankerwert (von Marko eingetragen) plus die Umsätze aus BuchhaltungsButler seither; darunter, was nach den angehakten Überweisungen übrig bleibt
+  function ueKontostaende(d, konten) {
+    var ks = d.kontostaende || [], heute = new Date().toISOString().slice(0, 10);
+    var zeilen = konten.map(function (k) {
+      var x = ks.filter(function (q) { return q.konto === k; })[0];
+      var dabei = (d.posten || []).filter(function (p) { return p.konto === k && ueGewaehlt(p); });
+      var summe = dabei.reduce(function (t, p) { return t + p.betrag; }, 0);
+      var inhalt;
+      if (x) {
+        var rest = x.stand - summe;
+        inhalt = '<span class="fett" title="Eingetragener Stand vom ' + esc(formatDate(x.datum)) + ' (' + esc(formatEuro(x.anker)) + ') plus die Umsätze seither laut BuchhaltungsButler (' + esc(formatEuro(x.seither)) + '), Stand der Umsätze ' + esc(x.letzter_umsatz ? formatDate(x.letzter_umsatz) : '–') + '">' + esc(formatEuro(x.stand)) + '</span> <span class="notiz" style="margin:0">(Eintrag ' + esc(formatDate(x.datum)) + ': ' + esc(formatEuro(x.anker)) + ', Umsätze bis ' + esc(x.letzter_umsatz ? formatDate(x.letzter_umsatz) : '–') + ')</span>' +
+          (dabei.length ? ' · angehakt ' + esc(formatEuro(summe)) + ' → bleibt <span class="' + (rest < 0 ? 'hinweis-warn' : 'gut') + '">' + esc(formatEuro(rest)) + '</span>' : '');
+      } else inhalt = '<span class="notiz" style="margin:0">noch kein Kontostand eingetragen</span>';
+      return '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:4px 0"><span style="min-width:150px">' + esc(UE_KONTEN[k]) + '</span>' + inhalt +
+        ' <input type="text" inputmode="decimal" class="eingabe-klein" style="width:120px;flex:none" placeholder="Stand heute in €" data-ue-ks="' + esc(k) + '" aria-label="Kontostand ' + esc(UE_KONTEN[k]) + ' heute"> <button type="button" class="link-btn" data-ue="ks-speichern" data-konto="' + esc(k) + '">Kontostand eintragen</button></div>';
+    }).join('');
+    return '<div class="card pad"><div class="fett">Kontostände</div><div class="notiz" style="margin:0 0 4px">Du trägst den Stand von heute einmal ein, danach rechnet das Dashboard die Umsätze aus BuchhaltungsButler dazu. Umsätze, die BuchhaltungsButler noch nicht hat, fehlen.</div>' + zeilen + '</div>';
+  }
+  async function ueKontostand(konto) {
+    var i = document.querySelector('input[data-ue-ks="' + konto + '"]'), roh = i ? String(i.value || '').trim() : '';
+    if (!roh) { UE.fehlerAktion = 'Bitte den Kontostand eintragen.'; renderUE(); return; }
+    var zahlW = Number(roh.replace(/\s|€/g, '').replace(/\./g, '').replace(',', '.'));
+    if (!isFinite(zahlW)) { UE.fehlerAktion = 'Der Betrag „' + roh + '“ ist keine Zahl.'; renderUE(); return; }
+    UE.fehlerAktion = ''; UE.meldung = '';
+    try {
+      var r = await uePost('kontostand-setzen', { konto: konto, datum: new Date().toISOString().slice(0, 10), betrag: zahlW });
+      if (!r.ok) throw new Error(r.meldung || 'Nicht gespeichert');
+      UE.meldung = 'Kontostand ' + UE_KONTEN[konto] + ' mit ' + formatEuro(zahlW) + ' gespeichert.';
+      await ladeUE(true);
+    } catch (e) { UE.fehlerAktion = e.message; renderUE(); }
+  }
   function renderUE() {
     var el = $('p-ueberweisungen'); if (!el) return;
     var d = UE.daten[UE.mandant];
@@ -5090,6 +5121,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (UE.meldung) h += '<div class="notiz" role="status">' + esc(UE.meldung) + '</div>';
     if (UE.fehlerAktion) h += '<div class="fehlerbox" role="alert">' + esc(UE.fehlerAktion) + '</div>';
     var konten = Object.keys(UE_KONTEN).filter(function (k) { return UE.mandant === 'XXL' ? k === 'XXL' : k !== 'XXL'; });
+    h += ueKontostaende(d, konten);
     konten.forEach(function (k) {
       var liste = (d.posten || []).filter(function (p) { return p.konto === k; });
       var offen = liste.filter(function (p) { return !p.inDatei; });
@@ -5099,17 +5131,19 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var dabei = liste.filter(ueGewaehlt);
       var summe = dabei.reduce(function (t, p) { return t + p.betrag; }, 0);
       var sumOffen = offen.reduce(function (t, p) { return t + p.betrag; }, 0);
-      h += '<div class="card scroll-x"><div class="card-kopf zeile-titel" style="margin:0"><span>Offene Posten · ' + esc(UE_KONTEN[k]) + ' · ' + esc(zahl(offen.length)) + ' Posten · ' + esc(formatEuro(sumOffen)) + '</span><span class="notiz" style="margin:0">' + esc(stand) + '</span></div>' +
+      var knopf = '';
+      if (UE.arbeitet === k) knopf = '<button type="button" class="link-btn" disabled>erzeuge Datei …</button>';
+      else if (UE.bereit === k) knopf = '<span class="notiz" style="margin:0">' + esc(zahl(dabei.length)) + ' Überweisungen über ' + esc(formatEuro(summe)) + ' erzeugen? Die Datei geht per Mail an dich, gezahlt wird erst im Online-Banking.</span> <button type="button" class="btn btn-primary" style="padding:4px 10px" data-ue="datei" data-konto="' + k + '">Ja, Datei erzeugen</button> <button type="button" class="link-btn" data-ue="abbrechen">Abbrechen</button>';
+      else knopf = '<button type="button" class="btn btn-secondary" style="padding:4px 10px" data-ue="datei" data-konto="' + k + '">Zahlungsdatei erzeugen</button>';
+      var zwischen = function (titel, l) { var sm = l.reduce(function (t, p) { return t + p.betrag; }, 0); return '<tr class="zwischensumme"><td colspan="5" class="notiz" style="text-align:right">Zwischensumme ' + esc(titel) + ' · ' + esc(zahl(l.length)) + (l.length === 1 ? ' Posten' : ' Posten') + '</td><td class="nowrap zahlen rechts fett">' + esc(formatEuro(sm)) + '</td><td></td></tr>'; };
+      h += '<div class="card scroll-x"><div class="card-kopf zeile-titel" style="margin:0"><span>Offene Posten · ' + esc(UE_KONTEN[k]) + ' · ' + esc(zahl(offen.length)) + ' Posten · ' + esc(formatEuro(sumOffen)) + (dabei.length ? ' · <b>angehakt ' + esc(zahl(dabei.length)) + ' Posten zu ' + esc(formatEuro(summe)) + '</b>' : '') + '</span><span class="notiz" style="margin:0">' + esc(stand) + '</span></div>' +
+        '<div class="zeile-titel" style="margin:8px 12px;gap:12px;flex-wrap:wrap"><span>Angehakt: ' + esc(zahl(dabei.length)) + ' · ' + esc(formatEuro(summe)) + '</span><span>' + knopf + '</span></div>' +
         '<table class="tbl kompakt"><thead><tr><th>zahlen</th><th>Fällig</th><th>Beleg</th><th>Empfänger</th><th>Verwendungszweck</th><th>Betrag</th><th>Bankverbindung</th></tr></thead><tbody>';
       if (!liste.length) h += '<tr><td colspan="7" class="leer">Keine offenen Posten.</td></tr>';
-      if (diese.length) { h += abschnittZeile('Fällig bis Ende dieser Woche (' + formatDate(d.wochenEnde) + ') und überfällig', 7); diese.forEach(function (p) { h += ueZeile(p); }); }
-      if (spaeter.length) { h += abschnittZeile('Noch nicht fällig', 7); spaeter.forEach(function (p) { h += ueZeile(p); }); }
-      if (inD.length) { h += abschnittZeile('Zahlungsdatei bereits erzeugt', 7); inD.forEach(function (p) { h += ueZeile(p); }); }
-      h += '</tbody></table><div class="zeile-titel" style="margin:8px 12px;gap:12px;flex-wrap:wrap"><span>Angehakt: ' + esc(zahl(dabei.length)) + ' · ' + esc(formatEuro(summe)) + '</span><span>';
-      if (UE.arbeitet === k) h += '<button type="button" class="link-btn" disabled>erzeuge Datei …</button>';
-      else if (UE.bereit === k) h += '<span class="notiz" style="margin:0">' + esc(zahl(dabei.length)) + ' Überweisungen über ' + esc(formatEuro(summe)) + ' erzeugen? Die Datei geht per Mail an dich, gezahlt wird erst im Online-Banking.</span> <button type="button" class="link-btn" data-ue="datei" data-konto="' + k + '">Ja, Datei erzeugen</button> <button type="button" class="link-btn" data-ue="abbrechen">Abbrechen</button>';
-      else h += '<button type="button" class="link-btn" data-ue="datei" data-konto="' + k + '">Zahlungsdatei erzeugen</button>';
-      h += '</span></div></div>';
+      if (diese.length) { h += abschnittZeile('Fällig bis Ende dieser Woche (' + formatDate(d.wochenEnde) + ') und überfällig', 7); diese.forEach(function (p) { h += ueZeile(p); }); h += zwischen('fällig bis Ende der Woche', diese); }
+      if (spaeter.length) { h += abschnittZeile('Noch nicht fällig', 7); spaeter.forEach(function (p) { h += ueZeile(p); }); h += zwischen('noch nicht fällig', spaeter); }
+      if (inD.length) { h += abschnittZeile('Zahlungsdatei bereits erzeugt', 7); inD.forEach(function (p) { h += ueZeile(p); }); h += zwischen('in Datei', inD); }
+      h += '</tbody><tfoot><tr class="gesamtsumme"><td colspan="5" style="text-align:right" class="fett">Summe ' + esc(UE_KONTEN[k]) + ' · ' + esc(zahl(liste.length)) + ' Posten' + (dabei.length ? ' · angehakt ' + esc(zahl(dabei.length)) + ' Posten zu ' + esc(formatEuro(summe)) + '' : '') + '</td><td class="nowrap zahlen rechts fett">' + esc(formatEuro(liste.reduce(function (t, p) { return t + p.betrag; }, 0))) + '</td><td></td></tr></tfoot></table></div>';
     });
     var gsl = d.gutschriften || [];
     if (gsl.length) {
@@ -5146,6 +5180,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var b = e.target.closest('button[data-ue]'); if (!b) return;
       var w = b.getAttribute('data-ue');
       if (w === 'mandant') { UE.mandant = b.getAttribute('data-m'); UE.bereit = ''; UE.meldung = ''; UE.fehlerAktion = ''; if (UE.daten[UE.mandant]) renderUE(); else ladeUE(); }
+      else if (w === 'iban-speichern') { var pi = ueFinden(b.getAttribute('data-key')), ii = p.querySelector('input[data-ue="iban"][data-key="' + b.getAttribute('data-key') + '"]'); if (pi && ii && String(ii.value).trim()) ueSpeichern(pi, 'iban', ii.value); else { UE.fehlerAktion = 'Bitte zuerst die IBAN eintragen.'; renderUE(); } }
+      else if (w === 'ks-speichern') { ueKontostand(b.getAttribute('data-konto')); }
       else if (w === 'datei') ueDatei(b.getAttribute('data-konto'));
       else if (w === 'lastschrift') { var pl = ueFinden(b.getAttribute('data-key')); if (pl) ueLastschrift(pl.fallId, true, pl); }
       else if (w === 'lastschrift-zurueck') ueLastschrift(b.getAttribute('data-fall'), false, null);
@@ -6530,7 +6566,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261020214719';
+  var BUILD = '20261021080456';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
