@@ -5086,7 +5086,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var dabei = (d.posten || []).filter(function (p) { return p.konto === k && ueGewaehlt(p); });
       var summe = dabei.reduce(function (t, p) { return t + p.betrag; }, 0);
       var inhalt;
-      if (x) {
+      if (x && x.quelle === 'liquisheet') {
+        var rest0 = x.stand - summe;
+        inhalt = '<span class="fett" title="Zelle „Kontostand Gesamt“ im Liquisheet-Reiter des Kontos, Stand ' + esc(x.datum ? formatDate(x.datum) : '–') + (x.total_cash != null ? '. Total Cash laut Liquisheet: ' + esc(formatEuro(x.total_cash)) : '') + '">' + esc(formatEuro(x.stand)) + '</span> <span class="notiz" style="margin:0">(laut Liquisheet' + (x.datum ? ', Stand ' + esc(formatDate(x.datum)) : '') + ')</span>' +
+          (dabei.length ? ' · angehakt ' + esc(formatEuro(summe)) + ' → bleibt <span class="' + (rest0 < 0 ? 'hinweis-warn' : 'gut') + '">' + esc(formatEuro(rest0)) + '</span>' : '');
+      } else if (x) {
         var rest = x.stand - summe;
         inhalt = '<span class="fett" title="Eingetragener Stand vom ' + esc(formatDate(x.datum)) + ' (' + esc(formatEuro(x.anker)) + ') plus die Umsätze seither laut BuchhaltungsButler (' + esc(formatEuro(x.seither)) + '), Stand der Umsätze ' + esc(x.letzter_umsatz ? formatDate(x.letzter_umsatz) : '–') + '">' + esc(formatEuro(x.stand)) + '</span> <span class="notiz" style="margin:0">(Eintrag ' + esc(formatDate(x.datum)) + ': ' + esc(formatEuro(x.anker)) + ', Umsätze bis ' + esc(x.letzter_umsatz ? formatDate(x.letzter_umsatz) : '–') + ')</span>' +
           (dabei.length ? ' · angehakt ' + esc(formatEuro(summe)) + ' → bleibt <span class="' + (rest < 0 ? 'hinweis-warn' : 'gut') + '">' + esc(formatEuro(rest)) + '</span>' : '');
@@ -5094,7 +5098,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       return '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:4px 0"><span style="min-width:150px">' + esc(UE_KONTEN[k]) + '</span>' + inhalt +
         ' <input type="text" inputmode="decimal" class="eingabe-klein" style="width:120px;flex:none" placeholder="Stand heute in €" data-ue-ks="' + esc(k) + '" aria-label="Kontostand ' + esc(UE_KONTEN[k]) + ' heute"> <button type="button" class="link-btn" data-ue="ks-speichern" data-konto="' + esc(k) + '">Kontostand eintragen</button></div>';
     }).join('');
-    return '<div class="card pad"><div class="fett">Kontostände</div><div class="notiz" style="margin:0 0 4px">Du trägst den Stand von heute einmal ein, danach rechnet das Dashboard die Umsätze aus BuchhaltungsButler dazu. Umsätze, die BuchhaltungsButler noch nicht hat, fehlen.</div>' + zeilen + '</div>';
+    return '<div class="card pad"><div class="fett">Kontostände <button type="button" class="link-btn" data-ue="liqui-aktualisieren" title="Das Liquisheet läuft sonst werktags um 8 Uhr und nach Änderungen an Belegen und Zahlungen">Liquisheet jetzt aktualisieren</button></div><div class="notiz" style="margin:0 0 4px">Der Stand kommt aus dem Liquisheet (Kontoauszüge, Stand siehe Datum). Ist dort nichts hinterlegt, trägst du den Stand von heute einmal ein; das Dashboard rechnet dann die Umsätze aus BuchhaltungsButler dazu.</div>' + zeilen + '</div>';
   }
   async function ueKontostand(konto) {
     var i = document.querySelector('input[data-ue-ks="' + konto + '"]'), roh = i ? String(i.value || '').trim() : '';
@@ -5108,6 +5112,14 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       UE.meldung = 'Kontostand ' + UE_KONTEN[konto] + ' mit ' + formatEuro(zahlW) + ' gespeichert.';
       await ladeUE(true);
     } catch (e) { UE.fehlerAktion = e.message; renderUE(); }
+  }
+  async function ueLiquiAktualisieren() {
+    UE.fehlerAktion = ''; UE.meldung = '';
+    try {
+      var r = await uePost('liqui-aktualisieren', {});
+      UE.meldung = (r && r.meldung) || 'Liquisheet wird aktualisiert, das dauert etwa eine halbe Minute. Danach „Neu laden“ drücken.';
+    } catch (e) { UE.fehlerAktion = e.message; }
+    renderUE();
   }
   function renderUE() {
     var el = $('p-ueberweisungen'); if (!el) return;
@@ -5182,6 +5194,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       if (w === 'mandant') { UE.mandant = b.getAttribute('data-m'); UE.bereit = ''; UE.meldung = ''; UE.fehlerAktion = ''; if (UE.daten[UE.mandant]) renderUE(); else ladeUE(); }
       else if (w === 'iban-speichern') { var pi = ueFinden(b.getAttribute('data-key')), ii = p.querySelector('input[data-ue="iban"][data-key="' + b.getAttribute('data-key') + '"]'); if (pi && ii && String(ii.value).trim()) ueSpeichern(pi, 'iban', ii.value); else { UE.fehlerAktion = 'Bitte zuerst die IBAN eintragen.'; renderUE(); } }
       else if (w === 'ks-speichern') { ueKontostand(b.getAttribute('data-konto')); }
+      else if (w === 'liqui-aktualisieren') { ueLiquiAktualisieren(); }
       else if (w === 'datei') ueDatei(b.getAttribute('data-konto'));
       else if (w === 'lastschrift') { var pl = ueFinden(b.getAttribute('data-key')); if (pl) ueLastschrift(pl.fallId, true, pl); }
       else if (w === 'lastschrift-zurueck') ueLastschrift(b.getAttribute('data-fall'), false, null);
@@ -6566,7 +6579,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261021080456';
+  var BUILD = '20261021102245';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
