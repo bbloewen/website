@@ -870,7 +870,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
     { id: 'segmentierung', name: 'Segmentierung', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
     { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlungen XXL' }, { id: 'ueberweisungen-xxl', name: 'Überweisungen XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlungen LEV' }, { id: 'ueberweisungen-lev', name: 'Überweisungen LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlungen Löwenpark' }, { id: 'ueberweisungen-lev-lp', name: 'Überweisungen Löwenpark' }, { id: 'ausgang-xxl', name: 'Ausgangsrechnungen XXL' }, { id: 'ausgang-lev', name: 'Ausgangsrechnungen LEV' }, { id: 'rueckfragen', name: 'Rückfragen', versteckt: true }] },
-    { id: 'administration', name: 'Administration', unter: true, tabs: [{ id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }, { id: 'kreditoren', name: 'Kreditoren / Debitoren' }, { id: 'zugriffe', name: 'Zugriffe', nurAdmin: true }] },
+    { id: 'administration', name: 'Administration', unter: true, tabs: [{ id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }, { id: 'kreditoren', name: 'Kreditoren / Debitoren' }] },
+    { id: 'zugriffe', name: 'Zugriffe', unter: true, tabs: [{ id: 'zugriffe', name: 'Zugriffe' }] },
     { id: 'auslagen', name: 'Auslagen', tabs: [{ id: 'auslage-neu', name: 'Auslage einreichen' }, { id: 'vorschuss-neu', name: 'Vorschuss beantragen' }] }
   ];
   var VW_PANEL = { 'zahlung-xxl': { el: 'p-vw-xxl', mandant: 'XXL' }, 'zahlung-lev': { el: 'p-vw-lev', mandant: 'LEV' } }; // Vorschüsse stehen oben in den Zahlungen, nicht bei Löwenpark
@@ -885,18 +886,12 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 
   // Welche Bereiche eine Person sieht, kommt aus der Rechte-Tabelle (crm-db). Hier wird nur ausgeblendet,
   // entschieden wird im Gateway.
-  var RECHT_ID = { ticketing: 'ticketing', gutscheine: 'gutscheine', website: 'website', segmentierung: 'crm', accounting: 'accounting', administration: 'accounting', auslagen: 'auslagen' };
+  var RECHT_ID = { ticketing: 'ticketing', gutscheine: 'gutscheine', website: 'website', segmentierung: 'crm', accounting: 'accounting', administration: 'accounting', auslagen: 'auslagen', zugriffe: 'zugriffe' };
   function darfBereich(b) {
     var n = window.LOEWEN_NUTZER;
     if (!n) return true;
     var r = n.bereiche || [], l = n.lesen || [];
     return r.indexOf('alles') >= 0 || r.indexOf(RECHT_ID[b.id]) >= 0 || l.indexOf(RECHT_ID[b.id]) >= 0;
-  }
-  // Die Auswertung der Zugriffe sieht nur, wer „alles“ oder „zugriffe“ hat (entschieden wird im Gateway)
-  function darfZugriffe() {
-    var n = window.LOEWEN_NUTZER; if (!n) return true;
-    var r = n.bereiche || [];
-    return r.indexOf('alles') >= 0 || r.indexOf('zugriffe') >= 0;
   }
   // Nur Lesezugriff: der Bereich ist sichtbar, geändert wird im Gateway abgelehnt
   function nurLesen(b) {
@@ -918,7 +913,6 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var t = '';
     b.tabs.forEach(function (x) {
       if (x.versteckt && x.id !== S.tab) return;
-      if (x.nurAdmin && !darfZugriffe()) return;
       var aktiv = x.id === S.tab;
       var vwM = { 'zahlung-xxl': 'XXL', 'zahlung-lev': 'LEV' }[x.id];
       var badge = x.id === 'rueckfragen' && RF.daten && RF.daten.zaehler && RF.daten.zaehler.offen ? ' (' + RF.daten.zaehler.offen + ')' : (vwM && VW.daten && vwOffen(vwM) ? ' (' + vwOffen(vwM) + ' Vorschüsse)' : '');
@@ -937,7 +931,6 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (t === 'vorschuesse') t = 'zahlung-xxl'; // Vorschüsse stehen jetzt in den Zahlungen
     if (TABS.indexOf(t) === -1) t = 'erstellen';
     if (!darfBereich(bereichVon(t))) { var erlaubt = BEREICHE.filter(darfBereich)[0]; if (erlaubt) t = erlaubt.tabs[0].id; }
-    if (t === 'zugriffe' && !darfZugriffe()) t = 'buchungstexte';
     S.tab = t; S.tabArg = arg || '';
     letzterTab[bereichVon(t).id] = t;
     renderNavigation();
@@ -3113,11 +3106,22 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     return basis + beVorschlagZuordnen(r) + beLastschriftLink(r, a, b);
   }
   function beZahlungZelle0(r, a, b) {
-    if (blGebucht(r)) { var bz = b ? Number(b.bezahlt || 0) : 0; return bz > 0 ? '<span class="zahl-ok">' + esc(formatEuro(-bz)) + '</span>' : '<span class="gedaempft">–</span>'; }
+    // Zugeordnete Zahlungen zeigen immer Datum, Gegenpartei und Verwendungszweck (Marko 21.10.2026)
+    var zDetail = function (zz) {
+      var t = String(zz.zweck || '').replace(/\s+/g, ' ').trim();
+      return '<div class="notiz" style="margin:0;white-space:normal">' + esc(formatDate(String(zz.datum).slice(0, 10))) + (zz.name ? ' · ' + esc(zz.name) : '') + '</div>' +
+        (t ? '<div class="notiz" style="margin:0;white-space:normal" title="Verwendungszweck der Zahlung">Zweck: ' + esc(t.slice(0, 80)) + '</div>' : '');
+    };
+    if (blGebucht(r)) {
+      var bz = b ? Number(b.bezahlt || 0) : 0;
+      if (!(bz > 0)) return '<span class="gedaempft">–</span>';
+      var gz = a && a.zahlung;
+      return '<span class="zahl-ok">' + esc(formatEuro(-bz)) + '</span>' + (gz && gz.datum ? zDetail(gz) : '');
+    }
     var z = a && a.zahlung, rf = a && a.geplant && a.geplant.rueckfrage, offen = rf && !(a.geplant && a.geplant.gebucht_am);
     if (!z) return '<span class="gedaempft">–</span>';
-    // Schon übertragen und Zahlung zugeordnet: wie bei den gebuchten Belegen nur der grüne Betrag, Datum und Gegenpartei im Tooltip
-    if (!offen && (z.status === 'zugeordnet' || z.status === 'auto')) return '<span class="zahl-ok" title="' + esc(formatDate(String(z.datum).slice(0, 10)) + (z.name ? ' · ' + z.name : '')) + '">' + esc(formatEuro(z.betrag)) + '</span>';
+    // Schon übertragen und Zahlung zugeordnet: grüner Betrag, darunter Datum, Gegenpartei und Verwendungszweck
+    if (!offen && (z.status === 'zugeordnet' || z.status === 'auto')) return '<span class="zahl-ok">' + esc(formatEuro(z.betrag)) + '</span>' + zDetail(z);
     var zw = String(z.zweck || '').replace(/\s+/g, ' ').trim();
     var betrag = '<div class="nowrap zahlen ' + (z.status === 'vorschlag' ? 'zahl-vorschlag' : 'zahl-ok') + '"' + (zw ? ' title="Verwendungszweck: ' + esc(zw) + '"' : '') + '>' + esc(formatEuro(z.betrag)) + '</div>' + '<div class="notiz" style="margin:0;white-space:normal">' + esc(formatDate(String(z.datum).slice(0, 10))) + (z.name ? ' · ' + esc(z.name) : '') + '</div>' +
       (zw ? '<div class="notiz" style="margin:0;white-space:normal" title="Verwendungszweck der Zahlung">Zweck: ' + esc(zw.slice(0, 80)) + '</div>' : '');
@@ -6890,7 +6894,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261021203650';
+  var BUILD = '20261021204519';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
