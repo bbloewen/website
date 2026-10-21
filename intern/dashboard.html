@@ -3305,6 +3305,17 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       (String(z.suche || '').trim() ? '<div class="notiz" style="margin:6px 0 0">' + esc(zahl(zeilen.length)) + ' noch nicht gebucht · ' + esc(zahl(uebZeilen.length)) + ' in BuchhaltungsButler gebucht. Die Suche gilt für den gewählten Monat, einen anderen Monat oben wählen.</div>' : '') + '</div>';
     h += chipLeiste(obenAlle, z.richtung, 'richtung', 'Art der Belege');
     h += uebLeiste();
+    // Legende der Symbole in der Spalte „Status“ (gilt für XXL und LEV)
+    h += '<div class="card pad" role="group" aria-label="Legende der Symbole"><div class="text-klein fett" style="margin-bottom:4px">Legende</div>' +
+      '<div class="notiz" style="margin:2px 0;display:flex;gap:14px;flex-wrap:wrap;align-items:center"><span>€ Zahlung:</span>' +
+      '<span>' + ikSymbol('euro', true, 'Zahlung zugewiesen') + ' Zahlung zugewiesen, Beleg ausgeglichen</span>' +
+      '<span>' + ikSymbol('euro', false, 'Lastschrift', 'gruen') + ' Lastschrift, wird vom Kreditor eingezogen</span>' +
+      '<span>' + ikSymbol('euro', false, 'Zahlungsdatei erzeugt', true) + ' Zahlungsdatei erzeugt, noch nicht bezahlt</span>' +
+      '<span>' + ikSymbol('euro', false, 'Zahlung überfällig', 'rot') + ' überfällig</span>' +
+      '<span>' + ikSymbol('euro', false, 'Zahlung fehlt noch') + ' Zahlung fehlt noch oder nur teilweise bezahlt</span></div>' +
+      '<div class="notiz" style="margin:2px 0;display:flex;gap:14px;flex-wrap:wrap;align-items:center"><span>Buch:</span>' +
+      '<span>' + ikSymbol('buch', true, 'Gebucht') + ' in BuchhaltungsButler gebucht</span>' +
+      '<span>' + ikSymbol('buch', false, 'Noch nicht gebucht') + ' noch nicht gebucht</span></div></div>';
     var tabKopf = '<div class="tbl-voll tbl-fix"><table class="tbl kompakt fest"><colgroup><col style="width:3%"><col style="width:5%"><col style="width:7%"><col style="width:16%"><col style="width:6%"><col style="width:8%"><col style="width:11%"><col style="width:8%"><col style="width:8%"><col style="width:8%"><col style="width:8%"><col style="width:4%"><col style="width:6%"><col style="width:5%"><col style="width:6%"><col style="width:3%"></colgroup><thead><tr><th><span class="sr-only">Zur Übertragung auswählen</span></th><th><abbr title="Gebucht (Buch-Symbol) und Zahlung zugewiesen (Euro-Symbol)">Status</abbr></th><th style="white-space:normal"><abbr title="Buchungsdatum: danach wird sortiert und nach Monaten geblättert. Das Rechnungsdatum steht beim Beleg, das Eingangsdatum darunter.">Buchungs&shy;datum</abbr></th><th><abbr title="Gegenpartei, Rechnungsnummer, Links und Quelle">Beleg</abbr></th><th class="rechts"><abbr title="Belegbetrag brutto">Beleg €</abbr></th><th class="rechts"><abbr title="Zugeordnete Zahlung (Abbuchung vom Konto, negativ). Bei noch nicht gebuchten Belegen wird sie beim Übertragen nach BuchhaltungsButler zugeordnet und ausgeglichen.">Zahlung €</abbr></th><th><abbr title="Buchungstext aus BuchhaltungsButler, bei noch nicht gebuchten Belegen der Vorschlag des Agenten">Text</abbr></th><th><abbr title="Sachkonto. Die Bezeichnung steht im Tooltip der Nummer.">Sachk.</abbr></th><th><abbr title="Gegenkonto: Kreditor (Eingangsbeleg) oder Debitor (Ausgangsbeleg)">Gegenk.</abbr></th><th><abbr title="Kostenstelle 1. Die Bezeichnung steht im Tooltip der Nummer.">KST1</abbr></th><th><abbr title="Kostenstelle 2 (Zweck). Die Bezeichnung steht im Tooltip der Nummer.">KST2</abbr></th><th class="rechts"><abbr title="Umsatzsteuersatz">USt</abbr></th><th class="rechts"><abbr title="Nettobetrag der Buchungszeile (aus Brutto und Satz gerechnet)">Netto</abbr></th><th class="rechts"><abbr title="Steuerbetrag der Buchungszeile (aus Brutto und Satz gerechnet)">Steuer</abbr></th><th class="rechts"><abbr title="Bruttobetrag der Buchungszeile">Brutto</abbr></th><th><abbr title="Steuerschlüssel: Umsatzsteuer-Kennzeichen der Buchung aus BuchhaltungsButler">Schl.</abbr></th></tr></thead><tbody>';
     h += '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Belege ' + esc(k) + ' · ' + esc(d.monat ? monatName(d.monat) : '') + ' · ' + esc(zahl(zeilen.length)) + (zeilen.length === obenAlle.length ? '' : ' von ' + esc(zahl(obenAlle.length))) + ' noch nicht gebucht</span><span>' +
       '<select class="auswahl" data-be="filter" data-k="' + k + '" aria-label="Filter">' + opt('alle', 'Alle Belege') + opt('bezahlt', 'Gebucht und bezahlt') + opt('offen', 'Gebucht, Zahlung offen') + opt('ungebucht', 'Noch nicht gebucht') + opt('eingang', 'Nur im Eingang, nicht in BHB') + opt('pruefen', 'Agent: zur Prüfung') + '</select> ' +
@@ -6954,7 +6965,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261021213443';
+  var BUILD = '20261021214626';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
