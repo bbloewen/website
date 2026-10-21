@@ -3049,7 +3049,17 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   }
   async function beKredWahl(b) {
     var k = b.getAttribute('data-k'), rf = b.getAttribute('data-rf'), nr = b.getAttribute('data-nr');
-    if (!nr) { var inp = document.getElementById('kw-' + rf), m = inp ? /^\s*([0-9]{5,6})/.exec(inp.value) : null; if (!m) { window.alert('Bitte einen Kreditor aus der Liste wählen (mit Nummer).'); return; } nr = m[1]; }
+    if (!nr) {
+      var inp = document.getElementById('kw-' + rf), txt = inp ? inp.value : '', m = /^\s*([0-9]{5,6})/.exec(txt);
+      if (m) nr = m[1];
+      else {
+        // Name statt Nummer getippt: eindeutiger Treffer, Wortreihenfolge egal („Laura Thiele“ = „THIELE LAURA“)
+        var wort = function (t) { return String(t || '').toLowerCase().split(/[^a-z0-9äöüß]+/).filter(Boolean).sort().join(' '); };
+        var gesucht = wort(txt), treffer = ((RF.kred && RF.kred[k]) || []).filter(function (kr) { return (kr.art || 'kreditor') !== 'debitor' && gesucht && wort(kr.name) === gesucht; });
+        if (treffer.length !== 1) { window.alert(treffer.length ? 'Der Name ist nicht eindeutig, bitte einen Kreditor aus der Liste wählen.' : 'Bitte einen Kreditor aus der Liste wählen.'); return; }
+        nr = String(treffer[0].nr);
+      }
+    }
     try {
       var res = await fetch('/webhook/accounting/rueckfrage-kreditor', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: Number(rf), kreditor: nr }) });
       var d = await res.json().catch(function () { return {}; });
@@ -6894,7 +6904,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261021205709';
+  var BUILD = '20261021211930';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
