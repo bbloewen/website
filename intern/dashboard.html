@@ -487,6 +487,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   <section id="p-auslage-neu" role="tabpanel" aria-labelledby="tab-auslage-neu" hidden></section>
   <section id="p-vorschuss-neu" role="tabpanel" aria-labelledby="tab-vorschuss-neu" hidden></section>
   <section id="p-kreditoren" role="tabpanel" aria-labelledby="tab-kreditoren" hidden></section>
+  <section id="p-zugriffe" role="tabpanel" aria-labelledby="tab-zugriffe" hidden></section>
 
 </main>
 </div>
@@ -715,7 +716,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   // Alle bisherigen Aufrufe der Daten-Webhooks laufen unverändert im Seitencode und werden hier umgeleitet.
   window.fetch = function (url, opts) {
     var u = typeof url === 'string' ? url : ((url && url.url) || '');
-    var m = /^\/webhook\/((?:ticketing|crm|accounting|auslagen)\/[a-z0-9-]+)(?:\?(.*))?$/.exec(u);
+    var m = /^\/webhook\/((?:ticketing|crm|accounting|auslagen|verwaltung)\/[a-z0-9-]+)(?:\?(.*))?$/.exec(u);
     if (!m || m[1] === 'ticketing/gutschein-karte' || m[1] === 'ticketing/board') return origFetch(url, opts);
     return ueberGateway(m[1], m[2] || '', opts);
   };
@@ -869,7 +870,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
     { id: 'segmentierung', name: 'Segmentierung', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
     { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlungen XXL' }, { id: 'ueberweisungen-xxl', name: 'Überweisungen XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlungen LEV' }, { id: 'ueberweisungen-lev', name: 'Überweisungen LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlungen Löwenpark' }, { id: 'ueberweisungen-lev-lp', name: 'Überweisungen Löwenpark' }, { id: 'ausgang-xxl', name: 'Ausgangsrechnungen XXL' }, { id: 'ausgang-lev', name: 'Ausgangsrechnungen LEV' }, { id: 'rueckfragen', name: 'Rückfragen', versteckt: true }] },
-    { id: 'administration', name: 'Administration', unter: true, tabs: [{ id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }, { id: 'kreditoren', name: 'Kreditoren / Debitoren' }] },
+    { id: 'administration', name: 'Administration', unter: true, tabs: [{ id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }, { id: 'kreditoren', name: 'Kreditoren / Debitoren' }, { id: 'zugriffe', name: 'Zugriffe', nurAdmin: true }] },
     { id: 'auslagen', name: 'Auslagen', tabs: [{ id: 'auslage-neu', name: 'Auslage einreichen' }, { id: 'vorschuss-neu', name: 'Vorschuss beantragen' }] }
   ];
   var VW_PANEL = { 'zahlung-xxl': { el: 'p-vw-xxl', mandant: 'XXL' }, 'zahlung-lev': { el: 'p-vw-lev', mandant: 'LEV' } }; // Vorschüsse stehen oben in den Zahlungen, nicht bei Löwenpark
@@ -891,6 +892,12 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var r = n.bereiche || [], l = n.lesen || [];
     return r.indexOf('alles') >= 0 || r.indexOf(RECHT_ID[b.id]) >= 0 || l.indexOf(RECHT_ID[b.id]) >= 0;
   }
+  // Die Auswertung der Zugriffe sieht nur, wer „alles“ oder „zugriffe“ hat (entschieden wird im Gateway)
+  function darfZugriffe() {
+    var n = window.LOEWEN_NUTZER; if (!n) return true;
+    var r = n.bereiche || [];
+    return r.indexOf('alles') >= 0 || r.indexOf('zugriffe') >= 0;
+  }
   // Nur Lesezugriff: der Bereich ist sichtbar, geändert wird im Gateway abgelehnt
   function nurLesen(b) {
     var n = window.LOEWEN_NUTZER; if (!n || !b) return false;
@@ -911,6 +918,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var t = '';
     b.tabs.forEach(function (x) {
       if (x.versteckt && x.id !== S.tab) return;
+      if (x.nurAdmin && !darfZugriffe()) return;
       var aktiv = x.id === S.tab;
       var vwM = { 'zahlung-xxl': 'XXL', 'zahlung-lev': 'LEV' }[x.id];
       var badge = x.id === 'rueckfragen' && RF.daten && RF.daten.zaehler && RF.daten.zaehler.offen ? ' (' + RF.daten.zaehler.offen + ')' : (vwM && VW.daten && vwOffen(vwM) ? ' (' + vwOffen(vwM) + ' Vorschüsse)' : '');
@@ -929,6 +937,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (t === 'vorschuesse') t = 'zahlung-xxl'; // Vorschüsse stehen jetzt in den Zahlungen
     if (TABS.indexOf(t) === -1) t = 'erstellen';
     if (!darfBereich(bereichVon(t))) { var erlaubt = BEREICHE.filter(darfBereich)[0]; if (erlaubt) t = erlaubt.tabs[0].id; }
+    if (t === 'zugriffe' && !darfZugriffe()) t = 'buchungstexte';
     S.tab = t; S.tabArg = arg || '';
     letzterTab[bereichVon(t).id] = t;
     renderNavigation();
@@ -954,6 +963,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (AG_TAB[t]) ladeAG(AG_TAB[t]);
     if (t === 'kreditoren' && !KR.daten && !KR.laedt) ladeKR(); else if (t === 'kreditoren') renderKR();
     if (t === 'kostenstellen') ladeKS();
+    if (t === 'zugriffe') ladeZG();
     if (t === 'sachkonten-xxl') ladeSK('XXL');
     if (t === 'sachkonten-lev') ladeSK('LEV');
     if (t === 'rueckfragen') ladeRF();
@@ -4685,6 +4695,66 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       else if (w === 'einlesen') ksEinlesen();
     });
   }
+  // ---------- Administration: Zugriffe (wer war wann im Dashboard; Tabelle zugriffsprotokoll aus crm-db) ----------
+  // Das Gateway schreibt jede Anmeldung mit und je Person und Bereich höchstens alle 15 Minuten einen Besuch. Einzelne Klicks werden nicht gespeichert.
+  var ZG = { daten: null, fehler: null, laedt: false, tage: 14 };
+  var ZG_BEREICH = { ticketing: 'Spieltag', gutscheine: 'Gutscheine', website: 'Website', crm: 'Segmentierung', accounting: 'Accounting', auslagen: 'Auslagen', zugriffe: 'Zugriffe' };
+  async function ladeZG() {
+    ZG.laedt = true; ZG.fehler = null; renderZG();
+    try {
+      var res = await fetch('/webhook/verwaltung/zugriffe');
+      var d = await res.json();
+      if (!res.ok) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
+      ZG.daten = d;
+    } catch (e) { ZG.fehler = e.message; }
+    ZG.laedt = false; renderZG();
+  }
+  function zgName(personen, mail) {
+    var p = (personen || []).filter(function (x) { return x.email === mail; })[0];
+    return p && p.name ? p.name : String(mail || '').split('@')[0];
+  }
+  function renderZG() {
+    var el = $('p-zugriffe'); if (!el) return;
+    if (ZG.laedt && !ZG.daten) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
+    if (ZG.fehler && !ZG.daten) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(ZG.fehler) + '</div>'; return; }
+    if (!ZG.daten) { el.innerHTML = ''; return; }
+    var d = ZG.daten, personen = d.personen || [], tage = d.tage || [], abg = d.abgelehnt || [];
+    var grenze = new Date(Date.now() - ZG.tage * 86400000).toISOString().slice(0, 10);
+    var liste = tage.filter(function (t) { return t.tag > grenze; });
+    var chip = function (n, text) { return '<button type="button" class="chip' + (ZG.tage === n ? ' aktiv' : '') + '" data-zg="zeitraum" data-n="' + n + '" aria-pressed="' + (ZG.tage === n) + '">' + text + '</button>'; };
+    var wt = function (tag) { try { return new Date(tag + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'short' }); } catch (e) { return ''; } };
+    var bereicheText = function (b) { return String(b || '').split(',').filter(Boolean).map(function (x) { return ZG_BEREICH[x] || x; }).join(', ') || '–'; };
+    var h = '<div class="stapel">';
+    h += '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Zugriffe je Person · seit ' + esc(formatDate(String(d.seit || '').slice(0, 10))) + '</span><span><button type="button" class="link-btn" data-zg="neu">Aktualisieren</button></span></div>' +
+      '<div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Person</th><th class="zahlen">Tage aktiv</th><th class="zahlen">Anmeldungen</th><th class="zahlen">Bereichsbesuche</th><th>Zuletzt</th><th class="zahlen">Abgelehnt</th></tr></thead><tbody>';
+    personen.forEach(function (p) {
+      h += '<tr><td>' + esc(p.name || p.email) + '</td><td class="zahlen">' + esc(zahl(p.tage)) + '</td><td class="zahlen">' + esc(zahl(p.anmeldungen)) + '</td><td class="zahlen">' + (d.bereicheSeit ? esc(zahl(p.besuche)) : '–') + '</td><td>' + esc(p.zuletzt ? formatDate(p.zuletzt.slice(0, 10)) + ', ' + p.zuletzt.slice(11) + ' Uhr' : '–') + '</td><td class="zahlen">' + esc(zahl(p.abgelehnt)) + '</td></tr>';
+    });
+    if (!personen.length) h += '<tr><td colspan="6" class="leer">Noch keine Zugriffe protokolliert.</td></tr>';
+    h += '</tbody></table></div><div class="card-fuss">Eine Anmeldung zählt, wenn die Seite geöffnet oder neu geladen wird oder sich die Sitzung erneuert, sie ist also kein einzelner Besuch. Ein Bereichsbesuch zählt höchstens einmal je Person und Bereich in 15 Minuten' + (d.bereicheSeit ? ', protokolliert seit ' + esc(formatDate(String(d.bereicheSeit).slice(0, 10))) : ', die Aufzeichnung dafür beginnt jetzt') + '. Gespeichert wird nur, wer welchen Bereich wann geöffnet hat, keine einzelnen Klicks. Es werden 90 Tage ausgewertet.</div></div>';
+    h += '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Zugriffe je Tag</span><nav class="chips" aria-label="Zeitraum wählen">' + chip(7, '7 Tage') + chip(14, '14 Tage') + chip(60, '60 Tage') + '</nav></div>' +
+      '<div class="tbl-voll tbl-fix"><table class="tbl kompakt"><thead><tr><th>Tag</th><th>Person</th><th class="zahlen">Anmeldungen</th><th>Erster</th><th>Letzter</th><th>Bereiche</th></tr></thead><tbody>';
+    liste.forEach(function (t) {
+      h += '<tr><td>' + esc(wt(t.tag) + ' ' + formatDate(t.tag)) + '</td><td>' + esc(zgName(personen, t.email)) + '</td><td class="zahlen">' + esc(zahl(t.anmeldungen)) + '</td><td>' + esc(t.erster) + '</td><td>' + esc(t.letzter) + '</td><td>' + esc(bereicheText(t.bereiche)) + '</td></tr>';
+    });
+    if (!liste.length) h += '<tr><td colspan="6" class="leer">In diesem Zeitraum keine Zugriffe.</td></tr>';
+    h += '</tbody></table></div></div>';
+    if (abg.length) {
+      h += '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Abgelehnte Zugriffe (letzte ' + esc(zahl(abg.length)) + ')</span></div><div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Zeit</th><th>Konto</th><th>Ziel</th><th>Grund</th></tr></thead><tbody>';
+      abg.forEach(function (a) { h += '<tr><td>' + esc(formatDate(a.zeit.slice(0, 10)) + ', ' + a.zeit.slice(11)) + '</td><td>' + esc(a.email || '(unbekannt)') + '</td><td>' + esc(a.ziel || '') + '</td><td>' + esc(a.ergebnis === 'abgelehnt-unbekannt' ? 'Konto nicht freigeschaltet' : 'Kein Recht für den Bereich') + '</td></tr>'; });
+      h += '</tbody></table></div></div>';
+    }
+    el.innerHTML = h + '</div>';
+  }
+  function bindZG() {
+    var p = $('p-zugriffe'); if (!p) return;
+    p.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-zg]'); if (!b) return;
+      var w = b.getAttribute('data-zg');
+      if (w === 'zeitraum') { ZG.tage = Number(b.getAttribute('data-n')); renderZG(); }
+      else if (w === 'neu') ladeZG();
+    });
+  }
   // ---------- Spieltag: Auswertung (je Heimspieltag festgehalten, Tabelle spieltag_auswertung) ----------
   // Zeile je Spieltag. Vorschlag aus pretix (Dauerkarten, Einzeltickets Vorverkauf, Abendkasse); Kartenumsatz der
   // Terminals und Ausschank-Gutscheine kommen aus den Kassenbelegen und werden von Claude eingetragen (keine Eingabefelder, Marko 15.10.2026). „Abschließen“ speichert die aktuellen Zahlen einmalig, danach steht die Zeile fest.
@@ -6759,6 +6829,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   bindBelege();
   bindBT();
   bindKS();
+  bindZG();
   bindAW();
   bindAS();
   bindUE();
@@ -6819,7 +6890,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261021175430';
+  var BUILD = '20261021203650';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
