@@ -4958,7 +4958,20 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   // Port der Zahlungsfunktion des alten Buchungsagent-Boards. Die Posten leitet der Webhook accounting/offene-posten ab
   // (gebucht, aber ohne zugeordnete Zahlung, ab 01.07.2026), die Zahlungsdatei erzeugt n8n und schickt sie per Mail an Marko.
   // Das Dashboard löst nie eine Zahlung aus. Fremde IBANs kommen nur gekürzt in die Seite.
-  var UE = { mandant: 'XXL', daten: { XXL: null, LEV: null }, laedt: false, fehler: '', meldung: '', fehlerAktion: '', auswahl: {}, bereit: '', arbeitet: '', holen: false };
+  var UE = { mandant: 'XXL', daten: { XXL: null, LEV: null }, laedt: false, fehler: '', meldung: '', fehlerAktion: '', auswahl: {}, bereit: '', arbeitet: '', holen: false, zu: {}, zeilenMsg: {}, bicNoetig: {}, ibanEntwurf: {} };
+  // Einklappen: welche Bereiche zu sind, merkt sich der Browser (nur Komfort, ohne Speicher sind alle offen)
+  function ueZuLaden() { try { return JSON.parse(localStorage.getItem('ueZu') || '{}') || {}; } catch (e) { return {}; } }
+  function ueZuSpeichern() { try { localStorage.setItem('ueZu', JSON.stringify(UE.zu)); } catch (e) {} }
+  function ueZuKnopf(key, titel) { var zu = !!UE.zu[key]; return '<button type="button" class="link-btn" data-ue="zu" data-zu="' + key + '" aria-expanded="' + (!zu) + '" title="' + (zu ? 'Aufklappen' : 'Einklappen') + '">' + (zu ? '▸ ' : '▾ ') + esc(titel) + '</button>'; }
+  // IBAN prüfen wie der Server (Prüfziffer), damit der Fehler gleich an der Zeile steht
+  function ueIbanGueltig(iban) {
+    var s2 = String(iban || '').replace(/\s+/g, '').toUpperCase();
+    if (!/^[A-Z]{2}[0-9]{2}[A-Z0-9]{11,30}$/.test(s2)) return false;
+    var t = s2.slice(4) + s2.slice(0, 4), rest = 0;
+    for (var i = 0; i < t.length; i++) { var c = t.charAt(i), v = /[0-9]/.test(c) ? c : String(c.charCodeAt(0) - 55); for (var j = 0; j < v.length; j++) rest = (rest * 10 + Number(v.charAt(j))) % 97; }
+    return rest === 1;
+  }
+  function ueZeilenMsg(key) { var m = UE.zeilenMsg[key]; return m ? '<div class="notiz" role="' + (m.fehler ? 'alert' : 'status') + '" style="margin:2px 0 0;color:var(--color-' + (m.fehler ? 'error' : 'success') + ')">' + esc(m.text) + '</div>' : ''; }
   var UE_KONTEN = { 'XXL': 'XXL Girokonto', 'LEV-GIRO': 'BLEV Girokonto', 'LEV-LOEWENPARK': 'Löwenparkkonto' };
   async function ladeUE(still) {
     var m = UE.mandant;
@@ -5005,6 +5018,20 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     } catch (e) { if (d && alt) { d.posten = alt.posten; d.lastschriften = alt.lastschriften; } UE.fehlerAktion = e.message; UE.meldung = ''; renderUE(); }
     UE.lsBusy[fallId] = false;
   }
+  async function ueKreditorIban(p, iban, bic) {
+    var key = p.key, roh = String(iban || '').replace(/\s+/g, '').toUpperCase(), bicR = String(bic || '').replace(/\s+/g, '').toUpperCase();
+    UE.ibanEntwurf[key] = roh;
+    if (!ueIbanGueltig(roh)) { UE.zeilenMsg[key] = { text: 'Diese IBAN ist ungültig (Prüfziffer stimmt nicht). Bitte noch einmal prüfen.', fehler: true }; renderUE(); return; }
+    if (roh.slice(0, 2) !== 'DE' && !/^[A-Z0-9]{8}([A-Z0-9]{3})?$/.test(bicR)) { UE.bicNoetig[key] = true; UE.zeilenMsg[key] = { text: 'Ausländische IBAN: bitte auch die BIC eintragen.', fehler: true }; renderUE(); return; }
+    UE.zeilenMsg[key] = { text: 'IBAN wird am Kreditor gespeichert …', fehler: false }; renderUE();
+    try {
+      var r = await uePost('kreditor-iban', { mandant: UE.mandant, nr: p.kreditor, iban: roh, bic: bicR });
+      if (!r.ok) throw new Error(r.meldung || 'Nicht gespeichert');
+      delete UE.ibanEntwurf[key]; delete UE.bicNoetig[key];
+      UE.zeilenMsg[key] = { text: 'IBAN am Kreditor ' + p.kreditor + ' gespeichert, sie gilt jetzt für alle seine Belege.', fehler: false };
+      await ladeUE(true);
+    } catch (e) { UE.zeilenMsg[key] = { text: 'IBAN nicht gespeichert: ' + e.message, fehler: true }; renderUE(); }
+  }
   async function ueSpeichern(p, art, wert, btn) {
     UE.fehlerAktion = ''; UE.meldung = '';
     try {
@@ -5014,15 +5041,21 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         if (!r.ok) throw new Error(r.meldung || 'Fälligkeit nicht gespeichert');
         UE.meldung = 'Fälligkeit zu Beleg ' + p.fallId + (p.teilIndex ? ' (' + p.teilIndex + '. Teil)' : '') + (wert ? ' ' + formatDate(wert) + ' vermerkt.' : ' entfernt.');
       } else {
+        if (art === 'iban') {
+          if (!ueIbanGueltig(wert)) { UE.zeilenMsg[p.key] = { text: 'Diese IBAN ist ungültig (Prüfziffer stimmt nicht). Bitte noch einmal prüfen.', fehler: true }; renderUE(); return; }
+          if (String(wert).replace(/\s+/g, '').toUpperCase().slice(0, 2) !== 'DE') { UE.ibanEntwurf[p.key] = String(wert).trim(); if (p.kreditor) { UE.bicNoetig[p.key] = true; UE.zeilenMsg[p.key] = { text: 'Ausländische IBAN: bitte „Am Kreditor speichern“ mit der BIC nehmen.', fehler: true }; } else UE.zeilenMsg[p.key] = { text: 'Ausländische IBAN: die BIC fehlt, bitte erst den Kreditor anlegen.', fehler: true }; renderUE(); return; }
+          UE.zeilenMsg[p.key] = { text: 'IBAN wird gespeichert …', fehler: false }; renderUE();
+        }
         await ueZeileSichern(p, p.fallId);
         var body = { mandant: UE.mandant, fall_id: p.fallId };
         if (art === 'zweck') body.zahl_zweck = wert; else if (art === 'iban') body.zahl_iban = wert;
         var r2 = await uePost('posten-zahlweg', body);
         if (!r2.ok) throw new Error(r2.meldung || 'Nicht gespeichert');
+        if (art === 'iban') UE.zeilenMsg[p.key] = { text: 'IBAN gespeichert.', fehler: false };
         UE.meldung = (art === 'zweck' ? 'Verwendungszweck' : 'IBAN (nur für diesen Beleg)') + ' zu Beleg ' + p.fallId + ' gespeichert.';
       }
       await ladeUE(true);
-    } catch (e) { UE.fehlerAktion = e.message; renderUE(); }
+    } catch (e) { if (art === 'iban') UE.zeilenMsg[p.key] = { text: 'IBAN nicht gespeichert: ' + e.message, fehler: true }; else UE.fehlerAktion = e.message; renderUE(); }
   }
   async function ueDatei(konto) {
     var d = UE.daten[UE.mandant]; if (!d) return;
@@ -5063,7 +5096,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (p.inDatei) bank = '<div class="notiz" style="margin:0">in Datei<br>' + esc(p.inDatei) + '</div>';
     else if (ok) bank = '<div style="font-family:var(--font-mono,monospace);word-break:break-all;min-width:230px">' + esc(p.iban || p.ibanKurz) + '</div>' + (p.ibanQuelle === 'fall' ? '<div class="notiz" style="margin:0">nur für diesen Beleg</div>' : '') + (p.ibanQuelle === 'beleg' ? '<div class="notiz" style="margin:0">IBAN vom Beleg, bitte prüfen</div>' : '') + (p.ibanQuelle === 'auslagenbeleg' ? '<div class="notiz" style="margin:0">IBAN vom Auslagenbeleg</div>' : '') + (p.ibanAbweichung ? '<div class="notiz" style="margin:0;color:var(--color-error)">IBAN am Beleg weicht vom Kreditor ab</div>' : '');
     else bank = '<div class="notiz" style="margin:0;color:var(--color-error)">' + (p.hatIban ? 'IBAN ungültig' : 'IBAN fehlt') + '</div>' +
-      '<input type="text" class="eingabe-klein" style="width:170px;flex:none" placeholder="IBAN nur für diesen Beleg" data-ue="iban" data-key="' + esc(p.key) + '" aria-label="IBAN für Beleg ' + esc(p.fallId) + '"> <button type="button" class="link-btn" data-ue="iban-speichern" data-key="' + esc(p.key) + '">Speichern</button>';
+      '<input type="text" class="eingabe-klein" style="width:170px;flex:none" placeholder="IBAN nur für diesen Beleg" data-ue="iban" data-key="' + esc(p.key) + '" value="' + esc(UE.ibanEntwurf[p.key] || '') + '" aria-label="IBAN für Beleg ' + esc(p.fallId) + '">' +
+      (UE.bicNoetig[p.key] ? ' <input type="text" class="eingabe-klein" style="width:110px;flex:none" placeholder="BIC (Ausland)" data-ue="bic" data-key="' + esc(p.key) + '" aria-label="BIC für Beleg ' + esc(p.fallId) + '">' : '') +
+      ' <button type="button" class="link-btn" data-ue="iban-speichern" data-key="' + esc(p.key) + '" title="Gilt nur für diesen Beleg">Speichern für diesen Beleg</button>' +
+      (p.kreditor ? ' <button type="button" class="link-btn" data-ue="iban-kreditor" data-key="' + esc(p.key) + '" title="Die IBAN wird beim Kreditor in BuchhaltungsButler eingetragen und gilt für alle seine Belege">Am Kreditor speichern</button>' : '');
+    bank += ueZeilenMsg(p.key);
     var chk = '<input type="checkbox" data-ue="haken" data-key="' + esc(p.key) + '"' + (ueGewaehlt(p) ? ' checked' : '') + (p.inDatei || !ok ? ' disabled' : '') + ' aria-label="Beleg ' + esc(p.fallId) + ' überweisen">';
     var teil = p.teilAnzahl ? '<div class="notiz" style="margin:0">' + p.teilIndex + '. von ' + p.teilAnzahl + '. Zahlungen</div>' : '';
     var dash = '';
@@ -5098,7 +5135,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       return '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:4px 0"><span style="min-width:150px">' + esc(UE_KONTEN[k]) + '</span>' + inhalt +
         ' <input type="text" inputmode="decimal" class="eingabe-klein" style="width:120px;flex:none" placeholder="Stand heute in €" data-ue-ks="' + esc(k) + '" aria-label="Kontostand ' + esc(UE_KONTEN[k]) + ' heute"> <button type="button" class="link-btn" data-ue="ks-speichern" data-konto="' + esc(k) + '">Kontostand eintragen</button></div>';
     }).join('');
-    return '<div class="card pad"><div class="fett">Kontostände <button type="button" class="link-btn" data-ue="liqui-aktualisieren" title="Das Liquisheet läuft sonst werktags um 8 Uhr und nach Änderungen an Belegen und Zahlungen">Liquisheet jetzt aktualisieren</button></div><div class="notiz" style="margin:0 0 4px">Der Stand kommt aus dem Liquisheet (Kontoauszüge, Stand siehe Datum). Ist dort nichts hinterlegt, trägst du den Stand von heute einmal ein; das Dashboard rechnet dann die Umsätze aus BuchhaltungsButler dazu.</div>' + zeilen + '</div>';
+    if (UE.zu.konten) return '<div class="card pad"><div class="fett">' + ueZuKnopf('konten', 'Kontostände') + '</div></div>';
+    return '<div class="card pad"><div class="fett">' + ueZuKnopf('konten', 'Kontostände') + ' <button type="button" class="link-btn" data-ue="liqui-aktualisieren" title="Das Liquisheet läuft sonst werktags um 8 Uhr und nach Änderungen an Belegen und Zahlungen">Liquisheet jetzt aktualisieren</button></div><div class="notiz" style="margin:0 0 4px">Der Stand kommt aus dem Liquisheet (Kontoauszüge, Stand siehe Datum). Ist dort nichts hinterlegt, trägst du den Stand von heute einmal ein; das Dashboard rechnet dann die Umsätze aus BuchhaltungsButler dazu.</div>' + zeilen + '</div>';
   }
   async function ueKontostand(konto) {
     var i = document.querySelector('input[data-ue-ks="' + konto + '"]'), roh = i ? String(i.value || '').trim() : '';
@@ -5133,6 +5171,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (UE.meldung) h += '<div class="notiz" role="status">' + esc(UE.meldung) + '</div>';
     if (UE.fehlerAktion) h += '<div class="fehlerbox" role="alert">' + esc(UE.fehlerAktion) + '</div>';
     var konten = Object.keys(UE_KONTEN).filter(function (k) { return UE.mandant === 'XXL' ? k === 'XXL' : k !== 'XXL'; });
+    h += '<div style="display:flex;gap:12px"><button type="button" class="link-btn" data-ue="alle-zu">Alles einklappen (nur offene Posten zeigen)</button><button type="button" class="link-btn" data-ue="alle-auf">Alles aufklappen</button></div>';
     h += ueKontostaende(d, konten);
     konten.forEach(function (k) {
       var liste = (d.posten || []).filter(function (p) { return p.konto === k; });
@@ -5148,31 +5187,34 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       else if (UE.bereit === k) knopf = '<span class="notiz" style="margin:0">' + esc(zahl(dabei.length)) + ' Überweisungen über ' + esc(formatEuro(summe)) + ' erzeugen? Die Datei geht per Mail an dich, gezahlt wird erst im Online-Banking.</span> <button type="button" class="btn btn-primary" style="padding:4px 10px" data-ue="datei" data-konto="' + k + '">Ja, Datei erzeugen</button> <button type="button" class="link-btn" data-ue="abbrechen">Abbrechen</button>';
       else knopf = '<button type="button" class="btn btn-secondary" style="padding:4px 10px" data-ue="datei" data-konto="' + k + '">Zahlungsdatei erzeugen</button>';
       var zwischen = function (titel, l) { var sm = l.reduce(function (t, p) { return t + p.betrag; }, 0); return '<tr class="zwischensumme"><td colspan="5" class="notiz" style="text-align:right">Zwischensumme ' + esc(titel) + ' · ' + esc(zahl(l.length)) + (l.length === 1 ? ' Posten' : ' Posten') + '</td><td class="nowrap zahlen rechts fett">' + esc(formatEuro(sm)) + '</td><td></td></tr>'; };
-      h += '<div class="card scroll-x"><div class="card-kopf zeile-titel" style="margin:0"><span>Offene Posten · ' + esc(UE_KONTEN[k]) + ' · ' + esc(zahl(offen.length)) + ' Posten · ' + esc(formatEuro(sumOffen)) + (dabei.length ? ' · <b>angehakt ' + esc(zahl(dabei.length)) + ' Posten zu ' + esc(formatEuro(summe)) + '</b>' : '') + '</span><span class="notiz" style="margin:0">' + esc(stand) + '</span></div>' +
+      var zuP = !!UE.zu['posten-' + k];
+      h += '<div class="card scroll-x"><div class="card-kopf zeile-titel" style="margin:0"><span>' + ueZuKnopf('posten-' + k, 'Offene Posten') + ' · ' + esc(UE_KONTEN[k]) + ' · ' + esc(zahl(offen.length)) + ' Posten · ' + esc(formatEuro(sumOffen)) + (dabei.length ? ' · <b>angehakt ' + esc(zahl(dabei.length)) + ' Posten zu ' + esc(formatEuro(summe)) + '</b>' : '') + '</span><span class="notiz" style="margin:0">' + esc(stand) + '</span></div>' + (zuP ? '<div hidden>' : '<div>') +
         '<div class="zeile-titel" style="margin:8px 12px;gap:12px;flex-wrap:wrap"><span>Angehakt: ' + esc(zahl(dabei.length)) + ' · ' + esc(formatEuro(summe)) + '</span><span>' + knopf + '</span></div>' +
         '<table class="tbl kompakt"><thead><tr><th>zahlen</th><th>Fällig</th><th>Beleg</th><th>Empfänger</th><th>Verwendungszweck</th><th>Betrag</th><th>Bankverbindung</th></tr></thead><tbody>';
       if (!liste.length) h += '<tr><td colspan="7" class="leer">Keine offenen Posten.</td></tr>';
-      if (diese.length) { h += abschnittZeile('Fällig bis Ende dieser Woche (' + formatDate(d.wochenEnde) + ') und überfällig', 7); diese.forEach(function (p) { h += ueZeile(p); }); h += zwischen('fällig bis Ende der Woche', diese); }
-      if (spaeter.length) { h += abschnittZeile('Noch nicht fällig', 7); spaeter.forEach(function (p) { h += ueZeile(p); }); h += zwischen('noch nicht fällig', spaeter); }
-      if (inD.length) { h += abschnittZeile('Zahlungsdatei bereits erzeugt', 7); inD.forEach(function (p) { h += ueZeile(p); }); h += zwischen('in Datei', inD); }
-      h += '</tbody><tfoot><tr class="gesamtsumme"><td colspan="5" style="text-align:right" class="fett">Summe ' + esc(UE_KONTEN[k]) + ' · ' + esc(zahl(liste.length)) + ' Posten' + (dabei.length ? ' · angehakt ' + esc(zahl(dabei.length)) + ' Posten zu ' + esc(formatEuro(summe)) + '' : '') + '</td><td class="nowrap zahlen rechts fett">' + esc(formatEuro(liste.reduce(function (t, p) { return t + p.betrag; }, 0))) + '</td><td></td></tr></tfoot></table></div>';
+      var abschn = function (key, titel, l, kurz) { var zu = !!UE.zu[key + '-' + k]; h += '<tr class="abschnitt-zeile"><td colspan="7">' + ueZuKnopf(key + '-' + k, titel) + '</td></tr>'; if (!zu) l.forEach(function (p) { h += ueZeile(p); }); h += zwischen(kurz, l); };
+      if (diese.length) abschn('diese', 'Fällig bis Ende dieser Woche (' + formatDate(d.wochenEnde) + ') und überfällig', diese, 'fällig bis Ende der Woche');
+      if (spaeter.length) abschn('spaeter', 'Noch nicht fällig', spaeter, 'noch nicht fällig');
+      if (inD.length) abschn('datei', 'Zahlungsdatei bereits erzeugt', inD, 'in Datei');
+      h += '</tbody><tfoot><tr class="gesamtsumme"><td colspan="5" style="text-align:right" class="fett">Summe ' + esc(UE_KONTEN[k]) + ' · ' + esc(zahl(liste.length)) + ' Posten' + (dabei.length ? ' · angehakt ' + esc(zahl(dabei.length)) + ' Posten zu ' + esc(formatEuro(summe)) + '' : '') + '</td><td class="nowrap zahlen rechts fett">' + esc(formatEuro(liste.reduce(function (t, p) { return t + p.betrag; }, 0))) + '</td><td></td></tr></tfoot></table></div></div>';
     });
-    var gsl = d.gutschriften || [];
+    // Vollständig verrechnete Gutschriften stehen schon bei der Rechnung („− Gutschrift …“), hier nur, was noch übrig ist
+    var gsl = (d.gutschriften || []).filter(function (g) { return Number(g.rest || 0) > 0.005; });
     if (gsl.length) {
-      h += '<div class="card scroll-x"><div class="card-kopf zeile-titel" style="margin:0"><span>Gutschriften von Lieferanten · ' + esc(zahl(gsl.length)) + ' (werden mit offenen Rechnungen desselben Lieferanten verrechnet, nie überzahlt)</span></div><table class="tbl kompakt"><thead><tr><th>Gutschrift</th><th>Lieferant</th><th>Betrag</th><th>Verrechnet</th><th>Mit Rechnung</th></tr></thead><tbody>';
-      gsl.forEach(function (g) {
+      h += '<div class="card scroll-x"><div class="card-kopf zeile-titel" style="margin:0"><span>' + ueZuKnopf('gutschriften', 'Gutschriften von Lieferanten') + ' · ' + esc(zahl(gsl.length)) + ' (werden mit offenen Rechnungen desselben Lieferanten verrechnet, nie überzahlt)</span></div>' + (UE.zu.gutschriften ? '' : '<table class="tbl kompakt"><thead><tr><th>Gutschrift</th><th>Lieferant</th><th>Betrag</th><th>Verrechnet</th><th>Mit Rechnung</th></tr></thead><tbody>');
+      if (!UE.zu.gutschriften) gsl.forEach(function (g) {
         var rest = Number(g.rest || 0), vr = Number(g.verrechnet || 0), voll = rest <= 0.005;
         h += '<tr><td>' + (g.link ? '<a href="' + esc(g.link) + '" target="_blank" rel="noopener">' + esc(g.rechnungsnr || ('Beleg ' + g.fallId)) + '</a>' : esc(g.rechnungsnr || ('Beleg ' + g.fallId))) + '<div class="notiz" style="margin:0">Beleg ' + esc(g.fallId) + ' · ' + esc(formatDate(g.datum)) + '</div></td><td>' + esc(g.gegenpartei || '–') + '</td><td style="text-align:right">−' + esc(formatEuro(Math.abs(Number(g.betrag)))) + '</td><td style="text-align:right">' + (vr > 0 ? esc(formatEuro(vr)) : '–') + (!voll && vr > 0 ? '<div class="notiz" style="margin:0">Rest ' + esc(formatEuro(rest)) + '</div>' : '') + '</td><td>' + ((g.mit || []).length ? esc((g.mit || []).join(', ')) : '<span class="notiz" style="margin:0">keine offene Rechnung desselben Lieferanten, Gutschrift bleibt stehen</span>') + '</td></tr>';
       });
-      h += '</tbody></table></div>';
+      h += (UE.zu.gutschriften ? '' : '</tbody></table>') + '</div>';
     }
     var lsl = d.lastschriften || [];
     if (lsl.length) {
-      h += '<div class="card scroll-x"><div class="card-kopf zeile-titel" style="margin:0"><span>Als Lastschrift gekennzeichnet · ' + esc(zahl(lsl.length)) + ' (werden von der Firma eingezogen, nicht überwiesen)</span></div><table class="tbl kompakt"><tbody>';
-      lsl.forEach(function (l) {
+      h += '<div class="card scroll-x"><div class="card-kopf zeile-titel" style="margin:0"><span>' + ueZuKnopf('lastschriften', 'Als Lastschrift gekennzeichnet') + ' · ' + esc(zahl(lsl.length)) + ' (werden von der Firma eingezogen, nicht überwiesen)</span></div>' + (UE.zu.lastschriften ? '' : '<table class="tbl kompakt"><tbody>');
+      if (!UE.zu.lastschriften) lsl.forEach(function (l) {
         h += '<tr><td>' + esc(l.gegenpartei || '–') + '</td><td>' + (l.link ? '<a href="' + esc(l.link) + '" target="_blank" rel="noopener">' + esc(l.rechnungsnr || ('Beleg ' + l.fallId)) + '</a>' : esc(l.rechnungsnr || ('Beleg ' + l.fallId))) + '</td><td style="text-align:right">' + esc(formatEuro(l.betrag)) + '</td><td><button type="button" class="link-btn" data-ue="lastschrift-zurueck" data-fall="' + esc(l.fallId) + '">zurücknehmen</button></td></tr>';
       });
-      h += '</tbody></table></div>';
+      h += (UE.zu.lastschriften ? '' : '</tbody></table>') + '</div>';
     }
     h += '<div><button type="button" class="link-btn" data-ue="neu">Aktualisieren</button> <button type="button" class="link-btn" data-ue="abgleichen"' + (UE.holen ? ' disabled' : '') + '>' + (UE.holen ? 'gleiche ab …' : 'Mit BuchhaltungsButler abgleichen') + '</button></div>' +
       '<div class="notiz">Offen ist ein gebuchter Beleg ab 01.07.2026 ohne zugeordnete Zahlung. Dazu kommen Belege aus dem Dashboard, die noch nicht in BuchhaltungsButler gebucht sind (Rechnungen per Überweisung und Auslagen): sie sind nur vorangehakt, wenn du sie in den Rückfragen bestätigt hast. Zahlst du vor dem Buchen, ordnet BuchhaltungsButler die Zahlung beim Buchen selbst zu. Abgänge auf dem Konto, die zu einem Posten passen, setzen den Haken zurück („wohl schon bezahlt“). Lastschriften stehen nicht in der Liste. Beträge über 100.000 € werden in gleiche Teile geteilt.</div></div>';
@@ -5180,18 +5222,33 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   }
   function bindUE() {
     var p = $('p-ueberweisungen'); if (!p) return;
+    UE.zu = ueZuLaden();
     p.addEventListener('change', function (e) {
       var t = e.target.closest('[data-ue]'); if (!t) return;
       var w = t.getAttribute('data-ue'), post = ueFinden(t.getAttribute('data-key'));
       if (w === 'haken' && post) { UE.auswahl[UE.mandant + '|' + post.key] = t.checked; UE.bereit = ''; renderUE(); }
       else if (w === 'faellig' && post) ueSpeichern(post, 'faellig', t.value);
       else if (w === 'zweck' && post) { if (String(t.value).trim() !== post.zweckBasis) ueSpeichern(post, 'zweck', t.value); }
-      else if (w === 'iban' && post) { if (String(t.value).trim()) ueSpeichern(post, 'iban', t.value); }
+    });
+    p.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+      var t = e.target.closest('input[data-ue="iban"]'); if (!t) return;
+      var post = ueFinden(t.getAttribute('data-key')); if (post && String(t.value).trim()) { e.preventDefault(); ueSpeichern(post, 'iban', t.value); }
     });
     p.addEventListener('click', function (e) {
       var b = e.target.closest('button[data-ue]'); if (!b) return;
       var w = b.getAttribute('data-ue');
+      if (w === 'zu') { var zk = b.getAttribute('data-zu'); UE.zu[zk] = !UE.zu[zk]; ueZuSpeichern(); renderUE(); return; }
+      if (w === 'alle-zu' || w === 'alle-auf') {
+        var keys = ['konten', 'gutschriften', 'lastschriften'];
+        Object.keys(UE_KONTEN).forEach(function (k) { keys.push('posten-' + k, 'diese-' + k, 'spaeter-' + k, 'datei-' + k); });
+        keys.forEach(function (k) { UE.zu[k] = w === 'alle-zu'; });
+        // „Alles einklappen“ lässt nur die offenen Posten stehen (fällig und noch nicht fällig)
+        if (w === 'alle-zu') Object.keys(UE_KONTEN).forEach(function (k) { UE.zu['posten-' + k] = false; UE.zu['diese-' + k] = false; UE.zu['spaeter-' + k] = false; });
+        ueZuSpeichern(); renderUE(); return;
+      }
       if (w === 'mandant') { UE.mandant = b.getAttribute('data-m'); UE.bereit = ''; UE.meldung = ''; UE.fehlerAktion = ''; if (UE.daten[UE.mandant]) renderUE(); else ladeUE(); }
+      else if (w === 'iban-kreditor') { var pk = ueFinden(b.getAttribute('data-key')), ik = p.querySelector('input[data-ue="iban"][data-key="' + b.getAttribute('data-key') + '"]'), bk = p.querySelector('input[data-ue="bic"][data-key="' + b.getAttribute('data-key') + '"]'); if (pk && ik && String(ik.value).trim()) ueKreditorIban(pk, ik.value, bk ? bk.value : ''); else { UE.zeilenMsg[b.getAttribute('data-key')] = { text: 'Bitte zuerst die IBAN eintragen.', fehler: true }; renderUE(); } }
       else if (w === 'iban-speichern') { var pi = ueFinden(b.getAttribute('data-key')), ii = p.querySelector('input[data-ue="iban"][data-key="' + b.getAttribute('data-key') + '"]'); if (pi && ii && String(ii.value).trim()) ueSpeichern(pi, 'iban', ii.value); else { UE.fehlerAktion = 'Bitte zuerst die IBAN eintragen.'; renderUE(); } }
       else if (w === 'ks-speichern') { ueKontostand(b.getAttribute('data-konto')); }
       else if (w === 'liqui-aktualisieren') { ueLiquiAktualisieren(); }
@@ -6579,7 +6636,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261021102245';
+  var BUILD = '20261021153827';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
