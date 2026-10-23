@@ -887,7 +887,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     { id: 'accounting', name: 'Accounting', tabs: [{ id: 'rueckfragen', name: 'Rückfragen' }] },
     { id: 'acc-xxl', name: 'XXL', unter: true, tabs: [{ id: 'belege-xxl', name: 'Belege' }, { id: 'zahlung-xxl', name: 'Zahlung' }, { id: 'ueberweisungen-xxl', name: 'Überweisung' }] },
     { id: 'acc-lev', name: 'LEV', unter: true, tabs: [{ id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'ueberweisungen-lev', name: 'Überweisung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung Löwenpark' }, { id: 'ueberweisungen-lev-lp', name: 'Überweisung Löwenpark' }] },
-    { id: 'acc-ausgang', name: 'Ausgangsrechnungen', unter: true, tabs: [{ id: 'ausgang-xxl', name: 'XXL Ausgangsrechnung' }, { id: 'ausgang-lev', name: 'LEV Ausgangsrechnung' }, { id: 'spenden', name: 'Spendenbescheinigungen' }] },
+    { id: 'acc-ausgang', name: 'Ausgangsrechnungen', unter: true, tabs: [{ id: 'ausgang-xxl', name: 'XXL Ausgangsrechnung' }, { id: 'ausgang-lev', name: 'LEV Ausgangsrechnung' }] },
+    { id: 'spendenbescheinigungen', name: 'Spendenbescheinigungen', unter: true, tabs: [{ id: 'spenden', name: 'Spendenbescheinigungen' }] },
     { id: 'administration', name: 'Administration', unter: true, tabs: [{ id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }, { id: 'kreditoren', name: 'Kreditoren / Debitoren' }] },
     { id: 'auslagen', name: 'Auslagen', tabs: [{ id: 'auslage-neu', name: 'Auslage einreichen' }, { id: 'vorschuss-neu', name: 'Vorschuss beantragen' }, { id: 'auslage-protokoll', name: 'Protokoll', recht: 'accounting' }] },
     { id: 'zugriffe', name: 'Zugriffe', eingeklappt: true, tabs: [{ id: 'zugriffe', name: 'Zugriffe' }] }
@@ -904,7 +905,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 
   // Welche Bereiche eine Person sieht, kommt aus der Rechte-Tabelle (crm-db). Hier wird nur ausgeblendet,
   // entschieden wird im Gateway.
-  var RECHT_ID = { ticketing: 'ticketing', gutscheine: 'gutscheine', website: 'website', segmentierung: 'crm', accounting: 'accounting', 'acc-xxl': 'accounting', 'acc-lev': 'accounting', 'acc-ausgang': 'accounting', administration: 'accounting', auslagen: 'auslagen', zugriffe: 'zugriffe' };
+  var RECHT_ID = { ticketing: 'ticketing', gutscheine: 'gutscheine', website: 'website', segmentierung: 'crm', accounting: 'accounting', 'acc-xxl': 'accounting', 'acc-lev': 'accounting', 'acc-ausgang': 'accounting', spendenbescheinigungen: 'accounting', administration: 'accounting', auslagen: 'auslagen', zugriffe: 'zugriffe' };
   function darfBereich(b) {
     var n = window.LOEWEN_NUTZER;
     if (!n) return true;
@@ -962,7 +963,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     S.tab = t; S.tabArg = arg || '';
     letzterTab[bereichVon(t).id] = t;
     renderNavigation();
-    document.body.classList.toggle('breit', ['accounting', 'acc-xxl', 'acc-lev', 'acc-ausgang', 'administration'].indexOf(bereichVon(t).id) >= 0 || t === 'auswertung');
+    document.body.classList.toggle('breit', ['accounting', 'acc-xxl', 'acc-lev', 'acc-ausgang', 'spendenbescheinigungen', 'administration'].indexOf(bereichVon(t).id) >= 0 || t === 'auswertung');
     TABS.forEach(function (name) { $('p-' + name).hidden = name !== t; });
     Object.keys(VW_PANEL).forEach(function (name) { $(VW_PANEL[name].el).hidden = name !== t; });
     if (fokus) $('tab-' + t).focus();
@@ -7155,7 +7156,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261023165452';
+  var BUILD = '20261023173612';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
