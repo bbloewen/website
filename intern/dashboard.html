@@ -69,6 +69,13 @@ body.breit .wrap { max-width: none; }
 .bereich:hover { background: var(--bg-subtle); color: var(--text-primary); }
 .bereich-unter .bereich { padding-left: 26px; font-size: 13px; font-weight: 400; }
 .bereich-ende { margin-top: 18px; }
+details.klapp { margin: 0 0 12px; }
+details.klapp > summary { cursor: pointer; font-size: 18px; font-weight: 500; padding: 6px 0; list-style: none; }
+details.klapp > summary::-webkit-details-marker { display: none; }
+details.klapp > summary::before { content: '▸ '; color: var(--text-muted); }
+details.klapp[open] > summary::before { content: '▾ '; }
+.card > details.klapp { margin: 0; }
+.card > details.klapp > summary { font-size: 16px; padding: 12px 16px; }
 .bereich-ende summary { cursor: pointer; font-size: 12px; color: var(--text-muted); padding: 4px 12px; list-style: none; }
 .bereich-ende summary::-webkit-details-marker { display: none; }
 .bereich-ende summary::before { content: '▸ '; }
@@ -1233,6 +1240,18 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       'Tickets bei Dauerkarten = Plätze (eine Dauerkarte zählt einmal, nicht je Spiel). Orders mit gemischten Tickets (bezahlt und gratis) stehen in beiden Zeilen, die Gesamtsumme zählt jede Order nur einmal.</div></div>';
     return h;
   }
+  // Auf- und zuklappbare Blöcke im Reiter Tickets; der Zustand bleibt beim Neuzeichnen erhalten (S.klapp)
+  function klappBlock(key, titel, inhalt, standardOffen) {
+    S.klapp = S.klapp || {};
+    var offen = Object.prototype.hasOwnProperty.call(S.klapp, key) ? S.klapp[key] : standardOffen;
+    return '<details class="klapp" data-klapp="' + esc(key) + '"' + (offen ? ' open' : '') + '><summary>' + titel + '</summary>' + inhalt + '</details>';
+  }
+  // Ein Block mit eigener Überschrift (h2.abschnitt): die Überschrift wird zur Kopfzeile
+  function klappAusH2(key, html, standardOffen) {
+    var m = /<h2 class="abschnitt"[^>]*>([\s\S]*?)<\/h2>/.exec(html);
+    if (!m) return html;
+    return klappBlock(key, esc('') + m[1], html.replace(m[0], ''), standardOffen);
+  }
   function renderDauerkarten() {
     var el = $('p-dauerkarten');
     if (S.dkLoading) { el.innerHTML = '<div class="laedt">Lade Tickets …</div>'; return; }
@@ -1242,39 +1261,41 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var cats = dk.byCategory || [];
     var h = '<div class="stapel">';
 
-    h += '<div><h2 class="abschnitt">Gesamtzahl</h2><div class="grid sm-2">';
+    var hGesamt = '<div><h2 class="abschnitt">Gesamtzahl</h2><div class="grid sm-2">';
     // 14.10.2026 (Marko): Die Platz-Spiele-Zahl (jede Dauerkarte 14-mal) ist uninteressant und steht nicht mehr da; gezeigt wird nur die Anzahl der Dauerkarten.
-    h += '<div class="card pad"><div class="kpi-label">Dauerkarten (Saison 2026/2027)</div>' +
+    hGesamt += '<div class="card pad"><div class="kpi-label">Dauerkarten (Saison 2026/2027)</div>' +
       '<div class="kpi">' + esc(zahl(dk.total)) + '</div>' +
       '<div class="notiz">davon ' + esc(zahl(dk.verkauft)) + ' bezahlt und ' + esc(zahl((dk.total || 0) - (dk.verkauft || 0))) + ' Freikarten (100 % Rabatt, z. B. Sponsoren, Ehrenamtliche, Trainer)</div>' +
       '<div class="notiz notiz-2">Saison 2025/2026 zum Vergleich: 70 Dauerkarten</div></div>';
-    h += '<div class="card pad"><div class="kpi-label">Erlös (Saison gesamt)</div>' +
+    hGesamt += '<div class="card pad"><div class="kpi-label">Erlös (Saison gesamt)</div>' +
       '<div class="kpi">' + esc(formatEuro(dk.gesamtUmsatz)) + '</div>' +
       '<div class="notiz">von Zielbetrag ' + esc(formatEuro(S.zielUmsatz)) + ' · ' + esc(pct(umsatzPct)) + '</div>' +
       balken(umsatzPct || 0, 'b-orange', 'notiz-2') +
       (dk.gesamtUmsatzInklNachwuchs != null ? '<div class="notiz notiz-2">Zuzüglich Nachwuchsbeitrag ' + esc(formatEuro(dk.aufschluesselung ? dk.aufschluesselung.nachwuchsEuro : 0)) + ': ' + esc(formatEuro(dk.gesamtUmsatzInklNachwuchs)) + ' gesamt</div>' : '') +
       '<div class="notiz notiz-2">Saison 2025/2026 zum Vergleich: ' + esc(formatEuro(S.letzteSaisonUmsatz)) + '</div></div>';
-    h += '</div></div>';
+    hGesamt += '</div></div>';
+    h += klappAusH2('dk-gesamt', hGesamt, true);
 
-    h += aufschluesselungHtml(dk);
-    h += '<div><h2 class="abschnitt">Dauerkarten</h2><div class="grid sm-4">';
-    h += '<div class="card pad"><div class="kpi-label">Wirklich verkaufte Dauerkarten</div><div class="kpi">' + esc(dk.verkauft) + '</div>' +
+    h += klappAusH2('dk-vergleich', aufschluesselungHtml(dk), true);
+    var hDk = '<div><h2 class="abschnitt">Dauerkarten</h2><div class="grid sm-4">';
+    hDk += '<div class="card pad"><div class="kpi-label">Wirklich verkaufte Dauerkarten</div><div class="kpi">' + esc(dk.verkauft) + '</div>' +
       '<div class="notiz">von ' + esc(dk.total) + ' gesamt (inkl. Sponsoren/Ehrenamtliche mit 100 % Rabatt)</div>' +
       '<div class="notiz notiz-2">Saison 2025/2026 zum Vergleich: 70</div></div>';
-    h += '<div class="card pad"><div class="kpi-label">Preis</div><div class="kpi">' + esc(formatEuro(sumBy(cats, 'totalPrice'))) + '</div></div>';
-    h += '<div class="card pad"><div class="kpi-label">Noch einzuziehende Beträge</div><div class="kpi">' + esc(formatEuro(sumBy(cats, 'stillToCollect'))) + '</div></div>';
-    h += '<div class="card pad"><div class="kpi-label">Nächstes Heimspiel</div>' +
+    hDk += '<div class="card pad"><div class="kpi-label">Preis</div><div class="kpi">' + esc(formatEuro(sumBy(cats, 'totalPrice'))) + '</div></div>';
+    hDk += '<div class="card pad"><div class="kpi-label">Noch einzuziehende Beträge</div><div class="kpi">' + esc(formatEuro(sumBy(cats, 'stillToCollect'))) + '</div></div>';
+    hDk += '<div class="card pad"><div class="kpi-label">Nächstes Heimspiel</div>' +
       (dk.nextGame
         ? '<div class="kpi-klein" style="margin-top:4px">' + esc(dk.nextGame.name) + '</div><div class="notiz">' + esc(formatDate(dk.nextGame.dateFrom)) + '</div>'
         : '<div class="text-klein gedaempft">Kein anstehendes Heimspiel</div>') +
       '</div>';
-    h += '</div></div>';
+    hDk += '</div></div>';
+    h += klappAusH2('dk-karten', hDk, true);
 
     var dkAgg = ((dk.aufschluesselung && dk.aufschluesselung.rows) || []).filter(function (r) { return r.type === 'Dauerkarte'; })[0];
     var catSplit = cats.length > 0 && cats[0].ticketsPaid != null;
     var catsPaid = catSplit ? cats.filter(function (c) { return c.ticketsPaid > 0 || c.totalPrice > 0; }) : cats;
     var catsFree = catSplit ? cats.filter(function (c) { return c.ticketsFree > 0; }) : [];
-    h += '<div class="card scroll-x"><div class="card-kopf zeile-titel" style="margin:0;align-items:center"><span>Nach Kategorie</span>' +
+    var hKat = '<div class="card scroll-x"><div class="card-kopf zeile-titel" style="margin:0;align-items:center"><span>Nach Kategorie</span>' +
       '<button type="button" class="btn btn-secondary" style="padding:6px 12px;font-size:13px" data-aktion="platzkarten">Platzliste</button></div><table class="tbl"><thead><tr>' +
       '<th>Kategorie</th><th>Orders</th><th>Tickets</th><th>Preis</th><th>Nachwuchs (Anzahl)</th><th>Nachwuchs €</th><th>Noch einzuziehende Beträge</th></tr></thead><tbody>';
     var ticketsPaidSum = 0;
@@ -1282,26 +1303,27 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var o = catSplit ? c.ordersWithPaid : c.orders;
       var t = catSplit ? c.ticketsPaid : (c.tickets != null ? c.tickets : c.count);
       ticketsPaidSum += t;
-      h += trZeile([c.name, o != null ? o : '–', t, formatEuro(c.totalPrice), c.nachwuchsOrders != null ? c.nachwuchsOrders : '–', c.nachwuchsEuro != null ? formatEuro(c.nachwuchsEuro) : '–', formatEuro(c.stillToCollect)]);
+      hKat += trZeile([c.name, o != null ? o : '–', t, formatEuro(c.totalPrice), c.nachwuchsOrders != null ? c.nachwuchsOrders : '–', c.nachwuchsEuro != null ? formatEuro(c.nachwuchsEuro) : '–', formatEuro(c.stillToCollect)]);
     });
     if (catsPaid.length > 0) {
       var sumOrdersDk = catSplit ? (dkAgg ? dkAgg.ordersWithPaid : sumBy(catsPaid, 'ordersWithPaid')) : (dk.totalOrders != null ? dk.totalOrders : '–');
-      h += trZeile([catSplit ? 'Zwischensumme verkauft' : 'Summe', sumOrdersDk, ticketsPaidSum, formatEuro(sumBy(catsPaid, 'totalPrice')), sumBy(catsPaid, 'nachwuchsOrders'), formatEuro(sumBy(catsPaid, 'nachwuchsEuro')), formatEuro(sumBy(catsPaid, 'stillToCollect'))], 'summe');
+      hKat += trZeile([catSplit ? 'Zwischensumme verkauft' : 'Summe', sumOrdersDk, ticketsPaidSum, formatEuro(sumBy(catsPaid, 'totalPrice')), sumBy(catsPaid, 'nachwuchsOrders'), formatEuro(sumBy(catsPaid, 'nachwuchsEuro')), formatEuro(sumBy(catsPaid, 'stillToCollect'))], 'summe');
     }
     if (catsFree.length > 0) {
       var freeTicketsSum = sumBy(catsFree, 'ticketsFree');
-      h += abschnittZeile('Freikarten (0 €), nicht in den verkauften Tickets oben', 7);
-      catsFree.forEach(function (c) { h += trZeile([c.name, zahl(c.ordersWithFree), zahl(c.ticketsFree), formatEuro(0), '–', '–', '–']); });
-      h += trZeile(['Zwischensumme Freikarten', zahl(dkAgg ? dkAgg.ordersWithFree : sumBy(catsFree, 'ordersWithFree')), zahl(freeTicketsSum), formatEuro(0), '', '', ''], 'summe');
-      h += trZeile(['Gesamtsumme', dk.totalOrders != null ? zahl(dk.totalOrders) : '–', zahl(ticketsPaidSum + freeTicketsSum), formatEuro(sumBy(catsPaid, 'totalPrice')), zahl(sumBy(catsPaid, 'nachwuchsOrders')), formatEuro(sumBy(catsPaid, 'nachwuchsEuro')), formatEuro(sumBy(catsPaid, 'stillToCollect'))], 'summe gesamt');
+      hKat += abschnittZeile('Freikarten (0 €), nicht in den verkauften Tickets oben', 7);
+      catsFree.forEach(function (c) { hKat += trZeile([c.name, zahl(c.ordersWithFree), zahl(c.ticketsFree), formatEuro(0), '–', '–', '–']); });
+      hKat += trZeile(['Zwischensumme Freikarten', zahl(dkAgg ? dkAgg.ordersWithFree : sumBy(catsFree, 'ordersWithFree')), zahl(freeTicketsSum), formatEuro(0), '', '', ''], 'summe');
+      hKat += trZeile(['Gesamtsumme', dk.totalOrders != null ? zahl(dk.totalOrders) : '–', zahl(ticketsPaidSum + freeTicketsSum), formatEuro(sumBy(catsPaid, 'totalPrice')), zahl(sumBy(catsPaid, 'nachwuchsOrders')), formatEuro(sumBy(catsPaid, 'nachwuchsEuro')), formatEuro(sumBy(catsPaid, 'stillToCollect'))], 'summe gesamt');
     }
-    h += '</tbody></table></div>';
+    hKat += '</tbody></table></div>';
+    h += klappBlock('dk-kategorie', 'Dauerkarten nach Kategorie', hKat, true);
 
     h += '<div><h2 class="abschnitt" style="margin-bottom:4px">Einzeltickets pro Spiel</h2>' +
       '<div class="text-klein text-sek" style="margin-bottom:4px">Ohne Dauerkarten — die stehen vollständig im Block darüber. Je Spiel zuerst die verkauften Tickets (Preis über 0 €) mit Zwischensumme, darunter die Freikarten (0 €) mit eigener Zwischensumme, am Ende die Gesamtsumme.</div>' +
       '<div class="notiz" style="margin:0 0 12px">Saison 2025/2026 zum Vergleich: Ø 207 bezahlte Tickets und Ø 1.798,47 € Erlös pro Heimspiel, das sind Ø 8,69 € Erlös je Ticket (12 Heimspiele, ohne Dauerkarten-Anteil)</div>' +
       '<div class="grid">';
-    (dk.ticketSales || []).forEach(function (g) {
+    (dk.ticketSales || []).slice().sort(function (x, y) { return String(y.dateFrom || '').localeCompare(String(x.dateFrom || '')); }).forEach(function (g, gi) {
       var rows = g.paidRows || g.rows || [];
       var free = g.freeRows || [];
       var split = g.paidRows != null;
@@ -1309,39 +1331,39 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var tk = sumBy(rows, 'tickets');
       var erloes = sumBy(rows, 'totalPrice');
       var nw = g.nachwuchsOrders != null;
-      h += '<div class="card scroll-x"><div class="card-kopf"><div style="font-weight:500">' + esc(g.name) + '</div><div class="unter">' + esc(formatDate(g.dateFrom)) + ferienBadge(g.dateFrom) + '</div></div>' +
-        '<table class="tbl"><thead><tr><th>Typ</th><th>Kategorie</th><th>Orders</th><th>Tickets</th><th>Gesamtpreis</th><th>Ø Erlös je Ticket</th></tr></thead><tbody>';
+      var hSp = '<div class="scroll-x"><table class="tbl"><thead><tr><th>Typ</th><th>Kategorie</th><th>Orders</th><th>Tickets</th><th>Gesamtpreis</th><th>Ø Erlös je Ticket</th></tr></thead><tbody>';
       // Zwischensumme je Typ (Abendkasse/Einzelticket), wenn das Spiel beide Typen hat (11.10.2026, Marko)
       var typen = [];
       rows.forEach(function (r) { if (typen.indexOf(r.type) === -1) typen.push(r.type); });
       rows.forEach(function (r, i) {
         var t = r.tickets != null ? r.tickets : r.count;
-        h += trZeile([r.type, r.category, r.orders != null ? r.orders : '–', t, formatEuro(r.totalPrice), avgErloes(r.totalPrice, t)]);
+        hSp += trZeile([r.type, r.category, r.orders != null ? r.orders : '–', t, formatEuro(r.totalPrice), avgErloes(r.totalPrice, t)]);
         var next = rows[i + 1];
         if (typen.length > 1 && (!next || next.type !== r.type)) {
           var gleich = rows.filter(function (x) { return x.type === r.type; });
           var tkTyp = sumBy(gleich, 'tickets'), erTyp = sumBy(gleich, 'totalPrice');
           var oTyp = g.paidOrdersByType && g.paidOrdersByType[r.type] != null ? zahl(g.paidOrdersByType[r.type]) : '–';
-          h += trZeile(['Zwischensumme ' + r.type, '', oTyp, zahl(tkTyp), formatEuro(erTyp), avgErloes(erTyp, tkTyp)], 'summe');
+          hSp += trZeile(['Zwischensumme ' + r.type, '', oTyp, zahl(tkTyp), formatEuro(erTyp), avgErloes(erTyp, tkTyp)], 'summe');
         }
       });
-      if (rows.length === 0) h += '<tr><td colspan="6" class="leer">Keine Verkäufe.</td></tr>';
+      if (rows.length === 0) hSp += '<tr><td colspan="6" class="leer">Keine Verkäufe.</td></tr>';
       else {
-        h += trZeile([split ? 'Zwischensumme verkauft' : 'Summe', '', ordersPaid != null ? ordersPaid : '–', zahl(tk), formatEuro(erloes), avgErloes(erloes, tk)], 'summe');
+        hSp += trZeile([split ? 'Zwischensumme verkauft' : 'Summe', '', ordersPaid != null ? ordersPaid : '–', zahl(tk), formatEuro(erloes), avgErloes(erloes, tk)], 'summe');
         if (nw) {
-          h += trZeile(['Nachwuchsbeitrag', '', zahl(g.nachwuchsOrders), '', formatEuro(g.nachwuchsEuro), ''], '');
-          h += trZeile(['Zwischensumme inkl. Nachwuchs', '', ordersPaid != null ? ordersPaid : '–', zahl(tk), formatEuro(erloes + g.nachwuchsEuro), avgErloes(erloes + g.nachwuchsEuro, tk)], 'summe');
+          hSp += trZeile(['Nachwuchsbeitrag', '', zahl(g.nachwuchsOrders), '', formatEuro(g.nachwuchsEuro), ''], '');
+          hSp += trZeile(['Zwischensumme inkl. Nachwuchs', '', ordersPaid != null ? ordersPaid : '–', zahl(tk), formatEuro(erloes + g.nachwuchsEuro), avgErloes(erloes + g.nachwuchsEuro, tk)], 'summe');
         }
       }
       if (free.length > 0) {
         var freeTk = sumBy(free, 'tickets');
-        h += abschnittZeile('Freikarten (0 €), nicht in den verkauften Tickets oben', 6);
-        free.forEach(function (r) { h += trZeile([r.type, r.category, zahl(r.orders), zahl(r.tickets), formatEuro(0), '–']); });
-        h += trZeile(['Zwischensumme Freikarten', '', zahl(g.ordersWithFree), zahl(freeTk), formatEuro(0), ''], 'summe');
-        h += trZeile(['Gesamtsumme', '', g.ordersTotal != null ? zahl(g.ordersTotal) : '–', zahl(tk + freeTk), formatEuro(erloes + (nw ? g.nachwuchsEuro : 0)), ''], 'summe gesamt');
+        hSp += abschnittZeile('Freikarten (0 €), nicht in den verkauften Tickets oben', 6);
+        free.forEach(function (r) { hSp += trZeile([r.type, r.category, zahl(r.orders), zahl(r.tickets), formatEuro(0), '–']); });
+        hSp += trZeile(['Zwischensumme Freikarten', '', zahl(g.ordersWithFree), zahl(freeTk), formatEuro(0), ''], 'summe');
+        hSp += trZeile(['Gesamtsumme', '', g.ordersTotal != null ? zahl(g.ordersTotal) : '–', zahl(tk + freeTk), formatEuro(erloes + (nw ? g.nachwuchsEuro : 0)), ''], 'summe gesamt');
       }
-      if (nw) h += '<tr><td colspan="6" class="notiz" style="padding-top:8px">Bestellungen: ' + esc(zahl(g.ordersPaid)) + ' bezahlt · ' + esc(zahl(g.ordersFree)) + ' gratis</td></tr>';
-      h += '</tbody></table></div>';
+      if (nw) hSp += '<tr><td colspan="6" class="notiz" style="padding-top:8px">Bestellungen: ' + esc(zahl(g.ordersPaid)) + ' bezahlt · ' + esc(zahl(g.ordersFree)) + ' gratis</td></tr>';
+      hSp += '</tbody></table></div>';
+      h += '<div class="card">' + klappBlock('sp-' + String(g.name || '') + '-' + String(g.dateFrom || ''), '<span style="font-weight:500">' + esc(g.name) + '</span> <span class="unter">' + esc(formatDate(g.dateFrom)) + ferienBadge(g.dateFrom) + '</span>', hSp, gi === 0) + '</div>';
     });
     h += '</div></div>';
 
@@ -4943,6 +4965,10 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     }
     el.innerHTML = h + '</div>';
   }
+  (function () {
+    var p = document.getElementById('p-dauerkarten');
+    if (p) p.addEventListener('toggle', function (e) { var d = e.target; if (d && d.matches && d.matches('details[data-klapp]')) { S.klapp = S.klapp || {}; S.klapp[d.getAttribute('data-klapp')] = d.open; } }, true);
+  })();
   function bindZG() {
     var p = $('p-zugriffe'); if (!p) return;
     p.addEventListener('click', function (e) {
@@ -7091,7 +7117,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261023124000';
+  var BUILD = '20261023131253';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
