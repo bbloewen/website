@@ -3615,18 +3615,50 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   }
   function btPopupSchliessen() { var o = document.getElementById('bt-popup'); if (o && o.parentNode) o.parentNode.removeChild(o); if (BT_POPUP.zurueck && BT_POPUP.zurueck.focus) BT_POPUP.zurueck.focus(); BT_POPUP.zurueck = null; }
   var BT_POPUP = { zurueck: null };
+  // Muster aus den bisherigen Buchungstexten (Server wertet bei jedem Öffnen die aktuellen Texte aus): Konto, Kostenstelle 2 und Auslage-Person der Zahlung
+  var BT_MUSTER = {};
+  function btMusterKontext(p, k) {
+    var z0 = (p.plan && p.plan.zeilen && p.plan.zeilen[0]) || (p.wk_vorschlag && p.wk_vorschlag.zeilen && p.wk_vorschlag.zeilen[0]) || (p.eingang_beleg && p.eingang_beleg.sachkonto && { sachkonto: p.eingang_beleg.sachkonto, kst2: p.eingang_beleg.kst2 }) ||
+      (p.belege && p.belege[0] && p.belege[0].konten && p.belege[0].konten[0]) || (p.buchungen && p.buchungen[0]) || {};
+    var person = String((p.eingang_beleg && p.eingang_beleg.person) || '').trim().split(/\s+/).pop() || '';
+    return { mandant: k === 'XXL' ? 'XXL' : 'LEV', gegenpartei: String(p.gegenpartei || '').replace(/\s*\n\s*/g, ' '), sachkonto: String(z0.sachkonto || z0.konto || ''), kst2: String(z0.kst2 || ''), person: person, zweck: String(p.zweck || '').replace(/\s*\n\s*/g, ' ').slice(0, 140) };
+  }
+  function btMusterLaden(p, k) {
+    var q = btMusterKontext(p, k), key = k + '|' + p.transaction_id;
+    if (BT_MUSTER[key]) return Promise.resolve(BT_MUSTER[key]);
+    var qs = Object.keys(q).map(function (n) { return n + '=' + encodeURIComponent(q[n]); }).join('&');
+    return fetch('/webhook/accounting/buchungstext-muster?' + qs).then(function (r) { return r.json(); }).then(function (d) { BT_MUSTER[key] = (d && d.ok && d.kandidaten) || []; return BT_MUSTER[key]; }).catch(function () { return []; });
+  }
   function btPopupOeffnen(p, ziel, ausloeser) {
     btPopupSchliessen(); BT_POPUP.zurueck = ausloeser || null;
-    var liste = btKandidaten(p, ziel);
+    var k = ausloeser && ausloeser.getAttribute ? ausloeser.getAttribute('data-k') : '';
+    var liste = btKandidaten(p, ziel), muster = [];
     var o = document.createElement('div'); o.id = 'bt-popup'; o.setAttribute('style', 'position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px');
     var h = '<div role="dialog" aria-modal="true" aria-labelledby="bt-popup-titel" style="background:var(--bg,#fff);color:var(--text,inherit);border-radius:10px;padding:16px;max-width:560px;width:100%;max-height:80vh;overflow:auto;box-shadow:0 8px 30px rgba(0,0,0,.3)">' +
-      '<div id="bt-popup-titel" class="fett" style="margin-bottom:4px">Buchungstext wählen</div><div class="notiz" style="margin:0 0 8px">' + esc(String(p.gegenpartei || '').replace(/\s*\n\s*/g, ' ')) + ' · ' + esc(formatEuro(Number(p.betrag || 0))) + '</div>';
-    h += liste.length ? liste.map(function (v, i) { return '<div><button type="button" class="btn btn-secondary" style="width:100%;text-align:left;margin:3px 0;padding:6px 10px;white-space:normal" data-bt-wahl="' + i + '"><span class="fett">' + esc(v.text) + '</span><br><span class="notiz" style="margin:0">' + esc(v.art) + '</span></button></div>'; }).join('') : '<div class="notiz">Keine früheren Texte dieser Gegenpartei gefunden. Bitte den Text selbst eingeben.</div>';
+      '<div id="bt-popup-titel" class="fett" style="margin-bottom:4px">Buchungstext wählen</div><div class="notiz" style="margin:0 0 8px">' + esc(String(p.gegenpartei || '').replace(/\s*\n\s*/g, ' ')) + ' · ' + esc(formatEuro(Number(p.betrag || 0))) + '</div><div id="bt-liste"></div>';
     h += '<div style="margin-top:8px"><button type="button" class="link-btn" data-bt-zu="1">Schließen</button></div></div>';
     o.innerHTML = h; document.body.appendChild(o);
+    var gesamt = [];
+    function zeichne(laedt) {
+      var gesehen = {}, alle = [];
+      liste.concat(muster).forEach(function (v) { var t = v.text; if (!t || gesehen[t.toLowerCase()]) return; gesehen[t.toLowerCase()] = true; alle.push(v); });
+      gesamt = alle;
+      var c = o.querySelector('#bt-liste'); if (!c) return;
+      c.innerHTML = (alle.length ? alle.map(function (v, i) { return '<div><button type="button" class="btn btn-secondary" style="width:100%;text-align:left;margin:3px 0;padding:6px 10px;white-space:normal" data-bt-wahl="' + i + '"' + (v.grund ? ' title="' + esc(v.grund) + '"' : '') + '><span class="fett">' + esc(v.text) + '</span><br><span class="notiz" style="margin:0">' + esc(v.art) + (v.grund ? ' · ' + esc(v.grund) : '') + '</span></button></div>'; }).join('') : (laedt ? '' : '<div class="notiz">Keine früheren Texte dieser Gegenpartei gefunden. Bitte den Text selbst eingeben.</div>')) +
+        (laedt ? '<div class="notiz" role="status" style="margin:4px 0">Muster aus bisherigen Buchungstexten werden gesucht …</div>' : '');
+    }
+    zeichne(!!k);
+    if (k) btMusterLaden(p, k).then(function (m) {
+      if (!document.getElementById('bt-popup')) return;
+      muster = m.map(function (v) {
+        var t = btZweckForm(btAnpassen(v.text, p)); t = ziel !== 'zbg' ? t.slice(0, 45) : wkvText(p, t, { kreditor_name: String(p.gegenpartei || '').replace(/\s*\n\s*/g, ' ') });
+        return { text: t, art: v.art, grund: v.grund };
+      });
+      zeichne(false);
+    });
     o.addEventListener('click', function (e) {
       var w = e.target.closest('[data-bt-wahl]');
-      if (w) { var i2 = document.getElementById(ziel + '-wert'), v = liste[Number(w.getAttribute('data-bt-wahl'))]; if (i2 && v) { i2.value = v.text; i2.dispatchEvent(new Event('input', { bubbles: true })); } BT_POPUP.zurueck = i2 || BT_POPUP.zurueck; btPopupSchliessen(); return; }
+      if (w) { var i2 = document.getElementById(ziel + '-wert'), v = gesamt[Number(w.getAttribute('data-bt-wahl'))]; if (i2 && v) { i2.value = v.text; i2.dispatchEvent(new Event('input', { bubbles: true })); } BT_POPUP.zurueck = i2 || BT_POPUP.zurueck; btPopupSchliessen(); return; }
       if (e.target === o || e.target.closest('[data-bt-zu]')) btPopupSchliessen();
     });
     o.addEventListener('keydown', function (e) { if (e.key === 'Escape') btPopupSchliessen(); });
@@ -7117,7 +7149,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261023131253';
+  var BUILD = '20261023151851';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
