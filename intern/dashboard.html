@@ -327,6 +327,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   .tbl.kompakt.aw th, .tbl.kompakt.aw td { padding-left: 4px; padding-right: 4px; }
   .tbl.kompakt.aw th:first-child, .tbl.kompakt.aw td:first-child { padding-left: 12px; }
   .tbl.kompakt.aw th { white-space: normal; vertical-align: bottom; line-height: 1.25; }
+  .lq-bar { height: 8px; min-width: 90px; background: var(--surface-2, #e3e3e3); border-radius: 4px; overflow: hidden; }
+  .lq-bar > span { display: block; height: 100%; background: var(--accent, #1f6feb); }
+  .lq-bar.ueber > span { background: var(--color-error, #c62828); }
+  .lq-kachel { background: var(--surface-1); border-radius: var(--radius); padding: 1rem; }
+  .lq-kachel .gross { font-size: 24px; font-weight: 500; }
 </style>
 </head>
 <body>
@@ -487,6 +492,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   <section id="p-vw-lev" aria-label="Vorschüsse LEV" hidden></section>
   <section id="p-zahlung-lev" role="tabpanel" aria-labelledby="tab-zahlung-lev" hidden></section>
   <section id="p-zahlung-lev-lp" role="tabpanel" aria-labelledby="tab-zahlung-lev-lp" hidden></section>
+  <section id="p-liquiditaet" role="tabpanel" aria-labelledby="tab-liquiditaet" hidden></section>
   <section id="p-rueckfragen" role="tabpanel" aria-labelledby="tab-rueckfragen" hidden></section>
   <section id="p-buchungstexte" role="tabpanel" aria-labelledby="tab-buchungstexte" hidden></section>
   <section id="p-ueberweisungen-xxl" role="tabpanel" aria-labelledby="tab-ueberweisungen-xxl" hidden></section>
@@ -884,7 +890,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
     { id: 'segmentierung', name: 'Segmentierung', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
-    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'rueckfragen', name: 'Rückfragen' }] },
+    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'liquiditaet', name: 'Übersicht' }, { id: 'rueckfragen', name: 'Rückfragen', versteckt: true }] },
     { id: 'acc-xxl', name: 'XXL', unter: true, tabs: [{ id: 'belege-xxl', name: 'Belege' }, { id: 'zahlung-xxl', name: 'Zahlung' }, { id: 'ueberweisungen-xxl', name: 'Überweisung' }] },
     { id: 'acc-lev', name: 'LEV', unter: true, tabs: [{ id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'ueberweisungen-lev', name: 'Überweisung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung Löwenpark' }, { id: 'ueberweisungen-lev-lp', name: 'Überweisung Löwenpark' }] },
     { id: 'acc-ausgang', name: 'Ausgangsrechnungen', unter: true, tabs: [{ id: 'ausgang-xxl', name: 'XXL Ausgangsrechnung' }, { id: 'ausgang-lev', name: 'LEV Ausgangsrechnung' }] },
@@ -983,6 +989,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (t === 'vorschuss-neu') ladeVZ();
     if (t === 'auslage-protokoll') ladeAP();
     if (t === 'spenden') ladeSP();
+    if (t === 'liquiditaet') ladeLQ();
     if (VW_PANEL[t]) ladeVW();
     if (AG_TAB[t]) ladeAG(AG_TAB[t]);
     if (t === 'kreditoren' && !KR.daten && !KR.laedt) ladeKR(); else if (t === 'kreditoren') renderKR();
@@ -4912,6 +4919,77 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       else if (w === 'erzeugen') spErzeugen();
     });
   }
+  // ---------- Accounting: Übersicht (Liquidität): Budget, Ist und Kontostände aus dem Liquiditätsplan ----------
+  // Quelle ist das Google Sheet „BL_Liquiditaetsplanung_26-27“ (Tabs „XXL - Budget“ und „LEV - Budget“, Kontostände aus den Bankumsatz-Tabs). Entwurf, wird Schritt für Schritt erweitert.
+  var LQ = { mandant: 'XXL', daten: { XXL: null, LEV: null }, fehler: '', laedt: false };
+  function lqEuro(n) { return n === null || n === undefined ? '–' : formatEuro(Number(n)); }
+  async function ladeLQ(still) {
+    var m = LQ.mandant;
+    if (!still) { LQ.laedt = true; LQ.fehler = ''; renderLQ(); }
+    try {
+      var res = await fetch('/webhook/accounting/liquiditaet?mandant=' + encodeURIComponent(m));
+      var d = await res.json();
+      if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || 'Der Liquiditätsplan konnte nicht gelesen werden.');
+      LQ.daten[m] = d;
+    } catch (e) { LQ.fehler = e.message; }
+    LQ.laedt = false; renderLQ();
+  }
+  function lqBalken(ist, budget, ausgabe) {
+    if (!budget) return ist ? '<span class="notiz" style="margin:0">ohne Budget</span>' : '<span class="notiz" style="margin:0">–</span>';
+    var pct = Math.round((Number(ist) || 0) / budget * 100), breit = Math.max(0, Math.min(100, pct));
+    return '<div style="display:flex;align-items:center;gap:6px"><div class="lq-bar' + (ausgabe && pct > 100 ? ' ueber' : '') + '" role="img" aria-label="' + pct + ' Prozent" style="flex:1"><span style="width:' + breit + '%"></span></div><span class="text-klein" style="min-width:3.2em;text-align:right">' + pct + ' %</span></div>';
+  }
+  function lqTabelle(b, titel, ausgabe, q) {
+    if (!b || !(b.zeilen || []).length) return '';
+    var zeile = function (z, fett) {
+      var rest = z.budgetSumme === null || z.istSumme === null ? null : z.budgetSumme - z.istSumme;
+      return '<tr' + (fett ? ' style="font-weight:500"' : '') + '><td>' + esc(z.name) + '</td><td class="zahlen">' + esc(lqEuro(z.budgetSumme)) + '</td><td class="zahlen">' + esc(lqEuro(z.istSumme)) + '</td><td class="zahlen">' + esc(lqEuro(rest)) + '</td><td style="min-width:150px">' + lqBalken(z.istSumme, z.budgetSumme, ausgabe) + '</td></tr>';
+    };
+    var h = '<div class="card"><div class="card-kopf" style="margin:0">' + esc(titel) + '</div><div class="tbl-voll"><table class="tbl kompakt"><caption class="nur-lesen-text" style="position:absolute;left:-9999px">' + esc(titel) + '</caption><thead><tr><th>Kategorie</th><th class="zahlen">Budget</th><th class="zahlen">' + (ausgabe ? 'Ausgegeben' : 'Eingenommen') + '</th><th class="zahlen">' + (ausgabe ? 'Noch frei' : 'Noch offen') + '</th><th>' + (ausgabe ? 'Verbrauch' : 'Erreicht') + '</th></tr></thead><tbody>';
+    h += b.zeilen.map(function (z) { return zeile(z, false); }).join('');
+    if (b.gesamt) h += zeile(b.gesamt, true);
+    h += '</tbody></table></div>';
+    (b.hinweise || []).forEach(function (x) { h += '<div class="notiz" style="margin:4px 12px">' + esc(x.text) + ': ' + esc(lqEuro(x.wert)) + '</div>'; });
+    var qn = q || ['Q3', 'Q4', 'Q1', 'Q2'];
+    h += '<details class="klapp" style="margin:6px 12px 10px"><summary class="text-klein">Nach Quartalen</summary><div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Kategorie</th>' + qn.map(function (x) { return '<th class="zahlen">' + esc(x) + ' Budget</th><th class="zahlen">' + esc(x) + ' Ist</th>'; }).join('') + '</tr></thead><tbody>' +
+      b.zeilen.concat(b.gesamt ? [b.gesamt] : []).map(function (z) { return '<tr><td>' + esc(z.name) + '</td>' + qn.map(function (x, i) { return '<td class="zahlen">' + esc(lqEuro(z.budget[i])) + '</td><td class="zahlen">' + esc(lqEuro(z.ist[i])) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div></details></div>';
+    return h;
+  }
+  function renderLQ() {
+    var el = $('p-liquiditaet'); if (!el) return;
+    var d = LQ.daten[LQ.mandant];
+    var kopf = '<div class="card pad" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span class="text-klein">Gesellschaft</span>' +
+      ['XXL', 'LEV'].map(function (m) { return '<button type="button" class="btn ' + (m === LQ.mandant ? 'btn-primary' : 'btn-secondary') + '" style="padding:4px 14px" data-lq="mandant" data-m="' + m + '" aria-pressed="' + (m === LQ.mandant) + '">' + m + '</button>'; }).join('') +
+      '<button type="button" class="link-btn" data-lq="neu">Aktualisieren</button><span class="notiz" style="margin:0">Quelle: Liquiditätsplan 2026/27' + (d && d.status ? ' · ' + esc(d.status) : '') + '</span></div>';
+    if (LQ.laedt && !d) { el.innerHTML = '<div class="stapel">' + kopf + '<div class="laedt">Lade …</div></div>'; return; }
+    if (LQ.fehler && !d) { el.innerHTML = '<div class="stapel">' + kopf + '<div class="fehlerbox" role="alert">' + esc(LQ.fehler) + '</div></div>'; return; }
+    if (!d) { el.innerHTML = ''; return; }
+    var su = d.summen || {}, saldo = su.einnahmen_ist === null || su.ausgaben_ist === null || su.einnahmen_ist === undefined ? null : su.einnahmen_ist - su.ausgaben_ist;
+    var kachel = function (t, w, u) { return '<div class="lq-kachel"><div class="text-klein">' + esc(t) + '</div><div class="gross">' + esc(w) + '</div>' + (u ? '<div class="text-klein">' + esc(u) + '</div>' : '') + '</div>'; };
+    var kk = '';
+    (d.kontostaende || []).forEach(function (k) { kk += kachel('Kontostand ' + ({ 'XXL': 'XXL Girokonto', 'LEV-GIRO': 'LEV Girokonto', 'LEV-LOEWENPARK': 'Löwenpark' }[k.konto] || k.konto), lqEuro(k.stand), k.datum ? 'Stand ' + k.datum : ''); });
+    var pr = function (a, b) { return b ? Math.round(a / b * 100) + ' % vom Budget' : ''; };
+    kk += kachel('Ausgaben bisher', lqEuro(su.ausgaben_ist), 'Budget ' + lqEuro(su.ausgaben_budget) + (su.ausgaben_budget ? ' · ' + pr(su.ausgaben_ist, su.ausgaben_budget) : ''));
+    kk += kachel('Einnahmen bisher', lqEuro(su.einnahmen_ist), 'Budget ' + lqEuro(su.einnahmen_budget) + (su.einnahmen_budget ? ' · ' + pr(su.einnahmen_ist, su.einnahmen_budget) : ''));
+    kk += kachel('Saldo bisher', lqEuro(saldo), 'Einnahmen minus Ausgaben');
+    var h = '<div class="stapel">' + kopf + (LQ.fehler ? '<div class="fehlerbox" role="alert">' + esc(LQ.fehler) + '</div>' : '') + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">' + kk + '</div>';
+    h += lqTabelle(d.ausgaben, d.ausgaben.titel || 'Ausgaben', true, d.quartale) + lqTabelle(d.einnahmen, d.einnahmen.titel || 'Einnahmen', false, d.quartale);
+    var cf = d.cashflow || {};
+    if ((cf.zeilen || []).length) {
+      var qn = d.quartale || ['Q3', 'Q4', 'Q1', 'Q2'];
+      h += '<div class="card"><div class="card-kopf" style="margin:0">' + esc(cf.titel || 'Cash Flow') + '</div><div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th></th>' + qn.map(function (x) { return '<th class="zahlen">' + esc(x) + ' Budget</th><th class="zahlen">' + esc(x) + ' Ist</th>'; }).join('') + '</tr></thead><tbody>' +
+        cf.zeilen.map(function (z) { return '<tr><td>' + esc(z.name) + '</td>' + qn.map(function (x, i) { return '<td class="zahlen">' + esc(lqEuro(z.budget[i])) + '</td><td class="zahlen">' + esc(lqEuro(z.ist[i])) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div></div>';
+    }
+    el.innerHTML = h + '</div>';
+  }
+  function bindLQ() {
+    var p = $('p-liquiditaet'); if (!p) return;
+    p.addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-lq]'); if (!b) return;
+      if (b.getAttribute('data-lq') === 'mandant') { LQ.mandant = b.getAttribute('data-m'); LQ.fehler = ''; if (LQ.daten[LQ.mandant]) renderLQ(); else ladeLQ(); }
+      else if (b.getAttribute('data-lq') === 'neu') ladeLQ();
+    });
+  }
   // ---------- Auslagen: Protokoll (wer hat wann welche Auslage in welcher Höhe eingereicht) ----------
   var AP = { daten: null, fehler: null, laedt: false, mandant: '' };
   var AP_STATUS = { offen: 'Offen', bestaetigt: 'Freigegeben', korrigiert: 'Freigegeben', steuerberater: 'Beim Steuerberater', verworfen: 'Verworfen' };
@@ -7095,6 +7173,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   bindZG();
   bindAP();
   bindSP();
+  bindLQ();
   $('bereiche').addEventListener('toggle', function (e) { if (e.target && e.target.matches && e.target.matches('details[data-nav-ende]')) NAV.endeOffen = e.target.open; }, true);
   bindAW();
   bindAS();
@@ -7156,7 +7235,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261023173612';
+  var BUILD = '20261023184355';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
