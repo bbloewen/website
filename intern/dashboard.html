@@ -68,6 +68,12 @@ body.breit .wrap { max-width: none; }
 .bereich { display: block; width: 100%; text-align: left; background: none; border: 0; border-radius: var(--radius-sm); padding: 9px 10px; font-size: 14px; font-weight: 500; color: var(--text-secondary); cursor: pointer; border-left: 3px solid transparent; }
 .bereich:hover { background: var(--bg-subtle); color: var(--text-primary); }
 .bereich-unter .bereich { padding-left: 26px; font-size: 13px; font-weight: 400; }
+.bereich-ende { margin-top: 18px; }
+.bereich-ende summary { cursor: pointer; font-size: 12px; color: var(--text-muted); padding: 4px 12px; list-style: none; }
+.bereich-ende summary::-webkit-details-marker { display: none; }
+.bereich-ende summary::before { content: '▸ '; }
+.bereich-ende details[open] summary::before { content: '▾ '; }
+.bereich-ende .bereich { padding-left: 26px; font-size: 13px; font-weight: 400; }
 .bereich[aria-current="page"] { background: var(--color-orange-50); color: var(--text-primary); border-left-color: var(--color-brand-orange); }
 .spalte { flex: 1; min-width: 0; }
 .kopf { background: var(--bg-card); border-bottom: 1px solid var(--border); }
@@ -873,8 +879,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     { id: 'segmentierung', name: 'Segmentierung', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
     { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlungen XXL' }, { id: 'ueberweisungen-xxl', name: 'Überweisungen XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlungen LEV' }, { id: 'ueberweisungen-lev', name: 'Überweisungen LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlungen Löwenpark' }, { id: 'ueberweisungen-lev-lp', name: 'Überweisungen Löwenpark' }, { id: 'ausgang-xxl', name: 'Ausgangsrechnungen XXL' }, { id: 'ausgang-lev', name: 'Ausgangsrechnungen LEV' }, { id: 'spenden', name: 'Spenden' }, { id: 'rueckfragen', name: 'Rückfragen', versteckt: true }] },
     { id: 'administration', name: 'Administration', unter: true, tabs: [{ id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }, { id: 'kreditoren', name: 'Kreditoren / Debitoren' }] },
-    { id: 'zugriffe', name: 'Zugriffe', unter: true, tabs: [{ id: 'zugriffe', name: 'Zugriffe' }] },
-    { id: 'auslagen', name: 'Auslagen', tabs: [{ id: 'auslage-neu', name: 'Auslage einreichen' }, { id: 'vorschuss-neu', name: 'Vorschuss beantragen' }, { id: 'auslage-protokoll', name: 'Protokoll', recht: 'accounting' }] }
+    { id: 'auslagen', name: 'Auslagen', tabs: [{ id: 'auslage-neu', name: 'Auslage einreichen' }, { id: 'vorschuss-neu', name: 'Vorschuss beantragen' }, { id: 'auslage-protokoll', name: 'Protokoll', recht: 'accounting' }] },
+    { id: 'zugriffe', name: 'Zugriffe', eingeklappt: true, tabs: [{ id: 'zugriffe', name: 'Zugriffe' }] }
   ];
   var VW_PANEL = { 'zahlung-xxl': { el: 'p-vw-xxl', mandant: 'XXL' }, 'zahlung-lev': { el: 'p-vw-lev', mandant: 'LEV' } }; // Vorschüsse stehen oben in den Zahlungen, nicht bei Löwenpark
   var AG_TAB = { 'ausgang-xxl': 'XXL', 'ausgang-lev': 'LEV' };
@@ -907,11 +913,15 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     return r.indexOf('alles') < 0 && r.indexOf(RECHT_ID[b.id]) < 0 && (n.lesen || []).indexOf(RECHT_ID[b.id]) >= 0;
   }
 
+  var NAV = { endeOffen: false };
   function renderNavigation() {
     var b = bereichVon(S.tab);
     var h = '';
     BEREICHE.filter(darfBereich).forEach(function (x) {
-      h += '<li' + (x.unter ? ' class="bereich-unter"' : '') + '><button type="button" class="bereich" data-bereich="' + x.id + '"' + (x === b ? ' aria-current="page"' : '') + '>' + esc(x.name) + '</button></li>';
+      var knopf = '<button type="button" class="bereich" data-bereich="' + x.id + '"' + (x === b ? ' aria-current="page"' : '') + '>' + esc(x.name) + '</button>';
+      // Eingeklappt am Ende der Navigation: wird beim Zeigen des Boards nicht gesehen, nur auf bewussten Klick
+      if (x.eingeklappt) h += '<li class="bereich-ende"><details data-nav-ende' + (x === b || NAV.endeOffen ? ' open' : '') + '><summary>Verwaltung</summary>' + knopf + '</details></li>';
+      else h += '<li' + (x.unter ? ' class="bereich-unter"' : '') + '>' + knopf + '</li>';
     });
     $('bereiche').innerHTML = h;
     $('bereich-titel').textContent = b.name;
@@ -7018,6 +7028,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   bindZG();
   bindAP();
   bindSP();
+  $('bereiche').addEventListener('toggle', function (e) { if (e.target && e.target.matches && e.target.matches('details[data-nav-ende]')) NAV.endeOffen = e.target.open; }, true);
   bindAW();
   bindAS();
   bindUE();
@@ -7078,7 +7089,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261023113124';
+  var BUILD = '20261023121236';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
