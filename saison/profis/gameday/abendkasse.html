@@ -856,6 +856,10 @@ document.addEventListener('DOMContentLoaded', function () {
   var erneutEl = document.getElementById('ak-erneut');
   var ctaEl = document.getElementById('seatplan-cta');
   var barEl = document.getElementById('ak-bar');
+  // Karte = SumUp (Kartenleser Air), seit dem 23.10.2026 statt S-Cube (Marko: funktioniert nicht). Nur in einer aelteren
+  // App ohne SumUp bleibt der S-Cube-Weg (charge), damit der Knopf dort nicht ins Leere laeuft.
+  var sumupAn = !!(window.OpiBridge && window.OpiBridge.sumupAvailable && window.OpiBridge.sumupAvailable());
+  if (sumupAn) ctaEl.textContent = 'SumUp';
   var stornoEl = document.getElementById('ak-storno');
 
   // Der Seat-Picker steuert nur #seatplan-cta (= "Karte": disabled/hidden). Bar und Stornieren
@@ -1060,7 +1064,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     zeigeStatus();
     if (inApp && !bar && !gratis) {
-      window.OpiBridge.charge(gesamt).then(function () {
+      (sumupAn ? window.OpiBridge.sumup(gesamt) : window.OpiBridge.charge(gesamt)).then(function () {
         pay.state = 'ok';
         order.state = 'offen';
         zeigeStatus();
