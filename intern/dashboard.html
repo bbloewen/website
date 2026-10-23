@@ -884,7 +884,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
     { id: 'segmentierung', name: 'Segmentierung', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
-    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlungen XXL' }, { id: 'ueberweisungen-xxl', name: 'Überweisungen XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlungen LEV' }, { id: 'ueberweisungen-lev', name: 'Überweisungen LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlungen Löwenpark' }, { id: 'ueberweisungen-lev-lp', name: 'Überweisungen Löwenpark' }, { id: 'ausgang-xxl', name: 'Ausgangsrechnungen XXL' }, { id: 'ausgang-lev', name: 'Ausgangsrechnungen LEV' }, { id: 'spenden', name: 'Spenden' }, { id: 'rueckfragen', name: 'Rückfragen', versteckt: true }] },
+    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlungen XXL' }, { id: 'ueberweisungen-xxl', name: 'Überweisungen XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlungen LEV' }, { id: 'ueberweisungen-lev', name: 'Überweisungen LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlungen Löwenpark' }, { id: 'ueberweisungen-lev-lp', name: 'Überweisungen Löwenpark' }, { id: 'ausgang-xxl', name: 'Ausgangsrechnungen XXL' }, { id: 'ausgang-lev', name: 'Ausgangsrechnungen LEV' }, { id: 'rueckfragen', name: 'Rückfragen', versteckt: true }] },
+    { id: 'spendenbescheinigungen', name: 'Spendenbescheinigungen', unter: true, tabs: [{ id: 'spenden', name: 'Spendenbescheinigungen' }] },
     { id: 'administration', name: 'Administration', unter: true, tabs: [{ id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }, { id: 'kreditoren', name: 'Kreditoren / Debitoren' }] },
     { id: 'auslagen', name: 'Auslagen', tabs: [{ id: 'auslage-neu', name: 'Auslage einreichen' }, { id: 'vorschuss-neu', name: 'Vorschuss beantragen' }, { id: 'auslage-protokoll', name: 'Protokoll', recht: 'accounting' }] },
     { id: 'zugriffe', name: 'Zugriffe', eingeklappt: true, tabs: [{ id: 'zugriffe', name: 'Zugriffe' }] }
@@ -901,7 +902,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 
   // Welche Bereiche eine Person sieht, kommt aus der Rechte-Tabelle (crm-db). Hier wird nur ausgeblendet,
   // entschieden wird im Gateway.
-  var RECHT_ID = { ticketing: 'ticketing', gutscheine: 'gutscheine', website: 'website', segmentierung: 'crm', accounting: 'accounting', administration: 'accounting', auslagen: 'auslagen', zugriffe: 'zugriffe' };
+  var RECHT_ID = { ticketing: 'ticketing', gutscheine: 'gutscheine', website: 'website', segmentierung: 'crm', accounting: 'accounting', spendenbescheinigungen: 'accounting', administration: 'accounting', auslagen: 'auslagen', zugriffe: 'zugriffe' };
   function darfBereich(b) {
     var n = window.LOEWEN_NUTZER;
     if (!n) return true;
@@ -4800,7 +4801,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   // ---------- Administration: Zugriffe (wer war wann im Dashboard; Tabelle zugriffsprotokoll aus crm-db) ----------
   // Das Gateway schreibt jede Anmeldung mit und je Person und Bereich höchstens alle 15 Minuten einen Besuch. Einzelne Klicks werden nicht gespeichert.
   // ---------- Spenden: Zuwendungsbestätigungen (Basketball Löwen e.V.), Monatsliste aus dem Spendenworkflow, Belegbuch in Notion ----------
-  var SP = { monat: '', daten: null, fehler: '', laedt: false, laeuft: false, ergebnis: null, meldung: '', markiert: '' };
+  var SP = { monat: '', daten: null, fehler: '', laedt: false, laeuft: false, ergebnis: null, meldung: '', auswahl: {} };
   function spStartMonat() {
     var j = new Date(), letzter = new Date(j.getFullYear(), j.getMonth() + 1, 0).getDate();
     var bezug = (letzter - j.getDate()) <= 2 ? j : new Date(j.getFullYear(), j.getMonth() - 1, 15);
@@ -4811,6 +4812,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     for (var i = 0; i < 10; i++) { var d = new Date(j.getFullYear(), j.getMonth() - i, 15); l.push(d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2)); }
     return l;
   }
+  // Was noch zu bescheinigen ist: Spendeneingänge und gebuchte Spenden, die noch nicht im Spendenbelegbuch stehen
+  function spOffen() { return ((SP.daten && SP.daten.offen_liste) || []); }
+  function spAngehakt() { return spOffen().filter(function (f) { return f.status === 'bereit' && SP.auswahl[f.schluessel]; }); }
   async function ladeSP(still) {
     if (!SP.monat) SP.monat = spStartMonat();
     if (!still) { SP.laedt = true; SP.fehler = ''; renderSP(); }
@@ -4819,90 +4823,83 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var d = await res.json();
       if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Fehler beim Laden');
       SP.daten = d;
+      var neu = {};
+      (d.offen_liste || []).forEach(function (f) { if (f.status === 'bereit') neu[f.schluessel] = (f.schluessel in SP.auswahl) ? SP.auswahl[f.schluessel] : f.hat_anschrift !== false; });
+      SP.auswahl = neu;
     } catch (e) { SP.fehler = e.message; }
     SP.laedt = false; renderSP();
   }
   async function spErzeugen() {
     var d = SP.daten; if (!d || SP.laeuft) return;
-    var faelle = (d.faelle || []).filter(function (f) { return f.status === 'bereit'; });
+    var faelle = spAngehakt();
     if (!faelle.length) return;
     var summe = faelle.reduce(function (a, f) { return a + (Number(f.betrag) || 0); }, 0);
-    if (!window.confirm(faelle.length + ' Zuwendungsbestätigungen für ' + monatName(SP.monat) + ' über ' + formatEuro(summe) + ' erzeugen? Die Bescheinigungen werden als Mail-Entwurf in deinem Postfach abgelegt (Ausstellungsdatum ' + d.ausstellungsdatum + '), noch nichts wird verschickt.')) return;
+    if (!window.confirm(faelle.length + ' Zuwendungsbestätigung' + (faelle.length === 1 ? '' : 'en') + ' über ' + formatEuro(summe) + ' erzeugen? Die Mails liegen danach als Entwurf in deinem Postfach, noch nichts wird verschickt. Im Spendenbelegbuch gelten die Bestätigungen ab jetzt als versendet.')) return;
     SP.laeuft = true; SP.meldung = ''; SP.ergebnis = null; renderSP();
     try {
-      var res = await fetch('/webhook/spenden/erzeugen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ monat: SP.monat }) });
+      var res = await fetch('/webhook/spenden/erzeugen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ monat: SP.monat, auswahl: faelle.map(function (f) { return f.schluessel; }) }) });
       var r = await res.json();
       if (!res.ok || !r.ok) throw new Error(r.meldung || r.message || r.fehler || 'Nicht erzeugt');
       SP.ergebnis = r;
     } catch (e) { SP.meldung = e.message; }
     SP.laeuft = false; await ladeSP(true);
   }
-  async function spMarkieren(id, name) {
-    if (!window.confirm('Die Zuwendungsbestätigung für ' + name + ' als versendet eintragen? Das Datum von heute wird als Versanddatum gesetzt.')) return;
-    SP.meldung = ''; SP.markiert = id; renderSP();
-    try {
-      var res = await fetch('/webhook/spenden/markieren', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
-      var r = await res.json();
-      if (!res.ok || !r.ok) throw new Error(r.meldung || r.message || r.fehler || 'Nicht gespeichert');
-    } catch (e) { SP.meldung = e.message; }
-    SP.markiert = ''; await ladeSP(true);
-  }
   function renderSP() {
     var el = $('p-spenden'); if (!el) return;
     if (SP.laedt && !SP.daten) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
     if (SP.fehler && !SP.daten) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(SP.fehler) + '</div><button type="button" class="link-btn" data-sp="neu">Noch einmal versuchen</button>'; return; }
     if (!SP.daten) { el.innerHTML = ''; return; }
-    var d = SP.daten, faelle = d.faelle || [], bereit = faelle.filter(function (f) { return f.status === 'bereit'; });
+    var d = SP.daten, offen = spOffen(), bereit = offen.filter(function (f) { return f.status === 'bereit'; }), angehakt = spAngehakt();
     var summe = bereit.reduce(function (a, f) { return a + (Number(f.betrag) || 0); }, 0);
     var kachel = function (t, w, u) { return '<div style="background:var(--surface-1);border-radius:var(--radius);padding:1rem"><div class="text-klein">' + esc(t) + '</div><div style="font-size:24px;font-weight:500">' + esc(w) + '</div>' + (u ? '<div class="text-klein">' + esc(u) + '</div>' : '') + '</div>'; };
     var opt = spMonate().map(function (m) { return '<option value="' + m + '"' + (m === SP.monat ? ' selected' : '') + '>' + esc(monatName(m)) + '</option>'; }).join('');
+    var fehlt = bereit.filter(function (f) { return f.hat_anschrift === false; }).length;
     var h = '<div class="stapel">';
-    h += '<div class="card pad" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><label class="text-klein" for="sp-monat">Monat</label><select id="sp-monat" class="auswahl" data-sp="monat">' + opt + '</select><span class="notiz" style="margin:0">Ausstellungsdatum der Bestätigungen: ' + esc(d.ausstellungsdatum || '') + ' (Monatsletzter)</span><button type="button" class="link-btn" data-sp="neu">Aktualisieren</button></div>';
-    h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">' + kachel('Noch zu bescheinigen', zahl(bereit.length) + (bereit.length === 1 ? ' Spende' : ' Spenden'), formatEuro(summe)) + kachel('Klärung nötig', zahl(d.klaerung || 0), 'Angaben fehlen oder passen nicht') + kachel('Schon versendet', zahl(d.schon_versendet || 0), 'in diesem Monat') + '</div>';
+    h += '<div class="card pad" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><label class="text-klein" for="sp-monat">Gebuchte Spenden und Sammeleinzug aus</label><select id="sp-monat" class="auswahl" data-sp="monat">' + opt + '</select><span class="notiz" style="margin:0">Ausstellungsdatum: Monatsletzter der Spende, höchstens heute</span><button type="button" class="link-btn" data-sp="neu">Aktualisieren</button></div>';
+    h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">' + kachel('Noch zu bescheinigen', zahl(bereit.length) + (bereit.length === 1 ? ' Spende' : ' Spenden'), formatEuro(summe)) + kachel('Anschrift fehlt', zahl(fehlt), 'im Kontakt in Notion ergänzen') + '</div>';
     if (SP.meldung) h += '<div class="fehlerbox" role="alert">' + esc(SP.meldung) + '</div>';
     (d.hinweise || []).forEach(function (t) { h += '<div class="hinweis-warn" style="white-space:normal">' + esc(t) + '</div>'; });
     if (d.belegbuchLesbar === false) h += '<div class="hinweis-warn" style="white-space:normal">Das Spendenbelegbuch in Notion ist nicht lesbar. Solange das so ist, wird nichts erzeugt.</div>';
-    h += '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Zu bescheinigen · ' + esc(monatName(SP.monat)) + '</span><span>' +
-      (bereit.length && d.versandbereit !== false ? '<button type="button" class="btn btn-primary" style="padding:4px 10px" data-sp="erzeugen"' + (SP.laeuft ? ' disabled' : '') + '>' + (SP.laeuft ? 'Erzeuge …' : 'Entwürfe erzeugen (' + bereit.length + ')') + '</button>' : '') + '</span></div>' +
-      '<div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Spender</th><th>Zuwendung</th><th class="zahlen">Betrag</th><th>Herkunft</th><th>Angaben</th><th>Status</th></tr></thead><tbody>';
-    faelle.forEach(function (f) {
-      var ang = (f.hat_anschrift ? '<span style="color:var(--color-success)">Anschrift</span>' : '<span style="color:var(--color-error)">Anschrift fehlt</span>') + ' · ' + (f.hat_mail ? '<span style="color:var(--color-success)">Mail</span>' : '<span style="color:var(--color-error)">Mail fehlt</span>');
-      var st = f.status === 'bereit' ? 'bereit' : (f.status === 'klaerung' ? 'Klärung' : (f.status === 'schon_versendet' ? 'schon versendet' : esc(f.status)));
-      h += '<tr><td>' + esc(f.name) + '</td><td>' + esc(f.tag_der_zuwendung) + '</td><td class="zahlen">' + esc(formatEuro(f.betrag)) + '</td><td>' + esc(f.quelle || '') + '</td><td>' + ang + '</td><td>' + st + (f.grund ? '<div class="notiz" style="margin:0;white-space:normal">' + esc(f.grund) + '</div>' : '') + '</td></tr>';
+    var alleAn = bereit.length > 0 && bereit.every(function (f) { return SP.auswahl[f.schluessel]; });
+    h += '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Noch zu bescheinigen</span><span>' +
+      (bereit.length && d.versandbereit !== false ? '<button type="button" class="btn btn-primary" style="padding:4px 10px" data-sp="erzeugen"' + (SP.laeuft || !angehakt.length ? ' disabled' : '') + '>' + (SP.laeuft ? 'Erzeuge …' : 'Entwürfe erzeugen (' + angehakt.length + ')') + '</button>' : '') + '</span></div>' +
+      '<div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th style="width:1%"><input type="checkbox" data-sp="alle" aria-label="Alle Spenden auswählen"' + (alleAn ? ' checked' : '') + (bereit.length ? '' : ' disabled') + '></th><th>Datum</th><th>Spender</th><th class="zahlen">Betrag</th><th>Herkunft</th><th>Angaben</th><th>Hinweis</th></tr></thead><tbody>';
+    offen.forEach(function (f) {
+      var ang = f.hat_anschrift == null ? '–' : ((f.hat_anschrift ? '<span style="color:var(--color-success)">Anschrift</span>' : '<span style="color:var(--color-error)">Anschrift fehlt</span>') + ' · ' + (f.hat_mail ? '<span style="color:var(--color-success)">Mail</span>' : '<span style="color:var(--color-error)">Mail fehlt</span>'));
+      var kann = f.status === 'bereit';
+      h += '<tr><td><input type="checkbox" data-sp="wahl" data-id="' + esc(f.schluessel) + '" aria-label="Spende von ' + esc(f.name) + ' über ' + esc(formatEuro(f.betrag)) + ' auswählen"' + (kann && SP.auswahl[f.schluessel] ? ' checked' : '') + (kann ? '' : ' disabled') + '></td><td>' + esc(f.datum ? formatDate(String(f.datum).slice(0, 10)) : '–') + '</td><td>' + esc(f.name) + '</td><td class="zahlen">' + esc(formatEuro(f.betrag)) + '</td><td>' + esc(f.quelle || '') + (f.zweck ? '<div class="notiz" style="margin:0;white-space:normal">' + esc(f.zweck) + '</div>' : '') + '</td><td>' + ang + '</td><td>' + (f.status === 'klaerung' ? 'Klärung nötig: ' : '') + esc(f.grund || '') + '</td></tr>';
     });
-    if (!faelle.length) h += '<tr><td colspan="6" class="leer">Keine Spendenbuchungen in diesem Monat.</td></tr>';
-    h += '</tbody></table></div><div class="card-fuss">Es zählen nur Spenden, die in BuchhaltungsButler auf die Spenden-Kostenstellen gebucht sind. Geldspenden, immer mit der vollen Bestätigung (amtlicher Vordruck 034122).</div></div>';
+    if (!offen.length) h += '<tr><td colspan="7" class="leer">Alle Spenden sind bescheinigt.</td></tr>';
+    h += '</tbody></table></div><div class="card-fuss">Gebucht wird im Reiter Belege: Die Bestätigung erscheint dort als Ausgangsbeleg. Geldspenden, immer mit der vollen Bestätigung (amtlicher Vordruck 034122).</div></div>';
     if (SP.ergebnis) {
       var r = SP.ergebnis;
-      h += '<div class="card"><div class="card-kopf" style="margin:0">Ergebnis: ' + esc(zahl(r.entwuerfe || 0)) + ' Entwürfe erzeugt · ' + esc(zahl(r.abgelegt || 0)) + ' in BuchhaltungsButler abgelegt · ' + esc(zahl(r.gebucht || 0)) + ' gebucht</div><div class="notiz" style="margin:6px 12px;white-space:normal">Die Entwürfe liegen in deinem Gmail-Postfach, mit CC Aaron und Valentin und BCC an dich. Nach dem Absenden unten „Als versendet markieren“ klicken.</div><div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Spender</th><th class="zahlen">Betrag</th><th>Mail an</th><th>Belegbuch</th><th>BuchhaltungsButler</th></tr></thead><tbody>';
+      h += '<div class="card"><div class="card-kopf" style="margin:0">Ergebnis: ' + esc(zahl(r.entwuerfe || 0)) + ' Entwürfe erzeugt · ' + esc(zahl(r.abgelegt || 0)) + ' in BuchhaltungsButler abgelegt</div><div class="notiz" style="margin:6px 12px;white-space:normal">Die Entwürfe liegen in deinem Gmail-Postfach, mit CC Aaron und Valentin und BCC an dich. Sie stehen jetzt im Spendenbelegbuch als versendet.</div><div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Spender</th><th class="zahlen">Betrag</th><th>Mail an</th><th>Belegbuch</th><th>BuchhaltungsButler</th></tr></thead><tbody>';
       (r.ergebnis || []).forEach(function (z) { h += '<tr><td>' + esc(z.name) + '</td><td class="zahlen">' + esc(formatEuro(z.betrag)) + '</td><td>' + esc(z.mail_an || '') + '</td><td>' + esc(z.belegbuch || '') + '</td><td>' + esc(z.bhb_beleg ? ('Beleg ' + z.bhb_beleg + (z.gebucht ? ', gebucht' : '')) : (z.hinweis || '–')) + '</td></tr>'; });
       h += '</tbody></table></div></div>';
     }
-    var ung = d.ungebucht || [];
-    if (ung.length) {
-      h += '<div class="card"><div class="card-kopf" style="margin:0">Spendeneingänge, die noch nicht gebucht sind · ' + esc(zahl(ung.length)) + '</div><div class="notiz" style="margin:6px 12px;white-space:normal">Sie erscheinen oben erst, wenn die Zahlung in BuchhaltungsButler auf eine Spenden-Kostenstelle gebucht ist (Reiter Zahlungen LEV).</div><div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Datum</th><th>Spender</th><th>Verwendungszweck</th><th class="zahlen">Betrag</th></tr></thead><tbody>';
-      ung.forEach(function (z) { h += '<tr><td>' + esc(formatDate(String(z.datum).slice(0, 10))) + '</td><td>' + esc(String(z.gegenpartei || '').replace(/\s+/g, ' ')) + '</td><td>' + esc(z.zweck || '') + '</td><td class="zahlen">' + esc(formatEuro(z.betrag)) + '</td></tr>'; });
-      h += '</tbody></table></div></div>';
-    }
     var buch = (d.belegbuch || []).slice(0, 60);
-    h += '<div class="card"><div class="card-kopf" style="margin:0">Spendenbelegbuch · ' + esc(zahl((d.belegbuch || []).length)) + ' Einträge</div><div class="tbl-voll tbl-fix"><table class="tbl kompakt"><thead><tr><th>Spender</th><th>Eingang</th><th class="zahlen">Betrag</th><th>Bestätigung</th><th>Versendet am</th><th></th></tr></thead><tbody>';
+    h += '<div class="card"><div class="card-kopf" style="margin:0">Bereits bescheinigt · Spendenbelegbuch · ' + esc(zahl((d.belegbuch || []).length)) + ' Einträge</div><div class="tbl-voll tbl-fix"><table class="tbl kompakt"><thead><tr><th>Spender</th><th>Eingang</th><th class="zahlen">Betrag</th><th>Bestätigung</th><th>Versendet am</th></tr></thead><tbody>';
     buch.forEach(function (b) {
-      var knopf = b.status === 'Entwurf' ? '<button type="button" class="link-btn" data-sp="markieren" data-id="' + esc(b.id) + '" data-name="' + esc(b.spender) + '"' + (SP.markiert === b.id ? ' disabled' : '') + '>Als versendet markieren</button>' : '';
-      h += '<tr><td>' + esc(b.spender) + '</td><td>' + esc(b.eingang ? formatDate(String(b.eingang).slice(0, 10)) : '–') + '</td><td class="zahlen">' + esc(b.betrag == null ? '–' : formatEuro(b.betrag)) + '</td><td>' + esc(b.status || '–') + '</td><td>' + esc(b.versand ? formatDate(String(b.versand).slice(0, 10)) : '–') + '</td><td>' + knopf + '</td></tr>';
+      h += '<tr><td>' + esc(b.spender) + '</td><td>' + esc(b.eingang ? formatDate(String(b.eingang).slice(0, 10)) : '–') + '</td><td class="zahlen">' + esc(b.betrag == null ? '–' : formatEuro(b.betrag)) + '</td><td>' + esc(b.status || '–') + '</td><td>' + esc(b.versand ? formatDate(String(b.versand).slice(0, 10)) : '–') + '</td></tr>';
     });
-    if (!buch.length) h += '<tr><td colspan="6" class="leer">Noch keine Einträge.</td></tr>';
+    if (!buch.length) h += '<tr><td colspan="5" class="leer">Noch keine Einträge.</td></tr>';
     h += '</tbody></table></div></div>';
     el.innerHTML = h + '</div>';
   }
   function bindSP() {
     var p = $('p-spenden'); if (!p) return;
-    p.addEventListener('change', function (e) { var s = e.target.closest('select[data-sp="monat"]'); if (s) { SP.monat = s.value; SP.ergebnis = null; ladeSP(); } });
+    p.addEventListener('change', function (e) {
+      var s = e.target.closest('select[data-sp="monat"]'); if (s) { SP.monat = s.value; SP.ergebnis = null; ladeSP(); return; }
+      var c = e.target.closest('input[data-sp]'); if (!c) return;
+      if (c.getAttribute('data-sp') === 'alle') spOffen().forEach(function (f) { if (f.status === 'bereit') SP.auswahl[f.schluessel] = c.checked; });
+      else if (c.getAttribute('data-sp') === 'wahl') SP.auswahl[c.getAttribute('data-id')] = c.checked;
+      renderSP();
+    });
     p.addEventListener('click', function (e) {
       var b = e.target.closest('button[data-sp]'); if (!b) return;
       var w = b.getAttribute('data-sp');
       if (w === 'neu') ladeSP();
       else if (w === 'erzeugen') spErzeugen();
-      else if (w === 'markieren') spMarkieren(b.getAttribute('data-id'), b.getAttribute('data-name') || '');
     });
   }
   // ---------- Auslagen: Protokoll (wer hat wann welche Auslage in welcher Höhe eingereicht) ----------
@@ -7149,7 +7146,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261023151851';
+  var BUILD = '20261023161536';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
