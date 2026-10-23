@@ -202,14 +202,6 @@
           "abgesagt": false
         },
         {
-          "datum": "2026-11-22",
-          "zeit": "12:30",
-          "heim": false,
-          "gegner": "NINERS Chemnitz 2",
-          "ergebnis": null,
-          "abgesagt": false
-        },
-        {
           "datum": "2026-11-29",
           "zeit": "11:30",
           "heim": true,
@@ -218,8 +210,8 @@
           "abgesagt": false
         },
         {
-          "datum": "2026-12-06",
-          "zeit": "10:00",
+          "datum": "2026-12-04",
+          "zeit": "18:30",
           "heim": false,
           "gegner": "BIG Gotha",
           "ergebnis": null,
@@ -230,6 +222,14 @@
           "zeit": "09:00",
           "heim": true,
           "gegner": "Science City Jena",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2027-01-10",
+          "zeit": "10:00",
+          "heim": false,
+          "gegner": "NINERS Chemnitz 2",
           "ergebnis": null,
           "abgesagt": false
         },
