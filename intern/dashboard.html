@@ -5261,7 +5261,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var vText = '';
     if (v) {
       // Nur bei gleichem Betrag UND passendem Empfänger (Server prüft das), mit allem, was zur Annahme führt
-      vText = '<div class="notiz" style="margin:2px 0 0;color:var(--color-' + (v.art === 'beleg' ? 'success' : 'error') + ')">' + (v.art === 'beleg' ? 'Bezahlt? ' : 'Wohl schon bezahlt? ') + 'Abgang ' + esc(formatDate(v.datum)) + ', ' + esc(formatEuro(v.zahlBetrag)) + ' an ' + esc(v.name) + (v.zweck ? ', „' + esc(v.zweck) + '“' : '') + (v.art === 'beleg' ? ' (nennt diese Rechnung)' : ' (gleicher Betrag und Empfänger)') + '</div>';
+      if (v.art === 'eigen') vText = '<div class="notiz" style="margin:2px 0 0;white-space:normal;color:var(--color-success)"><b>Bezahlt.</b> Abgang ' + esc(formatDate(v.datum)) + ', ' + esc(formatEuro(v.zahlBetrag)) + ' an ' + esc(v.name) + (v.zweck ? ', „' + esc(v.zweck) + '“' : '') + '. Das ist unsere eigene Überweisung. Sie wird beim Zahlungsabgleich dem Beleg zugeordnet und gebucht (Reiter Zahlungen).</div>';
+      else vText = '<div class="notiz" style="margin:2px 0 0;color:var(--color-' + (v.art === 'beleg' ? 'success' : 'error') + ')">' + (v.art === 'beleg' ? 'Bezahlt? ' : 'Wohl schon bezahlt? ') + 'Abgang ' + esc(formatDate(v.datum)) + ', ' + esc(formatEuro(v.zahlBetrag)) + ' an ' + esc(v.name) + (v.zweck ? ', „' + esc(v.zweck) + '“' : '') + (v.art === 'beleg' ? ' (nennt diese Rechnung)' : ' (gleicher Betrag und Empfänger)') + '</div>';
     }
     var bank;
     if (p.inDatei) bank = '<div class="notiz" style="margin:0">in Datei<br>' + esc(p.inDatei) + '</div>';
@@ -5272,7 +5273,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       ' <button type="button" class="link-btn" data-ue="iban-speichern" data-key="' + esc(p.key) + '" title="Gilt nur für diesen Beleg">Speichern für diesen Beleg</button>' +
       (p.kreditor ? ' <button type="button" class="link-btn" data-ue="iban-kreditor" data-key="' + esc(p.key) + '" title="Die IBAN wird beim Kreditor in BuchhaltungsButler eingetragen und gilt für alle seine Belege">Am Kreditor speichern</button>' : '');
     bank += ueZeilenMsg(p.key);
-    var chk = '<input type="checkbox" data-ue="haken" data-key="' + esc(p.key) + '"' + (ueGewaehlt(p) ? ' checked' : '') + (p.inDatei || !ok ? ' disabled' : '') + ' aria-label="Beleg ' + esc(p.fallId) + ' überweisen">';
+    var chk = '<input type="checkbox" data-ue="haken" data-key="' + esc(p.key) + '"' + (ueGewaehlt(p) ? ' checked' : '') + (p.inDatei || !ok || (p.verdacht && p.verdacht.art === 'eigen') ? ' disabled' : '') + ' aria-label="Beleg ' + esc(p.fallId) + ' überweisen">';
     var teil = p.teilAnzahl ? '<div class="notiz" style="margin:0">' + p.teilIndex + '. von ' + p.teilAnzahl + '. Zahlungen</div>' : '';
     var dash = '';
     if (p.quelle === 'dashboard') {
@@ -6968,7 +6969,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261022175921';
+  var BUILD = '20261023095029';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
