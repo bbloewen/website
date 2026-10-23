@@ -5024,12 +5024,12 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       '<div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Status</th><th>Eingereicht am</th><th>Belegdatum</th><th>Ausgezahlt am</th><th>Eingereicht von</th><th>Auslage von</th><th>Mandant</th><th>Lieferant</th><th>Anlass</th><th class="zahlen">Betrag</th></tr></thead><tbody>';
     zeilen.forEach(function (z) {
       var status = z.gebucht ? 'Gebucht' : (AP_STATUS[z.status] || (z.rueckfrage ? z.status : 'Noch nicht geprüft'));
-      var euroT = z.zahlungGebucht ? 'Ausgezahlt am ' + formatDate(z.ausgezahlt) + ', in BuchhaltungsButler gebucht' : (z.zahlungZugeordnet ? 'Zahlung vom ' + formatDate(z.ausgezahlt) + ' zugeordnet, noch nicht gebucht' : 'Noch nicht ausgezahlt');
-      var sym = '<div class="ikreihe">' + ikSymbol('dok', true, 'Beleg liegt vor') + (z.zahlungGebucht ? ikSymbol('euro', true, euroT) : ikSymbol('euro', false, euroT, z.zahlungZugeordnet ? 'gruen' : null)) + ikSymbol('buch', !!z.gebucht, z.gebucht ? 'In BuchhaltungsButler gebucht' : status) + '</div>';
+      var euroT = z.zahlungGebucht ? 'Ausgezahlt am ' + formatDate(z.ausgezahlt) + ', in BuchhaltungsButler gebucht' : (z.zahlungZugeordnet ? 'Zahlung vom ' + formatDate(z.ausgezahlt) + ' zugeordnet, noch nicht gebucht' : (z.zahlungsdatei ? 'Zahlungsdatei erzeugt am ' + formatDate(z.zahlungsdateiDatum) + ' (' + z.zahlungsdatei + '), Zahlung noch nicht gebucht' : 'Noch nicht ausgezahlt'));
+      var sym = '<div class="ikreihe">' + ikSymbol('dok', true, 'Beleg liegt vor') + (z.zahlungGebucht ? ikSymbol('euro', true, euroT) : ikSymbol('euro', false, euroT, (z.zahlungZugeordnet || z.zahlungsdatei) ? 'gruen' : null)) + ikSymbol('buch', !!z.gebucht, z.gebucht ? 'In BuchhaltungsButler gebucht' : status) + '</div>';
       h += '<tr><td>' + sym + '<div class="notiz" style="margin:0">' + esc(status) + '</div></td><td>' + esc(formatDate(String(z.eingereicht || '').slice(0, 10))) + '<div class="notiz" style="margin:0">' + esc(String(z.eingereicht || '').slice(11, 16)) + (z.formular ? ' · Formular' : ' · E-Mail') + '</div></td><td>' + esc(z.belegdatum ? formatDate(String(z.belegdatum).slice(0, 10)) : '–') + '</td><td>' + esc(z.ausgezahlt ? formatDate(z.ausgezahlt) : '–') + '</td><td>' + esc(z.von) + '</td><td>' + esc(z.fuer || z.von) + '</td><td>' + esc(z.mandant || '–') + '</td><td>' + esc(z.lieferant) + '</td><td>' + esc(z.anlass) + '</td><td class="zahlen">' + (z.betrag == null ? '–' : esc(formatEuro(z.betrag))) + '</td></tr>';
     });
     if (!zeilen.length) h += '<tr><td colspan="10" class="leer">Noch keine Auslagen eingereicht.</td></tr>';
-    h += '</tbody></table></div><div class="card-fuss">Alle Auslagen, die per Formular oder E-Mail eingegangen sind (ohne Belege, die nur aus BuchhaltungsButler übernommen wurden). „Auslage von“ ist die Person, die das Geld zurückbekommt. Symbole: Beleg, Auszahlung (grün gefüllt = ausgezahlt und gebucht, grün umrandet = Zahlung zugeordnet), Buchung in BuchhaltungsButler.</div></div></div>';
+    h += '</tbody></table></div><div class="card-fuss">Alle Auslagen, die per Formular oder E-Mail eingegangen sind (ohne Belege, die nur aus BuchhaltungsButler übernommen wurden). „Auslage von“ ist die Person, die das Geld zurückbekommt. Symbole: Beleg, Auszahlung (grün gefüllt = ausgezahlt und gebucht, grün umrandet = Zahlungsdatei erzeugt oder Zahlung zugeordnet; „Ausgezahlt am“ ist dann das Datum der Zahlungsdatei bzw. der Zahlung), Buchung in BuchhaltungsButler.</div></div></div>';
     el.innerHTML = h;
   }
   function bindAP() {
@@ -7243,7 +7243,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261023213712';
+  var BUILD = '20261023220240';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
