@@ -481,6 +481,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   <section id="p-ueberweisungen-lev-lp" role="tabpanel" aria-labelledby="tab-ueberweisungen-lev-lp" hidden></section>
   <section id="p-ausgang-xxl" role="tabpanel" aria-labelledby="tab-ausgang-xxl" hidden></section>
   <section id="p-ausgang-lev" role="tabpanel" aria-labelledby="tab-ausgang-lev" hidden></section>
+  <section id="p-spenden" role="tabpanel" aria-labelledby="tab-spenden" hidden></section>
   <section id="p-kostenstellen" role="tabpanel" aria-labelledby="tab-kostenstellen" hidden></section>
   <section id="p-sachkonten-xxl" role="tabpanel" aria-labelledby="tab-sachkonten-xxl" hidden></section>
   <section id="p-sachkonten-lev" role="tabpanel" aria-labelledby="tab-sachkonten-lev" hidden></section>
@@ -717,7 +718,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   // Alle bisherigen Aufrufe der Daten-Webhooks laufen unverändert im Seitencode und werden hier umgeleitet.
   window.fetch = function (url, opts) {
     var u = typeof url === 'string' ? url : ((url && url.url) || '');
-    var m = /^\/webhook\/((?:ticketing|crm|accounting|auslagen|verwaltung)\/[a-z0-9-]+)(?:\?(.*))?$/.exec(u);
+    var m = /^\/webhook\/((?:ticketing|crm|accounting|auslagen|verwaltung|spenden)\/[a-z0-9-]+)(?:\?(.*))?$/.exec(u);
     if (!m || m[1] === 'ticketing/gutschein-karte' || m[1] === 'ticketing/board') return origFetch(url, opts);
     return ueberGateway(m[1], m[2] || '', opts);
   };
@@ -870,7 +871,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
     { id: 'segmentierung', name: 'Segmentierung', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
-    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlungen XXL' }, { id: 'ueberweisungen-xxl', name: 'Überweisungen XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlungen LEV' }, { id: 'ueberweisungen-lev', name: 'Überweisungen LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlungen Löwenpark' }, { id: 'ueberweisungen-lev-lp', name: 'Überweisungen Löwenpark' }, { id: 'ausgang-xxl', name: 'Ausgangsrechnungen XXL' }, { id: 'ausgang-lev', name: 'Ausgangsrechnungen LEV' }, { id: 'rueckfragen', name: 'Rückfragen', versteckt: true }] },
+    { id: 'accounting', name: 'Accounting', tabs: [{ id: 'belege-xxl', name: 'Belege XXL' }, { id: 'zahlung-xxl', name: 'Zahlungen XXL' }, { id: 'ueberweisungen-xxl', name: 'Überweisungen XXL' }, { id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlungen LEV' }, { id: 'ueberweisungen-lev', name: 'Überweisungen LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlungen Löwenpark' }, { id: 'ueberweisungen-lev-lp', name: 'Überweisungen Löwenpark' }, { id: 'ausgang-xxl', name: 'Ausgangsrechnungen XXL' }, { id: 'ausgang-lev', name: 'Ausgangsrechnungen LEV' }, { id: 'spenden', name: 'Spenden' }, { id: 'rueckfragen', name: 'Rückfragen', versteckt: true }] },
     { id: 'administration', name: 'Administration', unter: true, tabs: [{ id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }, { id: 'kreditoren', name: 'Kreditoren / Debitoren' }] },
     { id: 'zugriffe', name: 'Zugriffe', unter: true, tabs: [{ id: 'zugriffe', name: 'Zugriffe' }] },
     { id: 'auslagen', name: 'Auslagen', tabs: [{ id: 'auslage-neu', name: 'Auslage einreichen' }, { id: 'vorschuss-neu', name: 'Vorschuss beantragen' }, { id: 'auslage-protokoll', name: 'Protokoll', recht: 'accounting' }] }
@@ -960,6 +961,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (t === 'auslage-neu') ladeAU();
     if (t === 'vorschuss-neu') ladeVZ();
     if (t === 'auslage-protokoll') ladeAP();
+    if (t === 'spenden') ladeSP();
     if (VW_PANEL[t]) ladeVW();
     if (AG_TAB[t]) ladeAG(AG_TAB[t]);
     if (t === 'kreditoren' && !KR.daten && !KR.laedt) ladeKR(); else if (t === 'kreditoren') renderKR();
@@ -4733,6 +4735,112 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   }
   // ---------- Administration: Zugriffe (wer war wann im Dashboard; Tabelle zugriffsprotokoll aus crm-db) ----------
   // Das Gateway schreibt jede Anmeldung mit und je Person und Bereich höchstens alle 15 Minuten einen Besuch. Einzelne Klicks werden nicht gespeichert.
+  // ---------- Spenden: Zuwendungsbestätigungen (Basketball Löwen e.V.), Monatsliste aus dem Spendenworkflow, Belegbuch in Notion ----------
+  var SP = { monat: '', daten: null, fehler: '', laedt: false, laeuft: false, ergebnis: null, meldung: '', markiert: '' };
+  function spStartMonat() {
+    var j = new Date(), letzter = new Date(j.getFullYear(), j.getMonth() + 1, 0).getDate();
+    var bezug = (letzter - j.getDate()) <= 2 ? j : new Date(j.getFullYear(), j.getMonth() - 1, 15);
+    return bezug.getFullYear() + '-' + ('0' + (bezug.getMonth() + 1)).slice(-2);
+  }
+  function spMonate() {
+    var l = [], j = new Date();
+    for (var i = 0; i < 10; i++) { var d = new Date(j.getFullYear(), j.getMonth() - i, 15); l.push(d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2)); }
+    return l;
+  }
+  async function ladeSP(still) {
+    if (!SP.monat) SP.monat = spStartMonat();
+    if (!still) { SP.laedt = true; SP.fehler = ''; renderSP(); }
+    try {
+      var res = await fetch('/webhook/spenden/liste?monat=' + encodeURIComponent(SP.monat));
+      var d = await res.json();
+      if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Fehler beim Laden');
+      SP.daten = d;
+    } catch (e) { SP.fehler = e.message; }
+    SP.laedt = false; renderSP();
+  }
+  async function spErzeugen() {
+    var d = SP.daten; if (!d || SP.laeuft) return;
+    var faelle = (d.faelle || []).filter(function (f) { return f.status === 'bereit'; });
+    if (!faelle.length) return;
+    var summe = faelle.reduce(function (a, f) { return a + (Number(f.betrag) || 0); }, 0);
+    if (!window.confirm(faelle.length + ' Zuwendungsbestätigungen für ' + monatName(SP.monat) + ' über ' + formatEuro(summe) + ' erzeugen? Die Bescheinigungen werden als Mail-Entwurf in deinem Postfach abgelegt (Ausstellungsdatum ' + d.ausstellungsdatum + '), noch nichts wird verschickt.')) return;
+    SP.laeuft = true; SP.meldung = ''; SP.ergebnis = null; renderSP();
+    try {
+      var res = await fetch('/webhook/spenden/erzeugen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ monat: SP.monat }) });
+      var r = await res.json();
+      if (!res.ok || !r.ok) throw new Error(r.meldung || r.message || r.fehler || 'Nicht erzeugt');
+      SP.ergebnis = r;
+    } catch (e) { SP.meldung = e.message; }
+    SP.laeuft = false; await ladeSP(true);
+  }
+  async function spMarkieren(id, name) {
+    if (!window.confirm('Die Zuwendungsbestätigung für ' + name + ' als versendet eintragen? Das Datum von heute wird als Versanddatum gesetzt.')) return;
+    SP.meldung = ''; SP.markiert = id; renderSP();
+    try {
+      var res = await fetch('/webhook/spenden/markieren', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
+      var r = await res.json();
+      if (!res.ok || !r.ok) throw new Error(r.meldung || r.message || r.fehler || 'Nicht gespeichert');
+    } catch (e) { SP.meldung = e.message; }
+    SP.markiert = ''; await ladeSP(true);
+  }
+  function renderSP() {
+    var el = $('p-spenden'); if (!el) return;
+    if (SP.laedt && !SP.daten) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
+    if (SP.fehler && !SP.daten) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(SP.fehler) + '</div><button type="button" class="link-btn" data-sp="neu">Noch einmal versuchen</button>'; return; }
+    if (!SP.daten) { el.innerHTML = ''; return; }
+    var d = SP.daten, faelle = d.faelle || [], bereit = faelle.filter(function (f) { return f.status === 'bereit'; });
+    var summe = bereit.reduce(function (a, f) { return a + (Number(f.betrag) || 0); }, 0);
+    var kachel = function (t, w, u) { return '<div style="background:var(--surface-1);border-radius:var(--radius);padding:1rem"><div class="text-klein">' + esc(t) + '</div><div style="font-size:24px;font-weight:500">' + esc(w) + '</div>' + (u ? '<div class="text-klein">' + esc(u) + '</div>' : '') + '</div>'; };
+    var opt = spMonate().map(function (m) { return '<option value="' + m + '"' + (m === SP.monat ? ' selected' : '') + '>' + esc(monatName(m)) + '</option>'; }).join('');
+    var h = '<div class="stapel">';
+    h += '<div class="card pad" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><label class="text-klein" for="sp-monat">Monat</label><select id="sp-monat" class="auswahl" data-sp="monat">' + opt + '</select><span class="notiz" style="margin:0">Ausstellungsdatum der Bestätigungen: ' + esc(d.ausstellungsdatum || '') + ' (Monatsletzter)</span><button type="button" class="link-btn" data-sp="neu">Aktualisieren</button></div>';
+    h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">' + kachel('Noch zu bescheinigen', zahl(bereit.length) + (bereit.length === 1 ? ' Spende' : ' Spenden'), formatEuro(summe)) + kachel('Klärung nötig', zahl(d.klaerung || 0), 'Angaben fehlen oder passen nicht') + kachel('Schon versendet', zahl(d.schon_versendet || 0), 'in diesem Monat') + '</div>';
+    if (SP.meldung) h += '<div class="fehlerbox" role="alert">' + esc(SP.meldung) + '</div>';
+    (d.hinweise || []).forEach(function (t) { h += '<div class="hinweis-warn" style="white-space:normal">' + esc(t) + '</div>'; });
+    if (d.belegbuchLesbar === false) h += '<div class="hinweis-warn" style="white-space:normal">Das Spendenbelegbuch in Notion ist nicht lesbar. Solange das so ist, wird nichts erzeugt.</div>';
+    h += '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Zu bescheinigen · ' + esc(monatName(SP.monat)) + '</span><span>' +
+      (bereit.length && d.versandbereit !== false ? '<button type="button" class="btn btn-primary" style="padding:4px 10px" data-sp="erzeugen"' + (SP.laeuft ? ' disabled' : '') + '>' + (SP.laeuft ? 'Erzeuge …' : 'Entwürfe erzeugen (' + bereit.length + ')') + '</button>' : '') + '</span></div>' +
+      '<div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Spender</th><th>Zuwendung</th><th class="zahlen">Betrag</th><th>Herkunft</th><th>Angaben</th><th>Status</th></tr></thead><tbody>';
+    faelle.forEach(function (f) {
+      var ang = (f.hat_anschrift ? '<span style="color:var(--color-success)">Anschrift</span>' : '<span style="color:var(--color-error)">Anschrift fehlt</span>') + ' · ' + (f.hat_mail ? '<span style="color:var(--color-success)">Mail</span>' : '<span style="color:var(--color-error)">Mail fehlt</span>');
+      var st = f.status === 'bereit' ? 'bereit' : (f.status === 'klaerung' ? 'Klärung' : (f.status === 'schon_versendet' ? 'schon versendet' : esc(f.status)));
+      h += '<tr><td>' + esc(f.name) + '</td><td>' + esc(f.tag_der_zuwendung) + '</td><td class="zahlen">' + esc(formatEuro(f.betrag)) + '</td><td>' + esc(f.quelle || '') + '</td><td>' + ang + '</td><td>' + st + (f.grund ? '<div class="notiz" style="margin:0;white-space:normal">' + esc(f.grund) + '</div>' : '') + '</td></tr>';
+    });
+    if (!faelle.length) h += '<tr><td colspan="6" class="leer">Keine Spendenbuchungen in diesem Monat.</td></tr>';
+    h += '</tbody></table></div><div class="card-fuss">Es zählen nur Spenden, die in BuchhaltungsButler auf die Spenden-Kostenstellen gebucht sind. Geldspenden, immer mit der vollen Bestätigung (amtlicher Vordruck 034122).</div></div>';
+    if (SP.ergebnis) {
+      var r = SP.ergebnis;
+      h += '<div class="card"><div class="card-kopf" style="margin:0">Ergebnis: ' + esc(zahl(r.entwuerfe || 0)) + ' Entwürfe erzeugt · ' + esc(zahl(r.abgelegt || 0)) + ' in BuchhaltungsButler abgelegt · ' + esc(zahl(r.gebucht || 0)) + ' gebucht</div><div class="notiz" style="margin:6px 12px;white-space:normal">Die Entwürfe liegen in deinem Gmail-Postfach, mit CC Aaron und Valentin und BCC an dich. Nach dem Absenden unten „Als versendet markieren“ klicken.</div><div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Spender</th><th class="zahlen">Betrag</th><th>Mail an</th><th>Belegbuch</th><th>BuchhaltungsButler</th></tr></thead><tbody>';
+      (r.ergebnis || []).forEach(function (z) { h += '<tr><td>' + esc(z.name) + '</td><td class="zahlen">' + esc(formatEuro(z.betrag)) + '</td><td>' + esc(z.mail_an || '') + '</td><td>' + esc(z.belegbuch || '') + '</td><td>' + esc(z.bhb_beleg ? ('Beleg ' + z.bhb_beleg + (z.gebucht ? ', gebucht' : '')) : (z.hinweis || '–')) + '</td></tr>'; });
+      h += '</tbody></table></div></div>';
+    }
+    var ung = d.ungebucht || [];
+    if (ung.length) {
+      h += '<div class="card"><div class="card-kopf" style="margin:0">Spendeneingänge, die noch nicht gebucht sind · ' + esc(zahl(ung.length)) + '</div><div class="notiz" style="margin:6px 12px;white-space:normal">Sie erscheinen oben erst, wenn die Zahlung in BuchhaltungsButler auf eine Spenden-Kostenstelle gebucht ist (Reiter Zahlungen LEV).</div><div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Datum</th><th>Spender</th><th>Verwendungszweck</th><th class="zahlen">Betrag</th></tr></thead><tbody>';
+      ung.forEach(function (z) { h += '<tr><td>' + esc(formatDate(String(z.datum).slice(0, 10))) + '</td><td>' + esc(String(z.gegenpartei || '').replace(/\s+/g, ' ')) + '</td><td>' + esc(z.zweck || '') + '</td><td class="zahlen">' + esc(formatEuro(z.betrag)) + '</td></tr>'; });
+      h += '</tbody></table></div></div>';
+    }
+    var buch = (d.belegbuch || []).slice(0, 60);
+    h += '<div class="card"><div class="card-kopf" style="margin:0">Spendenbelegbuch · ' + esc(zahl((d.belegbuch || []).length)) + ' Einträge</div><div class="tbl-voll tbl-fix"><table class="tbl kompakt"><thead><tr><th>Spender</th><th>Eingang</th><th class="zahlen">Betrag</th><th>Bestätigung</th><th>Versendet am</th><th></th></tr></thead><tbody>';
+    buch.forEach(function (b) {
+      var knopf = b.status === 'Entwurf' ? '<button type="button" class="link-btn" data-sp="markieren" data-id="' + esc(b.id) + '" data-name="' + esc(b.spender) + '"' + (SP.markiert === b.id ? ' disabled' : '') + '>Als versendet markieren</button>' : '';
+      h += '<tr><td>' + esc(b.spender) + '</td><td>' + esc(b.eingang ? formatDate(String(b.eingang).slice(0, 10)) : '–') + '</td><td class="zahlen">' + esc(b.betrag == null ? '–' : formatEuro(b.betrag)) + '</td><td>' + esc(b.status || '–') + '</td><td>' + esc(b.versand ? formatDate(String(b.versand).slice(0, 10)) : '–') + '</td><td>' + knopf + '</td></tr>';
+    });
+    if (!buch.length) h += '<tr><td colspan="6" class="leer">Noch keine Einträge.</td></tr>';
+    h += '</tbody></table></div></div>';
+    el.innerHTML = h + '</div>';
+  }
+  function bindSP() {
+    var p = $('p-spenden'); if (!p) return;
+    p.addEventListener('change', function (e) { var s = e.target.closest('select[data-sp="monat"]'); if (s) { SP.monat = s.value; SP.ergebnis = null; ladeSP(); } });
+    p.addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-sp]'); if (!b) return;
+      var w = b.getAttribute('data-sp');
+      if (w === 'neu') ladeSP();
+      else if (w === 'erzeugen') spErzeugen();
+      else if (w === 'markieren') spMarkieren(b.getAttribute('data-id'), b.getAttribute('data-name') || '');
+    });
+  }
   // ---------- Auslagen: Protokoll (wer hat wann welche Auslage in welcher Höhe eingereicht) ----------
   var AP = { daten: null, fehler: null, laedt: false, mandant: '' };
   var AP_STATUS = { offen: 'Offen', bestaetigt: 'Freigegeben', korrigiert: 'Freigegeben', steuerberater: 'Beim Steuerberater', verworfen: 'Verworfen' };
@@ -6909,6 +7017,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   bindKS();
   bindZG();
   bindAP();
+  bindSP();
   bindAW();
   bindAS();
   bindUE();
@@ -6969,7 +7078,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261023095029';
+  var BUILD = '20261023113124';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
