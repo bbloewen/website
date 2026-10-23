@@ -360,6 +360,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   <section id="p-auslastung" role="tabpanel" aria-labelledby="tab-auslastung" hidden></section>
   <section id="p-auswertung" role="tabpanel" aria-labelledby="tab-auswertung" hidden></section>
   <section id="p-ausschank" role="tabpanel" aria-labelledby="tab-ausschank" hidden></section>
+  <section id="p-firmenevents" role="tabpanel" aria-labelledby="tab-firmenevents" hidden></section>
   <section id="p-statistik" role="tabpanel" aria-labelledby="tab-statistik" hidden></section>
 
   <section id="p-erstellen" role="tabpanel" aria-labelledby="tab-erstellen" hidden>
@@ -886,7 +887,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   // ---------- Navigation: Bereiche (links) und Tabs (oben) ----------
   // Neuer Tab = Eintrag hier + <section id="p-..."> im HTML.
   var BEREICHE = [
-    { id: 'ticketing', name: 'Spieltag', tabs: [{ id: 'dauerkarten', name: 'Tickets' }, { id: 'auslastung', name: 'Auslastung' }, { id: 'auswertung', name: 'Auswertung' }, { id: 'ausschank', name: 'Ausschank' }] },
+    { id: 'ticketing', name: 'Spieltag', tabs: [{ id: 'dauerkarten', name: 'Tickets' }, { id: 'auslastung', name: 'Auslastung' }, { id: 'auswertung', name: 'Auswertung' }, { id: 'ausschank', name: 'Ausschank' }, { id: 'firmenevents', name: 'Firmen-Events' }] },
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
     { id: 'segmentierung', name: 'Segmentierung', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
@@ -982,6 +983,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (t === 'versand') loadVersand();
     if (t === 'auswertung') ladeAW();
     if (t === 'ausschank') ladeAS();
+    if (t === 'firmenevents') ladeFE();
     if (BE_MANDANT[t]) ladeListe('beleg', BE_MANDANT[t]);
     if (ZA_KONTO[t]) ladeListe('zahlung', ZA_KONTO[t]);
     if (t === 'buchungstexte') ladeBT();
@@ -5321,6 +5323,65 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       if (b.getAttribute('data-aw-aktion') === 'abschliessen') awAbschliessen(b.getAttribute('data-key'));
     });
   }
+  // ---------- Spieltag: Firmen-Events (Sponsor lädt Kunden zum Heimspiel ein): Anmeldungen, ausgestellte Tickets, tatsächliche Besucher ----------
+  // Webhook ticketing/firmenevents: Anmeldungen aus der Data Table, Tickets und Einlass (Check-in) aus pretix über die Gutscheine FE-…, Aktionen und Spiele von der Website.
+  var FE = { daten: null, fehler: null, laedt: false };
+  async function ladeFE() {
+    FE.laedt = true; FE.fehler = null; renderFE();
+    try {
+      var res = await fetch('/webhook/ticketing/firmenevents');
+      var d = await res.json();
+      if (!res.ok || !d.ok) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
+      FE.daten = d.aktionen || [];
+    } catch (e) { FE.fehler = e.message; }
+    FE.laedt = false; renderFE();
+  }
+  function feGespielt(a) {
+    if (!a.spiel || !a.spiel.datum) return false;
+    var t = new Date(a.spiel.datum + 'T' + (a.spiel.zeit || '00:00') + ':00');
+    return !isNaN(t.getTime()) && t.getTime() <= Date.now();
+  }
+  function renderFE() {
+    var el = $('p-firmenevents'); if (!el) return;
+    if (FE.laedt && !FE.daten) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
+    if (FE.fehler && !FE.daten) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(FE.fehler) + '</div>'; return; }
+    if (!FE.daten) { el.innerHTML = ''; return; }
+    var h = '<div class="stapel">';
+    if (FE.fehler) h += '<div class="fehlerbox" role="alert">' + esc(FE.fehler) + '</div>';
+    if (!FE.daten.length) h += '<div class="card pad"><div class="leer">Noch keine Firmen-Events.</div></div>';
+    FE.daten.forEach(function (a) {
+      var s = a.summen || {}, gespielt = feGespielt(a);
+      var spielText = a.spiel ? 'Heimspiel ' + formatDate(a.spiel.datum) + (a.spiel.zeit ? ', ' + a.spiel.zeit + ' Uhr' : '') + (a.spiel.gegner ? ' gegen ' + a.spiel.gegner : '') : 'Spiel noch nicht festgelegt';
+      var schluss = a.anmeldeschluss ? 'Anmeldeschluss ' + formatDate(String(a.anmeldeschluss).slice(0, 10)) + ', ' + String(a.anmeldeschluss).slice(11, 16) + ' Uhr' : '';
+      var besucherText = gespielt ? zahl(s.eingecheckt || 0) + (s.quote === null || s.quote === undefined ? '' : ' (' + String(s.quote).replace('.', ',') + ' %)') : 'noch nicht gespielt';
+      h += '<div class="card"><div class="card-kopf"><div style="font-weight:500">' + esc(a.name) + (a.aktiv ? ' <span class="notiz" style="margin:0">· laufende Aktion</span>' : '') + '</div>' +
+        '<div class="unter">' + esc(spielText) + (a.block ? ' · Block ' + esc(a.block) : '') + (schluss ? ' · ' + esc(schluss) : '') + '</div>' +
+        '<div class="unter">Firmen ' + esc(zahl(s.firmen || 0)) + ' · angemeldet ' + esc(zahl(s.angemeldet || 0)) + ' Tickets · ausgestellt ' + esc(zahl(s.ausgestellt || 0)) + (a.kontingent ? ' von ' + esc(zahl(a.kontingent)) : '') + ' · Besucher ' + esc(besucherText) + '</div></div>' +
+        '<div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">Anmeldungen und Besucher ' + esc(a.name) + '</caption><thead><tr><th scope="col">Firma</th><th scope="col">Angemeldet am</th><th scope="col">Angemeldet</th><th scope="col">Ausgestellt</th><th scope="col">Besucher</th><th scope="col">Quote</th></tr></thead><tbody>';
+      if (!(a.firmen || []).length) h += '<tr><td colspan="6" class="leer">Noch keine Anmeldungen.</td></tr>';
+      (a.firmen || []).forEach(function (f) {
+        var abw = '';
+        if (f.angemeldet > 0 && f.ausgestellt === 0) abw = 'noch keine Tickets ausgestellt';
+        else if (f.ausgestellt > 0 && f.angemeldet > 0 && f.ausgestellt < f.angemeldet) abw = 'weniger ausgestellt als angemeldet';
+        else if (f.ausgestellt > f.angemeldet && f.angemeldet > 0) abw = 'mehr ausgestellt als angemeldet';
+        else if (f.angemeldet === 0 && f.ausgestellt > 0) abw = 'ohne Eintrag in der Anmeldeliste';
+        var quote = gespielt && f.ausgestellt > 0 ? String(Math.round(f.eingecheckt / f.ausgestellt * 1000) / 10).replace('.', ',') + ' %' : '–';
+        var kontakt = [f.ansprechpartner ? esc(f.ansprechpartner) : '', f.email ? '<a href="mailto:' + esc(f.email) + '">' + esc(f.email) + '</a>' : ''].filter(Boolean).join(' · ');
+        h += '<tr><td><div class="fett">' + esc(f.firma) + '</div>' + (kontakt ? '<div class="notiz" style="margin:0">' + kontakt + '</div>' : '') +
+          (f.gutscheine && f.gutscheine.length ? '<div class="notiz" style="margin:0">' + f.gutscheine.map(esc).join(', ') + '</div>' : '') +
+          (f.anmerkung && f.anmerkung.length ? '<div class="notiz" style="margin:0;white-space:normal">' + f.anmerkung.map(esc).join(' · ') + '</div>' : '') + '</td>' +
+          '<td>' + (f.am ? esc(formatDate(f.am.slice(0, 10))) : '–') + (f.anmeldungen > 1 ? '<div class="notiz" style="margin:0">' + esc(String(f.anmeldungen)) + ' Anmeldungen</div>' : '') + '</td>' +
+          '<td>' + esc(zahl(f.angemeldet)) + (f.vip || f.mitarbeitende ? '<div class="notiz" style="margin:0">' + esc(zahl(f.vip)) + ' VIP, ' + esc(zahl(f.mitarbeitende)) + ' Mitarbeitende</div>' : '') + '</td>' +
+          '<td>' + esc(zahl(f.ausgestellt)) + (abw ? '<div class="notiz" style="margin:0;white-space:normal">' + esc(abw) + '</div>' : '') + '</td>' +
+          '<td>' + (gespielt ? esc(zahl(f.eingecheckt)) : '–') + '</td><td>' + esc(quote) + '</td></tr>';
+      });
+      if ((a.firmen || []).length) h += '<tr class="summe"><td>Summe</td><td></td><td>' + esc(zahl(s.angemeldet || 0)) + '</td><td>' + esc(zahl(s.ausgestellt || 0)) + '</td><td>' + (gespielt ? esc(zahl(s.eingecheckt || 0)) : '–') + '</td><td>' + (gespielt && s.quote !== null && s.quote !== undefined ? esc(String(s.quote).replace('.', ',')) + ' %' : '–') + '</td></tr>';
+      h += '</tbody></table></div></div>';
+    });
+    h += '<div class="notiz">Angemeldet: Anmeldungen über die Einladungsseite und per Mail. Ausgestellt: Tickets über die Gutscheine FE-… in pretix. Besucher: Tickets mit Einlass beim Scan, sobald das Spiel angepfiffen ist.</div>';
+    h += '<div>' + aktualisierenBtn('firmenevents') + '</div></div>';
+    el.innerHTML = h;
+  }
   // ---------- Spieltag: Ausschank-Artikelverkaufsbericht (Data Table Ausschank-Verkaeufe, Webhook ticketing/ausschank-bericht) ----------
   // Je Tag (Europe/Berlin): Artikel mit Menge/Liter/Umsatz/Pfand, Zahlarten, Leergut (Becher mit Pfand gegen Pfand zurück), Bier.
   // Abgleich mit der Spieltag-Auswertung (Ausschank Karte €, Ausschank bar €), sobald diese abgeschlossen ist.
@@ -6403,6 +6464,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       if (a === 'dauerkarten') loadDauerkarten();
       else if (a === 'auswertung') { loadDauerkarten(); ladeAW(); }
       else if (a === 'ausschank') ladeAS();
+      else if (a === 'firmenevents') ladeFE();
       else if (a === 'platzkarten') platzkartenDrucken();
       else if (a === 'stats') loadStats();
       else if (a === 'seo') loadSeo();
@@ -7243,7 +7305,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261023221740';
+  var BUILD = '20261023230915';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
