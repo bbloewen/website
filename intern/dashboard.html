@@ -249,6 +249,10 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 .form > * + * { margin-top: 16px; }
 .feld-label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px; }
 .pflicht { color: var(--color-error); }
+.maske-raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px 16px; }
+.maske-feld .feld-label { display: block; margin-bottom: 4px; }
+.maske-haken { align-self: end; padding-bottom: 8px; }
+.nur-lesen .nur-schreiben { display: none; }
 .eingabe { width: 100%; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 8px 12px; font-size: 14px; background: var(--bg-card); }
 .tbl.aw th:not(:first-child), .tbl.aw td:not(:first-child) { text-align: right; }
 .tbl.aw input[type=number] { text-align: right; }
@@ -2647,11 +2651,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     return h.join(' ');
   }
   // --- Unternehmensseite (#unternehmen/<notion_id>) ---
-  var FI = { id: '', firma: null, fehler: null };
+  var FI = { id: '', firma: null, fehler: null, edit: null, meldung: '', aenderungen: null };
   function zeigeFirma(id) {
-    FI.id = id; FI.firma = null; FI.fehler = null; renderFirma();
+    FI.id = id; FI.firma = null; FI.fehler = null; FI.edit = null; FI.meldung = ''; FI.aenderungen = null; renderFirma();
     holeJson('/webhook/crm/firma?id=' + encodeURIComponent(id))
-      .then(function (r) { if (FI.id !== id) return; FI.firma = r.firma || false; renderFirma(); })
+      .then(function (r) { if (FI.id !== id) return; FI.firma = r.firma || false; renderFirma(); if (r.firma) ladeAenderungen('firma', id, FI); })
       .catch(function (e) { if (FI.id !== id) return; FI.fehler = e.message; renderFirma(); });
   }
   function renderFirma() {
@@ -2680,16 +2684,19 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var ap = f.ansprechpartner.length
       ? '<ul class="blockliste">' + f.ansprechpartner.map(function (a) { return '<li>' + personLink(a) + (a.email ? ' <span class="gedaempft">' + esc(a.email) + '</span>' : ' <span class="hinweis">ohne E-Mail</span>') + (a.kein_versand ? ' <span class="badge">kein Versand</span>' : '') + '</li>'; }).join('') + '</ul>'
       : '<div class="gedaempft">Kein Ansprechpartner. Versand geht an die Firmen-E-Mail.</div>';
+    if (FI.meldung) h += '<div class="notiz" role="status">' + esc(FI.meldung) + '</div>';
+    if (FI.edit) h += '<div class="card pad-l"><div class="card-kopf" style="margin:0 0 12px">Firma bearbeiten</div>' + maskeFormular('fi', MASKE_FIRMA, f, FI.edit) + '</div>';
     h += '<div class="grid lg-3">' +
-      '<div class="card"><div class="card-kopf">Firmendaten</div>' + daten + '</div>' +
+      (FI.edit ? '' : '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Firmendaten</span><button type="button" class="link-btn nur-schreiben" data-maske-aktion="bearbeiten" data-art="firma">Bearbeiten</button></div>' + daten + '</div>') +
       '<div class="card"><div class="card-kopf">Merkmale</div><div class="pad">' + merkm + '</div></div>' +
       '<div class="card"><div class="card-kopf">Ansprechpartner (' + f.ansprechpartner.length + ')</div><div class="pad">' + ap + '</div></div></div>';
     h += '<div class="card"><div class="card-kopf">Aktionen (' + f.aktionen.length + ')</div><div class="scroll-x"><table class="tbl kompakt"><thead><tr><th>Datum</th><th>Aktion</th><th>An</th><th>E-Mail</th><th>Versand</th><th>Rückmeldung</th></tr></thead><tbody>' +
       (f.aktionen.length ? f.aktionen.map(function (a) {
         return '<tr><td class="nowrap">' + esc(formatDate(a.datum)) + '</td><td>' + esc(a.name) + '</td><td>' + (a.person_id ? personLink({ id: a.person_id, name: a.wer }) : esc(a.wer)) + '</td><td>' + esc(a.email) + '</td><td>' + esc(a.versandstatus) + '</td><td>' + esc(a.rueckmeldung || '') + '</td></tr>';
       }).join('') : '<tr><td colspan="6" class="leer">Noch in keiner Aktion.</td></tr>') + '</tbody></table></div>' +
-      '<div class="card-fuss">Stand crm-db ' + esc(formatDateTime(f.stand)) + '</div></div></div>';
+      '<div class="card-fuss">Stand crm-db ' + esc(formatDateTime(f.stand)) + '</div></div>' + aenderungenKarte(FI.aenderungen) + '</div>';
     el.innerHTML = h;
+    if (FI.edit && FI.edit.fokus) { FI.edit.fokus = false; var ersteF = document.getElementById('fi-name'); if (ersteF) ersteF.focus(); }
   }
   function renderUnternehmen() {
     var el = $('p-unternehmen');
@@ -2729,6 +2736,29 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     if (zeilen.length > grenze) h += '<div class="card-fuss"><button type="button" class="link-btn" data-aktion="un-alle">Alle ' + zeilen.length + ' anzeigen</button></div>';
     box.innerHTML = h;
   }
+  function bindMaske() {
+    document.addEventListener('click', async function (e) {
+      var b = e.target.closest('[data-maske-aktion]'); if (!b) return;
+      var aktion = b.getAttribute('data-maske-aktion');
+      var form = b.closest('form[data-maske]'), art = b.getAttribute('data-art') || (form && form.getAttribute('data-maske') === 'fi' ? 'firma' : 'person');
+      var Z = art === 'firma' ? FI : PE, o = art === 'firma' ? FI.firma : PE.person, liste = art === 'firma' ? MASKE_FIRMA : MASKE_PERSON;
+      var neuZeichnen = function () { if (art === 'firma') renderFirma(); else renderPerson(); };
+      if (aktion === 'bearbeiten') { if (!o) return; Z.edit = maskeStart(liste, o); Z.edit.fokus = true; Z.meldung = ''; neuZeichnen(); return; }
+      if (aktion === 'abbrechen') { Z.edit = null; neuZeichnen(); return; }
+      if (aktion === 'speichern') {
+        if (!Z.edit || Z.edit.laeuft) return;
+        maskeLesen(art === 'firma' ? 'fi' : 'pe', liste, Z.edit);
+        Z.edit.laeuft = true; Z.edit.fehler = ''; neuZeichnen();
+        try {
+          var d = await maskeSpeichern(art, o.id, liste, o, Z.edit);
+          if (!d.aenderungen) { Z.edit = null; Z.meldung = 'Nichts geändert.'; neuZeichnen(); return; }
+          if (d.seite) { if (art === 'firma') FI.firma = d.seite; else PE.person = d.seite; }
+          Z.edit = null; Z.meldung = 'Gespeichert: ' + d.aenderungen + (d.aenderungen === 1 ? ' Änderung' : ' Änderungen') + '.' + (d.hinweis ? ' ' + d.hinweis : '');
+          neuZeichnen(); ladeAenderungen(art, o.id, Z);
+        } catch (x) { Z.edit.laeuft = false; Z.edit.fehler = x.message; neuZeichnen(); }
+      }
+    });
+  }
   function bindUnternehmen() {
     var el = $('p-unternehmen');
     el.addEventListener('input', function (e) {
@@ -2746,7 +2776,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 
   // ---------- Tab: Segmentierung > Kontakte (Liste + Kontaktseite) ----------
   // Adresse #personen = Liste, #personen/<notion_id> = Kontaktseite. Bearbeitet wird weiter in Notion.
-  var PE = { liste: null, fehler: null, laedtListe: false, suche: '', merkmal: '', ohneMail: false, alle: false, id: '', person: null, personFehler: null };
+  var PE = { liste: null, fehler: null, laedtListe: false, suche: '', merkmal: '', ohneMail: false, alle: false, id: '', person: null, personFehler: null, edit: null, meldung: '', aenderungen: null };
 
   async function loadPersonen() {
     PE.fehler = null;
@@ -2757,10 +2787,10 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   function zeigePersonen(id) {
     PE.id = id || '';
     if (PE.id) {
-      PE.person = null; PE.personFehler = null; renderPersonen();
+      PE.person = null; PE.personFehler = null; PE.edit = null; PE.meldung = ''; PE.aenderungen = null; renderPersonen();
       var gesucht = PE.id;
       holeJson('/webhook/crm/person?id=' + encodeURIComponent(gesucht))
-        .then(function (r) { if (PE.id !== gesucht) return; PE.person = r.person || false; renderPersonen(); })
+        .then(function (r) { if (PE.id !== gesucht) return; PE.person = r.person || false; renderPersonen(); if (r.person) ladeAenderungen('person', gesucht, PE); })
         .catch(function (e) { if (PE.id !== gesucht) return; PE.personFehler = e.message; renderPersonen(); });
     } else {
       if (!PE.liste && !PE.laedtListe) { PE.laedtListe = true; loadPersonen(); }
@@ -2822,6 +2852,90 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   }
 
   function zeile(label, wert) { return wert ? '<tr><th scope="row">' + esc(label) + '</th><td>' + wert + '</td></tr>' : ''; }
+  // --- Bearbeitungsmaske (Kontakt und Firma): Stammdaten ändern, gespeichert wird in Notion (führend) und hier, jede Änderung steht im Protokoll ---
+  var MASKE_ANREDE = ['Herr', 'Frau', 'Divers'], MASKE_ANSPRACHE = ['Du', 'Sie'], MASKE_VERSAND = ['Haupt', 'Geschäftlich', 'Privat'];
+  var MASKE_LEVEL = ['Namenssponsor', 'Performance PLATIN', 'Hauptsponsor', 'Wirkungspartner', 'Performance GOLD', 'Performance SILBER', 'Performance BRONZE', 'Basis-Partner', 'Sponsor', 'Unterstützer', 'Club 100', 'Akquise'];
+  var MASKE_STATUS = ['✅ Vertrag unterschrieben', '📄 Angebot versendet', '🔄 In Verhandlung', '📞 Termin vereinbart', '⏳ Termin ausstehend', '❌ Lost', '⏸ Pausiert', 'Pot. Namenssponsor'];
+  var MASKE_PERSON = [
+    { f: 'name', l: 'Name', t: 'text', pflicht: true }, { f: 'titel', l: 'Titel', t: 'text' }, { f: 'anrede', l: 'Anrede', t: 'select', o: MASKE_ANREDE },
+    { f: 'ansprache', l: 'Ansprache', t: 'select', o: MASKE_ANSPRACHE, leer: 'nicht gesetzt (Sie)' }, { f: 'email_haupt', l: 'E-Mail', t: 'email' },
+    { f: 'email_geschaeftlich', l: 'E-Mail geschäftlich', t: 'email' }, { f: 'email_privat', l: 'E-Mail privat', t: 'email' },
+    { f: 'versand_email_wahl', l: 'Versand an', t: 'select', o: MASKE_VERSAND, leer: 'automatisch' }, { f: 'eltern_email', l: 'E-Mail Erziehungsberechtigte:r', t: 'email' },
+    { f: 'plz', l: 'PLZ', t: 'text' }, { f: 'ort', l: 'Ort', t: 'text' }, { f: 'geburtsdatum', l: 'Geburtsdatum', t: 'date' }, { f: 'kein_versand', l: 'Kein Versand', t: 'haken' }];
+  var MASKE_FIRMA = [
+    { f: 'name', l: 'Kurzbezeichnung', t: 'text', pflicht: true }, { f: 'firmenbezeichnung', l: 'Firmenbezeichnung', t: 'text' }, { f: 'rechnungs_email', l: 'Rechnungs-E-Mail', t: 'email' },
+    { f: 'allgemeine_email', l: 'Allgemeine E-Mail', t: 'email' }, { f: 'sponsoren_level', l: 'Sponsoren-Level', t: 'select', o: MASKE_LEVEL }, { f: 'status', l: 'Status', t: 'select', o: MASKE_STATUS },
+    { f: 'bhb_kreditor_lev', l: 'BHB-Kreditor LEV', t: 'text' }, { f: 'bhb_kreditor_xxl', l: 'BHB-Kreditor XXL', t: 'text' }, { f: 'salesforce_id', l: 'Salesforce-ID', t: 'text' }];
+  function maskeWert(def, o) {
+    var v = def.f === 'sponsoren_level' && o.sponsoren_level === undefined ? o.level : o[def.f];   // die Firmenseite liefert das Level als „level“
+    if (def.f === 'ansprache' && !o.ansprache_gesetzt) return '';
+    if (def.t === 'haken') return v === true;
+    if (def.t === 'date') return v ? String(v).slice(0, 10) : '';
+    return v === null || v === undefined ? '' : String(v);
+  }
+  function maskeFormular(pre, liste, o, ed) {
+    var h = '<form class="maske" data-maske="' + pre + '" novalidate><div class="maske-raster">';
+    liste.forEach(function (d) {
+      var id = pre + '-' + d.f, v = ed.felder[d.f];
+      if (d.t === 'haken') {
+        h += '<div class="maske-feld maske-haken"><label><input type="checkbox" id="' + id + '" data-feld="' + d.f + '"' + (v ? ' checked' : '') + '> ' + esc(d.l) + '</label></div>'; return;
+      }
+      h += '<div class="maske-feld"><label class="feld-label" for="' + id + '">' + esc(d.l) + (d.pflicht ? ' <span class="pflicht">*</span>' : '') + '</label>';
+      if (d.t === 'select') {
+        h += '<select class="eingabe" id="' + id + '" data-feld="' + d.f + '"><option value="">' + esc(d.leer || '–') + '</option>' + d.o.map(function (x) { return '<option' + (x === v ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join('') + '</select>';
+      } else {
+        h += '<input class="eingabe" id="' + id + '" data-feld="' + d.f + '" type="' + (d.t === 'email' ? 'email' : (d.t === 'date' ? 'date' : 'text')) + '" value="' + esc(v) + '"' + (d.pflicht ? ' required' : '') + ' autocomplete="off">';
+      }
+      h += '</div>';
+    });
+    h += '</div>' + (ed.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:12px">' + esc(ed.fehler) + '</div>' : '') +
+      '<div style="display:flex;gap:8px;align-items:center;margin-top:12px"><button type="button" class="btn btn-primary" data-maske-aktion="speichern"' + (ed.laeuft ? ' disabled' : '') + '>' + (ed.laeuft ? 'Speichere …' : 'Speichern') + '</button>' +
+      '<button type="button" class="link-btn" data-maske-aktion="abbrechen"' + (ed.laeuft ? ' disabled' : '') + '>Abbrechen</button></div>' +
+      '<div class="notiz">Gespeichert wird in Notion und hier. Jede Änderung steht unten im Protokoll.</div></form>';
+    return h;
+  }
+  function maskeStart(liste, o) { var felder = {}; liste.forEach(function (d) { felder[d.f] = maskeWert(d, o); }); return { felder: felder, laeuft: false, fehler: '' }; }
+  function maskeLesen(pre, liste, ed) {
+    var form = document.querySelector('[data-maske="' + pre + '"]'); if (!form) return;
+    liste.forEach(function (d) {
+      var el = form.querySelector('[data-feld="' + d.f + '"]'); if (!el) return;
+      ed.felder[d.f] = d.t === 'haken' ? el.checked : el.value;
+    });
+  }
+  // Nur geänderte Felder gehen an den Server
+  function maskeAenderungen(liste, o, ed) {
+    var aus = {};
+    liste.forEach(function (d) {
+      var a = maskeWert(d, o), n = ed.felder[d.f];
+      if (d.t === 'haken') { if (a !== (n === true)) aus[d.f] = n === true; return; }
+      if (String(a).trim() !== String(n).trim()) aus[d.f] = n;
+    });
+    return aus;
+  }
+  async function maskeSpeichern(art, id, liste, o, ed) {
+    maskeLesen(art === 'person' ? 'pe' : 'fi', liste, ed);
+    var felder = maskeAenderungen(liste, o, ed);
+    if (!Object.keys(felder).length) return { ok: true, aenderungen: 0 };
+    var res = await fetch('/webhook/crm/speichern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ art: art, id: id, felder: felder }) });
+    var d = await res.json().catch(function () { return {}; });
+    if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Nicht gespeichert.');
+    return d;
+  }
+  function aenderungenKarte(liste) {
+    if (!liste) return '';
+    var h = '<div class="card"><div class="card-kopf">Änderungen (' + liste.length + ')</div><div class="scroll-x"><table class="tbl kompakt"><thead><tr><th>Wann</th><th>Wer</th><th>Feld</th><th>Vorher</th><th>Nachher</th></tr></thead><tbody>';
+    if (!liste.length) h += '<tr><td colspan="5" class="leer">Noch keine Änderung über das Dashboard.</td></tr>';
+    var wert = function (v) { return v === null || v === undefined || v === '' ? '<span class="gedaempft">leer</span>' : esc(v === true ? 'ja' : (v === false ? 'nein' : String(v))); };
+    liste.forEach(function (a) { h += '<tr><td class="nowrap">' + esc(formatDateTime(a.zeit)) + '</td><td>' + esc(String(a.von || '').split('@')[0]) + '</td><td>' + esc(a.feld) + '</td><td>' + wert(a.alt) + '</td><td>' + wert(a.neu) + '</td></tr>'; });
+    return h + '</tbody></table></div></div>';
+  }
+  function ladeAenderungen(art, id, ziel) {
+    holeJson('/webhook/crm/aenderungen?art=' + art + '&id=' + encodeURIComponent(id)).then(function (r) {
+      if (art === 'person' ? PE.id !== id : FI.id !== id) return;
+      ziel.aenderungen = Array.isArray(r.liste) ? r.liste : [];
+      if (art === 'person') renderPerson(); else renderFirma();
+    }).catch(function () { /* Protokoll ist Zusatz: ohne Antwort bleibt die Karte weg */ });
+  }
   function renderPerson() {
     var el = $('p-personen');
     var zurueck = '<a href="#personen" class="link-btn">← Alle Kontakte</a>';
@@ -2865,8 +2979,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       '<div class="trenner text-klein fett">Öffnet den Kontakt zu</div><div>' + (p.kontaktpfad_fuer.length ? p.kontaktpfad_fuer.map(personLink).join(', ') : '<span class="gedaempft">–</span>') + '</div>' +
       '<div class="notiz">Eintragen in Notion im Feld „Kontaktpfad“.</div>';
 
+    if (PE.meldung) h += '<div class="notiz" role="status">' + esc(PE.meldung) + '</div>';
+    var kopfBearb = '<div class="card-kopf zeile-titel" style="margin:0"><span>Erreichbarkeit</span><button type="button" class="link-btn nur-schreiben" data-maske-aktion="bearbeiten" data-art="person">Bearbeiten</button></div>';
+    if (PE.edit) h += '<div class="card pad-l"><div class="card-kopf" style="margin:0 0 12px">Kontakt bearbeiten</div>' + maskeFormular('pe', MASKE_PERSON, p, PE.edit) + '</div>';
     h += '<div class="grid lg-3">' +
-      '<div class="card"><div class="card-kopf">Erreichbarkeit</div>' + erreichbar + '</div>' +
+      (PE.edit ? '' : '<div class="card">' + kopfBearb + erreichbar + '</div>') +
       '<div class="card"><div class="card-kopf">Merkmale</div><div class="pad">' + merkm + '</div></div>' +
       '<div class="card"><div class="card-kopf">Kontaktpfad</div><div class="pad">' + pfad + '</div></div></div>';
 
@@ -2875,8 +2992,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
         return '<tr><td class="nowrap">' + esc(formatDate(a.datum)) + '</td><td>' + esc(a.name) + '</td><td class="text-sek">' + esc(a.typ) + '</td><td>' + esc(a.email) + '</td>' +
           '<td>' + esc(a.versandstatus) + (a.versendet_am ? ' <span class="gedaempft">' + esc(formatDateTime(a.versendet_am)) + '</span>' : '') + '</td><td>' + esc(a.rueckmeldung || '') + '</td></tr>';
       }).join('') : '<tr><td colspan="6" class="leer">Noch in keiner Aktion.</td></tr>') + '</tbody></table></div>' +
-      '<div class="card-fuss">Stand crm-db ' + esc(formatDateTime(p.stand)) + '</div></div></div>';
+      '<div class="card-fuss">Stand crm-db ' + esc(formatDateTime(p.stand)) + '</div></div>' + aenderungenKarte(PE.aenderungen) + '</div>';
     el.innerHTML = h;
+    if (PE.edit && PE.edit.fokus) { PE.edit.fokus = false; var ersteF = document.getElementById('pe-name'); if (ersteF) ersteF.focus(); }
   }
   function bindPersonen() {
     var el = $('p-personen');
@@ -7236,6 +7354,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   bindKontakte();
   bindUnternehmen();
   bindPersonen();
+  bindMaske();
   bindVersand();
   bindBelege();
   bindBT();
@@ -7305,7 +7424,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261023230915';
+  var BUILD = '20261023233532';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
