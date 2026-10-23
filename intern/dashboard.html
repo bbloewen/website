@@ -3816,11 +3816,19 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     } catch (x) { ed.laeuft = false; ed.fehler = x.message; }
     beAlleRender();
   }
+  // Web-Recherche der KI: Suchfrage und Quellen als Links unter der Antwort
+  function zkQuellen(m) {
+    if (!m.recherche && !(m.quellen && m.quellen.length)) return '';
+    var h = '<div class="notiz" style="margin:6px 0 0;white-space:normal">';
+    if (m.recherche) h += 'Im Web recherchiert: „' + esc(m.recherche.frage) + '“' + (m.recherche.ok ? '' : ' (ohne Ergebnis)');
+    if (m.quellen && m.quellen.length) h += '<ul style="margin:4px 0 0;padding-left:18px">' + m.quellen.filter(function (x) { return /^https?:\/\//i.test(String(x.url || '')); }).map(function (x) { return '<li><a href="' + esc(x.url) + '" target="_blank" rel="noopener noreferrer">' + esc(x.titel || x.title || x.url) + '</a></li>'; }).join('') + '</ul>';
+    return h + '</div>';
+  }
   function zkPanel(k) {
     var q = BE.zk; if (!q || q.k !== k) return '';
     var h = '<div class="card pad" role="region" aria-label="Zahlung mit der KI besprechen"><div class="fett">Mit der KI besprechen: ' + esc(q.titel) + '</div>' +
       '<div class="text-klein" style="margin-top:6px">Sag, wie die Zahlung gebucht werden soll (Konto, Steuer, Kostenstellen, Text) oder stell eine Frage. Die Regeln des Steuerberaters kennt die KI. Eine Änderung wird gespeichert und mit dem Haken oben in BuchhaltungsButler übertragen.</div>';
-    if (q.verlauf.length) h += '<div role="log" aria-label="Gespräch mit der KI" style="margin-top:8px;display:flex;flex-direction:column;gap:6px">' + q.verlauf.map(function (m, i) { return '<div style="' + (m.von === 'marko' ? 'align-self:flex-end;background:var(--bg-subtle)' : 'align-self:flex-start;border:1px solid var(--border-strong)') + ';border-radius:10px;padding:6px 10px;max-width:92%;white-space:pre-wrap">' + esc(m.text) + (m.regel ? '<div class="notiz" style="margin:4px 0 0;white-space:normal">' + (m.regel.zurueck ? 'Zurückgenommen: ' + esc(m.regel.text) : '<span class="gut">Im Kontenplan festgehalten:</span> ' + esc(m.regel.text) + ' · <button type="button" class="link-btn" data-be="zk-regel-zurueck" data-i="' + i + '">Rückgängig</button>') + '</div>' : '') + '</div>'; }).join('') + '</div>';
+    if (q.verlauf.length) h += '<div role="log" aria-label="Gespräch mit der KI" style="margin-top:8px;display:flex;flex-direction:column;gap:6px">' + q.verlauf.map(function (m, i) { return '<div style="' + (m.von === 'marko' ? 'align-self:flex-end;background:var(--bg-subtle)' : 'align-self:flex-start;border:1px solid var(--border-strong)') + ';border-radius:10px;padding:6px 10px;max-width:92%;white-space:pre-wrap">' + esc(m.text) + zkQuellen(m) + (m.regel ? '<div class="notiz" style="margin:4px 0 0;white-space:normal">' + (m.regel.zurueck ? 'Zurückgenommen: ' + esc(m.regel.text) : '<span class="gut">Im Kontenplan festgehalten:</span> ' + esc(m.regel.text) + ' · <button type="button" class="link-btn" data-be="zk-regel-zurueck" data-i="' + i + '">Rückgängig</button>') + '</div>' : '') + '</div>'; }).join('') + '</div>';
     h += zkPlanHtml(q);
     h += '<label class="text-klein" for="zk-text" style="display:block;margin-top:8px">Deine Nachricht</label><textarea id="zk-text" class="eingabe" rows="3" style="width:100%;margin-top:4px" maxlength="2000" data-be="zk-text" placeholder="z. B. Das ist die Lohnsteuer September, bitte nach der Regel buchen"' + (q.laeuft ? ' disabled' : '') + '>' + esc(q.text) + '</textarea>';
     if (q.fehler) h += '<div class="fehlerbox" role="alert" style="margin-top:6px;white-space:normal">' + esc(q.fehler) + '</div>';
@@ -3836,7 +3844,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       var d = await res.json().catch(function () { return {}; });
       if (!d.ok) throw new Error(d.meldung || d.message || 'Die KI hat gerade nicht geantwortet.');
       var antwort = d.antwort || '';
-      var verlauf = q.verlauf.concat([{ von: 'marko', text: text }, { von: 'ki', text: antwort, regel: d.regel || undefined }]).slice(-12);
+      var verlauf = q.verlauf.concat([{ von: 'marko', text: text }, { von: 'ki', text: antwort, regel: d.regel || undefined, quellen: Array.isArray(d.quellen) && d.quellen.length ? d.quellen.slice(0, 6) : undefined, recherche: d.recherche && d.recherche.frage ? { frage: String(d.recherche.frage).slice(0, 300), ok: !!d.recherche.ok } : undefined }]).slice(-12);
       if (Array.isArray(d.zeilen) && d.zeilen.length) {
         var e = { k: q.mandant };
         var sp = null;
@@ -7235,7 +7243,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261023184355';
+  var BUILD = '20261023213712';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
