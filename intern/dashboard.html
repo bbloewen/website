@@ -252,6 +252,10 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 .maske-raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px 16px; }
 .maske-feld .feld-label { display: block; margin-bottom: 4px; }
 .maske-haken { align-self: end; padding-bottom: 8px; }
+.maske-gruppe { grid-column: 1 / -1; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted); }
+.maske-gruppe:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+.maske-breit { grid-column: 1 / -1; }
+textarea.maske-lang { min-height: 72px; }
 .nur-lesen .nur-schreiben { display: none; }
 .eingabe { width: 100%; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 8px 12px; font-size: 14px; background: var(--bg-card); }
 .tbl.aw th:not(:first-child), .tbl.aw td:not(:first-child) { text-align: right; }
@@ -2679,6 +2683,26 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       zeile('BHB-Kreditor LEV', esc(f.bhb_kreditor_lev || '')) + zeile('BHB-Kreditor XXL', esc(f.bhb_kreditor_xxl || '')) +
       zeile('Salesforce-ID', esc(f.salesforce_id || '')) + '</tbody></table>';
     if (!f.rechnungs_email && !f.allgemeine_email && !f.ansprechpartner.length) daten += '<div class="hinweis-warn" style="margin:12px 20px">Weder E-Mail noch Ansprechpartner: Mails an diese Firma kommen nicht an.</div>';
+    var lnk = function (u, t) { return u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(t) + ' ↗</a>' : ''; };
+    var lang = function (t) { return t ? '<span style="white-space:pre-wrap">' + esc(t) + '</span>' : ''; };
+    var dat = function (d) { return d ? esc(formatDate(String(d).slice(0, 10))) : ''; };
+    var vertrag = '<table class="tbl kompakt"><tbody>' +
+      zeile('Rechnungsadresse', lang(f.rechnungsadresse)) + zeile('Zahlungsbedingungen', esc(f.zahlungsbedingungen || '')) + zeile('Referenznummer', esc(f.referenznummer || '')) +
+      zeile('Letzte Rechnung', dat(f.letzte_rechnung) + (f.url_letzte_rechnung ? ' ' + lnk(f.url_letzte_rechnung, 'Beleg') : '')) +
+      zeile('Vertragsabschluss', dat(f.vertragsabschluss)) + zeile('Vertragslaufzeit bis', dat(f.vertragslaufzeit)) + zeile('Nächste Fälligkeit', dat(f.naechste_faelligkeit)) +
+      zeile('Verträge', [lnk(f.url_vertrag_gmbh, 'Vertrag GmbH'), lnk(f.url_vertrag_lev, 'Vertrag LEV')].filter(Boolean).join(' · ')) +
+      zeile('Unsere Vertragsleistungen', lang(f.unsere_vertragsleistungen)) + '</tbody></table>';
+    var betreuung = '<table class="tbl kompakt"><tbody>' +
+      zeile('Relationship-Manager', esc(f.relationship_manager || '')) + zeile('Nächster Schritt', esc(f.naechster_schritt || '')) + zeile('Letzter Kontakt', esc(f.letzter_kontakt_manuell || '')) +
+      zeile('Ticketgutscheine', esc(f.ticketgutscheine || '')) + zeile('Kurznotizen', lang(f.kurznotizen)) + zeile('Recherche', lang(f.recherche)) + '</tbody></table>';
+    var spon = f.sponsoring || {}, sk = Object.keys(spon).sort(function (a, b) { return a.localeCompare(b, 'de'); });
+    var sponWert = function (k, v) {
+      if (v === true) return 'ja';
+      if (Array.isArray(v)) return v.join(', ');
+      if (typeof v === 'number') return /(Cash|Barter|Herstellungskosten|Volumen|Betrag)/.test(k) ? formatEuro(v) : zahl(v);
+      return /^\d{4}-\d{2}-\d{2}/.test(String(v)) ? formatDate(String(v).slice(0, 10)) : String(v);
+    };
+    var sponsoring = sk.length ? '<table class="tbl kompakt"><tbody>' + sk.map(function (k) { return zeile(k, esc(sponWert(k, spon[k]))); }).join('') + '</tbody></table>' : '';
     var mk = Object.keys(f.merkmale || {}).sort(function (a, b) { return a.localeCompare(b, 'de'); });
     var merkm = mk.length ? '<ul class="blockliste">' + mk.map(function (k) { return '<li>' + esc(merkmalText(k, f.merkmale[k])) + '</li>'; }).join('') + '</ul>' : '<div class="gedaempft">Keine Merkmale.</div>';
     var ap = f.ansprechpartner.length
@@ -2690,6 +2714,12 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       (FI.edit ? '' : '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Firmendaten</span><button type="button" class="link-btn nur-schreiben" data-maske-aktion="bearbeiten" data-art="firma">Bearbeiten</button></div>' + daten + '</div>') +
       '<div class="card"><div class="card-kopf">Merkmale</div><div class="pad">' + merkm + '</div></div>' +
       '<div class="card"><div class="card-kopf">Ansprechpartner (' + f.ansprechpartner.length + ')</div><div class="pad">' + ap + '</div></div></div>';
+    if (!FI.edit) {
+      var ergaenz = (/<td>/.test(vertrag) ? '<div class="card"><div class="card-kopf">Rechnung und Vertrag</div>' + vertrag + '</div>' : '') +
+        (/<td>/.test(betreuung) ? '<div class="card"><div class="card-kopf">Betreuung</div>' + betreuung + '</div>' : '') +
+        (sponsoring ? '<div class="card"><div class="card-kopf">Sponsoring</div>' + sponsoring + '</div>' : '');
+      if (ergaenz) h += '<div class="grid lg-3">' + ergaenz + '</div>';
+    }
     h += '<div class="card"><div class="card-kopf">Aktionen (' + f.aktionen.length + ')</div><div class="scroll-x"><table class="tbl kompakt"><thead><tr><th>Datum</th><th>Aktion</th><th>An</th><th>E-Mail</th><th>Versand</th><th>Rückmeldung</th></tr></thead><tbody>' +
       (f.aktionen.length ? f.aktionen.map(function (a) {
         return '<tr><td class="nowrap">' + esc(formatDate(a.datum)) + '</td><td>' + esc(a.name) + '</td><td>' + (a.person_id ? personLink({ id: a.person_id, name: a.wer }) : esc(a.wer)) + '</td><td>' + esc(a.email) + '</td><td>' + esc(a.versandstatus) + '</td><td>' + esc(a.rueckmeldung || '') + '</td></tr>';
@@ -2856,16 +2886,29 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   var MASKE_ANREDE = ['Herr', 'Frau', 'Divers'], MASKE_ANSPRACHE = ['Du', 'Sie'], MASKE_VERSAND = ['Haupt', 'Geschäftlich', 'Privat'];
   var MASKE_LEVEL = ['Namenssponsor', 'Performance PLATIN', 'Hauptsponsor', 'Wirkungspartner', 'Performance GOLD', 'Performance SILBER', 'Performance BRONZE', 'Basis-Partner', 'Sponsor', 'Unterstützer', 'Club 100', 'Akquise'];
   var MASKE_STATUS = ['✅ Vertrag unterschrieben', '📄 Angebot versendet', '🔄 In Verhandlung', '📞 Termin vereinbart', '⏳ Termin ausstehend', '❌ Lost', '⏸ Pausiert', 'Pot. Namenssponsor'];
+  var MASKE_KANAL = ['E-Mail', 'Telefon', 'WhatsApp', 'Persönlich'];
   var MASKE_PERSON = [
-    { f: 'name', l: 'Name', t: 'text', pflicht: true }, { f: 'titel', l: 'Titel', t: 'text' }, { f: 'anrede', l: 'Anrede', t: 'select', o: MASKE_ANREDE },
-    { f: 'ansprache', l: 'Ansprache', t: 'select', o: MASKE_ANSPRACHE, leer: 'nicht gesetzt (Sie)' }, { f: 'email_haupt', l: 'E-Mail', t: 'email' },
-    { f: 'email_geschaeftlich', l: 'E-Mail geschäftlich', t: 'email' }, { f: 'email_privat', l: 'E-Mail privat', t: 'email' },
-    { f: 'versand_email_wahl', l: 'Versand an', t: 'select', o: MASKE_VERSAND, leer: 'automatisch' }, { f: 'eltern_email', l: 'E-Mail Erziehungsberechtigte:r', t: 'email' },
-    { f: 'plz', l: 'PLZ', t: 'text' }, { f: 'ort', l: 'Ort', t: 'text' }, { f: 'geburtsdatum', l: 'Geburtsdatum', t: 'date' }, { f: 'kein_versand', l: 'Kein Versand', t: 'haken' }];
+    { g: 'Person', f: 'name', l: 'Name', t: 'text', pflicht: true }, { f: 'titel', l: 'Titel', t: 'text' }, { f: 'anrede', l: 'Anrede', t: 'select', o: MASKE_ANREDE },
+    { f: 'ansprache', l: 'Ansprache', t: 'select', o: MASKE_ANSPRACHE, leer: 'nicht gesetzt (Sie)' }, { f: 'geburtsdatum', l: 'Geburtsdatum', t: 'date' },
+    { f: 'rolle', l: 'Rolle', t: 'text' }, { f: 'ansprechpartner_intern', l: 'Ansprechpartner bei uns', t: 'text' },
+    { g: 'E-Mail und Telefon', f: 'email_haupt', l: 'E-Mail', t: 'email' }, { f: 'email_geschaeftlich', l: 'E-Mail geschäftlich', t: 'email' }, { f: 'email_privat', l: 'E-Mail privat', t: 'email' },
+    { f: 'versand_email_wahl', l: 'Versand an', t: 'select', o: MASKE_VERSAND, leer: 'automatisch' }, { f: 'telefon', l: 'Telefon', t: 'tel' }, { f: 'mobil', l: 'Mobil', t: 'tel' },
+    { f: 'telefon_geschaeftlich', l: 'Telefon geschäftlich', t: 'tel' }, { f: 'bevorzugter_kanal', l: 'Bevorzugter Kanal', t: 'select', o: MASKE_KANAL }, { f: 'linkedin', l: 'LinkedIn (Link)', t: 'url' },
+    { g: 'Adresse privat', f: 'strasse', l: 'Straße', t: 'text' }, { f: 'plz', l: 'PLZ', t: 'text' }, { f: 'ort', l: 'Ort', t: 'text' },
+    { g: 'Adresse geschäftlich', f: 'strasse_geschaeftlich', l: 'Straße', t: 'text' }, { f: 'plz_geschaeftlich', l: 'PLZ', t: 'text' }, { f: 'ort_geschaeftlich', l: 'Ort', t: 'text' },
+    { g: 'Erziehungsberechtigte:r', f: 'eltern_vorname', l: 'Vorname', t: 'text' }, { f: 'eltern_nachname', l: 'Nachname', t: 'text' }, { f: 'eltern_email', l: 'E-Mail', t: 'email' }, { f: 'eltern_telefon', l: 'Telefon', t: 'tel' },
+    { g: 'Versand und Hinweise', f: 'kein_versand', l: 'Kein Versand', t: 'haken' }, { f: 'vorlieben', l: 'Vorlieben / Hinweise', t: 'lang' }, { f: 'verlauf', l: 'Verlauf', t: 'lang' }];
   var MASKE_FIRMA = [
-    { f: 'name', l: 'Kurzbezeichnung', t: 'text', pflicht: true }, { f: 'firmenbezeichnung', l: 'Firmenbezeichnung', t: 'text' }, { f: 'rechnungs_email', l: 'Rechnungs-E-Mail', t: 'email' },
+    { g: 'Firma', f: 'name', l: 'Kurzbezeichnung', t: 'text', pflicht: true }, { f: 'firmenbezeichnung', l: 'Firmenbezeichnung', t: 'text' }, { f: 'rechnungs_email', l: 'Rechnungs-E-Mail', t: 'email' },
     { f: 'allgemeine_email', l: 'Allgemeine E-Mail', t: 'email' }, { f: 'sponsoren_level', l: 'Sponsoren-Level', t: 'select', o: MASKE_LEVEL }, { f: 'status', l: 'Status', t: 'select', o: MASKE_STATUS },
-    { f: 'bhb_kreditor_lev', l: 'BHB-Kreditor LEV', t: 'text' }, { f: 'bhb_kreditor_xxl', l: 'BHB-Kreditor XXL', t: 'text' }, { f: 'salesforce_id', l: 'Salesforce-ID', t: 'text' }];
+    { f: 'relationship_manager', l: 'Relationship-Manager', t: 'text' }, { f: 'referenznummer', l: 'Referenznummer', t: 'text' }, { f: 'salesforce_id', l: 'Salesforce-ID', t: 'text' },
+    { g: 'Rechnung und Buchhaltung', f: 'rechnungsadresse', l: 'Rechnungsadresse', t: 'lang' }, { f: 'zahlungsbedingungen', l: 'Zahlungsbedingungen', t: 'text' },
+    { f: 'bhb_kreditor_lev', l: 'BHB-Kreditor LEV', t: 'text' }, { f: 'bhb_kreditor_xxl', l: 'BHB-Kreditor XXL', t: 'text' }, { f: 'letzte_rechnung', l: 'Letzte Rechnung', t: 'date' },
+    { f: 'url_letzte_rechnung', l: 'Letzte Rechnung (Link)', t: 'url' },
+    { g: 'Vertrag', f: 'vertragsabschluss', l: 'Vertragsabschluss', t: 'date' }, { f: 'vertragslaufzeit', l: 'Vertragslaufzeit bis', t: 'date' }, { f: 'naechste_faelligkeit', l: 'Nächste Fälligkeit', t: 'date' },
+    { f: 'url_vertrag_gmbh', l: 'Vertrag GmbH (Link)', t: 'url' }, { f: 'url_vertrag_lev', l: 'Vertrag LEV (Link)', t: 'url' }, { f: 'unsere_vertragsleistungen', l: 'Unsere Vertragsleistungen', t: 'lang' },
+    { g: 'Betreuung', f: 'naechster_schritt', l: 'Nächster Schritt', t: 'text' }, { f: 'letzter_kontakt_manuell', l: 'Letzter Kontakt', t: 'text' }, { f: 'ticketgutscheine', l: 'Ticketgutscheine', t: 'text' },
+    { f: 'kurznotizen', l: 'Kurznotizen', t: 'lang' }, { f: 'recherche', l: 'Recherche', t: 'lang' }];
   function maskeWert(def, o) {
     var v = def.f === 'sponsoren_level' && o.sponsoren_level === undefined ? o.level : o[def.f];   // die Firmenseite liefert das Level als „level“
     if (def.f === 'ansprache' && !o.ansprache_gesetzt) return '';
@@ -2877,14 +2920,17 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     var h = '<form class="maske" data-maske="' + pre + '" novalidate><div class="maske-raster">';
     liste.forEach(function (d) {
       var id = pre + '-' + d.f, v = ed.felder[d.f];
+      if (d.g) h += '<div class="maske-gruppe">' + esc(d.g) + '</div>';
       if (d.t === 'haken') {
         h += '<div class="maske-feld maske-haken"><label><input type="checkbox" id="' + id + '" data-feld="' + d.f + '"' + (v ? ' checked' : '') + '> ' + esc(d.l) + '</label></div>'; return;
       }
-      h += '<div class="maske-feld"><label class="feld-label" for="' + id + '">' + esc(d.l) + (d.pflicht ? ' <span class="pflicht">*</span>' : '') + '</label>';
+      h += '<div class="maske-feld' + (d.t === 'lang' ? ' maske-breit' : '') + '"><label class="feld-label" for="' + id + '">' + esc(d.l) + (d.pflicht ? ' <span class="pflicht">*</span>' : '') + '</label>';
       if (d.t === 'select') {
         h += '<select class="eingabe" id="' + id + '" data-feld="' + d.f + '"><option value="">' + esc(d.leer || '–') + '</option>' + d.o.map(function (x) { return '<option' + (x === v ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join('') + '</select>';
+      } else if (d.t === 'lang') {
+        h += '<textarea class="eingabe maske-lang" id="' + id + '" data-feld="' + d.f + '" rows="3" maxlength="2000">' + esc(v) + '</textarea>';
       } else {
-        h += '<input class="eingabe" id="' + id + '" data-feld="' + d.f + '" type="' + (d.t === 'email' ? 'email' : (d.t === 'date' ? 'date' : 'text')) + '" value="' + esc(v) + '"' + (d.pflicht ? ' required' : '') + ' autocomplete="off">';
+        h += '<input class="eingabe" id="' + id + '" data-feld="' + d.f + '" type="' + ({ email: 'email', date: 'date', tel: 'tel', url: 'url' }[d.t] || 'text') + '" value="' + esc(v) + '"' + (d.pflicht ? ' required' : '') + ' autocomplete="off">';
       }
       h += '</div>';
     });
@@ -2966,6 +3012,17 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       '</tbody></table>';
     if (!p.email_haupt && !p.email_geschaeftlich && !p.email_privat && !p.eltern_email) erreichbar += '<div class="hinweis-warn" style="margin:12px 20px">Keine E-Mail-Adresse: Mails an diesen Kontakt kommen nicht an.</div>';
 
+    var adr = function (str, plz, ort) { return esc([str, [plz, ort].filter(Boolean).join(' ')].filter(Boolean).join(', ')); };
+    var tel = function (n) { return n ? '<a href="tel:' + esc(String(n).replace(/[^+0-9]/g, '')) + '">' + esc(n) + '</a>' : ''; };
+    var weiteres = '<table class="tbl kompakt"><tbody>' +
+      zeile('Telefon', tel(p.telefon)) + zeile('Mobil', tel(p.mobil)) + zeile('Telefon geschäftlich', tel(p.telefon_geschaeftlich)) +
+      zeile('Bevorzugter Kanal', esc(p.bevorzugter_kanal || '')) + zeile('Rolle', esc(p.rolle || '')) + zeile('Ansprechpartner bei uns', esc(p.ansprechpartner_intern || '')) +
+      zeile('Adresse privat', p.strasse ? adr(p.strasse, p.plz, p.ort) : '') + zeile('Adresse geschäftlich', adr(p.strasse_geschaeftlich, p.plz_geschaeftlich, p.ort_geschaeftlich)) +
+      zeile('Erziehungsberechtigte:r', esc([p.eltern_vorname, p.eltern_nachname].filter(Boolean).join(' ')) + (p.eltern_telefon ? ' · ' + tel(p.eltern_telefon) : '')) +
+      zeile('LinkedIn', p.linkedin ? '<a href="' + esc(p.linkedin) + '" target="_blank" rel="noopener noreferrer">Profil ↗</a>' : '') +
+      zeile('Vorlieben / Hinweise', p.vorlieben ? '<span style="white-space:pre-wrap">' + esc(p.vorlieben) + '</span>' : '') + zeile('Verlauf', p.verlauf ? '<span style="white-space:pre-wrap">' + esc(p.verlauf) + '</span>' : '') +
+      '</tbody></table>';
+    var hatWeiteres = /<td>/.test(weiteres);
     var mk = Object.keys(p.merkmale || {}).sort(function (a, b) { return a.localeCompare(b, 'de'); });
     var merkm = mk.length ? '<ul class="blockliste">' + mk.map(function (k) { return '<li>' + esc(merkmalText(k, p.merkmale[k])) + '</li>'; }).join('') + '</ul>' : '<div class="gedaempft">Keine eigenen Merkmale.</div>';
     if (p.mitgliedsart) merkm += '<div class="notiz">Mitgliedsart: ' + esc(p.mitgliedsart) + '</div>';
@@ -2986,6 +3043,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
       (PE.edit ? '' : '<div class="card">' + kopfBearb + erreichbar + '</div>') +
       '<div class="card"><div class="card-kopf">Merkmale</div><div class="pad">' + merkm + '</div></div>' +
       '<div class="card"><div class="card-kopf">Kontaktpfad</div><div class="pad">' + pfad + '</div></div></div>';
+    if (hatWeiteres && !PE.edit) h += '<div class="card"><div class="card-kopf">Weitere Angaben</div>' + weiteres + '</div>';
 
     h += '<div class="card"><div class="card-kopf">Aktionen (' + p.aktionen.length + ')</div><div class="scroll-x"><table class="tbl kompakt"><thead><tr><th>Datum</th><th>Aktion</th><th>Art</th><th>E-Mail</th><th>Versand</th><th>Rückmeldung</th></tr></thead><tbody>' +
       (p.aktionen.length ? p.aktionen.map(function (a) {
@@ -7424,7 +7482,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261024080742';
+  var BUILD = '20261024090050';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
