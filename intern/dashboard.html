@@ -2185,6 +2185,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     { id: 'mitgliedsart', text: 'Mitgliedsart' },
     { id: 'firma_status', text: 'Firmen-Status (Pipeline)' },
     { id: 'firma_level', text: 'Sponsoren-Level' },
+    { id: 'firma_branche', text: 'Branche der Firma' },
     { id: 'typ', text: 'Nur Personen / nur Firmen' },
     { id: 'kontaktpfad', text: 'Erreichbar über (Kontaktpfad)' },
     { id: 'newsletter', text: 'Newsletter-Opt-in vorhanden' },
@@ -2382,8 +2383,8 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
         h += '<select ' + d + ' data-k="zustand" aria-label="Zeitraum">' + ZUSTAENDE.map(function (z) { return optTag(z.id, texte[z.id], b.zustand); }).join('') + '</select>';
       }
       if (b.zustand === 'saison') h += '<select ' + d + ' data-k="saison" aria-label="Saison">' + saisons().map(function (x) { return optTag(x, x, b.saison); }).join('') + '</select>';
-    } else if (b.art === 'mitgliedsart' || b.art === 'firma_status' || b.art === 'firma_level') {
-      var quelle = { mitgliedsart: 'mitgliedsarten', firma_status: 'firma_status', firma_level: 'firma_level' }[b.art];
+    } else if (b.art === 'mitgliedsart' || b.art === 'firma_status' || b.art === 'firma_level' || b.art === 'firma_branche') {
+      var quelle = { mitgliedsart: 'mitgliedsarten', firma_status: 'firma_status', firma_level: 'firma_level', firma_branche: 'branchen' }[b.art];
       var werte = (C.optionen && C.optionen[quelle]) || [];
       h += '<div class="werte" role="group" aria-label="Werte">' + werte.map(function (w) {
         return '<label><input type="checkbox" ' + d + ' data-k="werte" value="' + esc(w) + '"' + ((b.werte || []).indexOf(w) !== -1 ? ' checked' : '') + '> ' + esc(w) + '</label>';
@@ -8078,7 +8079,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261024125530';
+  var BUILD = '20261024130331';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
