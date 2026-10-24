@@ -512,6 +512,9 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   <section id="p-ueberweisungen-xxl" role="tabpanel" aria-labelledby="tab-ueberweisungen-xxl" hidden></section>
   <section id="p-ueberweisungen-lev" role="tabpanel" aria-labelledby="tab-ueberweisungen-lev" hidden></section>
   <section id="p-ueberweisungen-lev-lp" role="tabpanel" aria-labelledby="tab-ueberweisungen-lev-lp" hidden></section>
+  <section id="p-ls-tickets" role="tabpanel" aria-labelledby="tab-ls-tickets" hidden></section>
+  <section id="p-ls-mitglieder" role="tabpanel" aria-labelledby="tab-ls-mitglieder" hidden></section>
+  <section id="p-ls-camps" role="tabpanel" aria-labelledby="tab-ls-camps" hidden></section>
   <section id="p-ausgang-xxl" role="tabpanel" aria-labelledby="tab-ausgang-xxl" hidden></section>
   <section id="p-ausgang-lev" role="tabpanel" aria-labelledby="tab-ausgang-lev" hidden></section>
   <section id="p-spenden" role="tabpanel" aria-labelledby="tab-spenden" hidden></section>
@@ -909,6 +912,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     { id: 'acc-xxl', name: 'XXL', unter: true, tabs: [{ id: 'belege-xxl', name: 'Belege' }, { id: 'zahlung-xxl', name: 'Zahlung' }, { id: 'ueberweisungen-xxl', name: 'Überweisung' }] },
     { id: 'acc-lev', name: 'LEV', unter: true, tabs: [{ id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'ueberweisungen-lev', name: 'Überweisung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung Löwenpark' }, { id: 'ueberweisungen-lev-lp', name: 'Überweisung Löwenpark' }] },
     { id: 'acc-ausgang', name: 'Ausgangsrechnungen', unter: true, tabs: [{ id: 'ausgang-xxl', name: 'XXL Ausgangsrechnung' }, { id: 'ausgang-lev', name: 'LEV Ausgangsrechnung' }] },
+    { id: 'acc-lastschrift', name: 'Lastschriften', unter: true, tabs: [{ id: 'ls-tickets', name: 'Tickets' }, { id: 'ls-mitglieder', name: 'Mitglieder' }, { id: 'ls-camps', name: 'Camps' }] },
     { id: 'spendenbescheinigungen', name: 'Spendenbescheinigungen', unter: true, tabs: [{ id: 'spenden', name: 'Spendenbescheinigungen' }] },
     { id: 'administration', name: 'Administration', unter: true, tabs: [{ id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }, { id: 'kreditoren', name: 'Kreditoren / Debitoren' }] },
     { id: 'auslagen', name: 'Auslagen', tabs: [{ id: 'auslage-neu', name: 'Auslage einreichen' }, { id: 'vorschuss-neu', name: 'Vorschuss beantragen' }, { id: 'auslage-protokoll', name: 'Protokoll', recht: 'accounting' }] },
@@ -929,7 +933,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 
   // Welche Bereiche eine Person sieht, kommt aus der Rechte-Tabelle (crm-db). Hier wird nur ausgeblendet,
   // entschieden wird im Gateway.
-  var RECHT_ID = { ticketing: 'ticketing', gutscheine: 'gutscheine', website: 'website', segmentierung: 'crm', accounting: 'accounting', 'acc-xxl': 'accounting', 'acc-lev': 'accounting', 'acc-ausgang': 'accounting', spendenbescheinigungen: 'accounting', administration: 'accounting', auslagen: 'auslagen', zugriffe: 'zugriffe', berechtigungen: 'zugriffe', 'ki-verbrauch': 'zugriffe' };
+  var RECHT_ID = { ticketing: 'ticketing', gutscheine: 'gutscheine', website: 'website', segmentierung: 'crm', accounting: 'accounting', 'acc-xxl': 'accounting', 'acc-lev': 'accounting', 'acc-ausgang': 'accounting', 'acc-lastschrift': 'accounting', spendenbescheinigungen: 'accounting', administration: 'accounting', auslagen: 'auslagen', zugriffe: 'zugriffe', berechtigungen: 'zugriffe', 'ki-verbrauch': 'zugriffe' };
   function darfBereich(b) {
     var n = window.LOEWEN_NUTZER;
     if (!n) return true;
@@ -1013,6 +1017,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     if (t === 'liquiditaet') ladeLQ();
     if (VW_PANEL[t]) ladeVW();
     if (AG_TAB[t]) ladeAG(AG_TAB[t]);
+    if (LS_TAB[t]) { var lsArt = LS_TAB[t]; if (!LS[lsArt].daten) ladeLS(lsArt); else renderLS(lsArt); }
     if (t === 'kreditoren' && !KR.daten && !KR.laedt) ladeKR(); else if (t === 'kreditoren') renderKR();
     if (t === 'kostenstellen') ladeKS();
     if (t === 'zugriffe') ladeZG();
@@ -5739,6 +5744,102 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       else if (w === 'neu') ladeZG();
     });
   }
+  // ---------- Accounting: Lastschriften (Tickets, Mitglieder, Camps): Stand aus dem Probelauf, Lauf mit Bestätigung, Verlauf ----------
+  // Der Einzug selbst macht der SEPA-Workflow (Vorabankündigung, SEPA-Datei per Mail, Beleg nach BuchhaltungsButler). Die Seite zeigt vorher genau, was er einziehen würde,
+  // und startet ihn erst nach der zweiten Bestätigung. Der Server vergleicht vor dem Lauf noch einmal: hat sich der Stand geändert, wird nichts eingezogen.
+  var LS_TAB = { 'ls-tickets': 'tickets', 'ls-mitglieder': 'mitglieder', 'ls-camps': 'camps' };
+  var LS = { tickets: {}, mitglieder: {}, camps: {} };
+  var LS_TITEL = { tickets: 'Dauerkarten · XXL Baskets GmbH', mitglieder: 'Mitgliedsbeiträge inklusive Freundeskreis · Basketball Löwen e.V.', camps: 'Feriencamps · Basketball Löwen e.V.' };
+  var LS_NOTIZ = { tickets: 'SEPA-Datei per Mail an Marko, Vorabankündigung an die Käufer, Bestellung in pretix auf bezahlt, Sammeleinzug-Beleg nach BuchhaltungsButler.', mitglieder: 'SEPA-Dateien (eine je Mitgliedschaftsart) per Mail, Vorabankündigung an die Mitglieder, Sammeleinzug-Beleg nach BuchhaltungsButler.', camps: 'SEPA-Datei je Camp per Mail, Vorabankündigung an die Zahlenden, Sammeleinzug-Beleg nach BuchhaltungsButler.' };
+  async function ladeLS(art) {
+    var z = LS[art]; if (z.laedt) return;
+    z.laedt = true; z.fehler = null; renderLS(art);
+    try {
+      var res = await fetch('/webhook/accounting/lastschrift-stand?art=' + art);
+      var d = await res.json();
+      if (!res.ok) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
+      if (!d.ok) throw new Error(d.meldung || 'Der Probelauf hat nicht geantwortet.');
+      z.daten = d;
+    } catch (e) { z.fehler = e.message; }
+    z.laedt = false; renderLS(art);
+  }
+  function lsBetrag(t) { return formatEuro(parseFloat(String(t || '0').replace(',', '.')) || 0); }
+  function lsStatus(s) { return { gestartet: 'läuft', ok: 'fertig', fehler: 'Fehler', abgebrochen: 'abgebrochen' }[s] || s; }
+  function renderLS(art) {
+    var el = $('p-ls-' + art); if (!el) return;
+    var z = LS[art], d = z.daten;
+    var kopf = '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>' + esc(LS_TITEL[art]) + '</span><button type="button" class="link-btn" data-ls="neu" data-art="' + art + '"' + (z.laedt || z.laeuft ? ' disabled' : '') + '>Aktualisieren</button></div></div>';
+    if (z.laedt && !d) { el.innerHTML = '<div class="stapel">' + kopf + '<div class="laedt">Lade den Stand (Probelauf, das kann bis zu einer halben Minute dauern) …</div></div>'; return; }
+    if (z.fehler && !d) { el.innerHTML = '<div class="stapel">' + kopf + '<div class="fehlerbox" role="alert">' + esc(z.fehler) + '</div></div>'; return; }
+    if (!d) { el.innerHTML = ''; return; }
+    var kachel = function (l, w, n) { return '<div class="card pad"><div class="kpi-label">' + esc(l) + '</div><div class="kpi">' + esc(w) + '</div>' + (n ? '<div class="notiz">' + esc(n) + '</div>' : '') + '</div>'; };
+    var h = '<div class="stapel">' + kopf;
+    if (z.meldung) h += '<div class="notiz" role="status">' + esc(z.meldung) + '</div>';
+    if (z.fehler) h += '<div class="fehlerbox" role="alert">' + esc(z.fehler) + '</div>';
+    h += '<div class="grid sm-3">' + kachel('Einzuziehen', zahl(d.anzahl) + (d.anzahl === 1 ? ' Lastschrift' : ' Lastschriften'), d.ohne_einzug_null_euro ? d.ohne_einzug_null_euro + ' ohne Betrag übersprungen' : '') +
+      kachel('Betrag', lsBetrag(d.betrag)) + kachel('Fälligkeit', d.faelligkeit ? formatDate(d.faelligkeit) : '–') + '</div>';
+    if (d.fehler.length) h += '<div class="hinweis-warn" role="alert"><b>Datenfehler, so wird nichts eingezogen:</b><ul style="margin:4px 0 0;padding-left:20px">' + d.fehler.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>';
+    if (d.uebersprungen.length) h += '<div class="hinweis-warn"><b>Nicht eingezogen, bitte die Daten prüfen (' + d.uebersprungen.length + '):</b><ul style="margin:4px 0 0;padding-left:20px">' + d.uebersprungen.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>';
+    if (d.gruppen.length) {
+      h += '<div class="card"><div class="card-kopf" style="margin:0">' + (art === 'camps' ? 'Je Camp' : 'Je Mitgliedschaftsart') + ' (eine SEPA-Datei)</div><div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">Einzug je Datei</caption><thead><tr><th scope="col">' + (art === 'camps' ? 'Camp' : 'Art') + '</th><th scope="col" class="zahlen">Anzahl</th><th scope="col" class="zahlen">Betrag</th><th scope="col">Datei</th></tr></thead><tbody>' +
+        d.gruppen.map(function (g) { return '<tr><td>' + esc(g.label) + '</td><td class="zahlen">' + esc(zahl(g.anzahl)) + '</td><td class="zahlen">' + esc(lsBetrag(g.betrag)) + '</td><td class="text-sek">' + esc(g.datei) + '</td></tr>'; }).join('') + '</tbody></table></div></div>';
+    }
+    var bezugKopf = { tickets: 'Bestellung', mitglieder: 'Art', camps: 'Camp' }[art], datumKopf = art === 'tickets' ? 'Bestellt' : 'Fällig';
+    h += '<div class="card"><div class="card-kopf" style="margin:0">Einzuziehende Lastschriften (' + d.positionen.length + ')</div><div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">Einzuziehende Lastschriften</caption><thead><tr><th scope="col">Name</th><th scope="col">' + bezugKopf + '</th><th scope="col">E-Mail</th><th scope="col" class="zahlen">Betrag</th><th scope="col">Mandat</th><th scope="col">' + datumKopf + '</th></tr></thead><tbody>';
+    var summe = 0;
+    d.positionen.forEach(function (p) {
+      summe += parseFloat(String(p.betrag || '0').replace(',', '.')) || 0;
+      h += '<tr><td>' + esc(p.name) + (p.konto && p.konto !== p.name ? ' <span class="notiz" style="display:inline;margin:0">(Konto: ' + esc(p.konto) + ')</span>' : '') + '</td><td>' + esc(p.bezug) + '</td><td>' + (p.email ? esc(p.email) : '<span class="hinweis">keine E-Mail, keine Vorabankündigung möglich</span>') + '</td><td class="zahlen">' + esc(lsBetrag(p.betrag)) + '</td><td class="text-sek">' + esc(p.referenz) + '</td><td class="text-sek" data-sort="' + esc(p.datum || p.faelligkeit) + '">' + esc(formatDate(p.datum || p.faelligkeit)) + '</td></tr>';
+    });
+    if (!d.positionen.length) h += '<tr><td colspan="6" class="leer">Zurzeit ist nichts fällig.</td></tr>';
+    else h += '<tr class="summe"><td colspan="3">Summe</td><td class="zahlen">' + esc(formatEuro(summe)) + '</td><td colspan="2"></td></tr>';
+    h += '</tbody></table></div></div>';
+    if (d.anzahl > 0 && !d.fehler.length) {
+      h += '<div class="card pad nur-schreiben" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">';
+      if (z.laeuft) h += '<span role="status">Der Lauf läuft …</span><span class="notiz" style="margin:0">Bitte nicht noch einmal starten. Das Ergebnis erscheint im Verlauf.</span>';
+      else h += '<button type="button" class="btn ' + (z.bereit ? 'btn-primary' : 'btn-secondary') + '" data-ls="lauf" data-art="' + art + '">' + (z.bereit ? 'Wirklich starten · ' + d.anzahl + (d.anzahl === 1 ? ' Lastschrift' : ' Lastschriften') + ' über ' + esc(lsBetrag(d.betrag)) : 'Lauf starten') + '</button>' +
+        (z.bereit ? '<button type="button" class="link-btn" data-ls="abbrechen" data-art="' + art + '">Abbrechen</button>' : '') + '<span class="notiz" style="margin:0">' + esc(LS_NOTIZ[art]) + '</span>';
+      h += '</div>';
+    }
+    var v = d.verlauf || [];
+    h += '<div class="card"><div class="card-kopf" style="margin:0">Verlauf der Läufe</div><div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">Verlauf der Lastschriftläufe</caption><thead><tr><th scope="col">Gestartet</th><th scope="col" class="zahlen">Anzahl</th><th scope="col" class="zahlen">Betrag</th><th scope="col">Fälligkeit</th><th scope="col">Stand</th><th scope="col">Von</th><th scope="col">Meldung</th></tr></thead><tbody>' +
+      v.map(function (x) { return '<tr><td class="text-sek nowrap" data-sort="' + esc(x.gestartet) + '">' + esc(formatDateTime(x.gestartet)) + '</td><td class="zahlen">' + esc(zahl(x.anzahl || 0)) + '</td><td class="zahlen">' + esc(lsBetrag(x.betrag)) + '</td><td>' + esc(x.faelligkeit ? formatDate(x.faelligkeit) : '') + '</td><td>' + esc(lsStatus(x.status)) + '</td><td>' + esc(String(x.von || '').split('@')[0]) + '</td><td class="text-sek">' + esc(x.meldung || '') + '</td></tr>'; }).join('') +
+      (v.length ? '' : '<tr><td colspan="7" class="leer">Noch kein Lauf über das Dashboard.</td></tr>') + '</tbody></table></div></div>';
+    el.innerHTML = h + '</div>';
+  }
+  async function lsLauf(art) {
+    var z = LS[art], d = z.daten; if (!d || z.laeuft) return;
+    if (!z.bereit) { z.bereit = true; renderLS(art); return; }
+    z.bereit = false; z.fehler = null; z.meldung = ''; z.laeuft = true; renderLS(art);
+    try {
+      var res = await fetch('/webhook/accounting/lastschrift-lauf', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ art: art, bestaetigt: true, erwartet: { anzahl: d.anzahl, betrag: d.betrag, faelligkeit: d.faelligkeit } }) });
+      var r = await res.json().catch(function () { return {}; });
+      if (!res.ok || !r.ok) throw new Error(r.meldung || r.message || r.fehler || 'Der Lauf wurde nicht gestartet.');
+      lsWarten(art, r.lauf, 0);
+    } catch (e) { z.laeuft = false; z.fehler = e.message; renderLS(art); }
+  }
+  function lsWarten(art, nr, n) {
+    var z = LS[art];
+    setTimeout(async function () {
+      try {
+        var res = await fetch('/webhook/accounting/lastschrift-verlauf?art=' + art), r = await res.json();
+        var x = ((r && r.verlauf) || []).filter(function (e) { return e.id === nr; })[0];
+        if (x && x.status !== 'gestartet') { z.laeuft = false; z.meldung = 'Lauf ' + lsStatus(x.status) + (x.meldung ? ': ' + x.meldung : '') + '.'; z.daten = null; ladeLS(art); return; }
+      } catch (e) { /* weiter versuchen */ }
+      if (n >= 60) { z.laeuft = false; z.fehler = 'Noch keine Rückmeldung vom Lauf. Bitte im Verlauf nachsehen, nicht noch einmal starten.'; z.daten = null; ladeLS(art); return; }
+      lsWarten(art, nr, n + 1);
+    }, n === 0 ? 2000 : 5000);
+  }
+  function bindLS() {
+    document.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-ls]'); if (!b) return;
+      var art = b.getAttribute('data-art'), w = b.getAttribute('data-ls');
+      if (!LS[art]) return;
+      if (w === 'neu') { LS[art].bereit = false; LS[art].meldung = ''; ladeLS(art); }
+      else if (w === 'lauf') lsLauf(art);
+      else if (w === 'abbrechen') { LS[art].bereit = false; renderLS(art); }
+    });
+  }
   // ---------- Verwaltung: KI-Verbrauch (alle Aufrufe der Claude-API, Tabelle ki_aufrufe plus Belegerkennung) ----------
   var KV = { daten: null, fehler: null, laedt: false };
   async function ladeKV() {
@@ -8015,6 +8116,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   bindKS();
   bindZG();
   bindKV();
+  bindLS();
   bindAP();
   bindSP();
   bindLQ();
@@ -8079,7 +8181,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261024130331';
+  var BUILD = '20261024131552';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
