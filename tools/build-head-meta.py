@@ -641,6 +641,8 @@ def block_for(rel, text):
 
     lines = [
         START,
+        # Bitte an KI-Anbieter, Bilder und Texte nicht fuers Training zu nutzen (Marko, 24.10.2026).
+        '<meta name="robots" content="noai, noimageai" />',
         f'<link rel="canonical" href="{url}" />',
         f'<meta property="og:type" content="{og_type}" />',
         f'<meta property="og:site_name" content="{attr(SITE_NAME)}" />',
