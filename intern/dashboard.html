@@ -496,6 +496,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 
   <section id="p-personen" role="tabpanel" aria-labelledby="tab-personen" hidden></section>
 
+  <section id="p-liste" role="tabpanel" aria-labelledby="tab-liste" hidden></section>
   <section id="p-mitglieder" role="tabpanel" aria-labelledby="tab-mitglieder" hidden></section>
   <section id="p-unternehmen" role="tabpanel" aria-labelledby="tab-unternehmen" hidden></section>
 
@@ -906,7 +907,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   // ---------- Navigation: Bereiche (links) und Tabs (oben) ----------
   // Neuer Tab = Eintrag hier + <section id="p-..."> im HTML.
   var BEREICHE = [
-    { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'erstellen', name: 'Erstellen' }] },
+    { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'liste', name: 'Liste' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'ticketing', name: 'Spieltag', tabs: [{ id: 'dauerkarten', name: 'Tickets' }, { id: 'auslastung', name: 'Auslastung' }, { id: 'auswertung', name: 'Auswertung' }, { id: 'ausschank', name: 'Ausschank' }, { id: 'firmenevents', name: 'Firmen-Events' }] },
     { id: 'segmentierung', name: 'CRM', tabs: [{ id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'mitglieder', name: 'Mitglieder' }, { id: 'kontakte', name: 'Segmente' }, { id: 'versand', name: 'Versand' }] },
     { id: 'accounting', name: 'Accounting', tabs: [{ id: 'liquiditaet', name: 'Übersicht' }, { id: 'rueckfragen', name: 'Rückfragen', versteckt: true }] },
@@ -1006,6 +1007,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     if (t === 'unternehmen' && !S.unternehmenGeladen) { S.unternehmenGeladen = true; loadUnternehmen(); }
     if (t === 'personen') { zeigePersonen(S.tabArg); window.scrollTo(0, 0); }
     if (t === 'mitglieder') { if (!MGL.daten) ladeMGL(); else renderMGL(); }
+    if (t === 'liste') { if (!S.stats && !S.statsLoading) loadStats(); else renderGL(); }
     if (t === 'versand') loadVersand();
     if (t === 'auswertung') ladeAW();
     if (t === 'ausschank') ladeAS();
@@ -1440,6 +1442,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   function renderStats() {
     renderAuslastung();
     renderStatistik();
+    renderGL();
   }
 
   function renderAuslastung() {
@@ -1513,32 +1516,32 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       if (liste.length === 1) return esc(liste[0].name);
       return liste.map(function (x) { return esc(x.name) + ' (' + esc(x.count) + ')'; }).join('<br>');
     }
-    function kachel(label, wert) {
-      return '<div class="card pad"><div class="kpi-label">' + esc(label) + '</div><div class="kpi">' + esc(wert) + '</div></div>';
+    function kachel(label, wert, href) {
+      return '<div class="card pad"><div class="kpi-label">' + esc(label) + '</div><div class="kpi">' + (href ? '<a href="' + esc(href) + '" title="Liste dieser Gutscheine">' + esc(wert) + '</a>' : esc(wert)) + '</div></div>';
     }
     var h = '<div class="stapel"><div class="grid sm-2 lg-5">' +
-      kachel('Gutscheine insgesamt', st.totalIssued) +
+      kachel('Gutscheine insgesamt', st.totalIssued, '#liste') +
       kachel('Anzahl der Plätze', st.totalPotential) +
       kachel('Insgesamt eingelöst', st.totalRedeemedUses) +
-      kachel('Ohne festes Spiel', unbound.issued + ' / ' + unbound.redeemedVouchers + ' eingelöst') +
-      kachel('Neue Gutscheine (14 Tage)', st.newVouchersCount) +
+      kachel('Ohne festes Spiel', unbound.issued + ' / ' + (unbound.redeemedUses !== undefined ? unbound.redeemedUses : unbound.redeemedVouchers) + ' eingelöst', '#liste/ohne-spiel') +
+      kachel('Neue Gutscheine (14 Tage)', st.newVouchersCount, '#liste/neu') +
       '</div>';
 
     h += '<div class="card scroll-x"><div class="card-kopf">Pro Spiel</div><table class="tbl"><thead><tr>' +
-      '<th>Nr.</th><th>Spiel</th><th>Termin</th><th>Sitzplätze</th><th>Anzahl Gutscheine</th><th>Anzahl mögliche Einlösungen</th><th>Eingelöst</th><th>Echt belegt</th><th>Höchstens mit offenen Gutscheinen</th></tr></thead><tbody>';
+      '<th>Nr.</th><th>Spiel</th><th>Termin</th><th>Sitzplätze</th><th>Anzahl Gutscheine</th><th>Anzahl mögliche Einlösungen</th><th title="Einlösungen, nicht Zahl der Gutscheine">Eingelöst</th><th>Echt belegt</th><th>Höchstens mit offenen Gutscheinen</th></tr></thead><tbody>';
     games.forEach(function (g) {
-      h += '<tr><td class="zahlen">' + esc(spielNr(g, games)) + '</td><td>' + esc(g.name) + '</td><td class="text-sek">' + esc(formatDate(g.dateFrom)) + ferienBadge(g.dateFrom) + '</td><td>' + esc(g.capacity) + '</td><td>' + esc(g.issued) + '</td><td>' + esc(g.potential) + '</td><td>' + esc(g.redeemedVouchers) + '</td><td>' + esc(pct(g.pctBelegt)) + '</td><td>' + esc(pct(g.pctMax)) + '</td></tr>';
+      h += '<tr><td class="zahlen">' + esc(spielNr(g, games)) + '</td><td>' + esc(g.name) + '</td><td class="text-sek">' + esc(formatDate(g.dateFrom)) + ferienBadge(g.dateFrom) + '</td><td>' + esc(g.capacity) + '</td><td><a href="#liste/spiel-' + esc(g.subeventId) + '" title="Liste dieser Gutscheine">' + esc(g.issued) + '</a></td><td>' + esc(g.potential) + '</td><td>' + esc(g.redeemedUses !== undefined ? g.redeemedUses : g.redeemedVouchers) + '</td><td>' + esc(pct(g.pctBelegt)) + '</td><td>' + esc(pct(g.pctMax)) + '</td></tr>';
     });
     if (games.length === 0) h += '<tr><td colspan="9" class="leer">Keine spielgebundenen Gutscheine.</td></tr>';
-    else h += '<tr class="summe"><td></td><td>Summe</td><td></td><td>' + esc(sumBy(games, 'capacity')) + '</td><td>' + esc(sumBy(games, 'issued')) + '</td><td>' + esc(sumBy(games, 'potential')) + '</td><td>' + esc(sumBy(games, 'redeemedVouchers')) + '</td><td></td><td></td></tr>';
+    else h += '<tr class="summe"><td></td><td>Summe</td><td></td><td>' + esc(sumBy(games, 'capacity')) + '</td><td>' + esc(sumBy(games, 'issued')) + '</td><td>' + esc(sumBy(games, 'potential')) + '</td><td>' + esc(sumBy(games, 'redeemedUses')) + '</td><td></td><td></td></tr>';
     h += '</tbody></table></div>';
 
     h += '<div class="card scroll-x"><div class="card-kopf">Pro Anlass</div><table class="tbl"><thead><tr>' +
       '<th>Anlass (Tag)</th><th>Aussteller</th><th>Art</th><th>Anzahl Gutscheine</th><th>Anzahl mögliche Einlösungen</th><th>Eingelöst</th></tr></thead><tbody>';
     tags.forEach(function (t) {
-      h += '<tr><td>' + esc(t.tag) + '</td><td>' + zaehlText(t.aussteller) + '</td><td>' + zaehlText(t.arten) + '</td><td>' + esc(t.issued) + '</td><td>' + esc(t.potential) + '</td><td>' + esc(t.redeemedVouchers) + '</td></tr>';
+      h += '<tr><td>' + esc(t.tag) + '</td><td>' + zaehlText(t.aussteller) + '</td><td>' + zaehlText(t.arten) + '</td><td><a href="#liste/tag-' + encodeURIComponent(t.tag) + '" title="Liste dieser Gutscheine">' + esc(t.issued) + '</a></td><td>' + esc(t.potential) + '</td><td>' + esc(t.redeemedUses !== undefined ? t.redeemedUses : t.redeemedVouchers) + '</td></tr>';
     });
-    if (tags.length > 0) h += '<tr class="summe"><td>Summe</td><td></td><td></td><td>' + esc(sumBy(tags, 'issued')) + '</td><td>' + esc(sumBy(tags, 'potential')) + '</td><td>' + esc(sumBy(tags, 'redeemedVouchers')) + '</td></tr>';
+    if (tags.length > 0) h += '<tr class="summe"><td>Summe</td><td></td><td></td><td>' + esc(sumBy(tags, 'issued')) + '</td><td>' + esc(sumBy(tags, 'potential')) + '</td><td>' + esc(sumBy(tags, 'redeemedUses')) + '</td></tr>';
     h += '</tbody></table></div>';
 
     h += '<div class="card scroll-x"><div class="card-kopf">Neue Gutscheine (letzte 14 Tage)</div><table class="tbl"><thead><tr>' +
@@ -5950,6 +5953,53 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       var c = e.target.closest('[data-mgl="typ"]'); if (c) { MGL.art = c.getAttribute('data-wert'); renderMGL(); }
     });
   }
+  // ---------- Gutscheine > Liste: genau die Gutscheine, auf die die Zahlen in der Statistik verlinken (Spiel, Anlass, ohne Spiel, neu, alle) ----------
+  function glFilter() {
+    var arg = S.tabArg || '', liste = (S.stats && S.stats.liste) || [], titel = 'Alle Gutscheine', f = function () { return true; };
+    var m;
+    if ((m = /^spiel-(\d+)$/.exec(arg))) { var id = Number(m[1]), sp = liste.filter(function (v) { return v.spielId === id; })[0]; titel = 'Spiel: ' + (sp && sp.spielName ? sp.spielName : 'Spiel ' + id); f = function (v) { return v.spielId === id; }; }
+    else if (/^tag-/.test(arg)) { var tag; try { tag = decodeURIComponent(arg.slice(4)); } catch (e) { tag = arg.slice(4); } titel = 'Anlass: ' + tag; f = function (v) { return v.tag === tag; }; }
+    else if (arg === 'ohne-spiel') { titel = 'Ohne festes Spiel'; f = function (v) { return !v.spielId; }; }
+    else if (arg === 'neu') { titel = 'Neue Gutscheine (letzte 14 Tage)'; var grenze = Date.now() - 14 * 86400000; f = function (v) { return v.erstellt && new Date(v.erstellt).getTime() >= grenze; }; }
+    return { titel: titel, f: f, liste: liste };
+  }
+  function glRabatt(v) {
+    if (v.freiticket) return 'Freiticket';
+    if (v.rabattModus === 'percent') return String(v.rabattWert) + ' %';
+    if (v.rabattModus === 'subtract') return '− ' + formatEuro(v.rabattWert);
+    if (v.rabattModus === 'set') return 'Festpreis ' + formatEuro(v.rabattWert);
+    return '–';
+  }
+  var GL = { suche: '' };
+  function renderGL() {
+    var el = $('p-liste'); if (!el) return;
+    if (S.statsLoading && !S.stats) { el.innerHTML = '<div class="laedt">Lade Gutscheine …</div>'; return; }
+    if (!S.stats || !S.stats.liste) { el.innerHTML = ''; return; }
+    var fl = glFilter(), s = GL.suche.trim().toLowerCase();
+    var zeilen = fl.liste.filter(fl.f).filter(function (v) { return !s || (v.code + ' ' + (v.spielName || '') + ' ' + v.tag + ' ' + v.kommentar + ' ' + v.erstelltVon).toLowerCase().indexOf(s) >= 0; });
+    var h = '<div class="stapel"><div class="card"><div class="filter-kopf"><div><b>' + esc(fl.titel) + '</b> <span class="gedaempft">' + zeilen.length + ' Gutscheine' + (S.tabArg ? ' · <a href="#liste">alle zeigen</a>' : '') + '</span></div>' +
+      '<div style="flex:1;min-width:220px"><label class="sr-only" for="gl-suche">Suche</label><input class="eingabe" id="gl-suche" data-gl="suche" value="' + esc(GL.suche) + '" placeholder="Suche nach Code, Spiel, Anlass oder Kommentar"></div></div>' +
+      '<div id="gl-tabelle"></div></div></div>';
+    el.innerHTML = h; renderGLTabelle(zeilen);
+  }
+  function renderGLTabelle(zeilen) {
+    var box = $('gl-tabelle'); if (!box) return;
+    var h = '<div class="scroll-x"><table class="tbl kompakt"><caption class="sr-only">Gutscheine</caption><thead><tr><th scope="col">Code</th><th scope="col">Spiel</th><th scope="col">Anlass</th><th scope="col">Rabatt</th><th scope="col" class="zahlen">Einlösungen</th><th scope="col">Gültig bis</th><th scope="col">Erstellt</th><th scope="col">Erstellt von</th><th scope="col">Kommentar</th></tr></thead><tbody>';
+    zeilen.slice(0, 1000).forEach(function (v) {
+      h += '<tr><td class="mono">' + esc(v.code) + '</td><td>' + (v.spielName ? esc(v.spielName) : '<span class="gedaempft">–</span>') + '</td><td>' + esc(v.tag) + '</td><td>' + esc(glRabatt(v)) + '</td><td class="zahlen" data-sort="' + esc(v.einloesungen) + '">' + esc(v.einloesungen) + ' / ' + esc(v.max) + '</td>' +
+        '<td class="text-sek" data-sort="' + esc(v.gueltigBis || '') + '">' + esc(v.gueltigBis ? formatDate(v.gueltigBis) : '') + '</td><td class="text-sek" data-sort="' + esc(v.erstellt || '') + '">' + esc(v.erstellt ? formatDateTime(v.erstellt) : '') + '</td><td>' + esc(v.erstelltVon || '') + '</td><td class="text-sek">' + esc(v.kommentar) + '</td></tr>';
+    });
+    if (!zeilen.length) h += '<tr><td colspan="9" class="leer">Keine Gutscheine für diese Auswahl.</td></tr>';
+    box.innerHTML = h + '</tbody></table></div>' + (zeilen.length > 1000 ? '<div class="card-fuss">Die ersten 1.000 von ' + zeilen.length + ' Gutscheinen.</div>' : '');
+  }
+  function bindGL() {
+    var el = $('p-liste'); if (!el) return;
+    el.addEventListener('input', function (e) {
+      if (e.target.getAttribute('data-gl') !== 'suche') return;
+      GL.suche = e.target.value; var fl = glFilter(), s = GL.suche.trim().toLowerCase();
+      renderGLTabelle(fl.liste.filter(fl.f).filter(function (v) { return !s || (v.code + ' ' + (v.spielName || '') + ' ' + v.tag + ' ' + v.kommentar + ' ' + v.erstelltVon).toLowerCase().indexOf(s) >= 0; }));
+    });
+  }
   // ---------- Verwaltung: KI-Verbrauch (alle Aufrufe der Claude-API, Tabelle ki_aufrufe plus Belegerkennung) ----------
   var KV = { daten: null, fehler: null, laedt: false };
   async function ladeKV() {
@@ -8238,6 +8288,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   bindKV();
   bindLS();
   bindMGL();
+  bindGL();
   bindAP();
   bindSP();
   bindLQ();
@@ -8303,7 +8354,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261024152236';
+  var BUILD = '20261024153246';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
