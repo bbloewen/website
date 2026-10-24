@@ -1506,6 +1506,13 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     var tags = st.byTag || [];
     var recent = st.recentVouchers || [];
     var unbound = st.unbound || {};
+    // Aussteller und Art je Anlass: bei einem Wert nur der Name, sonst mit Anzahl.
+    function zaehlText(liste) {
+      liste = liste || [];
+      if (!liste.length) return '–';
+      if (liste.length === 1) return esc(liste[0].name);
+      return liste.map(function (x) { return esc(x.name) + ' (' + esc(x.count) + ')'; }).join('<br>');
+    }
     function kachel(label, wert) {
       return '<div class="card pad"><div class="kpi-label">' + esc(label) + '</div><div class="kpi">' + esc(wert) + '</div></div>';
     }
@@ -1527,11 +1534,11 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     h += '</tbody></table></div>';
 
     h += '<div class="card scroll-x"><div class="card-kopf">Pro Anlass</div><table class="tbl"><thead><tr>' +
-      '<th>Anlass (Tag)</th><th>Anzahl Gutscheine</th><th>Anzahl mögliche Einlösungen</th><th>Eingelöst</th></tr></thead><tbody>';
+      '<th>Anlass (Tag)</th><th>Aussteller</th><th>Art</th><th>Anzahl Gutscheine</th><th>Anzahl mögliche Einlösungen</th><th>Eingelöst</th></tr></thead><tbody>';
     tags.forEach(function (t) {
-      h += '<tr><td>' + esc(t.tag) + '</td><td>' + esc(t.issued) + '</td><td>' + esc(t.potential) + '</td><td>' + esc(t.redeemedVouchers) + '</td></tr>';
+      h += '<tr><td>' + esc(t.tag) + '</td><td>' + zaehlText(t.aussteller) + '</td><td>' + zaehlText(t.arten) + '</td><td>' + esc(t.issued) + '</td><td>' + esc(t.potential) + '</td><td>' + esc(t.redeemedVouchers) + '</td></tr>';
     });
-    if (tags.length > 0) h += '<tr class="summe"><td>Summe</td><td>' + esc(sumBy(tags, 'issued')) + '</td><td>' + esc(sumBy(tags, 'potential')) + '</td><td>' + esc(sumBy(tags, 'redeemedVouchers')) + '</td></tr>';
+    if (tags.length > 0) h += '<tr class="summe"><td>Summe</td><td></td><td></td><td>' + esc(sumBy(tags, 'issued')) + '</td><td>' + esc(sumBy(tags, 'potential')) + '</td><td>' + esc(sumBy(tags, 'redeemedVouchers')) + '</td></tr>';
     h += '</tbody></table></div>';
 
     h += '<div class="card scroll-x"><div class="card-kopf">Neue Gutscheine (letzte 14 Tage)</div><table class="tbl"><thead><tr>' +
@@ -8296,7 +8303,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261024151623';
+  var BUILD = '20261024152236';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
