@@ -5840,6 +5840,11 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     if (!d.positionen.length) h += '<tr><td colspan="7" class="leer">Zurzeit ist nichts fällig.</td></tr>';
     else h += '<tr class="summe"><td colspan="4">Summe</td><td class="zahlen">' + esc(formatEuro(summe)) + '</td><td colspan="2"></td></tr>';
     h += '</tbody></table></div></div>';
+    if ((d.demnaechst || []).length) {
+      h += '<div class="card"><div class="card-kopf" style="margin:0">Demnächst fällig, noch nicht im Lauf (' + d.demnaechst.length + ')</div><div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">Demnächst fällige Einzüge</caption><thead><tr><th scope="col">Name</th><th scope="col">Typ</th><th scope="col">Fällig am</th><th scope="col" class="zahlen">Betrag</th><th scope="col">Mandat</th></tr></thead><tbody>' +
+        d.demnaechst.map(function (x) { return '<tr><td>' + esc(x.name) + '</td><td class="text-sek">' + esc(x.bezug) + '</td><td data-sort="' + esc(x.faelligkeit) + '">' + esc(x.faelligkeit ? formatDate(x.faelligkeit) : '') + '</td><td class="zahlen">' + esc(lsBetrag(x.betrag)) + '</td><td class="text-sek">' + esc(x.referenz) + '</td></tr>'; }).join('') +
+        '</tbody></table></div><div class="card-fuss">Der erste Einzug ist 14 Tage nach der Anmeldung fällig (Frist der Vorabankündigung). Er erscheint im Lauf am Fälligkeitstag.</div></div>';
+    }
     if (d.anzahl > 0) h += '<div class="card pad nur-schreiben" id="ls-lauf-' + art + '" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">' + lsLaufInhalt(art) + '</div>';
     var v = d.verlauf || [];
     h += '<div class="card"><div class="card-kopf" style="margin:0">Verlauf der Läufe</div><div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">Verlauf der Lastschriftläufe</caption><thead><tr><th scope="col">Gestartet</th><th scope="col" class="zahlen">Anzahl</th><th scope="col" class="zahlen">Betrag</th><th scope="col">Fälligkeit</th><th scope="col">Stand</th><th scope="col">Von</th><th scope="col">Meldung</th></tr></thead><tbody>' +
@@ -8370,7 +8375,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261024164258';
+  var BUILD = '20261024174629';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
