@@ -62,7 +62,7 @@
       "lastmod": "2026-09-18"
     },
     "index.html": {
-      "hash": "39f3917c0cc025aed3c3bb773e90c8aee40347a0",
+      "hash": "776a92d9a9708d178b218adb8fb56c8488a66d5e",
       "lastmod": "2026-10-24"
     },
     "kontakt.html": {
@@ -78,12 +78,12 @@
       "lastmod": "2026-08-08"
     },
     "news/aktuelles.html": {
-      "hash": "ec59fdffaa4b7a4a02bdd681f87a02d4d630c6ed",
+      "hash": "4514630569974175d8b756d32a4fda1f88c7f6d6",
       "lastmod": "2026-10-24"
     },
     "news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html": {
-      "hash": "f84ec0b9456b82276e157fe64e1cf0525faff9c5",
-      "lastmod": "2026-10-19"
+      "hash": "2e0c3aa666f0ef046d6648cdf06f5954a09604bf",
+      "lastmod": "2026-10-24"
     },
     "news/artikel/2025-04-29_profis_achtelfinale-aus.html": {
       "hash": "c38eb425968ac35de960a97abce9a1fde0a3192a",
@@ -202,12 +202,16 @@
       "lastmod": "2026-10-20"
     },
     "news/artikel/2026-10-18_profis_spielbericht-reutlingen.html": {
-      "hash": "da7ce0ce5d41ac2d64e9c9b8ef01a87c10558ab9",
-      "lastmod": "2026-10-19"
+      "hash": "d0b4060a8fb51c17822c8ed9e2d6144d495f104f",
+      "lastmod": "2026-10-24"
     },
     "news/artikel/2026-10-18_profis_vorbericht-reutlingen.html": {
       "hash": "c25c6fc66084ab7c726eb1e73b8e271e62e7675b",
       "lastmod": "2026-10-20"
+    },
+    "news/artikel/2026-10-24_profis_spielbericht-fellbach.html": {
+      "hash": "04d821dde4b29a72d0906b472f8cb2f7a77ed90a",
+      "lastmod": "2026-10-24"
     },
     "news/newsletter/index.html": {
       "hash": "4caad0fb0b2a0fd640456d7f98fa89ad0d374cb4",
@@ -258,8 +262,8 @@
       "lastmod": "2026-10-16"
     },
     "saison/profis.html": {
-      "hash": "267a8fdf9930ed14ae3bb2916a9edfb674b10cfe",
-      "lastmod": "2026-10-19"
+      "hash": "435e37bb164d90b33a0500fa8f22c870a10b34ff",
+      "lastmod": "2026-10-24"
     },
     "saison/profis/gameday/2026-10-11-bba-ludwigsburg.html": {
       "hash": "4e70722b1db6ab6bed39f958eb62bd6d9a8f6f76",
@@ -318,7 +322,7 @@
       "lastmod": "2026-10-16"
     },
     "saison/profis/gameday/index.html": {
-      "hash": "6f716751fcadd3f215670a34f54be5a531b807cd",
+      "hash": "9cdcba838fa84e3d0cc19ca1f39af106c4b9aecf",
       "lastmod": "2026-10-24"
     },
     "saison/profis/gameday/spieltagsinfo/ausgabe-1/index.html": {

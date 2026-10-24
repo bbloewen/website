@@ -84,6 +84,18 @@
       "topNews": false
     },
     {
+      "datum": "24.10.2026",
+      "kategorie": "Spielbericht",
+      "tint": "tint-blue",
+      "icon": "newspaper",
+      "titel": "81:98 bei SV Fellbach Flashers: Basketball Löwen Erfurt unterliegen",
+      "kurztext": "Basketball Löwen Erfurt unterliegen bei SV Fellbach Flashers 81:98. Nur das Schlussviertel geht an die Löwen, Anthony erzielt 20 Punkte.",
+      "url": "/news/artikel/2026-10-24_profis_spielbericht-fellbach.html",
+      "bild": "/assets/img/news/spielbericht-bba-ludwigsburg-kachel.webp",
+      "topNews": false,
+      "team": "profis"
+    },
+    {
       "datum": "13.10.2026",
       "kategorie": "Spielbericht",
       "tint": "tint-blue",
