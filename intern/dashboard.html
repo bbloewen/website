@@ -518,6 +518,7 @@ textarea.maske-lang { min-height: 72px; }
   <section id="p-auslage-protokoll" role="tabpanel" aria-labelledby="tab-auslage-protokoll" hidden></section>
   <section id="p-kreditoren" role="tabpanel" aria-labelledby="tab-kreditoren" hidden></section>
   <section id="p-zugriffe" role="tabpanel" aria-labelledby="tab-zugriffe" hidden></section>
+  <section id="p-berechtigungen" role="tabpanel" aria-labelledby="tab-berechtigungen" hidden></section>
 
 </main>
 </div>
@@ -906,7 +907,8 @@ textarea.maske-lang { min-height: 72px; }
     { id: 'administration', name: 'Administration', unter: true, tabs: [{ id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }, { id: 'kreditoren', name: 'Kreditoren / Debitoren' }] },
     { id: 'auslagen', name: 'Auslagen', tabs: [{ id: 'auslage-neu', name: 'Auslage einreichen' }, { id: 'vorschuss-neu', name: 'Vorschuss beantragen' }, { id: 'auslage-protokoll', name: 'Protokoll', recht: 'accounting' }] },
     { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
-    { id: 'zugriffe', name: 'Zugriffe', eingeklappt: true, tabs: [{ id: 'zugriffe', name: 'Zugriffe' }] }
+    { id: 'zugriffe', name: 'Zugriffe', eingeklappt: true, tabs: [{ id: 'zugriffe', name: 'Zugriffe' }] },
+    { id: 'berechtigungen', name: 'Berechtigungen', eingeklappt: true, tabs: [{ id: 'berechtigungen', name: 'Berechtigungen' }] }
   ];
   var VW_PANEL = { 'zahlung-xxl': { el: 'p-vw-xxl', mandant: 'XXL' }, 'zahlung-lev': { el: 'p-vw-lev', mandant: 'LEV' } }; // Vorschüsse stehen oben in den Zahlungen, nicht bei Löwenpark
   var AG_TAB = { 'ausgang-xxl': 'XXL', 'ausgang-lev': 'LEV' };
@@ -920,7 +922,7 @@ textarea.maske-lang { min-height: 72px; }
 
   // Welche Bereiche eine Person sieht, kommt aus der Rechte-Tabelle (crm-db). Hier wird nur ausgeblendet,
   // entschieden wird im Gateway.
-  var RECHT_ID = { ticketing: 'ticketing', gutscheine: 'gutscheine', website: 'website', segmentierung: 'crm', accounting: 'accounting', 'acc-xxl': 'accounting', 'acc-lev': 'accounting', 'acc-ausgang': 'accounting', spendenbescheinigungen: 'accounting', administration: 'accounting', auslagen: 'auslagen', zugriffe: 'zugriffe' };
+  var RECHT_ID = { ticketing: 'ticketing', gutscheine: 'gutscheine', website: 'website', segmentierung: 'crm', accounting: 'accounting', 'acc-xxl': 'accounting', 'acc-lev': 'accounting', 'acc-ausgang': 'accounting', spendenbescheinigungen: 'accounting', administration: 'accounting', auslagen: 'auslagen', zugriffe: 'zugriffe', berechtigungen: 'zugriffe' };
   function darfBereich(b) {
     var n = window.LOEWEN_NUTZER;
     if (!n) return true;
@@ -943,12 +945,14 @@ textarea.maske-lang { min-height: 72px; }
   function renderNavigation() {
     var b = bereichVon(S.tab);
     var h = '';
+    var ende = [], endeOffen = NAV.endeOffen;
     BEREICHE.filter(darfBereich).forEach(function (x) {
       var knopf = '<button type="button" class="bereich" data-bereich="' + x.id + '"' + (x === b ? ' aria-current="page"' : '') + '>' + esc(x.name) + '</button>';
-      // Eingeklappt am Ende der Navigation: wird beim Zeigen des Boards nicht gesehen, nur auf bewussten Klick
-      if (x.eingeklappt) h += '<li class="bereich-ende"><details data-nav-ende' + (x === b || NAV.endeOffen ? ' open' : '') + '><summary>Verwaltung</summary>' + knopf + '</details></li>';
+      // Eingeklappt am Ende der Navigation (Gruppe „Verwaltung“): wird beim Zeigen des Boards nicht gesehen, nur auf bewussten Klick
+      if (x.eingeklappt) { ende.push(knopf); if (x === b) endeOffen = true; }
       else h += '<li' + (x.unter ? ' class="bereich-unter"' : '') + '>' + knopf + '</li>';
     });
+    if (ende.length) h += '<li class="bereich-ende"><details data-nav-ende' + (endeOffen ? ' open' : '') + '><summary>Verwaltung</summary>' + ende.join('') + '</details></li>';
     $('bereiche').innerHTML = h;
     $('bereich-titel').textContent = b.name;
     var lh = $('lesen-hinweis'); if (lh) lh.hidden = !nurLesen(b);
@@ -1005,6 +1009,7 @@ textarea.maske-lang { min-height: 72px; }
     if (t === 'kreditoren' && !KR.daten && !KR.laedt) ladeKR(); else if (t === 'kreditoren') renderKR();
     if (t === 'kostenstellen') ladeKS();
     if (t === 'zugriffe') ladeZG();
+    if (t === 'berechtigungen') ladeBR();
     if (t === 'sachkonten-xxl') ladeSK('XXL');
     if (t === 'sachkonten-lev') ladeSK('LEV');
     if (t === 'rueckfragen') ladeRF();
@@ -5221,6 +5226,45 @@ textarea.maske-lang { min-height: 72px; }
       else if (w === 'neu') ladeAP();
     });
   }
+  // ---------- Verwaltung: Berechtigungen (wer darf was, aus der Tabelle rechte) ----------
+  var BR = { daten: null, fehler: null, laedt: false };
+  var BR_SPALTEN = [['gutscheine', 'Gutscheine'], ['ticketing', 'Spieltag'], ['crm', 'CRM'], ['accounting', 'Accounting'], ['auslagen', 'Auslagen'], ['website', 'Website'], ['zugriffe', 'Verwaltung']];
+  async function ladeBR() {
+    BR.laedt = true; BR.fehler = null; renderBR();
+    try {
+      var res = await fetch('/webhook/verwaltung/berechtigungen');
+      var d = await res.json();
+      if (!res.ok) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
+      BR.daten = d.personen || [];
+    } catch (e) { BR.fehler = e.message; }
+    BR.laedt = false; renderBR();
+  }
+  // schreiben = darf ändern, lesen = darf nur ansehen, sonst keins; „alles“ gilt für jeden Bereich
+  function brStufe(p, id) {
+    var b = p.bereiche || [], l = p.lesen || [];
+    if (b.indexOf('alles') >= 0 || b.indexOf(id) >= 0) return 'schreiben';
+    return l.indexOf(id) >= 0 ? 'lesen' : '';
+  }
+  function renderBR() {
+    var el = $('p-berechtigungen'); if (!el) return;
+    if (BR.laedt && !BR.daten) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
+    if (BR.fehler && !BR.daten) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(BR.fehler) + '</div>'; return; }
+    if (!BR.daten) { el.innerHTML = ''; return; }
+    var zellen = { schreiben: '<span class="gut">Schreiben</span>', lesen: '<span class="gedaempft">Lesen</span>', '': '<span class="gedaempft">–</span>' };
+    var h = '<div class="stapel"><div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Berechtigungen · ' + esc(String(BR.daten.filter(function (p) { return p.aktiv; }).length)) + ' aktive Personen</span><span>' + aktualisierenBtn('berechtigungen') + '</span></div>' +
+      '<div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">Wer darf was im Löwen-Dashboard</caption><thead><tr><th scope="col">Person</th><th scope="col">Status</th>' +
+      BR_SPALTEN.map(function (c) { return '<th scope="col">' + esc(c[1]) + '</th>'; }).join('') + '<th scope="col">Zuletzt angemeldet</th><th scope="col">Anmeldungen (30 Tage)</th></tr></thead><tbody>';
+    if (!BR.daten.length) h += '<tr><td colspan="' + (BR_SPALTEN.length + 4) + '" class="leer">Keine Berechtigungen eingetragen.</td></tr>';
+    BR.daten.forEach(function (p) {
+      var voll = (p.bereiche || []).indexOf('alles') >= 0;
+      h += '<tr' + (p.aktiv ? '' : ' class="aus"') + '><td><div class="fett">' + esc(p.name || String(p.email).split('@')[0]) + (voll ? ' <span class="badge badge-optin">Vollzugriff</span>' : '') + '</div><div class="notiz" style="margin:0">' + esc(p.email) + '</div></td>' +
+        '<td>' + (p.aktiv ? 'Aktiv' : '<span class="warnwert">Gesperrt</span>') + '</td>' +
+        BR_SPALTEN.map(function (c) { return '<td>' + zellen[p.aktiv ? brStufe(p, c[0]) : ''] + '</td>'; }).join('') +
+        '<td class="nowrap">' + (p.zuletzt ? esc(formatDateTime(p.zuletzt.replace(' ', 'T'))) : '–') + '</td><td>' + esc(String(p.anmeldungen30 || 0)) + '</td></tr>';
+    });
+    h += '</tbody></table></div><div class="card-fuss">Schreiben: darf ansehen und ändern. Lesen: darf nur ansehen. Vollzugriff gilt für alle Bereiche und die Verwaltung. Gesperrte Personen haben nirgends Zugriff. Geändert wird die Tabelle „rechte“ in crm-db.</div></div></div>';
+    el.innerHTML = h;
+  }
   var ZG = { daten: null, fehler: null, laedt: false, tage: 14 };
   var ZG_BEREICH = { ticketing: 'Spieltag', gutscheine: 'Gutscheine', website: 'Website', crm: 'CRM', accounting: 'Accounting', auslagen: 'Auslagen', zugriffe: 'Zugriffe' };
   async function ladeZG() {
@@ -6643,6 +6687,7 @@ textarea.maske-lang { min-height: 72px; }
       else if (a === 'auswertung') { loadDauerkarten(); ladeAW(); }
       else if (a === 'ausschank') ladeAS();
       else if (a === 'firmenevents') ladeFE();
+      else if (a === 'berechtigungen') ladeBR();
       else if (a === 'platzkarten') platzkartenDrucken();
       else if (a === 'stats') loadStats();
       else if (a === 'seo') loadSeo();
@@ -7484,7 +7529,7 @@ textarea.maske-lang { min-height: 72px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261024095105';
+  var BUILD = '20261024103041';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
