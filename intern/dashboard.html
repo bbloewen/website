@@ -347,7 +347,7 @@ textarea.maske-lang { min-height: 72px; }
 <div class="rahmen">
 <nav class="seite" aria-label="Bereiche">
   <div class="marke">
-    <div class="eyebrow">Basketball Löwen Erfurt</div>
+    <div class="eyebrow">Basketball Löwen</div>
     <div class="marke-titel">Huddle</div>
   </div>
   <ul class="bereiche" id="bereiche"></ul>
@@ -560,7 +560,7 @@ textarea.maske-lang { min-height: 72px; }
 
   var box = document.createElement('div');
   box.id = 'anmeldung'; box.hidden = true;
-  box.innerHTML = '<div class="anm-karte" role="dialog" aria-labelledby="anm-titel"><img class="anm-logo" src="'+window.LOEWEN_LOGO+'" alt="Basketball Löwen Erfurt"><div class="anm-marke">Basketball Löwen Erfurt</div><h1 id="anm-titel">Huddle</h1><p id="anm-text" role="status"></p><div id="anm-knopf"></div></div>';
+  box.innerHTML = '<div class="anm-karte" role="dialog" aria-labelledby="anm-titel"><img class="anm-logo" src="'+window.LOEWEN_LOGO+'" alt="Basketball Löwen Erfurt"><div class="anm-marke">Basketball Löwen</div><h1 id="anm-titel">Huddle</h1><p id="anm-text" role="status"></p><div id="anm-knopf"></div></div>';
   document.body.appendChild(box);
 
   function expMs(t) {
@@ -2616,7 +2616,7 @@ textarea.maske-lang { min-height: 72px; }
 
   // ---------- Tab: Segmentierung > Unternehmen ----------
   // Liste aller Unternehmen aus crm-db; gefiltert wird im Browser (auch bei einigen tausend Firmen schnell genug).
-  var UN = { liste: null, fehler: null, suche: '', merkmal: '', status: '', quelle: '', ohneAp: false, ohneMail: false, alle: false, fokus: '' };
+  var UN = { liste: null, fehler: null, suche: '', merkmal: '', status: '', branche: '', quelle: '', ohneAp: false, ohneMail: false, alle: false, fokus: '' };
 
   async function loadUnternehmen() {
     UN.fehler = null; renderUnternehmen();
@@ -2643,6 +2643,7 @@ textarea.maske-lang { min-height: 72px; }
       if (UN.merkmal === '_sponsor_ehemalig' && !u.sponsor_ehemalig) return false;
       if (UN.merkmal && UN.merkmal[0] !== '_' && !(u.merkmale || {}).hasOwnProperty(UN.merkmal)) return false;
       if (UN.status && u.status !== UN.status) return false;
+      if (UN.branche === '_ohne' ? !!u.branche : (UN.branche && u.branche !== UN.branche)) return false;
       if (UN.quelle && (u.quelle || 'Notion') !== UN.quelle) return false;
       if (UN.ohneAp && u.kontakte > 0) return false;
       if (UN.ohneMail && (u.email || u.kontakte_mit_email > 0)) return false;
@@ -2682,10 +2683,11 @@ textarea.maske-lang { min-height: 72px; }
       '<div class="card pad-l"><div class="zeile-titel"><h2 class="abschnitt" style="margin:0">' + esc(f.name) + '</h2>' +
       '<span>' + (FI.edit ? '' : '<button type="button" class="btn btn-primary nur-schreiben" data-maske-aktion="bearbeiten" data-art="firma">Bearbeiten</button> ') +
       (f.notion_url ? '<a href="' + esc(f.notion_url) + '" target="_blank" rel="noopener" class="link-btn">In Notion öffnen ↗</a>' : '') + '</span></div>' +
-      '<div class="text-sek">' + esc([f.firmenbezeichnung && f.firmenbezeichnung !== f.name ? f.firmenbezeichnung : '', f.status, f.level, f.quelle ? 'Quelle ' + f.quelle : ''].filter(Boolean).join(' · ')) + '</div>' +
+      '<div class="text-sek">' + esc([f.branche, f.firmenbezeichnung && f.firmenbezeichnung !== f.name ? f.firmenbezeichnung : '', f.status, f.level, f.quelle ? 'Quelle ' + f.quelle : ''].filter(Boolean).join(' · ')) + '</div>' +
       (badges.length ? '<div class="notiz-2">' + badges.join(' ') + '</div>' : '') + '</div>';
     var fLink = function (u, t) { return /^https?:\/\//i.test(String(u || '')) ? '<a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(u.replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, '')) + ' ↗</a>' : '<span class="gedaempft">–</span>'; };
     var daten = '<table class="tbl kompakt"><tbody>' +
+      '<tr><th scope="row">Branche</th><td>' + (f.branche ? esc(f.branche) : '<span class="gedaempft">–</span>') + '</td></tr>' +
       '<tr><th scope="row">Website</th><td>' + fLink(f.website_url) + '</td></tr><tr><th scope="row">Instagram</th><td>' + fLink(f.instagram) + '</td></tr>' +
       zeile('Rechnungs-E-Mail', esc(f.rechnungs_email || '')) + zeile('Allgemeine E-Mail', esc(f.allgemeine_email || '')) +
       zeile('BHB-Kreditor LEV', esc(f.bhb_kreditor_lev || '')) + zeile('BHB-Kreditor XXL', esc(f.bhb_kreditor_xxl || '')) +
@@ -2742,6 +2744,7 @@ textarea.maske-lang { min-height: 72px; }
       '<div class="regler">' +
       '<select class="auswahl" data-un="merkmal" aria-label="Merkmal">' + optTag('', 'Alle Merkmale', UN.merkmal) + optTag('_sponsor_aktuell', 'Sponsor aktuell', UN.merkmal) + optTag('_sponsor_ehemalig', 'Sponsor ehemalig', UN.merkmal) +
         unMerkmalOptionen().filter(function (m) { return m !== 'Sponsor'; }).map(function (m) { return optTag(m, m, UN.merkmal); }).join('') + '</select>' +
+      '<select class="auswahl" data-un="branche" aria-label="Branche">' + optTag('', 'Alle Branchen', UN.branche) + optTag('_ohne', 'ohne Branche', UN.branche) + unWerte('branche').map(function (x) { return optTag(x, x, UN.branche); }).join('') + '</select>' +
       '<select class="auswahl" data-un="status" aria-label="Status">' + optTag('', 'Alle Status', UN.status) + unWerte('status').map(function (x) { return optTag(x, x, UN.status); }).join('') + '</select>' +
       '<select class="auswahl" data-un="quelle" aria-label="Quelle">' + optTag('', 'Alle Quellen', UN.quelle) + ['Notion'].concat(unWerte('quelle')).map(function (x) { return optTag(x, x === 'Notion' ? 'ohne Quelle (Notion)' : x, UN.quelle); }).join('') + '</select>' +
       '<label class="text-klein"><input type="checkbox" data-un="ohneAp"' + (UN.ohneAp ? ' checked' : '') + '> ohne Ansprechpartner</label>' +
@@ -2754,10 +2757,11 @@ textarea.maske-lang { min-height: 72px; }
     var box = $('un-tabelle'); if (!box) return;
     var zeilen = unGefiltert(); var grenze = UN.alle ? zeilen.length : 200;
     var h = '<div class="card-fuss" style="border-top:0;border-bottom:1px solid var(--border)">' + (UN.fokus ? 'Eine Firma ausgewählt · <a href="#unternehmen">alle Unternehmen zeigen</a>' : zeilen.length + ' von ' + (UN.liste || []).length + ' Unternehmen') + '</div>' +
-      '<div class="scroll-x"><table class="tbl kompakt"><thead><tr><th>Unternehmen</th><th>Merkmale</th><th>Status</th><th>Level</th><th>Ansprechpartner</th><th>E-Mail</th><th>Quelle</th></tr></thead><tbody>';
+      '<div class="scroll-x"><table class="tbl kompakt"><thead><tr><th>Unternehmen</th><th>Branche</th><th>Merkmale</th><th>Status</th><th>Level</th><th>Ansprechpartner</th><th>E-Mail</th><th>Quelle</th></tr></thead><tbody>';
     zeilen.slice(0, grenze).forEach(function (u) {
       h += '<tr><td><a href="#unternehmen/' + esc(u.id) + '">' + esc(u.name) + '</a>' +
           (u.firmenbezeichnung && u.firmenbezeichnung !== u.name ? '<div class="notiz" style="margin:0">' + esc(u.firmenbezeichnung) + '</div>' : '') + '</td>' +
+        '<td class="text-sek">' + (u.branche ? esc(u.branche) : '<span class="gedaempft">–</span>') + '</td>' +
         '<td>' + merkmalBadges(u) + '</td>' +
         '<td class="text-sek nowrap">' + esc(u.status || '') + '</td>' +
         '<td class="text-sek">' + esc(u.level || '') + '</td>' +
@@ -2765,7 +2769,7 @@ textarea.maske-lang { min-height: 72px; }
         '<td>' + esc(u.email || '') + '</td>' +
         '<td class="text-sek">' + esc(u.quelle || '') + '</td></tr>';
     });
-    if (!zeilen.length) h += '<tr><td colspan="7" class="leer">Keine Unternehmen für diese Auswahl.</td></tr>';
+    if (!zeilen.length) h += '<tr><td colspan="8" class="leer">Keine Unternehmen für diese Auswahl.</td></tr>';
     h += '</tbody></table></div>';
     if (zeilen.length > grenze) h += '<div class="card-fuss"><button type="button" class="link-btn" data-aktion="un-alle">Alle ' + zeilen.length + ' anzeigen</button></div>';
     box.innerHTML = h;
@@ -2890,6 +2894,13 @@ textarea.maske-lang { min-height: 72px; }
   var MASKE_ANREDE = ['Herr', 'Frau', 'Divers'], MASKE_ANSPRACHE = ['Du', 'Sie'], MASKE_VERSAND = ['Haupt', 'Geschäftlich', 'Privat'];
   var MASKE_LEVEL = ['Namenssponsor', 'Performance PLATIN', 'Hauptsponsor', 'Wirkungspartner', 'Performance GOLD', 'Performance SILBER', 'Performance BRONZE', 'Basis-Partner', 'Sponsor', 'Unterstützer', 'Club 100', 'Akquise'];
   var MASKE_STATUS = ['✅ Vertrag unterschrieben', '📄 Angebot versendet', '🔄 In Verhandlung', '📞 Termin vereinbart', '⏳ Termin ausstehend', '❌ Lost', '⏸ Pausiert', 'Pot. Namenssponsor'];
+  // Branchen wie in Notion; dazu kommen alle, die schon bei Unternehmen stehen. Neue Branchen lassen sich frei eintragen.
+  var MASKE_BRANCHEN = ['Handwerk & Bau', 'Industrie & Produktion', 'Handel', 'Gastronomie & Hotel', 'Gesundheit & Soziales', 'Finanzen & Versicherung', 'IT & Software', 'Energie & Versorgung', 'Immobilien & Wohnen', 'Logistik & Verkehr', 'Medien & Werbung', 'Bildung & Wissenschaft', 'Öffentliche Hand & Verwaltung', 'Beratung & Dienstleistung', 'Sport & Freizeit', 'Sonstiges'];
+  function maskeBranchen() {
+    var m = {}; MASKE_BRANCHEN.forEach(function (b) { m[b] = 1; });
+    (UN.liste || []).forEach(function (u) { if (u.branche) m[u.branche] = 1; });
+    return Object.keys(m).sort(function (a, b) { return a.localeCompare(b, 'de'); });
+  }
   var MASKE_KANAL = ['E-Mail', 'Telefon', 'WhatsApp', 'Persönlich'];
   var MASKE_PERSON = [
     { g: 'Person', f: 'name', l: 'Name', t: 'text', pflicht: true }, { f: 'titel', l: 'Titel', t: 'text' }, { f: 'anrede', l: 'Anrede', t: 'select', o: MASKE_ANREDE },
@@ -2903,7 +2914,7 @@ textarea.maske-lang { min-height: 72px; }
     { g: 'Erziehungsberechtigte:r', f: 'eltern_vorname', l: 'Vorname', t: 'text' }, { f: 'eltern_nachname', l: 'Nachname', t: 'text' }, { f: 'eltern_email', l: 'E-Mail', t: 'email' }, { f: 'eltern_telefon', l: 'Telefon', t: 'tel' },
     { g: 'Versand und Hinweise', f: 'kein_versand', l: 'Kein Versand', t: 'haken' }, { f: 'vorlieben', l: 'Vorlieben / Hinweise', t: 'lang' }, { f: 'verlauf', l: 'Verlauf', t: 'lang' }];
   var MASKE_FIRMA = [
-    { g: 'Firma', f: 'name', l: 'Kurzbezeichnung', t: 'text', pflicht: true }, { f: 'firmenbezeichnung', l: 'Firmenbezeichnung', t: 'text' }, { f: 'rechnungs_email', l: 'Rechnungs-E-Mail', t: 'email' },
+    { g: 'Firma', f: 'name', l: 'Kurzbezeichnung', t: 'text', pflicht: true }, { f: 'firmenbezeichnung', l: 'Firmenbezeichnung', t: 'text' }, { f: 'branche', l: 'Branche', t: 'wahl' }, { f: 'rechnungs_email', l: 'Rechnungs-E-Mail', t: 'email' },
     { f: 'allgemeine_email', l: 'Allgemeine E-Mail', t: 'email' }, { f: 'website_url', l: 'Website (Link)', t: 'url' }, { f: 'instagram', l: 'Instagram (Link)', t: 'url' }, { f: 'sponsoren_level', l: 'Sponsoren-Level', t: 'select', o: MASKE_LEVEL }, { f: 'status', l: 'Status', t: 'select', o: MASKE_STATUS },
     { f: 'relationship_manager', l: 'Relationship-Manager', t: 'text' }, { f: 'referenznummer', l: 'Referenznummer', t: 'text' }, { f: 'salesforce_id', l: 'Salesforce-ID', t: 'text' },
     { g: 'Rechnung und Buchhaltung', f: 'rechnungsadresse', l: 'Rechnungsadresse', t: 'lang' }, { f: 'zahlungsbedingungen', l: 'Zahlungsbedingungen', t: 'text' },
@@ -2931,6 +2942,8 @@ textarea.maske-lang { min-height: 72px; }
       h += '<div class="maske-feld' + (d.t === 'lang' ? ' maske-breit' : '') + '"><label class="feld-label" for="' + id + '">' + esc(d.l) + (d.pflicht ? ' <span class="pflicht">*</span>' : '') + '</label>';
       if (d.t === 'select') {
         h += '<select class="eingabe" id="' + id + '" data-feld="' + d.f + '"><option value="">' + esc(d.leer || '–') + '</option>' + d.o.map(function (x) { return '<option' + (x === v ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join('') + '</select>';
+      } else if (d.t === 'wahl') {
+        h += '<input class="eingabe" id="' + id + '" data-feld="' + d.f + '" type="text" list="' + id + '-liste" maxlength="80" value="' + esc(v) + '" autocomplete="off" placeholder="auswählen oder neu eintragen"><datalist id="' + id + '-liste">' + maskeBranchen().map(function (b) { return '<option value="' + esc(b) + '">'; }).join('') + '</datalist>';
       } else if (d.t === 'lang') {
         h += '<textarea class="eingabe maske-lang" id="' + id + '" data-feld="' + d.f + '" rows="3" maxlength="2000">' + esc(v) + '</textarea>';
       } else {
@@ -7607,7 +7620,7 @@ textarea.maske-lang { min-height: 72px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261024105657';
+  var BUILD = '20261024111412';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
