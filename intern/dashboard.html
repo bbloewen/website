@@ -496,6 +496,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 
   <section id="p-personen" role="tabpanel" aria-labelledby="tab-personen" hidden></section>
 
+  <section id="p-mitglieder" role="tabpanel" aria-labelledby="tab-mitglieder" hidden></section>
   <section id="p-unternehmen" role="tabpanel" aria-labelledby="tab-unternehmen" hidden></section>
 
   <section id="p-versand" role="tabpanel" aria-labelledby="tab-versand" hidden></section>
@@ -907,7 +908,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   var BEREICHE = [
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'ticketing', name: 'Spieltag', tabs: [{ id: 'dauerkarten', name: 'Tickets' }, { id: 'auslastung', name: 'Auslastung' }, { id: 'auswertung', name: 'Auswertung' }, { id: 'ausschank', name: 'Ausschank' }, { id: 'firmenevents', name: 'Firmen-Events' }] },
-    { id: 'segmentierung', name: 'CRM', tabs: [{ id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'kontakte', name: 'Segmente' }, { id: 'versand', name: 'Versand' }] },
+    { id: 'segmentierung', name: 'CRM', tabs: [{ id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'mitglieder', name: 'Mitglieder' }, { id: 'kontakte', name: 'Segmente' }, { id: 'versand', name: 'Versand' }] },
     { id: 'accounting', name: 'Accounting', tabs: [{ id: 'liquiditaet', name: 'Übersicht' }, { id: 'rueckfragen', name: 'Rückfragen', versteckt: true }] },
     { id: 'acc-xxl', name: 'XXL', unter: true, tabs: [{ id: 'belege-xxl', name: 'Belege' }, { id: 'zahlung-xxl', name: 'Zahlung' }, { id: 'ueberweisungen-xxl', name: 'Überweisung' }] },
     { id: 'acc-lev', name: 'LEV', unter: true, tabs: [{ id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'ueberweisungen-lev', name: 'Überweisung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung Löwenpark' }, { id: 'ueberweisungen-lev-lp', name: 'Überweisung Löwenpark' }] },
@@ -1003,6 +1004,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     if (t === 'unternehmen') { UN.fokus = S.tabArg; UN.alle = false; if (UN.fokus) { zeigeFirma(UN.fokus); window.scrollTo(0, 0); } else if (S.unternehmenGeladen) renderUnternehmen(); }
     if (t === 'unternehmen' && !S.unternehmenGeladen) { S.unternehmenGeladen = true; loadUnternehmen(); }
     if (t === 'personen') { zeigePersonen(S.tabArg); window.scrollTo(0, 0); }
+    if (t === 'mitglieder') { if (!MGL.daten) ladeMGL(); else renderMGL(); }
     if (t === 'versand') loadVersand();
     if (t === 'auswertung') ladeAW();
     if (t === 'ausschank') ladeAS();
@@ -5840,6 +5842,63 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       else if (w === 'abbrechen') { LS[art].bereit = false; renderLS(art); }
     });
   }
+  // ---------- CRM > Mitglieder: Liste aus der Tabelle „Lastschriften-Mitglieder“ (IBAN nur maskiert), Kennzahlen, Filter ----------
+  var MGL = { daten: null, fehler: null, laedt: false, suche: '', art: '', status: '' };
+  async function ladeMGL() {
+    MGL.laedt = true; MGL.fehler = null; renderMGL();
+    try {
+      var res = await fetch('/webhook/crm/mitglieder');
+      var d = await res.json();
+      if (!res.ok || d.ok === false) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
+      MGL.daten = d;
+    } catch (e) { MGL.fehler = e.message; }
+    MGL.laedt = false; renderMGL();
+  }
+  function mglGefiltert() {
+    var s = MGL.suche.trim().toLowerCase();
+    return ((MGL.daten && MGL.daten.zeilen) || []).filter(function (z) {
+      if (MGL.art && z.art_label !== MGL.art) return false;
+      if (MGL.status && z.status !== MGL.status) return false;
+      return !s || (z.name + ' ' + z.email + ' ' + z.ort + ' ' + z.mandatsreferenz + ' ' + z.kontoinhaber).toLowerCase().indexOf(s) >= 0;
+    });
+  }
+  function renderMGL() {
+    var el = $('p-mitglieder'); if (!el) return;
+    if (MGL.laedt && !MGL.daten) { el.innerHTML = '<div class="laedt">Lade Mitglieder …</div>'; return; }
+    if (MGL.fehler && !MGL.daten) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(MGL.fehler) + '</div>'; return; }
+    if (!MGL.daten) { el.innerHTML = ''; return; }
+    var d = MGL.daten, k = d.kpi || {};
+    var kachel = function (l, w, n) { return '<div class="card pad"><div class="kpi-label">' + esc(l) + '</div><div class="kpi">' + esc(w) + '</div>' + (n ? '<div class="notiz">' + esc(n) + '</div>' : '') + '</div>'; };
+    var h = '<div class="stapel"><div class="grid sm-3">' + kachel('Aktive Mitglieder', zahl(k.aktiv || 0), 'gekündigt ' + zahl(k.gekuendigt || 0) + ' · in der Tabelle ' + zahl(k.gesamt || 0)) +
+      kachel('Jahresbeitrag der Aktiven', formatEuro(k.jahresbeitrag_aktiv || 0), 'Beitrag × 12 / Turnus, ohne Aufnahmegebühr') +
+      '<div class="card pad"><div class="kpi-label">Je Art (aktiv)</div><ul class="blockliste" style="margin-top:4px">' + (d.arten || []).map(function (a) { return '<li>' + esc(a.art) + ' <span class="gedaempft">' + esc(zahl(a.anzahl)) + ' · ' + esc(formatEuro(a.jahresbeitrag)) + '</span></li>'; }).join('') + '</ul></div></div>';
+    (d.hinweise || []).forEach(function (t) { h += '<div class="hinweis-warn" role="status">' + esc(t) + '</div>'; });
+    var arten = (d.arten || []).map(function (a) { return a.art; });
+    var stati = []; (d.zeilen || []).forEach(function (z) { if (stati.indexOf(z.status) < 0) stati.push(z.status); });
+    h += '<div class="card"><div class="filter-kopf"><div style="flex:1;min-width:220px"><label class="sr-only" for="mgl-suche">Suche</label><input class="eingabe" id="mgl-suche" data-mgl="suche" value="' + esc(MGL.suche) + '" placeholder="Suche nach Name, E-Mail, Ort oder Mandatsreferenz"></div><div class="regler">' +
+      '<select class="auswahl" data-mgl="art" aria-label="Art">' + optTag('', 'Alle Arten', MGL.art) + arten.map(function (a) { return optTag(a, a, MGL.art); }).join('') + '</select>' +
+      '<select class="auswahl" data-mgl="status" aria-label="Status">' + optTag('', 'Alle Status', MGL.status) + stati.map(function (a) { return optTag(a, a, MGL.status); }).join('') + '</select>' +
+      '<button type="button" class="link-btn" data-mgl="neu">Aktualisieren</button></div></div><div id="mgl-tabelle"></div></div></div>';
+    el.innerHTML = h; renderMGLTabelle();
+  }
+  function renderMGLTabelle() {
+    var box = $('mgl-tabelle'); if (!box) return;
+    var zeilen = mglGefiltert();
+    var h = '<div class="card-fuss" style="border-top:0;border-bottom:1px solid var(--border)">' + zeilen.length + ' von ' + ((MGL.daten && MGL.daten.zeilen) || []).length + ' Einträgen</div><div class="scroll-x"><table class="tbl kompakt"><caption class="sr-only">Mitglieder</caption><thead><tr><th scope="col">Name</th><th scope="col">Art</th><th scope="col">Status</th><th scope="col" class="zahlen">Beitrag</th><th scope="col" class="zahlen">Jahresbeitrag</th><th scope="col">Nächster Einzug</th><th scope="col">Letzter Einzug</th><th scope="col">Mandat</th><th scope="col">IBAN</th><th scope="col">Eintritt</th></tr></thead><tbody>';
+    zeilen.forEach(function (z) {
+      h += '<tr><td>' + (z.kontakt_id ? '<a href="#personen/' + esc(z.kontakt_id) + '">' + esc(z.name) + '</a>' : esc(z.name)) + (z.ort ? '<div class="notiz" style="margin:0">' + esc(z.ort) + '</div>' : '') + '</td><td class="text-sek">' + esc(z.art_label) + '</td><td>' + (z.status === 'aktiv' ? 'aktiv' : '<span class="badge">' + esc(z.status) + '</span>') + '</td>' +
+        '<td class="zahlen" data-sort="' + esc(z.beitrag) + '">' + esc(formatEuro(z.beitrag)) + '<div class="notiz" style="margin:0">alle ' + esc(z.turnus_monate) + ' Mon.</div></td><td class="zahlen" data-sort="' + esc(z.jahresbeitrag) + '">' + esc(formatEuro(z.jahresbeitrag)) + '</td>' +
+        '<td data-sort="' + esc(z.naechster_einzug) + '">' + esc(z.naechster_einzug ? formatDate(z.naechster_einzug) : '') + '</td><td data-sort="' + esc(z.letzter_einzug) + '">' + esc(z.letzter_einzug ? formatDate(z.letzter_einzug) : '') + '</td><td class="text-sek">' + esc(z.mandatsreferenz) + '</td><td class="text-sek">' + (z.iban ? esc(z.iban) : '<span class="hinweis">fehlt</span>') + '</td><td data-sort="' + esc(z.eintritt) + '">' + esc(z.eintritt ? formatDate(z.eintritt) : '') + '</td></tr>';
+    });
+    if (!zeilen.length) h += '<tr><td colspan="10" class="leer">Keine Mitglieder für diese Auswahl.</td></tr>';
+    box.innerHTML = h + '</tbody></table></div>';
+  }
+  function bindMGL() {
+    var el = $('p-mitglieder'); if (!el) return;
+    el.addEventListener('input', function (e) { if (e.target.getAttribute('data-mgl') === 'suche') { MGL.suche = e.target.value; renderMGLTabelle(); } });
+    el.addEventListener('change', function (e) { var k = e.target.getAttribute('data-mgl'); if (k === 'art' || k === 'status') { MGL[k] = e.target.value; renderMGLTabelle(); } });
+    el.addEventListener('click', function (e) { if (e.target.closest('[data-mgl="neu"]')) ladeMGL(); });
+  }
   // ---------- Verwaltung: KI-Verbrauch (alle Aufrufe der Claude-API, Tabelle ki_aufrufe plus Belegerkennung) ----------
   var KV = { daten: null, fehler: null, laedt: false };
   async function ladeKV() {
@@ -8090,6 +8149,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   }
   function bindSortieren() {
     document.addEventListener('click', function (e) {
+      var tab = e.target.closest && e.target.closest('table.tbl'); if (tab && !tab.hasAttribute('data-sortinit') && tab.parentNode) sortSchmuecken(tab.parentNode);   // frisch gezeichnete Tabelle sofort scharf schalten
       var th = e.target.closest && e.target.closest('th[data-sortierbar]'); if (!th || e.target.closest('a,button,input,select,label')) return;
       sortKlick(th);
     });
@@ -8117,6 +8177,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   bindZG();
   bindKV();
   bindLS();
+  bindMGL();
   bindAP();
   bindSP();
   bindLQ();
@@ -8181,7 +8242,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261024131552';
+  var BUILD = '20261024132628';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
