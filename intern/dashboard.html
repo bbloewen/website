@@ -501,6 +501,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   <section id="p-liste" role="tabpanel" aria-labelledby="tab-liste" hidden></section>
   <section id="p-mitglieder" role="tabpanel" aria-labelledby="tab-mitglieder" hidden></section>
   <section id="p-freundeskreis" role="tabpanel" aria-labelledby="tab-freundeskreis" hidden></section>
+  <section id="p-camps" role="tabpanel" aria-labelledby="tab-camps" hidden></section>
   <section id="p-unternehmen" role="tabpanel" aria-labelledby="tab-unternehmen" hidden></section>
 
   <section id="p-versand" role="tabpanel" aria-labelledby="tab-versand" hidden></section>
@@ -922,7 +923,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   var BEREICHE = [
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'liste', name: 'Liste' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'ticketing', name: 'Spieltag', tabs: [{ id: 'dauerkarten', name: 'Tickets' }, { id: 'auslastung', name: 'Auslastung' }, { id: 'auswertung', name: 'Auswertung' }, { id: 'ausschank', name: 'Ausschank' }, { id: 'firmenevents', name: 'Firmen-Events' }] },
-    { id: 'segmentierung', name: 'CRM', tabs: [{ id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'mitglieder', name: 'Mitglieder' }, { id: 'freundeskreis', name: 'Freundeskreis' }, { id: 'kontakte', name: 'Segmente' }, { id: 'versand', name: 'Versand' }] },
+    { id: 'segmentierung', name: 'CRM', tabs: [{ id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'mitglieder', name: 'Mitglieder' }, { id: 'freundeskreis', name: 'Freundeskreis' }, { id: 'camps', name: 'Feriencamps' }, { id: 'kontakte', name: 'Segmente' }, { id: 'versand', name: 'Versand' }] },
     { id: 'accounting', name: 'Accounting', tabs: [{ id: 'liquiditaet', name: 'Übersicht' }, { id: 'rueckfragen', name: 'Rückfragen', versteckt: true }] },
     { id: 'acc-xxl', name: 'XXL', unter: true, tabs: [{ id: 'belege-xxl', name: 'Belege' }, { id: 'zahlung-xxl', name: 'Kontobewegungen' }] },
     { id: 'acc-lev', name: 'LEV', unter: true, tabs: [{ id: 'belege-lev', name: 'Belege' }, { id: 'zahlung-lev', name: 'Kontobewegungen' }, { id: 'zahlung-lev-lp', name: 'Kontobewegungen Löwenpark' }] },
@@ -1020,6 +1021,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     if (t === 'unternehmen' && !S.unternehmenGeladen) { S.unternehmenGeladen = true; loadUnternehmen(); }
     if (t === 'personen') { zeigePersonen(S.tabArg); window.scrollTo(0, 0); }
     if (t === 'mitglieder' || t === 'freundeskreis') { if (!MGL.daten) ladeMGL(); else renderMGL(t); }
+    if (t === 'camps') { if (!CP.daten) ladeCP(); else renderCP(); }
     if (t === 'liste') { if (!S.stats && !S.statsLoading) loadStats(); else renderGL(); }
     if (t === 'versand') loadVersand();
     if (t === 'auswertung') ladeAW();
@@ -6044,6 +6046,171 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     else h += sumZeile([{ t: 'Summe · ' + zahl(zeilen.length) + ' Aktive', span: eltern ? 6 : 5 }, { t: formatEuro(sumVon(zeilen, function (x) { return x.beitrag; })), z: true }, { t: formatEuro(sumVon(zeilen, function (x) { return x.jahresbeitrag; })), z: true }, { t: '', span: 4 }]);
     box.innerHTML = h + '</tbody></table></div>';
   }
+
+  // ---------- CRM: Feriencamps (Camps anlegen und ändern, Anmeldung öffnen, Teilnehmer, Warteliste, Storno) ----------
+  var CP = { daten: null, laedt: false, fehler: null, camp: '', suche: '', edit: null, meldung: '', aktionFehler: '', laeuft: false };
+  var CP_FELDER = ['name', 'saison', 'beginn', 'ende', 'ort', 'ort_link', 'beschreibung', 'alter_von', 'alter_bis', 'plaetze', 'preis_standard', 'preis_mitglied', 'preis_familienpass', 'anmeldung_von', 'anmeldung_bis'];
+  var CP_STATUS = { offen: 'offen', warteliste: 'Warteliste', storniert: 'storniert', bezahlt: 'bezahlt', eingezogen: 'eingezogen' };
+  async function ladeCP(still) {
+    if (!still) { CP.laedt = true; CP.fehler = null; renderCP(); }
+    try {
+      var res = await fetch('/webhook/crm/camps');
+      var d = await res.json();
+      if (!res.ok || d.ok === false) throw new Error(d.message || d.meldung || 'Fehler beim Laden');
+      CP.daten = d;
+    } catch (e) { CP.fehler = 'Die Camps konnten nicht geladen werden: ' + e.message; }
+    CP.laedt = false; renderCP();
+  }
+  function cpTag(iso) { return iso ? String(iso).slice(0, 10) : ''; }
+  function cpLokal(iso) {   // Zeitpunkt als Berliner Zeit für datetime-local
+    if (!iso) return '';
+    var t = new Date(iso); if (isNaN(t.getTime())) return '';
+    var p = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).format(t);
+    return p.replace(' ', 'T');
+  }
+  function cpFelder(c, offen) {
+    return { name: c.name, saison: c.saison, beginn: cpTag(c.beginn), ende: cpTag(c.ende), ort: c.ort || '', ort_link: c.ort_link || '', beschreibung: c.beschreibung || '', alter_von: c.alter_von == null ? '' : c.alter_von, alter_bis: c.alter_bis == null ? '' : c.alter_bis,
+      plaetze: c.plaetze == null ? '' : c.plaetze, preis_standard: c.preis_standard, preis_mitglied: c.preis_mitglied == null ? '' : c.preis_mitglied, preis_familienpass: c.preis_familienpass == null ? '' : c.preis_familienpass,
+      anmeldung_von: c.anmeldung_von || '', anmeldung_bis: c.anmeldung_bis || '', offen: offen };
+  }
+  function cpFeld(id, label, art, wert, extra, hint) {
+    return '<div class="field"><label for="cp-' + id + '">' + label + '</label><input class="eingabe" id="cp-' + id + '" type="' + art + '" value="' + esc(wert) + '" ' + (extra || '') + '>' + (hint ? '<div class="notiz" style="margin:2px 0 0">' + hint + '</div>' : '') + '</div>';
+  }
+  function cpForm(ed) {
+    var f = ed.f, neu = ed.neu;
+    return '<div class="card pad" role="region" aria-label="' + (neu ? 'Neues Camp' : 'Camp bearbeiten') + '"><div class="fett">' + (neu ? 'Neues Camp' : 'Camp bearbeiten: ' + esc(ed.name)) + '</div>' +
+      '<form data-cp-form style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px 16px;margin-top:8px">' +
+      cpFeld('name', 'Name *', 'text', f.name, 'required') + (neu ? cpFeld('id', 'Kurzbezeichnung (Adresse, leer = aus dem Namen)', 'text', ed.id || '', '', 'z. B. ostercamp-2028') : '') +
+      cpFeld('saison', 'Saison', 'text', f.saison) + cpFeld('beginn', 'Beginn *', 'date', f.beginn, 'required') + cpFeld('ende', 'Ende *', 'date', f.ende, 'required') +
+      cpFeld('ort', 'Ort', 'text', f.ort) + cpFeld('ort_link', 'Link zum Ort', 'text', f.ort_link, '', 'z. B. /trainieren/loewenpark.html') + cpFeld('beschreibung', 'Kurzbeschreibung', 'text', f.beschreibung) +
+      cpFeld('alter_von', 'Alter von', 'number', f.alter_von, 'min="0" max="99"') + cpFeld('alter_bis', 'Alter bis', 'number', f.alter_bis, 'min="0" max="99"') +
+      cpFeld('plaetze', 'Plätze', 'number', f.plaetze, 'min="1"', 'leer = unbegrenzt, danach kommt die Warteliste') +
+      cpFeld('preis_standard', 'Preis Standard (€) *', 'number', f.preis_standard, 'min="0" step="0.01" required') + cpFeld('preis_mitglied', 'Preis Mitglied (€)', 'number', f.preis_mitglied, 'min="0" step="0.01"', 'leer = Standardpreis') + cpFeld('preis_familienpass', 'Preis Familienpass (€)', 'number', f.preis_familienpass, 'min="0" step="0.01"', 'leer = Standardpreis') +
+      cpFeld('anmeldung_von', 'Anmeldung ab', 'datetime-local', cpLokal(f.anmeldung_von), '', 'leer = sofort, wenn „offen“') + cpFeld('anmeldung_bis', 'Anmeldung bis', 'datetime-local', cpLokal(f.anmeldung_bis), '', 'leer = bis zum Schalter „zu“') +
+      '<div class="field-checkbox" style="align-self:end"><input type="checkbox" id="cp-offen"' + (f.offen ? ' checked' : '') + '><label for="cp-offen">Anmeldung auf der Website offen</label></div></form>' +
+      (ed.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:8px">' + esc(ed.fehler) + '</div>' : '') +
+      '<div style="display:flex;gap:12px;align-items:center;margin-top:10px"><button type="button" class="btn btn-primary" data-cp="speichern"' + (CP.laeuft ? ' disabled' : '') + '>' + (CP.laeuft ? 'Speichere …' : 'Speichern') + '</button><button type="button" class="link-btn" data-cp="abbrechen">Abbrechen</button></div></div>';
+  }
+  function renderCP() {
+    var el = $('p-camps'); if (!el) return;
+    if (CP.laedt && !CP.daten) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
+    if (CP.fehler && !CP.daten) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(CP.fehler) + '</div>'; return; }
+    if (!CP.daten) { el.innerHTML = ''; return; }
+    var camps = CP.daten.camps || [], tn = CP.daten.teilnehmer || [];
+    var anm = sumVon(camps, function (c) { return c.anmeldungen; }), wl = sumVon(camps, function (c) { return c.warteliste_n; }), ums = sumVon(camps, function (c) { return c.umsatz; });
+    var kachel = function (l, w, n) { return '<div class="card pad"><div class="kpi-label">' + esc(l) + '</div><div class="kpi">' + esc(w) + '</div>' + (n ? '<div class="notiz">' + esc(n) + '</div>' : '') + '</div>'; };
+    var offene = camps.filter(function (c) { return c.offen; }).length;
+    var h = '<div class="stapel"><div class="grid sm-3">' + kachel('Camps mit offener Anmeldung', zahl(offene), 'von ' + zahl(camps.length) + ' Camps') + kachel('Anmeldungen', zahl(anm), zahl(wl) + ' auf der Warteliste') + kachel('Umsatz', formatEuro(ums), 'ohne Storno und Warteliste') + '</div>';
+    if (CP.meldung) h += '<div class="erfolg" role="status">' + esc(CP.meldung) + '</div>';
+    if (CP.aktionFehler) h += '<div class="fehlerbox" role="alert">' + esc(CP.aktionFehler) + '</div>';
+    if (CP.edit) h += cpForm(CP.edit);
+    h += '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Camps</span><span><button type="button" class="btn btn-secondary nur-schreiben" data-cp="neu">Neues Camp</button> <button type="button" class="link-btn" data-cp="neu-laden">Aktualisieren</button></span></div>' +
+      '<div class="scroll-x"><table class="tbl kompakt"><caption class="sr-only">Feriencamps</caption><thead><tr><th scope="col">Camp</th><th scope="col">Zeitraum</th><th scope="col">Ort</th><th scope="col" class="zahlen">Plätze</th><th scope="col" class="zahlen">Warteliste</th><th scope="col" class="zahlen">Standard</th><th scope="col" class="zahlen">Mitglied</th><th scope="col" class="zahlen">Familienpass</th><th scope="col" class="zahlen">Umsatz</th><th scope="col">Anmeldung</th><th scope="col"></th></tr></thead><tbody>';
+    camps.forEach(function (c) {
+      h += '<tr><td><a href="#camps" data-cp="zeige" data-id="' + esc(c.id) + '">' + esc(c.name) + '</a><div class="notiz" style="margin:0">' + esc(c.saison) + '</div></td>' +
+        '<td data-sort="' + esc(cpTag(c.beginn)) + '">' + esc(formatDate(cpTag(c.beginn)) + ' – ' + formatDate(cpTag(c.ende))) + '</td><td>' + esc(c.ort || '') + '</td>' +
+        '<td class="zahlen" data-sort="' + esc(c.belegt) + '">' + esc(zahl(c.belegt)) + (c.plaetze ? ' / ' + esc(zahl(c.plaetze)) : '') + '</td><td class="zahlen">' + esc(zahl(c.warteliste_n)) + '</td>' +
+        '<td class="zahlen" data-sort="' + esc(c.preis_standard) + '">' + esc(formatEuro(c.preis_standard)) + '</td><td class="zahlen" data-sort="' + esc(c.preis_mitglied == null ? '' : c.preis_mitglied) + '">' + (c.preis_mitglied == null ? '' : esc(formatEuro(c.preis_mitglied))) + '</td><td class="zahlen" data-sort="' + esc(c.preis_familienpass == null ? '' : c.preis_familienpass) + '">' + (c.preis_familienpass == null ? '' : esc(formatEuro(c.preis_familienpass))) + '</td>' +
+        '<td class="zahlen" data-sort="' + esc(c.umsatz) + '">' + esc(formatEuro(c.umsatz)) + '</td>' +
+        '<td><span class="badge' + (c.offen ? ' badge-optin' : '') + '">' + (c.offen ? 'offen' : 'zu') + '</span> <button type="button" class="link-btn nur-schreiben" data-cp="schalter" data-id="' + esc(c.id) + '">' + (c.offen ? 'schließen' : 'öffnen') + '</button></td>' +
+        '<td><button type="button" class="link-btn nur-schreiben" data-cp="bearbeiten" data-id="' + esc(c.id) + '">Bearbeiten</button></td></tr>';
+    });
+    if (!camps.length) h += '<tr><td colspan="11" class="leer">Noch kein Camp angelegt.</td></tr>';
+    else h += sumZeile([{ t: 'Summe · ' + zahl(camps.length) + ' Camps', span: 3 }, { t: zahl(sumVon(camps, function (c) { return c.belegt; })), z: true }, { t: zahl(wl), z: true }, { t: '', span: 3 }, { t: formatEuro(ums), z: true }, { t: '', span: 2 }]);
+    h += '</tbody></table></div></div>';
+    // Teilnehmer
+    var s = CP.suche.trim().toLowerCase();
+    var liste = tn.filter(function (t) {
+      if (CP.camp && t.camp_id !== CP.camp) return false;
+      return !s || [t.vorname, t.nachname, t.zahler, t.email, t.anmeldungsnummer, t.verein, t.tarif].join(' ').toLowerCase().indexOf(s) >= 0;
+    });
+    var chip = function (w, t) { return '<button type="button" class="chip' + (CP.camp === w ? ' aktiv' : '') + '" data-cp="filter" data-id="' + esc(w) + '" aria-pressed="' + (CP.camp === w) + '">' + esc(t) + '</button>'; };
+    h += '<div class="chips" role="group" aria-label="Camp wählen" style="display:flex;flex-wrap:wrap;gap:6px">' + chip('', 'Alle Camps') + camps.map(function (c) { return chip(c.id, c.name); }).join('') + '</div>';
+    h += '<div class="card"><div class="filter-kopf"><div style="flex:1;min-width:220px"><label class="sr-only" for="cp-suche">Suche</label><input class="eingabe" id="cp-suche" data-cp-suche value="' + esc(CP.suche) + '" placeholder="Suche nach Kind, Zahler, E-Mail, Anmeldenummer oder Verein"></div></div>' +
+      '<div class="card-fuss" style="border-top:0;border-bottom:1px solid var(--border)">' + zahl(liste.length) + ' von ' + zahl(tn.length) + ' Anmeldungen</div><div class="scroll-x" id="cp-teilnehmer"><table class="tbl kompakt"><caption class="sr-only">Teilnehmer der Feriencamps</caption><thead><tr><th scope="col">Anmeldung</th><th scope="col">Kind</th><th scope="col">Geburtsdatum</th><th scope="col">Tarif</th><th scope="col">Zahler:in</th><th scope="col">Kontakt</th><th scope="col" class="zahlen">Betrag</th><th scope="col">Status</th><th scope="col">Einzug</th><th scope="col"></th></tr></thead><tbody>';
+    liste.forEach(function (t) {
+      var einzug = t.letzter_einzug ? 'eingezogen ' + formatDate(cpTag(t.letzter_einzug)) : (t.naechster_einzug ? 'ab ' + formatDate(cpTag(t.naechster_einzug)) : '');
+      h += '<tr><td class="text-sek" data-sort="' + esc(t.angemeldet || '') + '">' + esc(t.anmeldungsnummer || '') + '<div class="notiz" style="margin:0">' + esc(t.camp_id ? '' : t.camp || '') + (t.angemeldet ? esc(formatDate(cpTag(t.angemeldet))) : '') + '</div></td>' +
+        '<td>' + esc(t.vorname + ' ' + t.nachname) + (t.hinweise ? '<div class="notiz" style="margin:0" title="Hinweise der Eltern">Hinweis: ' + esc(t.hinweise) + '</div>' : '') + (t.foto_ok === false ? '<div class="notiz" style="margin:0">keine Foto-Einwilligung</div>' : '') + '</td>' +
+        '<td data-sort="' + esc(cpTag(t.geburtsdatum)) + '">' + (t.geburtsdatum ? esc(formatDate(cpTag(t.geburtsdatum))) : '') + '</td>' +
+        '<td class="text-sek">' + esc(t.tarif || '') + (t.verein ? '<div class="notiz" style="margin:0">Verein: ' + esc(t.verein) + '</div>' : '') + '</td><td>' + esc(t.zahler || '') + '</td>' +
+        '<td class="text-sek">' + esc(t.email || '') + (t.telefon ? '<div class="notiz" style="margin:0">' + esc(t.telefon) + '</div>' : '') + '</td>' +
+        '<td class="zahlen" data-sort="' + esc(t.betrag == null ? '' : t.betrag) + '">' + (t.betrag == null ? '' : esc(formatEuro(t.betrag))) + '</td>' +
+        '<td><span class="badge' + (t.status === 'warteliste' ? ' badge-hervor' : '') + '">' + esc(CP_STATUS[t.status] || t.status) + '</span></td><td class="text-sek">' + esc(einzug) + '</td>' +
+        '<td>' + (t.status === 'warteliste' ? '<button type="button" class="link-btn nur-schreiben" data-cp="freigeben" data-id="' + t.id + '">Von der Warteliste nehmen</button> ' : '') +
+        (t.status === 'offen' || t.status === 'warteliste' ? '<button type="button" class="link-btn link-gefahr nur-schreiben" data-cp="storno" data-id="' + t.id + '" data-name="' + esc(t.vorname + ' ' + t.nachname) + '">Stornieren</button>' : '') + '</td></tr>';
+    });
+    if (!liste.length) h += '<tr><td colspan="10" class="leer">Keine Anmeldungen für diese Auswahl.</td></tr>';
+    else {
+      var zaehlt = liste.filter(function (t) { return t.status !== 'storniert' && t.status !== 'warteliste'; });
+      h += sumZeile([{ t: 'Summe ' + zahl(zaehlt.length) + ' Anmeldungen, ohne Storno und Warteliste', span: 6 }, { t: formatEuro(sumVon(zaehlt, function (t) { return t.betrag; })), z: true }, { t: '', span: 3 }]);
+    }
+    h += '</tbody></table></div></div></div>';
+    var fokus = document.activeElement && document.activeElement.getAttribute && document.activeElement.hasAttribute('data-cp-suche'), pos = fokus ? document.activeElement.selectionStart : 0;
+    el.innerHTML = h;
+    if (fokus) { var n = el.querySelector('[data-cp-suche]'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } }
+  }
+  async function cpSenden(url, body) {
+    var res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    var d = {}; try { d = await res.json(); } catch (e) { /* leere Antwort */ }
+    if (!res.ok && !d.meldung) throw new Error('Die Anfrage ist fehlgeschlagen (' + res.status + ').');
+    return d;
+  }
+  function cpFormLesen(ed) {
+    var v = function (n) { var e = $('cp-' + n); return e ? e.value : ''; };
+    CP_FELDER.forEach(function (n) { ed.f[n] = v(n); });
+    ed.f.anmeldung_von = $('cp-anmeldung_von').value ? new Date($('cp-anmeldung_von').value).toISOString() : '';
+    ed.f.anmeldung_bis = $('cp-anmeldung_bis').value ? new Date($('cp-anmeldung_bis').value).toISOString() : '';
+    ed.f.offen = $('cp-offen').checked;
+    if (ed.neu) ed.id = v('id');
+  }
+  function bindCP() {
+    var el = $('p-camps'); if (!el) return;
+    el.addEventListener('input', function (e) {
+      if (!e.target.hasAttribute('data-cp-suche')) return;
+      CP.suche = e.target.value; renderCP();
+    });
+    el.addEventListener('click', async function (e) {
+      var b = e.target.closest('[data-cp]'); if (!b) return;
+      var a = b.getAttribute('data-cp'), id = b.getAttribute('data-id'), camps = (CP.daten && CP.daten.camps) || [];
+      var camp = function (i) { return camps.filter(function (c) { return c.id === i; })[0]; };
+      if (a === 'zeige' || a === 'filter') { e.preventDefault(); CP.camp = a === 'zeige' ? id : id; renderCP(); return; }
+      if (a === 'neu-laden') { ladeCP(); return; }
+      if (a === 'neu') { CP.edit = { neu: true, id: '', f: { name: '', saison: '2026/2027', beginn: '', ende: '', ort: '', ort_link: '', beschreibung: '', alter_von: 7, alter_bis: 16, plaetze: '', preis_standard: 149, preis_mitglied: 139, preis_familienpass: 99, anmeldung_von: '', anmeldung_bis: '', offen: false }, fehler: '' }; CP.meldung = ''; renderCP(); return; }
+      if (a === 'bearbeiten') { var c = camp(id); if (!c) return; CP.edit = { neu: false, id: c.id, name: c.name, f: cpFelder(c, c.offen), fehler: '' }; CP.meldung = ''; renderCP(); return; }
+      if (a === 'abbrechen') { CP.edit = null; renderCP(); return; }
+      if (a === 'speichern') {
+        if (!CP.edit || CP.laeuft) return;
+        cpFormLesen(CP.edit); CP.laeuft = true; CP.edit.fehler = ''; renderCP();
+        try {
+          var d = await cpSenden('/webhook/crm/camp-speichern', { id: CP.edit.id || null, neu: CP.edit.neu, felder: CP.edit.f });
+          CP.laeuft = false;
+          if (!d.ok) { CP.edit.fehler = d.meldung || 'Das Speichern hat nicht geklappt.'; renderCP(); return; }
+          CP.meldung = 'Gespeichert: ' + CP.edit.f.name + '.'; CP.edit = null; await ladeCP(true);
+        } catch (x) { CP.laeuft = false; CP.edit.fehler = x.message; renderCP(); }
+        return;
+      }
+      if (a === 'schalter') {
+        var cc = camp(id); if (!cc || CP.laeuft) return;
+        CP.laeuft = true; CP.aktionFehler = ''; CP.meldung = '';
+        try {
+          var r = await cpSenden('/webhook/crm/camp-speichern', { id: cc.id, neu: false, felder: cpFelder(cc, !cc.offen) });
+          if (!r.ok) CP.aktionFehler = r.meldung || 'Das hat nicht geklappt.'; else CP.meldung = cc.name + ': Anmeldung ' + (!cc.offen ? 'geöffnet' : 'geschlossen') + '.';
+        } catch (x) { CP.aktionFehler = x.message; }
+        CP.laeuft = false; await ladeCP(true); return;
+      }
+      if (a === 'storno' || a === 'freigeben') {
+        if (CP.laeuft) return;
+        if (a === 'storno' && !window.confirm('Anmeldung von ' + b.getAttribute('data-name') + ' wirklich stornieren? Es wird nichts mehr eingezogen.')) return;
+        CP.laeuft = true; CP.aktionFehler = ''; CP.meldung = '';
+        try {
+          var x2 = await cpSenden('/webhook/crm/camp-aktion', { aktion: a === 'storno' ? 'storno' : 'warteliste_freigeben', id: Number(id) });
+          if (!x2.ok) CP.aktionFehler = x2.meldung || 'Das hat nicht geklappt.'; else CP.meldung = x2.name + ': ' + (a === 'storno' ? 'storniert.' : 'von der Warteliste genommen, der Einzug kann im Zahllauf folgen.');
+        } catch (x3) { CP.aktionFehler = x3.message; }
+        CP.laeuft = false; await ladeCP(true);
+      }
+    });
+  }
   function bindMGL() {
     ['mitglieder', 'freundeskreis'].forEach(function (modus) {
       var el = $('p-' + modus); if (!el) return;
@@ -8399,6 +8566,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   bindKV();
   bindLS();
   bindMGL();
+  bindCP();
   bindGL();
   bindAP();
   bindSP();
@@ -8465,7 +8633,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261024224908';
+  var BUILD = '20261024230255';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
