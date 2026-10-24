@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>Löwen-Dashboard · Basketball Löwen Erfurt</title>
+<title>Huddle · Basketball Löwen Erfurt</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -347,8 +347,8 @@ textarea.maske-lang { min-height: 72px; }
 <div class="rahmen">
 <nav class="seite" aria-label="Bereiche">
   <div class="marke">
-    <div class="eyebrow">Basketball Löwen</div>
-    <div class="marke-titel">Löwen-Dashboard</div>
+    <div class="eyebrow">Basketball Löwen Erfurt</div>
+    <div class="marke-titel">Huddle</div>
   </div>
   <ul class="bereiche" id="bereiche"></ul>
 </nav>
@@ -560,7 +560,7 @@ textarea.maske-lang { min-height: 72px; }
 
   var box = document.createElement('div');
   box.id = 'anmeldung'; box.hidden = true;
-  box.innerHTML = '<div class="anm-karte" role="dialog" aria-labelledby="anm-titel"><img class="anm-logo" src="'+window.LOEWEN_LOGO+'" alt="Basketball Löwen Erfurt"><h1 id="anm-titel">Löwen-Dashboard</h1><p id="anm-text" role="status"></p><div id="anm-knopf"></div></div>';
+  box.innerHTML = '<div class="anm-karte" role="dialog" aria-labelledby="anm-titel"><img class="anm-logo" src="'+window.LOEWEN_LOGO+'" alt="Basketball Löwen Erfurt"><div class="anm-marke">Basketball Löwen Erfurt</div><h1 id="anm-titel">Huddle</h1><p id="anm-text" role="status"></p><div id="anm-knopf"></div></div>';
   document.body.appendChild(box);
 
   function expMs(t) {
@@ -689,7 +689,7 @@ textarea.maske-lang { min-height: 72px; }
       }
       token = null; try { sessionStorage.removeItem('tb_idtoken'); } catch (e) {}
       zeigeLogin(d.fehler || 'Anmeldung nicht möglich.', true);
-    } catch (e) { zeigeLogin('Keine Verbindung zum Dashboard.', true); }
+    } catch (e) { zeigeLogin('Keine Verbindung zu Huddle.', true); }
   }
 
   function zeigeNutzer() {
@@ -756,7 +756,7 @@ textarea.maske-lang { min-height: 72px; }
 })();
 </script>
 <script>
-// Löwen-Dashboard: ohne Framework, Aufbau wie die Website-Skripte.
+// Huddle: ohne Framework, Aufbau wie die Website-Skripte.
 // Jeder Tab hat eine render-Funktion, die aus dem Zustand S das HTML baut.
 // Das Gutschein-Formular steht fest im HTML und wird nur gelesen/ergänzt,
 // damit beim Tippen weder Fokus noch Cursorposition verloren gehen.
@@ -2660,11 +2660,11 @@ textarea.maske-lang { min-height: 72px; }
     return h.join(' ');
   }
   // --- Unternehmensseite (#unternehmen/<notion_id>) ---
-  var FI = { id: '', firma: null, fehler: null, edit: null, meldung: '', aenderungen: null };
+  var FI = { id: '', firma: null, fehler: null, edit: null, meldung: '', feed: null, feedFilter: 'alle', feedForm: null };
   function zeigeFirma(id) {
-    FI.id = id; FI.firma = null; FI.fehler = null; FI.edit = null; FI.meldung = ''; FI.aenderungen = null; renderFirma();
+    FI.id = id; FI.firma = null; FI.fehler = null; FI.edit = null; FI.meldung = ''; FI.feed = null; FI.feedFilter = 'alle'; FI.feedForm = null; renderFirma();
     holeJson('/webhook/crm/firma?id=' + encodeURIComponent(id))
-      .then(function (r) { if (FI.id !== id) return; FI.firma = r.firma || false; renderFirma(); if (r.firma) ladeAenderungen('firma', id, FI); })
+      .then(function (r) { if (FI.id !== id) return; FI.firma = r.firma || false; renderFirma(); if (r.firma) ladeFeed('firma', id, FI); })
       .catch(function (e) { if (FI.id !== id) return; FI.fehler = e.message; renderFirma(); });
   }
   function renderFirma() {
@@ -2684,7 +2684,9 @@ textarea.maske-lang { min-height: 72px; }
       (f.notion_url ? '<a href="' + esc(f.notion_url) + '" target="_blank" rel="noopener" class="link-btn">In Notion öffnen ↗</a>' : '') + '</span></div>' +
       '<div class="text-sek">' + esc([f.firmenbezeichnung && f.firmenbezeichnung !== f.name ? f.firmenbezeichnung : '', f.status, f.level, f.quelle ? 'Quelle ' + f.quelle : ''].filter(Boolean).join(' · ')) + '</div>' +
       (badges.length ? '<div class="notiz-2">' + badges.join(' ') + '</div>' : '') + '</div>';
+    var fLink = function (u, t) { return /^https?:\/\//i.test(String(u || '')) ? '<a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(u.replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, '')) + ' ↗</a>' : '<span class="gedaempft">–</span>'; };
     var daten = '<table class="tbl kompakt"><tbody>' +
+      '<tr><th scope="row">Website</th><td>' + fLink(f.website_url) + '</td></tr><tr><th scope="row">Instagram</th><td>' + fLink(f.instagram) + '</td></tr>' +
       zeile('Rechnungs-E-Mail', esc(f.rechnungs_email || '')) + zeile('Allgemeine E-Mail', esc(f.allgemeine_email || '')) +
       zeile('BHB-Kreditor LEV', esc(f.bhb_kreditor_lev || '')) + zeile('BHB-Kreditor XXL', esc(f.bhb_kreditor_xxl || '')) +
       zeile('Salesforce-ID', esc(f.salesforce_id || '')) + '</tbody></table>';
@@ -2726,11 +2728,7 @@ textarea.maske-lang { min-height: 72px; }
         (sponsoring ? '<div class="card"><div class="card-kopf">Sponsoring</div>' + sponsoring + '</div>' : '');
       if (ergaenz) h += '<div class="grid lg-3">' + ergaenz + '</div>';
     }
-    h += '<div class="card"><div class="card-kopf">Aktionen (' + f.aktionen.length + ')</div><div class="scroll-x"><table class="tbl kompakt"><thead><tr><th>Datum</th><th>Aktion</th><th>An</th><th>E-Mail</th><th>Versand</th><th>Rückmeldung</th></tr></thead><tbody>' +
-      (f.aktionen.length ? f.aktionen.map(function (a) {
-        return '<tr><td class="nowrap">' + esc(formatDate(a.datum)) + '</td><td>' + esc(a.name) + '</td><td>' + (a.person_id ? personLink({ id: a.person_id, name: a.wer }) : esc(a.wer)) + '</td><td>' + esc(a.email) + '</td><td>' + esc(a.versandstatus) + '</td><td>' + esc(a.rueckmeldung || '') + '</td></tr>';
-      }).join('') : '<tr><td colspan="6" class="leer">Noch in keiner Aktion.</td></tr>') + '</tbody></table></div>' +
-      '<div class="card-fuss">Stand crm-db ' + esc(formatDateTime(f.stand)) + '</div></div>' + aenderungenKarte(FI.aenderungen) + '</div>';
+    h += feedKarte('firma') + '<div class="notiz">Stand crm-db ' + esc(formatDateTime(f.stand)) + '</div></div>';
     el.innerHTML = h;
     if (FI.edit && FI.edit.fokus) { FI.edit.fokus = false; var ersteF = document.getElementById('fi-name'); if (ersteF) ersteF.focus(); }
   }
@@ -2790,7 +2788,7 @@ textarea.maske-lang { min-height: 72px; }
           if (!d.aenderungen) { Z.edit = null; Z.meldung = 'Nichts geändert.'; neuZeichnen(); return; }
           if (d.seite) { if (art === 'firma') FI.firma = d.seite; else PE.person = d.seite; }
           Z.edit = null; Z.meldung = 'Gespeichert: ' + d.aenderungen + (d.aenderungen === 1 ? ' Änderung' : ' Änderungen') + '.' + (d.hinweis ? ' ' + d.hinweis : '');
-          neuZeichnen(); ladeAenderungen(art, o.id, Z);
+          neuZeichnen(); ladeFeed(art, o.id, Z);
         } catch (x) { Z.edit.laeuft = false; Z.edit.fehler = x.message; neuZeichnen(); }
       }
     });
@@ -2812,7 +2810,7 @@ textarea.maske-lang { min-height: 72px; }
 
   // ---------- Tab: Segmentierung > Kontakte (Liste + Kontaktseite) ----------
   // Adresse #personen = Liste, #personen/<notion_id> = Kontaktseite. Bearbeitet wird weiter in Notion.
-  var PE = { liste: null, fehler: null, laedtListe: false, suche: '', merkmal: '', ohneMail: false, alle: false, id: '', person: null, personFehler: null, edit: null, meldung: '', aenderungen: null };
+  var PE = { liste: null, fehler: null, laedtListe: false, suche: '', merkmal: '', ohneMail: false, alle: false, id: '', person: null, personFehler: null, edit: null, meldung: '', feed: null, feedFilter: 'alle', feedForm: null };
 
   async function loadPersonen() {
     PE.fehler = null;
@@ -2823,10 +2821,10 @@ textarea.maske-lang { min-height: 72px; }
   function zeigePersonen(id) {
     PE.id = id || '';
     if (PE.id) {
-      PE.person = null; PE.personFehler = null; PE.edit = null; PE.meldung = ''; PE.aenderungen = null; renderPersonen();
+      PE.person = null; PE.personFehler = null; PE.edit = null; PE.meldung = ''; PE.feed = null; PE.feedFilter = 'alle'; PE.feedForm = null; renderPersonen();
       var gesucht = PE.id;
       holeJson('/webhook/crm/person?id=' + encodeURIComponent(gesucht))
-        .then(function (r) { if (PE.id !== gesucht) return; PE.person = r.person || false; renderPersonen(); if (r.person) ladeAenderungen('person', gesucht, PE); })
+        .then(function (r) { if (PE.id !== gesucht) return; PE.person = r.person || false; renderPersonen(); if (r.person) ladeFeed('person', gesucht, PE); })
         .catch(function (e) { if (PE.id !== gesucht) return; PE.personFehler = e.message; renderPersonen(); });
     } else {
       if (!PE.liste && !PE.laedtListe) { PE.laedtListe = true; loadPersonen(); }
@@ -2899,14 +2897,14 @@ textarea.maske-lang { min-height: 72px; }
     { f: 'rolle', l: 'Rolle', t: 'text' }, { f: 'ansprechpartner_intern', l: 'Ansprechpartner bei uns', t: 'text' },
     { g: 'E-Mail und Telefon', f: 'email_haupt', l: 'E-Mail', t: 'email' }, { f: 'email_geschaeftlich', l: 'E-Mail geschäftlich', t: 'email' }, { f: 'email_privat', l: 'E-Mail privat', t: 'email' },
     { f: 'versand_email_wahl', l: 'Versand an', t: 'select', o: MASKE_VERSAND, leer: 'automatisch' }, { f: 'mobil', l: 'Mobil (nur Mobilnummern)', t: 'tel' }, { f: 'telefon', l: 'Festnetz', t: 'tel' },
-    { f: 'telefon_geschaeftlich', l: 'Telefon geschäftlich', t: 'tel' }, { f: 'bevorzugter_kanal', l: 'Bevorzugter Kanal', t: 'select', o: MASKE_KANAL }, { f: 'linkedin', l: 'LinkedIn (Link)', t: 'url' },
+    { f: 'telefon_geschaeftlich', l: 'Telefon geschäftlich', t: 'tel' }, { f: 'bevorzugter_kanal', l: 'Bevorzugter Kanal', t: 'select', o: MASKE_KANAL }, { f: 'linkedin', l: 'LinkedIn (Link)', t: 'url' }, { f: 'instagram', l: 'Instagram (Link)', t: 'url' }, { f: 'facebook', l: 'Facebook (Link)', t: 'url' },
     { g: 'Adresse privat', f: 'strasse', l: 'Straße', t: 'text' }, { f: 'plz', l: 'PLZ', t: 'text' }, { f: 'ort', l: 'Ort', t: 'text' },
     { g: 'Adresse geschäftlich', f: 'strasse_geschaeftlich', l: 'Straße', t: 'text' }, { f: 'plz_geschaeftlich', l: 'PLZ', t: 'text' }, { f: 'ort_geschaeftlich', l: 'Ort', t: 'text' },
     { g: 'Erziehungsberechtigte:r', f: 'eltern_vorname', l: 'Vorname', t: 'text' }, { f: 'eltern_nachname', l: 'Nachname', t: 'text' }, { f: 'eltern_email', l: 'E-Mail', t: 'email' }, { f: 'eltern_telefon', l: 'Telefon', t: 'tel' },
     { g: 'Versand und Hinweise', f: 'kein_versand', l: 'Kein Versand', t: 'haken' }, { f: 'vorlieben', l: 'Vorlieben / Hinweise', t: 'lang' }, { f: 'verlauf', l: 'Verlauf', t: 'lang' }];
   var MASKE_FIRMA = [
     { g: 'Firma', f: 'name', l: 'Kurzbezeichnung', t: 'text', pflicht: true }, { f: 'firmenbezeichnung', l: 'Firmenbezeichnung', t: 'text' }, { f: 'rechnungs_email', l: 'Rechnungs-E-Mail', t: 'email' },
-    { f: 'allgemeine_email', l: 'Allgemeine E-Mail', t: 'email' }, { f: 'sponsoren_level', l: 'Sponsoren-Level', t: 'select', o: MASKE_LEVEL }, { f: 'status', l: 'Status', t: 'select', o: MASKE_STATUS },
+    { f: 'allgemeine_email', l: 'Allgemeine E-Mail', t: 'email' }, { f: 'website_url', l: 'Website (Link)', t: 'url' }, { f: 'instagram', l: 'Instagram (Link)', t: 'url' }, { f: 'sponsoren_level', l: 'Sponsoren-Level', t: 'select', o: MASKE_LEVEL }, { f: 'status', l: 'Status', t: 'select', o: MASKE_STATUS },
     { f: 'relationship_manager', l: 'Relationship-Manager', t: 'text' }, { f: 'referenznummer', l: 'Referenznummer', t: 'text' }, { f: 'salesforce_id', l: 'Salesforce-ID', t: 'text' },
     { g: 'Rechnung und Buchhaltung', f: 'rechnungsadresse', l: 'Rechnungsadresse', t: 'lang' }, { f: 'zahlungsbedingungen', l: 'Zahlungsbedingungen', t: 'text' },
     { f: 'bhb_kreditor_lev', l: 'BHB-Kreditor LEV', t: 'text' }, { f: 'bhb_kreditor_xxl', l: 'BHB-Kreditor XXL', t: 'text' }, { f: 'letzte_rechnung', l: 'Letzte Rechnung', t: 'date' },
@@ -2973,20 +2971,102 @@ textarea.maske-lang { min-height: 72px; }
     if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Nicht gespeichert.');
     return d;
   }
-  function aenderungenKarte(liste) {
-    if (!liste) return '';
-    var h = '<div class="card"><div class="card-kopf">Änderungen (' + liste.length + ')</div><div class="scroll-x"><table class="tbl kompakt"><thead><tr><th>Wann</th><th>Wer</th><th>Feld</th><th>Vorher</th><th>Nachher</th></tr></thead><tbody>';
-    if (!liste.length) h += '<tr><td colspan="5" class="leer">Noch keine Änderung über das Dashboard.</td></tr>';
-    var wert = function (v) { return v === null || v === undefined || v === '' ? '<span class="gedaempft">leer</span>' : esc(v === true ? 'ja' : (v === false ? 'nein' : String(v))); };
-    liste.forEach(function (a) { h += '<tr><td class="nowrap">' + esc(formatDateTime(a.zeit)) + '</td><td>' + esc(String(a.von || '').split('@')[0]) + '</td><td>' + esc(a.feld) + '</td><td>' + wert(a.alt) + '</td><td>' + wert(a.neu) + '</td></tr>'; });
-    return h + '</tbody></table></div></div>';
-  }
-  function ladeAenderungen(art, id, ziel) {
-    holeJson('/webhook/crm/aenderungen?art=' + art + '&id=' + encodeURIComponent(id)).then(function (r) {
+  // --- Feed einer Kontakt- oder Firmenseite: manuelle Einträge, E-Mails/Aktionen und Änderungen in einer Liste, mit Filter-Chips ---
+  var FEED_ARTEN = [['email', 'E-Mails'], ['treffen', 'Treffen'], ['gespraech', 'Gespräche'], ['anruf', 'Anrufe'], ['notiz', 'Notizen'], ['aenderung', 'Änderungen'], ['publikation', 'Publikationen'], ['sonstiges', 'Sonstiges']];
+  var FEED_NEU = [['treffen', 'Treffen'], ['gespraech', 'Gespräch'], ['anruf', 'Anruf'], ['notiz', 'Notiz'], ['email', 'E-Mail'], ['sonstiges', 'Sonstiges']];
+  var FEED_LABEL = { email: 'E-Mail', treffen: 'Treffen', gespraech: 'Gespräch', anruf: 'Anruf', notiz: 'Notiz', aenderung: 'Änderung', publikation: 'Publikation', sonstiges: 'Sonstiges' };
+  function feedZiel(art) { return art === 'firma' ? FI : PE; }
+  function feedObjektId(art) { return art === 'firma' ? (FI.firma && FI.firma.id) : (PE.person && PE.person.id); }
+  function feedNeuZeichnen(art) { if (art === 'firma') renderFirma(); else renderPerson(); }
+  function ladeFeed(art, id, ziel) {
+    holeJson('/webhook/crm/feed?art=' + art + '&id=' + encodeURIComponent(id)).then(function (r) {
       if (art === 'person' ? PE.id !== id : FI.id !== id) return;
-      ziel.aenderungen = Array.isArray(r.liste) ? r.liste : [];
-      if (art === 'person') renderPerson(); else renderFirma();
-    }).catch(function () { /* Protokoll ist Zusatz: ohne Antwort bleibt die Karte weg */ });
+      ziel.feed = Array.isArray(r.feed) ? r.feed : [];
+      feedNeuZeichnen(art);
+    }).catch(function () { /* der Feed ist Zusatz: ohne Antwort bleibt die Karte weg */ });
+  }
+  // Uhrzeit nur zeigen, wenn sie nicht die Platzhalter-Mittagszeit eines Eintrags ohne Uhrzeit ist
+  function feedZeit(z) {
+    var d = new Date(z); if (isNaN(d.getTime())) return '';
+    var t = new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(d);
+    var tag = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Berlin' }).format(d);
+    return formatDate(tag) + (t === '12:00' ? '' : ', ' + t + ' Uhr');
+  }
+  function feedKarte(art) {
+    var Z = feedZiel(art), liste = Z.feed;
+    if (!liste) return '';
+    var zaehl = { alle: liste.length };
+    liste.forEach(function (e) { zaehl[e.art] = (zaehl[e.art] || 0) + 1; });
+    var chip = function (k, t) { return '<button type="button" class="chip' + (Z.feedFilter === k ? ' aktiv' : '') + '" data-feed="filter" data-art="' + k + '" aria-pressed="' + (Z.feedFilter === k) + '">' + esc(t) + ' ' + (zaehl[k] || 0) + '</button>'; };
+    var chips = chip('alle', 'Alle') + FEED_ARTEN.filter(function (a) { return zaehl[a[0]]; }).map(function (a) { return chip(a[0], a[1]); }).join('');
+    var sicht = liste.filter(function (e) { return Z.feedFilter === 'alle' || e.art === Z.feedFilter; });
+    var h = '<div class="card" id="feed-karte"><div class="card-kopf zeile-titel" style="margin:0"><span>Feed (' + liste.length + ')</span>' +
+      (Z.feedForm ? '' : '<button type="button" class="btn btn-secondary nur-schreiben" data-feed="neu">Eintrag hinzufügen</button>') + '</div>';
+    if (Z.feedForm) {
+      var f = Z.feedForm;
+      h += '<form class="maske" data-feedform novalidate style="padding:12px 20px;border-bottom:1px solid var(--border)"><div class="maske-raster">' +
+        '<div class="maske-feld"><label class="feld-label" for="feed-art">Art</label><select class="eingabe" id="feed-art">' + FEED_NEU.map(function (a) { return '<option value="' + a[0] + '"' + (f.art === a[0] ? ' selected' : '') + '>' + esc(a[1]) + '</option>'; }).join('') + '</select></div>' +
+        '<div class="maske-feld"><label class="feld-label" for="feed-datum">Datum</label><input class="eingabe" id="feed-datum" type="date" value="' + esc(f.datum) + '"></div>' +
+        '<div class="maske-feld maske-breit"><label class="feld-label" for="feed-titel">Titel (optional)</label><input class="eingabe" id="feed-titel" type="text" maxlength="200" value="' + esc(f.titel) + '" placeholder="z. B. Heimspiel gegen Weimar"></div>' +
+        '<div class="maske-feld maske-breit"><label class="feld-label" for="feed-text">Was war? <span class="pflicht">*</span></label><textarea class="eingabe maske-lang" id="feed-text" rows="4" maxlength="5000" placeholder="z. B. Getroffen beim Heimspiel, Interesse an einer Partnerschaft besprochen">' + esc(f.text) + '</textarea></div>' +
+        '</div>' + (f.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:12px">' + esc(f.fehler) + '</div>' : '') +
+        '<div style="display:flex;gap:8px;align-items:center;margin-top:12px"><button type="button" class="btn btn-primary" data-feed="speichern"' + (f.laeuft ? ' disabled' : '') + '>' + (f.laeuft ? 'Speichere …' : 'Speichern') + '</button><button type="button" class="link-btn" data-feed="abbrechen"' + (f.laeuft ? ' disabled' : '') + '>Abbrechen</button></div></form>';
+    }
+    h += '<div class="pad"><div class="chips" role="group" aria-label="Feed filtern" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">' + chips + '</div>';
+    if (!sicht.length) h += '<div class="gedaempft">' + (liste.length ? 'Keine Einträge in dieser Auswahl.' : 'Noch nichts im Feed. Mit „Eintrag hinzufügen“ Treffen, Gespräche und Notizen festhalten.') + '</div>';
+    else h += '<ul class="feed-liste" style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px">' + sicht.map(function (e) {
+      var typ = e.art === 'email' && e.daten && e.daten.typ ? ' <span class="badge">' + esc(e.daten.typ) + '</span>' : '';
+      return '<li class="feed-eintrag" data-schluessel="' + esc(e.schluessel) + '" style="border-left:3px solid var(--border-strong);padding-left:12px">' +
+        '<div class="notiz" style="margin:0">' + esc(feedZeit(e.zeit)) + ' · <span class="badge">' + esc(FEED_LABEL[e.art] || e.art) + '</span>' + typ + (e.autor ? ' · ' + esc(String(e.autor).split('@')[0]) : '') + '</div>' +
+        (e.titel ? '<div class="fett">' + esc(e.titel) + '</div>' : '') +
+        (e.text ? '<div style="white-space:pre-wrap">' + esc(e.text) + '</div>' : '') +
+        (e.bearbeitbar ? '<div style="margin-top:4px"><button type="button" class="link-btn nur-schreiben" data-feed="bearbeiten" data-eid="' + esc(String(e.id)) + '">Bearbeiten</button> · <button type="button" class="link-btn nur-schreiben" data-feed="loeschen" data-eid="' + esc(String(e.id)) + '">Löschen</button></div>' : '') + '</li>';
+    }).join('') + '</ul>';
+    return h + '</div></div>';
+  }
+  function feedFormLesen(Z) {
+    var f = Z.feedForm; if (!f) return;
+    var a = document.getElementById('feed-art'); if (!a) return;
+    f.art = a.value; f.datum = document.getElementById('feed-datum').value; f.titel = document.getElementById('feed-titel').value; f.text = document.getElementById('feed-text').value;
+  }
+  function bindFeed() {
+    document.addEventListener('click', async function (e) {
+      var b = e.target.closest('[data-feed]'); if (!b) return;
+      var aktion = b.getAttribute('data-feed');
+      var art = document.getElementById('p-unternehmen') && document.getElementById('p-unternehmen').contains(b) ? 'firma' : 'person';
+      var Z = feedZiel(art), id = feedObjektId(art);
+      if (aktion === 'filter') { feedFormLesen(Z); Z.feedFilter = b.getAttribute('data-art'); feedNeuZeichnen(art); return; }
+      if (aktion === 'neu') { Z.feedForm = { id: 0, art: 'notiz', datum: new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Berlin' }).format(new Date()), titel: '', text: '', laeuft: false, fehler: '' }; feedNeuZeichnen(art); var t0 = document.getElementById('feed-text'); if (t0) t0.focus(); return; }
+      if (aktion === 'abbrechen') { Z.feedForm = null; feedNeuZeichnen(art); return; }
+      if (aktion === 'bearbeiten') {
+        var eintrag = (Z.feed || []).filter(function (x) { return String(x.id) === b.getAttribute('data-eid'); })[0]; if (!eintrag) return;
+        var tag = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Berlin' }).format(new Date(eintrag.zeit));
+        Z.feedForm = { id: eintrag.id, art: FEED_NEU.some(function (a) { return a[0] === eintrag.art; }) ? eintrag.art : 'sonstiges', datum: tag, titel: eintrag.titel || '', text: eintrag.text || '', laeuft: false, fehler: '' };
+        feedNeuZeichnen(art); var t1 = document.getElementById('feed-text'); if (t1) t1.focus(); return;
+      }
+      if (aktion === 'speichern') {
+        if (!Z.feedForm || Z.feedForm.laeuft || !id) return;
+        feedFormLesen(Z); var f = Z.feedForm;
+        if (!String(f.text).trim() && !String(f.titel).trim()) { f.fehler = 'Bitte einen Titel oder einen Text eintragen.'; feedNeuZeichnen(art); return; }
+        f.laeuft = true; f.fehler = ''; feedNeuZeichnen(art);
+        try {
+          var res = await fetch('/webhook/crm/feed-speichern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ art: art, id: id, eintrag: { id: f.id || undefined, art: f.art, titel: f.titel, text: f.text, datum: f.datum } }) });
+          var d = await res.json().catch(function () { return {}; });
+          if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Nicht gespeichert.');
+          Z.feed = d.feed || []; Z.feedForm = null; feedNeuZeichnen(art);
+        } catch (x) { f.laeuft = false; f.fehler = x.message; feedNeuZeichnen(art); }
+        return;
+      }
+      if (aktion === 'loeschen') {
+        if (!id || !window.confirm('Diesen Eintrag löschen?')) return;
+        try {
+          var r2 = await fetch('/webhook/crm/feed-loeschen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ art: art, id: id, eintrag_id: Number(b.getAttribute('data-eid')) }) });
+          var d2 = await r2.json().catch(function () { return {}; });
+          if (!r2.ok || !d2.ok) throw new Error(d2.meldung || d2.message || d2.fehler || 'Nicht gelöscht.');
+          Z.feed = d2.feed || []; feedNeuZeichnen(art);
+        } catch (x2) { window.alert(x2.message); }
+      }
+    });
   }
   function renderPerson() {
     var el = $('p-personen');
@@ -3007,6 +3087,8 @@ textarea.maske-lang { min-height: 72px; }
       '<div class="text-sek">' + (p.firmen.length ? p.firmen.map(function (f) { return '<a href="#unternehmen/' + esc(f.id) + '">' + esc(f.name) + '</a>'; }).join(', ') : 'ohne Firma') +
       (p.quelle ? ' · Quelle ' + esc(p.quelle) : '') + '</div>' + (status.length ? '<div class="notiz-2">' + status.join(' ') + '</div>' : '') + '</div>';
 
+    var linkAn = function (u, t) { return /^https?:\/\//i.test(String(u || '')) ? '<a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(t) + ' ↗</a>' : ''; };   // nur echte Web-Adressen werden zum Link
+    var profile = [linkAn(p.linkedin, 'LinkedIn'), linkAn(p.instagram, 'Instagram'), linkAn(p.facebook, 'Facebook')].filter(Boolean).join(' · ');
     var telLink = function (n) { return n ? '<a href="tel:' + esc(String(n).replace(/[^+0-9]/g, '')) + '">' + esc(n) + '</a>' : ''; };
     var wahl = { 'Geschäftlich': 'email_geschaeftlich', 'Privat': 'email_privat', 'Haupt': 'email_haupt' }[p.versand_email_wahl] || '';
     var mail = function (feld) { return p[feld] ? esc(p[feld]) + (wahl === feld ? ' <span class="badge badge-optin">Versand</span>' : '') : ''; };
@@ -3016,6 +3098,7 @@ textarea.maske-lang { min-height: 72px; }
       zeile('Eltern-E-Mail', p.eltern_email ? esc(p.eltern_email) + (p.minderjaehrig ? ' <span class="badge badge-optin">Versand</span>' : '') : '') +
       zeile('Anrede', esc([p.anrede, p.titel].filter(Boolean).join(' '))) +
       zeile('Geburtsdatum', p.geburtsdatum ? esc(formatDate(p.geburtsdatum)) : '') +
+      '<tr><th scope="row">Profile</th><td>' + (profile || '<span class="gedaempft">–</span>') + '</td></tr>' +
       '</tbody></table>';
     if (!p.email_haupt && !p.email_geschaeftlich && !p.email_privat && !p.eltern_email) erreichbar += '<div class="hinweis-warn" style="margin:12px 20px">Keine E-Mail-Adresse: Mails an diesen Kontakt kommen nicht an.</div>';
 
@@ -3027,7 +3110,6 @@ textarea.maske-lang { min-height: 72px; }
       zeile('Mobil', tel(p.mobil)) + zeile('Festnetz', tel(p.telefon)) + zeile('Telefon geschäftlich', tel(p.telefon_geschaeftlich)) +
       zeile('Bevorzugter Kanal', esc(p.bevorzugter_kanal || '')) + zeile('Rolle', esc(p.rolle || '')) + zeile('Ansprechpartner bei uns', esc(p.ansprechpartner_intern || '')) +
       zeile('Erziehungsberechtigte:r', esc([p.eltern_vorname, p.eltern_nachname].filter(Boolean).join(' ')) + (p.eltern_telefon ? ' · ' + tel(p.eltern_telefon) : '')) +
-      zeile('LinkedIn', p.linkedin ? '<a href="' + esc(p.linkedin) + '" target="_blank" rel="noopener noreferrer">Profil ↗</a>' : '') +
       zeile('Vorlieben / Hinweise', p.vorlieben ? '<span style="white-space:pre-wrap">' + esc(p.vorlieben) + '</span>' : '') + zeile('Verlauf', p.verlauf ? '<span style="white-space:pre-wrap">' + esc(p.verlauf) + '</span>' : '') +
       '</tbody></table>';
     var hatWeiteres = true;
@@ -3052,12 +3134,7 @@ textarea.maske-lang { min-height: 72px; }
       '<div class="card"><div class="card-kopf">Kontaktpfad</div><div class="pad">' + pfad + '</div></div></div>';
     if (hatWeiteres && !PE.edit) h += '<div class="card"><div class="card-kopf">Weitere Angaben</div>' + weiteres + '</div>';
 
-    h += '<div class="card"><div class="card-kopf">Aktionen (' + p.aktionen.length + ')</div><div class="scroll-x"><table class="tbl kompakt"><thead><tr><th>Datum</th><th>Aktion</th><th>Art</th><th>E-Mail</th><th>Versand</th><th>Rückmeldung</th></tr></thead><tbody>' +
-      (p.aktionen.length ? p.aktionen.map(function (a) {
-        return '<tr><td class="nowrap">' + esc(formatDate(a.datum)) + '</td><td>' + esc(a.name) + '</td><td class="text-sek">' + esc(a.typ) + '</td><td>' + esc(a.email) + '</td>' +
-          '<td>' + esc(a.versandstatus) + (a.versendet_am ? ' <span class="gedaempft">' + esc(formatDateTime(a.versendet_am)) + '</span>' : '') + '</td><td>' + esc(a.rueckmeldung || '') + '</td></tr>';
-      }).join('') : '<tr><td colspan="6" class="leer">Noch in keiner Aktion.</td></tr>') + '</tbody></table></div>' +
-      '<div class="card-fuss">Stand crm-db ' + esc(formatDateTime(p.stand)) + '</div></div>' + aenderungenKarte(PE.aenderungen) + '</div>';
+    h += feedKarte('person') + '<div class="notiz">Stand crm-db ' + esc(formatDateTime(p.stand)) + '</div></div>';
     el.innerHTML = h;
     if (PE.edit && PE.edit.fokus) { PE.edit.fokus = false; var ersteF = document.getElementById('pe-name'); if (ersteF) ersteF.focus(); }
   }
@@ -5252,7 +5329,7 @@ textarea.maske-lang { min-height: 72px; }
     if (!BR.daten) { el.innerHTML = ''; return; }
     var zellen = { schreiben: '<span class="gut">Schreiben</span>', lesen: '<span class="gedaempft">Lesen</span>', '': '<span class="gedaempft">–</span>' };
     var h = '<div class="stapel"><div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Berechtigungen · ' + esc(String(BR.daten.filter(function (p) { return p.aktiv; }).length)) + ' aktive Personen</span><span>' + aktualisierenBtn('berechtigungen') + '</span></div>' +
-      '<div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">Wer darf was im Löwen-Dashboard</caption><thead><tr><th scope="col">Person</th><th scope="col">Status</th>' +
+      '<div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">Wer darf was in Huddle</caption><thead><tr><th scope="col">Person</th><th scope="col">Status</th>' +
       BR_SPALTEN.map(function (c) { return '<th scope="col">' + esc(c[1]) + '</th>'; }).join('') + '<th scope="col">Zuletzt angemeldet</th><th scope="col">Anmeldungen (30 Tage)</th></tr></thead><tbody>';
     if (!BR.daten.length) h += '<tr><td colspan="' + (BR_SPALTEN.length + 4) + '" class="leer">Keine Berechtigungen eingetragen.</td></tr>';
     BR.daten.forEach(function (p) {
@@ -7460,6 +7537,7 @@ textarea.maske-lang { min-height: 72px; }
   bindUnternehmen();
   bindPersonen();
   bindMaske();
+  bindFeed();
   bindVersand();
   bindBelege();
   bindBT();
@@ -7529,14 +7607,14 @@ textarea.maske-lang { min-height: 72px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261024103041';
+  var BUILD = '20261024105657';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
       var m = /var BUILD = '([^']+)'/.exec(t); if (!m || m[1] === BUILD || document.getElementById('neue-fassung')) return;
       var d = document.createElement('div'); d.id = 'neue-fassung'; d.setAttribute('role', 'status');
       d.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:9998;background:#0028AA;color:#fff;padding:10px 16px;text-align:center';
-      d.innerHTML = 'Es gibt eine neuere Fassung des Dashboards. <button type="button" style="margin-left:8px;padding:4px 12px;cursor:pointer">Jetzt neu laden</button>';
+      d.innerHTML = 'Es gibt eine neuere Fassung von Huddle. <button type="button" style="margin-left:8px;padding:4px 12px;cursor:pointer">Jetzt neu laden</button>';
       d.querySelector('button').addEventListener('click', function () { location.reload(); });
       document.body.appendChild(d);
     }).catch(function () {});
