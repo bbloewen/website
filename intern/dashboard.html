@@ -975,7 +975,8 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       if (x.recht && !darfRecht(x.recht)) return;
       var aktiv = x.id === S.tab;
       var vwM = { 'zahlung-xxl': 'XXL', 'zahlung-lev': 'LEV' }[x.id];
-      var badge = x.id === 'rueckfragen' && RF.daten && RF.daten.zaehler && RF.daten.zaehler.offen ? ' (' + RF.daten.zaehler.offen + ')' : (vwM && VW.daten && vwOffen(vwM) ? ' (' + vwOffen(vwM) + ' Vorschüsse)' : '');
+      var lsArt = typeof LS_TAB !== 'undefined' && LS_TAB[x.id];
+      var badge = lsArt && LSZ[lsArt] !== undefined ? ' (' + LSZ[lsArt] + ')' : x.id === 'rueckfragen' && RF.daten && RF.daten.zaehler && RF.daten.zaehler.offen ? ' (' + RF.daten.zaehler.offen + ')' : (vwM && VW.daten && vwOffen(vwM) ? ' (' + vwOffen(vwM) + ' Vorschüsse)' : '');
       t += '<button class="tab" role="tab" id="tab-' + x.id + '" data-tab="' + x.id + '" aria-controls="p-' + x.id + '" aria-selected="' + aktiv + '" tabindex="' + (aktiv ? 0 : -1) + '">' + esc(x.name + badge) + '</button>';
     });
     var tl = $('tabs');
@@ -5751,6 +5752,14 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   // und startet ihn erst nach der zweiten Bestätigung. Der Server vergleicht vor dem Lauf noch einmal: hat sich der Stand geändert, wird nichts eingezogen.
   var LS_TAB = { 'ls-tickets': 'tickets', 'ls-mitglieder': 'mitglieder', 'ls-camps': 'camps' };
   var LS = { tickets: {}, mitglieder: {}, camps: {} };
+  var LSZ = {};   // Zahl der einzuziehenden Lastschriften je Art für die Tabs, aus dem zuletzt gemerkten Probelauf (der volle Probelauf dauert zu lange fürs Öffnen)
+  function ladeLSZ() {
+    fetch('/webhook/accounting/lastschrift-zahlen').then(function (res) { return res.json(); }).then(function (d) {
+      if (!d || !d.ok) return;
+      ['tickets', 'mitglieder', 'camps'].forEach(function (a) { if (d.zahlen && d.zahlen[a]) LSZ[a] = Number(d.zahlen[a].anzahl); });
+      renderNavigation();
+    }).catch(function () { /* ohne Zahlen bleiben die Tabs ohne Klammer */ });
+  }
   var LS_TITEL = { tickets: 'Dauerkarten · XXL Baskets GmbH', mitglieder: 'Mitgliedsbeiträge inklusive Freundeskreis · Basketball Löwen e.V.', camps: 'Feriencamps · Basketball Löwen e.V.' };
   var LS_NOTIZ = { tickets: 'SEPA-Datei per Mail an Marko, Vorabankündigung an die Käufer, Bestellung in pretix auf bezahlt, Sammeleinzug-Beleg nach BuchhaltungsButler.', mitglieder: 'SEPA-Dateien (eine je Mitgliedschaftsart) per Mail, Vorabankündigung an die Mitglieder, Sammeleinzug-Beleg nach BuchhaltungsButler.', camps: 'SEPA-Datei je Camp per Mail, Vorabankündigung an die Zahlenden, Sammeleinzug-Beleg nach BuchhaltungsButler.' };
   async function ladeLS(art) {
@@ -5761,9 +5770,9 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       var d = await res.json();
       if (!res.ok) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
       if (!d.ok) throw new Error(d.meldung || 'Der Probelauf hat nicht geantwortet.');
-      z.daten = d;
+      z.daten = d; LSZ[art] = d.anzahl;
     } catch (e) { z.fehler = e.message; }
-    z.laedt = false; renderLS(art);
+    z.laedt = false; renderLS(art); renderNavigation();
   }
   function lsBetrag(t) { return formatEuro(parseFloat(String(t || '0').replace(',', '.')) || 0); }
   function lsStatus(s) { return { gestartet: 'läuft', ok: 'fertig', fehler: 'Fehler', abgebrochen: 'abgebrochen' }[s] || s; }
@@ -8208,6 +8217,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     if (startGeladen || !window.LOEWEN_NUTZER) return; startGeladen = true;
     if (darfRecht('gutscheine')) { loadFormular(); loadStats(); }
     if (darfRecht('ticketing')) loadDauerkarten();
+    if (darfRecht('accounting')) ladeLSZ();
   }
   document.addEventListener('loewen-nutzer', startLaden);
   startLaden();
@@ -8242,7 +8252,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261024132628';
+  var BUILD = '20261024142732';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
