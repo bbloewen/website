@@ -298,6 +298,7 @@ textarea.maske-lang { min-height: 72px; }
 .seg-neu { border-style: dashed; display: flex; align-items: center; justify-content: center; min-height: 104px; color: var(--text-secondary); font-weight: 500; }
 .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: var(--radius-full); background: var(--bg-subtle); color: var(--text-secondary); border: 1px solid var(--border); }
 .badge-optin { background: var(--color-blue-50); color: var(--color-brand-blue); border-color: transparent; }
+.badge-hervor { background: var(--color-warning-bg); color: var(--color-warning-text); border-color: var(--color-warning); font-weight: 600; }
 .badge-ferien { background: var(--color-warning-bg); color: var(--color-warning-text); border-color: transparent; margin-left: 6px; vertical-align: middle; }
 .block { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; background: var(--bg-subtle); }
 .block-kopf { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
@@ -2676,8 +2677,11 @@ textarea.maske-lang { min-height: 72px; }
     if (FI.firma === false) { el.innerHTML = zurueck + '<div class="fehlerbox" role="alert" style="margin-top:12px">Dieses Unternehmen gibt es in crm-db nicht (mehr).</div>'; return; }
     var f = FI.firma;
     var badges = [];
-    if (f.sponsor_aktuell) badges.push('<span class="badge badge-optin">Sponsor aktuell</span>');
-    else if (f.sponsor_ehemalig) badges.push('<span class="badge">Sponsor ehemalig</span>');
+    if (Object.keys(f.merkmale || {}).length) badges.push(merkmalBadges(f));
+    if (!(f.merkmale && f.merkmale.Sponsor)) {
+      if (f.sponsor_aktuell) badges.push('<span class="badge badge-optin">Sponsor aktuell</span>');
+      else if (f.sponsor_ehemalig) badges.push('<span class="badge">Sponsor ehemalig</span>');
+    }
     if (f.abgemeldet) badges.push('<span class="badge">hat sich abgemeldet</span>');
     var h = '<div class="stapel">' + zurueck +
       '<div class="card pad-l"><div class="zeile-titel"><h2 class="abschnitt" style="margin:0">' + esc(f.name) + '</h2>' +
@@ -2826,10 +2830,10 @@ textarea.maske-lang { min-height: 72px; }
   function zeigePersonen(id) {
     PE.id = id || '';
     if (PE.id) {
-      PE.person = null; PE.personFehler = null; PE.edit = null; PE.meldung = ''; PE.feed = null; PE.feedFilter = 'alle'; PE.feedForm = null; PE.ki = null; renderPersonen();
+      PE.person = null; PE.personFehler = null; PE.edit = null; PE.meldung = ''; PE.feed = null; PE.feedFilter = 'alle'; PE.feedForm = null; PE.ki = null; PE.foto = undefined; PE.fotoLaeuft = false; PE.fotoFehler = ''; PE.fotoQuelle = ''; renderPersonen();
       var gesucht = PE.id;
       holeJson('/webhook/crm/person?id=' + encodeURIComponent(gesucht))
-        .then(function (r) { if (PE.id !== gesucht) return; PE.person = r.person || false; renderPersonen(); if (r.person) ladeFeed('person', gesucht, PE); })
+        .then(function (r) { if (PE.id !== gesucht) return; PE.person = r.person || false; renderPersonen(); if (r.person) { ladeFeed('person', gesucht, PE); ladeFoto(gesucht); } })
         .catch(function (e) { if (PE.id !== gesucht) return; PE.personFehler = e.message; renderPersonen(); });
     } else {
       if (!PE.liste && !PE.laedtListe) { PE.laedtListe = true; loadPersonen(); }
@@ -3251,6 +3255,105 @@ textarea.maske-lang { min-height: 72px; }
       else if (aktion === 'neu') { feedZiel(art).ki = null; feedNeuZeichnen(art); var t = kiFeld(art); if (t) t.focus(); }
     });
   }
+  // --- Foto am Kontakt: Platzhalter mit „Im Web suchen“, LinkedIn und eigenem Bild (Datei, Einfügen, Ziehen). Kein Abruf von Websites oder LinkedIn, der Mensch wählt das Bild. ---
+  var FOTO_SEITE = 256;
+  function fotoInitialen(name) { return String(name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(function (t) { return t.charAt(0).toUpperCase(); }).join('') || '?'; }
+  function fotoBox(p) {
+    var f = PE.foto, name = p.name || '';
+    var suchtext = [name, p.firmen && p.firmen[0] ? p.firmen[0].name : ''].filter(Boolean).join(' ');
+    var web = 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(suchtext);
+    var li = /^https?:\/\//i.test(String(p.linkedin || '')) ? [p.linkedin, 'LinkedIn-Profil'] : ['https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent(suchtext), 'Auf LinkedIn suchen'];
+    var h = '<div class="foto-box" style="flex:0 0 112px;width:112px">';
+    h += '<div id="foto-flaeche" data-foto-flaeche style="width:96px;height:96px;border-radius:50%;overflow:hidden;background:var(--bg-subtle);border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:600;color:var(--text-secondary)">' +
+      (f && f.bild ? '<img src="' + esc(f.bild) + '" alt="Foto von ' + esc(name) + '" width="96" height="96" style="width:100%;height:100%;object-fit:cover">' : '<span role="img" aria-label="Kein Foto vorhanden">' + esc(fotoInitialen(name)) + '</span>') + '</div>';
+    h += '<div class="nur-schreiben text-klein" style="margin-top:8px;display:flex;flex-direction:column;gap:2px;align-items:flex-start">';
+    if (PE.fotoLaeuft) h += '<span class="gedaempft">Speichere …</span>';
+    else {
+      h += '<button type="button" class="link-btn" data-foto="datei">' + (f && f.bild ? 'Bild ersetzen' : 'Bild einfügen') + '</button>' +
+        '<input type="file" accept="image/*" data-foto="datei-wahl" class="sr-only" tabindex="-1" aria-label="Bilddatei wählen">';
+      if (f && f.bild) h += '<button type="button" class="link-btn" data-foto="entfernen">Entfernen</button>';
+      else h += '<a class="link-btn" href="' + esc(web) + '" target="_blank" rel="noopener noreferrer" data-foto-quelle="Web-Suche">Im Web suchen ↗</a>' +
+        '<a class="link-btn" href="' + esc(li[0]) + '" target="_blank" rel="noopener noreferrer" data-foto-quelle="LinkedIn">' + esc(li[1]) + ' ↗</a>';
+    }
+    h += '</div>';
+    if (f && f.bild && f.quelle) h += '<div class="notiz" style="margin:4px 0 0">Quelle: ' + esc(f.quelle) + '</div>';
+    return h + '</div>';
+  }
+  // Mittig zugeschnitten auf ein Quadrat (bei Hochformat etwas weiter oben, dort ist meist das Gesicht), WebP, wo der Browser es nicht kann JPEG
+  function fotoVerkleinernEcht(datei) {
+    return new Promise(function (ok, fehl) {
+      var url = URL.createObjectURL(datei), img = new Image();
+      img.onload = function () {
+        try {
+          var s = Math.min(img.naturalWidth, img.naturalHeight), sx = (img.naturalWidth - s) / 2, sy = img.naturalHeight > img.naturalWidth ? (img.naturalHeight - s) * 0.2 : 0;
+          var c = document.createElement('canvas'); c.width = c.height = FOTO_SEITE;
+          c.getContext('2d').drawImage(img, sx, sy, s, s, 0, 0, FOTO_SEITE, FOTO_SEITE);
+          var d = c.toDataURL('image/webp', 0.85);
+          if (d.indexOf('data:image/webp') !== 0) d = c.toDataURL('image/jpeg', 0.85);
+          URL.revokeObjectURL(url); ok(d);
+        } catch (e) { fehl(e); }
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); fehl(new Error('Das ist kein Bild, das der Browser lesen kann.')); };
+      img.src = url;
+    });
+  }
+  async function fotoUebernehmen(datei) {
+    var p = PE.person; if (!p || PE.fotoLaeuft) return;
+    if (!datei || !/^image\//.test(datei.type || '')) { PE.fotoFehler = 'Das ist keine Bilddatei.'; renderPerson(); return; }
+    PE.fotoLaeuft = true; PE.fotoFehler = ''; renderPerson();
+    try {
+      var bild = await (window.__fotoVerkleinern || fotoVerkleinernEcht)(datei);
+      var quelle = PE.fotoQuelle || 'Eigenes Bild';
+      var res = await fetch('/webhook/crm/foto-speichern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: p.id, bild: bild, quelle: quelle }) });
+      var d = await res.json().catch(function () { return {}; });
+      if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Das Foto wurde nicht gespeichert.');
+      if (PE.person === p) { PE.foto = { bild: bild, quelle: quelle }; PE.fotoQuelle = ''; }
+    } catch (x) { PE.fotoFehler = x.message; }
+    PE.fotoLaeuft = false; if (PE.person === p) renderPerson();
+  }
+  function ladeFoto(id) {
+    holeJson('/webhook/crm/foto?id=' + encodeURIComponent(id)).then(function (r) {
+      if (PE.id !== id) return; PE.foto = r.foto && r.foto.bild ? r.foto : null; renderPerson();
+    }).catch(function () { /* ohne Antwort bleibt der Platzhalter */ });
+  }
+  function bindFoto() {
+    var nurSeite = function (el) { var s = $('p-personen'); return !!(PE.id && PE.person && s && el && s.contains(el)); };
+    document.addEventListener('click', async function (e) {
+      var q = e.target.closest('[data-foto-quelle]');
+      if (q && nurSeite(q)) { PE.fotoQuelle = q.getAttribute('data-foto-quelle'); return; }
+      var b = e.target.closest('[data-foto]'); if (!b || !nurSeite(b)) return;
+      var a = b.getAttribute('data-foto');
+      if (a === 'datei') { var w = $('p-personen').querySelector('[data-foto="datei-wahl"]'); if (w) w.click(); }
+      else if (a === 'entfernen') {
+        if (!window.confirm('Das Foto entfernen?') || PE.fotoLaeuft) return;
+        var p = PE.person; PE.fotoLaeuft = true; PE.fotoFehler = ''; renderPerson();
+        try {
+          var res = await fetch('/webhook/crm/foto-speichern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: p.id, bild: null }) });
+          var d = await res.json().catch(function () { return {}; });
+          if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Das Foto wurde nicht entfernt.');
+          if (PE.person === p) PE.foto = null;
+        } catch (x) { PE.fotoFehler = x.message; }
+        PE.fotoLaeuft = false; if (PE.person === p) renderPerson();
+      }
+    });
+    document.addEventListener('change', function (e) {
+      if (!e.target || e.target.getAttribute('data-foto') !== 'datei-wahl' || !nurSeite(e.target)) return;
+      var f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) fotoUebernehmen(f);
+    });
+    // Bild aus der Zwischenablage (zum Beispiel aus der Bildersuche kopiert): gilt, solange kein Textfeld den Fokus hat
+    document.addEventListener('paste', function (e) {
+      var s = $('p-personen'); if (!PE.id || !PE.person || !s || s.hidden) return;
+      var t = e.target; if (t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable)) return;
+      if (/\bnur-lesen\b/.test(document.body.className)) return;
+      var items = (e.clipboardData && e.clipboardData.items) || [];
+      for (var i = 0; i < items.length; i++) if (/^image\//.test(items[i].type)) { var f = items[i].getAsFile(); if (f) { e.preventDefault(); fotoUebernehmen(f); } return; }
+    });
+    document.addEventListener('dragover', function (e) { if (e.target.closest && e.target.closest('[data-foto-flaeche]') && nurSeite(e.target)) e.preventDefault(); });
+    document.addEventListener('drop', function (e) {
+      if (!e.target.closest || !e.target.closest('[data-foto-flaeche]') || !nurSeite(e.target)) return;
+      e.preventDefault(); var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) fotoUebernehmen(f);
+    });
+  }
   function renderPerson() {
     var el = $('p-personen');
     var zurueck = '<a href="#personen" class="link-btn">← Alle Kontakte</a>';
@@ -3261,14 +3364,16 @@ textarea.maske-lang { min-height: 72px; }
     var status = [];
     if (p.kein_versand) status.push('<span class="badge">Kein Versand' + (p.kein_versand_seit ? ' seit ' + esc(formatDate(p.kein_versand_seit)) : '') + '</span>');
     if (p.abgemeldet) status.push('<span class="badge">hat sich abgemeldet</span>');
-    if (p.minderjaehrig) status.push('<span class="badge">minderjährig</span>');
     if (p.newsletter_optin) status.push('<span class="badge badge-optin">Newsletter-Opt-in ' + esc(formatDate(p.newsletter_optin)) + '</span>');
+    var labels = (p.minderjaehrig ? '<span class="badge badge-hervor">minderjährig</span> ' : '') +
+      personBadges(Object.keys(p.merkmale || {}).filter(function (k) { return !(p.minderjaehrig && /^minderj/i.test(k)); }).reduce(function (o, k) { o[k] = p.merkmale[k]; return o; }, {}));
     var h = '<div class="stapel">' + zurueck +
-      '<div class="card pad-l"><div class="zeile-titel"><h2 class="abschnitt" style="margin:0">' + esc(p.name) + '</h2>' +
+      '<div class="card pad-l"><div style="display:flex;gap:16px;align-items:flex-start">' + fotoBox(p) + '<div style="flex:1;min-width:0"><div class="zeile-titel"><h2 class="abschnitt" style="margin:0">' + esc(p.name) + '</h2>' +
       '<span>' + (PE.edit ? '' : '<button type="button" class="btn btn-primary nur-schreiben" data-maske-aktion="bearbeiten" data-art="person">Bearbeiten</button> ') +
       (p.notion_url ? '<a href="' + esc(p.notion_url) + '" target="_blank" rel="noopener" class="link-btn">In Notion öffnen ↗</a>' : '') + '</span></div>' +
       '<div class="text-sek">' + (p.firmen.length ? p.firmen.map(function (f) { return '<a href="#unternehmen/' + esc(f.id) + '">' + esc(f.name) + '</a>'; }).join(', ') : 'ohne Firma') +
-      (p.quelle ? ' · Quelle ' + esc(p.quelle) : '') + '</div>' + (status.length ? '<div class="notiz-2">' + status.join(' ') + '</div>' : '') + '</div>';
+      (p.quelle ? ' · Quelle ' + esc(p.quelle) : '') + '</div>' + (labels.trim() || status.length ? '<div class="notiz-2" aria-label="Merkmale">' + labels + ' ' + status.join(' ') + '</div>' : '') +
+      (PE.fotoFehler ? '<div class="fehlerbox" role="alert" style="margin-top:8px">' + esc(PE.fotoFehler) + '</div>' : '') + '</div></div></div>';
 
     var linkAn = function (u, t) { return /^https?:\/\//i.test(String(u || '')) ? '<a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(t) + ' ↗</a>' : ''; };   // nur echte Web-Adressen werden zum Link
     var profile = [linkAn(p.linkedin, 'LinkedIn'), linkAn(p.instagram, 'Instagram'), linkAn(p.facebook, 'Facebook')].filter(Boolean).join(' · ');
@@ -7723,6 +7828,7 @@ textarea.maske-lang { min-height: 72px; }
   bindMaske();
   bindFeed();
   bindKi();
+  bindFoto();
   bindVersand();
   bindBelege();
   bindBT();
@@ -7792,7 +7898,7 @@ textarea.maske-lang { min-height: 72px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261024113105';
+  var BUILD = '20261024121746';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
