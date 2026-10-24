@@ -524,6 +524,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   <section id="p-kreditoren" role="tabpanel" aria-labelledby="tab-kreditoren" hidden></section>
   <section id="p-zugriffe" role="tabpanel" aria-labelledby="tab-zugriffe" hidden></section>
   <section id="p-berechtigungen" role="tabpanel" aria-labelledby="tab-berechtigungen" hidden></section>
+  <section id="p-ki-verbrauch" role="tabpanel" aria-labelledby="tab-ki-verbrauch" hidden></section>
 
 </main>
 </div>
@@ -913,7 +914,8 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     { id: 'auslagen', name: 'Auslagen', tabs: [{ id: 'auslage-neu', name: 'Auslage einreichen' }, { id: 'vorschuss-neu', name: 'Vorschuss beantragen' }, { id: 'auslage-protokoll', name: 'Protokoll', recht: 'accounting' }] },
     { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
     { id: 'zugriffe', name: 'Zugriffe', eingeklappt: true, tabs: [{ id: 'zugriffe', name: 'Zugriffe' }] },
-    { id: 'berechtigungen', name: 'Berechtigungen', eingeklappt: true, tabs: [{ id: 'berechtigungen', name: 'Berechtigungen' }] }
+    { id: 'berechtigungen', name: 'Berechtigungen', eingeklappt: true, tabs: [{ id: 'berechtigungen', name: 'Berechtigungen' }] },
+    { id: 'ki-verbrauch', name: 'KI-Verbrauch', eingeklappt: true, tabs: [{ id: 'ki-verbrauch', name: 'KI-Verbrauch' }] }
   ];
   var VW_PANEL = { 'zahlung-xxl': { el: 'p-vw-xxl', mandant: 'XXL' }, 'zahlung-lev': { el: 'p-vw-lev', mandant: 'LEV' } }; // Vorschüsse stehen oben in den Zahlungen, nicht bei Löwenpark
   var AG_TAB = { 'ausgang-xxl': 'XXL', 'ausgang-lev': 'LEV' };
@@ -927,7 +929,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 
   // Welche Bereiche eine Person sieht, kommt aus der Rechte-Tabelle (crm-db). Hier wird nur ausgeblendet,
   // entschieden wird im Gateway.
-  var RECHT_ID = { ticketing: 'ticketing', gutscheine: 'gutscheine', website: 'website', segmentierung: 'crm', accounting: 'accounting', 'acc-xxl': 'accounting', 'acc-lev': 'accounting', 'acc-ausgang': 'accounting', spendenbescheinigungen: 'accounting', administration: 'accounting', auslagen: 'auslagen', zugriffe: 'zugriffe', berechtigungen: 'zugriffe' };
+  var RECHT_ID = { ticketing: 'ticketing', gutscheine: 'gutscheine', website: 'website', segmentierung: 'crm', accounting: 'accounting', 'acc-xxl': 'accounting', 'acc-lev': 'accounting', 'acc-ausgang': 'accounting', spendenbescheinigungen: 'accounting', administration: 'accounting', auslagen: 'auslagen', zugriffe: 'zugriffe', berechtigungen: 'zugriffe', 'ki-verbrauch': 'zugriffe' };
   function darfBereich(b) {
     var n = window.LOEWEN_NUTZER;
     if (!n) return true;
@@ -1015,6 +1017,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     if (t === 'kostenstellen') ladeKS();
     if (t === 'zugriffe') ladeZG();
     if (t === 'berechtigungen') ladeBR();
+    if (t === 'ki-verbrauch') ladeKV();
     if (t === 'sachkonten-xxl') ladeSK('XXL');
     if (t === 'sachkonten-lev') ladeSK('LEV');
     if (t === 'rueckfragen') ladeRF();
@@ -2850,7 +2853,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   function zeigePersonen(id) {
     PE.id = id || '';
     if (PE.id) {
-      PE.person = null; PE.personFehler = null; PE.edit = null; PE.meldung = ''; PE.feed = null; PE.feedFilter = 'alle'; PE.feedForm = null; PE.ki = null; PE.foto = undefined; PE.fotoLaeuft = false; PE.fotoFehler = ''; PE.fotoQuelle = ''; renderPersonen();
+      PE.person = null; PE.personFehler = null; PE.edit = null; PE.meldung = ''; PE.feed = null; PE.feedFilter = 'alle'; PE.feedForm = null; PE.ki = null; PE.foto = undefined; PE.fotoLaeuft = false; PE.fotoFehler = ''; PE.fotoQuelle = ''; PE.fotoLink = ''; PE.fotoHolt = false; renderPersonen();
       var gesucht = PE.id;
       holeJson('/webhook/crm/person?id=' + encodeURIComponent(gesucht))
         .then(function (r) { if (PE.id !== gesucht) return; PE.person = r.person || false; renderPersonen(); if (r.person) { ladeFeed('person', gesucht, PE); ladeFoto(gesucht); } })
@@ -3299,6 +3302,29 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     if (f && f.bild && f.quelle) h += '<div class="notiz" style="margin:4px 0 0">Quelle: ' + esc(f.quelle) + '</div>';
     return h + '</div>';
   }
+  // Link zum Bild oder zu einer Seite mit Bild (zum Beispiel Teamseite einer Firma): der Server holt das Bild, der Browser verkleinert und speichert es
+  function fotoLinkZeile() {
+    return '<div class="nur-schreiben" style="margin-top:12px;display:flex;gap:6px;max-width:520px;align-items:center"><label class="sr-only" for="foto-link">Link zum Bild oder zur Seite mit dem Bild</label>' +
+      '<input class="eingabe" id="foto-link" type="url" data-foto-link placeholder="Foto per Link holen: Bildlink oder Seite mit Bild" autocomplete="off" value="' + esc(PE.fotoLink || '') + '"' + (PE.fotoLaeuft ? ' disabled' : '') + '>' +
+      '<button type="button" class="btn btn-secondary" data-foto="link-holen"' + (PE.fotoLaeuft ? ' disabled' : '') + '>' + (PE.fotoHolt ? 'Hole …' : 'Foto holen') + '</button></div>';
+  }
+  async function fotoVonLink() {
+    var p = PE.person, feld = $('p-personen').querySelector('[data-foto-link]'); if (!p || PE.fotoLaeuft) return;
+    var url = String((feld && feld.value) || PE.fotoLink || '').trim(); PE.fotoLink = url;
+    if (!url) { PE.fotoFehler = 'Bitte einen Link zum Bild oder zu einer Seite mit dem Bild eintragen.'; renderPerson(); return; }
+    PE.fotoLaeuft = true; PE.fotoHolt = true; PE.fotoFehler = ''; renderPerson();
+    var datei = null;
+    try {
+      var res = await fetch('/webhook/crm/foto-link', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: p.id, url: url }) });
+      var d = await res.json().catch(function () { return {}; });
+      if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Das Bild konnte nicht geholt werden.');
+      var m = /^data:([^;]+);base64,(.*)$/.exec(d.bild || ''); if (!m) throw new Error('Das Bild konnte nicht gelesen werden.');
+      var roh = atob(m[2]), bytes = new Uint8Array(roh.length); for (var i = 0; i < roh.length; i++) bytes[i] = roh.charCodeAt(i);
+      datei = new Blob([bytes], { type: m[1] }); PE.fotoQuelle = d.quelle || 'Link';
+    } catch (x) { PE.fotoFehler = x.message; }
+    PE.fotoLaeuft = false; PE.fotoHolt = false;
+    if (datei && PE.person === p) { PE.fotoLink = ''; fotoUebernehmen(datei); } else if (PE.person === p) renderPerson();
+  }
   // Mittig zugeschnitten auf ein Quadrat (bei Hochformat etwas weiter oben, dort ist meist das Gesicht), WebP, wo der Browser es nicht kann JPEG
   function fotoVerkleinernEcht(datei) {
     return new Promise(function (ok, fehl) {
@@ -3343,6 +3369,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       if (q && nurSeite(q)) { PE.fotoQuelle = q.getAttribute('data-foto-quelle'); return; }
       var b = e.target.closest('[data-foto]'); if (!b || !nurSeite(b)) return;
       var a = b.getAttribute('data-foto');
+      if (a === 'link-holen') { fotoVonLink(); return; }
       if (a === 'datei') { var w = $('p-personen').querySelector('[data-foto="datei-wahl"]'); if (w) w.click(); }
       else if (a === 'entfernen') {
         if (!window.confirm('Das Foto entfernen?') || PE.fotoLaeuft) return;
@@ -3356,6 +3383,8 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
         PE.fotoLaeuft = false; if (PE.person === p) renderPerson();
       }
     });
+    document.addEventListener('input', function (e) { if (e.target && e.target.hasAttribute && e.target.hasAttribute('data-foto-link') && nurSeite(e.target)) PE.fotoLink = e.target.value; });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target && e.target.hasAttribute && e.target.hasAttribute('data-foto-link') && nurSeite(e.target)) { e.preventDefault(); fotoVonLink(); } });
     document.addEventListener('change', function (e) {
       if (!e.target || e.target.getAttribute('data-foto') !== 'datei-wahl' || !nurSeite(e.target)) return;
       var f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) fotoUebernehmen(f);
@@ -3393,7 +3422,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       (p.notion_url ? '<a href="' + esc(p.notion_url) + '" target="_blank" rel="noopener" class="link-btn">In Notion öffnen ↗</a>' : '') + '</span></div>' +
       '<div class="text-sek">' + (p.firmen.length ? p.firmen.map(function (f) { return '<a href="#unternehmen/' + esc(f.id) + '">' + esc(f.name) + '</a>'; }).join(', ') : 'ohne Firma') +
       (p.quelle ? ' · Quelle ' + esc(p.quelle) : '') + '</div>' + (labels.trim() || status.length ? '<div class="notiz-2" aria-label="Merkmale">' + labels + ' ' + status.join(' ') + '</div>' : '') +
-      (PE.fotoFehler ? '<div class="fehlerbox" role="alert" style="margin-top:8px">' + esc(PE.fotoFehler) + '</div>' : '') + '</div></div></div>';
+      fotoLinkZeile() + (PE.fotoFehler ? '<div class="fehlerbox" role="alert" style="margin-top:8px">' + esc(PE.fotoFehler) + '</div>' : '') + '</div></div></div>';
 
     var linkAn = function (u, t) { return /^https?:\/\//i.test(String(u || '')) ? '<a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(t) + ' ↗</a>' : ''; };   // nur echte Web-Adressen werden zum Link
     var profile = [linkAn(p.linkedin, 'LinkedIn'), linkAn(p.instagram, 'Instagram'), linkAn(p.facebook, 'Facebook')].filter(Boolean).join(' · ');
@@ -3897,15 +3926,11 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     var kredNoetig = ((BL[k] && BL[k].daten && BL[k].daten.belege) || []).some(function (r0) { var g0 = r0.agent && r0.agent.geplant && r0.agent.geplant.gegenkonto; return g0 && !g0.eindeutig; });
     if (kredNoetig && RF.kred && !RF.kred[k] && !BE.kredLaedt) { BE.kredLaedt = true; ladeKreditoren(k).then(function () { BE.kredLaedt = false; if (RF.kred[k] && BL[k] && BL[k].daten) renderAccounting('beleg', k); }); }
     var z = BL[k], d = z.daten, kp = d.kpi || {};
-    var anteil = Math.min(100, Math.round(Number(kp.kosten_monat || 0) / BE_BUDGET_USD * 100));
     var bhGes = Number(kp.bhb_stimmt || 0) + Number(kp.bhb_abweichung || 0) + Number(kp.bhb_fehlt || 0);
     var kpis = '<div class="grid sm-3">' +
       '<div class="card pad"><div class="kpi-label">Vom Agenten gelesen</div><div class="kpi">' + esc(zahl(kp.gelesen || 0)) + '</div><div class="notiz">sicher ' + esc(zahl(kp.sicher || 0)) + ' · Zweitlauf ' + esc(zahl(kp.zweitlauf || 0)) + '</div></div>' +
       '<div class="card pad"><div class="kpi-label">Zur Prüfung</div><div class="kpi' + (kp.pruefen ? ' kpi-orange' : '') + '">' + esc(zahl(kp.pruefen || 0)) + '</div><div class="notiz">Prüfschranke nicht durchgegangen</div></div>' +
-      '<div class="card pad"><div class="kpi-label">Abgleich mit BuchhaltungsButler</div><div class="kpi">' + esc(zahl(kp.bhb_stimmt || 0)) + ' von ' + esc(zahl(bhGes)) + '</div><div class="notiz">stimmen überein · Abweichung ' + esc(zahl(kp.bhb_abweichung || 0)) + ' · noch nicht in BHB ' + esc(zahl(kp.bhb_fehlt || 0)) + '</div></div>' +
-      '<div class="card pad"><div class="kpi-label">Kosten diesen Monat (beide Mandanten)</div><div class="kpi">' + esc(usd(kp.kosten_monat)) + '</div>' +
-      '<div class="balken" role="progressbar" aria-valuemin="0" aria-valuemax="' + BE_BUDGET_USD + '" aria-valuenow="' + Math.round(Number(kp.kosten_monat || 0)) + '"><div class="b-gruen" style="height:100%;width:' + anteil + '%"></div></div>' +
-      '<div class="notiz">von ' + esc(usd(BE_BUDGET_USD)) + ' Sperre · gesamt ' + esc(usd(kp.kosten_gesamt)) + '</div></div></div>';
+      '<div class="card pad"><div class="kpi-label">Abgleich mit BuchhaltungsButler</div><div class="kpi">' + esc(zahl(kp.bhb_stimmt || 0)) + ' von ' + esc(zahl(bhGes)) + '</div><div class="notiz">stimmen überein · Abweichung ' + esc(zahl(kp.bhb_abweichung || 0)) + ' · noch nicht in BHB ' + esc(zahl(kp.bhb_fehlt || 0)) + '</div></div>';
     var opt = function (w, t) { return '<option value="' + w + '"' + (z.filter === w ? ' selected' : '') + '>' + t + '</option>'; };
     // Oben: noch nicht gebuchte Belege. Unten: alles, was in BuchhaltungsButler gebucht ist (aus dem Dashboard übertragen oder dort direkt gebucht).
     var istUebertragen = function (r) { return !!(r.agent && r.agent.geplant && r.agent.geplant.gebucht_am) || blGebucht(r); };
@@ -5713,6 +5738,53 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       else if (w === 'neu') ladeZG();
     });
   }
+  // ---------- Verwaltung: KI-Verbrauch (alle Aufrufe der Claude-API, Tabelle ki_aufrufe plus Belegerkennung) ----------
+  var KV = { daten: null, fehler: null, laedt: false };
+  async function ladeKV() {
+    KV.laedt = true; KV.fehler = null; renderKV();
+    try {
+      var res = await fetch('/webhook/verwaltung/ki-verbrauch');
+      var d = await res.json();
+      if (!res.ok) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
+      var v = Array.isArray(d) ? d[0] : d; KV.daten = (v && v.verbrauch) || v;
+    } catch (e) { KV.fehler = e.message; }
+    KV.laedt = false; renderKV();
+  }
+  function renderKV() {
+    var el = $('p-ki-verbrauch'); if (!el) return;
+    if (KV.laedt && !KV.daten) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
+    if (KV.fehler && !KV.daten) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(KV.fehler) + '</div>'; return; }
+    if (!KV.daten) { el.innerHTML = ''; return; }
+    var d = KV.daten, m = d.monat || {}, g = d.gesamt || {}, anteil = Math.min(100, Math.round(Number(m.kosten || 0) / BE_BUDGET_USD * 100));
+    var kachel = function (l, w, n) { return '<div class="card pad"><div class="kpi-label">' + esc(l) + '</div><div class="kpi">' + esc(w) + '</div>' + (n ? '<div class="notiz">' + n + '</div>' : '') + '</div>'; };
+    var h = '<div class="stapel"><div class="grid sm-3">' +
+      '<div class="card pad"><div class="kpi-label">Kosten diesen Monat</div><div class="kpi">' + esc(usd(m.kosten)) + '</div>' +
+      '<div class="balken" role="progressbar" aria-label="Kosten gegen Sperre" aria-valuemin="0" aria-valuemax="' + BE_BUDGET_USD + '" aria-valuenow="' + Math.round(Number(m.kosten || 0)) + '"><div class="b-gruen" style="height:100%;width:' + anteil + '%"></div></div>' +
+      '<div class="notiz">von ' + esc(usd(BE_BUDGET_USD)) + ' Sperre der Belegerkennung</div></div>' +
+      kachel('Aufrufe diesen Monat', zahl(m.aufrufe || 0), 'gesamt ' + esc(zahl(g.aufrufe || 0)) + ' seit ' + esc(g.seit ? formatDate(String(g.seit).slice(0, 10)) : '–')) +
+      kachel('Tokens diesen Monat', zahl(Number(m.tokens_in || 0) + Number(m.tokens_out || 0)), esc(zahl(m.tokens_in || 0)) + ' rein · ' + esc(zahl(m.tokens_out || 0)) + ' raus') + '</div>';
+    h += '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Diesen Monat je Funktion</span><button type="button" class="link-btn" data-kv="neu">Aktualisieren</button></div><div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">KI-Verbrauch je Funktion</caption><thead><tr><th scope="col">Funktion</th><th scope="col" class="zahlen">Aufrufe</th><th scope="col" class="zahlen">Tokens rein</th><th scope="col" class="zahlen">Tokens raus</th><th scope="col" class="zahlen">Kosten</th><th scope="col">Zuletzt</th></tr></thead><tbody>';
+    (d.je_funktion || []).forEach(function (f) {
+      h += '<tr><td>' + esc(f.funktion) + '</td><td class="zahlen">' + esc(zahl(f.aufrufe)) + '</td><td class="zahlen">' + esc(zahl(f.tokens_in)) + '</td><td class="zahlen">' + esc(zahl(f.tokens_out)) + '</td><td class="zahlen">' + esc(usd(f.kosten)) + '</td><td class="text-sek">' + esc(formatDateTime(f.zuletzt)) + '</td></tr>';
+    });
+    if (!(d.je_funktion || []).length) h += '<tr><td colspan="6" class="leer">In diesem Monat noch keine Aufrufe.</td></tr>';
+    h += '</tbody></table></div><div class="card-fuss">Preis: 2 $ je Million Token rein, 10 $ raus (Sonnet 5.5, die Rechnung ist eine Schätzung aus den Tokens). Erfasst werden die Belegerkennung, die Zahlungs-, Beleg-, Ausgangs- und Zurückweisen-KI und der CRM-Assistent; Kosten der Web-Suche sind nicht eingerechnet.</div></div>';
+    h += '<div class="card"><div class="card-kopf" style="margin:0">Je Monat</div><div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">KI-Verbrauch je Monat</caption><thead><tr><th scope="col">Monat</th><th scope="col" class="zahlen">Aufrufe</th><th scope="col" class="zahlen">Tokens rein</th><th scope="col" class="zahlen">Tokens raus</th><th scope="col" class="zahlen">Kosten</th></tr></thead><tbody>';
+    (d.je_monat || []).forEach(function (x) {
+      h += '<tr><td data-sort="' + esc(x.monat + '-01') + '">' + esc(x.monat.slice(5) + '/' + x.monat.slice(0, 4)) + '</td><td class="zahlen">' + esc(zahl(x.aufrufe)) + '</td><td class="zahlen">' + esc(zahl(x.tokens_in)) + '</td><td class="zahlen">' + esc(zahl(x.tokens_out)) + '</td><td class="zahlen">' + esc(usd(x.kosten)) + '</td></tr>';
+    });
+    h += '</tbody></table></div></div>';
+    h += '<div class="card"><div class="card-kopf" style="margin:0">Letzte Aufrufe</div><div class="tbl-voll tbl-fix"><table class="tbl kompakt"><caption class="sr-only">Letzte KI-Aufrufe</caption><thead><tr><th scope="col">Zeit</th><th scope="col">Funktion</th><th scope="col">Person</th><th scope="col">Modell</th><th scope="col" class="zahlen">Tokens rein</th><th scope="col" class="zahlen">Tokens raus</th><th scope="col" class="zahlen">Kosten</th></tr></thead><tbody>';
+    (d.letzte || []).forEach(function (a) {
+      h += '<tr><td class="text-sek nowrap">' + esc(formatDateTime(a.zeit)) + '</td><td>' + esc(a.funktion) + '</td><td>' + (a.nutzer ? esc(String(a.nutzer).split('@')[0]) : '<span class="gedaempft">–</span>') + '</td><td class="text-sek">' + esc(a.modell || '') + '</td><td class="zahlen">' + esc(zahl(a.tokens_in)) + '</td><td class="zahlen">' + esc(zahl(a.tokens_out)) + '</td><td class="zahlen">' + esc(usd(a.kosten_usd)) + '</td></tr>';
+    });
+    if (!(d.letzte || []).length) h += '<tr><td colspan="7" class="leer">Noch keine Aufrufe erfasst.</td></tr>';
+    el.innerHTML = h + '</tbody></table></div></div></div>';
+  }
+  function bindKV() {
+    var p = $('p-ki-verbrauch'); if (!p) return;
+    p.addEventListener('click', function (e) { if (e.target.closest('[data-kv="neu"]')) ladeKV(); });
+  }
   // ---------- Spieltag: Auswertung (je Heimspieltag festgehalten, Tabelle spieltag_auswertung) ----------
   // Zeile je Spieltag. Vorschlag aus pretix (Dauerkarten, Einzeltickets Vorverkauf, Abendkasse); Kartenumsatz der
   // Terminals und Ausschank-Gutscheine kommen aus den Kassenbelegen und werden von Claude eingetragen (keine Eingabefelder, Marko 15.10.2026). „Abschließen“ speichert die aktuellen Zahlen einmalig, danach steht die Zeile fest.
@@ -7074,6 +7146,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       else if (a === 'ausschank') ladeAS();
       else if (a === 'firmenevents') ladeFE();
       else if (a === 'berechtigungen') ladeBR();
+      else if (a === 'ki-verbrauch') ladeKV();
       else if (a === 'platzkarten') platzkartenDrucken();
       else if (a === 'stats') loadStats();
       else if (a === 'seo') loadSeo();
@@ -7940,6 +8013,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   bindBT();
   bindKS();
   bindZG();
+  bindKV();
   bindAP();
   bindSP();
   bindLQ();
@@ -8004,7 +8078,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261024123330';
+  var BUILD = '20261024125530';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
