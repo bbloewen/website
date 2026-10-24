@@ -884,6 +884,15 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     if (n === null || n === undefined || isNaN(n)) return '–';
     return Number(n).toLocaleString('de-DE');
   }
+  // Summenzeile unter den Währungsspalten (Marko, 24.10.2026: jede Tabelle mit Beträgen zeigt unten die Summe).
+  // teile: Zellen als Text oder { t: Text, span: Spaltenzahl, z: true für Zahlenspalten }. Die Klasse summe bleibt beim Sortieren unten.
+  function sumZeile(teile) {
+    return '<tr class="summe">' + teile.map(function (t) {
+      var o = typeof t === 'object' ? t : { t: t };
+      return '<td' + (o.span ? ' colspan="' + o.span + '"' : '') + (o.z ? ' class="zahlen"' : '') + '>' + esc(o.t) + '</td>';
+    }).join('') + '</tr>';
+  }
+  function sumVon(liste, wert) { return (liste || []).reduce(function (t, x) { return t + (Number(wert(x)) || 0); }, 0); }
   function komma(n) {
     if (n === null || n === undefined || isNaN(n)) return '–';
     return String(Math.round(Number(n) * 10) / 10).replace('.', ',');
@@ -3799,6 +3808,12 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     if (ls && (ls.am_beleg || ls.kreditor) && blRichtung(r) === 'eingang' && !blBezahlt(r) && !(r.agent && String(r.agent.auslage) === 'true') && basis.indexOf('>–<') >= 0) basis = '<span>Lastschrift</span>';
     return basis + beVorschlagZuordnen(r) + beLastschriftLink(r, a, b);
   }
+  // Der Betrag, den beZahlungZelle0 in der Spalte „Zahlung €“ zeigt (für die Summenzeile): gebucht = bezahlt mit Minus, sonst die zugeordnete oder vorgeschlagene Zahlung
+  function beZahlBetrag(r, a, b) {
+    if (blGebucht(r)) { var bz = b ? Number(b.bezahlt || 0) : 0; return bz > 0 ? -bz : 0; }
+    var z = a && a.zahlung;
+    return z && z.status !== 'keine' ? (Number(z.betrag) || 0) : 0;
+  }
   function beZahlungZelle0(r, a, b) {
     // Zugeordnete Zahlungen zeigen immer Datum, Gegenpartei und Verwendungszweck (Marko 21.10.2026)
     var zDetail = function (zz) {
@@ -4001,6 +4016,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     (d.belege || []).forEach(function (r) { var sc = dupSchl(r); if (sc) (dupIndex[sc] = dupIndex[sc] || []).push(r); });
     var zeilenHtml = function (liste, leer) {
       var h = '';
+      var sm = { n: 0, beleg: 0, zahlung: 0, netto: 0, steuer: 0, brutto: 0 };
       liste.forEach(function (r) {
       var b = r.bhb, a = r.agent;
       var titel = (b && b.gegenpartei) || (a && (a.aussteller || a.anhang_name)) || (b && b.dateiname) || '–';
@@ -4170,6 +4186,8 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       }
       var rs = ' rowspan="' + zl.length + '"';
       var eu = function (n) { return n === null || n === undefined ? '' : esc(formatEuro(n)); };
+      sm.n++; sm.beleg += brutto !== null ? brutto : 0; sm.zahlung += beZahlBetrag(r, a, b);
+      zl.forEach(function (x) { sm.netto += Number(x.netto) || 0; sm.steuer += Number(x.steuer) || 0; sm.brutto += Number(x.brutto) || 0; });
       zl.forEach(function (x, i) {
         var text = (x.text ? '<div>' + esc(x.text) + '</div>' : '') + (x.komm ? '<div class="notiz" style="margin:0">Kommentar: ' + esc(x.komm) + '</div>' : '') +
           (x.bdat && r.datum && String(x.bdat).slice(0, 10) !== String(r.datum).slice(0, 10) ? '<div class="notiz" style="margin:0">gebucht am ' + esc(formatDate(String(x.bdat).slice(0, 10))) + '</div>' : '') +
@@ -4186,6 +4204,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       if (a) h += beLoeschBox(a);
       });
       if (!liste.length && leer) h += '<tr><td colspan="16" class="leer">' + leer + '</td></tr>';
+      if (liste.length) h += sumZeile([{ t: 'Summe · ' + zahl(sm.n) + (sm.n === 1 ? ' Beleg' : ' Belege'), span: 4 }, { t: formatEuro(sm.beleg), z: true }, { t: formatEuro(sm.zahlung), z: true }, { t: '', span: 6 }, { t: formatEuro(sm.netto), z: true }, { t: formatEuro(sm.steuer), z: true }, { t: formatEuro(sm.brutto), z: true }, '']);
       return h;
     };
     h += zeilenHtml(zeilen, 'Keine Belege in dieser Ansicht.');
@@ -4733,9 +4752,9 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       '<button type="button" class="link-btn" data-be="neu" data-k="' + k + '" data-art="zahlung"' + (BE.holen ? ' disabled' : '') + '>' + (BE.holen ? 'Hole aus BuchhaltungsButler …' : 'Aktualisieren') + '</button></span></div>' +
       (BE.meldung ? '<div class="erfolg" role="status" style="margin:8px 12px">' + esc(BE.meldung) + '</div>' : '') +
       '<div class="notiz" style="margin:6px 12px;display:flex;gap:14px;flex-wrap:wrap;align-items:center">' + ikSymbol('dok', true, 'Beleg') + ' Beleg ' + ikSymbol('dok', false, 'Eigenbeleg', 'eigen') + ' Eigenbeleg ' + ikSymbol('dok', false, 'Beleg ohne Datei: wiederkehrend oder bewusst ohne Datei angelegt', 'blau') + ' ohne Datei ' + ikSymbol('dok', false, 'beleglos', 'grau') + ' beleglos ' + ikSymbol('dok', false, 'offen') + ' offen</div>' +
-      '<div class="tbl-voll tbl-fix"><table class="tbl kompakt fest">' + kopf + '<tbody>' + (offenZ.length ? offenZ.map(function (p) { return zeile(p, false); }).join('') : '<tr><td colspan="10" class="leer">Keine offenen Zahlungen in dieser Ansicht.</td></tr>') + '</tbody></table></div>' +
+      '<div class="tbl-voll tbl-fix"><table class="tbl kompakt fest">' + kopf + '<tbody>' + (offenZ.length ? offenZ.map(function (p) { return zeile(p, false); }).join('') : '<tr><td colspan="10" class="leer">Keine offenen Zahlungen in dieser Ansicht.</td></tr>') + (offenZ.length ? sumZeile([{ t: 'Summe · ' + zahl(offenZ.length) + (offenZ.length === 1 ? ' Zahlung' : ' Zahlungen'), span: 4 }, { t: formatEuro(sumVon(offenZ, function (p) { return p.betrag; })), z: true }, { t: '', span: 5 }]) : '') + '</tbody></table></div>' +
       (Number(kp.ohne_konto || 0) ? '<div class="card-fuss">' + esc(zahl(kp.ohne_konto)) + ' Umsätze sind keinem Bankkonto zugeordnet.</div>' : '') + '</div>';
-    h += '<details class="card" style="margin-top:16px" open><summary class="card-kopf" style="cursor:pointer">In BuchhaltungsButler gebucht · ' + esc(zahl(gebuchtZ.length)) + '</summary><div class="tbl-voll tbl-fix"><table class="tbl kompakt fest">' + kopf + '<tbody>' + (gebuchtZ.length ? gebuchtZ.map(function (p) { return zeile(p, true); }).join('') : '<tr><td colspan="10" class="leer">Keine gebuchten Zahlungen in dieser Ansicht.</td></tr>') + '</tbody></table></div></details>';
+    h += '<details class="card" style="margin-top:16px" open><summary class="card-kopf" style="cursor:pointer">In BuchhaltungsButler gebucht · ' + esc(zahl(gebuchtZ.length)) + '</summary><div class="tbl-voll tbl-fix"><table class="tbl kompakt fest">' + kopf + '<tbody>' + (gebuchtZ.length ? gebuchtZ.map(function (p) { return zeile(p, true); }).join('') : '<tr><td colspan="10" class="leer">Keine gebuchten Zahlungen in dieser Ansicht.</td></tr>') + (gebuchtZ.length ? sumZeile([{ t: 'Summe · ' + zahl(gebuchtZ.length) + (gebuchtZ.length === 1 ? ' Zahlung' : ' Zahlungen'), span: 4 }, { t: formatEuro(sumVon(gebuchtZ, function (p) { return p.betrag; })), z: true }, { t: '', span: 5 }]) : '') + '</tbody></table></div></details>';
     return h;
   }
   // ---------- Accounting: Rückfragen (Etappe 2) ----------
@@ -5380,6 +5399,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       h += '<tr><td class="zahlen fett">' + esc(k.nr) + '</td><td>' + (k.name ? esc(k.name) : '<span class="gedaempft">–</span>') + '</td><td class="rechts zahlen">' + esc(zahl(k.buchungen || 0)) + '</td><td>' + (k.zuletzt ? esc(formatDate(String(k.zuletzt).slice(0, 10))) : '<span class="gedaempft">noch nie</span>') + '</td><td class="rechts zahlen">' + (k.summe ? esc(formatEuro(Number(k.summe))) : '') + '</td><td class="notiz">' + esc((k.plan || []).join(' · ')) + '</td></tr>';
     });
     if (!liste.length) h += '<tr><td colspan="6" class="leer">Keine Konten.</td></tr>';
+    else h += sumZeile([{ t: 'Summe · ' + zahl(liste.length) + ' Konten', span: 2 }, { t: zahl(sumVon(liste, function (k) { return k.buchungen; })), z: true }, '', { t: formatEuro(sumVon(liste, function (k) { return k.summe; })), z: true }, '']);
     h += '</tbody></table></div><div class="card-fuss">Gezeigt sind die Konten, auf die wir Belege gebucht haben, plus die Konten im Kontenplan. Die Bezeichnung kommt aus BuchhaltungsButler. Neue gebuchte Konten erscheinen automatisch mit Namen.</div></div></div>';
     el.innerHTML = h;
     if (fokus) { var n = el.querySelector('[data-sk="suche"]'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } }
@@ -5519,11 +5539,13 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       h += '<tr><td><input type="checkbox" data-sp="wahl" data-id="' + esc(f.schluessel) + '" aria-label="Spende von ' + esc(f.name) + ' über ' + esc(formatEuro(f.betrag)) + ' auswählen"' + (kann && SP.auswahl[f.schluessel] ? ' checked' : '') + (kann ? '' : ' disabled') + '></td><td>' + esc(f.datum ? formatDate(String(f.datum).slice(0, 10)) : '–') + '</td><td>' + esc(f.name) + '</td><td class="zahlen">' + esc(formatEuro(f.betrag)) + '</td><td>' + esc(f.quelle || '') + (f.zweck ? '<div class="notiz" style="margin:0;white-space:normal">' + esc(f.zweck) + '</div>' : '') + '</td><td>' + ang + '</td><td>' + (f.status === 'klaerung' ? 'Klärung nötig: ' : '') + esc(f.grund || '') + '</td></tr>';
     });
     if (!offen.length) h += '<tr><td colspan="7" class="leer">Alle Spenden sind bescheinigt.</td></tr>';
+    else h += sumZeile([{ t: 'Summe · ' + zahl(offen.length) + (offen.length === 1 ? ' Spende' : ' Spenden'), span: 3 }, { t: formatEuro(sumVon(offen, function (f) { return f.betrag; })), z: true }, { t: '', span: 3 }]);
     h += '</tbody></table></div><div class="card-fuss">Gebucht wird im Reiter Belege: Die Bestätigung erscheint dort als Ausgangsbeleg. Geldspenden, immer mit der vollen Bestätigung (amtlicher Vordruck 034122).</div></div>';
     if (SP.ergebnis) {
       var r = SP.ergebnis;
       h += '<div class="card"><div class="card-kopf" style="margin:0">Ergebnis: ' + esc(zahl(r.entwuerfe || 0)) + ' Entwürfe erzeugt · ' + esc(zahl(r.abgelegt || 0)) + ' in BuchhaltungsButler abgelegt</div><div class="notiz" style="margin:6px 12px;white-space:normal">Die Entwürfe liegen in deinem Gmail-Postfach, mit CC Aaron und Valentin und BCC an dich. Sie stehen jetzt im Spendenbelegbuch als versendet.</div><div class="tbl-voll"><table class="tbl kompakt"><thead><tr><th>Spender</th><th class="zahlen">Betrag</th><th>Mail an</th><th>Belegbuch</th><th>BuchhaltungsButler</th></tr></thead><tbody>';
       (r.ergebnis || []).forEach(function (z) { h += '<tr><td>' + esc(z.name) + '</td><td class="zahlen">' + esc(formatEuro(z.betrag)) + '</td><td>' + esc(z.mail_an || '') + '</td><td>' + esc(z.belegbuch || '') + '</td><td>' + esc(z.bhb_beleg ? ('Beleg ' + z.bhb_beleg + (z.gebucht ? ', gebucht' : '')) : (z.hinweis || '–')) + '</td></tr>'; });
+      if ((r.ergebnis || []).length) h += sumZeile(['Summe', { t: formatEuro(sumVon(r.ergebnis, function (z) { return z.betrag; })), z: true }, { t: '', span: 3 }]);
       h += '</tbody></table></div></div>';
     }
     var buch = (d.belegbuch || []).slice(0, 60);
@@ -5532,6 +5554,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       h += '<tr><td>' + esc(b.spender) + '</td><td>' + esc(b.eingang ? formatDate(String(b.eingang).slice(0, 10)) : '–') + '</td><td class="zahlen">' + esc(b.betrag == null ? '–' : formatEuro(b.betrag)) + '</td><td>' + esc(b.status || '–') + '</td><td>' + esc(b.versand ? formatDate(String(b.versand).slice(0, 10)) : '–') + '</td></tr>';
     });
     if (!buch.length) h += '<tr><td colspan="5" class="leer">Noch keine Einträge.</td></tr>';
+    else h += sumZeile([{ t: 'Summe' + ((d.belegbuch || []).length > buch.length ? ' der ' + zahl(buch.length) + ' angezeigten' : ''), span: 2 }, { t: formatEuro(sumVon(buch, function (b) { return b.betrag; })), z: true }, { t: '', span: 2 }]);
     h += '</tbody></table></div></div>';
     el.innerHTML = h + '</div>';
   }
@@ -5653,6 +5676,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       h += '<tr><td>' + sym + '<div class="notiz" style="margin:0">' + esc(status) + '</div></td><td>' + esc(formatDate(String(z.eingereicht || '').slice(0, 10))) + '<div class="notiz" style="margin:0">' + esc(String(z.eingereicht || '').slice(11, 16)) + (z.formular ? ' · Formular' : ' · E-Mail') + '</div></td><td>' + esc(z.belegdatum ? formatDate(String(z.belegdatum).slice(0, 10)) : '–') + '</td><td>' + esc(z.ausgezahlt ? formatDate(z.ausgezahlt) : '–') + '</td><td>' + esc(z.von) + '</td><td>' + esc(z.fuer || z.von) + '</td><td>' + esc(z.mandant || '–') + '</td><td>' + esc(z.lieferant) + '</td><td>' + esc(z.anlass) + '</td><td class="zahlen">' + (z.betrag == null ? '–' : esc(formatEuro(z.betrag))) + '</td></tr>';
     });
     if (!zeilen.length) h += '<tr><td colspan="10" class="leer">Noch keine Auslagen eingereicht.</td></tr>';
+    else h += sumZeile([{ t: 'Summe · ' + zahl(zeilen.length) + (zeilen.length === 1 ? ' Eintrag' : ' Einträge'), span: 9 }, { t: formatEuro(summe), z: true }]);
     h += '</tbody></table></div><div class="card-fuss">Alle Auslagen, die per Formular oder E-Mail eingegangen sind (ohne Belege, die nur aus BuchhaltungsButler übernommen wurden). „Auslage von“ ist die Person, die das Geld zurückbekommt. Symbole: Beleg, Auszahlung (grün gefüllt = ausgezahlt und gebucht, grün umrandet = Zahlungsdatei erzeugt oder Zahlung zugeordnet; „Ausgezahlt am“ ist dann das Datum der Zahlungsdatei bzw. der Zahlung), Buchung in BuchhaltungsButler.</div></div></div>';
     el.innerHTML = h;
   }
@@ -5825,7 +5849,8 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     if (d.uebersprungen.length) h += '<div class="hinweis-warn"><b>Nicht eingezogen, bitte die Daten prüfen (' + d.uebersprungen.length + '):</b><ul style="margin:4px 0 0;padding-left:20px">' + d.uebersprungen.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>';
     if (d.gruppen.length) {
       h += '<div class="card"><div class="card-kopf" style="margin:0">' + (art === 'camps' ? 'Je Camp' : 'Je Mitgliedschaftsart') + ' (eine SEPA-Datei)</div><div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">Einzug je Datei</caption><thead><tr><th scope="col">' + (art === 'camps' ? 'Camp' : 'Art') + '</th><th scope="col" class="zahlen">Anzahl</th><th scope="col" class="zahlen">Betrag</th><th scope="col">Datei</th></tr></thead><tbody>' +
-        d.gruppen.map(function (g) { return '<tr><td>' + esc(g.label) + '</td><td class="zahlen">' + esc(zahl(g.anzahl)) + '</td><td class="zahlen">' + esc(lsBetrag(g.betrag)) + '</td><td class="text-sek">' + esc(g.datei) + '</td></tr>'; }).join('') + '</tbody></table></div></div>';
+        d.gruppen.map(function (g) { return '<tr><td>' + esc(g.label) + '</td><td class="zahlen">' + esc(zahl(g.anzahl)) + '</td><td class="zahlen">' + esc(lsBetrag(g.betrag)) + '</td><td class="text-sek">' + esc(g.datei) + '</td></tr>'; }).join('') +
+        sumZeile(['Summe', { t: zahl(sumVon(d.gruppen, function (g) { return g.anzahl; })), z: true }, { t: formatEuro(sumVon(d.gruppen, function (g) { return parseFloat(String(g.betrag || '0').replace(',', '.')); })), z: true }, '']) + '</tbody></table></div></div>';
     }
     var bezugKopf = { tickets: 'Bestellung', mitglieder: 'Typ', freundeskreis: 'Typ', camps: 'Camp' }[art], datumKopf = art === 'tickets' ? 'Bestellt' : 'Fällig';
     var alleGewaehlt = d.positionen.length > 0 && d.positionen.every(function (p) { return z.auswahl[p.schluessel]; });
@@ -5843,13 +5868,14 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     if ((d.demnaechst || []).length) {
       h += '<div class="card"><div class="card-kopf" style="margin:0">Demnächst fällig, noch nicht im Lauf (' + d.demnaechst.length + ')</div><div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">Demnächst fällige Einzüge</caption><thead><tr><th scope="col">Name</th><th scope="col">Typ</th><th scope="col">Fällig am</th><th scope="col" class="zahlen">Betrag</th><th scope="col">Mandat</th></tr></thead><tbody>' +
         d.demnaechst.map(function (x) { return '<tr><td>' + esc(x.name) + '</td><td class="text-sek">' + esc(x.bezug) + '</td><td data-sort="' + esc(x.faelligkeit) + '">' + esc(x.faelligkeit ? formatDate(x.faelligkeit) : '') + '</td><td class="zahlen">' + esc(lsBetrag(x.betrag)) + '</td><td class="text-sek">' + esc(x.referenz) + '</td></tr>'; }).join('') +
+        sumZeile([{ t: 'Summe', span: 3 }, { t: formatEuro(sumVon(d.demnaechst, function (x) { return parseFloat(String(x.betrag || '0').replace(',', '.')); })), z: true }, '']) +
         '</tbody></table></div><div class="card-fuss">Der erste Einzug ist 14 Tage nach der Anmeldung fällig (Frist der Vorabankündigung). Er erscheint im Lauf am Fälligkeitstag.</div></div>';
     }
     if (d.anzahl > 0) h += '<div class="card pad nur-schreiben" id="ls-lauf-' + art + '" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">' + lsLaufInhalt(art) + '</div>';
     var v = d.verlauf || [];
     h += '<div class="card"><div class="card-kopf" style="margin:0">Verlauf der Läufe</div><div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">Verlauf der Lastschriftläufe</caption><thead><tr><th scope="col">Gestartet</th><th scope="col" class="zahlen">Anzahl</th><th scope="col" class="zahlen">Betrag</th><th scope="col">Fälligkeit</th><th scope="col">Stand</th><th scope="col">Von</th><th scope="col">Meldung</th></tr></thead><tbody>' +
       v.map(function (x) { return '<tr><td class="text-sek nowrap" data-sort="' + esc(x.gestartet) + '">' + esc(formatDateTime(x.gestartet)) + '</td><td class="zahlen">' + esc(zahl(x.anzahl || 0)) + '</td><td class="zahlen">' + esc(lsBetrag(x.betrag)) + '</td><td>' + esc(x.faelligkeit ? formatDate(x.faelligkeit) : '') + '</td><td>' + esc(lsStatus(x.status)) + '</td><td>' + esc(String(x.von || '').split('@')[0]) + '</td><td class="text-sek">' + esc(x.meldung || '') + '</td></tr>'; }).join('') +
-      (v.length ? '' : '<tr><td colspan="7" class="leer">Noch kein Lauf über das Dashboard.</td></tr>') + '</tbody></table></div></div>';
+      (v.length ? sumZeile(['Summe fertige Läufe', { t: zahl(sumVon(v.filter(function (x) { return x.status === 'ok'; }), function (x) { return x.anzahl; })), z: true }, { t: formatEuro(sumVon(v.filter(function (x) { return x.status === 'ok'; }), function (x) { return parseFloat(String(x.betrag || '0').replace(',', '.')); })), z: true }, { t: '', span: 4 }]) : '<tr><td colspan="7" class="leer">Noch kein Lauf über das Dashboard.</td></tr>') + '</tbody></table></div></div>';
     el.innerHTML = h + '</div>';
   }
   async function lsLauf(art) {
@@ -5961,6 +5987,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
         '<td class="text-sek">' + esc(x.mandatsreferenz) + '</td><td class="text-sek">' + (x.iban ? esc(x.iban) : '<span class="hinweis">fehlt</span>') + '</td></tr>';
     });
     if (!zeilen.length) h += '<tr><td colspan="11" class="leer">Keine Einträge für diese Auswahl.</td></tr>';
+    else h += sumZeile([{ t: 'Summe · ' + zahl(zeilen.length) + ' Aktive', span: 5 }, { t: formatEuro(sumVon(zeilen, function (x) { return x.beitrag; })), z: true }, { t: formatEuro(sumVon(zeilen, function (x) { return x.jahresbeitrag; })), z: true }, { t: '', span: 4 }]);
     box.innerHTML = h + '</tbody></table></div>';
   }
   function bindMGL() {
@@ -6051,17 +6078,20 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       h += '<tr><td>' + esc(f.funktion) + '</td><td class="zahlen">' + esc(zahl(f.aufrufe)) + '</td><td class="zahlen">' + esc(zahl(f.tokens_in)) + '</td><td class="zahlen">' + esc(zahl(f.tokens_out)) + '</td><td class="zahlen">' + esc(usd(f.kosten)) + '</td><td class="text-sek">' + esc(formatDateTime(f.zuletzt)) + '</td></tr>';
     });
     if (!(d.je_funktion || []).length) h += '<tr><td colspan="6" class="leer">In diesem Monat noch keine Aufrufe.</td></tr>';
+    else h += sumZeile(['Summe', { t: zahl(sumVon(d.je_funktion, function (f) { return f.aufrufe; })), z: true }, { t: zahl(sumVon(d.je_funktion, function (f) { return f.tokens_in; })), z: true }, { t: zahl(sumVon(d.je_funktion, function (f) { return f.tokens_out; })), z: true }, { t: usd(sumVon(d.je_funktion, function (f) { return f.kosten; })), z: true }, '']);
     h += '</tbody></table></div><div class="card-fuss">Preis: 2 $ je Million Token rein, 10 $ raus (Sonnet 5.5, die Rechnung ist eine Schätzung aus den Tokens). Erfasst werden die Belegerkennung, die Zahlungs-, Beleg-, Ausgangs- und Zurückweisen-KI und der CRM-Assistent; Kosten der Web-Suche sind nicht eingerechnet.</div></div>';
     h += '<div class="card"><div class="card-kopf" style="margin:0">Je Monat</div><div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">KI-Verbrauch je Monat</caption><thead><tr><th scope="col">Monat</th><th scope="col" class="zahlen">Aufrufe</th><th scope="col" class="zahlen">Tokens rein</th><th scope="col" class="zahlen">Tokens raus</th><th scope="col" class="zahlen">Kosten</th></tr></thead><tbody>';
     (d.je_monat || []).forEach(function (x) {
       h += '<tr><td data-sort="' + esc(x.monat + '-01') + '">' + esc(x.monat.slice(5) + '/' + x.monat.slice(0, 4)) + '</td><td class="zahlen">' + esc(zahl(x.aufrufe)) + '</td><td class="zahlen">' + esc(zahl(x.tokens_in)) + '</td><td class="zahlen">' + esc(zahl(x.tokens_out)) + '</td><td class="zahlen">' + esc(usd(x.kosten)) + '</td></tr>';
     });
+    if ((d.je_monat || []).length) h += sumZeile(['Summe', { t: zahl(sumVon(d.je_monat, function (x) { return x.aufrufe; })), z: true }, { t: zahl(sumVon(d.je_monat, function (x) { return x.tokens_in; })), z: true }, { t: zahl(sumVon(d.je_monat, function (x) { return x.tokens_out; })), z: true }, { t: usd(sumVon(d.je_monat, function (x) { return x.kosten; })), z: true }]);
     h += '</tbody></table></div></div>';
     h += '<div class="card"><div class="card-kopf" style="margin:0">Letzte Aufrufe</div><div class="tbl-voll tbl-fix"><table class="tbl kompakt"><caption class="sr-only">Letzte KI-Aufrufe</caption><thead><tr><th scope="col">Zeit</th><th scope="col">Funktion</th><th scope="col">Person</th><th scope="col">Modell</th><th scope="col" class="zahlen">Tokens rein</th><th scope="col" class="zahlen">Tokens raus</th><th scope="col" class="zahlen">Kosten</th></tr></thead><tbody>';
     (d.letzte || []).forEach(function (a) {
       h += '<tr><td class="text-sek nowrap">' + esc(formatDateTime(a.zeit)) + '</td><td>' + esc(a.funktion) + '</td><td>' + (a.nutzer ? esc(String(a.nutzer).split('@')[0]) : '<span class="gedaempft">–</span>') + '</td><td class="text-sek">' + esc(a.modell || '') + '</td><td class="zahlen">' + esc(zahl(a.tokens_in)) + '</td><td class="zahlen">' + esc(zahl(a.tokens_out)) + '</td><td class="zahlen">' + esc(usd(a.kosten_usd)) + '</td></tr>';
     });
     if (!(d.letzte || []).length) h += '<tr><td colspan="7" class="leer">Noch keine Aufrufe erfasst.</td></tr>';
+    else h += sumZeile([{ t: 'Summe der letzten ' + zahl(d.letzte.length) + ' Aufrufe', span: 4 }, { t: zahl(sumVon(d.letzte, function (a) { return a.tokens_in; })), z: true }, { t: zahl(sumVon(d.letzte, function (a) { return a.tokens_out; })), z: true }, { t: usd(sumVon(d.letzte, function (a) { return a.kosten_usd; })), z: true }]);
     el.innerHTML = h + '</tbody></table></div></div></div>';
   }
   function bindKV() {
@@ -6681,6 +6711,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
         var rest = Number(g.rest || 0), vr = Number(g.verrechnet || 0), voll = rest <= 0.005;
         h += '<tr><td>' + (g.link ? '<a href="' + esc(g.link) + '" target="_blank" rel="noopener">' + esc(g.rechnungsnr || ('Beleg ' + g.fallId)) + '</a>' : esc(g.rechnungsnr || ('Beleg ' + g.fallId))) + '<div class="notiz" style="margin:0">Beleg ' + esc(g.fallId) + ' · ' + esc(formatDate(g.datum)) + '</div></td><td>' + esc(g.gegenpartei || '–') + '</td><td style="text-align:right">−' + esc(formatEuro(Math.abs(Number(g.betrag)))) + '</td><td style="text-align:right">' + (vr > 0 ? esc(formatEuro(vr)) : '–') + (!voll && vr > 0 ? '<div class="notiz" style="margin:0">Rest ' + esc(formatEuro(rest)) + '</div>' : '') + '</td><td>' + ((g.mit || []).length ? esc((g.mit || []).join(', ')) : '<span class="notiz" style="margin:0">keine offene Rechnung desselben Lieferanten, Gutschrift bleibt stehen</span>') + '</td></tr>';
       });
+      if (!UE.zu.gutschriften) h += sumZeile([{ t: 'Summe', span: 2 }, { t: '−' + formatEuro(sumVon(gsl, function (g) { return Math.abs(Number(g.betrag)); })), z: true }, { t: formatEuro(sumVon(gsl, function (g) { return g.verrechnet; })), z: true }, '']);
       h += (UE.zu.gutschriften ? '' : '</tbody></table>') + '</div>';
     }
     var lsl = istLP ? [] : (d.lastschriften || []);
@@ -6689,6 +6720,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       if (!UE.zu.lastschriften) lsl.forEach(function (l) {
         h += '<tr><td>' + esc(l.gegenpartei || '–') + '</td><td>' + (l.link ? '<a href="' + esc(l.link) + '" target="_blank" rel="noopener">' + esc(l.rechnungsnr || ('Beleg ' + l.fallId)) + '</a>' : esc(l.rechnungsnr || ('Beleg ' + l.fallId))) + '</td><td style="text-align:right">' + esc(formatEuro(l.betrag)) + '</td><td><button type="button" class="link-btn" data-ue="lastschrift-zurueck" data-fall="' + esc(l.fallId) + '">zurücknehmen</button></td></tr>';
       });
+      if (!UE.zu.lastschriften) h += sumZeile([{ t: 'Summe', span: 2 }, { t: formatEuro(sumVon(lsl, function (l) { return l.betrag; })), z: true }, '']);
       h += (UE.zu.lastschriften ? '' : '</tbody></table>') + '</div>';
     }
     h += '<div><button type="button" class="link-btn" data-ue="neu">Aktualisieren</button> <button type="button" class="link-btn" data-ue="abgleichen"' + (UE.holen ? ' disabled' : '') + '>' + (UE.holen ? 'gleiche ab …' : 'Mit BuchhaltungsButler abgleichen') + '</button></div>' +
@@ -7795,6 +7827,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
         }
         h += '<tr><td class="zahlen">' + v.id + '</td><td>' + esc(v.anlass) + '</td><td class="zahlen">' + esc(auEuro(v.betrag)) + ' €</td><td>' + esc(stand) + extra + '</td></tr>';
       });
+      h += sumZeile([{ t: 'Summe ohne abgelehnte', span: 2 }, { t: formatEuro(sumVon(VZ.liste.filter(function (v) { return v.status !== 'abgelehnt'; }), function (v) { return v.betrag; })), z: true }, '']);
       h += '</tbody></table></div></div>';
     }
     var fokus = document.activeElement && document.activeElement.id, pos = document.activeElement && document.activeElement.selectionStart;
@@ -7901,6 +7934,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
           var art = z.status === 'Bedingt' ? 'bedingt' : (z.typ === 'Barter' ? 'Barter, kein Geldfluss' : 'Cash');
           h += '<tr><td><a href="' + esc(z.url) + '" target="_blank" rel="noopener">' + esc(z.position) + '</a>' + (z.leistung ? '<div class="notiz" style="margin:0">' + esc(z.leistung) + '</div>' : '') + '</td><td' + (art !== 'Cash' ? ' class="notiz"' : '') + '>' + esc(art) + '</td><td>' + (z.datum ? esc(formatDate(String(z.datum).slice(0, 10))) : '–') + '</td><td class="nowrap zahlen rechts">' + esc(formatEuro(z.netto)) + '</td><td class="nowrap zahlen rechts">' + esc(formatEuro(z.brutto)) + '</td></tr>';
         });
+        h += sumZeile([{ t: 'Summe Cash · ' + zahl(cashZ.length) + (cashZ.length === 1 ? ' Rechnung' : ' Rechnungen') + ', ohne Barter und Bedingtes', span: 3 }, { t: formatEuro(sumN), z: true }, { t: formatEuro(sumB), z: true }]);
         h += '</tbody></table><div class="card-fuss">Aus der Notion-Tabelle „Rechnungsplan“ (Status Offen und Bedingt), nur die Saison 26/27 bis 30.06.2027. Der Auslösetermin ist das Rechnungsdatum, die Zahlung kommt rund 14 Tage später. Barter und bedingte Posten (zum Beispiel Playoff-Bonus) zählen nicht zum erwarteten Geld. Fehlt in Notion der Umsatzsteuersatz, rechne ich mit 19 %.</div>';
       }
       h += '</div>';
@@ -8000,6 +8034,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
         }
         h += '<tr><td class="zahlen">' + v.id + '</td><td>' + esc(v.name) + '<div class="notiz" style="margin:0">' + esc(v.mandant) + (v.iban ? ' · ' + esc(v.iban.replace(/(.{4})/g, '$1 ').trim()) : '') + '</div></td><td>' + esc(v.anlass) + '<div class="notiz" style="margin:0">' + esc(v.verwendung || '') + (v.benoetigt_bis ? ' · benötigt bis ' + esc(vzDatum(v.benoetigt_bis)) : '') + '</div></td><td class="zahlen">' + esc(auEuro(v.betrag)) + ' €</td><td>' + esc(stand) + zus + '</td><td>' + knoepfe + '</td></tr>';
       });
+      h += sumZeile([{ t: 'Summe ohne abgelehnte', span: 3 }, { t: formatEuro(sumVon(liste.filter(function (v) { return v.status !== 'abgelehnt'; }), function (v) { return v.betrag; })), z: true }, { t: '', span: 2 }]);
       h += '</tbody></table></div><div class="card-fuss">Das System überweist nichts. Nach der Genehmigung überweist du den Vorschuss und trägst ihn hier als ausgezahlt ein. Ein Vorschuss muss mit Originalbelegen bis zum Quartalsende abgerechnet sein.</div>';
     }
     h += '</div></div>';
@@ -8375,7 +8410,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261024174629';
+  var BUILD = '20261024183412';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
