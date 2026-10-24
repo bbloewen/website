@@ -2663,7 +2663,7 @@ textarea.maske-lang { min-height: 72px; }
   // --- Unternehmensseite (#unternehmen/<notion_id>) ---
   var FI = { id: '', firma: null, fehler: null, edit: null, meldung: '', feed: null, feedFilter: 'alle', feedForm: null };
   function zeigeFirma(id) {
-    FI.id = id; FI.firma = null; FI.fehler = null; FI.edit = null; FI.meldung = ''; FI.feed = null; FI.feedFilter = 'alle'; FI.feedForm = null; renderFirma();
+    FI.id = id; FI.firma = null; FI.fehler = null; FI.edit = null; FI.meldung = ''; FI.feed = null; FI.feedFilter = 'alle'; FI.feedForm = null; FI.ki = null; renderFirma();
     holeJson('/webhook/crm/firma?id=' + encodeURIComponent(id))
       .then(function (r) { if (FI.id !== id) return; FI.firma = r.firma || false; renderFirma(); if (r.firma) ladeFeed('firma', id, FI); })
       .catch(function (e) { if (FI.id !== id) return; FI.fehler = e.message; renderFirma(); });
@@ -2719,6 +2719,7 @@ textarea.maske-lang { min-height: 72px; }
       ? '<ul class="blockliste">' + f.ansprechpartner.map(function (a) { return '<li>' + personLink(a) + (a.email ? ' <span class="gedaempft">' + esc(a.email) + '</span>' : ' <span class="hinweis">ohne E-Mail</span>') + (a.kein_versand ? ' <span class="badge">kein Versand</span>' : '') + '</li>'; }).join('') + '</ul>'
       : '<div class="gedaempft">Kein Ansprechpartner. Versand geht an die Firmen-E-Mail.</div>';
     if (FI.meldung) h += '<div class="notiz" role="status">' + esc(FI.meldung) + '</div>';
+    if (!FI.edit) h += kiPanel('firma');
     if (FI.edit) h += '<div class="card pad-l"><div class="card-kopf" style="margin:0 0 12px">Firma bearbeiten</div>' + maskeFormular('fi', MASKE_FIRMA, f, FI.edit) + '</div>';
     h += '<div class="grid lg-3">' +
       (FI.edit ? '' : '<div class="card"><div class="card-kopf">Firmendaten</div>' + daten + '</div>') +
@@ -2825,7 +2826,7 @@ textarea.maske-lang { min-height: 72px; }
   function zeigePersonen(id) {
     PE.id = id || '';
     if (PE.id) {
-      PE.person = null; PE.personFehler = null; PE.edit = null; PE.meldung = ''; PE.feed = null; PE.feedFilter = 'alle'; PE.feedForm = null; renderPersonen();
+      PE.person = null; PE.personFehler = null; PE.edit = null; PE.meldung = ''; PE.feed = null; PE.feedFilter = 'alle'; PE.feedForm = null; PE.ki = null; renderPersonen();
       var gesucht = PE.id;
       holeJson('/webhook/crm/person?id=' + encodeURIComponent(gesucht))
         .then(function (r) { if (PE.id !== gesucht) return; PE.person = r.person || false; renderPersonen(); if (r.person) ladeFeed('person', gesucht, PE); })
@@ -3081,6 +3082,175 @@ textarea.maske-lang { min-height: 72px; }
       }
     });
   }
+  // --- KI-Assistent auf Kontakt- und Firmenseite: Text oder Diktat → Vorschlag (Änderungen und Feed-Einträge) → bestätigen → speichern ---
+  var KI_BEISPIEL = {
+    person: 'z. B. „Hat jetzt die Mobilnummer 0170 5551234, wir duzen uns, und wir haben gestern kurz zur Saisonkarte telefoniert.“',
+    firma: 'z. B. „Die Branche ist Gastronomie, unser Ansprechpartner ist Marko, und wir haben am Dienstag den Vertrag besprochen.“'
+  };
+  function kiNeu() { return { text: '', dialog: [], v: null, laeuft: false, uebernimmt: false, fehler: '' }; }
+  function kiZustand(Z) { if (!Z.ki) Z.ki = kiNeu(); return Z.ki; }
+  function kiBox(art) { return $(art === 'firma' ? 'p-unternehmen' : 'p-personen'); }   // beide Seiten bleiben im DOM: Fundstellen immer in der eigenen Seite suchen
+  function kiFeld(art) { return kiBox(art).querySelector('textarea[data-ki-text]'); }
+  function kiArt(el) { return document.getElementById('p-unternehmen') && document.getElementById('p-unternehmen').contains(el) ? 'firma' : 'person'; }
+  function kiWert(c, wert) {
+    if (wert === null || wert === undefined || wert === '') return '<span class="gedaempft">–</span>';
+    if (c.typ === 'checkbox') return wert === true ? 'ja' : 'nein';
+    if (c.typ === 'date') return esc(formatDate(String(wert).slice(0, 10)));
+    return '<span style="white-space:pre-wrap">' + esc(String(wert)) + '</span>';
+  }
+  function kiAuswahl(v, schluessel) { return !v.wahl || v.wahl[schluessel] !== false; }
+  function kiAnzahl(v) {
+    var n = 0;
+    (v.aenderungen || []).forEach(function (c) { if (kiAuswahl(v, 'a:' + c.feld)) n++; });
+    (v.feed || []).forEach(function (e, i) { if (kiAuswahl(v, 'f:' + i)) n++; });
+    return n;
+  }
+  function kiPanel(art) {
+    var Z = feedZiel(art), k = kiZustand(Z), v = k.v, beschaeftigt = k.laeuft || k.uebernimmt;
+    var mikro = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+    var h = '<div class="card nur-schreiben" id="ki-karte"><div class="card-kopf" style="margin:0">KI-Assistent</div><div class="pad">' +
+      '<label class="feld-label" for="ki-text-' + art + '">' + (v || k.dialog.length ? 'Korrektur oder Ergänzung' : 'Was soll geändert oder festgehalten werden?') + '</label>' +
+      '<textarea class="eingabe maske-lang" id="ki-text-' + art + '" data-ki-text rows="3" maxlength="3000" placeholder="Schreiben oder sprechen, ' + esc(KI_BEISPIEL[art]) + '"' + (beschaeftigt ? ' disabled' : '') + '>' + esc(k.text) + '</textarea>' +
+      '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px">' +
+      '<button type="button" class="btn btn-primary" data-ki="senden"' + (beschaeftigt ? ' disabled' : '') + '>' + (k.laeuft ? 'Die KI liest …' : (v || k.dialog.length ? 'Vorschlag anpassen' : 'Vorschlag machen')) + '</button>' +
+      (mikro ? '<button type="button" class="btn btn-secondary" data-ki="mikro" aria-pressed="false"' + (beschaeftigt ? ' disabled' : '') + '>Diktieren</button>' : '') +
+      (v || k.dialog.length ? '<button type="button" class="link-btn" data-ki="neu"' + (beschaeftigt ? ' disabled' : '') + '>Neu beginnen</button>' : '') + '</div>' +
+      (k.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:12px">' + esc(k.fehler) + '</div>' : '');
+    if (v) {
+      h += '<div style="margin-top:16px" role="status" aria-live="polite">' + (v.antwort ? '<div>' + esc(v.antwort) + '</div>' : '') +
+        (v.rueckfrage ? '<div class="hinweis-warn" style="margin-top:8px">Rückfrage: ' + esc(v.rueckfrage) + '</div>' : '') + '</div>';
+      if (v.aenderungen.length) {
+        h += '<div class="scroll-x" style="margin-top:12px"><table class="tbl kompakt"><thead><tr><th scope="col">Übernehmen</th><th scope="col">Feld</th><th scope="col">Bisher</th><th scope="col">Neu</th></tr></thead><tbody>' +
+          v.aenderungen.map(function (c) {
+            var id = 'ki-a-' + art + '-' + c.feld;
+            return '<tr><td><input type="checkbox" id="' + id + '" data-ki-wahl="a:' + esc(c.feld) + '"' + (kiAuswahl(v, 'a:' + c.feld) ? ' checked' : '') + (k.uebernimmt ? ' disabled' : '') + '><label class="sr-only" for="' + id + '">' + esc(c.label) + ' übernehmen</label></td>' +
+              '<th scope="row">' + esc(c.label) + '</th><td>' + kiWert(c, c.alt) + '</td><td>' + (c.neu === null ? '<span class="gedaempft">wird geleert</span>' : kiWert(c, c.neu)) +
+              (c.grund ? '<div class="notiz" style="margin:2px 0 0">' + esc(c.grund) + '</div>' : '') + '</td></tr>';
+          }).join('') + '</tbody></table></div>';
+      }
+      if (v.feed.length) {
+        h += '<div class="text-klein fett" style="margin-top:12px">Neu im Feed</div><ul style="list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:8px">' +
+          v.feed.map(function (e, i) {
+            var id = 'ki-f-' + art + '-' + i;
+            return '<li style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" id="' + id + '" data-ki-wahl="f:' + i + '"' + (kiAuswahl(v, 'f:' + i) ? ' checked' : '') + (k.uebernimmt ? ' disabled' : '') + ' style="margin-top:4px"><label for="' + id + '" style="flex:1">' +
+              '<span class="badge">' + esc(FEED_LABEL[e.art] || e.art) + '</span> <span class="gedaempft">' + (e.datum ? esc(formatDate(e.datum)) : 'heute') + '</span>' +
+              (e.titel ? ' <span class="fett">' + esc(e.titel) + '</span>' : '') + (e.text ? '<div style="white-space:pre-wrap">' + esc(e.text) + '</div>' : '') + '</label></li>';
+          }).join('') + '</ul>';
+      }
+      (v.hinweise || []).forEach(function (t) { h += '<div class="notiz">' + esc(t) + '</div>'; });
+      if (!v.aenderungen.length && !v.feed.length && !v.rueckfrage) h += '<div class="gedaempft" style="margin-top:12px">Dazu gibt es nichts zu ändern oder festzuhalten.</div>';
+      if (v.aenderungen.length || v.feed.length) {
+        var n = kiAnzahl(v);
+        h += '<div style="display:flex;gap:8px;align-items:center;margin-top:12px"><button type="button" class="btn btn-primary" data-ki="uebernehmen"' + (n === 0 || beschaeftigt ? ' disabled' : '') + '>' + (k.uebernimmt ? 'Speichere …' : 'Übernehmen (' + n + ')') + '</button>' +
+          '<button type="button" class="link-btn" data-ki="verwerfen"' + (beschaeftigt ? ' disabled' : '') + '>Verwerfen</button></div>' +
+          '<div class="notiz">Gespeichert wird in Notion und hier. Jede Änderung steht danach im Feed.</div>';
+      }
+    }
+    return h + '</div></div>';
+  }
+  function kiZusammenfassung(v) {
+    var t = v.antwort || '';
+    if (v.rueckfrage) t += ' Rückfrage: ' + v.rueckfrage;
+    if (v.aenderungen.length) t += ' Vorschlag Felder: ' + v.aenderungen.map(function (c) { return c.label + ' = ' + (c.neu === null ? '(leer)' : c.neu); }).join('; ') + '.';
+    if (v.feed.length) t += ' Vorschlag Feed: ' + v.feed.map(function (e) { return (FEED_LABEL[e.art] || e.art) + (e.datum ? ' ' + e.datum : '') + ': ' + (e.titel || e.text); }).join('; ') + '.';
+    return t.slice(0, 1400);
+  }
+  var kiErkenner = null;
+  function kiMikroKnopf(art, an) { var b = kiBox(art).querySelector('[data-ki="mikro"]'); if (b) { b.textContent = an ? 'Diktat beenden' : 'Diktieren'; b.setAttribute('aria-pressed', an ? 'true' : 'false'); } }
+  function kiDiktat(art) {
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) return;
+    if (kiErkenner) { kiErkenner.stop(); return; }
+    var k = kiZustand(feedZiel(art)), feld = kiFeld(art), basis = feld ? feld.value : k.text;
+    var e = new SR(); e.lang = 'de-DE'; e.interimResults = true; e.continuous = true;
+    e.onresult = function (ev) {
+      var t = ''; for (var i = 0; i < ev.results.length; i++) t += ev.results[i][0].transcript;
+      k.text = (basis ? basis.replace(/\s+$/, '') + ' ' : '') + t;
+      var f = kiFeld(art); if (f) f.value = k.text;
+    };
+    e.onend = function () { kiErkenner = null; kiMikroKnopf(art, false); };
+    e.onerror = function () { kiErkenner = null; kiMikroKnopf(art, false); };
+    kiErkenner = e; kiMikroKnopf(art, true);
+    try { e.start(); } catch (x) { kiErkenner = null; kiMikroKnopf(art, false); }
+  }
+  async function kiSenden(art) {
+    var Z = feedZiel(art), k = kiZustand(Z), id = feedObjektId(art);
+    if (kiErkenner) kiErkenner.stop();
+    var feld = kiFeld(art); if (feld) k.text = feld.value;
+    var text = String(k.text).trim();
+    if (!text) { k.fehler = 'Bitte schreibe oder sprich, was geändert oder festgehalten werden soll.'; feedNeuZeichnen(art); return; }
+    if (!id || k.laeuft) return;
+    k.laeuft = true; k.fehler = ''; feedNeuZeichnen(art);
+    try {
+      var res = await fetch('/webhook/crm/ki', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ art: art, id: id, text: text, dialog: k.dialog }) });
+      var d = await res.json().catch(function () { return {}; });
+      if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Die KI hat nicht geantwortet.');
+      d.aenderungen = d.aenderungen || []; d.feed = d.feed || []; d.wahl = {};
+      k.dialog.push({ von: 'marko', text: text }); k.dialog.push({ von: 'ki', text: kiZusammenfassung(d) });
+      k.v = d; k.text = ''; k.laeuft = false; feedNeuZeichnen(art);
+      var t = kiFeld(art); if (t) t.focus();
+    } catch (x) { k.laeuft = false; k.fehler = x.message; feedNeuZeichnen(art); }
+  }
+  async function kiUebernehmen(art) {
+    var Z = feedZiel(art), k = kiZustand(Z), v = k.v, id = feedObjektId(art);
+    if (!v || !id || k.uebernimmt) return;
+    var aenderungen = v.aenderungen.filter(function (c) { return kiAuswahl(v, 'a:' + c.feld); });
+    var eintraege = v.feed.filter(function (e, i) { return kiAuswahl(v, 'f:' + i); });
+    if (!aenderungen.length && !eintraege.length) return;
+    k.uebernimmt = true; k.fehler = ''; feedNeuZeichnen(art);
+    var felder = null, feedAntwort = null, gespeichert = 0, feedAnzahl = 0;
+    try {
+      if (aenderungen.length) {
+        felder = {}; aenderungen.forEach(function (c) { felder[c.feld] = c.neu === null ? '' : c.neu; });
+        var res = await fetch('/webhook/crm/speichern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ art: art, id: id, felder: felder }) });
+        var d = await res.json().catch(function () { return {}; });
+        if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Die Änderungen wurden nicht gespeichert.');
+        gespeichert = d.aenderungen || 0;
+        if (d.seite) { if (art === 'firma') FI.firma = d.seite; else PE.person = d.seite; }
+        // gespeicherte Änderungen aus dem Vorschlag nehmen, falls ein Feed-Eintrag danach scheitert
+        v.aenderungen = v.aenderungen.filter(function (c) { return !felder.hasOwnProperty(c.feld); });
+      }
+      for (var i = 0; i < eintraege.length; i++) {
+        var e = eintraege[i];
+        var r2 = await fetch('/webhook/crm/feed-speichern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ art: art, id: id, eintrag: { art: e.art, titel: e.titel, text: e.text, datum: e.datum } }) });
+        var d2 = await r2.json().catch(function () { return {}; });
+        if (!r2.ok || !d2.ok) throw new Error((gespeichert ? 'Die Änderungen sind gespeichert. ' : '') + (d2.meldung || d2.message || d2.fehler || 'Ein Feed-Eintrag wurde nicht gespeichert.'));
+        feedAnzahl++; feedAntwort = d2.feed || feedAntwort;
+        v.feed = v.feed.filter(function (x) { return x !== e; }); v.wahl = {};
+      }
+    } catch (x) {
+      k.uebernimmt = false; k.fehler = x.message; if (feedAntwort) Z.feed = feedAntwort;
+      v.wahl = {}; feedNeuZeichnen(art); return;
+    }
+    var teile = [];
+    if (gespeichert) teile.push(gespeichert + (gespeichert === 1 ? ' Änderung' : ' Änderungen'));
+    if (feedAnzahl) teile.push(feedAnzahl + (feedAnzahl === 1 ? ' Feed-Eintrag' : ' Feed-Einträge'));
+    Z.meldung = 'Übernommen: ' + (teile.join(' und ') || 'nichts geändert') + '.';
+    Z.ki = null; if (feedAntwort) Z.feed = feedAntwort;
+    feedNeuZeichnen(art);
+    if (!feedAntwort) ladeFeed(art, id, Z);
+  }
+  function bindKi() {
+    document.addEventListener('input', function (e) {
+      if (!e.target || !e.target.hasAttribute || !e.target.hasAttribute('data-ki-text')) return;
+      kiZustand(feedZiel(kiArt(e.target))).text = e.target.value;
+    });
+    document.addEventListener('change', function (e) {
+      var w = e.target && e.target.getAttribute && e.target.getAttribute('data-ki-wahl'); if (!w) return;
+      var art = kiArt(e.target), k = kiZustand(feedZiel(art)); if (!k.v) return;
+      k.v.wahl = k.v.wahl || {}; k.v.wahl[w] = e.target.checked;
+      var n = kiAnzahl(k.v), b = kiBox(art).querySelector('[data-ki="uebernehmen"]');
+      if (b) { b.textContent = 'Übernehmen (' + n + ')'; b.disabled = n === 0; }
+    });
+    document.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-ki]'); if (!b || !b.getAttribute('data-ki')) return;
+      var aktion = b.getAttribute('data-ki'), art = kiArt(b);
+      if (aktion === 'senden') kiSenden(art);
+      else if (aktion === 'uebernehmen') kiUebernehmen(art);
+      else if (aktion === 'mikro') kiDiktat(art);
+      else if (aktion === 'verwerfen') { var k = kiZustand(feedZiel(art)); k.v = null; k.fehler = ''; feedNeuZeichnen(art); }
+      else if (aktion === 'neu') { feedZiel(art).ki = null; feedNeuZeichnen(art); var t = kiFeld(art); if (t) t.focus(); }
+    });
+  }
   function renderPerson() {
     var el = $('p-personen');
     var zurueck = '<a href="#personen" class="link-btn">← Alle Kontakte</a>';
@@ -3140,6 +3310,7 @@ textarea.maske-lang { min-height: 72px; }
       '<div class="notiz">Eintragen in Notion im Feld „Kontaktpfad“.</div>';
 
     if (PE.meldung) h += '<div class="notiz" role="status">' + esc(PE.meldung) + '</div>';
+    if (!PE.edit) h += kiPanel('person');
     if (PE.edit) h += '<div class="card pad-l"><div class="card-kopf" style="margin:0 0 12px">Kontakt bearbeiten</div>' + maskeFormular('pe', MASKE_PERSON, p, PE.edit) + '</div>';
     h += '<div class="grid lg-3">' +
       (PE.edit ? '' : '<div class="card"><div class="card-kopf">Erreichbarkeit</div>' + erreichbar + '</div>') +
@@ -7551,6 +7722,7 @@ textarea.maske-lang { min-height: 72px; }
   bindPersonen();
   bindMaske();
   bindFeed();
+  bindKi();
   bindVersand();
   bindBelege();
   bindBT();
@@ -7620,7 +7792,7 @@ textarea.maske-lang { min-height: 72px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261024111412';
+  var BUILD = '20261024113105';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
