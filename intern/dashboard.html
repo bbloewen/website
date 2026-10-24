@@ -2463,7 +2463,7 @@ textarea.maske-lang { min-height: 72px; }
       var aus = !e.versendbar || C.abgewaehlt[e.notion_id];
       h += '<tr class="' + (aus ? 'aus' : '') + '"><td>' + (e.versendbar
           ? '<input type="checkbox" data-empf="' + esc(e.notion_id) + '"' + (C.abgewaehlt[e.notion_id] ? '' : ' checked') + ' aria-label="' + esc(e.name) + ' dabei">' : '') + '</td>' +
-        '<td class="nm">' + (e.notion_url ? '<a href="' + esc(e.notion_url) + '" target="_blank" rel="noopener">' + esc(e.name) + '</a>' : esc(e.name)) + '</td>' +
+        '<td class="nm"><a href="#' + (e.typ === 'firma' ? 'unternehmen' : 'personen') + '/' + esc(e.notion_id) + '">' + esc(e.name) + '</a></td>' +
         '<td class="text-sek">' + esc(e.typ === 'firma' ? '' : (e.firma_name || '')) + '</td>' +
         '<td>' + esc(e.email || '–') + (e.email_quelle && e.email_quelle !== 'Haupt' ? ' <span class="badge">' + esc(e.email_quelle) + '</span>' : '') + '</td>' +
         '<td class="text-sek nowrap">' + esc((e.bloecke || []).map(function (b) { return gruppe(b); }).join(', ')) + '</td>' +
@@ -2675,7 +2675,8 @@ textarea.maske-lang { min-height: 72px; }
     if (f.abgemeldet) badges.push('<span class="badge">hat sich abgemeldet</span>');
     var h = '<div class="stapel">' + zurueck +
       '<div class="card pad-l"><div class="zeile-titel"><h2 class="abschnitt" style="margin:0">' + esc(f.name) + '</h2>' +
-      (f.notion_url ? '<a href="' + esc(f.notion_url) + '" target="_blank" rel="noopener" class="link-btn">In Notion bearbeiten ↗</a>' : '') + '</div>' +
+      '<span>' + (FI.edit ? '' : '<button type="button" class="btn btn-primary nur-schreiben" data-maske-aktion="bearbeiten" data-art="firma">Bearbeiten</button> ') +
+      (f.notion_url ? '<a href="' + esc(f.notion_url) + '" target="_blank" rel="noopener" class="link-btn">In Notion öffnen ↗</a>' : '') + '</span></div>' +
       '<div class="text-sek">' + esc([f.firmenbezeichnung && f.firmenbezeichnung !== f.name ? f.firmenbezeichnung : '', f.status, f.level, f.quelle ? 'Quelle ' + f.quelle : ''].filter(Boolean).join(' · ')) + '</div>' +
       (badges.length ? '<div class="notiz-2">' + badges.join(' ') + '</div>' : '') + '</div>';
     var daten = '<table class="tbl kompakt"><tbody>' +
@@ -2711,7 +2712,7 @@ textarea.maske-lang { min-height: 72px; }
     if (FI.meldung) h += '<div class="notiz" role="status">' + esc(FI.meldung) + '</div>';
     if (FI.edit) h += '<div class="card pad-l"><div class="card-kopf" style="margin:0 0 12px">Firma bearbeiten</div>' + maskeFormular('fi', MASKE_FIRMA, f, FI.edit) + '</div>';
     h += '<div class="grid lg-3">' +
-      (FI.edit ? '' : '<div class="card"><div class="card-kopf zeile-titel" style="margin:0"><span>Firmendaten</span><button type="button" class="link-btn nur-schreiben" data-maske-aktion="bearbeiten" data-art="firma">Bearbeiten</button></div>' + daten + '</div>') +
+      (FI.edit ? '' : '<div class="card"><div class="card-kopf">Firmendaten</div>' + daten + '</div>') +
       '<div class="card"><div class="card-kopf">Merkmale</div><div class="pad">' + merkm + '</div></div>' +
       '<div class="card"><div class="card-kopf">Ansprechpartner (' + f.ansprechpartner.length + ')</div><div class="pad">' + ap + '</div></div></div>';
     if (!FI.edit) {
@@ -2892,7 +2893,7 @@ textarea.maske-lang { min-height: 72px; }
     { f: 'ansprache', l: 'Ansprache', t: 'select', o: MASKE_ANSPRACHE, leer: 'nicht gesetzt (Sie)' }, { f: 'geburtsdatum', l: 'Geburtsdatum', t: 'date' },
     { f: 'rolle', l: 'Rolle', t: 'text' }, { f: 'ansprechpartner_intern', l: 'Ansprechpartner bei uns', t: 'text' },
     { g: 'E-Mail und Telefon', f: 'email_haupt', l: 'E-Mail', t: 'email' }, { f: 'email_geschaeftlich', l: 'E-Mail geschäftlich', t: 'email' }, { f: 'email_privat', l: 'E-Mail privat', t: 'email' },
-    { f: 'versand_email_wahl', l: 'Versand an', t: 'select', o: MASKE_VERSAND, leer: 'automatisch' }, { f: 'telefon', l: 'Telefon', t: 'tel' }, { f: 'mobil', l: 'Mobil', t: 'tel' },
+    { f: 'versand_email_wahl', l: 'Versand an', t: 'select', o: MASKE_VERSAND, leer: 'automatisch' }, { f: 'mobil', l: 'Mobil (nur Mobilnummern)', t: 'tel' }, { f: 'telefon', l: 'Festnetz', t: 'tel' },
     { f: 'telefon_geschaeftlich', l: 'Telefon geschäftlich', t: 'tel' }, { f: 'bevorzugter_kanal', l: 'Bevorzugter Kanal', t: 'select', o: MASKE_KANAL }, { f: 'linkedin', l: 'LinkedIn (Link)', t: 'url' },
     { g: 'Adresse privat', f: 'strasse', l: 'Straße', t: 'text' }, { f: 'plz', l: 'PLZ', t: 'text' }, { f: 'ort', l: 'Ort', t: 'text' },
     { g: 'Adresse geschäftlich', f: 'strasse_geschaeftlich', l: 'Straße', t: 'text' }, { f: 'plz_geschaeftlich', l: 'PLZ', t: 'text' }, { f: 'ort_geschaeftlich', l: 'Ort', t: 'text' },
@@ -2996,33 +2997,35 @@ textarea.maske-lang { min-height: 72px; }
     if (p.newsletter_optin) status.push('<span class="badge badge-optin">Newsletter-Opt-in ' + esc(formatDate(p.newsletter_optin)) + '</span>');
     var h = '<div class="stapel">' + zurueck +
       '<div class="card pad-l"><div class="zeile-titel"><h2 class="abschnitt" style="margin:0">' + esc(p.name) + '</h2>' +
-      (p.notion_url ? '<a href="' + esc(p.notion_url) + '" target="_blank" rel="noopener" class="link-btn">In Notion bearbeiten ↗</a>' : '') + '</div>' +
+      '<span>' + (PE.edit ? '' : '<button type="button" class="btn btn-primary nur-schreiben" data-maske-aktion="bearbeiten" data-art="person">Bearbeiten</button> ') +
+      (p.notion_url ? '<a href="' + esc(p.notion_url) + '" target="_blank" rel="noopener" class="link-btn">In Notion öffnen ↗</a>' : '') + '</span></div>' +
       '<div class="text-sek">' + (p.firmen.length ? p.firmen.map(function (f) { return '<a href="#unternehmen/' + esc(f.id) + '">' + esc(f.name) + '</a>'; }).join(', ') : 'ohne Firma') +
       (p.quelle ? ' · Quelle ' + esc(p.quelle) : '') + '</div>' + (status.length ? '<div class="notiz-2">' + status.join(' ') + '</div>' : '') + '</div>';
 
+    var telLink = function (n) { return n ? '<a href="tel:' + esc(String(n).replace(/[^+0-9]/g, '')) + '">' + esc(n) + '</a>' : ''; };
     var wahl = { 'Geschäftlich': 'email_geschaeftlich', 'Privat': 'email_privat', 'Haupt': 'email_haupt' }[p.versand_email_wahl] || '';
     var mail = function (feld) { return p[feld] ? esc(p[feld]) + (wahl === feld ? ' <span class="badge badge-optin">Versand</span>' : '') : ''; };
     var erreichbar = '<table class="tbl kompakt"><tbody>' +
-      zeile('E-Mail', mail('email_haupt')) + zeile('E-Mail geschäftlich', mail('email_geschaeftlich')) + zeile('E-Mail privat', mail('email_privat')) +
+      zeile('E-Mail', mail('email_haupt')) + zeile('Mobil', telLink(p.mobil)) + zeile('Ansprache', esc(p.ansprache) + (p.ansprache_gesetzt ? '' : ' <span class="gedaempft">(nicht gesetzt)</span>')) +
+      zeile('E-Mail geschäftlich', mail('email_geschaeftlich')) + zeile('E-Mail privat', mail('email_privat')) +
       zeile('Eltern-E-Mail', p.eltern_email ? esc(p.eltern_email) + (p.minderjaehrig ? ' <span class="badge badge-optin">Versand</span>' : '') : '') +
-      zeile('Ansprache', esc(p.ansprache) + (p.ansprache_gesetzt ? '' : ' <span class="gedaempft">(nicht gesetzt)</span>')) +
       zeile('Anrede', esc([p.anrede, p.titel].filter(Boolean).join(' '))) +
-      zeile('Ort', esc([p.plz, p.ort].filter(Boolean).join(' '))) +
       zeile('Geburtsdatum', p.geburtsdatum ? esc(formatDate(p.geburtsdatum)) : '') +
       '</tbody></table>';
     if (!p.email_haupt && !p.email_geschaeftlich && !p.email_privat && !p.eltern_email) erreichbar += '<div class="hinweis-warn" style="margin:12px 20px">Keine E-Mail-Adresse: Mails an diesen Kontakt kommen nicht an.</div>';
 
     var adr = function (str, plz, ort) { return esc([str, [plz, ort].filter(Boolean).join(' ')].filter(Boolean).join(', ')); };
-    var tel = function (n) { return n ? '<a href="tel:' + esc(String(n).replace(/[^+0-9]/g, '')) + '">' + esc(n) + '</a>' : ''; };
+    var tel = telLink;
+    var immer = function (label, wert) { return '<tr><th scope="row">' + esc(label) + '</th><td>' + (wert || '<span class="gedaempft">–</span>') + '</td></tr>'; };   // Adressen stehen immer da, auch leer
     var weiteres = '<table class="tbl kompakt"><tbody>' +
-      zeile('Telefon', tel(p.telefon)) + zeile('Mobil', tel(p.mobil)) + zeile('Telefon geschäftlich', tel(p.telefon_geschaeftlich)) +
+      immer('Adresse privat', adr(p.strasse, p.plz, p.ort)) + immer('Adresse geschäftlich', adr(p.strasse_geschaeftlich, p.plz_geschaeftlich, p.ort_geschaeftlich)) +
+      zeile('Mobil', tel(p.mobil)) + zeile('Festnetz', tel(p.telefon)) + zeile('Telefon geschäftlich', tel(p.telefon_geschaeftlich)) +
       zeile('Bevorzugter Kanal', esc(p.bevorzugter_kanal || '')) + zeile('Rolle', esc(p.rolle || '')) + zeile('Ansprechpartner bei uns', esc(p.ansprechpartner_intern || '')) +
-      zeile('Adresse privat', p.strasse ? adr(p.strasse, p.plz, p.ort) : '') + zeile('Adresse geschäftlich', adr(p.strasse_geschaeftlich, p.plz_geschaeftlich, p.ort_geschaeftlich)) +
       zeile('Erziehungsberechtigte:r', esc([p.eltern_vorname, p.eltern_nachname].filter(Boolean).join(' ')) + (p.eltern_telefon ? ' · ' + tel(p.eltern_telefon) : '')) +
       zeile('LinkedIn', p.linkedin ? '<a href="' + esc(p.linkedin) + '" target="_blank" rel="noopener noreferrer">Profil ↗</a>' : '') +
       zeile('Vorlieben / Hinweise', p.vorlieben ? '<span style="white-space:pre-wrap">' + esc(p.vorlieben) + '</span>' : '') + zeile('Verlauf', p.verlauf ? '<span style="white-space:pre-wrap">' + esc(p.verlauf) + '</span>' : '') +
       '</tbody></table>';
-    var hatWeiteres = /<td>/.test(weiteres);
+    var hatWeiteres = true;
     var mk = Object.keys(p.merkmale || {}).sort(function (a, b) { return a.localeCompare(b, 'de'); });
     var merkm = mk.length ? '<ul class="blockliste">' + mk.map(function (k) { return '<li>' + esc(merkmalText(k, p.merkmale[k])) + '</li>'; }).join('') + '</ul>' : '<div class="gedaempft">Keine eigenen Merkmale.</div>';
     if (p.mitgliedsart) merkm += '<div class="notiz">Mitgliedsart: ' + esc(p.mitgliedsart) + '</div>';
@@ -3037,10 +3040,9 @@ textarea.maske-lang { min-height: 72px; }
       '<div class="notiz">Eintragen in Notion im Feld „Kontaktpfad“.</div>';
 
     if (PE.meldung) h += '<div class="notiz" role="status">' + esc(PE.meldung) + '</div>';
-    var kopfBearb = '<div class="card-kopf zeile-titel" style="margin:0"><span>Erreichbarkeit</span><button type="button" class="link-btn nur-schreiben" data-maske-aktion="bearbeiten" data-art="person">Bearbeiten</button></div>';
     if (PE.edit) h += '<div class="card pad-l"><div class="card-kopf" style="margin:0 0 12px">Kontakt bearbeiten</div>' + maskeFormular('pe', MASKE_PERSON, p, PE.edit) + '</div>';
     h += '<div class="grid lg-3">' +
-      (PE.edit ? '' : '<div class="card">' + kopfBearb + erreichbar + '</div>') +
+      (PE.edit ? '' : '<div class="card"><div class="card-kopf">Erreichbarkeit</div>' + erreichbar + '</div>') +
       '<div class="card"><div class="card-kopf">Merkmale</div><div class="pad">' + merkm + '</div></div>' +
       '<div class="card"><div class="card-kopf">Kontaktpfad</div><div class="pad">' + pfad + '</div></div></div>';
     if (hatWeiteres && !PE.edit) h += '<div class="card"><div class="card-kopf">Weitere Angaben</div>' + weiteres + '</div>';
@@ -7482,7 +7484,7 @@ textarea.maske-lang { min-height: 72px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261024090050';
+  var BUILD = '20261024095105';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
