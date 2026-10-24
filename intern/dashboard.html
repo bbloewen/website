@@ -5943,7 +5943,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     var z = MGL.z[modus], s = z.suche.trim().toLowerCase();
     return mglGruppe(modus).aktiv.filter(function (x) {
       if (z.art && x.art_label !== z.art) return false;
-      return !s || (x.name + ' ' + x.email + ' ' + x.ort + ' ' + x.mandatsreferenz + ' ' + x.kontoinhaber).toLowerCase().indexOf(s) >= 0;
+      return !s || (x.name + ' ' + (x.erziehungsberechtigt || '') + ' ' + x.email + ' ' + x.ort + ' ' + x.mandatsreferenz + ' ' + x.kontoinhaber).toLowerCase().indexOf(s) >= 0;
     });
   }
   function mglZahl(x) {
@@ -5977,17 +5977,17 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   }
   function renderMGLTabelle(modus) {
     var box = $('mgl-tabelle-' + modus); if (!box) return;
-    var zeilen = mglGefiltert(modus);
-    var h = '<div class="card-fuss" style="border-top:0;border-bottom:1px solid var(--border)">' + zeilen.length + ' von ' + mglGruppe(modus).aktiv.length + ' Aktiven</div><div class="scroll-x"><table class="tbl kompakt"><caption class="sr-only">' + MGL_NAME[modus] + '</caption><thead><tr><th scope="col" title="Zahlstatus: grün bezahlt, rot offen">Zahlstatus</th><th scope="col">Name</th><th scope="col">Typ</th><th scope="col">Eintrittsdatum</th><th scope="col">Status</th><th scope="col" class="zahlen">Beitrag</th><th scope="col" class="zahlen">Jahresbeitrag</th><th scope="col">Letzter Einzug</th><th scope="col">Nächster Einzug</th><th scope="col">Mandat</th><th scope="col">IBAN</th></tr></thead><tbody>';
+    var zeilen = mglGefiltert(modus), eltern = modus !== 'freundeskreis';
+    var h = '<div class="card-fuss" style="border-top:0;border-bottom:1px solid var(--border)">' + zeilen.length + ' von ' + mglGruppe(modus).aktiv.length + ' Aktiven</div><div class="scroll-x"><table class="tbl kompakt"><caption class="sr-only">' + MGL_NAME[modus] + '</caption><thead><tr><th scope="col" title="Zahlstatus: grün bezahlt, rot offen">Zahlstatus</th><th scope="col">Name</th>' + (eltern ? '<th scope="col" title="Aus dem CRM; bei Minderjährigen sonst der zahlende Kontoinhaber">Erziehungsberechtigte:r</th>' : '') + '<th scope="col">Typ</th><th scope="col">Eintrittsdatum</th><th scope="col">Status</th><th scope="col" class="zahlen">Beitrag</th><th scope="col" class="zahlen">Jahresbeitrag</th><th scope="col">Letzter Einzug</th><th scope="col">Nächster Einzug</th><th scope="col">Mandat</th><th scope="col">IBAN</th></tr></thead><tbody>';
     zeilen.forEach(function (x) {
-      h += '<tr><td data-sort="' + (x.zahlstatus === 'bezahlt' ? 1 : 0) + '" style="text-align:center">' + mglZahl(x) + '</td><td>' + (x.kontakt_id ? '<a href="#personen/' + esc(x.kontakt_id) + '">' + esc(x.name) + '</a>' : esc(x.name)) + (x.ort ? '<div class="notiz" style="margin:0">' + esc(x.ort) + '</div>' : '') + '</td><td class="text-sek">' + esc(x.art_label) + '</td>' +
+      h += '<tr><td data-sort="' + (x.zahlstatus === 'bezahlt' ? 1 : 0) + '" style="text-align:center">' + mglZahl(x) + '</td><td>' + (x.kontakt_id ? '<a href="#personen/' + esc(x.kontakt_id) + '">' + esc(x.name) + '</a>' : esc(x.name)) + (x.ort ? '<div class="notiz" style="margin:0">' + esc(x.ort) + '</div>' : '') + '</td>' + (eltern ? '<td>' + (x.erziehungsberechtigt ? esc(x.erziehungsberechtigt) : '') + '</td>' : '') + '<td class="text-sek">' + esc(x.art_label) + '</td>' +
         '<td data-sort="' + esc(x.eintritt) + '">' + esc(x.eintritt ? formatDate(x.eintritt) : '') + '</td><td>aktiv</td>' +
         '<td class="zahlen" data-sort="' + esc(x.beitrag) + '">' + esc(formatEuro(x.beitrag)) + '<div class="notiz" style="margin:0">alle ' + esc(x.turnus_monate) + ' Mon.</div></td><td class="zahlen" data-sort="' + esc(x.jahresbeitrag) + '">' + esc(formatEuro(x.jahresbeitrag)) + '</td>' +
         '<td data-sort="' + esc(x.letzter_einzug) + '">' + esc(x.letzter_einzug ? formatDate(x.letzter_einzug) : '') + '</td><td data-sort="' + esc(x.naechster_einzug) + '">' + esc(x.naechster_einzug ? formatDate(x.naechster_einzug) : '') + '</td>' +
         '<td class="text-sek">' + esc(x.mandatsreferenz) + '</td><td class="text-sek">' + (x.iban ? esc(x.iban) : '<span class="hinweis">fehlt</span>') + '</td></tr>';
     });
-    if (!zeilen.length) h += '<tr><td colspan="11" class="leer">Keine Einträge für diese Auswahl.</td></tr>';
-    else h += sumZeile([{ t: 'Summe · ' + zahl(zeilen.length) + ' Aktive', span: 5 }, { t: formatEuro(sumVon(zeilen, function (x) { return x.beitrag; })), z: true }, { t: formatEuro(sumVon(zeilen, function (x) { return x.jahresbeitrag; })), z: true }, { t: '', span: 4 }]);
+    if (!zeilen.length) h += '<tr><td colspan="' + (eltern ? 12 : 11) + '" class="leer">Keine Einträge für diese Auswahl.</td></tr>';
+    else h += sumZeile([{ t: 'Summe · ' + zahl(zeilen.length) + ' Aktive', span: eltern ? 6 : 5 }, { t: formatEuro(sumVon(zeilen, function (x) { return x.beitrag; })), z: true }, { t: formatEuro(sumVon(zeilen, function (x) { return x.jahresbeitrag; })), z: true }, { t: '', span: 4 }]);
     box.innerHTML = h + '</tbody></table></div>';
   }
   function bindMGL() {
@@ -8410,7 +8410,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261024183412';
+  var BUILD = '20261024223752';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
