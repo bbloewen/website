@@ -498,6 +498,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 
   <section id="p-liste" role="tabpanel" aria-labelledby="tab-liste" hidden></section>
   <section id="p-mitglieder" role="tabpanel" aria-labelledby="tab-mitglieder" hidden></section>
+  <section id="p-freundeskreis" role="tabpanel" aria-labelledby="tab-freundeskreis" hidden></section>
   <section id="p-unternehmen" role="tabpanel" aria-labelledby="tab-unternehmen" hidden></section>
 
   <section id="p-versand" role="tabpanel" aria-labelledby="tab-versand" hidden></section>
@@ -516,6 +517,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   <section id="p-ueberweisungen-lev-lp" role="tabpanel" aria-labelledby="tab-ueberweisungen-lev-lp" hidden></section>
   <section id="p-ls-tickets" role="tabpanel" aria-labelledby="tab-ls-tickets" hidden></section>
   <section id="p-ls-mitglieder" role="tabpanel" aria-labelledby="tab-ls-mitglieder" hidden></section>
+  <section id="p-ls-freundeskreis" role="tabpanel" aria-labelledby="tab-ls-freundeskreis" hidden></section>
   <section id="p-ls-camps" role="tabpanel" aria-labelledby="tab-ls-camps" hidden></section>
   <section id="p-ausgang-xxl" role="tabpanel" aria-labelledby="tab-ausgang-xxl" hidden></section>
   <section id="p-ausgang-lev" role="tabpanel" aria-labelledby="tab-ausgang-lev" hidden></section>
@@ -909,12 +911,12 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   var BEREICHE = [
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'liste', name: 'Liste' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'ticketing', name: 'Spieltag', tabs: [{ id: 'dauerkarten', name: 'Tickets' }, { id: 'auslastung', name: 'Auslastung' }, { id: 'auswertung', name: 'Auswertung' }, { id: 'ausschank', name: 'Ausschank' }, { id: 'firmenevents', name: 'Firmen-Events' }] },
-    { id: 'segmentierung', name: 'CRM', tabs: [{ id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'mitglieder', name: 'Mitglieder' }, { id: 'kontakte', name: 'Segmente' }, { id: 'versand', name: 'Versand' }] },
+    { id: 'segmentierung', name: 'CRM', tabs: [{ id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'mitglieder', name: 'Mitglieder' }, { id: 'freundeskreis', name: 'Freundeskreis' }, { id: 'kontakte', name: 'Segmente' }, { id: 'versand', name: 'Versand' }] },
     { id: 'accounting', name: 'Accounting', tabs: [{ id: 'liquiditaet', name: 'Übersicht' }, { id: 'rueckfragen', name: 'Rückfragen', versteckt: true }] },
     { id: 'acc-xxl', name: 'XXL', unter: true, tabs: [{ id: 'belege-xxl', name: 'Belege' }, { id: 'zahlung-xxl', name: 'Kontobewegungen' }] },
     { id: 'acc-lev', name: 'LEV', unter: true, tabs: [{ id: 'belege-lev', name: 'Belege' }, { id: 'zahlung-lev', name: 'Kontobewegungen' }, { id: 'zahlung-lev-lp', name: 'Kontobewegungen Löwenpark' }] },
     { id: 'acc-ausgang', name: 'Ausgangsrechnungen', unter: true, tabs: [{ id: 'ausgang-xxl', name: 'XXL Ausgangsrechnung' }, { id: 'ausgang-lev', name: 'LEV Ausgangsrechnung' }] },
-    { id: 'acc-zahllauf', name: 'Zahllauf', unter: true, tabs: [{ id: 'ueberweisungen-xxl', name: 'XXL-Überweisungen' }, { id: 'ueberweisungen-lev', name: 'LEV-Überweisungen' }, { id: 'ueberweisungen-lev-lp', name: 'Löwenpark-Überweisungen' }, { id: 'ls-tickets', name: 'Tickets' }, { id: 'ls-mitglieder', name: 'Mitglieder' }, { id: 'ls-camps', name: 'Feriencamps' }] },
+    { id: 'acc-zahllauf', name: 'Zahllauf', unter: true, tabs: [{ id: 'ueberweisungen-xxl', name: 'XXL-Überweisungen' }, { id: 'ueberweisungen-lev', name: 'LEV-Überweisungen' }, { id: 'ueberweisungen-lev-lp', name: 'Löwenpark-Überweisungen' }, { id: 'ls-tickets', name: 'Tickets' }, { id: 'ls-mitglieder', name: 'Mitglieder' }, { id: 'ls-freundeskreis', name: 'Freundeskreis' }, { id: 'ls-camps', name: 'Feriencamps' }] },
     { id: 'spendenbescheinigungen', name: 'Spendenbescheinigungen', unter: true, tabs: [{ id: 'spenden', name: 'Spendenbescheinigungen' }] },
     { id: 'administration', name: 'Administration', unter: true, tabs: [{ id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }, { id: 'kreditoren', name: 'Kreditoren / Debitoren' }] },
     { id: 'auslagen', name: 'Auslagen', tabs: [{ id: 'auslage-neu', name: 'Auslage einreichen' }, { id: 'vorschuss-neu', name: 'Vorschuss beantragen' }, { id: 'auslage-protokoll', name: 'Protokoll', recht: 'accounting' }] },
@@ -1006,7 +1008,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     if (t === 'unternehmen') { UN.fokus = S.tabArg; UN.alle = false; if (UN.fokus) { zeigeFirma(UN.fokus); window.scrollTo(0, 0); } else if (S.unternehmenGeladen) renderUnternehmen(); }
     if (t === 'unternehmen' && !S.unternehmenGeladen) { S.unternehmenGeladen = true; loadUnternehmen(); }
     if (t === 'personen') { zeigePersonen(S.tabArg); window.scrollTo(0, 0); }
-    if (t === 'mitglieder') { if (!MGL.daten) ladeMGL(); else renderMGL(); }
+    if (t === 'mitglieder' || t === 'freundeskreis') { if (!MGL.daten) ladeMGL(); else renderMGL(t); }
     if (t === 'liste') { if (!S.stats && !S.statsLoading) loadStats(); else renderGL(); }
     if (t === 'versand') loadVersand();
     if (t === 'auswertung') ladeAW();
@@ -5767,18 +5769,18 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   // ---------- Accounting: Lastschriften (Tickets, Mitglieder, Camps): Stand aus dem Probelauf, Lauf mit Bestätigung, Verlauf ----------
   // Der Einzug selbst macht der SEPA-Workflow (Vorabankündigung, SEPA-Datei per Mail, Beleg nach BuchhaltungsButler). Die Seite zeigt vorher genau, was er einziehen würde,
   // und startet ihn erst nach der zweiten Bestätigung. Der Server vergleicht vor dem Lauf noch einmal: hat sich der Stand geändert, wird nichts eingezogen.
-  var LS_TAB = { 'ls-tickets': 'tickets', 'ls-mitglieder': 'mitglieder', 'ls-camps': 'camps' };
-  var LS = { tickets: { auswahl: {} }, mitglieder: { auswahl: {} }, camps: { auswahl: {} } };
+  var LS_TAB = { 'ls-tickets': 'tickets', 'ls-mitglieder': 'mitglieder', 'ls-freundeskreis': 'freundeskreis', 'ls-camps': 'camps' };
+  var LS = { tickets: { auswahl: {} }, mitglieder: { auswahl: {} }, freundeskreis: { auswahl: {} }, camps: { auswahl: {} } };
   var LSZ = {};   // Zahl der einzuziehenden Lastschriften je Art für die Tabs, aus dem zuletzt gemerkten Probelauf (der volle Probelauf dauert zu lange fürs Öffnen)
   function ladeLSZ() {
     fetch('/webhook/accounting/lastschrift-zahlen').then(function (res) { return res.json(); }).then(function (d) {
       if (!d || !d.ok) return;
-      ['tickets', 'mitglieder', 'camps'].forEach(function (a) { if (d.zahlen && d.zahlen[a]) LSZ[a] = Number(d.zahlen[a].anzahl); });
+      ['tickets', 'mitglieder', 'freundeskreis', 'camps'].forEach(function (a) { if (d.zahlen && d.zahlen[a]) LSZ[a] = Number(d.zahlen[a].anzahl); });
       renderNavigation();
     }).catch(function () { /* ohne Zahlen bleiben die Tabs ohne Klammer */ });
   }
-  var LS_TITEL = { tickets: 'Dauerkarten · XXL Baskets GmbH', mitglieder: 'Mitgliedsbeiträge inklusive Freundeskreis · Basketball Löwen e.V.', camps: 'Feriencamps · Basketball Löwen e.V.' };
-  var LS_NOTIZ = { tickets: 'SEPA-Datei per Mail an Marko, Vorabankündigung an die Käufer, Bestellung in pretix auf bezahlt, Sammeleinzug-Beleg nach BuchhaltungsButler.', mitglieder: 'SEPA-Dateien (eine je Mitgliedschaftsart) per Mail, Vorabankündigung an die Mitglieder, Sammeleinzug-Beleg nach BuchhaltungsButler.', camps: 'SEPA-Datei je Camp per Mail, Vorabankündigung an die Zahlenden, Sammeleinzug-Beleg nach BuchhaltungsButler.' };
+  var LS_TITEL = { tickets: 'Dauerkarten · XXL Baskets GmbH', mitglieder: 'Mitgliedsbeiträge · Basketball Löwen e.V.', freundeskreis: 'Freundeskreis · Basketball Löwen e.V.', camps: 'Feriencamps · Basketball Löwen e.V.' };
+  var LS_NOTIZ = { tickets: 'SEPA-Datei per Mail an Marko, Vorabankündigung an die Käufer, Bestellung in pretix auf bezahlt, Sammeleinzug-Beleg nach BuchhaltungsButler.', mitglieder: 'SEPA-Dateien (eine je Mitgliedschaftsart) per Mail, Vorabankündigung an die Mitglieder, Sammeleinzug-Beleg nach BuchhaltungsButler.', freundeskreis: 'SEPA-Datei per Mail, Vorabankündigung an die Beitragszahler, Sammeleinzug-Beleg nach BuchhaltungsButler.', camps: 'SEPA-Datei je Camp per Mail, Vorabankündigung an die Zahlenden, Sammeleinzug-Beleg nach BuchhaltungsButler.' };
   async function ladeLS(art) {
     var z = LS[art]; if (z.laedt) return;
     z.laedt = true; z.fehler = null; renderLS(art);
@@ -5825,7 +5827,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       h += '<div class="card"><div class="card-kopf" style="margin:0">' + (art === 'camps' ? 'Je Camp' : 'Je Mitgliedschaftsart') + ' (eine SEPA-Datei)</div><div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">Einzug je Datei</caption><thead><tr><th scope="col">' + (art === 'camps' ? 'Camp' : 'Art') + '</th><th scope="col" class="zahlen">Anzahl</th><th scope="col" class="zahlen">Betrag</th><th scope="col">Datei</th></tr></thead><tbody>' +
         d.gruppen.map(function (g) { return '<tr><td>' + esc(g.label) + '</td><td class="zahlen">' + esc(zahl(g.anzahl)) + '</td><td class="zahlen">' + esc(lsBetrag(g.betrag)) + '</td><td class="text-sek">' + esc(g.datei) + '</td></tr>'; }).join('') + '</tbody></table></div></div>';
     }
-    var bezugKopf = { tickets: 'Bestellung', mitglieder: 'Typ', camps: 'Camp' }[art], datumKopf = art === 'tickets' ? 'Bestellt' : 'Fällig';
+    var bezugKopf = { tickets: 'Bestellung', mitglieder: 'Typ', freundeskreis: 'Typ', camps: 'Camp' }[art], datumKopf = art === 'tickets' ? 'Bestellt' : 'Fällig';
     var alleGewaehlt = d.positionen.length > 0 && d.positionen.every(function (p) { return z.auswahl[p.schluessel]; });
     h += '<div class="card"><div class="card-kopf" style="margin:0">Einzuziehende Lastschriften (' + d.positionen.length + ')</div><div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">Einzuziehende Lastschriften</caption><thead><tr><th scope="col" class="auswahl-zelle"><input type="checkbox" data-ls-alle data-art="' + art + '" aria-label="Alle auswählen"' + (alleGewaehlt ? ' checked' : '') + (z.laeuft ? ' disabled' : '') + '></th><th scope="col">Name</th><th scope="col">' + bezugKopf + '</th><th scope="col">E-Mail</th><th scope="col" class="zahlen">Betrag</th><th scope="col">Mandat</th><th scope="col">' + datumKopf + '</th></tr></thead><tbody>';
     var summe = 0;
@@ -5891,8 +5893,10 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       var box = $('ls-lauf-' + art); if (box) box.innerHTML = lsLaufInhalt(art);
     });
   }
-  // ---------- CRM > Mitglieder: Liste aus der Tabelle „Lastschriften-Mitglieder“ (IBAN nur maskiert), Kennzahlen, Filter ----------
-  var MGL = { daten: null, fehler: null, laedt: false, suche: '', art: '', status: '' };
+  // ---------- CRM > Mitglieder und Freundeskreis: Listen aus der Tabelle „Lastschriften-Mitglieder“ (IBAN nur maskiert), Zahlstatus, Gekündigte getrennt ----------
+  // Der Freundeskreis zählt nicht zu den Mitgliedern und hat einen eigenen Reiter mit eigenen Zahlen.
+  var MGL = { daten: null, fehler: null, laedt: false, z: { mitglieder: { suche: '', art: '', gkOffen: false }, freundeskreis: { suche: '', art: '', gkOffen: false } } };
+  var MGL_NAME = { mitglieder: 'Mitglieder', freundeskreis: 'Freundeskreis' };
   async function ladeMGL() {
     MGL.laedt = true; MGL.fehler = null; renderMGL();
     try {
@@ -5903,54 +5907,66 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     } catch (e) { MGL.fehler = e.message; }
     MGL.laedt = false; renderMGL();
   }
-  function mglGefiltert() {
-    var s = MGL.suche.trim().toLowerCase();
-    return ((MGL.daten && MGL.daten.zeilen) || []).filter(function (z) {
-      if (MGL.art && z.art_label !== MGL.art) return false;
-      if (MGL.status && z.status !== MGL.status) return false;
-      return !s || (z.name + ' ' + z.email + ' ' + z.ort + ' ' + z.mandatsreferenz + ' ' + z.kontoinhaber).toLowerCase().indexOf(s) >= 0;
+  function mglGruppe(modus) { return (MGL.daten && MGL.daten[modus]) || { kpi: {}, arten: [], aktiv: [], gekuendigt: [] }; }
+  function mglGefiltert(modus) {
+    var z = MGL.z[modus], s = z.suche.trim().toLowerCase();
+    return mglGruppe(modus).aktiv.filter(function (x) {
+      if (z.art && x.art_label !== z.art) return false;
+      return !s || (x.name + ' ' + x.email + ' ' + x.ort + ' ' + x.mandatsreferenz + ' ' + x.kontoinhaber).toLowerCase().indexOf(s) >= 0;
     });
   }
-  function renderMGL() {
-    var el = $('p-mitglieder'); if (!el) return;
-    if (MGL.laedt && !MGL.daten) { el.innerHTML = '<div class="laedt">Lade Mitglieder …</div>'; return; }
+  function mglZahl(x) {
+    var ok = x.zahlstatus === 'bezahlt';
+    return '<span role="img" aria-label="' + (ok ? 'Beitrag bezahlt' : 'Beitrag noch offen') + '" title="' + (ok ? 'bezahlt: eingezogen seit ' : 'offen: seit ') + esc(formatDate(x.zeitraum_ab)) + (ok ? '' : ' noch nicht eingezogen') + '" style="font-weight:700;font-size:15px;color:' + (ok ? 'var(--color-success, #1b873f)' : 'var(--color-error, #c0392b)') + '">€</span>';
+  }
+  function renderMGL(modus) {
+    if (!modus) { renderMGL('mitglieder'); renderMGL('freundeskreis'); return; }
+    var el = $('p-' + modus); if (!el) return;
+    if (MGL.laedt && !MGL.daten) { el.innerHTML = '<div class="laedt">Lade …</div>'; return; }
     if (MGL.fehler && !MGL.daten) { el.innerHTML = '<div class="fehlerbox" role="alert">' + esc(MGL.fehler) + '</div>'; return; }
     if (!MGL.daten) { el.innerHTML = ''; return; }
-    var d = MGL.daten, k = d.kpi || {};
+    var g = mglGruppe(modus), k = g.kpi || {}, z = MGL.z[modus], fk = modus === 'freundeskreis';
     var kachel = function (l, w, n) { return '<div class="card pad"><div class="kpi-label">' + esc(l) + '</div><div class="kpi">' + esc(w) + '</div>' + (n ? '<div class="notiz">' + esc(n) + '</div>' : '') + '</div>'; };
-    var h = '<div class="stapel"><div class="grid sm-3">' + kachel('Aktive Mitglieder', zahl(k.aktiv || 0), 'gekündigt ' + zahl(k.gekuendigt || 0) + ' · in der Tabelle ' + zahl(k.gesamt || 0)) +
-      kachel('Jahresbeitrag der Aktiven', formatEuro(k.jahresbeitrag_aktiv || 0), 'Beitrag × 12 / Turnus, ohne Aufnahmegebühr') +
-      '<div class="card pad"><div class="kpi-label">Je Typ (aktiv)</div><ul class="blockliste" style="margin-top:4px">' + (d.arten || []).map(function (a) { return '<li>' + esc(a.art) + ' <span class="gedaempft">' + esc(zahl(a.anzahl)) + ' · ' + esc(formatEuro(a.jahresbeitrag)) + '</span></li>'; }).join('') + '</ul></div></div>';
-    (d.hinweise || []).forEach(function (t) { h += '<div class="hinweis-warn" role="status">' + esc(t) + '</div>'; });
-    var arten = (d.arten || []).map(function (a) { return a.art; });
-    var stati = []; (d.zeilen || []).forEach(function (z) { if (stati.indexOf(z.status) < 0) stati.push(z.status); });
-    var zaehl = {}; (d.zeilen || []).forEach(function (z) { zaehl[z.art_label] = (zaehl[z.art_label] || 0) + 1; });
-    var chip = function (w, t, n) { return '<button type="button" class="chip' + (MGL.art === w ? ' aktiv' : '') + '" data-mgl="typ" data-wert="' + esc(w) + '" aria-pressed="' + (MGL.art === w) + '">' + esc(t) + ' ' + n + '</button>'; };
-    h += '<div class="chips" role="group" aria-label="Typ wählen" style="display:flex;flex-wrap:wrap;gap:6px">' + chip('', 'Alle', (d.zeilen || []).length) + Object.keys(zaehl).sort(function (a, b) { return zaehl[b] - zaehl[a]; }).map(function (k) { return chip(k, k, zaehl[k]); }).join('') + '</div>';
-    h += '<div class="card"><div class="filter-kopf"><div style="flex:1;min-width:220px"><label class="sr-only" for="mgl-suche">Suche</label><input class="eingabe" id="mgl-suche" data-mgl="suche" value="' + esc(MGL.suche) + '" placeholder="Suche nach Name, E-Mail, Ort oder Mandatsreferenz"></div><div class="regler">' +
-      '<select class="auswahl" data-mgl="status" aria-label="Status">' + optTag('', 'Alle Status', MGL.status) + stati.map(function (a) { return optTag(a, a, MGL.status); }).join('') + '</select>' +
-      '<button type="button" class="link-btn" data-mgl="neu">Aktualisieren</button></div></div><div id="mgl-tabelle"></div></div></div>';
-    el.innerHTML = h; renderMGLTabelle();
+    var h = '<div class="stapel"><div class="grid sm-3">' + kachel(fk ? 'Aktive im Freundeskreis' : 'Aktive Mitglieder', zahl(k.aktiv || 0), 'gekündigt ' + zahl(k.gekuendigt || 0) + ' (zählen nicht mit)') +
+      kachel('Beitrag bezahlt', zahl(k.bezahlt || 0) + ' von ' + zahl(k.aktiv || 0), zahl(k.offen || 0) + ' noch offen') +
+      kachel('Jahresbeitrag der Aktiven', formatEuro(k.jahresbeitrag_aktiv || 0), 'Beitrag × 12 / Turnus, ohne Aufnahmegebühr') + '</div>';
+    if (!fk) (MGL.daten.hinweise || []).forEach(function (t) { h += '<div class="hinweis-warn" role="status">' + esc(t) + '</div>'; });
+    var zaehl = {}; g.aktiv.forEach(function (x) { zaehl[x.art_label] = (zaehl[x.art_label] || 0) + 1; });
+    var typen = Object.keys(zaehl).sort(function (a, b) { return zaehl[b] - zaehl[a]; });
+    var chip = function (w, t, n) { return '<button type="button" class="chip' + (z.art === w ? ' aktiv' : '') + '" data-mgl="typ" data-modus="' + modus + '" data-wert="' + esc(w) + '" aria-pressed="' + (z.art === w) + '">' + esc(t) + ' ' + n + '</button>'; };
+    if (typen.length > 1) h += '<div class="chips" role="group" aria-label="Typ wählen" style="display:flex;flex-wrap:wrap;gap:6px">' + chip('', 'Alle', g.aktiv.length) + typen.map(function (t) { return chip(t, t, zaehl[t]); }).join('') + '</div>';
+    h += '<div class="card"><div class="filter-kopf"><div style="flex:1;min-width:220px"><label class="sr-only" for="mgl-suche-' + modus + '">Suche</label><input class="eingabe" id="mgl-suche-' + modus + '" data-mgl="suche" data-modus="' + modus + '" value="' + esc(z.suche) + '" placeholder="Suche nach Name, E-Mail, Ort oder Mandatsreferenz"></div><div class="regler">' +
+      '<button type="button" class="link-btn" data-mgl="neu">Aktualisieren</button></div></div><div id="mgl-tabelle-' + modus + '"></div></div>';
+    // Gekündigte: eigene Tabelle zum Aufklappen, zählt nicht mit
+    h += '<details class="klapp" data-mgl-gk="' + modus + '"' + (z.gkOffen ? ' open' : '') + '><summary class="text-klein">Gekündigt (' + g.gekuendigt.length + ')</summary>' + (g.gekuendigt.length
+      ? '<div class="scroll-x"><table class="tbl kompakt"><caption class="sr-only">Gekündigte</caption><thead><tr><th scope="col">Name</th><th scope="col">Typ</th><th scope="col">Eintrittsdatum</th><th scope="col">Kündigungsdatum</th></tr></thead><tbody>' +
+        g.gekuendigt.map(function (x) { return '<tr><td>' + (x.kontakt_id ? '<a href="#personen/' + esc(x.kontakt_id) + '">' + esc(x.name) + '</a>' : esc(x.name)) + '</td><td class="text-sek">' + esc(x.art_label) + '</td><td data-sort="' + esc(x.eintritt) + '">' + (x.eintritt ? esc(formatDate(x.eintritt)) : '<span class="gedaempft">–</span>') + '</td><td data-sort="' + esc(x.gekuendigt_am) + '">' + (x.gekuendigt_am ? esc(formatDate(x.gekuendigt_am)) : '<span class="gedaempft">nicht erfasst</span>') + '</td></tr>'; }).join('') + '</tbody></table></div>'
+      : '<div class="gedaempft" style="padding:8px 12px">Niemand gekündigt.</div>') + '</details></div>';
+    el.innerHTML = h; renderMGLTabelle(modus);
   }
-  function renderMGLTabelle() {
-    var box = $('mgl-tabelle'); if (!box) return;
-    var zeilen = mglGefiltert();
-    var h = '<div class="card-fuss" style="border-top:0;border-bottom:1px solid var(--border)">' + zeilen.length + ' von ' + ((MGL.daten && MGL.daten.zeilen) || []).length + ' Einträgen</div><div class="scroll-x"><table class="tbl kompakt"><caption class="sr-only">Mitglieder</caption><thead><tr><th scope="col">Name</th><th scope="col">Typ</th><th scope="col">Status</th><th scope="col" class="zahlen">Beitrag</th><th scope="col" class="zahlen">Jahresbeitrag</th><th scope="col">Nächster Einzug</th><th scope="col">Letzter Einzug</th><th scope="col">Mandat</th><th scope="col">IBAN</th><th scope="col">Eintritt</th></tr></thead><tbody>';
-    zeilen.forEach(function (z) {
-      h += '<tr><td>' + (z.kontakt_id ? '<a href="#personen/' + esc(z.kontakt_id) + '">' + esc(z.name) + '</a>' : esc(z.name)) + (z.ort ? '<div class="notiz" style="margin:0">' + esc(z.ort) + '</div>' : '') + '</td><td class="text-sek">' + esc(z.art_label) + '</td><td>' + (z.status === 'aktiv' ? 'aktiv' : '<span class="badge">' + esc(z.status) + '</span>') + '</td>' +
-        '<td class="zahlen" data-sort="' + esc(z.beitrag) + '">' + esc(formatEuro(z.beitrag)) + '<div class="notiz" style="margin:0">alle ' + esc(z.turnus_monate) + ' Mon.</div></td><td class="zahlen" data-sort="' + esc(z.jahresbeitrag) + '">' + esc(formatEuro(z.jahresbeitrag)) + '</td>' +
-        '<td data-sort="' + esc(z.naechster_einzug) + '">' + esc(z.naechster_einzug ? formatDate(z.naechster_einzug) : '') + '</td><td data-sort="' + esc(z.letzter_einzug) + '">' + esc(z.letzter_einzug ? formatDate(z.letzter_einzug) : '') + '</td><td class="text-sek">' + esc(z.mandatsreferenz) + '</td><td class="text-sek">' + (z.iban ? esc(z.iban) : '<span class="hinweis">fehlt</span>') + '</td><td data-sort="' + esc(z.eintritt) + '">' + esc(z.eintritt ? formatDate(z.eintritt) : '') + '</td></tr>';
+  function renderMGLTabelle(modus) {
+    var box = $('mgl-tabelle-' + modus); if (!box) return;
+    var zeilen = mglGefiltert(modus);
+    var h = '<div class="card-fuss" style="border-top:0;border-bottom:1px solid var(--border)">' + zeilen.length + ' von ' + mglGruppe(modus).aktiv.length + ' Aktiven</div><div class="scroll-x"><table class="tbl kompakt"><caption class="sr-only">' + MGL_NAME[modus] + '</caption><thead><tr><th scope="col" title="Zahlstatus: grün bezahlt, rot offen">Zahlstatus</th><th scope="col">Name</th><th scope="col">Typ</th><th scope="col">Eintrittsdatum</th><th scope="col">Status</th><th scope="col" class="zahlen">Beitrag</th><th scope="col" class="zahlen">Jahresbeitrag</th><th scope="col">Letzter Einzug</th><th scope="col">Nächster Einzug</th><th scope="col">Mandat</th><th scope="col">IBAN</th></tr></thead><tbody>';
+    zeilen.forEach(function (x) {
+      h += '<tr><td data-sort="' + (x.zahlstatus === 'bezahlt' ? 1 : 0) + '" style="text-align:center">' + mglZahl(x) + '</td><td>' + (x.kontakt_id ? '<a href="#personen/' + esc(x.kontakt_id) + '">' + esc(x.name) + '</a>' : esc(x.name)) + (x.ort ? '<div class="notiz" style="margin:0">' + esc(x.ort) + '</div>' : '') + '</td><td class="text-sek">' + esc(x.art_label) + '</td>' +
+        '<td data-sort="' + esc(x.eintritt) + '">' + esc(x.eintritt ? formatDate(x.eintritt) : '') + '</td><td>aktiv</td>' +
+        '<td class="zahlen" data-sort="' + esc(x.beitrag) + '">' + esc(formatEuro(x.beitrag)) + '<div class="notiz" style="margin:0">alle ' + esc(x.turnus_monate) + ' Mon.</div></td><td class="zahlen" data-sort="' + esc(x.jahresbeitrag) + '">' + esc(formatEuro(x.jahresbeitrag)) + '</td>' +
+        '<td data-sort="' + esc(x.letzter_einzug) + '">' + esc(x.letzter_einzug ? formatDate(x.letzter_einzug) : '') + '</td><td data-sort="' + esc(x.naechster_einzug) + '">' + esc(x.naechster_einzug ? formatDate(x.naechster_einzug) : '') + '</td>' +
+        '<td class="text-sek">' + esc(x.mandatsreferenz) + '</td><td class="text-sek">' + (x.iban ? esc(x.iban) : '<span class="hinweis">fehlt</span>') + '</td></tr>';
     });
-    if (!zeilen.length) h += '<tr><td colspan="10" class="leer">Keine Mitglieder für diese Auswahl.</td></tr>';
+    if (!zeilen.length) h += '<tr><td colspan="11" class="leer">Keine Einträge für diese Auswahl.</td></tr>';
     box.innerHTML = h + '</tbody></table></div>';
   }
   function bindMGL() {
-    var el = $('p-mitglieder'); if (!el) return;
-    el.addEventListener('input', function (e) { if (e.target.getAttribute('data-mgl') === 'suche') { MGL.suche = e.target.value; renderMGLTabelle(); } });
-    el.addEventListener('change', function (e) { var k = e.target.getAttribute('data-mgl'); if (k === 'art' || k === 'status') { MGL[k] = e.target.value; renderMGLTabelle(); } });
-    el.addEventListener('click', function (e) {
-      if (e.target.closest('[data-mgl="neu"]')) { ladeMGL(); return; }
-      var c = e.target.closest('[data-mgl="typ"]'); if (c) { MGL.art = c.getAttribute('data-wert'); renderMGL(); }
+    ['mitglieder', 'freundeskreis'].forEach(function (modus) {
+      var el = $('p-' + modus); if (!el) return;
+      el.addEventListener('input', function (e) { if (e.target.getAttribute('data-mgl') === 'suche') { MGL.z[modus].suche = e.target.value; renderMGLTabelle(modus); } });
+      el.addEventListener('click', function (e) {
+        if (e.target.closest('[data-mgl="neu"]')) { ladeMGL(); return; }
+        var c = e.target.closest('[data-mgl="typ"]'); if (c) { MGL.z[modus].art = c.getAttribute('data-wert'); renderMGL(modus); }
+      });
+      el.addEventListener('toggle', function (e) { var d = e.target; if (d && d.matches && d.matches('details[data-mgl-gk]')) MGL.z[modus].gkOffen = d.open; }, true);
     });
   }
   // ---------- Gutscheine > Liste: genau die Gutscheine, auf die die Zahlen in der Statistik verlinken (Spiel, Anlass, ohne Spiel, neu, alle) ----------
@@ -8354,7 +8370,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261024153246';
+  var BUILD = '20261024164258';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
