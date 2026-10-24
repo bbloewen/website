@@ -2862,7 +2862,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   function zeigePersonen(id) {
     PE.id = id || '';
     if (PE.id) {
-      PE.person = null; PE.personFehler = null; PE.edit = null; PE.meldung = ''; PE.feed = null; PE.feedFilter = 'alle'; PE.feedForm = null; PE.ki = null; PE.foto = undefined; PE.fotoLaeuft = false; PE.fotoFehler = ''; PE.fotoQuelle = ''; PE.fotoLink = ''; PE.fotoHolt = false; renderPersonen();
+      PE.person = null; PE.personFehler = null; PE.edit = null; PE.meldung = ''; PE.feed = null; PE.feedFilter = 'alle'; PE.feedForm = null; PE.ki = null; PE.foto = undefined; PE.fotoLaeuft = false; PE.fotoFehler = ''; PE.fotoQuelle = ''; PE.fotoLink = ''; PE.fotoHolt = false; PE.fotoTausch = false; renderPersonen();
       var gesucht = PE.id;
       holeJson('/webhook/crm/person?id=' + encodeURIComponent(gesucht))
         .then(function (r) { if (PE.id !== gesucht) return; PE.person = r.person || false; renderPersonen(); if (r.person) { ladeFeed('person', gesucht, PE); ladeFoto(gesucht); } })
@@ -3290,32 +3290,38 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   // --- Foto am Kontakt: Platzhalter mit „Im Web suchen“, LinkedIn und eigenem Bild (Datei, Einfügen, Ziehen). Kein Abruf von Websites oder LinkedIn, der Mensch wählt das Bild. ---
   var FOTO_SEITE = 256;
   function fotoInitialen(name) { return String(name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(function (t) { return t.charAt(0).toUpperCase(); }).join('') || '?'; }
-  function fotoBox(p) {
-    var f = PE.foto, name = p.name || '';
-    var suchtext = [name, p.firmen && p.firmen[0] ? p.firmen[0].name : ''].filter(Boolean).join(' ');
+  function fotoSuchLinks(p) {
+    var suchtext = [p.name || '', p.firmen && p.firmen[0] ? p.firmen[0].name : ''].filter(Boolean).join(' ');
     var web = 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(suchtext);
-    var li = /^https?:\/\//i.test(String(p.linkedin || '')) ? [p.linkedin, 'LinkedIn-Profil'] : ['https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent(suchtext), 'Auf LinkedIn suchen'];
-    var h = '<div class="foto-box" style="flex:0 0 112px;width:112px">';
-    h += '<div id="foto-flaeche" data-foto-flaeche style="width:96px;height:96px;border-radius:50%;overflow:hidden;background:var(--bg-subtle);border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:600;color:var(--text-secondary)">' +
-      (f && f.bild ? '<img src="' + esc(f.bild) + '" alt="Foto von ' + esc(name) + '" width="96" height="96" style="width:100%;height:100%;object-fit:cover">' : '<span role="img" aria-label="Kein Foto vorhanden">' + esc(fotoInitialen(name)) + '</span>') + '</div>';
-    h += '<div class="nur-schreiben text-klein" style="margin-top:8px;display:flex;flex-direction:column;gap:2px;align-items:flex-start">';
-    if (PE.fotoLaeuft) h += '<span class="gedaempft">Speichere …</span>';
-    else {
-      h += '<button type="button" class="link-btn" data-foto="datei">' + (f && f.bild ? 'Bild ersetzen' : 'Bild einfügen') + '</button>' +
-        '<input type="file" accept="image/*" data-foto="datei-wahl" class="sr-only" tabindex="-1" aria-label="Bilddatei wählen">';
-      if (f && f.bild) h += '<button type="button" class="link-btn" data-foto="entfernen">Entfernen</button>';
-      else h += '<a class="link-btn" href="' + esc(web) + '" target="_blank" rel="noopener noreferrer" data-foto-quelle="Web-Suche">Im Web suchen ↗</a>' +
-        '<a class="link-btn" href="' + esc(li[0]) + '" target="_blank" rel="noopener noreferrer" data-foto-quelle="LinkedIn">' + esc(li[1]) + ' ↗</a>';
+    var li = /^https?:\/\//i.test(String(p.linkedin || '')) ? [p.linkedin, 'LinkedIn'] : ['https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent(suchtext), 'LinkedIn'];
+    return { web: '<a href="' + esc(web) + '" target="_blank" rel="noopener noreferrer" data-foto-quelle="Web-Suche" title="Im Web nach einem Foto suchen">Web ↗</a>',
+      linkedin: '<a href="' + esc(li[0]) + '" target="_blank" rel="noopener noreferrer" data-foto-quelle="LinkedIn" title="' + (/^https?:/.test(String(p.linkedin || '')) ? 'LinkedIn-Profil öffnen' : 'Auf LinkedIn suchen') + '">LinkedIn ↗</a>' };
+  }
+  // Kreis mit Foto oder Platzhalter. Ohne Foto stehen Web und LinkedIn klein im Kreis, mit Foto bleibt nur ein grauer Link „Foto tauschen“.
+  function fotoBox(p) {
+    var f = PE.foto, name = p.name || '', hat = !!(f && f.bild), l = fotoSuchLinks(p);
+    var h = '<div class="foto-box" style="flex:0 0 100px;width:100px;text-align:center">';
+    h += '<div id="foto-flaeche" data-foto-flaeche style="width:96px;height:96px;margin:0 auto;border-radius:50%;overflow:hidden;background:var(--bg-subtle);border:1px solid var(--border-strong);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-secondary)">' +
+      (hat ? '<img src="' + esc(f.bild) + '" alt="Foto von ' + esc(name) + '" width="96" height="96" style="width:100%;height:100%;object-fit:cover">'
+        : '<span role="img" aria-label="Kein Foto vorhanden" style="font-size:26px;font-weight:600;line-height:1.1">' + esc(fotoInitialen(name)) + '</span>' +
+          '<span class="nur-schreiben" style="font-size:11px;line-height:1.5;margin-top:4px">' + (PE.fotoLaeuft ? 'Speichere …' : l.web + ' · ' + l.linkedin) + '</span>') + '</div>';
+    if (hat) {
+      h += '<div class="nur-schreiben" style="margin-top:4px;font-size:11px">' + (PE.fotoLaeuft ? '<span class="gedaempft">Speichere …</span>' : '<button type="button" class="link-btn" data-foto="tauschen" style="font-size:11px;color:var(--text-muted,var(--text-secondary));text-decoration:none" aria-expanded="' + (PE.fotoTausch ? 'true' : 'false') + '">Foto tauschen</button>') + '</div>';
+      if (f.quelle) h += '<div class="gedaempft" style="font-size:11px;margin-top:2px">Quelle: ' + esc(f.quelle) + '</div>';
     }
-    h += '</div>';
-    if (f && f.bild && f.quelle) h += '<div class="notiz" style="margin:4px 0 0">Quelle: ' + esc(f.quelle) + '</div>';
     return h + '</div>';
   }
-  // Link zum Bild oder zu einer Seite mit Bild (zum Beispiel Teamseite einer Firma): der Server holt das Bild, der Browser verkleinert und speichert es
+  // „Foto holen“: Link zum Bild oder zu einer Seite mit Bild (der Server holt das Bild, der Browser verkleinert und speichert es), oder eine Datei. Sichtbar, solange es kein Foto gibt, oder nach „Foto tauschen“.
   function fotoLinkZeile() {
-    return '<div class="nur-schreiben" style="margin-top:12px;display:flex;gap:6px;max-width:520px;align-items:center"><label class="sr-only" for="foto-link">Link zum Bild oder zur Seite mit dem Bild</label>' +
-      '<input class="eingabe" id="foto-link" type="url" data-foto-link placeholder="Foto per Link holen: Bildlink oder Seite mit Bild" autocomplete="off" value="' + esc(PE.fotoLink || '') + '"' + (PE.fotoLaeuft ? ' disabled' : '') + '>' +
-      '<button type="button" class="btn btn-secondary" data-foto="link-holen"' + (PE.fotoLaeuft ? ' disabled' : '') + '>' + (PE.fotoHolt ? 'Hole …' : 'Foto holen') + '</button></div>';
+    var f = PE.foto, hat = !!(f && f.bild);
+    if (hat && !PE.fotoTausch) return '';
+    var l = fotoSuchLinks(PE.person || {});
+    return '<div class="nur-schreiben" style="margin-top:10px;max-width:520px"><div style="display:flex;gap:6px;align-items:center"><label class="sr-only" for="foto-link">Link zum Bild oder zur Seite mit dem Bild</label>' +
+      '<input class="eingabe" id="foto-link" type="url" data-foto-link placeholder="Foto holen: Link zum Bild oder zur Seite" autocomplete="off" style="font-size:13px;padding:6px 8px" value="' + esc(PE.fotoLink || '') + '"' + (PE.fotoLaeuft ? ' disabled' : '') + '>' +
+      '<button type="button" class="btn btn-secondary" style="padding:6px 12px;font-size:13px" data-foto="link-holen"' + (PE.fotoLaeuft ? ' disabled' : '') + '>' + (PE.fotoHolt ? 'Hole …' : 'Holen') + '</button></div>' +
+      '<div style="margin-top:4px;font-size:11px;display:flex;gap:10px;flex-wrap:wrap;align-items:center" class="gedaempft"><button type="button" class="link-btn" data-foto="datei" style="font-size:11px">Datei wählen</button>' +
+      '<input type="file" accept="image/*" data-foto="datei-wahl" class="sr-only" tabindex="-1" aria-label="Bilddatei wählen">' +
+      (hat ? l.web + l.linkedin + '<button type="button" class="link-btn" data-foto="entfernen" style="font-size:11px">Foto entfernen</button><button type="button" class="link-btn" data-foto="tauschen" style="font-size:11px">Schließen</button>' : '<span>oder ein Bild hier einfügen (Strg/Cmd+V) oder auf den Kreis ziehen</span>') + '</div></div>';
   }
   async function fotoVonLink() {
     var p = PE.person, feld = $('p-personen').querySelector('[data-foto-link]'); if (!p || PE.fotoLaeuft) return;
@@ -3362,7 +3368,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       var res = await fetch('/webhook/crm/foto-speichern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: p.id, bild: bild, quelle: quelle }) });
       var d = await res.json().catch(function () { return {}; });
       if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Das Foto wurde nicht gespeichert.');
-      if (PE.person === p) { PE.foto = { bild: bild, quelle: quelle }; PE.fotoQuelle = ''; }
+      if (PE.person === p) { PE.foto = { bild: bild, quelle: quelle }; PE.fotoQuelle = ''; PE.fotoTausch = false; }
     } catch (x) { PE.fotoFehler = x.message; }
     PE.fotoLaeuft = false; if (PE.person === p) renderPerson();
   }
@@ -3379,6 +3385,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       var b = e.target.closest('[data-foto]'); if (!b || !nurSeite(b)) return;
       var a = b.getAttribute('data-foto');
       if (a === 'link-holen') { fotoVonLink(); return; }
+      if (a === 'tauschen') { PE.fotoTausch = !PE.fotoTausch; renderPerson(); return; }
       if (a === 'datei') { var w = $('p-personen').querySelector('[data-foto="datei-wahl"]'); if (w) w.click(); }
       else if (a === 'entfernen') {
         if (!window.confirm('Das Foto entfernen?') || PE.fotoLaeuft) return;
@@ -3387,7 +3394,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
           var res = await fetch('/webhook/crm/foto-speichern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: p.id, bild: null }) });
           var d = await res.json().catch(function () { return {}; });
           if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Das Foto wurde nicht entfernt.');
-          if (PE.person === p) PE.foto = null;
+          if (PE.person === p) { PE.foto = null; PE.fotoTausch = false; }
         } catch (x) { PE.fotoFehler = x.message; }
         PE.fotoLaeuft = false; if (PE.person === p) renderPerson();
       }
@@ -5770,7 +5777,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       var d = await res.json();
       if (!res.ok) throw new Error(d.message || d.fehler || 'Fehler beim Laden');
       if (!d.ok) throw new Error(d.meldung || 'Der Probelauf hat nicht geantwortet.');
-      z.daten = d; z.auswahl = {}; LSZ[art] = d.anzahl;
+      z.daten = d; z.auswahl = {}; d.positionen.forEach(function (p) { z.auswahl[p.schluessel] = true; }); LSZ[art] = d.anzahl;   // alles Fällige ist vorangehakt
     } catch (e) { z.fehler = e.message; }
     z.laedt = false; renderLS(art); renderNavigation();
   }
@@ -5907,8 +5914,10 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     (d.hinweise || []).forEach(function (t) { h += '<div class="hinweis-warn" role="status">' + esc(t) + '</div>'; });
     var arten = (d.arten || []).map(function (a) { return a.art; });
     var stati = []; (d.zeilen || []).forEach(function (z) { if (stati.indexOf(z.status) < 0) stati.push(z.status); });
+    var zaehl = {}; (d.zeilen || []).forEach(function (z) { zaehl[z.art_label] = (zaehl[z.art_label] || 0) + 1; });
+    var chip = function (w, t, n) { return '<button type="button" class="chip' + (MGL.art === w ? ' aktiv' : '') + '" data-mgl="typ" data-wert="' + esc(w) + '" aria-pressed="' + (MGL.art === w) + '">' + esc(t) + ' ' + n + '</button>'; };
+    h += '<div class="chips" role="group" aria-label="Typ wählen" style="display:flex;flex-wrap:wrap;gap:6px">' + chip('', 'Alle', (d.zeilen || []).length) + Object.keys(zaehl).sort(function (a, b) { return zaehl[b] - zaehl[a]; }).map(function (k) { return chip(k, k, zaehl[k]); }).join('') + '</div>';
     h += '<div class="card"><div class="filter-kopf"><div style="flex:1;min-width:220px"><label class="sr-only" for="mgl-suche">Suche</label><input class="eingabe" id="mgl-suche" data-mgl="suche" value="' + esc(MGL.suche) + '" placeholder="Suche nach Name, E-Mail, Ort oder Mandatsreferenz"></div><div class="regler">' +
-      '<select class="auswahl" data-mgl="art" aria-label="Typ">' + optTag('', 'Alle Typen', MGL.art) + arten.map(function (a) { return optTag(a, a, MGL.art); }).join('') + '</select>' +
       '<select class="auswahl" data-mgl="status" aria-label="Status">' + optTag('', 'Alle Status', MGL.status) + stati.map(function (a) { return optTag(a, a, MGL.status); }).join('') + '</select>' +
       '<button type="button" class="link-btn" data-mgl="neu">Aktualisieren</button></div></div><div id="mgl-tabelle"></div></div></div>';
     el.innerHTML = h; renderMGLTabelle();
@@ -5929,7 +5938,10 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     var el = $('p-mitglieder'); if (!el) return;
     el.addEventListener('input', function (e) { if (e.target.getAttribute('data-mgl') === 'suche') { MGL.suche = e.target.value; renderMGLTabelle(); } });
     el.addEventListener('change', function (e) { var k = e.target.getAttribute('data-mgl'); if (k === 'art' || k === 'status') { MGL[k] = e.target.value; renderMGLTabelle(); } });
-    el.addEventListener('click', function (e) { if (e.target.closest('[data-mgl="neu"]')) ladeMGL(); });
+    el.addEventListener('click', function (e) {
+      if (e.target.closest('[data-mgl="neu"]')) { ladeMGL(); return; }
+      var c = e.target.closest('[data-mgl="typ"]'); if (c) { MGL.art = c.getAttribute('data-wert'); renderMGL(); }
+    });
   }
   // ---------- Verwaltung: KI-Verbrauch (alle Aufrufe der Claude-API, Tabelle ki_aufrufe plus Belegerkennung) ----------
   var KV = { daten: null, fehler: null, laedt: false };
@@ -6366,10 +6378,12 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     });
   }
   function ueFinden(key) { var d = UE.daten[UE.mandant]; return d ? (d.posten || []).filter(function (p) { return p.key === key; })[0] : null; }
+  // Wählbar ist, was noch nicht in einer Zahlungsdatei steht, eine gültige IBAN hat und kein eigener Abgang ist
+  function ueWaehlbar(p) { return !(p.inDatei || !p.hatIban || !p.ibanOk || (p.verdacht && p.verdacht.art === 'eigen')); }
   function ueGewaehlt(p) {
-    if (p.inDatei || !p.hatIban || !p.ibanOk) return false;
+    if (!ueWaehlbar(p)) return false;
     var a = UE.auswahl[UE.mandant + '|' + p.key];
-    return a !== undefined ? a : false; // nichts vorangehakt: Marko wählt selbst (19.10.2026)
+    return a !== undefined ? a : true; // alles noch zu Überweisende ist vorangehakt, Abwählen merkt sich die Seite (24.10.2026)
   }
   function ueZeileSichern(p, zeilenId) {
     return uePost('posten-zeile', { mandant: UE.mandant, fall_id: zeilenId, eingang: !p.erstattung, gegenpartei: p.gegenpartei, betrag: p.betrag, datum: p.datum, rechnungsnr: p.rechnungsnr });
@@ -6559,20 +6573,26 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       var summe = dabei.reduce(function (t, p) { return t + p.betrag; }, 0);
       var sumOffen = offen.reduce(function (t, p) { return t + p.betrag; }, 0);
       var knopf = '';
-      if (UE.arbeitet === k) knopf = '<button type="button" class="link-btn" disabled>erzeuge Datei …</button>';
-      else if (UE.bereit === k) knopf = '<span class="notiz" style="margin:0">' + esc(zahl(dabei.length)) + ' Überweisungen über ' + esc(formatEuro(summe)) + ' erzeugen? Die Datei geht per Mail an dich, gezahlt wird erst im Online-Banking.</span> <button type="button" class="btn btn-primary" style="padding:4px 10px" data-ue="datei" data-konto="' + k + '">Ja, Datei erzeugen</button> <button type="button" class="link-btn" data-ue="abbrechen">Abbrechen</button>';
-      else knopf = '<button type="button" class="btn btn-secondary" style="padding:4px 10px" data-ue="datei" data-konto="' + k + '">Zahlungsdatei erzeugen</button>';
+      var wortU = dabei.length === 1 ? ' Überweisung' : ' Überweisungen';
+      if (UE.arbeitet === k) knopf = '<button type="button" class="btn btn-secondary" disabled>erzeuge Datei …</button>';
+      else if (UE.bereit === k) knopf = '<button type="button" class="btn btn-primary" data-ue="datei" data-konto="' + k + '">Wirklich erzeugen · ' + esc(zahl(dabei.length)) + wortU + ' über ' + esc(formatEuro(summe)) + '</button><button type="button" class="link-btn" data-ue="abbrechen">Abbrechen</button>';
+      else knopf = '<button type="button" class="btn btn-secondary" data-ue="datei" data-konto="' + k + '"' + (dabei.length ? '' : ' disabled') + '>' + (dabei.length ? 'Auswahl überweisen · ' + esc(zahl(dabei.length)) + wortU + ' über ' + esc(formatEuro(summe)) : 'Zum Überweisen Posten auswählen') + '</button>';
+      knopf += '<span class="notiz" style="margin:0">Die Zahlungsdatei geht per Mail an dich, gezahlt wird erst im Online-Banking.</span>';
       var zwischen = function (titel, l) { var sm = l.reduce(function (t, p) { return t + p.betrag; }, 0); return '<tr class="zwischensumme"><td colspan="5" class="notiz" style="text-align:right">Zwischensumme ' + esc(titel) + ' · ' + esc(zahl(l.length)) + (l.length === 1 ? ' Posten' : ' Posten') + '</td><td class="nowrap zahlen rechts fett">' + esc(formatEuro(sm)) + '</td><td></td></tr>'; };
       var zuP = !!UE.zu['posten-' + k];
+      var sumDiese = diese.reduce(function (t, p) { return t + p.betrag; }, 0);
+      var kachelU = function (l, w, n) { return '<div class="card pad"><div class="kpi-label">' + esc(l) + '</div><div class="kpi">' + esc(w) + '</div>' + (n ? '<div class="notiz">' + esc(n) + '</div>' : '') + '</div>'; };
+      h += '<div class="grid sm-3">' + kachelU('Zu überweisen', zahl(dabei.length) + wortU, 'angehakt von ' + zahl(offen.length) + ' offenen Posten') + kachelU('Betrag', formatEuro(summe), 'alle offenen Posten ' + formatEuro(sumOffen)) +
+        kachelU('Diese Woche fällig', zahl(diese.length) + (diese.length === 1 ? ' Posten' : ' Posten'), formatEuro(sumDiese) + ' bis ' + formatDate(d.wochenEnde)) + '</div>';
       h += '<div class="card scroll-x"><div class="card-kopf zeile-titel" style="margin:0"><span>' + ueZuKnopf('posten-' + k, 'Offene Posten') + ' · ' + esc(UE_KONTEN[k]) + ' · ' + esc(zahl(offen.length)) + ' Posten · ' + esc(formatEuro(sumOffen)) + (dabei.length ? ' · <b>angehakt ' + esc(zahl(dabei.length)) + ' Posten zu ' + esc(formatEuro(summe)) + '</b>' : '') + '</span><span class="notiz" style="margin:0">' + esc(stand) + '</span></div>' + (zuP ? '<div hidden>' : '<div>') +
-        '<div class="zeile-titel" style="margin:8px 12px;gap:12px;flex-wrap:wrap"><span>Angehakt: ' + esc(zahl(dabei.length)) + ' · ' + esc(formatEuro(summe)) + '</span><span>' + knopf + '</span></div>' +
-        '<table class="tbl kompakt"><thead><tr><th>zahlen</th><th>Fällig</th><th>Beleg</th><th>Empfänger</th><th>Verwendungszweck</th><th>Betrag</th><th>Bankverbindung</th></tr></thead><tbody>';
+        '<table class="tbl kompakt"><thead><tr><th><input type="checkbox" data-ue="alle" data-konto="' + k + '" aria-label="Alle auswählen"' + (liste.filter(ueWaehlbar).length && liste.filter(ueWaehlbar).every(ueGewaehlt) ? ' checked' : '') + (liste.filter(ueWaehlbar).length ? '' : ' disabled') + '><label class="sr-only">zahlen</label></th><th>Fällig</th><th>Beleg</th><th>Empfänger</th><th>Verwendungszweck</th><th>Betrag</th><th>Bankverbindung</th></tr></thead><tbody>';
       if (!liste.length) h += '<tr><td colspan="7" class="leer">Keine offenen Posten.</td></tr>';
       var abschn = function (key, titel, l, kurz) { var zu = !!UE.zu[key + '-' + k]; h += '<tr class="abschnitt-zeile"><td colspan="7">' + ueZuKnopf(key + '-' + k, titel) + '</td></tr>'; if (!zu) l.forEach(function (p) { h += ueZeile(p); }); h += zwischen(kurz, l); };
       if (diese.length) abschn('diese', 'Fällig bis Ende dieser Woche (' + formatDate(d.wochenEnde) + ') und überfällig', diese, 'fällig bis Ende der Woche');
       if (spaeter.length) abschn('spaeter', 'Noch nicht fällig', spaeter, 'noch nicht fällig');
       if (inD.length) abschn('datei', 'Zahlungsdatei bereits erzeugt', inD, 'in Datei');
       h += '</tbody><tfoot><tr class="gesamtsumme"><td colspan="5" style="text-align:right" class="fett">Summe ' + esc(UE_KONTEN[k]) + ' · ' + esc(zahl(liste.length)) + ' Posten' + (dabei.length ? ' · angehakt ' + esc(zahl(dabei.length)) + ' Posten zu ' + esc(formatEuro(summe)) + '' : '') + '</td><td class="nowrap zahlen rechts fett">' + esc(formatEuro(liste.reduce(function (t, p) { return t + p.betrag; }, 0))) + '</td><td></td></tr></tfoot></table></div></div>';
+      h += '<div class="card pad nur-schreiben" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">' + knopf + '</div>';
     });
     // Vollständig verrechnete Gutschriften stehen schon bei der Rechnung („− Gutschrift …“), hier nur, was noch übrig ist
     var istLP = UE_TAB[UE.tab].konto === 'LEV-LOEWENPARK'; // Gutschriften und Lastschriften gehören zum Mandanten, sie stehen beim Girokonto
@@ -6603,6 +6623,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       var t = e.target.closest('[data-ue]'); if (!t) return;
       var w = t.getAttribute('data-ue'), post = ueFinden(t.getAttribute('data-key'));
       if (w === 'haken' && post) { UE.auswahl[UE.mandant + '|' + post.key] = t.checked; UE.bereit = ''; renderUE(); }
+      else if (w === 'alle') { var dd = UE.daten[UE.mandant]; ((dd && dd.posten) || []).filter(function (x) { return x.konto === t.getAttribute('data-konto') && ueWaehlbar(x); }).forEach(function (x) { UE.auswahl[UE.mandant + '|' + x.key] = t.checked; }); UE.bereit = ''; renderUE(); }
       else if (w === 'faellig' && post) ueSpeichern(post, 'faellig', t.value);
       else if (w === 'zweck' && post) { if (String(t.value).trim() !== post.zweckBasis) ueSpeichern(post, 'zweck', t.value); }
     });
@@ -8275,7 +8296,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261024145335';
+  var BUILD = '20261024151623';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
