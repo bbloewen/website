@@ -5,9 +5,9 @@
    Eyebrow: Auswärtsspiele immer "Auswärts mit Gebrüll", Heimspiele
    durchnummeriert ("1. Heimspiel", ...). Die Zeile zwischen Termin und CTAs
    richtet sich nach spielStatus() (Anpfiff aus Datum+Uhrzeit): vor Anpfiff
-   -> Vorbericht, Tabelle, Livescore, Livestream; ab Anpfiff bis zum
-   Dienstag-Cutoff -> Ergebnis, Tabelle, Nachbericht (kein Livestream/
-   Livescore mehr) (Marko, 26.09.2026).
+   -> Vorbericht, Tabelle, Boxscore, Livestream; ab Anpfiff bis zum
+   Dienstag-Cutoff -> Ergebnis, Tabelle, Boxscore, Nachbericht (kein
+   Livestream mehr; Boxscore auch nach Anpfiff: Marko, 24.10.2026).
    Quelle: /data/heimspiele.json (Heimspiele) + /data/spielplan-saison.json
    (profisAuswaerts), wie js/spielplan.js. */
 (function () {
@@ -102,8 +102,8 @@
     function livescoreIcon(extraMargin) {
       var stil = extraMargin ? ' style="margin-left:4px"' : '';
       return g.livescore
-        ? '<a class="cal-link" href="' + g.livescore + '" target="_blank" rel="noopener" title="Livescore"' + stil + '><i data-lucide="activity" style="width:22px;height:22px"></i></a>'
-        : '<span class="cal-link" style="opacity:.4;cursor:default' + (extraMargin ? ';margin-left:4px' : '') + '" title="Livescore"><i data-lucide="activity" style="width:22px;height:22px"></i></span>';
+        ? '<a class="cal-link" href="' + g.livescore + '" target="_blank" rel="noopener" title="Boxscore"' + stil + '><i data-lucide="activity" style="width:22px;height:22px"></i></a>'
+        : '<span class="cal-link" style="opacity:.4;cursor:default' + (extraMargin ? ';margin-left:4px' : '') + '" title="Boxscore"><i data-lucide="activity" style="width:22px;height:22px"></i></span>';
     }
     function livestreamLink(extraMargin) {
       var stil = extraMargin ? ' style="margin-left:4px"' : '';
@@ -115,7 +115,7 @@
     if (status === 'bevorstehend') {
       /* Vor Anpfiff (auch waehrend des laufenden Spiels, solange der Anpfiff-
          Zeitpunkt in der Zukunft liegt): Vorbericht, Tabelle, Boxscore/
-         Fieberkurve (Livescore), Livestream (Marko, 26.09.2026). Vorbericht
+         Fieberkurve, Livestream (Marko, 26.09.2026). Vorbericht
          nur bei Auswaertsspielen mit echtem Artikel verlinken -- bei
          Heimspielen zeigt spielberichtUrl auf die eigene Spieltagsseite
          (Ticket-Hub), das ist kein redaktioneller Vorbericht und wird schon
@@ -125,8 +125,8 @@
       rowHTML = berichtIconHTML('Vorbericht', vorberichtUrl, false) + spieltagsinfoIcon() + tabelleIcon(false) + livescoreIcon(false) + livestreamLink(true);
     } else {
       /* Ab Anpfiff bis zum Dienstag-Cutoff (danach verschwindet der Slide
-         ohnehin): Ergebnis gross, Tabelle, Nachbericht -- kein Livestream
-         und kein Livescore mehr. Nachbericht-Icon nutzt bei Auswaertsspielen
+         ohnehin): Ergebnis gross, Tabelle, Boxscore, Nachbericht -- kein
+         Livestream mehr (Boxscore ab 24.10.2026 auch nach dem Anpfiff, Marko). Nachbericht-Icon nutzt bei Auswaertsspielen
          ein eigenes Feld (nachberichtUrl), NICHT spielberichtUrl (das zeigt
          auf den Vorbericht) -- sonst wuerde das Icon nach dem Spiel auf den
          alten Vorbericht statt auf den echten Spielbericht zeigen. Bei
@@ -134,7 +134,7 @@
          auf die eigene Spieltagsseite) (Marko, 26.09.2026). */
       var nachberichtUrl = g.heim ? g.spielberichtUrl : g.nachberichtUrl;
       rowHTML = '<div class="fixture-result">' + (g.ergebnis || '– – : – –') + '</div>' +
-        tabelleIcon(true) + spieltagsinfoIcon() + berichtIconHTML('Nachbericht', nachberichtUrl, false);
+        tabelleIcon(true) + spieltagsinfoIcon() + livescoreIcon(false) + berichtIconHTML('Nachbericht', nachberichtUrl, false);
     }
 
     var ctaHTML = g.heim

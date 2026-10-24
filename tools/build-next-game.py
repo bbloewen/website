@@ -152,9 +152,9 @@ def slide_html(g, i, label, jetzt):
     def livescore_icon(extra_margin):
         stil = ' style="margin-left:4px"' if extra_margin else ""
         if g.get("livescore"):
-            return f'<a class="cal-link" href="{esc(g["livescore"])}" target="_blank" rel="noopener" title="Livescore"{stil}><i data-lucide="activity" style="width:18px;height:18px"></i></a>'
+            return f'<a class="cal-link" href="{esc(g["livescore"])}" target="_blank" rel="noopener" title="Boxscore"{stil}><i data-lucide="activity" style="width:18px;height:18px"></i></a>'
         opazitaet = "opacity:.4;cursor:default" + (";margin-left:4px" if extra_margin else "")
-        return f'<span class="cal-link" style="{opazitaet}" title="Livescore"><i data-lucide="activity" style="width:18px;height:18px"></i></span>'
+        return f'<span class="cal-link" style="{opazitaet}" title="Boxscore"><i data-lucide="activity" style="width:18px;height:18px"></i></span>'
 
     def livestream_link(extra_margin):
         stil = ' style="margin-left:4px"' if extra_margin else ""
@@ -178,7 +178,7 @@ def slide_html(g, i, label, jetzt):
         nachbericht_url = g.get("spielberichtUrl") if g["heim"] else g.get("nachberichtUrl")
         row_html = (
             f'<div class="fixture-result">{esc(g.get("ergebnis") or "– – : – –")}</div>'
-            + tabelle_icon(True) + spieltagsinfo_icon() + bericht_icon("Nachbericht", nachbericht_url, False)
+            + tabelle_icon(True) + spieltagsinfo_icon() + livescore_icon(False) + bericht_icon("Nachbericht", nachbericht_url, False)
         )
 
     if g["heim"]:
