@@ -891,10 +891,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   // ---------- Navigation: Bereiche (links) und Tabs (oben) ----------
   // Neuer Tab = Eintrag hier + <section id="p-..."> im HTML.
   var BEREICHE = [
-    { id: 'ticketing', name: 'Spieltag', tabs: [{ id: 'dauerkarten', name: 'Tickets' }, { id: 'auslastung', name: 'Auslastung' }, { id: 'auswertung', name: 'Auswertung' }, { id: 'ausschank', name: 'Ausschank' }, { id: 'firmenevents', name: 'Firmen-Events' }] },
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'erstellen', name: 'Erstellen' }] },
-    { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
-    { id: 'segmentierung', name: 'Segmentierung', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
+    { id: 'ticketing', name: 'Spieltag', tabs: [{ id: 'dauerkarten', name: 'Tickets' }, { id: 'auslastung', name: 'Auslastung' }, { id: 'auswertung', name: 'Auswertung' }, { id: 'ausschank', name: 'Ausschank' }, { id: 'firmenevents', name: 'Firmen-Events' }] },
+    { id: 'segmentierung', name: 'CRM', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
     { id: 'accounting', name: 'Accounting', tabs: [{ id: 'liquiditaet', name: 'Übersicht' }, { id: 'rueckfragen', name: 'Rückfragen', versteckt: true }] },
     { id: 'acc-xxl', name: 'XXL', unter: true, tabs: [{ id: 'belege-xxl', name: 'Belege' }, { id: 'zahlung-xxl', name: 'Zahlung' }, { id: 'ueberweisungen-xxl', name: 'Überweisung' }] },
     { id: 'acc-lev', name: 'LEV', unter: true, tabs: [{ id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'ueberweisungen-lev', name: 'Überweisung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung Löwenpark' }, { id: 'ueberweisungen-lev-lp', name: 'Überweisung Löwenpark' }] },
@@ -902,6 +901,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     { id: 'spendenbescheinigungen', name: 'Spendenbescheinigungen', unter: true, tabs: [{ id: 'spenden', name: 'Spendenbescheinigungen' }] },
     { id: 'administration', name: 'Administration', unter: true, tabs: [{ id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }, { id: 'kreditoren', name: 'Kreditoren / Debitoren' }] },
     { id: 'auslagen', name: 'Auslagen', tabs: [{ id: 'auslage-neu', name: 'Auslage einreichen' }, { id: 'vorschuss-neu', name: 'Vorschuss beantragen' }, { id: 'auslage-protokoll', name: 'Protokoll', recht: 'accounting' }] },
+    { id: 'website', name: 'Website', tabs: [{ id: 'seo', name: 'SEO' }] },
     { id: 'zugriffe', name: 'Zugriffe', eingeklappt: true, tabs: [{ id: 'zugriffe', name: 'Zugriffe' }] }
   ];
   var VW_PANEL = { 'zahlung-xxl': { el: 'p-vw-xxl', mandant: 'XXL' }, 'zahlung-lev': { el: 'p-vw-lev', mandant: 'LEV' } }; // Vorschüsse stehen oben in den Zahlungen, nicht bei Löwenpark
@@ -5162,7 +5162,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
     });
   }
   var ZG = { daten: null, fehler: null, laedt: false, tage: 14 };
-  var ZG_BEREICH = { ticketing: 'Spieltag', gutscheine: 'Gutscheine', website: 'Website', crm: 'Segmentierung', accounting: 'Accounting', auslagen: 'Auslagen', zugriffe: 'Zugriffe' };
+  var ZG_BEREICH = { ticketing: 'Spieltag', gutscheine: 'Gutscheine', website: 'Website', crm: 'CRM', accounting: 'Accounting', auslagen: 'Auslagen', zugriffe: 'Zugriffe' };
   async function ladeZG() {
     ZG.laedt = true; ZG.fehler = null; renderZG();
     try {
@@ -7424,7 +7424,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261023233532';
+  var BUILD = '20261024080742';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
