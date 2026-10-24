@@ -298,6 +298,10 @@ textarea.maske-lang { min-height: 72px; }
 .seg-neu { border-style: dashed; display: flex; align-items: center; justify-content: center; min-height: 104px; color: var(--text-secondary); font-weight: 500; }
 .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: var(--radius-full); background: var(--bg-subtle); color: var(--text-secondary); border: 1px solid var(--border); }
 .badge-optin { background: var(--color-blue-50); color: var(--color-brand-blue); border-color: transparent; }
+th[data-sortierbar] { cursor: pointer; user-select: none; }
+th[data-sortierbar]:hover { background: var(--bg-subtle); }
+th[aria-sort="ascending"]::after { content: ' ▲'; font-size: 10px; }
+th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 .badge-hervor { background: var(--color-warning-bg); color: var(--color-warning-text); border-color: var(--color-warning); font-weight: 600; }
 .badge-ferien { background: var(--color-warning-bg); color: var(--color-warning-text); border-color: transparent; margin-left: 6px; vertical-align: middle; }
 .block { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; background: var(--bg-subtle); }
@@ -899,7 +903,7 @@ textarea.maske-lang { min-height: 72px; }
   var BEREICHE = [
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'ticketing', name: 'Spieltag', tabs: [{ id: 'dauerkarten', name: 'Tickets' }, { id: 'auslastung', name: 'Auslastung' }, { id: 'auswertung', name: 'Auswertung' }, { id: 'ausschank', name: 'Ausschank' }, { id: 'firmenevents', name: 'Firmen-Events' }] },
-    { id: 'segmentierung', name: 'CRM', tabs: [{ id: 'kontakte', name: 'Segmente' }, { id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'versand', name: 'Versand' }] },
+    { id: 'segmentierung', name: 'CRM', tabs: [{ id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'kontakte', name: 'Segmente' }, { id: 'versand', name: 'Versand' }] },
     { id: 'accounting', name: 'Accounting', tabs: [{ id: 'liquiditaet', name: 'Übersicht' }, { id: 'rueckfragen', name: 'Rückfragen', versteckt: true }] },
     { id: 'acc-xxl', name: 'XXL', unter: true, tabs: [{ id: 'belege-xxl', name: 'Belege' }, { id: 'zahlung-xxl', name: 'Zahlung' }, { id: 'ueberweisungen-xxl', name: 'Überweisung' }] },
     { id: 'acc-lev', name: 'LEV', unter: true, tabs: [{ id: 'belege-lev', name: 'Belege LEV' }, { id: 'zahlung-lev', name: 'Zahlung LEV' }, { id: 'ueberweisungen-lev', name: 'Überweisung LEV' }, { id: 'zahlung-lev-lp', name: 'Zahlung Löwenpark' }, { id: 'ueberweisungen-lev-lp', name: 'Überweisung Löwenpark' }] },
@@ -1466,8 +1470,24 @@ textarea.maske-lang { min-height: 72px; }
     el.innerHTML = h;
   }
 
+  // Spielnummer 1 bis 14 aus dem Spielplan der Website (öffentlich, gleiche Herkunft), Zuordnung über das Datum; ohne Spielplan zählt die Reihenfolge nach Datum
+  function ladeSpielNr() {
+    if (S.spielNr !== undefined) return;
+    S.spielNr = null;
+    fetch('/data/heimspiele.json').then(function (r) { return r.json(); }).then(function (d) {
+      var m = {}; ((d && d.spiele) || []).forEach(function (sp, i) { m[sp.datum] = i + 1; });
+      if (Object.keys(m).length) { S.spielNr = m; if (S.stats) renderStatistik(); }
+    }).catch(function () { /* ohne Spielplan bleibt die Reihenfolge nach Datum */ });
+  }
+  function spielNr(g, games) {
+    var n = S.spielNr && S.spielNr[formatDate(g.dateFrom)];
+    if (n) return n;
+    var sortiert = games.slice().sort(function (a, b) { return String(a.dateFrom).localeCompare(String(b.dateFrom)); });
+    return sortiert.indexOf(g) + 1;
+  }
   function renderStatistik() {
     var el = $('p-statistik');
+    ladeSpielNr();
     if (S.statsLoading) { el.innerHTML = '<div class="laedt">Lade Statistik …</div>'; return; }
     var st = S.stats;
     if (!st) { el.innerHTML = ''; return; }
@@ -1487,12 +1507,12 @@ textarea.maske-lang { min-height: 72px; }
       '</div>';
 
     h += '<div class="card scroll-x"><div class="card-kopf">Pro Spiel</div><table class="tbl"><thead><tr>' +
-      '<th>Spiel</th><th>Termin</th><th>Sitzplätze</th><th>Anzahl Gutscheine</th><th>Anzahl mögliche Einlösungen</th><th>Eingelöst</th><th>Echt belegt</th><th>Höchstens mit offenen Gutscheinen</th></tr></thead><tbody>';
+      '<th>Nr.</th><th>Spiel</th><th>Termin</th><th>Sitzplätze</th><th>Anzahl Gutscheine</th><th>Anzahl mögliche Einlösungen</th><th>Eingelöst</th><th>Echt belegt</th><th>Höchstens mit offenen Gutscheinen</th></tr></thead><tbody>';
     games.forEach(function (g) {
-      h += '<tr><td>' + esc(g.name) + '</td><td class="text-sek">' + esc(formatDate(g.dateFrom)) + ferienBadge(g.dateFrom) + '</td><td>' + esc(g.capacity) + '</td><td>' + esc(g.issued) + '</td><td>' + esc(g.potential) + '</td><td>' + esc(g.redeemedVouchers) + '</td><td>' + esc(pct(g.pctBelegt)) + '</td><td>' + esc(pct(g.pctMax)) + '</td></tr>';
+      h += '<tr><td class="zahlen">' + esc(spielNr(g, games)) + '</td><td>' + esc(g.name) + '</td><td class="text-sek">' + esc(formatDate(g.dateFrom)) + ferienBadge(g.dateFrom) + '</td><td>' + esc(g.capacity) + '</td><td>' + esc(g.issued) + '</td><td>' + esc(g.potential) + '</td><td>' + esc(g.redeemedVouchers) + '</td><td>' + esc(pct(g.pctBelegt)) + '</td><td>' + esc(pct(g.pctMax)) + '</td></tr>';
     });
-    if (games.length === 0) h += '<tr><td colspan="8" class="leer">Keine spielgebundenen Gutscheine.</td></tr>';
-    else h += '<tr class="summe"><td>Summe</td><td></td><td>' + esc(sumBy(games, 'capacity')) + '</td><td>' + esc(sumBy(games, 'issued')) + '</td><td>' + esc(sumBy(games, 'potential')) + '</td><td>' + esc(sumBy(games, 'redeemedVouchers')) + '</td><td></td><td></td></tr>';
+    if (games.length === 0) h += '<tr><td colspan="9" class="leer">Keine spielgebundenen Gutscheine.</td></tr>';
+    else h += '<tr class="summe"><td></td><td>Summe</td><td></td><td>' + esc(sumBy(games, 'capacity')) + '</td><td>' + esc(sumBy(games, 'issued')) + '</td><td>' + esc(sumBy(games, 'potential')) + '</td><td>' + esc(sumBy(games, 'redeemedVouchers')) + '</td><td></td><td></td></tr>';
     h += '</tbody></table></div>';
 
     h += '<div class="card scroll-x"><div class="card-kopf">Pro Anlass</div><table class="tbl"><thead><tr>' +
@@ -7825,7 +7845,93 @@ textarea.maske-lang { min-height: 72px; }
   bindKontakte();
   bindUnternehmen();
   bindPersonen();
+  // --- Standard für alle Tabellen: Klick (oder Enter) auf einen Spaltenkopf sortiert, nochmal Klick dreht um. Die Wahl bleibt, wenn die Tabelle neu gezeichnet wird.
+  // Ausnahmen: Tabellen mit eigener Sortierung (aria-sort schon gesetzt), mehrzeilige oder verbundene Köpfe und Tabellen mit data-nosort.
+  var SORT = {};
+  function sortSchluessel(t) {
+    var p = t.closest('section[id]');
+    return (p ? p.id : '') + '|' + Array.prototype.map.call(t.tHead.rows[0].cells, function (c) { return c.textContent.replace(/\s+/g, ' ').trim(); }).join('|');
+  }
+  function sortWert(roh) {
+    var t = String(roh).replace(/\s+/g, ' ').trim();
+    if (t === '' || t === '–' || t === '-' || t === '—') return null;
+    var m = /^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:[, ]+(\d{1,2}):(\d{2}))?/.exec(t);
+    if (m) return { z: Date.UTC(+m[3], +m[2] - 1, +m[1], +(m[4] || 0), +(m[5] || 0)) };
+    m = /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}))?/.exec(t);
+    if (m) return { z: Date.UTC(+m[1], +m[2] - 1, +m[3], +(m[4] || 0), +(m[5] || 0)) };
+    if (/^[-+−]?[$€]?\s?(\d{1,3}(\.\d{3})+|\d+)(,\d+)?\s?(€|%|\$|EUR|USD|ct)?$/.test(t)) return { z: parseFloat(t.replace(/[^\d,+\-−]/g, '').replace('−', '-').replace(',', '.')) };
+    return { s: t };
+  }
+  function sortGruppen(tb) {
+    var gruppen = [], fest = [];
+    Array.prototype.forEach.call(tb.rows, function (tr) {
+      if (tr.classList.contains('summe') || tr.classList.contains('gesamt')) { fest.push(tr); return; }
+      var einzeln = tr.cells.length === 1 && tr.cells[0].colSpan > 1;
+      if (einzeln) { if (gruppen.length) gruppen[gruppen.length - 1].push(tr); else fest.push(tr); return; }
+      gruppen.push([tr]);
+    });
+    return { gruppen: gruppen, fest: fest };
+  }
+  function sortAnwenden(t, spalte, richtung) {
+    var tb = t.tBodies[0], g = sortGruppen(tb);
+    var werte = g.gruppen.map(function (gr) { var c = gr[0].cells[spalte]; return c ? (c.hasAttribute('data-sort') ? sortWert(c.getAttribute('data-sort')) : sortWert(c.textContent)) : null; });
+    var zahlen = werte.every(function (w) { return w === null || w.z !== undefined; });
+    var zeilen = g.gruppen.map(function (gr, i) { return { gr: gr, w: werte[i], i: i }; });
+    var vgl = new Intl.Collator('de', { numeric: true, sensitivity: 'base' });
+    zeilen.sort(function (a, b) {
+      if (a.w === null || b.w === null) return a.w === b.w ? a.i - b.i : (a.w === null ? 1 : -1);   // leere Zellen immer ans Ende
+      var c = zahlen ? a.w.z - b.w.z : vgl.compare(a.w.z !== undefined ? String(a.w.z) : a.w.s, b.w.z !== undefined ? String(b.w.z) : b.w.s);
+      return (richtung === 'ab' ? -c : c) || a.i - b.i;
+    });
+    zeilen.forEach(function (z) { z.gr.forEach(function (tr) { tb.appendChild(tr); }); });
+    g.fest.forEach(function (tr) { tb.appendChild(tr); });
+    Array.prototype.forEach.call(t.tHead.rows[0].cells, function (th, i) { if (th.hasAttribute('data-sortierbar')) th.setAttribute('aria-sort', i === spalte ? (richtung === 'ab' ? 'descending' : 'ascending') : 'none'); });
+  }
+  function sortSchmuecken(wurzel) {
+    Array.prototype.forEach.call(wurzel.querySelectorAll('table.tbl'), function (t) {
+      if (t.hasAttribute('data-sortinit')) return;
+      t.setAttribute('data-sortinit', '1');
+      if (t.hasAttribute('data-nosort') || !t.tHead || t.tHead.rows.length !== 1 || !t.tBodies.length) return;
+      var koepfe = Array.prototype.slice.call(t.tHead.rows[0].cells);
+      if (koepfe.some(function (c) { return c.colSpan > 1 || c.hasAttribute('aria-sort'); })) return;
+      koepfe.forEach(function (th) {
+        if (!th.textContent.trim() || th.querySelector('input,button,select')) return;
+        th.setAttribute('data-sortierbar', ''); th.setAttribute('aria-sort', 'none'); th.tabIndex = 0;
+      });
+      var st = SORT[sortSchluessel(t)];
+      if (st && koepfe[st.spalte] && koepfe[st.spalte].hasAttribute('data-sortierbar')) sortAnwenden(t, st.spalte, st.richtung);
+    });
+  }
+  function sortKlick(th) {
+    var t = th.closest('table'); if (!t || !t.tHead) return;
+    var spalte = th.cellIndex, key = sortSchluessel(t), alt = SORT[key];
+    var richtung = alt && alt.spalte === spalte && alt.richtung === 'auf' ? 'ab' : 'auf';
+    SORT[key] = { spalte: spalte, richtung: richtung };
+    // Gekürzte Listen („Alle 312 anzeigen“) erst ganz aufklappen, sonst würde nur der sichtbare Teil sortiert; die neue Tabelle übernimmt die Wahl
+    var umfeld = t.closest('.card') || t.closest('section') || document;
+    var alle = umfeld.querySelector('button[data-aktion="un-alle"],button[data-aktion="pe-alle"],button[data-aktion="alle-zeigen"]');
+    if (alle) { alle.click(); return; }
+    sortAnwenden(t, spalte, richtung);
+  }
+  function bindSortieren() {
+    document.addEventListener('click', function (e) {
+      var th = e.target.closest && e.target.closest('th[data-sortierbar]'); if (!th || e.target.closest('a,button,input,select,label')) return;
+      sortKlick(th);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      var th = e.target.closest && e.target.closest('th[data-sortierbar]'); if (!th || e.target !== th) return;
+      e.preventDefault(); sortKlick(th);
+    });
+    var wartet = false;
+    new MutationObserver(function () {
+      if (wartet) return; wartet = true;
+      setTimeout(function () { wartet = false; try { if (document.body) sortSchmuecken(document.body); } catch (e) { /* Seite wird gerade geschlossen */ } }, 0);
+    }).observe(document.body, { childList: true, subtree: true });
+    sortSchmuecken(document.body);
+  }
   bindMaske();
+  bindSortieren();
   bindFeed();
   bindKi();
   bindFoto();
@@ -7898,7 +8004,7 @@ textarea.maske-lang { min-height: 72px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261024121746';
+  var BUILD = '20261024123330';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
