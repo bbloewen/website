@@ -72,6 +72,8 @@ jobs:
       - name: Spieltagsseiten, Startseiten-Widget, Partials, Head-Meta und Sitemap neu bauen
         run: |
           python3 tools/vorverkauf-starten.py
+          # Boxscore-Links (Spiel-ID des Liga-Livetickers) der naechsten Spiele eintragen, VOR den Seiten.
+          python3 tools/livescore-ids.py
           # Dauerkartenpreise VOR dem Hub: der Hub liest die data-base-Werte aus tickets/dauerkarte.html.
           # Sie sinken 4 Stunden nach jedem Heimspiel um einen Einzelpreis (Marko, 12.10.2026),
           # im selben Moment, in dem der Hub aufs naechste Spiel umschaltet.
@@ -94,7 +96,7 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add saison/profis/gameday/ kalender/ data/heimspiele.json data/dauerkarte-preise.json tickets/dauerkarte.html saison/spielplan.html index.html sitemap.xml data/seiten-stand.json
+          git add saison/profis/gameday/ kalender/ data/heimspiele.json data/spielplan-saison.json data/dauerkarte-preise.json tickets/dauerkarte.html saison/spielplan.html index.html sitemap.xml data/seiten-stand.json
           git diff --cached --quiet && { echo "Nichts nachzuziehen."; exit 0; }
           git commit -m "Spieltagsseiten und Startseiten-Widget: Phase/Sitemap nachgezogen"
           git push

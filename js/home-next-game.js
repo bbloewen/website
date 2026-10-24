@@ -174,7 +174,7 @@
 
   Promise.all([
     fetch('/data/heimspiele.json?v=1791549139').then(function (r) { return r.json(); }),
-    fetch('/data/spielplan-saison.json?v=1792399055').then(function (r) { return r.json(); })
+    fetch('/data/spielplan-saison.json?v=1792830311').then(function (r) { return r.json(); })
   ]).then(function (results) {
     var heim = results[0], saison = results[1];
 
