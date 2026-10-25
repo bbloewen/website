@@ -930,7 +930,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     { id: 'acc-xxl', name: 'XXL', unter: true, tabs: [{ id: 'belege-xxl', name: 'Belege' }, { id: 'zahlung-xxl', name: 'Kontobewegungen' }] },
     { id: 'acc-lev', name: 'LEV', unter: true, tabs: [{ id: 'belege-lev', name: 'Belege' }, { id: 'zahlung-lev', name: 'Kontobewegungen' }, { id: 'zahlung-lev-lp', name: 'Kontobewegungen Löwenpark' }] },
     { id: 'acc-ausgang', name: 'Ausgangsrechnungen', unter: true, tabs: [{ id: 'ausgang-xxl', name: 'XXL Ausgangsrechnung' }, { id: 'ausgang-lev', name: 'LEV Ausgangsrechnung' }] },
-    { id: 'acc-zahllauf', name: 'Zahllauf', unter: true, tabs: [{ id: 'ueberweisungen-xxl', name: 'XXL-Überweisungen' }, { id: 'ueberweisungen-lev', name: 'LEV-Überweisungen' }, { id: 'ueberweisungen-lev-lp', name: 'Löwenpark-Überweisungen' }, { id: 'ls-tickets', name: 'Tickets' }, { id: 'ls-mitglieder', name: 'Mitglieder' }, { id: 'ls-freundeskreis', name: 'Freundeskreis' }, { id: 'ls-camps', name: 'Feriencamps' }, { id: 'zahllaeufe', name: 'Verlauf' }] },
+    { id: 'acc-zahllauf', name: 'Zahllauf', unter: true, tabs: [{ id: 'ueberweisungen-xxl', name: 'XXL-Überweisungen' }, { id: 'ueberweisungen-lev', name: 'LEV-Überweisungen' }, { id: 'ueberweisungen-lev-lp', name: 'Löwenpark-Überweisungen' }, { id: 'ls-tickets', name: 'Tickets' }, { id: 'ls-mitglieder', name: 'Mitglieder' }, { id: 'ls-freundeskreis', name: 'Freundeskreis' }, { id: 'ls-camps', name: 'Feriencamps' }, { id: 'zahllaeufe', name: 'Historie' }] },
     { id: 'spendenbescheinigungen', name: 'Spendenbescheinigungen', unter: true, tabs: [{ id: 'spenden', name: 'Spendenbescheinigungen' }] },
     { id: 'administration', name: 'Administration', unter: true, tabs: [{ id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }, { id: 'kreditoren', name: 'Kreditoren / Debitoren' }] },
     { id: 'auslagen', name: 'Auslagen', tabs: [{ id: 'auslage-neu', name: 'Auslage einreichen' }, { id: 'vorschuss-neu', name: 'Vorschuss beantragen' }, { id: 'auslage-protokoll', name: 'Protokoll', recht: 'accounting' }] },
@@ -3384,48 +3384,22 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     return { web: '<a href="' + esc(web) + '" target="_blank" rel="noopener noreferrer" data-foto-quelle="Web-Suche" title="Im Web nach einem Foto suchen">Web ↗</a>',
       linkedin: '<a href="' + esc(li[0]) + '" target="_blank" rel="noopener noreferrer" data-foto-quelle="LinkedIn" title="' + (/^https?:/.test(String(p.linkedin || '')) ? 'LinkedIn-Profil öffnen' : 'Auf LinkedIn suchen') + '">LinkedIn ↗</a>' };
   }
-  // Kreis mit Foto oder Platzhalter. Ohne Foto stehen Web und LinkedIn klein im Kreis, mit Foto bleibt nur ein grauer Link „Foto tauschen“.
+  // Kreis mit Foto oder Platzhalter. Ohne Foto steht „Datei wählen“ im Kreis (Bild einfügen mit Strg/Cmd+V oder auf den Kreis ziehen geht auch), darunter klein Web und LinkedIn
+  // zum Suchen. Mit Foto bleiben darunter „Foto tauschen“ (öffnet die Dateiauswahl) und „Entfernen“.
   function fotoBox(p) {
     var f = PE.foto, name = p.name || '', hat = !!(f && f.bild), l = fotoSuchLinks(p);
     var h = '<div class="foto-box" style="flex:0 0 100px;width:100px;text-align:center">';
-    h += '<div id="foto-flaeche" data-foto-flaeche style="width:96px;height:96px;margin:0 auto;border-radius:50%;overflow:hidden;background:var(--bg-subtle);border:1px solid var(--border-strong);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-secondary)">' +
+    h += '<div id="foto-flaeche" data-foto-flaeche title="Bild einfügen (Strg/Cmd+V) oder auf den Kreis ziehen" style="width:96px;height:96px;margin:0 auto;border-radius:50%;overflow:hidden;background:var(--bg-subtle);border:1px solid var(--border-strong);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-secondary)">' +
       (hat ? '<img src="' + esc(f.bild) + '" alt="Foto von ' + esc(name) + '" width="96" height="96" style="width:100%;height:100%;object-fit:cover">'
         : '<span role="img" aria-label="Kein Foto vorhanden" style="font-size:26px;font-weight:600;line-height:1.1">' + esc(fotoInitialen(name)) + '</span>' +
-          '<span class="nur-schreiben" style="font-size:11px;line-height:1.5;margin-top:4px">' + (PE.fotoLaeuft ? 'Speichere …' : l.web + ' · ' + l.linkedin) + '</span>') + '</div>';
-    if (hat) {
-      h += '<div class="nur-schreiben" style="margin-top:4px;font-size:11px">' + (PE.fotoLaeuft ? '<span class="gedaempft">Speichere …</span>' : '<button type="button" class="link-btn" data-foto="tauschen" style="font-size:11px;color:var(--text-muted,var(--text-secondary));text-decoration:none" aria-expanded="' + (PE.fotoTausch ? 'true' : 'false') + '">Foto tauschen</button>') + '</div>';
-      if (f.quelle) h += '<div class="gedaempft" style="font-size:11px;margin-top:2px">Quelle: ' + esc(f.quelle) + '</div>';
-    }
+          '<span class="nur-schreiben" style="font-size:11px;line-height:1.5;margin-top:4px">' + (PE.fotoLaeuft ? 'Speichere …' : '<button type="button" class="link-btn" data-foto="datei" style="font-size:11px">Datei wählen</button>') + '</span>') + '</div>';
+    h += '<div class="nur-schreiben" style="margin-top:4px;font-size:11px;line-height:1.6">';
+    if (PE.fotoLaeuft && hat) h += '<span class="gedaempft">Speichere …</span>';
+    else if (hat) h += '<button type="button" class="link-btn" data-foto="datei" style="font-size:11px;color:var(--text-muted,var(--text-secondary));text-decoration:none">Foto tauschen</button> · <button type="button" class="link-btn" data-foto="entfernen" style="font-size:11px;color:var(--text-muted,var(--text-secondary));text-decoration:none">Entfernen</button>';
+    else h += l.web + ' · ' + l.linkedin;
+    h += '<input type="file" accept="image/*" data-foto="datei-wahl" class="sr-only" tabindex="-1" aria-label="Bilddatei wählen"></div>';
+    if (hat && f.quelle) h += '<div class="gedaempft" style="font-size:11px;margin-top:2px">Quelle: ' + esc(f.quelle) + '</div>';
     return h + '</div>';
-  }
-  // „Foto holen“: Link zum Bild oder zu einer Seite mit Bild (der Server holt das Bild, der Browser verkleinert und speichert es), oder eine Datei. Sichtbar, solange es kein Foto gibt, oder nach „Foto tauschen“.
-  function fotoLinkZeile() {
-    var f = PE.foto, hat = !!(f && f.bild);
-    if (hat && !PE.fotoTausch) return '';
-    var l = fotoSuchLinks(PE.person || {});
-    return '<div class="nur-schreiben" style="margin-top:10px;max-width:520px"><div style="display:flex;gap:6px;align-items:center"><label class="sr-only" for="foto-link">Link zum Bild oder zur Seite mit dem Bild</label>' +
-      '<input class="eingabe" id="foto-link" type="url" data-foto-link placeholder="Foto holen: Link zum Bild oder zur Seite" autocomplete="off" style="font-size:13px;padding:6px 8px" value="' + esc(PE.fotoLink || '') + '"' + (PE.fotoLaeuft ? ' disabled' : '') + '>' +
-      '<button type="button" class="btn btn-secondary" style="padding:6px 12px;font-size:13px" data-foto="link-holen"' + (PE.fotoLaeuft ? ' disabled' : '') + '>' + (PE.fotoHolt ? 'Hole …' : 'Holen') + '</button></div>' +
-      '<div style="margin-top:4px;font-size:11px;display:flex;gap:10px;flex-wrap:wrap;align-items:center" class="gedaempft"><button type="button" class="link-btn" data-foto="datei" style="font-size:11px">Datei wählen</button>' +
-      '<input type="file" accept="image/*" data-foto="datei-wahl" class="sr-only" tabindex="-1" aria-label="Bilddatei wählen">' +
-      (hat ? l.web + l.linkedin + '<button type="button" class="link-btn" data-foto="entfernen" style="font-size:11px">Foto entfernen</button><button type="button" class="link-btn" data-foto="tauschen" style="font-size:11px">Schließen</button>' : '<span>oder ein Bild hier einfügen (Strg/Cmd+V) oder auf den Kreis ziehen</span>') + '</div></div>';
-  }
-  async function fotoVonLink() {
-    var p = PE.person, feld = $('p-personen').querySelector('[data-foto-link]'); if (!p || PE.fotoLaeuft) return;
-    var url = String((feld && feld.value) || PE.fotoLink || '').trim(); PE.fotoLink = url;
-    if (!url) { PE.fotoFehler = 'Bitte einen Link zum Bild oder zu einer Seite mit dem Bild eintragen.'; renderPerson(); return; }
-    PE.fotoLaeuft = true; PE.fotoHolt = true; PE.fotoFehler = ''; renderPerson();
-    var datei = null;
-    try {
-      var res = await fetch('/webhook/crm/foto-link', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: p.id, url: url }) });
-      var d = await res.json().catch(function () { return {}; });
-      if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Das Bild konnte nicht geholt werden.');
-      var m = /^data:([^;]+);base64,(.*)$/.exec(d.bild || ''); if (!m) throw new Error('Das Bild konnte nicht gelesen werden.');
-      var roh = atob(m[2]), bytes = new Uint8Array(roh.length); for (var i = 0; i < roh.length; i++) bytes[i] = roh.charCodeAt(i);
-      datei = new Blob([bytes], { type: m[1] }); PE.fotoQuelle = d.quelle || 'Link';
-    } catch (x) { PE.fotoFehler = x.message; }
-    PE.fotoLaeuft = false; PE.fotoHolt = false;
-    if (datei && PE.person === p) { PE.fotoLink = ''; fotoUebernehmen(datei); } else if (PE.person === p) renderPerson();
   }
   // Mittig zugeschnitten auf ein Quadrat (bei Hochformat etwas weiter oben, dort ist meist das Gesicht), WebP, wo der Browser es nicht kann JPEG
   function fotoVerkleinernEcht(datei) {
@@ -3471,8 +3445,6 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       if (q && nurSeite(q)) { PE.fotoQuelle = q.getAttribute('data-foto-quelle'); return; }
       var b = e.target.closest('[data-foto]'); if (!b || !nurSeite(b)) return;
       var a = b.getAttribute('data-foto');
-      if (a === 'link-holen') { fotoVonLink(); return; }
-      if (a === 'tauschen') { PE.fotoTausch = !PE.fotoTausch; renderPerson(); return; }
       if (a === 'datei') { var w = $('p-personen').querySelector('[data-foto="datei-wahl"]'); if (w) w.click(); }
       else if (a === 'entfernen') {
         if (!window.confirm('Das Foto entfernen?') || PE.fotoLaeuft) return;
@@ -3481,13 +3453,11 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
           var res = await fetch('/webhook/crm/foto-speichern', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: p.id, bild: null }) });
           var d = await res.json().catch(function () { return {}; });
           if (!res.ok || !d.ok) throw new Error(d.meldung || d.message || d.fehler || 'Das Foto wurde nicht entfernt.');
-          if (PE.person === p) { PE.foto = null; PE.fotoTausch = false; }
+          if (PE.person === p) { PE.foto = null; }
         } catch (x) { PE.fotoFehler = x.message; }
         PE.fotoLaeuft = false; if (PE.person === p) renderPerson();
       }
     });
-    document.addEventListener('input', function (e) { if (e.target && e.target.hasAttribute && e.target.hasAttribute('data-foto-link') && nurSeite(e.target)) PE.fotoLink = e.target.value; });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target && e.target.hasAttribute && e.target.hasAttribute('data-foto-link') && nurSeite(e.target)) { e.preventDefault(); fotoVonLink(); } });
     document.addEventListener('change', function (e) {
       if (!e.target || e.target.getAttribute('data-foto') !== 'datei-wahl' || !nurSeite(e.target)) return;
       var f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) fotoUebernehmen(f);
@@ -3526,7 +3496,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       (p.notion_url ? '<a href="' + esc(p.notion_url) + '" target="_blank" rel="noopener" class="link-btn">In Notion öffnen ↗</a>' : '') + '</span></div>' +
       '<div class="text-sek">' + (p.firmen.length ? p.firmen.map(function (f) { return '<a href="#unternehmen/' + esc(f.id) + '">' + esc(f.name) + '</a>'; }).join(', ') : 'ohne Firma') +
       (p.quelle ? ' · Quelle ' + esc(p.quelle) : '') + '</div>' + (labels.trim() || status.length ? '<div class="notiz-2" aria-label="Merkmale">' + labels + ' ' + status.join(' ') + '</div>' : '') +
-      fotoLinkZeile() + (PE.fotoFehler ? '<div class="fehlerbox" role="alert" style="margin-top:8px">' + esc(PE.fotoFehler) + '</div>' : '') + '</div></div></div>' + loeschenKarte(PE, 'person');
+      (PE.fotoFehler ? '<div class="fehlerbox" role="alert" style="margin-top:8px">' + esc(PE.fotoFehler) + '</div>' : '') + '</div></div></div>' + loeschenKarte(PE, 'person');
 
     var linkAn = function (u, t) { return /^https?:\/\//i.test(String(u || '')) ? '<a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(t) + ' ↗</a>' : ''; };   // nur echte Web-Adressen werden zum Link
     var profile = [linkAn(p.linkedin, 'LinkedIn'), linkAn(p.instagram, 'Instagram'), linkAn(p.facebook, 'Facebook')].filter(Boolean).join(' · ');
@@ -8859,7 +8829,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261025155208';
+  var BUILD = '20261025165253';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
