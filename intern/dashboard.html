@@ -204,6 +204,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 /* Buttons + Links */
 .link-btn { background: none; border: 0; padding: 0; color: var(--link); font-size: 14px; cursor: pointer; }
 .link-btn:hover { text-decoration: underline; }
+.tbl tr.gruppe th { text-align: left; background: var(--bg-subtle); font-weight: 600; padding: 8px 12px; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: var(--radius-sm); padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; border: 1px solid transparent; }
 .btn-primary { background: var(--color-brand-orange); color: var(--color-brand-navy); }
 .btn-primary:hover { background: #C25E09; color: var(--color-white); }
@@ -6791,10 +6792,10 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     h += '<div class="card pad" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><label for="spo-saison" class="text-klein">Saison</label><select id="spo-saison" class="eingabe-klein" style="flex:none">' +
       (d.saisons || []).map(function (x) { return '<option value="' + esc(x) + '"' + (x === s0 ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join('') + '</select>' +
       '<span class="notiz" style="margin:0">Nettobeträge je Sponsor und Saison. Eintragen und ändern auf der Unternehmensseite (Karte „Sponsoring-Jahre“).</span></div>';
-    var kachel = function (t, wert, unter, klasse) { return '<div class="card pad"><div class="kpi-label">' + esc(t) + '</div><div class="kpi' + (klasse ? ' ' + klasse : '') + '">' + wert + '</div>' + (unter ? '<div class="notiz">' + unter + '</div>' : '') + '</div>'; };
-    h += '<div class="grid sm-3">' +
+    var kachel = function (t, wert, unter, klasse) { return '<div class="card pad"><div class="kpi-label">' + esc(t) + '</div><div class="kpi-mittel' + (klasse ? ' ' + klasse : '') + '">' + wert + '</div>' + (unter ? '<div class="notiz">' + unter + '</div>' : '') + '</div>'; };
+    h += '<div style="display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">' +
       kachel('Aktive Sponsoren ' + s0, esc(zahl(k.aktiv)), '') +
-      kachel('Gesamtvolumen ' + s0, esc(formatEuro(Number(k.gesamt))), k.vorjahr_gesamt ? spoDiff(delta) + ' ggü. ' + esc(formatEuro(Number(k.vorjahr_gesamt))) + ' in ' + esc(s1) : '') +
+      kachel('Gesamtvolumen ' + s0, esc(formatEuro(Number(k.gesamt))), (k.vorjahr_gesamt ? spoDiff(delta) + ' ggü. ' + esc(formatEuro(Number(k.vorjahr_gesamt))) + ' in ' + esc(s1) : '') + '<br>XXL ' + esc(formatEuro(Number(k.xxl || 0))) + ' · Verein ' + esc(formatEuro(Number(k.verein || 0)))) +
       kachel('Cash-Volumen ' + s0, esc(formatEuro(Number(k.cash))), '') +
       kachel('Barter-Volumen ' + s0, esc(formatEuro(Number(k.barter))), '') +
       kachel('Neu / Reaktiviert', esc(zahl(k.neu)), '', 'gut') +
@@ -6805,13 +6806,27 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     };
     var th = function (t, z) { return '<th scope="col"' + (z ? ' class="zahlen"' : '') + '>' + esc(t) + '</th>'; };
     var akt = d.aktuell || [];
-    h += tabelle('Aktuelle Sponsoren (' + akt.length + ')', th('Sponsor') + th('Cash', 1) + th('Barter', 1) + th('Gesamt', 1) + th('Hinweis'),
-      akt.map(function (x) { return '<tr><td>' + spoName(x) + (x.neu ? ' <span class="badge badge-optin">neu</span>' : '') + '</td><td class="zahlen">' + spoEuro(x.cash) + '</td><td class="zahlen">' + spoEuro(x.barter) + '</td><td class="zahlen">' + spoEuro(x.gesamt) + '</td><td class="text-sek">' + esc(x.hinweis || '') + '</td></tr>'; }),
-      sumZeile(['Summe', { t: formatEuro(sumVon(akt, function (x) { return x.cash; })), z: true }, { t: formatEuro(sumVon(akt, function (x) { return x.barter; })), z: true }, { t: formatEuro(sumVon(akt, function (x) { return x.gesamt; })), z: true }, '']), 'Für diese Saison sind keine Sponsoren eingetragen.');
-    var vg = d.vergleich || [], bekannt = vg.filter(function (x) { return x.v1 !== null && x.v1 !== undefined; });
-    h += tabelle('Vorjahresvergleich ' + s1 + ' → ' + s0, th('Sponsor') + th(s2, 1) + th(s1, 1) + th(s0, 1) + th('Differenz ' + s1 + ' → ' + s0, 1),
-      vg.map(function (x) { var diff = x.v1 === null || x.v1 === undefined ? null : Number(x.v0) - Number(x.v1); return '<tr><td>' + spoName(x) + '</td><td class="zahlen">' + (x.v2 == null ? '<span class="gedaempft">—</span>' : esc(formatEuro(Number(x.v2)))) + '</td><td class="zahlen">' + (x.v1 == null ? '<span class="gedaempft">—</span>' : esc(formatEuro(Number(x.v1)))) + '</td><td class="zahlen">' + esc(formatEuro(Number(x.v0))) + '</td><td class="zahlen">' + spoDiff(diff) + '</td></tr>'; }),
-      sumZeile(['Summe', { t: formatEuro(sumVon(vg, function (x) { return x.v2; })), z: true }, { t: formatEuro(sumVon(vg, function (x) { return x.v1; })), z: true }, { t: formatEuro(sumVon(vg, function (x) { return x.v0; })), z: true }, { t: (sumVon(bekannt, function (x) { return x.v0; }) - sumVon(bekannt, function (x) { return x.v1; }) >= 0 ? '+' : '−') + formatEuro(Math.abs(sumVon(bekannt, function (x) { return x.v0; }) - sumVon(bekannt, function (x) { return x.v1; }))) + ' (nur Sponsoren mit Vorjahreswert)', z: true }]), 'Keine Sponsoren in dieser Saison.');
+    var betr = function (x, f) { return Number(x[f]) || 0; };
+    var cashGruppe = akt.filter(function (x) { return betr(x, 'cash') >= betr(x, 'barter'); }), barterGruppe = akt.filter(function (x) { return betr(x, 'cash') < betr(x, 'barter'); });
+    var vzahl = function (x, f) { return x.v1_gesamt == null ? '<span class="gedaempft">—</span>' : (x.v1_geschaetzt ? '<span class="gedaempft" title="Aufteilung der Vorsaison angenommen wie in der aktuellen Saison">' + (Number(x[f]) ? esc(formatEuro(Number(x[f]))) + '*' : '—') + '</span>' : spoEuro(x[f])); };
+    var summeVon = function (liste) {
+      var bk = liste.filter(function (x) { return x.v1_gesamt != null; });
+      var diff = sumVon(bk, function (x) { return x.gesamt; }) - sumVon(bk, function (x) { return x.v1_gesamt; });
+      return [{ t: formatEuro(sumVon(liste, function (x) { return x.cash; })), z: true }, { t: formatEuro(sumVon(liste, function (x) { return x.barter; })), z: true }, { t: formatEuro(sumVon(liste, function (x) { return x.gesamt; })), z: true },
+        { t: formatEuro(sumVon(liste, function (x) { return x.xxl; })), z: true }, { t: formatEuro(sumVon(liste, function (x) { return x.verein; })), z: true },
+        { t: formatEuro(sumVon(bk, function (x) { return x.v1_cash; })), z: true }, { t: formatEuro(sumVon(bk, function (x) { return x.v1_barter; })), z: true }, { t: formatEuro(sumVon(bk, function (x) { return x.v1_gesamt; })), z: true },
+        { t: (diff >= 0 ? '+' : '−') + formatEuro(Math.abs(diff)), z: true }, ''];
+    };
+    var zeileSP = function (x) {
+      var diff = x.v1_gesamt == null ? null : Number(x.gesamt) - Number(x.v1_gesamt);
+      return '<tr><td>' + spoName(x) + (x.neu ? ' <span class="badge badge-optin">neu</span>' : '') + '</td><td class="zahlen">' + spoEuro(x.cash) + '</td><td class="zahlen">' + spoEuro(x.barter) + '</td><td class="zahlen">' + spoEuro(x.gesamt) + '</td><td class="zahlen">' + spoEuro(x.xxl) + '</td><td class="zahlen">' + spoEuro(x.verein) + '</td>' +
+        '<td class="zahlen">' + vzahl(x, 'v1_cash') + '</td><td class="zahlen">' + vzahl(x, 'v1_barter') + '</td><td class="zahlen">' + (x.v1_gesamt == null ? '<span class="gedaempft">—</span>' : esc(formatEuro(Number(x.v1_gesamt)))) + '</td><td class="zahlen">' + spoDiff(diff) + '</td><td class="text-sek">' + esc(x.hinweis || '') + '</td></tr>';
+    };
+    var gruppe = function (titel, liste) { return '<tr class="gruppe"><th scope="rowgroup" colspan="11">' + esc(titel + ' (' + liste.length + ')') + '</th></tr>' + liste.map(zeileSP).join('') + sumZeile(['Zwischensumme ' + titel].concat(summeVon(liste))); };
+    var kopfSP = th('Sponsor') + th('Cash ' + s0 + ' (akt.)', 1) + th('Barter ' + s0 + ' (akt.)', 1) + th('Gesamt ' + s0, 1) + th('davon XXL', 1) + th('davon Verein', 1) + th('Cash ' + s1 + ' (Vorsaison)', 1) + th('Barter ' + s1 + ' (Vorsaison)', 1) + th('Gesamt ' + s1, 1) + th('Differenz', 1) + th('Hinweis');
+    h += '<div class="card"><div class="card-kopf" style="margin:0">Aktuelle Sponsoren ' + esc(s0) + ' (' + akt.length + ') im Vergleich zur Vorsaison ' + esc(s1) + '</div><div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">Aktuelle Sponsoren mit Cash und Barter dieser und der letzten Saison</caption><thead><tr>' + kopfSP + '</tr></thead><tbody>' +
+      (akt.length ? gruppe('Cash-Sponsoren', cashGruppe) + gruppe('Barter-Sponsoren', barterGruppe) + sumZeile(['Summe'].concat(summeVon(akt))) : '<tr><td colspan="11" class="leer">Für diese Saison sind keine Sponsoren eingetragen.</td></tr>') + '</tbody></table></div>' +
+      '<div class="card-fuss">XXL = XXL Baskets GmbH, Verein = Basketball Löwen e.V. (Anteil je Sponsor am Unternehmen unter „Sponsoring-Jahre“ pflegbar). Cash-Sponsoren: Cash-Anteil mindestens so groß wie der Barter-Anteil, sonst Barter-Sponsor. Die Vorsaison zählt nur Sponsoren mit Wert aus dieser Saison; Differenz und Vorsaison-Summen beziehen sich auf Sponsoren mit Vorsaisonwert. * Aufteilung Cash/Barter der Vorsaison angenommen wie in der aktuellen Saison (am Unternehmen unter „Sponsoring-Jahre“ korrigierbar).</div></div>';
     var au = d.ausgeschieden || [];
     h += tabelle('Ausgeschieden seit letzter Saison (' + au.length + ')', th('Sponsor') + th('Typ') + th('Volumen ' + s1, 1) + th('Hinweis'),
       au.map(function (x) { return '<tr><td>' + spoName(x) + '</td><td>' + esc(x.typ || '–') + '</td><td class="zahlen">' + esc(formatEuro(Number(x.volumen))) + '</td><td class="text-sek">' + esc(x.hinweis || '') + '</td></tr>'; }),
@@ -6839,15 +6854,15 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     var sponsor = rows.length || (f.merkmale && f.merkmale.Sponsor);
     if (!sponsor && !SPJ.edit) return '<div class="card pad nur-schreiben"><button type="button" class="link-btn" data-spj="neu">Saison als Sponsor eintragen</button></div>';
     var kopf = '<div class="card-kopf">Sponsoring-Jahre</div>';
-    var tab = rows.length ? '<div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">Sponsoring-Jahre</caption><thead><tr><th scope="col">Saison</th><th scope="col" class="zahlen">Cash</th><th scope="col" class="zahlen">Barter</th><th scope="col" class="zahlen">Netto gesamt</th><th scope="col">Status</th><th scope="col">Hinweis</th><th scope="col"><span class="sr-only">Aktionen</span></th></tr></thead><tbody>' +
-      rows.map(function (x) { return '<tr><td>' + esc(x.saison) + (x.neu ? ' <span class="badge badge-optin">neu</span>' : '') + '</td><td class="zahlen">' + spoEuro(x.cash) + '</td><td class="zahlen">' + spoEuro(x.barter) + '</td><td class="zahlen">' + esc(formatEuro(Number(x.gesamt))) + (x.typ ? ' <span class="text-sek">' + esc(x.typ) + '</span>' : '') + '</td><td>' + esc(SPJ_STATUS[x.status] || x.status) + '</td><td class="text-sek">' + esc(x.hinweis || '') + '</td><td class="nowrap nur-schreiben"><button type="button" class="link-btn" data-spj="bearbeiten" data-saison="' + esc(x.saison) + '">Ändern</button></td></tr>'; }).join('') + '</tbody></table></div>'
+    var tab = rows.length ? '<div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">Sponsoring-Jahre</caption><thead><tr><th scope="col">Saison</th><th scope="col" class="zahlen">Cash</th><th scope="col" class="zahlen">Barter</th><th scope="col" class="zahlen">Netto gesamt</th><th scope="col" class="zahlen">davon Verein</th><th scope="col">Status</th><th scope="col">Hinweis</th><th scope="col"><span class="sr-only">Aktionen</span></th></tr></thead><tbody>' +
+      rows.map(function (x) { return '<tr><td>' + esc(x.saison) + (x.neu ? ' <span class="badge badge-optin">neu</span>' : '') + '</td><td class="zahlen">' + spoEuro(x.cash) + '</td><td class="zahlen">' + spoEuro(x.barter) + '</td><td class="zahlen">' + esc(formatEuro(Number(x.gesamt))) + (x.typ ? ' <span class="text-sek">' + esc(x.typ) + '</span>' : '') + '</td><td class="zahlen">' + (x.cash_verein == null && x.barter_verein == null ? '<span class="gedaempft">—</span>' : spoEuro(Number(x.cash_verein || 0) + Number(x.barter_verein || 0))) + '</td><td>' + esc(SPJ_STATUS[x.status] || x.status) + '</td><td class="text-sek">' + esc(x.hinweis || '') + '</td><td class="nowrap nur-schreiben"><button type="button" class="link-btn" data-spj="bearbeiten" data-saison="' + esc(x.saison) + '">Ändern</button></td></tr>'; }).join('') + '</tbody></table></div>'
       : '<div class="pad gedaempft">Noch keine Saison eingetragen.</div>';
     var e = SPJ.edit, form = '';
     if (e) {
       var inp = function (name, label, wert, extra) { return '<div style="min-width:110px"><label class="text-klein" for="spj-' + name + '">' + esc(label) + '</label><input id="spj-' + name + '" class="eingabe-klein" style="width:100%" data-spj-feld="' + name + '" value="' + esc(wert == null ? '' : wert) + '"' + (extra || '') + '></div>'; };
       var opt = function (w, t, a) { return '<option value="' + w + '"' + (a === w ? ' selected' : '') + '>' + esc(t) + '</option>'; };
       form = '<div class="pad" style="border-top:1px solid var(--border-subtle,#e5e5e5)"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">' +
-        inp('saison', 'Saison (z. B. 26/27)', e.saison, ' maxlength="5" placeholder="26/27"' + (e.vorhanden ? ' readonly' : '')) + inp('cash', 'Cash netto €', e.cash) + inp('barter', 'Barter netto €', e.barter) + inp('gesamt', 'Gesamt netto € (wenn Cash und Barter leer)', e.gesamt) +
+        inp('saison', 'Saison (z. B. 26/27)', e.saison, ' maxlength="5" placeholder="26/27"' + (e.vorhanden ? ' readonly' : '')) + inp('cash', 'Cash netto €', e.cash) + inp('cash_verein', 'davon Verein €', e.cash_verein) + inp('barter', 'Barter netto €', e.barter) + inp('barter_verein', 'davon Verein €', e.barter_verein) + inp('gesamt', 'Gesamt netto € (wenn Cash und Barter leer)', e.gesamt) +
         '<div><label class="text-klein" for="spj-status">Status</label><select id="spj-status" class="eingabe-klein" data-spj-feld="status">' + opt('aktiv', 'aktiv', e.status) + opt('verlaengerung', 'In Verlängerung', e.status) + opt('ausgeschieden', 'ausgeschieden', e.status) + '</select></div>' +
         '<div><label class="text-klein" for="spj-typ">Typ (wenn Cash und Barter leer)</label><select id="spj-typ" class="eingabe-klein" data-spj-feld="typ">' + opt('', '–', e.typ) + opt('Cash', 'Cash', e.typ) + opt('Barter', 'Barter', e.typ) + '</select></div>' +
         '<label style="display:flex;gap:6px;align-items:center;font-size:13px"><input type="checkbox" data-spj-feld="neu"' + (e.neu ? ' checked' : '') + '> neu / reaktiviert</label></div>' +
@@ -6861,11 +6876,11 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     var b = ev.target.closest && ev.target.closest('[data-spj]'); if (!b) return;
     var w = b.getAttribute('data-spj');
     if (w === 'neu') { SPJ.edit = { saison: '', status: 'aktiv', typ: '', vorhanden: false }; SPJ.fehler = ''; SPJ.meldung = ''; renderFirma(); return; }
-    if (w === 'bearbeiten') { var x = (SPJ.daten || []).filter(function (r) { return r.saison === b.getAttribute('data-saison'); })[0]; if (x) { SPJ.edit = { saison: x.saison, cash: x.cash, barter: x.barter, gesamt: x.cash == null && x.barter == null ? x.gesamt : '', status: x.status, typ: x.typ || '', neu: x.neu, hinweis: x.hinweis || '', vorhanden: true }; SPJ.fehler = ''; SPJ.meldung = ''; renderFirma(); } return; }
+    if (w === 'bearbeiten') { var x = (SPJ.daten || []).filter(function (r) { return r.saison === b.getAttribute('data-saison'); })[0]; if (x) { SPJ.edit = { saison: x.saison, cash: x.cash, barter: x.barter, cash_verein: x.cash_verein, barter_verein: x.barter_verein, gesamt: x.cash == null && x.barter == null ? x.gesamt : '', status: x.status, typ: x.typ || '', neu: x.neu, hinweis: x.hinweis || '', vorhanden: true }; SPJ.fehler = ''; SPJ.meldung = ''; renderFirma(); } return; }
     if (w === 'abbrechen') { SPJ.edit = null; SPJ.fehler = ''; renderFirma(); return; }
     if (w === 'speichern' && !SPJ.arbeitet) {
       var panel = $('p-unternehmen'), v = function (n) { var el = panel.querySelector('[data-spj-feld="' + n + '"]'); return el ? (el.type === 'checkbox' ? el.checked : el.value) : ''; };
-      var daten = { id: SPJ.id, saison: String(v('saison')).trim(), cash: String(v('cash')).trim() || null, barter: String(v('barter')).trim() || null, gesamt: String(v('gesamt')).trim() || null, status: v('status'), typ: v('typ'), neu: !!v('neu'), hinweis: String(v('hinweis')).trim() };
+      var daten = { id: SPJ.id, saison: String(v('saison')).trim(), cash: String(v('cash')).trim() || null, barter: String(v('barter')).trim() || null, cash_verein: String(v('cash_verein')).trim() || null, barter_verein: String(v('barter_verein')).trim() || null, gesamt: String(v('gesamt')).trim() || null, status: v('status'), typ: v('typ'), neu: !!v('neu'), hinweis: String(v('hinweis')).trim() };
       if (!/^[0-9]{2}\/[0-9]{2}$/.test(daten.saison)) { SPJ.edit = Object.assign({}, SPJ.edit, daten); SPJ.fehler = 'Bitte die Saison als 26/27 angeben.'; renderFirma(); return; }
       SPJ.arbeitet = true; SPJ.fehler = ''; SPJ.edit = Object.assign({}, SPJ.edit, daten); renderFirma();
       try {
@@ -8954,7 +8969,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261025172212';
+  var BUILD = '20261025175204';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
