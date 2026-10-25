@@ -62,7 +62,13 @@ body.breit .wrap { max-width: none; }
 .seite { width: 232px; flex-shrink: 0; background: var(--bg-card); border-right: 1px solid var(--border); padding: 20px 12px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
 .marke { padding: 0 10px 18px; }
 .eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-brand-orange-text); }
-.marke-titel { margin: 2px 0 0; font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
+.marke-titel { margin: 2px 0 0; font-size: 1.25rem; font-weight: 700; text-transform: uppercase; display: inline-block; white-space: nowrap; }
+/* Navigation einklappbar (Zustand wird im Browser gemerkt) */
+.nav-toggle { position: absolute; top: 14px; right: 8px; background: none; border: 0; border-radius: var(--radius-sm); width: 28px; height: 28px; font-size: 18px; line-height: 1; color: var(--text-muted); cursor: pointer; }
+.nav-toggle:hover { background: var(--bg-subtle); color: var(--text-primary); }
+body.nav-zu .seite { width: 44px; padding: 20px 6px; overflow: hidden; }
+body.nav-zu .marke, body.nav-zu .bereiche { display: none; }
+body.nav-zu .nav-toggle { position: static; display: block; margin: 0 auto; }
 .bereiche { list-style: none; margin: 0; padding: 0; }
 .bereiche li + li { margin-top: 2px; }
 .bereich { display: block; width: 100%; text-align: left; background: none; border: 0; border-radius: var(--radius-sm); padding: 9px 10px; font-size: 14px; font-weight: 500; color: var(--text-secondary); cursor: pointer; border-left: 3px solid transparent; }
@@ -95,6 +101,8 @@ details.klapp[open] > summary::before { content: '▾ '; }
   .rahmen { display: block; }
   .seite { width: auto; height: auto; position: static; border-right: 0; border-bottom: 1px solid var(--border); padding: 12px 16px 8px; }
   .marke { padding: 0 0 8px; }
+  body.nav-zu .seite { width: auto; padding: 8px 16px; }
+  .nav-toggle { top: 10px; right: 12px; }
   .bereiche { display: flex; gap: 4px; overflow-x: auto; }
   .bereiche li + li { margin-top: 0; }
   .bereich { width: auto; white-space: nowrap; border-left: 0; border-bottom: 3px solid transparent; border-radius: var(--radius-sm) var(--radius-sm) 0 0; }
@@ -353,7 +361,8 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 <body>
 
 <div class="rahmen">
-<nav class="seite" aria-label="Bereiche">
+<nav class="seite" aria-label="Bereiche" id="seitenleiste">
+  <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="bereiche" aria-expanded="true" aria-label="Navigation einklappen" title="Navigation einklappen">«</button>
   <div class="marke">
     <div class="eyebrow">Basketball Löwen</div>
     <div class="marke-titel">Huddle</div>
@@ -7986,6 +7995,32 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 
   // ---------- Ereignisse ----------
   function bind() {
+    // Navigation ein- und ausklappen; HUDDLE gesperrt auf die Breite von „Basketball Löwen“
+    (function () {
+      var knopf = $('nav-toggle');
+      function nav(zu, merken) {
+        document.body.classList.toggle('nav-zu', zu);
+        knopf.setAttribute('aria-expanded', zu ? 'false' : 'true'); knopf.textContent = zu ? '»' : '«';
+        var t = zu ? 'Navigation ausklappen' : 'Navigation einklappen'; knopf.setAttribute('aria-label', t); knopf.setAttribute('title', t);
+        if (merken) { try { localStorage.setItem('huddle_nav', zu ? 'zu' : 'offen'); } catch (e) {} }
+        if (!zu) huddleSperren();
+      }
+      knopf.addEventListener('click', function () { nav(!document.body.classList.contains('nav-zu'), true); });
+      var zu = false; try { zu = localStorage.getItem('huddle_nav') === 'zu'; } catch (e) {}
+      if (zu) nav(true, false);
+    })();
+    function huddleSperren() {
+      var e = document.querySelector('.marke .eyebrow'), t = document.querySelector('.marke-titel');
+      if (!e || !t || !e.offsetParent) return;
+      t.style.letterSpacing = '0px'; t.style.marginRight = '0px';
+      var natuerlich = t.getBoundingClientRect().width, ziel = e.getBoundingClientRect().width - parseFloat(getComputedStyle(e).letterSpacing || 0);
+      var n = (t.textContent || '').length;
+      if (!(natuerlich > 0) || !(ziel > natuerlich) || n < 2) return;
+      var ls = (ziel - natuerlich) / (n - 1);
+      t.style.letterSpacing = ls.toFixed(2) + 'px'; t.style.marginRight = (-ls).toFixed(2) + 'px';
+    }
+    huddleSperren(); window.addEventListener('resize', huddleSperren);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(huddleSperren);
     $('bereiche').addEventListener('click', function (e) {
       var btn = e.target.closest('[data-bereich]');
       if (!btn) return;
@@ -8969,7 +9004,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261025175204';
+  var BUILD = '20261025200943';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
