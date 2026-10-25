@@ -502,6 +502,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   <section id="p-mitglieder" role="tabpanel" aria-labelledby="tab-mitglieder" hidden></section>
   <section id="p-freundeskreis" role="tabpanel" aria-labelledby="tab-freundeskreis" hidden></section>
   <section id="p-camps" role="tabpanel" aria-labelledby="tab-camps" hidden></section>
+  <section id="p-geloescht" role="tabpanel" aria-labelledby="tab-geloescht" hidden></section>
   <section id="p-unternehmen" role="tabpanel" aria-labelledby="tab-unternehmen" hidden></section>
 
   <section id="p-versand" role="tabpanel" aria-labelledby="tab-versand" hidden></section>
@@ -923,7 +924,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   var BEREICHE = [
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'liste', name: 'Liste' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'ticketing', name: 'Spieltag', tabs: [{ id: 'dauerkarten', name: 'Tickets' }, { id: 'auslastung', name: 'Auslastung' }, { id: 'auswertung', name: 'Auswertung' }, { id: 'ausschank', name: 'Ausschank' }, { id: 'firmenevents', name: 'Firmen-Events' }] },
-    { id: 'segmentierung', name: 'CRM', tabs: [{ id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'mitglieder', name: 'Mitglieder' }, { id: 'freundeskreis', name: 'Freundeskreis' }, { id: 'camps', name: 'Feriencamps' }, { id: 'kontakte', name: 'Segmente' }, { id: 'versand', name: 'Versand' }] },
+    { id: 'segmentierung', name: 'CRM', tabs: [{ id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'mitglieder', name: 'Mitglieder' }, { id: 'freundeskreis', name: 'Freundeskreis' }, { id: 'camps', name: 'Feriencamps' }, { id: 'kontakte', name: 'Segmente' }, { id: 'versand', name: 'Versand' }, { id: 'geloescht', name: 'Gelöscht' }] },
     { id: 'accounting', name: 'Accounting', tabs: [{ id: 'liquiditaet', name: 'Übersicht' }, { id: 'rueckfragen', name: 'Rückfragen', versteckt: true }] },
     { id: 'acc-xxl', name: 'XXL', unter: true, tabs: [{ id: 'belege-xxl', name: 'Belege' }, { id: 'zahlung-xxl', name: 'Kontobewegungen' }] },
     { id: 'acc-lev', name: 'LEV', unter: true, tabs: [{ id: 'belege-lev', name: 'Belege' }, { id: 'zahlung-lev', name: 'Kontobewegungen' }, { id: 'zahlung-lev-lp', name: 'Kontobewegungen Löwenpark' }] },
@@ -1022,6 +1023,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     if (t === 'personen') { zeigePersonen(S.tabArg); window.scrollTo(0, 0); }
     if (t === 'mitglieder' || t === 'freundeskreis') { if (!MGL.daten) ladeMGL(); else renderMGL(t); }
     if (t === 'camps') { if (!CP.daten) ladeCP(); else renderCP(); }
+    if (t === 'geloescht') ladeLG();
     if (t === 'liste') { if (!S.stats && !S.statsLoading) loadStats(); else renderGL(); }
     if (t === 'versand') loadVersand();
     if (t === 'auswertung') ladeAW();
@@ -2847,18 +2849,23 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     h += '<div class="fett">' + was + ' „' + esc(l.name) + '“ wirklich löschen?</div>' +
       '<div class="text-klein" style="margin-top:4px">Der Eintrag wird in Notion archiviert (dort noch 30 Tage im Papierkorb, von dort lässt er sich zurückholen) und hier entfernt.</div>' +
       ((l.hinweise || []).length ? '<ul class="text-klein" style="margin:6px 0 0;padding-left:20px">' + l.hinweise.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '') +
+      '<div class="field" style="margin-top:8px"><label for="loeschen-grund">Grund für das Löschen *</label><textarea id="loeschen-grund" class="eingabe" rows="2" maxlength="500" data-loeschen-grund placeholder="z. B. Dublette, Wunsch der Person, nicht mehr relevant"' + (l.phase === 'laeuft' ? ' disabled' : '') + '>' + esc(l.grund || '') + '</textarea><div class="notiz" style="margin:2px 0 0">Der Grund steht im Löschprotokoll (Reiter „Gelöscht“), damit niemand versehentlich wieder angelegt und angeschrieben wird.</div></div>' +
       (l.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:8px">' + esc(l.fehler) + '</div>' : '') +
       '<div style="display:flex;gap:12px;align-items:center;margin-top:10px"><button type="button" class="btn btn-loeschen" data-loeschen="ja" data-art="' + art + '"' + (l.phase === 'laeuft' ? ' disabled' : '') + '>' + (l.phase === 'laeuft' ? 'Lösche …' : 'Endgültig löschen') + '</button>' +
       '<button type="button" class="link-btn" data-loeschen="abbrechen" data-art="' + art + '"' + (l.phase === 'laeuft' ? ' disabled' : '') + '>Abbrechen</button></div></div>';
     return h;
   }
-  async function loeschenAufruf(art, id, nurPruefen) {
-    var res = await fetch('/webhook/crm/loeschen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ art: art, id: id, nur_pruefen: !!nurPruefen }) });
+  async function loeschenAufruf(art, id, nurPruefen, grund) {
+    var res = await fetch('/webhook/crm/loeschen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ art: art, id: id, nur_pruefen: !!nurPruefen, grund: grund || '' }) });
     var d = {}; try { d = await res.json(); } catch (e) { /* leere Antwort */ }
     if (!res.ok && !d.meldung) throw new Error('Die Anfrage ist fehlgeschlagen (' + res.status + ').');
     return d;
   }
   function bindLoeschen() {
+    document.addEventListener('input', function (e) {
+      if (!e.target.hasAttribute || !e.target.hasAttribute('data-loeschen-grund')) return;
+      var Z = $('p-unternehmen') && !$('p-unternehmen').hidden ? FI : PE; if (Z.loeschen) Z.loeschen.grund = e.target.value;
+    });
     document.addEventListener('click', async function (e) {
       var b = e.target.closest('[data-loeschen]'); if (!b) return;
       var aktion = b.getAttribute('data-loeschen'), art = b.getAttribute('data-art') === 'firma' ? 'firma' : 'person';
@@ -2876,9 +2883,11 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       }
       if (aktion === 'ja') {
         if (!Z.loeschen || Z.loeschen.phase === 'laeuft') return;
+        var gf = $('loeschen-grund'); if (gf) Z.loeschen.grund = gf.value;
+        if (String(Z.loeschen.grund || '').trim().length < 3) { Z.loeschen.fehler = 'Bitte einen Grund für das Löschen angeben.'; neuZeichnen(); var gf2 = $('loeschen-grund'); if (gf2) gf2.focus(); return; }
         Z.loeschen.phase = 'laeuft'; Z.loeschen.fehler = ''; neuZeichnen();
         try {
-          var r = await loeschenAufruf(art, o.id, false);
+          var r = await loeschenAufruf(art, o.id, false, Z.loeschen.grund);
           if (!r.ok) { Z.loeschen.phase = 'frage'; Z.loeschen.fehler = r.meldung || 'Das Löschen hat nicht geklappt.'; neuZeichnen(); return; }
           Z.loeschen = null;
           if (art === 'firma') { UN.liste = null; FI.firma = null; location.hash = '#unternehmen'; loadUnternehmen(); }
@@ -6211,6 +6220,47 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       }
     });
   }
+
+  // ---------- CRM: Löschprotokoll (wer wurde von wem aus welchem Grund gelöscht, durchsuchbar) ----------
+  var LG = { daten: null, laedt: false, fehler: null, suche: '', timer: null, zaehler: 0 };
+  async function ladeLG() {
+    var nr = ++LG.zaehler; LG.laedt = true; LG.fehler = null; renderLG();
+    try {
+      var res = await fetch('/webhook/crm/geloescht?q=' + encodeURIComponent(LG.suche.trim()));
+      var d = await res.json();
+      if (nr !== LG.zaehler) return;   // eine neuere Suche läuft schon
+      if (!res.ok || d.ok === false) throw new Error(d.message || d.meldung || 'Fehler beim Laden');
+      LG.daten = d;
+    } catch (e) { if (nr === LG.zaehler) LG.fehler = 'Das Löschprotokoll konnte nicht geladen werden: ' + e.message; }
+    if (nr === LG.zaehler) { LG.laedt = false; renderLG(); }
+  }
+  function renderLG() {
+    var el = $('p-geloescht'); if (!el) return;
+    var box = $('lg-tabelle');
+    if (!box) {
+      el.innerHTML = '<div class="stapel"><div class="card"><div class="card-kopf" style="margin:0">Löschprotokoll</div><div class="pad"><div class="notiz" style="margin:0 0 8px">Hier steht, welche Kontakte und Unternehmen gelöscht wurden, von wem und warum. Vor dem Anlegen einer neuen Person kurz hier suchen (Name oder E-Mail).</div>' +
+        '<label class="sr-only" for="lg-suche">Suche im Löschprotokoll</label><input class="eingabe" id="lg-suche" data-lg-suche value="' + esc(LG.suche) + '" placeholder="Suche nach Name, E-Mail, Firma, Grund oder Person"></div><div id="lg-tabelle"></div></div></div>';
+      box = $('lg-tabelle');
+    }
+    if (LG.laedt && !LG.daten) { box.innerHTML = '<div class="laedt">Lade …</div>'; return; }
+    if (LG.fehler) { box.innerHTML = '<div class="fehlerbox" role="alert">' + esc(LG.fehler) + '</div>'; return; }
+    if (!LG.daten) { box.innerHTML = ''; return; }
+    var liste = LG.daten.eintraege || [];
+    var h = '<div class="card-fuss" style="border-top:0;border-bottom:1px solid var(--border)">' + zahl(liste.length) + (LG.suche.trim() ? ' Treffer von ' : ' von ') + zahl(LG.daten.gesamt || 0) + ' Einträgen</div><div class="scroll-x"><table class="tbl kompakt"><caption class="sr-only">Gelöschte Kontakte und Unternehmen</caption><thead><tr><th scope="col">Gelöscht am</th><th scope="col">Art</th><th scope="col">Name</th><th scope="col">E-Mail</th><th scope="col">Firma / Ort</th><th scope="col">Grund</th><th scope="col">Gelöscht von</th></tr></thead><tbody>';
+    liste.forEach(function (x) {
+      h += '<tr><td class="text-sek nowrap" data-sort="' + esc(x.zeit) + '">' + esc(formatDateTime(x.zeit)) + '</td><td class="text-sek">' + (x.art === 'firma' ? 'Unternehmen' : 'Kontakt') + '</td><td class="fett">' + esc(x.name) + '</td>' +
+        '<td class="text-sek">' + esc(x.emails || '') + '</td><td class="text-sek">' + esc([x.firma, x.ort].filter(Boolean).join(' · ')) + '</td><td>' + esc(x.grund) + '</td><td class="text-sek">' + esc(String(x.von || '').split('@')[0]) + '</td></tr>';
+    });
+    if (!liste.length) h += '<tr><td colspan="7" class="leer">' + (LG.suche.trim() ? 'Dazu gibt es keinen Eintrag im Löschprotokoll.' : 'Bisher wurde nichts gelöscht.') + '</td></tr>';
+    box.innerHTML = h + '</tbody></table></div>';
+  }
+  function bindLG() {
+    var el = $('p-geloescht'); if (!el) return;
+    el.addEventListener('input', function (e) {
+      if (!e.target.hasAttribute('data-lg-suche')) return;
+      LG.suche = e.target.value; clearTimeout(LG.timer); LG.timer = setTimeout(ladeLG, 300);
+    });
+  }
   function bindMGL() {
     ['mitglieder', 'freundeskreis'].forEach(function (modus) {
       var el = $('p-' + modus); if (!el) return;
@@ -8567,6 +8617,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   bindLS();
   bindMGL();
   bindCP();
+  bindLG();
   bindGL();
   bindAP();
   bindSP();
@@ -8633,7 +8684,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261025090042';
+  var BUILD = '20261025091652';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
