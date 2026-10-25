@@ -5759,7 +5759,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   }
   // ---------- Verwaltung: Berechtigungen (wer darf was, aus der Tabelle rechte) ----------
   var BR = { daten: null, fehler: null, laedt: false };
-  var BR_SPALTEN = [['gutscheine', 'Gutscheine'], ['ticketing', 'Spieltag'], ['crm', 'CRM'], ['accounting', 'Accounting'], ['auslagen', 'Auslagen'], ['website', 'Website'], ['zugriffe', 'Verwaltung']];
+  var BR_SPALTEN = [['gutscheine', 'Gutscheine'], ['ticketing', 'Spieltag'], ['crm', 'CRM'], ['accounting', 'Accounting'], ['auslagen', 'Auslagen'], ['website', 'Website'], ['export', 'Export'], ['zugriffe', 'Verwaltung']];
   async function ladeBR() {
     BR.laedt = true; BR.fehler = null; renderBR();
     try {
@@ -5797,7 +5797,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     el.innerHTML = h;
   }
   var ZG = { daten: null, fehler: null, laedt: false, tage: 14 };
-  var ZG_BEREICH = { ticketing: 'Spieltag', gutscheine: 'Gutscheine', website: 'Website', crm: 'CRM', accounting: 'Accounting', auslagen: 'Auslagen', zugriffe: 'Zugriffe' };
+  var ZG_BEREICH = { ticketing: 'Spieltag', gutscheine: 'Gutscheine', website: 'Website', crm: 'CRM', accounting: 'Accounting', auslagen: 'Auslagen', export: 'Export', zugriffe: 'Zugriffe' };
   async function ladeZG() {
     ZG.laedt = true; ZG.fehler = null; renderZG();
     try {
@@ -5992,6 +5992,60 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       var box = $('ls-lauf-' + art); if (box) box.innerHTML = lsLaufInhalt(art);
     });
   }
+  // ---------- Export (Mitglieder als CSV oder LSB-Import, Camp-Teilnehmer als CSV) ----------
+  // Der Knopf ist für alle sichtbar, damit man weiß, dass es den Export gibt. Ausführen darf nur, wer das Recht „export“ hat (oder Vollzugriff): das prüfen Gateway und Datenbank noch einmal.
+  var EX = { s: { mitglieder: { laeuft: '', meldung: '', fehler: '', hinweise: [] }, camps: { laeuft: '', meldung: '', fehler: '', hinweise: [] } } };
+  var EX_RECHT = 'Für den Export brauchst du die Berechtigung „Export“. Bitte bei Marko melden.';
+  function darfExport() { var n = window.LOEWEN_NUTZER; if (!n) return true; var b = n.bereiche || []; return b.indexOf('alles') >= 0 || b.indexOf('export') >= 0; }
+  function exErgebnis(art) {
+    var s = EX.s[art], h = '';
+    if (s.laeuft) h += '<div class="notiz" role="status">Datei wird erstellt …</div>';
+    if (s.fehler) h += '<div class="fehlerbox" role="alert">' + esc(s.fehler) + '</div>';
+    if (s.meldung) h += '<div class="erfolg" role="status">' + esc(s.meldung) + '</div>';
+    (s.hinweise || []).forEach(function (t) { h += '<div class="hinweis-warn" role="status">' + esc(t) + '</div>'; });
+    return h;
+  }
+  function exKarte(art) {
+    var knoepfe = art === 'mitglieder'
+      ? '<button type="button" class="btn btn-secondary" data-ex="mitglieder|csv">CSV mit allen Mitgliederdaten</button> <button type="button" class="btn btn-secondary" data-ex="mitglieder|lsb">Für den LSB (Import Bestandserhebung)</button>'
+      : '<button type="button" class="btn btn-secondary" data-ex="camps|csv">Teilnehmer als CSV</button>';
+    var text = art === 'mitglieder'
+      ? 'Lädt die aktiven und gekündigten Mitglieder ohne Freundeskreis und ohne Bankdaten herunter. Das LSB-Format ist die Mitgliederliste für die Bestandserhebung des Landessportbunds Thüringen (nur aktive Mitglieder, Sportart Basketball).'
+      : 'Lädt die Anmeldungen ' + ((CP.camp && ((CP.daten && CP.daten.camps) || []).filter(function (c) { return c.id === CP.camp; })[0]) ? 'des gewählten Camps' : 'aller Camps') + ' herunter (siehe Auswahl unten), ohne Bankdaten.';
+    return '<div class="card pad" id="ex-karte-' + art + '"><div class="kpi-label">Export</div><div class="text-klein" style="margin:4px 0 8px">' + esc(text) + '</div><div style="display:flex;flex-wrap:wrap;gap:8px">' + knoepfe + '</div>' +
+      '<div class="notiz">Ausführen dürfen nur Personen mit der Berechtigung „Export“. Jeder Abruf wird protokolliert.</div><div id="ex-ergebnis-' + art + '">' + exErgebnis(art) + '</div></div>';
+  }
+  function exAnzeigen(art) {
+    var e = $('ex-ergebnis-' + art); if (e) e.innerHTML = exErgebnis(art);
+    var k = $('ex-karte-' + art); if (k) Array.prototype.forEach.call(k.querySelectorAll('[data-ex]'), function (b) { b.disabled = !!EX.s[art].laeuft; });
+  }
+  function exSpeichern(inhalt, name, mime) {
+    var blob = new Blob([inhalt], { type: mime || 'text/csv;charset=utf-8' }), a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  }
+  async function exportiere(art, format) {
+    var s = EX.s[art]; if (!s || s.laeuft) return;
+    s.fehler = ''; s.meldung = ''; s.hinweise = [];
+    if (!darfExport()) { s.fehler = EX_RECHT; exAnzeigen(art); return; }
+    s.laeuft = format; exAnzeigen(art);
+    try {
+      var camp = '';
+      if (art === 'camps' && CP.camp) { var c = ((CP.daten && CP.daten.camps) || []).filter(function (x) { return x.id === CP.camp; })[0]; camp = c ? c.name : ''; }
+      var res = await fetch('/webhook/crm/export', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ art: art, format: format, camp: camp }) });
+      var d = {}; try { d = await res.json(); } catch (e) { /* leere Antwort */ }
+      if (res.status === 403) throw new Error(EX_RECHT);
+      if (!res.ok || !d.ok) throw new Error(d.meldung || d.fehler || 'Der Export hat nicht geklappt.');
+      exSpeichern(d.inhalt, d.dateiname, d.mime);
+      s.meldung = zahl(d.anzahl) + ' Einträge exportiert (' + d.dateiname + ').'; s.hinweise = d.hinweise || [];
+    } catch (e) { s.fehler = e.message; }
+    s.laeuft = ''; exAnzeigen(art);
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-ex]'); if (!b) return;
+    var p = b.getAttribute('data-ex').split('|'); exportiere(p[0], p[1]);
+  });
+
   // ---------- CRM > Mitglieder und Freundeskreis: Listen aus der Tabelle „Lastschriften-Mitglieder“ (IBAN nur maskiert), Zahlstatus, Gekündigte getrennt ----------
   // Der Freundeskreis zählt nicht zu den Mitgliedern und hat einen eigenen Reiter mit eigenen Zahlen.
   var MGL = { daten: null, fehler: null, laedt: false, z: { mitglieder: { suche: '', art: '', gkOffen: false }, freundeskreis: { suche: '', art: '', gkOffen: false } } };
@@ -6030,6 +6084,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       kachel('Beitrag bezahlt', zahl(k.bezahlt || 0) + ' von ' + zahl(k.aktiv || 0), zahl(k.offen || 0) + ' noch offen') +
       kachel('Jahresbeitrag der Aktiven', formatEuro(k.jahresbeitrag_aktiv || 0), 'Beitrag × 12 / Turnus, ohne Aufnahmegebühr') + '</div>';
     if (!fk) (MGL.daten.hinweise || []).forEach(function (t) { h += '<div class="hinweis-warn" role="status">' + esc(t) + '</div>'; });
+    if (!fk) h += exKarte('mitglieder');
     var zaehl = {}; g.aktiv.forEach(function (x) { zaehl[x.art_label] = (zaehl[x.art_label] || 0) + 1; });
     var typen = Object.keys(zaehl).sort(function (a, b) { return zaehl[b] - zaehl[a]; });
     var chip = function (w, t, n) { return '<button type="button" class="chip' + (z.art === w ? ' aktiv' : '') + '" data-mgl="typ" data-modus="' + modus + '" data-wert="' + esc(w) + '" aria-pressed="' + (z.art === w) + '">' + esc(t) + ' ' + n + '</button>'; };
@@ -6137,6 +6192,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       return !s || [t.vorname, t.nachname, t.zahler, t.email, t.anmeldungsnummer, t.verein, t.tarif].join(' ').toLowerCase().indexOf(s) >= 0;
     });
     var chip = function (w, t) { return '<button type="button" class="chip' + (CP.camp === w ? ' aktiv' : '') + '" data-cp="filter" data-id="' + esc(w) + '" aria-pressed="' + (CP.camp === w) + '">' + esc(t) + '</button>'; };
+    h += exKarte('camps');
     h += '<div class="chips" role="group" aria-label="Camp wählen" style="display:flex;flex-wrap:wrap;gap:6px">' + chip('', 'Alle Camps') + camps.map(function (c) { return chip(c.id, c.name); }).join('') + '</div>';
     h += '<div class="card"><div class="filter-kopf"><div style="flex:1;min-width:220px"><label class="sr-only" for="cp-suche">Suche</label><input class="eingabe" id="cp-suche" data-cp-suche value="' + esc(CP.suche) + '" placeholder="Suche nach Kind, Zahler, E-Mail, Anmeldenummer oder Verein"></div></div>' +
       '<div class="card-fuss" style="border-top:0;border-bottom:1px solid var(--border)">' + zahl(liste.length) + ' von ' + zahl(tn.length) + ' Anmeldungen</div><div class="scroll-x" id="cp-teilnehmer"><table class="tbl kompakt"><caption class="sr-only">Teilnehmer der Feriencamps</caption><thead><tr><th scope="col">Anmeldung</th><th scope="col">Kind</th><th scope="col">Geburtsdatum</th><th scope="col">Tarif</th><th scope="col">Zahler:in</th><th scope="col">Kontakt</th><th scope="col" class="zahlen">Betrag</th><th scope="col">Status</th><th scope="col">Einzug</th><th scope="col"></th></tr></thead><tbody>';
@@ -8687,7 +8743,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261025103546';
+  var BUILD = '20261025105317';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
