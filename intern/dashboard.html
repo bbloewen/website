@@ -6890,7 +6890,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
         if (auf) h += '<tr id="zl-d-' + esc(key) + '"><td colspan="8" style="padding:8px 16px 16px">' + (x.meldung && x.status !== 'ok' ? '<div class="notiz" style="margin:0 0 8px">' + esc(x.meldung) + '</div>' : '') + zlPositionen(key, x) + '</td></tr>';
       });
       h += (liste.length ? sumZeile(['Summe', { t: '', span: 2 }, { t: zahl(sumVon(liste, function (x) { return x.anzahl; })), z: true }, { t: formatEuro(sumVon(liste, function (x) { return x.betrag; })), z: true }, { t: '', span: 3 }]) : '<tr><td colspan="8" class="leer">Keine Läufe.</td></tr>') + '</tbody></table></div>' +
-        '<div class="card-fuss">Neue Läufe werden beim Erzeugen automatisch mit allen Zahlungen gespeichert. Ältere Läufe sind aus den Vermerken und Einzugsdaten rekonstruiert.</div></div>';
+        '<div class="card-fuss">Neue Läufe werden beim Erzeugen automatisch mit allen Zahlungen gespeichert. Ältere Läufe stehen so, wie die Dateien per Mail verschickt wurden (Testdateien und doppelt versendete Dateien sind ausgelassen).</div></div>';
     }
     el.innerHTML = h + '</div>';
     var f = $('zl-filter'); if (f) f.addEventListener('change', function () { ZL.filter = f.value; renderZL(); var n = $('zl-filter'); if (n) n.focus(); });
@@ -8859,7 +8859,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261025141102';
+  var BUILD = '20261025155208';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
