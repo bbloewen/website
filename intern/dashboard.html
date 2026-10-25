@@ -519,6 +519,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   <section id="p-ueberweisungen-xxl" role="tabpanel" aria-labelledby="tab-ueberweisungen-xxl" hidden></section>
   <section id="p-ueberweisungen-lev" role="tabpanel" aria-labelledby="tab-ueberweisungen-lev" hidden></section>
   <section id="p-ueberweisungen-lev-lp" role="tabpanel" aria-labelledby="tab-ueberweisungen-lev-lp" hidden></section>
+  <section id="p-zahllaeufe" role="tabpanel" aria-labelledby="tab-zahllaeufe" hidden></section>
   <section id="p-ls-tickets" role="tabpanel" aria-labelledby="tab-ls-tickets" hidden></section>
   <section id="p-ls-mitglieder" role="tabpanel" aria-labelledby="tab-ls-mitglieder" hidden></section>
   <section id="p-ls-freundeskreis" role="tabpanel" aria-labelledby="tab-ls-freundeskreis" hidden></section>
@@ -929,7 +930,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     { id: 'acc-xxl', name: 'XXL', unter: true, tabs: [{ id: 'belege-xxl', name: 'Belege' }, { id: 'zahlung-xxl', name: 'Kontobewegungen' }] },
     { id: 'acc-lev', name: 'LEV', unter: true, tabs: [{ id: 'belege-lev', name: 'Belege' }, { id: 'zahlung-lev', name: 'Kontobewegungen' }, { id: 'zahlung-lev-lp', name: 'Kontobewegungen Löwenpark' }] },
     { id: 'acc-ausgang', name: 'Ausgangsrechnungen', unter: true, tabs: [{ id: 'ausgang-xxl', name: 'XXL Ausgangsrechnung' }, { id: 'ausgang-lev', name: 'LEV Ausgangsrechnung' }] },
-    { id: 'acc-zahllauf', name: 'Zahllauf', unter: true, tabs: [{ id: 'ueberweisungen-xxl', name: 'XXL-Überweisungen' }, { id: 'ueberweisungen-lev', name: 'LEV-Überweisungen' }, { id: 'ueberweisungen-lev-lp', name: 'Löwenpark-Überweisungen' }, { id: 'ls-tickets', name: 'Tickets' }, { id: 'ls-mitglieder', name: 'Mitglieder' }, { id: 'ls-freundeskreis', name: 'Freundeskreis' }, { id: 'ls-camps', name: 'Feriencamps' }] },
+    { id: 'acc-zahllauf', name: 'Zahllauf', unter: true, tabs: [{ id: 'ueberweisungen-xxl', name: 'XXL-Überweisungen' }, { id: 'ueberweisungen-lev', name: 'LEV-Überweisungen' }, { id: 'ueberweisungen-lev-lp', name: 'Löwenpark-Überweisungen' }, { id: 'ls-tickets', name: 'Tickets' }, { id: 'ls-mitglieder', name: 'Mitglieder' }, { id: 'ls-freundeskreis', name: 'Freundeskreis' }, { id: 'ls-camps', name: 'Feriencamps' }, { id: 'zahllaeufe', name: 'Verlauf' }] },
     { id: 'spendenbescheinigungen', name: 'Spendenbescheinigungen', unter: true, tabs: [{ id: 'spenden', name: 'Spendenbescheinigungen' }] },
     { id: 'administration', name: 'Administration', unter: true, tabs: [{ id: 'buchungstexte', name: 'Buchungstexte' }, { id: 'kostenstellen', name: 'Kostenstellen' }, { id: 'sachkonten-xxl', name: 'Sachkonten XXL' }, { id: 'sachkonten-lev', name: 'Sachkonten LEV' }, { id: 'kreditoren', name: 'Kreditoren / Debitoren' }] },
     { id: 'auslagen', name: 'Auslagen', tabs: [{ id: 'auslage-neu', name: 'Auslage einreichen' }, { id: 'vorschuss-neu', name: 'Vorschuss beantragen' }, { id: 'auslage-protokoll', name: 'Protokoll', recht: 'accounting' }] },
@@ -1049,6 +1050,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     if (t === 'sachkonten-lev') ladeSK('LEV');
     if (t === 'rueckfragen') ladeRF();
     if (UE_TAB[t]) { UE.tab = t; UE.mandant = UE_TAB[t].mandant; ladeUE(); }
+    if (t === 'zahllaeufe') ladeZL();
     // SEO laedt erst, wenn der Tab zum ersten Mal geoeffnet wird: die
     // Sheets-Abfrage dauert laenger als die pretix-Aufrufe und wird beim
     // taeglichen Gutschein-Anlegen gar nicht gebraucht.
@@ -5941,9 +5943,9 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     }
     if (d.anzahl > 0) h += '<div class="card pad nur-schreiben" id="ls-lauf-' + art + '" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">' + lsLaufInhalt(art) + '</div>';
     var v = d.verlauf || [];
-    h += '<div class="card"><div class="card-kopf" style="margin:0">Verlauf der Läufe</div><div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">Verlauf der Lastschriftläufe</caption><thead><tr><th scope="col">Gestartet</th><th scope="col" class="zahlen">Anzahl</th><th scope="col" class="zahlen">Betrag</th><th scope="col">Fälligkeit</th><th scope="col">Stand</th><th scope="col">Von</th><th scope="col">Meldung</th></tr></thead><tbody>' +
-      v.map(function (x) { return '<tr><td class="text-sek nowrap" data-sort="' + esc(x.gestartet) + '">' + esc(formatDateTime(x.gestartet)) + '</td><td class="zahlen">' + esc(zahl(x.anzahl || 0)) + '</td><td class="zahlen">' + esc(lsBetrag(x.betrag)) + '</td><td>' + esc(x.faelligkeit ? formatDate(x.faelligkeit) : '') + '</td><td>' + esc(lsStatus(x.status)) + '</td><td>' + esc(String(x.von || '').split('@')[0]) + '</td><td class="text-sek">' + esc(x.meldung || '') + '</td></tr>'; }).join('') +
-      (v.length ? sumZeile(['Summe fertige Läufe', { t: zahl(sumVon(v.filter(function (x) { return x.status === 'ok'; }), function (x) { return x.anzahl; })), z: true }, { t: formatEuro(sumVon(v.filter(function (x) { return x.status === 'ok'; }), function (x) { return parseFloat(String(x.betrag || '0').replace(',', '.')); })), z: true }, { t: '', span: 4 }]) : '<tr><td colspan="7" class="leer">Noch kein Lauf über das Dashboard.</td></tr>') + '</tbody></table></div></div>';
+    h += '<div class="card"><div class="card-kopf" style="margin:0">Verlauf der Läufe</div><div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">Verlauf der Lastschriftläufe</caption><thead><tr><th scope="col">Gestartet</th><th scope="col" class="zahlen">Anzahl</th><th scope="col" class="zahlen">Betrag</th><th scope="col">Fälligkeit</th><th scope="col">Stand</th><th scope="col">Von</th><th scope="col">Meldung</th><th scope="col">Zahlungen</th></tr></thead><tbody>' +
+      v.map(function (x) { return '<tr><td class="text-sek nowrap" data-sort="' + esc(x.gestartet) + '">' + esc(formatDateTime(x.gestartet)) + '</td><td class="zahlen">' + esc(zahl(x.anzahl || 0)) + '</td><td class="zahlen">' + esc(lsBetrag(x.betrag)) + '</td><td>' + esc(x.faelligkeit ? formatDate(x.faelligkeit) : '') + '</td><td>' + esc(lsStatus(x.status)) + '</td><td>' + esc(String(x.von || '').split('@')[0]) + '</td><td class="text-sek">' + esc(x.meldung || '') + '</td><td><a href="#zahllaeufe/einzug-' + esc(x.id) + '">ansehen</a></td></tr>'; }).join('') +
+      (v.length ? sumZeile(['Summe fertige Läufe', { t: zahl(sumVon(v.filter(function (x) { return x.status === 'ok'; }), function (x) { return x.anzahl; })), z: true }, { t: formatEuro(sumVon(v.filter(function (x) { return x.status === 'ok'; }), function (x) { return parseFloat(String(x.betrag || '0').replace(',', '.')); })), z: true }, { t: '', span: 5 }]) : '<tr><td colspan="8" class="leer">Noch kein Lauf über das Dashboard.</td></tr>') + '</tbody></table></div></div>';
     el.innerHTML = h + '</div>';
   }
   async function lsLauf(art) {
@@ -6780,6 +6782,120 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       AS.tag = b.getAttribute('data-as-tag'); renderAS();
     });
   }
+  // ---------- Accounting: Zahllauf-Verlauf (Überweisungsdateien und Lastschriftläufe mit den enthaltenen Zahlungen) ----------
+  // Jeder Lauf hat eine eigene Adresse: #zahllaeufe/ueberweisung-<Nr> oder #zahllaeufe/einzug-<Nr>; #zahllaeufe/datei:<Dateiname> öffnet den Lauf mit dieser Datei,
+  // #zahllaeufe/suche:<Text> sucht eine Zahlung in allen Läufen. Die Zahlungen eines Laufs werden erst beim Aufklappen geladen.
+  var ZL = { daten: null, laedt: false, fehler: '', offen: {}, pos: {}, suche: '', treffer: null, sucht: false, filter: '', verdrahtet: false };
+  var ZL_BEREICH = { 'ueberweisung-xxl': 'XXL-Überweisung', 'ueberweisung-lev': 'LEV-Überweisung', tickets: 'Lastschrift Tickets', mitglieder: 'Lastschrift Mitglieder', freundeskreis: 'Lastschrift Freundeskreis', camps: 'Lastschrift Feriencamps' };
+  function zlSchluessel(x) { return x.lauf_art + '-' + x.id; }
+  function zlBereich(x) { return ZL_BEREICH[x.bereich] || x.bereich; }
+  function zlLink(x) { return location.origin + location.pathname + '#zahllaeufe/' + zlSchluessel(x); }
+  async function zlGet(query) {
+    var res = await fetch('/webhook/accounting/zahllaeufe?' + query);
+    var d = await res.json();
+    if (!res.ok || !d || !d.ok) throw new Error((d && (d.message || d.meldung)) || 'Der Verlauf konnte nicht geladen werden.');
+    return d.daten || [];
+  }
+  async function ladeZL() {
+    var arg = S.tabArg || ''; ZL.meldung = '';
+    if (!ZL.verdrahtet) { ZL.verdrahtet = true; $('p-zahllaeufe').addEventListener('click', zlKlick); $('p-zahllaeufe').addEventListener('submit', function (ev) { ev.preventDefault(); zlSuchen($('zl-suche').value); }); }
+    if (!ZL.daten && !ZL.laedt) {
+      ZL.laedt = true; ZL.fehler = ''; renderZL();
+      try { ZL.daten = await zlGet(''); } catch (e) { ZL.fehler = e.message; }
+      ZL.laedt = false;
+    }
+    if (ZL.daten && arg) {
+      var m;
+      if ((m = /^suche:(.*)$/.exec(arg))) { var t = decodeURIComponent(m[1]); if (t !== ZL.suche || !ZL.treffer) await zlSuchen(t, true); }
+      else if ((m = /^datei:(.*)$/.exec(arg))) {
+        var datei = decodeURIComponent(m[1]);
+        var x = ZL.daten.filter(function (l) { return l.datei && l.datei.split(', ').indexOf(datei) >= 0; })[0];
+        if (x) await zlOeffnen(zlSchluessel(x), true); else ZL.meldung = 'Zur Datei ' + datei + ' ist kein Lauf gespeichert.';
+      } else if (/^(einzug|ueberweisung)-[0-9]+$/.test(arg)) await zlOeffnen(arg, true);
+    }
+    renderZL();
+    if (arg && /^(einzug|ueberweisung)-/.test(arg)) { var el = document.getElementById('zl-' + arg); if (el) el.scrollIntoView({ block: 'center' }); }
+  }
+  async function zlOeffnen(key, nurAuf) {
+    if (ZL.offen[key] && !nurAuf) { delete ZL.offen[key]; renderZL(); return; }
+    ZL.offen[key] = true;
+    if (!ZL.pos[key]) {
+      var teile = key.split('-'); renderZL();
+      try { ZL.pos[key] = await zlGet('art=' + teile[0] + '&id=' + teile[1]); } catch (e) { ZL.pos[key] = null; ZL.fehler = e.message; }
+    }
+    renderZL();
+  }
+  async function zlSuchen(text, still) {
+    ZL.suche = String(text || '').trim();
+    if (ZL.suche.length < 2) { ZL.treffer = null; renderZL(); return; }
+    ZL.sucht = true; if (!still) renderZL();
+    try { ZL.treffer = await zlGet('q=' + encodeURIComponent(ZL.suche)); ZL.fehler = ''; } catch (e) { ZL.fehler = e.message; ZL.treffer = null; }
+    ZL.sucht = false; renderZL();
+  }
+  function zlKopieren(text, knopf) {
+    var fertig = function () { if (knopf) { knopf.textContent = 'Link kopiert'; setTimeout(function () { knopf.textContent = 'Link kopieren'; }, 2000); } };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(fertig, function () { window.prompt('Link kopieren:', text); });
+    else window.prompt('Link kopieren:', text);
+  }
+  function zlKlick(ev) {
+    var b = ev.target.closest('[data-zl]'); if (!b) return;
+    var w = b.getAttribute('data-zl'), key = b.getAttribute('data-key');
+    if (w === 'auf') zlOeffnen(key);
+    else if (w === 'link') zlKopieren(location.origin + location.pathname + '#zahllaeufe/' + key, b);
+    else if (w === 'suchlink') zlKopieren(location.origin + location.pathname + '#zahllaeufe/suche:' + encodeURIComponent(ZL.suche), b);
+    else if (w === 'lauf') { ZL.treffer = null; zlOeffnen(key, true).then(function () { var el = document.getElementById('zl-' + key); if (el) el.scrollIntoView({ block: 'center' }); }); }
+    else if (w === 'neu') { ZL.daten = null; ZL.pos = {}; ZL.treffer = null; ladeZL(); }
+  }
+  function zlPositionen(key, l) {
+    var p = ZL.pos[key];
+    if (p === undefined) return '<div class="laedt">Lade die Zahlungen …</div>';
+    if (!p || !p.length) return '<div class="notiz" style="margin:0">Zu diesem Lauf sind keine einzelnen Zahlungen gespeichert.</div>';
+    var rek = p.some(function (x) { return x.quelle === 'rekonstruiert'; });
+    return '<div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">Zahlungen im Lauf vom ' + esc(formatDateTime(l.zeit)) + '</caption><thead><tr><th scope="col">Empfänger / Zahler</th><th scope="col">Bezug</th><th scope="col">Referenz</th><th scope="col">Zweck</th><th scope="col" class="zahlen">Betrag</th></tr></thead><tbody>' +
+      p.map(function (x) { return '<tr><td>' + esc(x.name) + (x.iban_kurz ? ' <span class="text-sek">' + esc(x.iban_kurz) + '</span>' : '') + '</td><td>' + esc(x.bezug) + '</td><td>' + esc(x.referenz) + '</td><td class="text-sek">' + esc(x.zweck) + '</td><td class="zahlen">' + esc(x.betrag == null ? '' : formatEuro(Number(x.betrag))) + '</td></tr>'; }).join('') +
+      sumZeile(['Summe', { t: '', span: 3 }, { t: formatEuro(sumVon(p, function (x) { return x.betrag; })), z: true }]) + '</tbody></table></div>' +
+      (rek ? '<div class="notiz" style="margin:8px 0 0">Nachträglich rekonstruiert (aus den Vermerken „in Datei“ an den Belegen bzw. aus den Einzugsdaten). Bei Überweisungen steht der Betrag laut Beleg, bei Gutschriftverrechnung oder Teilzahlungen kann die tatsächlich überwiesene Summe abweichen.</div>' : '');
+  }
+  function renderZL() {
+    var el = $('p-zahllaeufe'); if (!el) return;
+    var h = '<div class="stapel">';
+    h += '<div class="card pad"><form id="zl-form" class="zeile" style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap" role="search"><div style="flex:1;min-width:260px"><label for="zl-suche" class="text-klein">War diese Zahlung in einem Lauf?</label>' +
+      '<input id="zl-suche" type="search" class="eingabe" style="width:100%" maxlength="80" placeholder="Name, Rechnungsnummer, Mandatsreferenz, Bestellcode oder Betrag (z. B. 114,00)" value="' + esc(ZL.suche) + '"></div>' +
+      '<button type="submit" class="btn btn-primary">Suchen</button>' + (ZL.treffer ? '<button type="button" class="btn btn-secondary" data-zl="suchlink">Link kopieren</button>' : '') +
+      '<button type="button" class="btn btn-secondary" data-zl="neu">Aktualisieren</button></form></div>';
+    if (ZL.fehler) h += '<div class="card pad" role="alert"><span class="fehler">' + esc(ZL.fehler) + '</span></div>';
+    if (ZL.meldung) h += '<div class="card pad"><span class="notiz" style="margin:0">' + esc(ZL.meldung) + '</span></div>';
+    if (ZL.sucht) h += '<div class="card pad laedt" role="status">Suche läuft …</div>';
+    if (ZL.treffer) {
+      h += '<div class="card"><div class="card-kopf" style="margin:0">Treffer für „' + esc(ZL.suche) + '“ · ' + ZL.treffer.length + (ZL.treffer.length === 1 ? ' Zahlung' : ' Zahlungen') + '</div>';
+      if (!ZL.treffer.length) h += '<div class="pad notiz" style="margin:0">Diese Zahlung steht in keinem gespeicherten Lauf. Gesucht wird in Name, Bezug, Referenz, Zweck und Betrag.</div>';
+      else h += '<div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">Treffer in den Zahlläufen</caption><thead><tr><th scope="col">Lauf</th><th scope="col">Bereich</th><th scope="col">Empfänger / Zahler</th><th scope="col">Bezug</th><th scope="col">Referenz</th><th scope="col" class="zahlen">Betrag</th></tr></thead><tbody>' +
+        ZL.treffer.map(function (x) { var k = x.lauf_art + '-' + x.lauf_id; return '<tr><td class="nowrap"><button type="button" class="link-btn" data-zl="lauf" data-key="' + esc(k) + '">' + esc(formatDateTime(x.zeit)) + '</button></td><td>' + esc(ZL_BEREICH[x.bereich] || x.bereich) + '</td><td>' + esc(x.name) + '</td><td>' + esc(x.bezug) + '</td><td>' + esc(x.referenz) + '</td><td class="zahlen">' + esc(x.betrag == null ? '' : formatEuro(Number(x.betrag))) + '</td></tr>'; }).join('') +
+        sumZeile(['Summe', { t: '', span: 4 }, { t: formatEuro(sumVon(ZL.treffer, function (x) { return x.betrag; })), z: true }]) + '</tbody></table></div>';
+      h += '</div>';
+    }
+    if (ZL.laedt && !ZL.daten) h += '<div class="card pad laedt" role="status">Lade den Verlauf …</div>';
+    if (ZL.daten) {
+      var liste = ZL.daten.filter(function (x) { return !ZL.filter || x.bereich === ZL.filter; });
+      var bereiche = []; ZL.daten.forEach(function (x) { if (bereiche.indexOf(x.bereich) < 0) bereiche.push(x.bereich); });
+      h += '<div class="card"><div class="card-kopf" style="margin:0;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span>Zahlläufe (Überweisungsdateien und Lastschriften)</span>' +
+        '<label class="text-klein" for="zl-filter" style="margin-left:auto">Bereich</label><select id="zl-filter" class="eingabe-klein"><option value="">alle</option>' +
+        bereiche.map(function (b) { return '<option value="' + esc(b) + '"' + (ZL.filter === b ? ' selected' : '') + '>' + esc(ZL_BEREICH[b] || b) + '</option>'; }).join('') + '</select></div>' +
+        '<div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">Verlauf aller Zahlläufe</caption><thead><tr><th scope="col">Datum</th><th scope="col">Bereich</th><th scope="col">Datei</th><th scope="col" class="zahlen">Zahlungen</th><th scope="col" class="zahlen">Betrag</th><th scope="col">Von</th><th scope="col">Stand</th><th scope="col"><span class="sr-only">Aktionen</span></th></tr></thead><tbody>';
+      liste.forEach(function (x) {
+        var key = zlSchluessel(x), auf = !!ZL.offen[key];
+        h += '<tr id="zl-' + esc(key) + '"><td class="text-sek nowrap">' + esc(formatDateTime(x.zeit)) + '</td><td>' + esc(zlBereich(x)) + (x.konto ? ' <span class="text-sek">' + esc(x.konto) + '</span>' : '') + '</td><td class="text-sek">' + esc(x.datei || '') + '</td>' +
+          '<td class="zahlen">' + esc(zahl(x.anzahl)) + '</td><td class="zahlen">' + esc(formatEuro(Number(x.betrag))) + '</td><td>' + esc(String(x.von || '').split('@')[0]) + '</td><td>' + esc(x.status === 'ok' ? 'fertig' : lsStatus(x.status)) + (x.gespeichert < 1 ? ' <span class="text-sek">(keine Einzelzahlungen)</span>' : '') + '</td>' +
+          '<td class="nowrap"><button type="button" class="link-btn" data-zl="auf" data-key="' + esc(key) + '" aria-expanded="' + auf + '" aria-controls="zl-d-' + esc(key) + '">' + (auf ? 'Zuklappen' : 'Zahlungen') + '</button> · <button type="button" class="link-btn" data-zl="link" data-key="' + esc(key) + '">Link kopieren</button></td></tr>';
+        if (auf) h += '<tr id="zl-d-' + esc(key) + '"><td colspan="8" style="padding:8px 16px 16px">' + (x.meldung && x.status !== 'ok' ? '<div class="notiz" style="margin:0 0 8px">' + esc(x.meldung) + '</div>' : '') + zlPositionen(key, x) + '</td></tr>';
+      });
+      h += (liste.length ? sumZeile(['Summe', { t: '', span: 2 }, { t: zahl(sumVon(liste, function (x) { return x.anzahl; })), z: true }, { t: formatEuro(sumVon(liste, function (x) { return x.betrag; })), z: true }, { t: '', span: 3 }]) : '<tr><td colspan="8" class="leer">Keine Läufe.</td></tr>') + '</tbody></table></div>' +
+        '<div class="card-fuss">Neue Läufe werden beim Erzeugen automatisch mit allen Zahlungen gespeichert. Ältere Läufe sind aus den Vermerken und Einzugsdaten rekonstruiert.</div></div>';
+    }
+    el.innerHTML = h + '</div>';
+    var f = $('zl-filter'); if (f) f.addEventListener('change', function () { ZL.filter = f.value; renderZL(); var n = $('zl-filter'); if (n) n.focus(); });
+  }
+
   // ---------- Accounting: Überweisungen (offene Posten, Zahlungsdatei) ----------
   // Port der Zahlungsfunktion des alten Buchungsagent-Boards. Die Posten leitet der Webhook accounting/offene-posten ab
   // (gebucht, aber ohne zugeordnete Zahlung, ab 01.07.2026), die Zahlungsdatei erzeugt n8n und schickt sie per Mail an Marko.
@@ -6922,7 +7038,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       else vText = '<div class="notiz" style="margin:2px 0 0;color:var(--color-' + (v.art === 'beleg' ? 'success' : 'error') + ')">' + (v.art === 'beleg' ? 'Bezahlt? ' : 'Wohl schon bezahlt? ') + 'Abgang ' + esc(formatDate(v.datum)) + ', ' + esc(formatEuro(v.zahlBetrag)) + ' an ' + esc(v.name) + (v.zweck ? ', „' + esc(v.zweck) + '“' : '') + (v.art === 'beleg' ? ' (nennt diese Rechnung)' : ' (gleicher Betrag und Empfänger)') + '</div>';
     }
     var bank;
-    if (p.inDatei) bank = '<div class="notiz" style="margin:0">in Datei<br>' + esc(p.inDatei) + '</div>';
+    if (p.inDatei) bank = '<div class="notiz" style="margin:0">in Datei<br><a href="#zahllaeufe/datei:' + encodeURIComponent(p.inDatei) + '">' + esc(p.inDatei) + '</a></div>';
     else if (ok) bank = '<div style="font-family:var(--font-mono,monospace);word-break:break-all;min-width:230px">' + esc(p.iban || p.ibanKurz) + '</div>' + (p.ibanQuelle === 'fall' ? '<div class="notiz" style="margin:0">nur für diesen Beleg</div>' : '') + (p.ibanQuelle === 'beleg' ? '<div class="notiz" style="margin:0">IBAN vom Beleg, bitte prüfen</div>' : '') + (p.ibanQuelle === 'auslagenbeleg' ? '<div class="notiz" style="margin:0">IBAN vom Auslagenbeleg</div>' : '') + (p.ibanAbweichung ? '<div class="notiz" style="margin:0;color:var(--color-error)">IBAN am Beleg weicht vom Kreditor ab</div>' : '');
     else bank = '<div class="notiz" style="margin:0;color:var(--color-error)">' + (p.hatIban ? 'IBAN ungültig' : 'IBAN fehlt') + '</div>' +
       '<input type="text" class="eingabe-klein" style="width:170px;flex:none" placeholder="IBAN nur für diesen Beleg" data-ue="iban" data-key="' + esc(p.key) + '" value="' + esc(UE.ibanEntwurf[p.key] || '') + '" aria-label="IBAN für Beleg ' + esc(p.fallId) + '">' +
@@ -8743,7 +8859,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261025105317';
+  var BUILD = '20261025141102';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
