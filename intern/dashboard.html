@@ -4134,7 +4134,10 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       var links = [];
       if (a && a.drive_url) links.push('<a href="' + esc(a.drive_url) + '" target="_blank" rel="noopener">Original</a>');
       else if (b && b.drive_url) links.push('<a href="' + esc(b.drive_url) + '" target="_blank" rel="noopener">Original in Drive</a>');
-      if (b && bhbBelegLink(b.link, b.dateiname)) links.push('<a href="' + esc(bhbBelegLink(b.link, b.dateiname)) + '" target="_blank" rel="noopener">Beleg in BHB</a>');
+      // Huddle-eigene Belege (Schlüssel H<Nr>, z. B. Sammeleinzug) liegen noch nicht in BuchhaltungsButler: erst beim Buchen im Huddle werden sie dorthin übertragen
+      var nurHuddle = !!(b && /^H/.test(String(b.beleg_id || '')));
+      if (nurHuddle) links.push('<span class="notiz" style="margin:0">Noch nicht in BuchhaltungsButler, wird beim Buchen übertragen</span>');
+      else if (b && bhbBelegLink(b.link, b.dateiname)) links.push('<a href="' + esc(bhbBelegLink(b.link, b.dateiname)) + '" target="_blank" rel="noopener">Beleg in BHB</a>');
       // Original und Löschen direkt unter dem Datum: sichtbar, ohne Aufklappen
       var dateiLinks = links.length ? '<div style="margin-top:4px">' + links.join('<br>') + '</div>' : '';
       var loeschLink = a ? '<div style="margin-top:4px"><button type="button" class="link-btn" style="font-size:12px;color:var(--text-muted)" data-be="loeschen" data-id="' + a.id + '" title="Entfernt diesen Beleg aus der Liste und die Datei aus Google Drive. Die Mail kommt in den Papierkorb, wenn kein weiterer relevanter Anhang daran hängt. In BuchhaltungsButler ändert sich nichts." aria-label="Beleg löschen: ' + esc(titel) + '">löschen</button></div>' : (b && b.beleg_id && !(b.buchungen && b.buchungen.length) ? '<div style="margin-top:4px"><button type="button" class="link-btn" style="font-size:12px;color:var(--text-muted)" data-be="bhb-loeschen" data-bid="' + esc(String(b.beleg_id)) + '" title="Markiert den Beleg ' + esc(String(b.beleg_id)) + ' in BuchhaltungsButler als gelöscht (wiederherstellbar). Nur möglich, solange dort nichts gebucht ist." aria-label="Beleg in BuchhaltungsButler löschen: ' + esc(titel) + '">löschen</button></div>' : '');
@@ -8684,7 +8687,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261025091652';
+  var BUILD = '20261025103546';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
