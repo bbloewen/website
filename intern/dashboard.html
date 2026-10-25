@@ -504,6 +504,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   <section id="p-camps" role="tabpanel" aria-labelledby="tab-camps" hidden></section>
   <section id="p-geloescht" role="tabpanel" aria-labelledby="tab-geloescht" hidden></section>
   <section id="p-unternehmen" role="tabpanel" aria-labelledby="tab-unternehmen" hidden></section>
+  <section id="p-sponsoren" role="tabpanel" aria-labelledby="tab-sponsoren" hidden></section>
 
   <section id="p-versand" role="tabpanel" aria-labelledby="tab-versand" hidden></section>
   <section id="p-belege-xxl" role="tabpanel" aria-labelledby="tab-belege-xxl" hidden></section>
@@ -925,7 +926,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   var BEREICHE = [
     { id: 'gutscheine', name: 'Gutscheine', tabs: [{ id: 'statistik', name: 'Statistik' }, { id: 'liste', name: 'Liste' }, { id: 'erstellen', name: 'Erstellen' }] },
     { id: 'ticketing', name: 'Spieltag', tabs: [{ id: 'dauerkarten', name: 'Tickets' }, { id: 'auslastung', name: 'Auslastung' }, { id: 'auswertung', name: 'Auswertung' }, { id: 'ausschank', name: 'Ausschank' }, { id: 'firmenevents', name: 'Firmen-Events' }] },
-    { id: 'segmentierung', name: 'CRM', tabs: [{ id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'mitglieder', name: 'Mitglieder' }, { id: 'freundeskreis', name: 'Freundeskreis' }, { id: 'camps', name: 'Feriencamps' }, { id: 'kontakte', name: 'Segmente' }, { id: 'versand', name: 'Versand' }, { id: 'geloescht', name: 'Gelöscht' }] },
+    { id: 'segmentierung', name: 'CRM', tabs: [{ id: 'personen', name: 'Kontakte' }, { id: 'unternehmen', name: 'Unternehmen' }, { id: 'sponsoren', name: 'Sponsoren' }, { id: 'mitglieder', name: 'Mitglieder' }, { id: 'freundeskreis', name: 'Freundeskreis' }, { id: 'camps', name: 'Feriencamps' }, { id: 'kontakte', name: 'Segmente' }, { id: 'versand', name: 'Versand' }, { id: 'geloescht', name: 'Gelöscht' }] },
     { id: 'accounting', name: 'Accounting', tabs: [{ id: 'liquiditaet', name: 'Übersicht' }, { id: 'rueckfragen', name: 'Rückfragen', versteckt: true }] },
     { id: 'acc-xxl', name: 'XXL', unter: true, tabs: [{ id: 'belege-xxl', name: 'Belege' }, { id: 'zahlung-xxl', name: 'Kontobewegungen' }] },
     { id: 'acc-lev', name: 'LEV', unter: true, tabs: [{ id: 'belege-lev', name: 'Belege' }, { id: 'zahlung-lev', name: 'Kontobewegungen' }, { id: 'zahlung-lev-lp', name: 'Kontobewegungen Löwenpark' }] },
@@ -1051,6 +1052,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
     if (t === 'rueckfragen') ladeRF();
     if (UE_TAB[t]) { UE.tab = t; UE.mandant = UE_TAB[t].mandant; ladeUE(); }
     if (t === 'zahllaeufe') ladeZL();
+    if (t === 'sponsoren') ladeSPO();
     // SEO laedt erst, wenn der Tab zum ersten Mal geoeffnet wird: die
     // Sheets-Abfrage dauert laenger als die pretix-Aufrufe und wird beim
     // taeglichen Gutschein-Anlegen gar nicht gebraucht.
@@ -2727,7 +2729,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
   function zeigeFirma(id) {
     FI.id = id; FI.firma = null; FI.fehler = null; FI.edit = null; FI.loeschen = null; FI.meldung = ''; FI.feed = null; FI.feedFilter = 'alle'; FI.feedForm = null; FI.ki = null; renderFirma();
     holeJson('/webhook/crm/firma?id=' + encodeURIComponent(id))
-      .then(function (r) { if (FI.id !== id) return; FI.firma = r.firma || false; renderFirma(); if (r.firma) ladeFeed('firma', id, FI); })
+      .then(function (r) { if (FI.id !== id) return; FI.firma = r.firma || false; renderFirma(); if (r.firma) { ladeFeed('firma', id, FI); ladeSPJ(id); } })
       .catch(function (e) { if (FI.id !== id) return; FI.fehler = e.message; renderFirma(); });
   }
   function renderFirma() {
@@ -2797,6 +2799,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
         (sponsoring ? '<div class="card"><div class="card-kopf">Sponsoring</div>' + sponsoring + '</div>' : '');
       if (ergaenz) h += '<div class="grid lg-3">' + ergaenz + '</div>';
     }
+    if (!FI.edit) h += spjKarte(f);
     h += feedKarte('firma') + '<div class="notiz">Stand crm-db ' + esc(formatDateTime(f.stand)) + '</div></div>';
     el.innerHTML = h;
     if (FI.edit && FI.edit.fokus) { FI.edit.fokus = false; var ersteF = document.getElementById('fi-name'); if (ersteF) ersteF.focus(); }
@@ -6752,6 +6755,128 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       AS.tag = b.getAttribute('data-as-tag'); renderAS();
     });
   }
+  // ---------- CRM: Sponsoren (Übersicht je Saison) und Sponsoring-Jahre am Unternehmen ----------
+  // Quelle ist die Tabelle sponsor_saison in crm-db (Nettobetrag, Cash, Barter und Status je Unternehmen und Saison). Bearbeitet wird auf der Unternehmensseite.
+  var SPO = { daten: null, laedt: false, fehler: '', saison: '', verdrahtet: false };
+  async function ladeSPO(saison) {
+    if (!SPO.verdrahtet) {
+      SPO.verdrahtet = true;
+      $('p-sponsoren').addEventListener('change', function (ev) { if (ev.target && ev.target.id === 'spo-saison') ladeSPO(ev.target.value); });
+    }
+    if (saison !== undefined) { SPO.saison = saison; SPO.daten = null; }
+    if (SPO.daten) { renderSPO(); return; }
+    if (SPO.laedt) return;
+    SPO.laedt = true; SPO.fehler = ''; renderSPO();
+    try {
+      var r = await holeJson('/webhook/crm/sponsoren' + (SPO.saison ? '?saison=' + encodeURIComponent(SPO.saison) : ''));
+      if (!r || !r.ok || !r.daten) throw new Error('Die Sponsorenübersicht konnte nicht geladen werden.');
+      SPO.daten = r.daten; SPO.saison = r.daten.saison;
+    } catch (e) { SPO.fehler = e.message; }
+    SPO.laedt = false; renderSPO();
+  }
+  function spoEuro(v) { return v === null || v === undefined || Number(v) === 0 ? '<span class="gedaempft">—</span>' : esc(formatEuro(Number(v))); }
+  function spoName(x) { return '<a href="#unternehmen/' + esc(x.id) + '">' + esc(x.name) + '</a>'; }
+  function spoDiff(v) {
+    if (v === null || v === undefined) return '<span class="gedaempft">k. A.</span>';
+    var n = Number(v), t = (n > 0 ? '+' : n < 0 ? '−' : '+') + formatEuro(Math.abs(n));
+    return n > 0 ? '<span class="gut">' + esc(t) + '</span>' : n < 0 ? '<span style="color:var(--color-error)">' + esc(t) + '</span>' : esc(t);
+  }
+  function renderSPO() {
+    var el = $('p-sponsoren'); if (!el) return;
+    var d = SPO.daten, h = '<div class="stapel">';
+    if (SPO.fehler) h += '<div class="fehlerbox" role="alert">' + esc(SPO.fehler) + '</div>';
+    if (!d) { el.innerHTML = h + (SPO.laedt ? '<div class="laedt" role="status">Lade die Sponsoren …</div>' : '') + '</div>'; return; }
+    var k = d.kpi || {}, s0 = d.saison, s1 = d.vorjahr, s2 = d.vorvorjahr;
+    var delta = Number(k.gesamt) - Number(k.vorjahr_gesamt);
+    h += '<div class="card pad" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><label for="spo-saison" class="text-klein">Saison</label><select id="spo-saison" class="eingabe-klein" style="flex:none">' +
+      (d.saisons || []).map(function (x) { return '<option value="' + esc(x) + '"' + (x === s0 ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join('') + '</select>' +
+      '<span class="notiz" style="margin:0">Nettobeträge je Sponsor und Saison. Eintragen und ändern auf der Unternehmensseite (Karte „Sponsoring-Jahre“).</span></div>';
+    var kachel = function (t, wert, unter, klasse) { return '<div class="card pad"><div class="kpi-label">' + esc(t) + '</div><div class="kpi' + (klasse ? ' ' + klasse : '') + '">' + wert + '</div>' + (unter ? '<div class="notiz">' + unter + '</div>' : '') + '</div>'; };
+    h += '<div class="grid sm-3">' +
+      kachel('Aktive Sponsoren ' + s0, esc(zahl(k.aktiv)), '') +
+      kachel('Gesamtvolumen ' + s0, esc(formatEuro(Number(k.gesamt))), k.vorjahr_gesamt ? spoDiff(delta) + ' ggü. ' + esc(formatEuro(Number(k.vorjahr_gesamt))) + ' in ' + esc(s1) : '') +
+      kachel('Cash-Volumen ' + s0, esc(formatEuro(Number(k.cash))), '') +
+      kachel('Barter-Volumen ' + s0, esc(formatEuro(Number(k.barter))), '') +
+      kachel('Neu / Reaktiviert', esc(zahl(k.neu)), '', 'gut') +
+      kachel('Ausgeschieden', esc(zahl(k.ausgeschieden)), esc(formatEuro(Number(k.ausgeschieden_volumen))) + ' Volumen', '') + '</div>';
+    var tabelle = function (titel, kopf, zeilen, summe, leer) {
+      return '<div class="card"><div class="card-kopf" style="margin:0">' + esc(titel) + '</div><div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">' + esc(titel) + '</caption><thead><tr>' + kopf + '</tr></thead><tbody>' +
+        (zeilen.length ? zeilen.join('') + summe : '<tr><td colspan="9" class="leer">' + esc(leer) + '</td></tr>') + '</tbody></table></div></div>';
+    };
+    var th = function (t, z) { return '<th scope="col"' + (z ? ' class="zahlen"' : '') + '>' + esc(t) + '</th>'; };
+    var akt = d.aktuell || [];
+    h += tabelle('Aktuelle Sponsoren (' + akt.length + ')', th('Sponsor') + th('Cash', 1) + th('Barter', 1) + th('Gesamt', 1) + th('Hinweis'),
+      akt.map(function (x) { return '<tr><td>' + spoName(x) + (x.neu ? ' <span class="badge badge-optin">neu</span>' : '') + '</td><td class="zahlen">' + spoEuro(x.cash) + '</td><td class="zahlen">' + spoEuro(x.barter) + '</td><td class="zahlen">' + spoEuro(x.gesamt) + '</td><td class="text-sek">' + esc(x.hinweis || '') + '</td></tr>'; }),
+      sumZeile(['Summe', { t: formatEuro(sumVon(akt, function (x) { return x.cash; })), z: true }, { t: formatEuro(sumVon(akt, function (x) { return x.barter; })), z: true }, { t: formatEuro(sumVon(akt, function (x) { return x.gesamt; })), z: true }, '']), 'Für diese Saison sind keine Sponsoren eingetragen.');
+    var vg = d.vergleich || [], bekannt = vg.filter(function (x) { return x.v1 !== null && x.v1 !== undefined; });
+    h += tabelle('Vorjahresvergleich ' + s1 + ' → ' + s0, th('Sponsor') + th(s2, 1) + th(s1, 1) + th(s0, 1) + th('Differenz ' + s1 + ' → ' + s0, 1),
+      vg.map(function (x) { var diff = x.v1 === null || x.v1 === undefined ? null : Number(x.v0) - Number(x.v1); return '<tr><td>' + spoName(x) + '</td><td class="zahlen">' + (x.v2 == null ? '<span class="gedaempft">—</span>' : esc(formatEuro(Number(x.v2)))) + '</td><td class="zahlen">' + (x.v1 == null ? '<span class="gedaempft">—</span>' : esc(formatEuro(Number(x.v1)))) + '</td><td class="zahlen">' + esc(formatEuro(Number(x.v0))) + '</td><td class="zahlen">' + spoDiff(diff) + '</td></tr>'; }),
+      sumZeile(['Summe', { t: formatEuro(sumVon(vg, function (x) { return x.v2; })), z: true }, { t: formatEuro(sumVon(vg, function (x) { return x.v1; })), z: true }, { t: formatEuro(sumVon(vg, function (x) { return x.v0; })), z: true }, { t: (sumVon(bekannt, function (x) { return x.v0; }) - sumVon(bekannt, function (x) { return x.v1; }) >= 0 ? '+' : '−') + formatEuro(Math.abs(sumVon(bekannt, function (x) { return x.v0; }) - sumVon(bekannt, function (x) { return x.v1; }))) + ' (nur Sponsoren mit Vorjahreswert)', z: true }]), 'Keine Sponsoren in dieser Saison.');
+    var au = d.ausgeschieden || [];
+    h += tabelle('Ausgeschieden seit letzter Saison (' + au.length + ')', th('Sponsor') + th('Typ') + th('Volumen ' + s1, 1) + th('Hinweis'),
+      au.map(function (x) { return '<tr><td>' + spoName(x) + '</td><td>' + esc(x.typ || '–') + '</td><td class="zahlen">' + esc(formatEuro(Number(x.volumen))) + '</td><td class="text-sek">' + esc(x.hinweis || '') + '</td></tr>'; }),
+      sumZeile(['Summe', '', { t: formatEuro(sumVon(au, function (x) { return x.volumen; })), z: true }, '']), 'Niemand ausgeschieden.');
+    var vl = d.verlaengerung || [];
+    h += tabelle('In Verlängerung, Entscheidung offen (' + vl.length + ')', th('Sponsor') + th('Typ') + th('Volumen', 1) + th('Hinweis'),
+      vl.map(function (x) { return '<tr><td>' + spoName(x) + '</td><td>' + esc(x.typ || '–') + '</td><td class="zahlen">' + esc(formatEuro(Number(x.volumen))) + '</td><td class="text-sek">' + esc(x.hinweis || '') + '</td></tr>'; }),
+      sumZeile(['Summe', '', { t: formatEuro(sumVon(vl, function (x) { return x.volumen; })), z: true }, '']), 'Keine offenen Verlängerungen.');
+    el.innerHTML = h + '</div>';
+    var sel = $('spo-saison'); if (sel && document.activeElement === document.body) { /* Fokus bleibt, wo er ist */ }
+  }
+
+  // Karte „Sponsoring-Jahre“ auf der Unternehmensseite: Saisons mit Nettobetrag und Status, Eintragen und Ändern (nur mit Schreibrecht)
+  var SPJ = { id: '', daten: null, edit: null, fehler: '', meldung: '', arbeitet: false, verdrahtet: false };
+  var SPJ_STATUS = { aktiv: 'aktiv', verlaengerung: 'In Verlängerung', ausgeschieden: 'ausgeschieden' };
+  function ladeSPJ(id) {
+    SPJ.id = id; SPJ.daten = null; SPJ.edit = null; SPJ.fehler = ''; SPJ.meldung = '';
+    if (!SPJ.verdrahtet) { SPJ.verdrahtet = true; $('p-unternehmen').addEventListener('click', spjKlick); }
+    holeJson('/webhook/crm/sponsor-jahre?id=' + encodeURIComponent(id)).then(function (r) {
+      if (SPJ.id !== id) return; SPJ.daten = (r && r.daten) || []; if (FI.id === id) renderFirma();
+    }).catch(function () { if (SPJ.id === id) SPJ.daten = []; });
+  }
+  function spjKarte(f) {
+    var rows = SPJ.daten; if (rows === null || SPJ.id !== f.id) return '';
+    var sponsor = rows.length || (f.merkmale && f.merkmale.Sponsor);
+    if (!sponsor && !SPJ.edit) return '<div class="card pad nur-schreiben"><button type="button" class="link-btn" data-spj="neu">Saison als Sponsor eintragen</button></div>';
+    var kopf = '<div class="card-kopf">Sponsoring-Jahre</div>';
+    var tab = rows.length ? '<div class="tbl-voll"><table class="tbl kompakt"><caption class="sr-only">Sponsoring-Jahre</caption><thead><tr><th scope="col">Saison</th><th scope="col" class="zahlen">Cash</th><th scope="col" class="zahlen">Barter</th><th scope="col" class="zahlen">Netto gesamt</th><th scope="col">Status</th><th scope="col">Hinweis</th><th scope="col"><span class="sr-only">Aktionen</span></th></tr></thead><tbody>' +
+      rows.map(function (x) { return '<tr><td>' + esc(x.saison) + (x.neu ? ' <span class="badge badge-optin">neu</span>' : '') + '</td><td class="zahlen">' + spoEuro(x.cash) + '</td><td class="zahlen">' + spoEuro(x.barter) + '</td><td class="zahlen">' + esc(formatEuro(Number(x.gesamt))) + (x.typ ? ' <span class="text-sek">' + esc(x.typ) + '</span>' : '') + '</td><td>' + esc(SPJ_STATUS[x.status] || x.status) + '</td><td class="text-sek">' + esc(x.hinweis || '') + '</td><td class="nowrap nur-schreiben"><button type="button" class="link-btn" data-spj="bearbeiten" data-saison="' + esc(x.saison) + '">Ändern</button></td></tr>'; }).join('') + '</tbody></table></div>'
+      : '<div class="pad gedaempft">Noch keine Saison eingetragen.</div>';
+    var e = SPJ.edit, form = '';
+    if (e) {
+      var inp = function (name, label, wert, extra) { return '<div style="min-width:110px"><label class="text-klein" for="spj-' + name + '">' + esc(label) + '</label><input id="spj-' + name + '" class="eingabe-klein" style="width:100%" data-spj-feld="' + name + '" value="' + esc(wert == null ? '' : wert) + '"' + (extra || '') + '></div>'; };
+      var opt = function (w, t, a) { return '<option value="' + w + '"' + (a === w ? ' selected' : '') + '>' + esc(t) + '</option>'; };
+      form = '<div class="pad" style="border-top:1px solid var(--border-subtle,#e5e5e5)"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">' +
+        inp('saison', 'Saison (z. B. 26/27)', e.saison, ' maxlength="5" placeholder="26/27"' + (e.vorhanden ? ' readonly' : '')) + inp('cash', 'Cash netto €', e.cash) + inp('barter', 'Barter netto €', e.barter) + inp('gesamt', 'Gesamt netto € (wenn Cash und Barter leer)', e.gesamt) +
+        '<div><label class="text-klein" for="spj-status">Status</label><select id="spj-status" class="eingabe-klein" data-spj-feld="status">' + opt('aktiv', 'aktiv', e.status) + opt('verlaengerung', 'In Verlängerung', e.status) + opt('ausgeschieden', 'ausgeschieden', e.status) + '</select></div>' +
+        '<div><label class="text-klein" for="spj-typ">Typ (wenn Cash und Barter leer)</label><select id="spj-typ" class="eingabe-klein" data-spj-feld="typ">' + opt('', '–', e.typ) + opt('Cash', 'Cash', e.typ) + opt('Barter', 'Barter', e.typ) + '</select></div>' +
+        '<label style="display:flex;gap:6px;align-items:center;font-size:13px"><input type="checkbox" data-spj-feld="neu"' + (e.neu ? ' checked' : '') + '> neu / reaktiviert</label></div>' +
+        '<div style="margin-top:8px">' + inp('hinweis', 'Hinweis', e.hinweis, ' maxlength="300"').replace('min-width:110px', 'min-width:100%') + '</div>' +
+        (SPJ.fehler ? '<div class="fehlerbox" role="alert" style="margin-top:8px">' + esc(SPJ.fehler) + '</div>' : '') +
+        '<div style="margin-top:10px;display:flex;gap:8px"><button type="button" class="btn btn-primary" data-spj="speichern"' + (SPJ.arbeitet ? ' disabled' : '') + '>' + (SPJ.arbeitet ? 'Speichere …' : 'Speichern') + '</button><button type="button" class="btn btn-secondary" data-spj="abbrechen">Abbrechen</button></div></div>';
+    }
+    return '<div class="card">' + kopf + tab + form + (e ? '' : '<div class="pad nur-schreiben"><button type="button" class="link-btn" data-spj="neu">Saison eintragen</button></div>') + (SPJ.meldung ? '<div class="notiz pad" role="status" style="margin:0">' + esc(SPJ.meldung) + '</div>' : '') + '</div>';
+  }
+  async function spjKlick(ev) {
+    var b = ev.target.closest && ev.target.closest('[data-spj]'); if (!b) return;
+    var w = b.getAttribute('data-spj');
+    if (w === 'neu') { SPJ.edit = { saison: '', status: 'aktiv', typ: '', vorhanden: false }; SPJ.fehler = ''; SPJ.meldung = ''; renderFirma(); return; }
+    if (w === 'bearbeiten') { var x = (SPJ.daten || []).filter(function (r) { return r.saison === b.getAttribute('data-saison'); })[0]; if (x) { SPJ.edit = { saison: x.saison, cash: x.cash, barter: x.barter, gesamt: x.cash == null && x.barter == null ? x.gesamt : '', status: x.status, typ: x.typ || '', neu: x.neu, hinweis: x.hinweis || '', vorhanden: true }; SPJ.fehler = ''; SPJ.meldung = ''; renderFirma(); } return; }
+    if (w === 'abbrechen') { SPJ.edit = null; SPJ.fehler = ''; renderFirma(); return; }
+    if (w === 'speichern' && !SPJ.arbeitet) {
+      var panel = $('p-unternehmen'), v = function (n) { var el = panel.querySelector('[data-spj-feld="' + n + '"]'); return el ? (el.type === 'checkbox' ? el.checked : el.value) : ''; };
+      var daten = { id: SPJ.id, saison: String(v('saison')).trim(), cash: String(v('cash')).trim() || null, barter: String(v('barter')).trim() || null, gesamt: String(v('gesamt')).trim() || null, status: v('status'), typ: v('typ'), neu: !!v('neu'), hinweis: String(v('hinweis')).trim() };
+      if (!/^[0-9]{2}\/[0-9]{2}$/.test(daten.saison)) { SPJ.edit = Object.assign({}, SPJ.edit, daten); SPJ.fehler = 'Bitte die Saison als 26/27 angeben.'; renderFirma(); return; }
+      SPJ.arbeitet = true; SPJ.fehler = ''; SPJ.edit = Object.assign({}, SPJ.edit, daten); renderFirma();
+      try {
+        var r = await holeJson('/webhook/crm/sponsor-speichern', daten);
+        if (!r || !r.ok) throw new Error((r && (r.message || r.meldung)) || 'Nicht gespeichert.');
+        SPJ.daten = r.daten || []; SPJ.edit = null; SPJ.meldung = 'Saison ' + daten.saison + ' gespeichert.'; SPO.daten = null;
+      } catch (e2) { SPJ.fehler = e2.message; }
+      SPJ.arbeitet = false; renderFirma();
+    }
+  }
+
   // ---------- Accounting: Zahllauf-Verlauf (Überweisungsdateien und Lastschriftläufe mit den enthaltenen Zahlungen) ----------
   // Jeder Lauf hat eine eigene Adresse: #zahllaeufe/ueberweisung-<Nr> oder #zahllaeufe/einzug-<Nr>; #zahllaeufe/datei:<Dateiname> öffnet den Lauf mit dieser Datei,
   // #zahllaeufe/suche:<Text> sucht eine Zahlung in allen Läufen. Die Zahlungen eines Laufs werden erst beim Aufklappen geladen.
@@ -8829,7 +8954,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261025165253';
+  var BUILD = '20261025172212';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
