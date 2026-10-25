@@ -30,6 +30,8 @@
       (p.familienpass !== null && p.familienpass !== undefined ? '<option value="familienpass">Familienpass der Stadt Erfurt (' + euro(p.familienpass) + ')</option>' : '');
   }
 
+  function vereine() { return (camp && camp.kooperationsvereine) || ['Basketball Löwen', 'Förderverein Basketball', 'BC Erfurt', 'USV Erfurt', 'Basketball in Gotha e.V.']; }
+
   function kindKarte(i) {
     var n = i + 1, id = 'ca-k' + i + '-';
     return '<fieldset class="ca-kind" data-kind="' + i + '" style="border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin:0 0 16px">' +
@@ -39,7 +41,8 @@
       '<div class="field"><label for="' + id + 'geburtsdatum">Geburtsdatum *</label><input type="date" id="' + id + 'geburtsdatum" data-f="geburtsdatum" required min="2000-01-01" max="' + new Date().toISOString().slice(0, 10) + '" /></div>' +
       '<div class="field"><label for="' + id + 'tarif">Tarif *</label><select id="' + id + 'tarif" data-f="tarif" required>' + tarifOptionen() + '</select>' +
       '<p class="hint">Den Familienpass bitte am ersten Camptag vorzeigen. Die Mitgliedschaft prüfen wir.</p></div>' +
-      '<div class="field ca-verein" hidden><label for="' + id + 'verein">In welchem Verein ist das Kind Mitglied? *</label><input type="text" id="' + id + 'verein" data-f="verein" autocomplete="off" /></div>' +
+      '<div class="field ca-verein" hidden><label for="' + id + 'verein">In welchem Verein ist das Kind Mitglied? *</label><select id="' + id + 'verein" data-f="verein"><option value="">Verein wählen *</option>' + vereine().map(function (v) { return '<option value="' + esc(v) + '">' + esc(v) + '</option>'; }).join('') + '</select>' +
+      '<p class="hint">Bei „Basketball Löwen“ gleichen wir den Namen mit unserer Mitgliederliste ab, bitte so schreiben wie bei der Mitgliedschaft. Die Mitgliedschaft in den anderen Kooperationsvereinen prüfen wir bei Bedarf.</p></div>' +
       '<div class="field"><label for="' + id + 'hinweise">Hinweise (Allergien, Medikamente, Wichtiges)</label><textarea id="' + id + 'hinweise" data-f="hinweise" rows="2" maxlength="500"></textarea></div>' +
       '<div class="field-checkbox" style="align-items:flex-start"><input type="checkbox" id="' + id + 'foto" data-f="fotoOk" class="mt-1" /><label for="' + id + 'foto" class="t-body-sm">Fotos und Videos aus dem Camp, auf denen mein Kind zu sehen ist, dürfen auf der Website und in den sozialen Medien der Basketball Löwen Erfurt gezeigt werden. Das kann ich jederzeit widerrufen.</label></div>' +
       (i > 0 ? '<button type="button" class="btn btn-ghost" data-weg="' + i + '" style="margin-top:8px">Dieses Kind entfernen</button>' : '') +
