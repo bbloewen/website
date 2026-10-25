@@ -62,7 +62,7 @@ body.breit .wrap { max-width: none; }
 .seite { width: 232px; flex-shrink: 0; background: var(--bg-card); border-right: 1px solid var(--border); padding: 20px 12px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
 .marke { padding: 0 10px 18px; }
 .eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-brand-orange-text); }
-.marke-titel { margin: 2px 0 0; font-size: 1.25rem; font-weight: 700; text-transform: uppercase; display: inline-block; white-space: nowrap; }
+.marke-titel { margin: 2px 0 0; font-size: 1.25rem; font-weight: 600; text-transform: uppercase; display: inline-block; white-space: nowrap; letter-spacing: 0.16em; line-height: 1.1; }
 /* Navigation einklappbar (Zustand wird im Browser gemerkt) */
 .nav-toggle { position: absolute; top: 14px; right: 8px; background: none; border: 0; border-radius: var(--radius-sm); width: 28px; height: 28px; font-size: 18px; line-height: 1; color: var(--text-muted); cursor: pointer; }
 .nav-toggle:hover { background: var(--bg-subtle); color: var(--text-primary); }
@@ -8010,14 +8010,21 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
       if (zu) nav(true, false);
     })();
     function huddleSperren() {
+      // HUDDLE mit demselben Zeichenabstand wie die Eyebrow („Basketball Löwen“), die Schriftgröße so, dass beide gleich breit sind
       var e = document.querySelector('.marke .eyebrow'), t = document.querySelector('.marke-titel');
       if (!e || !t || !e.offsetParent) return;
-      t.style.letterSpacing = '0px'; t.style.marginRight = '0px';
-      var natuerlich = t.getBoundingClientRect().width, ziel = e.getBoundingClientRect().width - parseFloat(getComputedStyle(e).letterSpacing || 0);
-      var n = (t.textContent || '').length;
-      if (!(natuerlich > 0) || !(ziel > natuerlich) || n < 2) return;
-      var ls = (ziel - natuerlich) / (n - 1);
-      t.style.letterSpacing = ls.toFixed(2) + 'px'; t.style.marginRight = (-ls).toFixed(2) + 'px';
+      var abstand = 0.16;
+      t.style.letterSpacing = abstand + 'em'; t.style.marginRight = '0'; t.style.fontSize = '100px';
+      var breit100 = t.getBoundingClientRect().width - abstand * 100;   // ohne den Abstand nach dem letzten Buchstaben
+      var r = document.createRange(); r.selectNodeContents(e);   // Breite des Textes, nicht des Blocks (die Eyebrow ist so breit wie die Leiste)
+      var ziel = r.getBoundingClientRect().width - parseFloat(getComputedStyle(e).letterSpacing || 0);
+      if (!(breit100 > 0) || !(ziel > 0)) { t.style.fontSize = ''; t.style.letterSpacing = ''; return; }
+      var gross = Math.min(40, ziel / breit100 * 100);
+      t.style.fontSize = gross.toFixed(2) + 'px'; t.style.marginRight = (-abstand * gross).toFixed(2) + 'px';
+      // einmal nachmessen (Text statt Block) und feinjustieren
+      var rt = document.createRange(); rt.selectNodeContents(t);
+      var ist = rt.getBoundingClientRect().width - abstand * gross;
+      if (ist > 0) { gross = Math.min(40, gross * ziel / ist); t.style.fontSize = gross.toFixed(2) + 'px'; t.style.marginRight = (-abstand * gross).toFixed(2) + 'px'; }
     }
     huddleSperren(); window.addEventListener('resize', huddleSperren);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(huddleSperren);
@@ -9004,7 +9011,7 @@ th[aria-sort="descending"]::after { content: ' ▼'; font-size: 10px; }
 <script>
 // Hinweis, wenn eine neuere Fassung der Seite online liegt (der Browser hält die Seite sonst bis zu 10 Minuten im Zwischenspeicher)
 (function () {
-  var BUILD = '20261025200943';
+  var BUILD = '20261025201955';
   if (BUILD.indexOf('__') === 0) return;
   function pruefe() {
     fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
