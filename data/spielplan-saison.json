@@ -24,7 +24,7 @@
       { "datum": "03.10.2026", "zeit": "16:00", "gegner": "TB 1888 Erlangen", "heim": false, "ort": "Erlangen", "ergebnis": "0 : 20" },
       { "datum": "11.10.2026", "zeit": "13:00", "gegner": "BC Dresden", "heim": true, "ergebnis": "54 : 77" },
       { "datum": "18.10.2026", "zeit": "14:00", "gegner": "DJK Don Bosco Bamberg", "heim": false, "ort": "Bamberg", "ergebnis": "57 : 54" },
-      { "datum": "24.10.2026", "zeit": "17:00", "gegner": "Leipzig Lakers", "heim": true },
+      { "datum": "24.10.2026", "zeit": "17:00", "gegner": "Leipzig Lakers", "heim": true, "ergebnis": "45 : 85" },
       { "datum": "31.10.2026", "zeit": "17:00", "gegner": "TG 48 Würzburg 2", "heim": true },
       { "datum": "07.11.2026", "zeit": "17:15", "gegner": "BG Litzendorf", "heim": false, "ort": "Litzendorf" },
       { "datum": "14.11.2026", "zeit": "15:00", "gegner": "Post SV Nürnberg", "heim": false, "ort": "Nürnberg" },
