@@ -548,7 +548,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Spieltag = heutiges Heimspiel aus data/heimspiele.json (Berliner Zeit; nach Mitternacht gilt noch der Vortag).
   // "Spiel vorbei" = Anpfiff plus SPIEL_DAUER_MIN. Den Stand holt die Seite beim Server (action status), damit eine Kasse, die auf
   // einem anderen iPad gezaehlt wurde, auch hier als erledigt gilt. Ohne die neue App fehlt der Link, der Text nennt dann den Weg.
-  var SPIEL_DAUER_MIN = 135;
+  var SPIEL_DAUER_MIN = 150;
   var KASSE_URL = 'https://ticketing.basketball-loewen.com/webhook/kasse-schnitt';
   var hinweise = document.getElementById('au-hinweise');
   var spieltag = null;
