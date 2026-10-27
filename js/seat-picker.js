@@ -77,6 +77,12 @@
     return sep === -1 ? { zoneId: key, category: null } : { zoneId: key.slice(0, sep), category: key.slice(sep + 2) };
   }
 
+  /* Gästeblock (Marko, 27.10.2026): Block D ist der Block für die Fans der Gastmannschaft. Im Sitzplan kann
+     ihn jeder buchen, deshalb steht „Gästeblock“ überall dabei, wo der Block benannt wird. Das ist nur eine
+     Kennzeichnung, keine Buchungssperre. Gutscheine für D vergibt weiterhin nur Kim (s. TICKETING-BACKEND.md). */
+  var GAESTE_BLOCKS = { D: true };
+  function gaesteZusatz(id) { return GAESTE_BLOCKS[id] ? ' (Gästeblock)' : ''; }
+
   /* Pretix-Einzelticket-Item je Block/Produkt — gleiche Zuordnung wie BLOCK_ITEM_MAP/resolveBlockKey im
      n8n-Workflow "Einzelticketbestellung verarbeiten" (Knoten "Sitze zuordnen"). Wird gebraucht, damit ein
      item-/kontingentgebundener Gutschein nur die Blöcke rabattiert, an die er wirklich gebunden ist, und nicht
@@ -694,7 +700,7 @@
       if (p.category === 'Fanblock' || p.category === 'VIP') return p.category;
       if (p.category === 'C unten') return 'Block CS';
       var z = self._zoneById(id);
-      return (z ? z.name : id) + ' (' + catShortLabel(p.category) + ')';
+      return (z ? z.name : id) + gaesteZusatz(id) + ' (' + catShortLabel(p.category) + ')';
     }
 
     // Verfügbarkeit je Kachel als Liste direkt unter der Blockauswahl (nur Einzelticket).
@@ -768,7 +774,8 @@
           inner = '<span class="seatplan-mobile-tile-cat"><strong>C</strong>ourtside</span>';
         } else {
           inner = '<span class="seatplan-mobile-tile-letter">' + id + '</span>' +
-            '<span class="seatplan-mobile-tile-cat">' + escapeHtml(p.label) + '</span>';
+            '<span class="seatplan-mobile-tile-cat">' + escapeHtml(p.label) + '</span>' +
+            (GAESTE_BLOCKS[id] ? '<span class="seatplan-mobile-tile-gast">Gästeblock</span>' : '');
         }
         if (self.readonly) {
           return '<div class="' + tileClass + '" style="' + tileStyle + '">' + inner + '</div>';
@@ -994,7 +1001,7 @@
         } else if (g.category === 'C unten') {
           key = 'CS'; label = 'Block CS';
         } else {
-          key = id; label = zone.name;
+          key = id; label = zone.name + gaesteZusatz(id);
         }
         addRow(key, label, o.gesamt, o.frei);
       });
@@ -1292,14 +1299,14 @@
       return text;
     }
     var headerText = groups.map(categoryHeaderText).join(' · ');
-    var titleText = this.mobileCategory ? zone.name + ' · ' + catShortLabel(this.mobileCategory) : zone.name;
+    var titleText = (this.mobileCategory ? zone.name + gaesteZusatz(zone.zone_id) + ' · ' + catShortLabel(this.mobileCategory) : zone.name + gaesteZusatz(zone.zone_id));
     /* Anzeigename eines Ring-Nachbarn (kann ein anderer Block ODER eine andere Kategorie
        desselben Blocks sein, s. _zoneRing) fürs aria-label der Pfeile. */
     function neighbourName(key) {
       var parts = splitZoneKey(key);
       var z = self._zoneById(parts.zoneId);
       if (!z) return '';
-      return parts.category ? z.name + ' · ' + catShortLabel(parts.category) : z.name;
+      return parts.category ? z.name + gaesteZusatz(parts.zoneId) + ' · ' + catShortLabel(parts.category) : z.name + gaesteZusatz(parts.zoneId);
     }
     /* Pfeile links/rechts vom Blocknamen statt eines Zurück-Pfeils: von hier aus lässt
        sich durch alle Bereiche blättern, ohne jedes Mal in die Übersicht und zurück. Der
@@ -3045,7 +3052,7 @@
     function optionLabel(id, p) {
       if (p.category === 'Fanblock' || p.category === 'VIP') return p.category;
       if (p.category === 'C unten') return 'Courtside';
-      return 'Block ' + id + ' – ' + p.label;
+      return 'Block ' + id + gaesteZusatz(id) + ' – ' + p.label;
     }
     this.northZones.concat(this.southZones).forEach(function (id) {
       var purchasable = self._purchasableCategories(id);
