@@ -334,9 +334,14 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // Stornieren/Gutschein/Bar/SumUp nur mit Inhalt im Warenkorb und nicht waehrend einer laufenden Zahlung.
+  var sumupMoeglich = false;
   function setActionsEnabled() {
     var aus = !hasItems() || zahlungLaeuft;
     ['au-storno', 'au-gutschein', 'au-sumup', 'au-bar'].forEach(function (id) { document.getElementById(id).disabled = aus; });
+    // Nur Pfand zurück (Summe unter 0, Marko 27.10.2026): keine Rückzahlung per SumUp oder Gutschein, es bleibt nur Bar.
+    var nurPfand = hasItems() && total() < -0.005;
+    document.getElementById('au-gutschein').hidden = nurPfand;
+    document.getElementById('au-sumup').hidden = nurPfand || !sumupMoeglich;
   }
 
   function add(key) {
@@ -513,9 +518,8 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // Ohne SumUp in dieser App (aeltere App, normaler Browser): Knopf ausblenden, es bleibt Bar.
-  if (!(window.OpiBridge && window.OpiBridge.sumupAvailable && window.OpiBridge.sumupAvailable())) {
-    document.getElementById('au-sumup').hidden = true;
-  }
+  sumupMoeglich = !!(window.OpiBridge && window.OpiBridge.sumupAvailable && window.OpiBridge.sumupAvailable());
+  document.getElementById('au-sumup').hidden = !sumupMoeglich;
 
   // Zettel-Toggle (Marko, 01.10.2026: "ausblenden, damit die Kacheln noch groesser
   // werden") - Zustand pro Geraet in localStorage gemerkt (reine Anzeige-Bequemlichkeit,
