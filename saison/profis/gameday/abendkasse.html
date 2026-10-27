@@ -86,6 +86,19 @@
   .ak-stepper button:active { background: var(--surface-1, #eee); }
   .ak-step-count { font-size: 1.4rem; font-weight: 700; min-width: 28px; text-align: center; }
 
+
+  /* Hinweise oben (Marko, 27.10.2026): Kasse zaehlen vor dem Spiel, Kassenschnitt nach dem Spiel (wie im Ausschank). */
+  .ak-hinweise { display: flex; flex-direction: column; gap: 8px; margin: 0 0 10px; }
+  .ak-hinweise:empty { display: none; }
+  .ak-hinweis { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 14px;
+    padding: 10px 14px; border-radius: 10px; font-size: 1.05rem; background: #fff3e0; border: 2px solid var(--brand-orange, #d9802e);
+    color: var(--color-brand-navy, #00122d); }
+  .ak-hinweis-ende { background: #fde8e8; border-color: #b3261e; }
+  .ak-hinweis b { font-weight: 800; }
+  .ak-hinweis-knoepfe { display: flex; gap: 10px; flex-wrap: wrap; }
+  .ak-hinweis .btn { padding: 8px 16px; font-size: 1rem; }
+  .ak-hinweis-fertig { opacity: .6; text-decoration: line-through; }
+
   .seatplan-cart-total { font-size: 1.4rem; font-weight: 700; padding: 10px 0; }
   #seatplan-cta, #ak-bar { font-size: 1.3rem; padding: 20px; min-height: 64px; }
   /* Bar links, Karte rechts nebeneinander, Stornieren darunter (Marko, 15.10.2026, Reihenfolge getauscht 15.10.). */
@@ -188,6 +201,7 @@
 </head>
 <body>
 <div class="ak-wrap">
+  <div class="ak-hinweise" id="ak-hinweise" aria-live="polite"></div>
   <p class="t-body-sm ak-fehler" id="ak-fehler" hidden></p>
 
   <div id="ak-blockwahl">
@@ -216,7 +230,7 @@
   <div class="seatplan-cart-total" id="ak-gesamt" hidden><span>Gesamt</span><span id="seatplan-total">0,00 €</span></div>
   <div class="ak-pay" id="ak-pay">
     <button class="btn btn-outline-orange" id="ak-bar" disabled hidden>Bar</button>
-    <button class="btn btn-primary" id="seatplan-cta" disabled hidden>Karte</button>
+    <button class="btn btn-primary" id="seatplan-cta" disabled hidden>SumUp</button>
     <button class="btn btn-outline-orange ak-storno" id="ak-storno" hidden>Stornieren</button>
   </div>
   <div id="seatplan-occupancy"></div>
@@ -235,7 +249,7 @@
 </div>
 
 <script src="/js/seat-picker.js?v=1793099030"></script>
-<script src="opi-bridge.js?v=7"></script>
+<script src="opi-bridge.js?v=9"></script>
 <script>
   (function () {
     var b = document.getElementById('ak-diag');
@@ -611,7 +625,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (picker && cartHatTickets()) {
       try { gratis = !(effektivGesamt(picker.getSummary()) > 0); } catch (e) {}
     }
-    document.getElementById('seatplan-cta').textContent = gratis ? 'Ticket ausgeben (kostenlos)' : 'Karte';
+    document.getElementById('seatplan-cta').textContent = gratis ? 'Ticket ausgeben (kostenlos)' : 'SumUp';
     document.getElementById('ak-pay').classList.toggle('ak-gratis', gratis);
   }
 
@@ -856,10 +870,9 @@ document.addEventListener('DOMContentLoaded', function () {
   var erneutEl = document.getElementById('ak-erneut');
   var ctaEl = document.getElementById('seatplan-cta');
   var barEl = document.getElementById('ak-bar');
-  // Karte = SumUp (Kartenleser Air), seit dem 23.10.2026 statt S-Cube (Marko: funktioniert nicht). Nur in einer aelteren
-  // App ohne SumUp bleibt der S-Cube-Weg (charge), damit der Knopf dort nicht ins Leere laeuft.
+  // Kartenzahlung = SumUp (Kartenleser). Der S-Cube ist seit dem 27.10.2026 auch hier ganz raus (Marko): In einer App ohne
+  // SumUp meldet der Knopf, dass die App aktualisiert werden muss; Bar geht immer.
   var sumupAn = !!(window.OpiBridge && window.OpiBridge.sumupAvailable && window.OpiBridge.sumupAvailable());
-  if (sumupAn) ctaEl.textContent = 'SumUp';
   var stornoEl = document.getElementById('ak-storno');
 
   // Der Seat-Picker steuert nur #seatplan-cta (= "Karte": disabled/hidden). Bar und Stornieren
@@ -1064,7 +1077,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     zeigeStatus();
     if (inApp && !bar && !gratis) {
-      (sumupAn ? window.OpiBridge.sumup(gesamt) : window.OpiBridge.charge(gesamt)).then(function () {
+      (sumupAn ? window.OpiBridge.sumup(gesamt) : Promise.reject(new Error('SumUp ist in dieser App-Version nicht verfügbar. Bitte die App aktualisieren oder Bar wählen.'))).then(function () {
         pay.state = 'ok';
         order.state = 'offen';
         zeigeStatus();
@@ -1115,6 +1128,68 @@ document.addEventListener('DOMContentLoaded', function () {
     bestellLaeuft = false;
     initPicker(currentGame);
   });
+
+  // ---- Hinweise: Kasse zaehlen (vor dem Spiel) und Kassenschnitt (nach dem Spiel), wie im Ausschank ----
+  // Spieltag = heutiges Heimspiel aus data/heimspiele.json (Berliner Zeit, nach Mitternacht bis 5 Uhr noch der Vortag),
+  // "Spiel vorbei" = Anpfiff plus SPIEL_DAUER_MIN. Den Stand der Kasse holt die Seite beim Server (action status).
+  var SPIEL_DAUER_MIN = 150;
+  var KASSE_URL = 'https://ticketing.basketball-loewen.com/webhook/kasse-schnitt';
+  var hinweise = document.getElementById('ak-hinweise');
+  var spieltag = null;
+  function berlin() {
+    var f = new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false });
+    var t = {}; f.formatToParts(new Date()).forEach(function (x) { t[x.type] = x.value; });
+    var h = parseInt(t.hour, 10) % 24, m = parseInt(t.minute, 10);
+    var d = new Date(Date.UTC(parseInt(t.year, 10), parseInt(t.month, 10) - 1, parseInt(t.day, 10)));
+    if (h < 5) d = new Date(d.getTime() - 86400000);
+    var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+    return { datum: pad(d.getUTCDate()) + '.' + pad(d.getUTCMonth() + 1) + '.' + d.getUTCFullYear(), minuten: (h < 5 ? h + 24 : h) * 60 + m };
+  }
+  function kasseApp() { return !!(window.OpiBridge && window.OpiBridge.kasseAvailable && window.OpiBridge.kasseAvailable()); }
+  function kasseKnopf(ziel, text) { return kasseApp() ? '<button type="button" class="btn btn-primary" data-kasse="' + ziel + '">' + text + '</button>' : ''; }
+  function zeigeHinweise(status) {
+    var heute = status && status.heute;
+    if (!spieltag || !heute) { hinweise.innerHTML = ''; return; }
+    var vorbei = berlin().minuten >= spieltag.minuten + SPIEL_DAUER_MIN;
+    var sumupMoeglich = !!(window.OpiBridge && window.OpiBridge.sumupAvailable && window.OpiBridge.sumupAvailable());
+    var h = '';
+    if (!heute.beginn) {
+      h += '<div class="ak-hinweis"><span><b>Kasse noch nicht gezählt.</b> Bitte den Anfangsbestand der Barkasse eintragen' + (kasseApp() ? '' : ' (Einstellungen, Diagnose, Kassenschnitt)') + '.</span>' +
+        '<span class="ak-hinweis-knoepfe">' + kasseKnopf('beginn', 'Kasse zählen') + '</span></div>';
+    } else if (vorbei && (!heute.schnittBar || (sumupMoeglich && !heute.schnittSumup))) {
+      h += '<div class="ak-hinweis ak-hinweis-ende"><span><b>Das Spiel ist vorbei: Kassenschnitt machen.</b> ' +
+        '<span class="' + (heute.schnittBar ? 'ak-hinweis-fertig' : '') + '">Barkasse' + (heute.schnittBar ? ' erledigt' : ' offen') + '</span>' +
+        (sumupMoeglich ? ' · <span class="' + (heute.schnittSumup ? 'ak-hinweis-fertig' : '') + '">SumUp' + (heute.schnittSumup ? ' erledigt' : ' offen') + '</span>' : '') + '</span>' +
+        '<span class="ak-hinweis-knoepfe">' + (heute.schnittBar ? '' : kasseKnopf('schnitt', 'Kassenschnitt Barkasse')) +
+        (sumupMoeglich && !heute.schnittSumup ? kasseKnopf('sumup', 'Kassenschnitt SumUp') : '') + '</span></div>';
+    }
+    hinweise.innerHTML = h;
+  }
+  function ladeKasseStatus() {
+    if (!spieltag) return;
+    fetch(KASSE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Kassen-Token': (window.OpiBridge && window.OpiBridge.token()) || '' },
+      body: JSON.stringify({ action: 'status', kasse: 'ticketing' })
+    }).then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) { if (d && d.ok) zeigeHinweise(d); })
+      .catch(function () {});
+  }
+  hinweise.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-kasse]');
+    if (b && window.OpiBridge && window.OpiBridge.kasse) window.OpiBridge.kasse(b.getAttribute('data-kasse'));
+  });
+  fetch('/data/heimspiele.json?t=' + Date.now()).then(function (r) { return r.json(); }).then(function (d) {
+    var heute = berlin().datum;
+    (d.spiele || []).forEach(function (sp) {
+      if (sp.datum !== heute || !/^\d{1,2}:\d{2}$/.test(sp.zeit || '')) return;
+      var t = sp.zeit.split(':');
+      spieltag = { minuten: parseInt(t[0], 10) * 60 + parseInt(t[1], 10) };
+    });
+    ladeKasseStatus();
+    setInterval(ladeKasseStatus, 60000);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) ladeKasseStatus(); });
+  }).catch(function () {});
 });
 </script>
 </body>
