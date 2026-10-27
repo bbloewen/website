@@ -125,6 +125,33 @@
   .au-actions .btn:disabled { opacity: 0.4; }
   .au-storno { padding-left: 18px; padding-right: 18px; }
   .au-actions [hidden] { display: none !important; }
+  /* Stornieren links neben dem Betrag (Marko, 27.10.2026); die Zahlarten rechts: Gutschein, Bar, SumUp (ganz rechts). */
+  .au-links { display: flex; align-items: center; gap: 18px; }
+  .au-links .btn { font-size: 1.2rem; padding: 16px 24px; white-space: nowrap; justify-content: center; }
+  .au-links .btn:disabled { opacity: 0.4; }
+
+  /* Hinweise oben (Marko, 27.10.2026): Kasse zaehlen vor dem Spiel, Kassenschnitt nach dem Spiel. */
+  .au-hinweise { flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; padding: 10px 16px 0; }
+  .au-hinweise:empty { display: none; }
+  .au-hinweis { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 14px;
+    padding: 10px 14px; border-radius: 10px; font-size: 1rem; background: #fff3e0; border: 2px solid var(--brand-orange, #d9802e);
+    color: var(--color-brand-navy, #00122d); }
+  .au-hinweis-ende { background: #fde8e8; border-color: #b3261e; }
+  .au-hinweis b { font-weight: 800; }
+  .au-hinweis-knoepfe { display: flex; gap: 10px; flex-wrap: wrap; }
+  .au-hinweis .btn { padding: 8px 16px; font-size: 1rem; }
+  .au-hinweis-fertig { opacity: .6; text-decoration: line-through; }
+
+  /* Gutschein einloesen: eigenes Fenster in der Seite (kein window.prompt, das gibt es in der App nicht). */
+  .au-modal { position: fixed; inset: 0; z-index: 60; display: none; align-items: center; justify-content: center; background: rgba(0,18,45,.45); }
+  .au-modal.au-modal-offen { display: flex; }
+  .au-modal-box { width: min(440px, 92vw); background: #fff; border-radius: 16px; padding: 22px; box-shadow: 0 12px 40px rgba(0,0,0,.35); }
+  .au-modal-box h2 { margin: 0 0 4px; font-size: 1.4rem; }
+  .au-modal-box p { margin: 0 0 14px; color: var(--text-muted, #555); }
+  .au-modal-box label { display: block; font-weight: 700; margin: 12px 0 4px; }
+  .au-modal-box input { width: 100%; font-size: 1.3rem; padding: 12px; border: 2px solid var(--border-strong, #999); border-radius: 10px; }
+  .au-modal-knoepfe { display: flex; gap: 12px; justify-content: flex-end; margin-top: 18px; }
+  .au-modal-knoepfe .btn { font-size: 1.15rem; padding: 14px 22px; }
 
   /* Betrags-Einblendung nach dem Bezahlen (Marko, 01.10.2026): kein voller
      Bildschirm, kein Begleittext - nur der grosse Betrag selbst, ueber den Kacheln und
@@ -144,6 +171,7 @@
 </head>
 <body>
 <div class="au-page">
+  <div class="au-hinweise" id="au-hinweise" aria-live="polite"></div>
   <div class="au-content">
     <div class="au-main">
       <div class="au-grid" id="au-grid"></div>
@@ -161,15 +189,33 @@
 
   <div class="au-bar">
     <div class="au-bar-inner">
-      <div>
-        <div class="au-total-label">Gesamt</div>
-        <div class="au-total" id="au-total">0,00 €</div>
+      <div class="au-links">
+        <button type="button" class="btn btn-outline-orange au-storno" id="au-storno" disabled>Stornieren</button>
+        <div>
+          <div class="au-total-label">Gesamt</div>
+          <div class="au-total" id="au-total">0,00 €</div>
+        </div>
       </div>
       <div class="au-actions">
-        <button type="button" class="btn btn-outline-orange au-storno" id="au-storno" disabled>Stornieren</button>
-        <button type="button" class="btn btn-primary" id="au-sumup" disabled>SumUp</button>
+        <button type="button" class="btn btn-outline-orange" id="au-gutschein" disabled>Gutschein</button>
         <button type="button" class="btn btn-outline-orange" id="au-bar" disabled>Bar</button>
+        <button type="button" class="btn btn-primary" id="au-sumup" disabled>SumUp</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<div class="au-modal" id="au-gs-modal" role="dialog" aria-modal="true" aria-labelledby="au-gs-titel">
+  <div class="au-modal-box">
+    <h2 id="au-gs-titel">Gutschein einlösen</h2>
+    <p id="au-gs-text">Der Gutschein deckt den ganzen Betrag.</p>
+    <label for="au-gs-anzahl">Anzahl Gutscheine</label>
+    <input type="number" id="au-gs-anzahl" min="1" max="50" step="1" value="1" inputmode="numeric" />
+    <label for="au-gs-nr">Gutschein-Nr. (freiwillig)</label>
+    <input type="text" id="au-gs-nr" maxlength="40" autocomplete="off" autocapitalize="characters" />
+    <div class="au-modal-knoepfe">
+      <button type="button" class="btn btn-outline-orange" id="au-gs-abbrechen">Abbrechen</button>
+      <button type="button" class="btn btn-primary" id="au-gs-ok">Einlösen</button>
     </div>
   </div>
 </div>
@@ -178,7 +224,7 @@
   <div class="au-overlay-total" id="au-overlay-total">0,00 €</div>
 </div>
 
-<script src="opi-bridge.js?v=8"></script>
+<script src="opi-bridge.js?v=9"></script>
 <script>
   (function () {
     var b = document.getElementById('au-diag');
@@ -287,10 +333,10 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('au-receipt-total-amount').textContent = fmtEUR(t);
   }
 
-  // Stornieren/Bar/Karte nur mit Inhalt im Warenkorb und nicht waehrend einer laufenden Zahlung.
+  // Stornieren/Gutschein/Bar/SumUp nur mit Inhalt im Warenkorb und nicht waehrend einer laufenden Zahlung.
   function setActionsEnabled() {
     var aus = !hasItems() || zahlungLaeuft;
-    ['au-storno', 'au-sumup', 'au-bar'].forEach(function (id) { document.getElementById(id).disabled = aus; });
+    ['au-storno', 'au-gutschein', 'au-sumup', 'au-bar'].forEach(function (id) { document.getElementById(id).disabled = aus; });
   }
 
   function add(key) {
@@ -414,6 +460,17 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
+    if (art === 'gutschein') {
+      // Gutschein (Marko, 27.10.2026): deckt den ganzen Betrag, wird mit Anzahl und freiwilliger Nummer protokolliert
+      // (zahlart gutschein), damit eingeloeste Gutscheine nachvollziehbar sind. Keine Gutschrift (Pfand zurueck) per Gutschein.
+      if (istGutschrift) {
+        window.alert('Pfand zurück geht nicht per Gutschein. Bitte Bar wählen.');
+        return;
+      }
+      gutscheinFragen(betrag);
+      return;
+    }
+
     if (art === 'sumup') {
       // SumUp erstattet nicht ueber die App: Pfand-Gutschrift (negative Summe) nur bar.
       if (istGutschrift) {
@@ -432,6 +489,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
   document.getElementById('au-bar').addEventListener('click', function () { bezahlen('bar'); });
   document.getElementById('au-sumup').addEventListener('click', function () { bezahlen('sumup'); });
+  document.getElementById('au-gutschein').addEventListener('click', function () { bezahlen('gutschein'); });
+
+  // Gutschein-Fenster: Anzahl (mindestens 1) und freiwillige Nummer, dann einloesen.
+  var gsModal = document.getElementById('au-gs-modal');
+  var gsBetrag = 0;
+  function gutscheinFragen(betrag) {
+    gsBetrag = betrag;
+    document.getElementById('au-gs-text').textContent = 'Der Gutschein deckt den ganzen Betrag von ' + fmtEUR(betrag) + '.';
+    document.getElementById('au-gs-anzahl').value = '1';
+    document.getElementById('au-gs-nr').value = '';
+    gsModal.classList.add('au-modal-offen');
+  }
+  function gutscheinZu() { gsModal.classList.remove('au-modal-offen'); }
+  document.getElementById('au-gs-abbrechen').addEventListener('click', gutscheinZu);
+  document.getElementById('au-gs-ok').addEventListener('click', function () {
+    var anzahl = parseInt(document.getElementById('au-gs-anzahl').value, 10);
+    if (!(anzahl >= 1 && anzahl <= 50)) { window.alert('Bitte die Anzahl der Gutscheine eintragen (1 bis 50).'); return; }
+    var nr = String(document.getElementById('au-gs-nr').value || '').replace(/[^0-9A-Za-z._ -]/g, '').slice(0, 40).trim();
+    gutscheinZu();
+    if (zahlungLaeuft || !hasItems() || Math.abs(total() - gsBetrag) > 0.005) return;
+    verkaufAbschliessen({ gutschein: true, anzahl: anzahl, nr: nr, refund: false });
+  });
 
   // Ohne SumUp in dieser App (aeltere App, normaler Browser): Knopf ausblenden, es bleibt Bar.
   if (!(window.OpiBridge && window.OpiBridge.sumupAvailable && window.OpiBridge.sumupAvailable())) {
@@ -464,6 +543,77 @@ document.addEventListener('DOMContentLoaded', function () {
       try { localStorage.setItem(STORAGE_KEY, sichtbar ? '1' : '0'); } catch (e) {}
     });
   })();
+
+  // ---- Hinweise: Kasse zaehlen (vor dem Spiel) und Kassenschnitt (nach dem Spiel) ----
+  // Spieltag = heutiges Heimspiel aus data/heimspiele.json (Berliner Zeit; nach Mitternacht gilt noch der Vortag).
+  // "Spiel vorbei" = Anpfiff plus SPIEL_DAUER_MIN. Den Stand holt die Seite beim Server (action status), damit eine Kasse, die auf
+  // einem anderen iPad gezaehlt wurde, auch hier als erledigt gilt. Ohne die neue App fehlt der Link, der Text nennt dann den Weg.
+  var SPIEL_DAUER_MIN = 135;
+  var KASSE_URL = 'https://ticketing.basketball-loewen.com/webhook/kasse-schnitt';
+  var hinweise = document.getElementById('au-hinweise');
+  var spieltag = null;
+  function berlin() {
+    var f = new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false });
+    var t = {}; f.formatToParts(new Date()).forEach(function (x) { t[x.type] = x.value; });
+    var h = parseInt(t.hour, 10) % 24, m = parseInt(t.minute, 10);
+    var d = new Date(Date.UTC(parseInt(t.year, 10), parseInt(t.month, 10) - 1, parseInt(t.day, 10)));
+    if (h < 5) d = new Date(d.getTime() - 86400000);
+    var minuten = (h < 5 ? h + 24 : h) * 60 + m;
+    var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+    return { datum: pad(d.getUTCDate()) + '.' + pad(d.getUTCMonth() + 1) + '.' + d.getUTCFullYear(), minuten: minuten };
+  }
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function kasseLink(ziel, text) {
+    if (window.OpiBridge && window.OpiBridge.kasseAvailable && window.OpiBridge.kasseAvailable()) {
+      return '<button type="button" class="btn btn-primary" data-kasse="' + ziel + '">' + text + '</button>';
+    }
+    return '';
+  }
+  function zeigeHinweise(status) {
+    var heute = status && status.heute;
+    if (!spieltag || !heute) { hinweise.innerHTML = ''; return; }
+    var jetzt = berlin();
+    var vorbei = jetzt.minuten >= spieltag.minuten + SPIEL_DAUER_MIN;
+    var h = '';
+    if (!heute.beginn) {
+      var weg = (window.OpiBridge && window.OpiBridge.kasseAvailable && window.OpiBridge.kasseAvailable()) ? '' : ' (Einstellungen, Diagnose, Kassenschnitt)';
+      h += '<div class="au-hinweis"><span><b>Kasse noch nicht gezählt.</b> Bitte den Anfangsbestand der Barkasse eintragen' + weg + '.</span>' +
+        '<span class="au-hinweis-knoepfe">' + kasseLink('beginn', 'Kasse zählen') + '</span></div>';
+    } else if (vorbei && (!heute.schnittBar || !heute.schnittSumup)) {
+      h += '<div class="au-hinweis au-hinweis-ende"><span><b>Das Spiel ist vorbei: Kassenschnitt machen.</b> ' +
+        '<span class="' + (heute.schnittBar ? 'au-hinweis-fertig' : '') + '">Barkasse' + (heute.schnittBar ? ' erledigt' : ' offen') + '</span> · ' +
+        '<span class="' + (heute.schnittSumup ? 'au-hinweis-fertig' : '') + '">SumUp' + (heute.schnittSumup ? ' erledigt' : ' offen') + '</span></span>' +
+        '<span class="au-hinweis-knoepfe">' +
+        (heute.schnittBar ? '' : kasseLink('schnitt', 'Kassenschnitt Barkasse')) +
+        (heute.schnittSumup ? '' : kasseLink('sumup', 'Kassenschnitt SumUp')) + '</span></div>';
+    }
+    hinweise.innerHTML = h;
+  }
+  function ladeStatus() {
+    if (!spieltag) return;
+    fetch(KASSE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Kassen-Token': (window.OpiBridge && window.OpiBridge.token()) || '' },
+      body: JSON.stringify({ action: 'status', kasse: 'ausschank' })
+    }).then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) { if (d && d.ok) zeigeHinweise(d); })
+      .catch(function () {});
+  }
+  hinweise.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-kasse]');
+    if (b && window.OpiBridge && window.OpiBridge.kasse) window.OpiBridge.kasse(b.getAttribute('data-kasse'));
+  });
+  fetch('/data/heimspiele.json?t=' + Date.now()).then(function (r) { return r.json(); }).then(function (d) {
+    var heute = berlin().datum;
+    (d.spiele || []).forEach(function (sp) {
+      if (sp.datum !== heute || !/^\d{1,2}:\d{2}$/.test(sp.zeit || '')) return;
+      var t = sp.zeit.split(':');
+      spieltag = { minuten: parseInt(t[0], 10) * 60 + parseInt(t[1], 10), gegner: sp.gegner || '' };
+    });
+    ladeStatus();
+    setInterval(ladeStatus, 60000);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) ladeStatus(); });
+  }).catch(function () {});
 
   render();
 });

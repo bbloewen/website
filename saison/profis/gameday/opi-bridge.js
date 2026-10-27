@@ -78,6 +78,14 @@
     token: function () {
       return global.__kassenToken || '';
     },
+    // Oeffnet den Kassenschnitt-Bereich der App (nur mit neuer App, window.__kasseAvailable): ziel 'beginn' (Kasse zaehlen,
+    // Anfangsbestand), 'schnitt' (Kassenschnitt Barkasse) oder 'sumup' (Kassenschnitt SumUp).
+    kasseAvailable: function () {
+      return available && !!global.__kasseAvailable;
+    },
+    kasse: function (ziel) {
+      if (available) global.webkit.messageHandlers.opiBridge.postMessage({ action: 'kasse', ziel: ziel || 'beginn' });
+    },
     // Oeffnet in der nativen App die Diagnose-/Einstellungsansicht (Terminal-IP, Drucker).
     openDiagnose: function () {
       if (available) global.webkit.messageHandlers.opiBridge.postMessage({ action: 'diagnose' });
