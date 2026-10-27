@@ -34,6 +34,7 @@ Aufruf:
 
 import argparse
 import json
+import re
 import sys
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -177,14 +178,18 @@ def kalender(events, name=None):
 def camps():
     """Feriencamps aus trainieren/feriencamps.html (ganztaegige Termine)."""
     import html as _html
-    import re
     import urllib.parse
     text = (REPO / "trainieren" / "feriencamps.html").read_text(encoding="utf-8")
-    bloecke = re.split(r'(?=<div class="card hoverable camp-slider-card">)', text)[1:]
+    # Das Muster endet bewusst mit [\s"] statt mit "> -- eine Karte kann weitere
+    # Attribute tragen (seit den Rueckblick-Seiten z. B. data-camp="ostercamp-2027").
+    # Mit dem starren "> fielen genau diese Karten durch den Split, ihre .ics-Dateien
+    # wurden nie erzeugt und die iCal-Links liefen in einen 404 (Ahrefs-Crawl
+    # 27.10.2026: Ostercamp und Sommercamp 2027).
+    KARTE = r'<div class="card hoverable camp-slider-card[\s"]'
+    bloecke = re.split(f"(?={KARTE})", text)[1:]
     out, ohne_link = [], []
     for b in bloecke:
-        b = b.split('<div class="card hoverable camp-slider-card">', 1)[-1]
-        b = re.split(r'</section>|<div class="card hoverable camp-slider-card">', b)[0]
+        b = re.split(r"</section>", b)[0]
         h3 = re.search(r"<h3>(.*?)</h3>", b, re.S)
         g = re.search(r'href="(https://calendar\.google\.com[^"]*)"', b)
         if not (h3 and g):
@@ -239,6 +244,15 @@ def main():
         soll[OUT / "camp" / f"{c['key']}.ics"] = camp_kalender(c)
     for titel in camp_ohne_link:
         print(f"  HINWEIS: Camp-Karte '{titel}' hat keinen iCal-Link (<a class=\"kal-ics\" href=\"/kalender/camp/<Startdatum>.ics\">iCal</a>)", file=sys.stderr)
+
+    # Und die Gegenrichtung: ein iCal-Link, zu dem keine Datei entsteht, ist ein 404
+    # auf der Seite. Genau das blieb vom 24.09. bis 27.10.2026 unbemerkt.
+    verlinkt = set(re.findall(r'/kalender/camp/([0-9-]+)\.ics',
+                              (REPO / "trainieren" / "feriencamps.html").read_text(encoding="utf-8")))
+    erzeugt = {c["key"] for c in camp_liste}
+    for key in sorted(verlinkt - erzeugt):
+        print(f"  ACHTUNG: /kalender/camp/{key}.ics ist verlinkt, wird aber nicht erzeugt — "
+              f"Karte in trainieren/feriencamps.html prüfen", file=sys.stderr)
 
     geaendert = []
     for pfad, inhalt in soll.items():
