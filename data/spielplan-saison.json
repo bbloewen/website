@@ -41,7 +41,7 @@
     "spiele": [
       { "datum": "10.10.2026", "zeit": "14:00", "gegner": "SCIENCE CITY JENA", "heim": true, "ergebnis": "71 : 95" },
       { "datum": "18.10.2026", "zeit": "16:00", "gegner": "SG Junior Löwen Braunschweig", "heim": false, "ort": "Braunschweig", "ergebnis": "99 : 46" },
-      { "datum": "25.10.2026", "zeit": "13:00", "gegner": "Sartorius Juniors", "heim": true },
+      { "datum": "25.10.2026", "zeit": "13:00", "gegner": "Sartorius Juniors", "heim": true, "ergebnis": "71 : 87" },
       { "datum": "01.11.2026", "zeit": "15:00", "gegner": "Noch offen", "heim": false },
       { "datum": "08.11.2026", "zeit": "15:00", "gegner": "Noch offen", "heim": false },
       { "datum": "15.11.2026", "zeit": "15:00", "gegner": "Noch offen", "heim": false },
