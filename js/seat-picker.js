@@ -182,6 +182,13 @@
     Object.keys(priceInfo).forEach(function (k) { if (k !== 'kind') copy[k] = priceInfo[k]; });
     return copy;
   }
+  /* Anzeigename des Bereichs bei gewählten Sitzen: Die Fanblock-Sitze liegen im Plan in der Zone "Block A".
+     Kunden, die Fanblock gebucht haben, sollen in Warenkorb, Bestellbestätigung und Mail nicht "Block A" lesen
+     (Marko, 28.10.2026). Nur die Anzeige: zoneLabel bleibt für Zuordnung und Server unverändert. */
+  function seatZoneName(s) {
+    var z = s && s.zoneLabel ? String(s.zoneLabel) : '';
+    return s && s.category === 'Fanblock' ? z.replace(/^Block A\b/, 'Fanblock') : z;
+  }
   function blockTarifPrice(priceInfo, tarif) {
     if (tarif === 'begleitung') return 0;
     return tarif === 'ermaessigt_begleit' ? priceInfo.ermaessigt : priceInfo[tarif];
@@ -580,7 +587,7 @@
     Object.keys(this.selected).forEach(function (guid) {
       if (self.takenSeatGuids.has(guid)) {
         var s = self.selected[guid];
-        entfernt.push(s.zoneLabel + ', Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber);
+        entfernt.push(seatZoneName(s) + ', Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber);
         delete self.selected[guid];
       }
     });
@@ -1239,7 +1246,7 @@
     var labels = guids.map(function (guid) {
       var s = seats[guid];
       var reihe = 'Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber;
-      return s.zoneLabel === currentZoneName ? reihe : s.zoneLabel + ' · ' + reihe;
+      return s.zoneLabel === currentZoneName ? reihe : seatZoneName(s) + ' · ' + reihe;
     });
     // Rollstuhlplatz ist "inkl. Begleitkarte" (s. Preisliste) — die Begleitperson braucht
     // trotzdem einen echten Sitzplatz im selben Block, den es hier (anders als beim
@@ -2877,7 +2884,7 @@
             '</div>';
         }
         row.innerHTML =
-          '<div>' + s.zoneLabel + ' · Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber +
+          '<div>' + seatZoneName(s) + ' · Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber +
           // Kategorie sichtbar machen, wenn sie vom Preis her sonst nicht erkennbar
           // waere — der Rollstuhlplatz-Preis (104,00 €) ist z.B. identisch mit dem
           // ermaessigten Fanblock-Preis, ohne diesen Zusatz waere nicht ersichtlich,
@@ -3291,7 +3298,7 @@
         Object.keys(this.selected).forEach(function (guid) {
           var s = self.selected[guid];
           lines.push({
-            label: s.zoneLabel + ' · Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber + ' · ' + (DK_TARIF_LABELS[s.tarif] || 'Normalpreis'),
+            label: seatZoneName(s) + ' · Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber + ' · ' + (DK_TARIF_LABELS[s.tarif] || 'Normalpreis'),
             qty: 1, unitPrice: s.price, lineTotal: s.price,
             type: 'block', zoneLabel: s.zoneLabel, category: s.category, zoneId: s.zoneId, tarif: s.tarif,
             seatGuid: guid, rowLabel: s.rowLabel, seatNumber: s.seatNumber
@@ -3313,7 +3320,7 @@
       if (self.einzelticket) {
         // Format der Einzelticket-Bestellung (type 'block', qty 1) plus gewaehlter Sitz.
         lines.push({
-          label: s.zoneLabel + ' · Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber + ' · ' + (DK_TARIF_LABELS[s.tarif] || 'Normalpreis'),
+          label: seatZoneName(s) + ' · Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber + ' · ' + (DK_TARIF_LABELS[s.tarif] || 'Normalpreis'),
           qty: 1, unitPrice: s.price, lineTotal: s.price,
           type: 'block', zoneLabel: s.zoneLabel, category: s.category, zoneId: s.zoneId, tarif: s.tarif,
           seatGuid: guid, rowLabel: s.rowLabel, seatNumber: s.seatNumber
@@ -3322,7 +3329,7 @@
         return;
       }
       lines.push({
-        label: s.zoneLabel + ' · Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber + ' · ' + (DK_TARIF_LABELS[s.tarif] || 'Normalpreis'),
+        label: seatZoneName(s) + ' · Reihe ' + s.rowLabel + ', Platz ' + s.seatNumber + ' · ' + (DK_TARIF_LABELS[s.tarif] || 'Normalpreis'),
         qty: 1, unitPrice: s.price, lineTotal: s.price,
         // Maschinenlesbare Felder für die echte Pretix-Order-Erstellung (n8n) —
         // category/tarif bestimmen dort Item+Variation, seatGuid den Sitz. zoneLabel
