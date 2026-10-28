@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-27T16:00:42.999+01:00",
+  "generatedAt": "2026-10-28T16:00:52.813+01:00",
   "publishFrom": "2026-08-22",
   "events": [
     {
@@ -175,6 +175,18 @@
       "location": "Riethsporthalle, Essener Straße 20, 99089 Erfurt, Deutschland",
       "heroImage": "https://basketball-loewen.com/assets/img/saisoneroeffnung-2026.webp",
       "notionId": "3c8a2418-e2d7-808f-abee-f85395811444"
+    },
+    {
+      "notionId": "3dba2418-e2d7-8159-a95f-dae3a1b2a2d5",
+      "name": "Löwen-Sponsorenturnier",
+      "category": "Turnier",
+      "status": "Genehmigt",
+      "start": "2026-10-31T09:30:00.000+01:00",
+      "end": "2026-10-31T15:00:00.000+01:00",
+      "isDatetime": true,
+      "description": "",
+      "location": "Essener Str. 20, 99089 Erfurt, Germany",
+      "heroImage": "https://lh3.googleusercontent.com/d/1unUg6PJ59dvkr4zfdF185W6a6iwq57OC=w1600"
     }
   ]
 }
