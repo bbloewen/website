@@ -227,13 +227,29 @@
 <!--/PARTIAL:header--></div>
 <main id="main">
   <section class="section">
-    <div class="container container-narrow" style="text-align:center;padding-top:48px;padding-bottom:48px">
-      <span class="eyebrow">Newsletter</span>
-      <h1 class="t-h2" style="margin:8px 0 20px" id="abmelden-heading">Wird abgemeldet …</h1>
-      <p class="t-body" id="abmelden-text">Einen Moment bitte.</p>
-      <a class="btn btn-primary" href="/news/newsletter/" style="margin-top:24px;display:none" id="abmelden-link">Zurück zur Newsletter-Seite</a>
+    <div class="container container-narrow" style="padding-top:48px;padding-bottom:48px">
+      <span class="eyebrow">Abmelden</span>
+      <h1 class="t-h2" style="margin:8px 0 12px" id="abmelden-heading">E-Mails abbestellen</h1>
+      <p class="t-body" id="abmelden-text">Wähle, was du nicht mehr von uns bekommen möchtest.</p>
+      <form id="abmelden-form" style="margin-top:20px" novalidate>
+        <fieldset style="border:0;padding:0;margin:0">
+          <legend class="sr-only">Von welchen E-Mails möchtest du dich abmelden?</legend>
+          <label class="abmelden-wahl"><input type="checkbox" name="liste" value="newsletter"> <span><b>Newsletter</b><br><span class="t-small">Neuigkeiten, Spieltage und Aktionen der Basketball Löwen Erfurt für Fans, Mitglieder und alle Interessierten.</span></span></label>
+          <label class="abmelden-wahl"><input type="checkbox" name="liste" value="fastbreak"> <span><b>Fastbreak</b><br><span class="t-small">Unser Newsletter für Unternehmen, Sponsoren und Partner.</span></span></label>
+          <label class="abmelden-wahl"><input type="checkbox" name="liste" value="alle"> <span><b>Alle E-Mails</b><br><span class="t-small">Keine Mails mehr von uns, auch keine Einladungen oder Informationen.</span></span></label>
+        </fieldset>
+        <p class="t-small" id="abmelden-fehler" role="alert" style="color:#B3261E;margin:12px 0 0" hidden></p>
+        <button class="btn btn-primary" type="submit" id="abmelden-knopf" style="margin-top:20px">Abmelden</button>
+      </form>
+      <a class="btn btn-secondary" href="/news/newsletter/" style="margin-top:24px;display:none" id="abmelden-link">Zurück zur Newsletter-Seite</a>
     </div>
   </section>
+  <style>
+    .abmelden-wahl{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid #D3D8E2;border-radius:10px;margin-bottom:10px;cursor:pointer}
+    .abmelden-wahl input{margin-top:4px;width:18px;height:18px;flex:none}
+    .abmelden-wahl:focus-within{outline:2px solid #0028AA;outline-offset:2px}
+    .abmelden-wahl:has(input:disabled){opacity:.55;cursor:default}
+  </style>
 </main>
 <div id="site-footer-placeholder"><!--PARTIAL:footer-->
 <footer class="site-footer">
@@ -380,10 +396,31 @@
   var heading = document.getElementById('abmelden-heading');
   var text = document.getElementById('abmelden-text');
   var link = document.getElementById('abmelden-link');
+  var form = document.getElementById('abmelden-form');
+  var fehler = document.getElementById('abmelden-fehler');
+  var knopf = document.getElementById('abmelden-knopf');
+  var boxen = Array.prototype.slice.call(form.querySelectorAll('input[name="liste"]'));
   var params = new URLSearchParams(window.location.search);
   var token = params.get('token');
+  var vorwahl = params.get('v');
+
+  function box(wert) { return boxen.filter(function (b) { return b.value === wert; })[0]; }
+  function alleSync() {   // „Alle E-Mails“ schließt die beiden anderen ein
+    var alle = box('alle').checked;
+    boxen.forEach(function (b) { if (b.value !== 'alle') { b.disabled = alle; if (alle) b.checked = true; } });
+  }
+  boxen.forEach(function (b) {
+    b.addEventListener('change', function () {
+      fehler.hidden = true;
+      if (b.value === 'alle' && !b.checked) boxen.forEach(function (x) { if (x.value !== 'alle') x.checked = false; });   // „Alle“ abgewählt: die eingeschlossenen Auswahlen leeren
+      alleSync();
+    });
+  });
+  if (vorwahl === 'fastbreak' || vorwahl === 'alle') box(vorwahl).checked = true; else box('newsletter').checked = true;
+  alleSync();
 
   function showResult(ok, message) {
+    form.style.display = 'none';
     heading.textContent = ok ? 'Abgemeldet' : 'Das hat nicht geklappt';
     text.textContent = message;
     link.style.display = 'inline-flex';
@@ -391,17 +428,25 @@
 
   if (!token) {
     showResult(false, 'Es fehlt ein Abmelde-Code in diesem Link. Bitte nutze den Link direkt aus der E-Mail.');
-  } else {
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var listen = boxen.filter(function (b) { return b.checked; }).map(function (b) { return b.value; });
+    if (!listen.length) { fehler.textContent = 'Bitte mindestens eine Auswahl treffen.'; fehler.hidden = false; return; }
+    if (listen.indexOf('alle') >= 0) listen = ['alle'];
+    knopf.disabled = true; knopf.textContent = 'Wird abgemeldet …';
     fetch('https://ticketing.basketball-loewen.com/webhook/newsletter-abmelden', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: token })
+      body: JSON.stringify({ token: token, listen: listen, quelle: 'Abmeldeseite' })
     }).then(function (res) { return res.json(); }).then(function (data) {
       showResult(!!(data && data.ok), (data && data.message) || 'Unbekannter Fehler.');
     }).catch(function () {
-      showResult(false, 'Verbindung zum Server ist fehlgeschlagen. Bitte versuche es später noch einmal.');
+      knopf.disabled = false; knopf.textContent = 'Abmelden';
+      fehler.textContent = 'Verbindung zum Server ist fehlgeschlagen. Bitte versuche es später noch einmal.'; fehler.hidden = false;
     });
-  }
+  });
 </script>
 </body>
 </html>
