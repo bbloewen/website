@@ -2418,6 +2418,14 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 }
 .feedback-widget-btn:hover { background: var(--action-primary-hover); transform: translateY(-1px); }
 .feedback-widget.open .feedback-widget-btn { display: none; }
+.feedback-widget-dismiss {
+  position: absolute; top: -12px; right: -6px; width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center; padding: 0;
+  background: #fff; color: var(--text-secondary); border: 1px solid var(--border-subtle, rgba(0,18,45,.15));
+  border-radius: var(--radius-full); box-shadow: var(--shadow-md, 0 2px 8px rgba(0,18,45,.18)); cursor: pointer;
+}
+.feedback-widget-dismiss:hover { color: var(--text-primary); background: #f3f4f6; }
+.feedback-widget.open .feedback-widget-dismiss, .feedback-widget.dismissed { display: none; }
 .feedback-widget-panel {
   display: none; position: absolute; bottom: 0; right: 0;
   width: min(420px, calc(100vw - 40px)); background: #fff;

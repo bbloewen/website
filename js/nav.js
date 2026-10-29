@@ -345,6 +345,16 @@ window.initNav = function initNav() {
         '<option value="' + pageLabel + '">' + pageLabel + '</option>' +
         '<option value="Allgemeines Feedback">Allgemeines Feedback</option>';
     }
+    /* Wegklicken: das Kreuz blendet den Button für den Rest dieses Besuchs aus (sessionStorage),
+       damit er keine Buttons darunter verdeckt, zum Beispiel die Platzreservierung. */
+    var feedbackDismiss = document.getElementById('feedback-widget-dismiss');
+    try { if (window.sessionStorage.getItem('feedbackWidgetAus') === '1') feedbackWidget.classList.add('dismissed'); } catch (e) {}
+    if (feedbackDismiss) {
+      feedbackDismiss.addEventListener('click', function () {
+        feedbackWidget.classList.add('dismissed');
+        try { window.sessionStorage.setItem('feedbackWidgetAus', '1'); } catch (e) {}
+      });
+    }
     feedbackToggle.addEventListener('click', function () {
       feedbackWidget.classList.add('open');
     });
