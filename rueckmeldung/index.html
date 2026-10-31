@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="format-detection" content="telephone=no" />
+<title>Rückmeldung zum Heimspiel — Basketball Löwen Erfurt</title>
+<meta name="description" content="Rückmeldung zum Heimspiel der Basketball Löwen für Inhaber einer Dauerkarte." />
+<meta name="robots" content="noindex, nofollow" />
+<meta name="referrer" content="no-referrer" />
+<link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/logo/favicon-16.png" />
+<link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+<link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
+<link rel="stylesheet" href="/css/site.css?v=1793260149" />
+<!-- Rückmeldeseite „Kommst du?“ (Marko, 31.10.2026): persönlicher Link aus der Mail (?c=<Code>&a=<Antwort>).
+     Bewusst ohne Zählskripte: Gemessen wird nur die Antwort selbst. Daten kommen von n8n „305: Kommst du?“ (ay1ZaiTvPwl4FwA4).
+     Die Antwort wird erst mit dem Knopf gesendet, nicht beim Öffnen: Virenscanner in Mailprogrammen rufen Links auf. -->
+<style>
+  .rm-wrap { max-width: 640px; margin: 0 auto; padding: 40px 16px 64px; }
+  .rm-eyebrow { font-weight: 600; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: #B55709; margin: 0 0 6px; }
+  .rm-titel { font-weight: 900; font-size: clamp(26px, 5vw, 34px); line-height: 1.15; margin: 0 0 6px; }
+  .rm-spiel { font-size: 18px; margin: 0 0 24px; color: var(--text-muted, #4a5873); }
+  .rm-karte { border: 1px solid var(--border-strong, #d9dfea); border-radius: 10px; padding: 20px; margin: 0 0 20px; }
+  .rm-optionen { border: 0; padding: 0; margin: 0 0 16px; display: grid; gap: 10px; }
+  .rm-optionen legend { font-weight: 800; font-size: 18px; margin: 0 0 10px; }
+  .rm-option { display: flex; gap: 12px; align-items: flex-start; border: 2px solid var(--border-strong, #d9dfea); border-radius: 8px; padding: 14px 16px; cursor: pointer; }
+  .rm-option:has(input:checked) { border-color: #B55709; background: #fff7f0; }
+  .rm-option input { margin-top: 4px; width: 18px; height: 18px; accent-color: #B55709; flex-shrink: 0; }
+  .rm-option strong { display: block; }
+  .rm-option span { font-size: 14px; color: var(--text-muted, #4a5873); }
+  .rm-gast { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; margin: 4px 0 16px; }
+  .rm-gast label { display: grid; gap: 4px; font-weight: 600; font-size: 14px; }
+  .rm-gast label.voll { grid-column: 1 / -1; }
+  .rm-gast input { font: inherit; padding: 10px 12px; border: 1px solid var(--border-strong, #c4ccdb); border-radius: 6px; }
+  .rm-gast p { grid-column: 1 / -1; margin: 0; font-size: 14px; color: var(--text-muted, #4a5873); }
+  @media (max-width: 480px) { .rm-gast { grid-template-columns: 1fr; } }
+  .rm-knopf { font: inherit; font-weight: 700; background: #B55709; color: #fff; border: 0; border-radius: 6px; padding: 14px 24px; cursor: pointer; }
+  .rm-knopf:disabled { opacity: .6; cursor: default; }
+  .rm-knopf:focus-visible, .rm-option:focus-within { outline: 3px solid #0028AA; outline-offset: 2px; }
+  .rm-meldung { margin: 14px 0 0; font-weight: 600; }
+  .rm-meldung.fehler { color: #b3261e; }
+  .rm-danke { border-left: 4px solid #1b7a3d; background: #e6f4ea; padding: 16px 18px; border-radius: 6px; }
+  .rm-danke h2 { margin: 0 0 6px; font-size: 20px; }
+  .rm-danke p { margin: 0 0 8px; }
+  .rm-klein { font-size: 13px; color: var(--text-muted, #4a5873); }
+  .rm-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; margin: 0 0 28px; }
+  .rm-logo img { width: 44px; height: auto; }
+  .rm-logo span { font-weight: 900; font-size: 18px; }
+</style>
+</head>
+<body>
+<main id="main" class="rm-wrap">
+  <a class="rm-logo" href="/"><img src="/assets/logo/loewen-logo-4c.svg" width="600" height="565" alt="" /><span>Basketball Löwen</span></a>
+  <p class="rm-eyebrow">Heimspiel</p>
+  <h1 class="rm-titel" id="rm-titel">Rückmeldung</h1>
+  <p class="rm-spiel" id="rm-spiel">Wird geladen …</p>
+  <div id="rm-inhalt" aria-live="polite"></div>
+  <p class="rm-klein">Fragen? <a href="mailto:info@basketball-loewen.com">info@basketball-loewen.com</a> · <a href="/datenschutz.html">Datenschutz</a> · <a href="/impressum.html">Impressum</a></p>
+</main>
+<script>
+(function () {
+  var API = 'https://ticketing.basketball-loewen.com/webhook/';
+  var q = new URLSearchParams(location.search);
+  var code = (q.get('c') || '').replace(/[^0-9a-f]/g, '').slice(0, 32);
+  var vorwahl = q.get('a') || '';
+  var inhalt = document.getElementById('rm-inhalt');
+  var D = null, du = false;
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function w(a, b) { return du ? a : b; }
+  function wann(iso) {
+    var d = new Date(iso);
+    var t = d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+    return t + ', ' + d.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }) + ' Uhr';
+  }
+  function kalender() { return API + 'kommst-du-kalender?c=' + code; }
+  function fehler(text) { inhalt.innerHTML = '<div class="rm-karte"><p class="rm-meldung fehler">' + esc(text) + '</p></div>'; document.getElementById('rm-spiel').textContent = ''; }
+  function anrede() {
+    if (du && D.vorname) return 'Hallo ' + D.vorname + ',';
+    if (!du && D.anrede === 'Frau' && D.nachname) return 'Sehr geehrte Frau ' + D.nachname + ',';
+    if (!du && D.anrede === 'Herr' && D.nachname) return 'Sehr geehrter Herr ' + D.nachname + ',';
+    return 'Guten Tag' + (D.name ? ' ' + D.name : '') + ',';
+  }
+  var BISHER = { kommt: 'Sie haben zugesagt.', kommt_nicht: 'Sie haben abgesagt.', weitergegeben: 'Sie haben die Karte weitergegeben.' };
+  var BISHER_DU = { kommt: 'Du hast zugesagt.', kommt_nicht: 'Du hast abgesagt.', weitergegeben: 'Du hast die Karte weitergegeben.' };
+  function danke(antwort, gast) {
+    var h = '<div class="rm-danke" tabindex="-1" id="rm-danke">';
+    if (antwort === 'kommt' || antwort === 'immer') {
+      h += '<h2>' + w('Danke, wir freuen uns auf dich!', 'Danke, wir freuen uns auf Sie!') + '</h2>';
+      if (antwort === 'immer') h += '<p>' + w('Wir fragen dich in dieser Saison nicht mehr. Wenn du einmal nicht kannst, sag uns bitte über den Link in einer unserer Mails Bescheid.', 'Wir fragen Sie in dieser Saison nicht mehr. Wenn Sie einmal nicht können, sagen Sie uns bitte über den Link in einer unserer Mails Bescheid.') + '</p>';
+      h += '<p><a href="' + esc(kalender()) + '">Termin in den Kalender eintragen</a></p>';
+    } else if (antwort === 'kommt_nicht') {
+      h += '<h2>Danke für ' + w('deine', 'Ihre') + ' Rückmeldung.</h2><p>Schade, beim nächsten Mal hoffentlich wieder.</p>';
+    } else {
+      h += '<h2>Danke, wir haben ' + esc(gast) + ' eingetragen.</h2><p>' + w('Gib bitte die Eintrittskarte an diese Person weiter.', 'Bitte geben Sie die Eintrittskarte an diese Person weiter.') + ' Sie bekommt von uns eine kurze Willkommensmail mit den Infos zum Spieltag.</p>';
+    }
+    h += '<p class="rm-klein">' + w('Du kannst deine Antwort bis zum Spielbeginn ändern: ', 'Sie können Ihre Antwort bis zum Spielbeginn ändern: ') + '<a href="?c=' + esc(code) + '">Antwort ändern</a></p></div>';
+    inhalt.innerHTML = h;
+    var el = document.getElementById('rm-danke'); if (el) el.focus();
+  }
+  function formular() {
+    var plaetze = Number(D.plaetze) || 1;
+    var karte = w('deiner Dauerkarte', 'Ihrer Dauerkarte') + ' (' + plaetze + (plaetze === 1 ? ' Platz' : ' Plätze') + (/vip/i.test(D.kategorie || '') ? ' im VIP-Bereich' : '') + ')';
+    var bisher = D.antwort ? (du ? BISHER_DU : BISHER)[D.antwort] + (D.immer ? ' ' + w('Du kommst immer.', 'Sie kommen immer.') : '') + (D.antwort === 'weitergegeben' && D.gast_vorname ? ' (an ' + D.gast_vorname + ' ' + D.gast_nachname + ')' : '') : '';
+    var wahl = vorwahl || (D.immer ? 'immer' : D.antwort) || '';
+    var opt = function (wert, titel, text) {
+      return '<label class="rm-option"><input type="radio" name="antwort" value="' + wert + '"' + (wahl === wert ? ' checked' : '') + ' /><span><strong>' + titel + '</strong>' + (text ? '<span>' + text + '</span>' : '') + '</span></label>';
+    };
+    var h = '<div class="rm-karte"><p>' + esc(anrede()) + '</p><p>' + w('kommst du', 'kommen Sie') + ' zum Heimspiel? Mit ' + esc(karte) + ' ' + w('bist du', 'sind Sie') + ' herzlich willkommen.</p>' +
+      (bisher ? '<p><strong>Bisher:</strong> ' + esc(bisher) + '</p>' : '') + '</div>';
+    h += '<form id="rm-form" novalidate><fieldset class="rm-optionen"><legend>' + w('Deine Antwort', 'Ihre Antwort') + '</legend>' +
+      opt('kommt', 'Ich komme', '') +
+      opt('kommt_nicht', 'Ich komme nicht', '') +
+      opt('weitergegeben', 'Ich habe meine Karte weitergegeben', w('Nenn uns bitte, wer an deiner Stelle kommt.', 'Nennen Sie uns bitte, wer an Ihrer Stelle kommt.')) +
+      opt('immer', 'Ich komme immer', w('Wir fragen dich in dieser Saison nicht mehr.', 'Wir fragen Sie in dieser Saison nicht mehr.')) +
+      '</fieldset>' +
+      '<div class="rm-gast" id="rm-gast" hidden>' +
+      '<label for="rm-vorname">Vorname<input id="rm-vorname" name="vorname" autocomplete="off" maxlength="80" /></label>' +
+      '<label for="rm-nachname">Nachname<input id="rm-nachname" name="nachname" autocomplete="off" maxlength="80" /></label>' +
+      '<label class="voll" for="rm-email">E-Mail-Adresse<input id="rm-email" name="email" type="email" autocomplete="off" maxlength="200" /></label>' +
+      '<p>Wir schicken der Person eine kurze Willkommensmail mit den Infos zum Spieltag und unserem Datenschutzhinweis. Werbung bekommt sie nur, wenn sie sich selbst dafür anmeldet.</p></div>' +
+      '<button class="rm-knopf" type="submit" id="rm-senden">Rückmeldung senden</button><p class="rm-meldung" id="rm-meldung" role="status"></p></form>';
+    inhalt.innerHTML = h;
+    var form = document.getElementById('rm-form'), gast = document.getElementById('rm-gast');
+    function gastZeigen() { var a = (form.querySelector('input[name=antwort]:checked') || {}).value; gast.hidden = a !== 'weitergegeben'; }
+    form.addEventListener('change', gastZeigen); gastZeigen();
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var m = document.getElementById('rm-meldung'), k = document.getElementById('rm-senden');
+      var a = (form.querySelector('input[name=antwort]:checked') || {}).value;
+      if (!a) { m.className = 'rm-meldung fehler'; m.textContent = 'Bitte eine Antwort wählen.'; return; }
+      var g = { vorname: form.vorname.value.trim(), nachname: form.nachname.value.trim(), email: form.email.value.trim() };
+      if (a === 'weitergegeben' && (!g.vorname || !g.nachname || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(g.email))) {
+        m.className = 'rm-meldung fehler'; m.textContent = 'Bitte Vorname, Nachname und eine gültige E-Mail-Adresse der Person angeben, die kommt.'; return;
+      }
+      k.disabled = true; m.className = 'rm-meldung'; m.textContent = 'Wird gesendet …';
+      fetch(API + 'kommst-du-antwort', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ c: code, antwort: a, gast: a === 'weitergegeben' ? g : null }) })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (!d || !d.ok) { k.disabled = false; m.className = 'rm-meldung fehler'; m.textContent = (d && d.meldung) || 'Das hat nicht geklappt. Bitte später noch einmal versuchen.'; return; }
+          vorwahl = ''; D.antwort = a === 'immer' ? 'kommt' : a; D.immer = a === 'immer' || D.immer;
+          if (a === 'weitergegeben') { D.gast_vorname = g.vorname; D.gast_nachname = g.nachname; }
+          danke(a, g.vorname + ' ' + g.nachname);
+        })
+        .catch(function () { k.disabled = false; m.className = 'rm-meldung fehler'; m.textContent = 'Keine Verbindung. Bitte später noch einmal versuchen.'; });
+    });
+  }
+  if (!code) { fehler('Dieser Link ist nicht vollständig. Bitte öffnen Sie den Link aus unserer Mail.'); return; }
+  fetch(API + 'kommst-du-info?c=' + encodeURIComponent(code))
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (!d || !d.ok) { fehler((d && d.meldung) || 'Dieser Link ist nicht gültig.'); return; }
+      D = d; du = String(d.ansprache || '').toLowerCase() === 'du';
+      document.getElementById('rm-titel').textContent = w('Kommst du?', 'Kommen Sie?');
+      document.getElementById('rm-spiel').textContent = wann(d.spiel_beginn) + ' · ' + d.spiel_name + ' · Riethsporthalle, Essener Straße 20, 99089 Erfurt';
+      if (!d.offen) { fehler('Das Spiel hat schon begonnen. Eine Rückmeldung ist nicht mehr möglich.'); document.getElementById('rm-spiel').textContent = wann(d.spiel_beginn) + ' · ' + d.spiel_name; return; }
+      formular();
+    })
+    .catch(function () { fehler('Keine Verbindung. Bitte später noch einmal versuchen.'); });
+})();
+</script>
+</body>
+</html>
