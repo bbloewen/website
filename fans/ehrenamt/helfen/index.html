@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="format-detection" content="telephone=no" />
+<title>Helfen beim Heimspiel — Basketball Löwen Erfurt</title>
+<meta name="description" content="Trag dich in den Schichtplan ein und hilf beim Heimspiel der Basketball Löwen Erfurt." />
+<meta name="robots" content="noindex, nofollow" />
+<meta name="referrer" content="no-referrer" />
+<link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/logo/favicon-16.png" />
+<link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+<link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
+<link rel="stylesheet" href="/css/site.css?v=1793260149" />
+<!-- Helferliste (Marko, 31.10.2026): unter /fans/ehrenamt/helfen/, ohne Code alle offenen Termine, je Termin ?p=<Code>, Absage über ?absage=<Code> aus der Bestätigungsmail.
+     Daten aus n8n „305: Ehrenamt“ (LlBZfLz6ubbo4yoG), Schichtplan in 305 (Ehrenamt > Termine). Ohne Zählskripte. -->
+<style>
+  .hf-wrap { max-width: 720px; margin: 0 auto; padding: 32px 16px 64px; }
+  .hf-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; margin: 0 0 24px; }
+  .hf-logo img { width: 44px; height: auto; }
+  .hf-logo span { font-weight: 900; font-size: 18px; }
+  .hf-hero { background: radial-gradient(110% 100% at 100% 0%, #0028AA 0%, #00122D 100%); color: #fff; border-radius: 12px; padding: 28px 24px; margin: 0 0 24px; }
+  .hf-eyebrow { font-weight: 600; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: #FFB27A; margin: 0 0 8px; }
+  .hf-titel { font-weight: 900; font-size: clamp(28px, 6vw, 40px); line-height: 1.1; margin: 0 0 10px; }
+  .hf-titel em { font-style: normal; color: #FFB27A; }
+  .hf-hero p { margin: 0 0 8px; font-size: 17px; }
+  .hf-karte { border: 1px solid var(--border-strong, #d9dfea); border-radius: 10px; padding: 20px; margin: 0 0 20px; }
+  .hf-karte h2 { font-weight: 800; font-size: 20px; margin: 0 0 12px; }
+  .hf-ablauf { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .hf-ablauf li { padding-left: 18px; position: relative; }
+  .hf-ablauf li::before { content: ""; position: absolute; left: 0; top: .6em; width: 8px; height: 8px; border-radius: 50%; background: #E5710B; }
+  .hf-bereich { font-weight: 800; font-size: 16px; margin: 18px 0 8px; }
+  .hf-aufgabe { display: flex; gap: 12px; align-items: flex-start; border: 2px solid var(--border-strong, #d9dfea); border-radius: 8px; padding: 12px 14px; margin: 0 0 8px; cursor: pointer; }
+  .hf-aufgabe:has(input:checked) { border-color: #B55709; background: #fff7f0; }
+  .hf-aufgabe.voll { opacity: .55; cursor: default; }
+  .hf-aufgabe input { margin-top: 4px; width: 18px; height: 18px; accent-color: #B55709; flex-shrink: 0; }
+  .hf-aufgabe strong { display: block; }
+  .hf-aufgabe span span { font-size: 14px; color: var(--text-muted, #4a5873); }
+  .hf-felder { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+  .hf-felder label { display: grid; gap: 4px; font-weight: 600; font-size: 14px; }
+  .hf-felder label.voll { grid-column: 1 / -1; }
+  .hf-felder input { font: inherit; padding: 10px 12px; border: 1px solid var(--border-strong, #c4ccdb); border-radius: 6px; }
+  @media (max-width: 480px) { .hf-felder { grid-template-columns: 1fr; } }
+  .hf-knopf { font: inherit; font-weight: 700; background: #B55709; color: #fff; border: 0; border-radius: 6px; padding: 14px 24px; cursor: pointer; margin-top: 16px; }
+  .hf-knopf:disabled { opacity: .6; cursor: default; }
+  .hf-knopf:focus-visible, .hf-aufgabe:focus-within, .hf-felder input:focus-visible { outline: 3px solid #0028AA; outline-offset: 2px; }
+  .hf-meldung { margin: 12px 0 0; font-weight: 600; }
+  .hf-meldung.fehler { color: #b3261e; }
+  .hf-danke { border-left: 4px solid #1b7a3d; background: #e6f4ea; padding: 16px 18px; border-radius: 6px; }
+  .hf-danke h2 { margin: 0 0 6px; font-size: 20px; }
+  .hf-klein { font-size: 13px; color: var(--text-muted, #4a5873); }
+</style>
+</head>
+<body>
+<main id="main" class="hf-wrap">
+  <a class="hf-logo" href="/"><img src="/assets/logo/loewen-logo-4c.svg" width="600" height="565" alt="" /><span>Basketball Löwen</span></a>
+  <p class="hf-klein" style="margin:-12px 0 20px"><a href="/fans/ehrenamt.html">← Ehrenamt bei den Basketball Löwen</a></p>
+  <div id="hf-inhalt" aria-live="polite"><p>Wird geladen …</p></div>
+  <p class="hf-klein">Fragen? <a href="mailto:ehrenamt@basketball-loewen.com">ehrenamt@basketball-loewen.com</a> · <a href="/datenschutz.html">Datenschutz</a> · <a href="/impressum.html">Impressum</a></p>
+</main>
+<script>
+(function () {
+  var API = 'https://ticketing.basketball-loewen.com/webhook/';
+  var q = new URLSearchParams(location.search);
+  var plan = (q.get('p') || '').replace(/[^0-9a-f]/g, '').slice(0, 32);
+  var absage = (q.get('absage') || '').replace(/[^0-9a-f]/g, '').slice(0, 32);
+  var el = document.getElementById('hf-inhalt');
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function tag(d) { return new Date(d + 'T12:00:00Z').toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }); }
+  function uhr(iso) { return iso ? new Date(iso).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }) + ' Uhr' : ''; }
+  function zeit(a) { return a.zeit_von ? a.zeit_von + (a.zeit_bis ? '–' + a.zeit_bis : '') + ' Uhr' : ''; }
+  function fehler(t) { el.innerHTML = '<div class="hf-karte"><p class="hf-meldung fehler">' + esc(t) + '</p></div>'; }
+  function post(pfad, body) { return fetch(API + pfad, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) { return r.json(); }); }
+
+  if (absage) {
+    el.innerHTML = '<div class="hf-karte"><h2>Einsatz absagen</h2><p>Schade, dass es nicht klappt. Mit dem Knopf sagst du diesen Einsatz ab, damit wir den Platz neu besetzen können.</p><button class="hf-knopf" id="hf-absagen">Einsatz absagen</button><p class="hf-meldung" id="hf-m" role="status"></p></div>';
+    document.getElementById('hf-absagen').addEventListener('click', function (ev) {
+      var k = ev.target, m = document.getElementById('hf-m'); k.disabled = true; m.className = 'hf-meldung'; m.textContent = 'Wird gesendet …';
+      post('helfen-absage', { c: absage }).then(function (d) {
+        if (!d || !d.ok) { k.disabled = false; m.className = 'hf-meldung fehler'; m.textContent = (d && d.meldung) || 'Das hat nicht geklappt.'; return; }
+        el.innerHTML = '<div class="hf-danke"><h2>Danke für deine Absage.</h2><p>Deinen Einsatz „' + esc(d.aufgabe) + '“ beim ' + esc(d.plan) + ' haben wir ausgetragen. Beim nächsten Mal hoffentlich wieder!</p></div>';
+      }).catch(function () { k.disabled = false; m.className = 'hf-meldung fehler'; m.textContent = 'Keine Verbindung. Bitte später noch einmal versuchen.'; });
+    });
+    return;
+  }
+  if (!plan) {   // ohne Code: alle Termine, für die gerade Helfer gesucht werden (ein Link für die WhatsApp-Gruppe)
+    fetch(API + 'helfen-termine').then(function (r) { return r.json(); }).then(function (d) {
+      var t = (d && d.termine) || [];
+      var h = '<section class="hf-hero"><p class="hf-eyebrow">Ehrenamt bei den Basketball Löwen</p><h1 class="hf-titel">Wir brauchen <em>dich</em>.</h1><p>Ohne unser Ehrenamtsteam gibt es keinen Spieltag. Such dir einen Termin aus und trag dich ein.</p></section>';
+      if (!t.length) h += '<div class="hf-karte"><p>Gerade suchen wir für keinen Termin Helfer. Schau bald wieder vorbei!</p></div>';
+      t.forEach(function (x) {
+        h += '<a class="hf-karte" style="display:block;text-decoration:none;color:inherit" href="?p=' + esc(x.code) + '"><p class="hf-eyebrow" style="color:#B55709">' + (x.art === 'heimspiel' ? 'Heimspiel' : 'Veranstaltung') + ' · ' + esc(tag(x.datum)) + (x.beginn ? ' · ' + esc(uhr(x.beginn)) : '') + '</p>' +
+          '<h2>' + esc(x.titel) + '</h2><p>' + (x.frei > 0 ? 'Noch ' + x.frei + (x.frei === 1 ? ' Platz' : ' Plätze') + ' frei' : 'Alle Plätze besetzt, danke!') + ' · <strong>Jetzt eintragen →</strong></p></a>';
+      });
+      el.innerHTML = h;
+    }).catch(function () { fehler('Keine Verbindung. Bitte später noch einmal versuchen.'); });
+    return;
+  }
+
+  fetch(API + 'helfen-info?c=' + encodeURIComponent(plan)).then(function (r) { return r.json(); }).then(function (d) {
+    if (!d || !d.ok) { fehler((d && d.meldung) || 'Diese Helferliste gibt es nicht.'); return; }
+    var heim = d.art === 'heimspiel';
+    var h = '<section class="hf-hero"><p class="hf-eyebrow">' + (heim ? 'Heimspiel' : 'Veranstaltung') + ' · ' + esc(tag(d.datum)) + '</p>' +
+      '<h1 class="hf-titel">Wir brauchen <em>dich</em>.</h1><p><strong>' + esc(d.titel) + '</strong></p>' +
+      (d.teaser ? '<p>' + esc(d.teaser).replace(/\n/g, '<br>') + '</p>' : '<p>Ohne unser Ehrenamtsteam gibt es keinen Spieltag. Hilf mit, dass die Halle bebt!</p>') + '</section>';
+    var ablauf = [];
+    if (d.beginn) ablauf.push((heim ? 'Spielbeginn ' : 'Beginn ') + uhr(d.beginn));
+    if (d.ende) ablauf.push('Ende voraussichtlich ' + uhr(d.ende));
+    String(d.beschreibung || '').split(/\n+/).map(function (x) { return x.trim(); }).filter(Boolean).forEach(function (x) { ablauf.push(x); });
+    h += '<section class="hf-karte"><h2>Ablauf</h2><ul class="hf-ablauf">' + ablauf.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '<li>' + esc(d.ort) + '</li></ul></section>';
+    if (!d.offen) { el.innerHTML = h + '<div class="hf-karte"><p class="hf-meldung">Für diesen Termin ist keine Anmeldung mehr möglich. Danke für dein Interesse!</p></div>'; return; }
+    var bereiche = [], je = {};
+    (d.aufgaben || []).forEach(function (a) { if (!je[a.bereich]) { je[a.bereich] = []; bereiche.push(a.bereich); } je[a.bereich].push(a); });
+    h += '<form class="hf-karte" id="hf-form" novalidate><h2>Wobei hilfst du?</h2><p class="hf-klein">Du kannst mehrere Aufgaben wählen, wenn sich die Zeiten nicht überschneiden.</p>';
+    bereiche.forEach(function (b) {
+      h += '<fieldset style="border:0;padding:0;margin:0"><legend class="hf-bereich">' + esc(b) + '</legend>';
+      je[b].forEach(function (a) {
+        var voll = a.frei <= 0;
+        h += '<label class="hf-aufgabe' + (voll ? ' voll' : '') + '"><input type="checkbox" name="aufgabe" value="' + a.id + '"' + (voll ? ' disabled' : '') + ' /><span><strong>' + esc(a.titel) + '</strong><span>' + esc(zeit(a)) +
+          (voll ? ' · schon voll besetzt' : ' · noch ' + a.frei + (a.frei === 1 ? ' Platz' : ' Plätze') + ' frei') + (a.beschreibung ? ' · ' + esc(a.beschreibung) : '') + '</span></span></label>';
+      });
+      h += '</fieldset>';
+    });
+    h += '<h2 style="margin-top:24px">Über dich</h2><div class="hf-felder">' +
+      '<label for="hf-vorname">Vorname<input id="hf-vorname" name="vorname" autocomplete="given-name" maxlength="80" required /></label>' +
+      '<label for="hf-nachname">Nachname<input id="hf-nachname" name="nachname" autocomplete="family-name" maxlength="80" required /></label>' +
+      '<label for="hf-email" class="voll">E-Mail-Adresse<input id="hf-email" name="email" type="email" autocomplete="email" maxlength="200" required /></label>' +
+      '<label for="hf-telefon" class="voll">Mobilnummer (für kurzfristige Absprachen am Spieltag)<input id="hf-telefon" name="telefon" type="tel" autocomplete="tel" maxlength="40" /></label></div>' +
+      '<p class="hf-klein">Deine Angaben nutzen wir für die Einsatzplanung und speichern sie in unserer Kontaktverwaltung. Mehr in unserer <a href="/datenschutz.html">Datenschutzerklärung</a>.</p>' +
+      '<button class="hf-knopf" type="submit" id="hf-senden">Ich helfe mit</button><p class="hf-meldung" id="hf-m" role="status"></p></form>';
+    el.innerHTML = h;
+    var form = document.getElementById('hf-form');
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var m = document.getElementById('hf-m'), k = document.getElementById('hf-senden');
+      var aufgaben = [].slice.call(form.querySelectorAll('input[name=aufgabe]:checked')).map(function (x) { return x.value; });
+      var b = { c: plan, aufgaben: aufgaben, vorname: form.vorname.value.trim(), nachname: form.nachname.value.trim(), email: form.email.value.trim(), telefon: form.telefon.value.trim() };
+      if (!aufgaben.length) { m.className = 'hf-meldung fehler'; m.textContent = 'Bitte mindestens eine Aufgabe wählen.'; return; }
+      if (!b.vorname || !b.nachname || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(b.email)) { m.className = 'hf-meldung fehler'; m.textContent = 'Bitte Vorname, Nachname und eine gültige E-Mail-Adresse angeben.'; return; }
+      k.disabled = true; m.className = 'hf-meldung'; m.textContent = 'Wird gesendet …';
+      post('helfen-anmeldung', b).then(function (r) {
+        if (!r || !r.ok) { k.disabled = false; m.className = 'hf-meldung fehler'; m.textContent = (r && r.meldung) || 'Das hat nicht geklappt. Bitte später noch einmal versuchen.'; return; }
+        el.innerHTML = '<div class="hf-danke" tabindex="-1" id="hf-danke"><h2>Danke, ' + esc(b.vorname) + '!</h2><p>Du hast dich für ' + esc(d.titel) + ' eingetragen:</p><ul>' +
+          (r.aufgaben || []).map(function (a) { return '<li>' + esc(a.titel) + (a.zeit_von ? ' (' + esc(zeit(a)) + ')' : '') + '</li>'; }).join('') +
+          '</ul><p>Du bekommst gleich eine Bestätigung per Mail mit Kalendereintrag. Die Schichtleitung bestätigt deinen Einsatz.</p></div>';
+        document.getElementById('hf-danke').focus();
+      }).catch(function () { k.disabled = false; m.className = 'hf-meldung fehler'; m.textContent = 'Keine Verbindung. Bitte später noch einmal versuchen.'; });
+    });
+  }).catch(function () { fehler('Keine Verbindung. Bitte später noch einmal versuchen.'); });
+})();
+</script>
+</body>
+</html>
