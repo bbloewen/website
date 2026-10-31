@@ -282,7 +282,7 @@
     <div class="container">
     <span class="eyebrow" id="hf-eyebrow">Ehrenamt</span>
     <h1>Wir brauchen <span class="kw">dich<span class="swoosh" aria-hidden="true"></span></span>.</h1>
-    <p class="lead" id="hf-lead">Ohne unser Ehrenamtsteam gibt es keinen Spieltag. Such dir einen Termin aus und trag dich ein.</p>
+    <p class="lead" id="hf-lead" hidden></p>
     </div>
   </section>
   <section class="section">
@@ -447,6 +447,9 @@
   function tag(d) { return new Date(d + 'T12:00:00Z').toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }); }
   function uhr(iso) { return iso ? new Date(iso).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }) + ' Uhr' : ''; }
   function zeit(a) { return a.zeit_von ? a.zeit_von + (a.zeit_bis ? '–' + a.zeit_bis : '') + ' Uhr' : ''; }
+  // Kurzinfo zum Termin im Seitenkopf: Wochentag, Datum, Beginn, Ort
+  function kurz(x) { var w = new Date(x.datum + 'T12:00:00Z').toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' }); return w + (x.beginn ? ', ' + uhr(x.beginn) : '') + (x.ort ? ' · ' + String(x.ort).split(',')[0] : ''); }
+  function lead(html) { var l = document.getElementById('hf-lead'); if (!l) return; l.innerHTML = html; l.hidden = !html; }
   function fehler(t) { el.innerHTML = '<div class="hf-karte"><p class="hf-meldung fehler">' + esc(t) + '</p></div>'; }
   function post(pfad, body) { return fetch(API + pfad, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) { return r.json(); }); }
 
@@ -464,6 +467,7 @@
   if (!plan) {   // ohne Code: alle Termine, für die gerade Helfer gesucht werden (ein Link für die WhatsApp-Gruppe)
     fetch(API + 'helfen-termine').then(function (r) { return r.json(); }).then(function (d) {
       var t = (d && d.termine) || [];
+      if (t.length) lead(t.map(function (x) { return '<strong>' + esc(x.titel) + '</strong> · ' + esc(kurz(x)); }).join('<br>'));
       var h = '';
       if (!t.length) h += '<div class="hf-karte"><p>Gerade suchen wir für keinen Termin Helfer. Schau bald wieder vorbei!</p></div>';
       t.forEach(function (x) {
@@ -479,7 +483,7 @@
     if (!d || !d.ok) { fehler((d && d.meldung) || 'Diese Helferliste gibt es nicht.'); return; }
     var heim = d.art === 'heimspiel';
     document.getElementById('hf-eyebrow').textContent = (heim ? 'Heimspiel' : 'Veranstaltung') + ' · ' + tag(d.datum);
-    document.getElementById('hf-lead').innerHTML = '<strong>' + esc(d.titel) + '</strong><br>' + (d.teaser ? esc(d.teaser).replace(/\n/g, '<br>') : 'Ohne unser Ehrenamtsteam gibt es keinen Spieltag. Hilf mit, dass die Halle bebt!');
+    lead('<strong>' + esc(d.titel) + '</strong><br>' + esc(kurz(d)) + (d.teaser ? '<br>' + esc(d.teaser).replace(/\n/g, '<br>') : ''));
     var h = '';
     var ablauf = [];
     if (d.beginn) ablauf.push((heim ? 'Spielbeginn ' : 'Beginn ') + uhr(d.beginn));
