@@ -51,7 +51,7 @@
   .hero-photo p.lead#hf-lead { max-width: none; }
   .hero-photo .hf-zeile a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
   .hero-photo .hf-icon { width: 18px; height: 18px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .hf-diagramm { display: flex; align-items: stretch; gap: 0; overflow-x: auto; margin: 0 0 20px calc(50% - min(600px, 50vw - 24px)); padding: 38px 0 6px; width: min(1200px, calc(100vw - 48px)); }
+  .hf-diagramm { display: flex; align-items: stretch; gap: 0; overflow-x: auto; margin: 0 0 20px calc(50% - min(600px, 50vw - 24px)); padding: 2px 0 6px; width: min(1200px, calc(100vw - 48px)); }
   .hf-phase { display: grid; align-content: start; gap: 6px; padding: 6px 6px 8px; flex: 1 1 auto; }
   .hf-phase-vor { background: linear-gradient(90deg, #fff6ee 0%, #ffe0c2 100%); border-radius: 10px 0 0 10px; }
   .hf-phase-waehrend { background: linear-gradient(90deg, #E5710B 0%, #f29a4f 100%); color: #fff; }
@@ -67,10 +67,11 @@
   .hf-etappe-text { display: grid; line-height: 1.15; min-width: 0; }
   .hf-etappe-zeit { font-weight: 700; font-size: 12px; font-variant-numeric: tabular-nums; }
   .hf-etappe-name { font-size: 11px; color: #4a5873; overflow-wrap: break-word; hyphens: auto; -webkit-hyphens: auto; min-width: 0; max-width: 100%; }
-  /* Spielbeginn, Spielende und Hinweise (z. B. Frühstück) als Linie, die nach oben über die Kacheln hinausragt, Beschriftung darüber */
+  /* Hinweise aus der Beschreibung (z. B. Frühstück) als Linie, die nach oben über die Kacheln hinausragt, Beschriftung darüber */
+  .hf-diagramm.hf-mit-hinweis { padding-top: 38px; }
+  .hf-phase-zusatz { text-transform: none; letter-spacing: 0; font-weight: 600; }
   .hf-linie { position: relative; flex: 0 0 0; width: 0; z-index: 1; }
   .hf-linie::before { content: ''; position: absolute; left: -1px; top: -38px; bottom: 0; border-left: 2px dashed #00122D; }
-  .hf-linie-spiel::before { border-left-style: solid; }
   .hf-linie-text { position: absolute; top: -38px; left: 6px; display: grid; white-space: nowrap; font-size: 11px; line-height: 15px; font-weight: 800; color: #00122D; font-variant-numeric: tabular-nums; }
   .hf-phase-etappen .hf-linie::before { top: -64px; }
   .hf-phase-etappen .hf-linie .hf-linie-text { top: -64px; left: auto; right: 6px; text-align: right; font-weight: 600; font-style: italic; }
@@ -548,7 +549,9 @@
     };
     p.forEach(function (x) { x.aufgaben = []; x.etappen = []; });
     var nach = {}; p.forEach(function (x) { nach[x.key] = x; });
-    (d.aufgaben || []).forEach(function (a) { nach[phase(a.zeit_von, a.zeit_bis)].aufgaben.push(a); });
+    // Aufbau gehört immer vor, Abbau immer nach das Spiel, auch wenn eine Aufgabe kurz vor dem geschätzten Spielende beginnt
+    var fest = function (a) { var b = String(a.bereich || '').toLowerCase(); return start == null ? '' : (/^aufbau/.test(b) ? 'vor' : (/^abbau/.test(b) ? 'nach' : '')); };
+    (d.aufgaben || []).forEach(function (a) { nach[fest(a) || phase(a.zeit_von, a.zeit_bis)].aufgaben.push(a); });
     // Etappen je Phase aus deren eigenen Aufgaben (ein Bereich über den ganzen Tag erscheint so in jeder Phase mit seinen Zeiten),
     // dazu Spielbeginn, Ende und Uhrzeit-Zeilen der Beschreibung
     p.forEach(function (x) { x.etappen = ablaufEtappen({ aufgaben: x.aufgaben }); });
@@ -611,9 +614,7 @@
     // Vor, während und nach dem Spiel: Zeitleiste und Kacheln je Phase (Phase einer Aufgabe = Mitte ihrer Einsatzzeit gegen Spielbeginn und -ende)
     var ph = phasen(d);
     // Kompaktes Ablaufdiagramm in einer Zeile: Phasen farbig (vor dem Spiel heller Verlauf hin zum Spielbeginn, während kräftig, danach abklingend),
-    // Spielbeginn und Spielende als Markierung dazwischen. Ein Klick auf eine Etappe springt zu deren Aufgaben im Formular.
-    var phIndex = {};
-    ph.forEach(function (x, i) { phIndex[x.key] = i; });
+    // Spielbeginn und Spielende stehen hinter dem Phasentitel. Ein Klick auf eine Etappe springt zu deren Aufgaben im Formular.
     var linie = function (zeit, text, art, titel) {
       return '<span class="hf-linie hf-linie-' + art + '" title="' + esc(titel) + '"><span class="hf-linie-text"><span class="hf-linie-zeit">' + esc(zeit) + '</span><span>' + esc(text) + '</span></span></span>';
     };
@@ -626,15 +627,14 @@
         '<span class="hf-etappe-icon">' + icon(e.icon) + '</span><span class="hf-etappe-text"><span class="hf-etappe-zeit">' + esc(e.von) + '</span>' +
         '<span class="hf-etappe-name">' + esc(e.name) + '</span></span></' + (ziel ? 'a' : 'span') + '>';
     };
-    var marke = function (zeit, text, art) { return zeit ? linie(zeit, text, art, text + ' ' + zeit) : ''; };
     var mitEtappen = ph.filter(function (x) { return x.etappen.length; });
     if (mitEtappen.length) {
-      h += '<nav class="hf-diagramm" aria-label="Ablauf">';
+      var hinweis = mitEtappen.some(function (x) { return x.etappen.some(function (e) { return e.info; }); });
+      var zusatz = { waehrend: ph.start ? (heim ? 'Spielbeginn ' : 'Beginn ') + ph.start + ' Uhr' : '', nach: ph.ende ? (heim ? 'Spielende ca. ' : 'Ende ca. ') + ph.ende + ' Uhr' : '' };
+      h += '<nav class="hf-diagramm' + (hinweis ? ' hf-mit-hinweis' : '') + '" aria-label="Ablauf">';
       ph.forEach(function (x, i) {
-        if (x.key === 'waehrend') h += marke(ph.start, heim ? 'Spielbeginn' : 'Beginn', 'spiel');
-        if (x.key === 'nach') h += marke(ph.ende ? 'ca. ' + ph.ende : '', heim ? 'Spielende' : 'Ende', 'ende');
         if (!x.etappen.length) return;
-        h += '<div class="hf-phase hf-phase-' + x.key + '" style="flex-grow:' + x.etappen.length + '"><span class="hf-phase-label">' + esc(x.titel) + '</span><div class="hf-phase-etappen">' + x.etappen.map(function (e) { return etappeHtml(x, e); }).join('') + '</div></div>';
+        h += '<div class="hf-phase hf-phase-' + x.key + '" style="flex-grow:' + x.etappen.length + '"><span class="hf-phase-label">' + esc(x.titel) + (zusatz[x.key] ? ' <span class="hf-phase-zusatz">– ' + esc(zusatz[x.key]) + '</span>' : '') + '</span><div class="hf-phase-etappen">' + x.etappen.map(function (e) { return etappeHtml(x, e); }).join('') + '</div></div>';
       });
       h += '</nav>';
     }
