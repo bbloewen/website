@@ -85,7 +85,19 @@
     });
     return;
   }
-  if (!plan) { fehler('Dieser Link ist nicht vollständig. Bitte öffne den Link, den du von uns bekommen hast.'); return; }
+  if (!plan) {   // ohne Code: alle Termine, für die gerade Helfer gesucht werden (ein Link für die WhatsApp-Gruppe)
+    fetch(API + 'helfen-termine').then(function (r) { return r.json(); }).then(function (d) {
+      var t = (d && d.termine) || [];
+      var h = '<section class="hf-hero"><p class="hf-eyebrow">Ehrenamt bei den Basketball Löwen</p><h1 class="hf-titel">Wir brauchen <em>dich</em>.</h1><p>Ohne unser Ehrenamtsteam gibt es keinen Spieltag. Such dir einen Termin aus und trag dich ein.</p></section>';
+      if (!t.length) h += '<div class="hf-karte"><p>Gerade suchen wir für keinen Termin Helfer. Schau bald wieder vorbei!</p></div>';
+      t.forEach(function (x) {
+        h += '<a class="hf-karte" style="display:block;text-decoration:none;color:inherit" href="?p=' + esc(x.code) + '"><p class="hf-eyebrow" style="color:#B55709">' + (x.art === 'heimspiel' ? 'Heimspiel' : 'Veranstaltung') + ' · ' + esc(tag(x.datum)) + (x.beginn ? ' · ' + esc(uhr(x.beginn)) : '') + '</p>' +
+          '<h2>' + esc(x.titel) + '</h2><p>' + (x.frei > 0 ? 'Noch ' + x.frei + (x.frei === 1 ? ' Platz' : ' Plätze') + ' frei' : 'Alle Plätze besetzt, danke!') + ' · <strong>Jetzt eintragen →</strong></p></a>';
+      });
+      el.innerHTML = h;
+    }).catch(function () { fehler('Keine Verbindung. Bitte später noch einmal versuchen.'); });
+    return;
+  }
 
   fetch(API + 'helfen-info?c=' + encodeURIComponent(plan)).then(function (r) { return r.json(); }).then(function (d) {
     if (!d || !d.ok) { fehler((d && d.meldung) || 'Diese Helferliste gibt es nicht.'); return; }
