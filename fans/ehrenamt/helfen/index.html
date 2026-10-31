@@ -549,8 +549,12 @@
     };
     p.forEach(function (x) { x.aufgaben = []; x.etappen = []; });
     var nach = {}; p.forEach(function (x) { nach[x.key] = x; });
-    // Aufbau gehört immer vor, Abbau immer nach das Spiel, auch wenn eine Aufgabe kurz vor dem geschätzten Spielende beginnt
-    var fest = function (a) { var b = String(a.bereich || '').toLowerCase(); return start == null ? '' : (/^aufbau/.test(b) ? 'vor' : (/^abbau/.test(b) ? 'nach' : '')); };
+    // Phase aus dem Bereich (in 305 festgelegt); ohne Angabe gehört Aufbau vor und Abbau nach das Spiel, sonst entscheidet die Einsatzzeit
+    var fest = function (a) {
+      if (start == null) return '';
+      if (a.phase && a.phase !== 'auto' && nach[a.phase]) return a.phase;
+      var b = String(a.bereich || '').toLowerCase(); return /^aufbau/.test(b) ? 'vor' : (/^abbau/.test(b) ? 'nach' : '');
+    };
     (d.aufgaben || []).forEach(function (a) { nach[fest(a) || phase(a.zeit_von, a.zeit_bis)].aufgaben.push(a); });
     // Etappen je Phase aus deren eigenen Aufgaben (ein Bereich über den ganzen Tag erscheint so in jeder Phase mit seinen Zeiten),
     // dazu Spielbeginn, Ende und Uhrzeit-Zeilen der Beschreibung
