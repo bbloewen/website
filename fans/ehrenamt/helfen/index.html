@@ -545,21 +545,14 @@
       if (start == null) return 'alle';
       var a = minuten(von), b = minuten(bis); if (a == null) return 'vor';
       var mitte = b != null && b > a ? (a + b) / 2 : a;
-      return mitte < start ? 'vor' : (mitte > ende ? 'nach' : 'waehrend');
+      return mitte < start ? 'vor' : (mitte >= ende ? 'nach' : 'waehrend');
     };
     p.forEach(function (x) { x.aufgaben = []; x.etappen = []; });
     var nach = {}; p.forEach(function (x) { nach[x.key] = x; });
-    // Phase aus dem Bereich (in 305 festgelegt); ohne Angabe gehört Aufbau vor und Abbau nach das Spiel, sonst entscheidet die Einsatzzeit
-    var fest = function (a) {
-      if (start == null) return '';
-      if (a.phase && a.phase !== 'auto' && nach[a.phase]) return a.phase;
-      var b = String(a.bereich || '').toLowerCase(); return /^aufbau/.test(b) ? 'vor' : (/^abbau/.test(b) ? 'nach' : '');
-    };
-    (d.aufgaben || []).forEach(function (a) { nach[fest(a) || phase(a.zeit_von, a.zeit_bis)].aufgaben.push(a); });
-    // Etappen je Phase aus deren eigenen Aufgaben (ein Bereich über den ganzen Tag erscheint so in jeder Phase mit seinen Zeiten),
-    // dazu Spielbeginn, Ende und Uhrzeit-Zeilen der Beschreibung
+    // Phase allein aus der Einsatzzeit rund um den Spielbeginn; die Aufgaben kommen in der Reihenfolge der Bereiche und Nummern aus 305
+    (d.aufgaben || []).forEach(function (a) { nach[phase(a.zeit_von, a.zeit_bis)].aufgaben.push(a); });
+    // Etappen je Phase aus deren eigenen Aufgaben (ein Bereich über den ganzen Tag erscheint so in jeder Phase mit seinen Zeiten)
     p.forEach(function (x) { x.etappen = ablaufEtappen({ aufgaben: x.aufgaben }); });
-    ablaufEtappen({ beschreibung: d.beschreibung }).forEach(function (e) { nach[phase(e.von, e.bis)].etappen.push(e); });
     p.start = d.beginn ? uhr(d.beginn).replace(' Uhr', '') : ''; p.ende = d.ende ? uhr(d.ende).replace(' Uhr', '') : '';
     p.forEach(function (x) { x.etappen.sort(function (a, b) { return a.von.localeCompare(b.von) || (a.bis || '').localeCompare(b.bis || ''); }); });
     return p;
@@ -612,8 +605,7 @@
     var zv = (d.aufgaben || []).map(function (a) { return a.zeit_von; }).filter(Boolean).sort(), zb = (d.aufgaben || []).map(function (a) { return a.zeit_bis; }).filter(Boolean).sort();
     lead(kopf(Object.assign({ code: plan }, d), zv[0], zb[zb.length - 1]));
     var h = '';
-    // Ablauf als waagerechte Zeitleiste: Etappen aus dem Schichtplan (je Bereich früheste bis späteste Einsatzzeit), Spielbeginn,
-    // Ende und Zeilen der Beschreibung, die mit einer Uhrzeit beginnen (z. B. „09:00-09:30 Uhr gemeinsames Frühstück“)
+    // Ablauf als waagerechte Zeitleiste: Etappen aus dem Schichtplan (je Bereich früheste bis späteste Einsatzzeit)
     if (d.teaser) h += '<p class="hf-teaser">' + esc(d.teaser).replace(/\n/g, '<br>') + '</p>';
     // Vor, während und nach dem Spiel: Zeitleiste und Kacheln je Phase (Phase einer Aufgabe = Mitte ihrer Einsatzzeit gegen Spielbeginn und -ende)
     var ph = phasen(d);
