@@ -44,9 +44,13 @@
 <meta name="twitter:image" content="https://basketball-loewen.com/assets/img/share/og-default.jpg" />
 <!-- SEO:auto END -->
 <style>
-  /* Hero der Helferliste: Ehrenamtsteam beim Alley-Oop (Marko, 31.10.2026) */
-  .hero-photo.hero-helfen { --hero-photo-url: url('/assets/img/hero-helfen.webp'); background-position: center 12%; }
+  /* Hero der Helferliste: Maskottchen beim Heimspiel (Marko, 31.10.2026) */
+  .hero-photo.hero-helfen { --hero-photo-url: url('/assets/img/hero-helfen.webp?v=2'); background-position: center 30%; }
   .hero-photo.hero-helfen h1 { white-space: normal; max-width: 23ch; }
+  .hero-photo .hf-zeile { display: flex; gap: 8px; align-items: center; margin: 0 0 4px; }
+  .hero-photo .hf-zeile a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+  .hero-photo .hf-icon { width: 18px; height: 18px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .hf-teaser { font-size: 18px; margin: 0 0 20px; }
   .hf-wrap { max-width: 720px; margin: 0 auto; padding: 32px 0 48px; }
   .hf-eyebrow { font-weight: 600; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: #B55709; margin: 0 0 6px; }
   .hf-karte { border: 1px solid var(--border-strong, #d9dfea); border-radius: 10px; padding: 20px; margin: 0 0 20px; }
@@ -285,7 +289,7 @@
     <div class="container">
     <span class="eyebrow" id="hf-eyebrow">Ehrenamt</span>
     <h1>Wir brauchen <span class="kw">dich<span class="swoosh" aria-hidden="true"></span></span>.</h1>
-    <p class="lead" id="hf-lead" hidden></p>
+    <div class="lead" id="hf-lead" hidden></div>
     </div>
   </section>
   <section class="section">
@@ -450,8 +454,20 @@
   function tag(d) { return new Date(d + 'T12:00:00Z').toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }); }
   function uhr(iso) { return iso ? new Date(iso).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }) + ' Uhr' : ''; }
   function zeit(a) { return a.zeit_von ? a.zeit_von + (a.zeit_bis ? '–' + a.zeit_bis : '') + ' Uhr' : ''; }
-  // Kurzinfo zum Termin im Seitenkopf: Wochentag, Datum, Beginn, Ort
-  function kurz(x) { var w = new Date(x.datum + 'T12:00:00Z').toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' }); return w + (x.beginn ? ', ' + uhr(x.beginn) : '') + (x.ort ? ' · ' + String(x.ort).split(',')[0] : ''); }
+  // Seitenkopf: Spiel, Zeit (Aufbaubeginn, Spielbeginn in Klammern, als Kalender-Link) und Ort (Karten-Link), je eine Zeile
+  var ICON_KAL = '<svg class="hf-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
+  var ICON_ORT = '<svg class="hf-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+  function kopf(x, aufbau, schluss) {
+    var tag2 = new Date(x.datum + 'T12:00:00Z').toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' });
+    var von = aufbau || (x.beginn ? uhr(x.beginn).replace(' Uhr', '') : ''), bis = schluss || (x.ende ? uhr(x.ende).replace(' Uhr', '') : von);
+    var d = x.datum.replace(/-/g, ''), t = function (hhmm) { return d + 'T' + String(hhmm || '00:00').replace(':', '') + '00'; };
+    var kal = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('Helfen: ' + x.titel) + '&dates=' + (von ? t(von) + '/' + t(bis) : d + '/' + d) + '&ctz=Europe/Berlin&location=' + encodeURIComponent(x.ort || '') + '&details=' + encodeURIComponent('Helferliste: ' + location.origin + location.pathname + '?p=' + (x.code || plan));
+    var karte = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(x.ort || '');
+    var zeitText = tag2 + (aufbau ? ', Aufbau ab ' + aufbau + ' Uhr' : '') + (x.beginn ? ' (' + (x.art === 'heimspiel' ? 'Spielbeginn ' : 'Beginn ') + uhr(x.beginn) + ')' : '');
+    return '<span class="hf-zeile"><strong>' + esc(x.titel) + '</strong></span>' +
+      '<span class="hf-zeile">' + ICON_KAL + '<a href="' + esc(kal) + '" target="_blank" rel="noopener">' + esc(zeitText) + '</a></span>' +
+      (x.ort ? '<span class="hf-zeile">' + ICON_ORT + '<a href="' + esc(karte) + '" target="_blank" rel="noopener">' + esc(x.ort) + '</a></span>' : '');
+  }
   function lead(html) { var l = document.getElementById('hf-lead'); if (!l) return; l.innerHTML = html; l.hidden = !html; }
   function fehler(t) { el.innerHTML = '<div class="hf-karte"><p class="hf-meldung fehler">' + esc(t) + '</p></div>'; }
   function post(pfad, body) { return fetch(API + pfad, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) { return r.json(); }); }
@@ -470,7 +486,7 @@
   if (!plan) {   // ohne Code: alle Termine, für die gerade Helfer gesucht werden (ein Link für die WhatsApp-Gruppe)
     fetch(API + 'helfen-termine').then(function (r) { return r.json(); }).then(function (d) {
       var t = (d && d.termine) || [];
-      if (t.length) lead(t.map(function (x) { return '<strong>' + esc(x.titel) + '</strong> · ' + esc(kurz(x)); }).join('<br>'));
+      if (t.length) lead(kopf(t[0], t[0].aufbau, t[0].schluss));
       var h = '';
       if (!t.length) h += '<div class="hf-karte"><p>Gerade suchen wir für keinen Termin Helfer. Schau bald wieder vorbei!</p></div>';
       t.forEach(function (x) {
@@ -486,12 +502,14 @@
     if (!d || !d.ok) { fehler((d && d.meldung) || 'Diese Helferliste gibt es nicht.'); return; }
     var heim = d.art === 'heimspiel';
     document.getElementById('hf-eyebrow').textContent = (heim ? 'Heimspiel' : 'Veranstaltung') + ' · ' + tag(d.datum);
-    lead('<strong>' + esc(d.titel) + '</strong><br>' + esc(kurz(d)) + (d.teaser ? '<br>' + esc(d.teaser).replace(/\n/g, '<br>') : ''));
+    var zv = (d.aufgaben || []).map(function (a) { return a.zeit_von; }).filter(Boolean).sort(), zb = (d.aufgaben || []).map(function (a) { return a.zeit_bis; }).filter(Boolean).sort();
+    lead(kopf(Object.assign({ code: plan }, d), zv[0], zb[zb.length - 1]));
     var h = '';
     var ablauf = [];
     if (d.beginn) ablauf.push((heim ? 'Spielbeginn ' : 'Beginn ') + uhr(d.beginn));
     if (d.ende) ablauf.push('Ende voraussichtlich ' + uhr(d.ende));
     String(d.beschreibung || '').split(/\n+/).map(function (x) { return x.trim(); }).filter(Boolean).forEach(function (x) { ablauf.push(x); });
+    if (d.teaser) h += '<p class="hf-teaser">' + esc(d.teaser).replace(/\n/g, '<br>') + '</p>';
     h += '<section class="hf-karte"><h2>Ablauf</h2><ul class="hf-ablauf">' + ablauf.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '<li>' + esc(d.ort) + '</li></ul></section>';
     if (!d.offen) { el.innerHTML = h + '<div class="hf-karte"><p class="hf-meldung">Für diesen Termin ist keine Anmeldung mehr möglich. Danke für dein Interesse!</p></div>'; return; }
     var bereiche = [], je = {};
