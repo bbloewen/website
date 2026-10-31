@@ -494,21 +494,16 @@
     });
     return;
   }
-  if (!plan) {   // ohne Code: alle Termine, für die gerade Helfer gesucht werden (ein Link für die WhatsApp-Gruppe)
+  if (!plan) {   // ohne Code: die Landingpage des nächsten offenen Spiels (eine Seite je Spiel, kein Zwischenschritt)
     fetch(API + 'helfen-termine').then(function (r) { return r.json(); }).then(function (d) {
       var t = (d && d.termine) || [];
-      if (t.length) lead(kopf(t[0], t[0].aufbau, t[0].schluss));
-      var h = '';
-      if (!t.length) h += '<div class="hf-karte"><p>Gerade suchen wir für keinen Termin Helfer. Schau bald wieder vorbei!</p></div>';
-      t.forEach(function (x) {
-        h += '<a class="hf-karte" style="display:block;text-decoration:none;color:inherit" href="?p=' + esc(x.code) + '"><p class="hf-eyebrow" style="color:#B55709">' + (x.art === 'heimspiel' ? 'Heimspiel' : 'Veranstaltung') + ' · ' + esc(tag(x.datum)) + (x.beginn ? ' · ' + esc(uhr(x.beginn)) : '') + '</p>' +
-          '<h2>' + esc(x.titel) + '</h2><p>' + (x.frei > 0 ? 'Noch ' + x.frei + (x.frei === 1 ? ' Platz' : ' Plätze') + ' frei' : 'Alle Plätze besetzt, danke!') + ' · <strong>Jetzt eintragen →</strong></p></a>';
-      });
-      el.innerHTML = h;
+      if (!t.length) { el.innerHTML = '<div class="hf-karte"><p>Gerade suchen wir für keinen Termin Helfer. Schau bald wieder vorbei!</p></div>'; return; }
+      plan = t[0].code; ladePlan();
     }).catch(function () { fehler('Keine Verbindung. Bitte später noch einmal versuchen.'); });
     return;
   }
-
+  ladePlan();
+  function ladePlan() {
   fetch(API + 'helfen-info?c=' + encodeURIComponent(plan)).then(function (r) { return r.json(); }).then(function (d) {
     if (!d || !d.ok) { fehler((d && d.meldung) || 'Diese Helferliste gibt es nicht.'); return; }
     var heim = d.art === 'heimspiel';
@@ -564,6 +559,7 @@
       }).catch(function () { k.disabled = false; m.className = 'hf-meldung fehler'; m.textContent = 'Keine Verbindung. Bitte später noch einmal versuchen.'; });
     });
   }).catch(function () { fehler('Keine Verbindung. Bitte später noch einmal versuchen.'); });
+  }
 })();
 </script>
 </body>
