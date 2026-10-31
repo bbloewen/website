@@ -48,19 +48,35 @@
   .hero-photo.hero-helfen { --hero-photo-url: url('/assets/img/hero-helfen.webp?v=2'); background-position: center 30%; }
   .hero-photo.hero-helfen h1 { white-space: normal; max-width: 23ch; }
   .hero-photo .hf-zeile { display: flex; gap: 8px; align-items: center; margin: 0 0 4px; }
+  .hero-photo p.lead#hf-lead { max-width: none; }
   .hero-photo .hf-zeile a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
   .hero-photo .hf-icon { width: 18px; height: 18px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .hf-zeitleiste { display: flex; gap: 0; overflow-x: auto; padding: 4px 2px 8px; scroll-snap-type: x proximity; }
-  .hf-etappe { flex: 1 0 120px; display: grid; justify-items: center; text-align: center; gap: 4px; position: relative; padding: 0 6px; scroll-snap-align: start; }
-  .hf-etappe::before { content: ""; position: absolute; top: 22px; left: 0; right: 0; height: 2px; background: var(--border-strong, #d9dfea); z-index: 0; }
-  .hf-etappe:first-child::before { left: 50%; }
-  .hf-etappe:last-child::before { right: 50%; }
-  .hf-etappe-icon { position: relative; z-index: 1; width: 44px; height: 44px; border-radius: 50%; background: #fff; border: 2px solid #B55709; color: #B55709; display: grid; place-items: center; }
-  .hf-etappe-icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .hf-spiel .hf-etappe-icon { background: #B55709; color: #fff; }
-  .hf-etappe-zeit { font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; }
-  .hf-etappe-name { font-size: 13px; color: var(--text-muted, #4a5873); line-height: 1.3; }
-  .hf-phasen { display: grid; gap: 18px; }
+  .hf-diagramm { display: flex; align-items: stretch; gap: 0; overflow-x: auto; margin: 0 0 20px calc(50% - min(600px, 50vw - 24px)); padding: 38px 0 6px; width: min(1200px, calc(100vw - 48px)); }
+  .hf-phase { display: grid; align-content: start; gap: 6px; padding: 6px 6px 8px; flex: 1 1 auto; }
+  .hf-phase-vor { background: linear-gradient(90deg, #fff6ee 0%, #ffe0c2 100%); border-radius: 10px 0 0 10px; }
+  .hf-phase-waehrend { background: linear-gradient(90deg, #E5710B 0%, #f29a4f 100%); color: #fff; }
+  .hf-phase-nach { background: linear-gradient(90deg, #ffd9b5 0%, #eef1f6 100%); border-radius: 0 10px 10px 0; }
+  .hf-phase-alle { background: #f3f5f9; border-radius: 10px; }
+  .hf-phase-label { white-space: nowrap; line-height: 14px; font-weight: 800; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; opacity: .85; }
+  .hf-phase-etappen { display: flex; gap: 4px; }
+  .hf-etappe { display: grid; justify-items: center; align-content: start; gap: 2px; padding: 6px 3px; border-radius: 8px; background: rgba(255,255,255,.75); color: #00122D; text-decoration: none; text-align: center; flex: 1 1 64px; min-width: 64px; }
+  a.hf-etappe:hover, a.hf-etappe:focus-visible { background: #fff; box-shadow: 0 0 0 2px #B55709; outline: none; }
+  .hf-phase-waehrend .hf-etappe { background: rgba(255,255,255,.9); }
+  .hf-etappe-icon { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; color: #B55709; flex-shrink: 0; }
+  .hf-etappe-icon svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .hf-etappe-text { display: grid; line-height: 1.15; min-width: 0; }
+  .hf-etappe-zeit { font-weight: 700; font-size: 12px; font-variant-numeric: tabular-nums; }
+  .hf-etappe-name { font-size: 11px; color: #4a5873; overflow-wrap: break-word; hyphens: auto; -webkit-hyphens: auto; min-width: 0; max-width: 100%; }
+  /* Spielbeginn, Spielende und Hinweise (z. B. Frühstück) als Linie, die nach oben über die Kacheln hinausragt, Beschriftung darüber */
+  .hf-linie { position: relative; flex: 0 0 0; width: 0; z-index: 1; }
+  .hf-linie::before { content: ''; position: absolute; left: -1px; top: -38px; bottom: 0; border-left: 2px dashed #00122D; }
+  .hf-linie-spiel::before { border-left-style: solid; }
+  .hf-linie-text { position: absolute; top: -38px; left: 6px; display: grid; white-space: nowrap; font-size: 11px; line-height: 15px; font-weight: 800; color: #00122D; font-variant-numeric: tabular-nums; }
+  .hf-phase-etappen .hf-linie::before { top: -64px; }
+  .hf-phase-etappen .hf-linie .hf-linie-text { top: -64px; left: auto; right: 6px; text-align: right; font-weight: 600; font-style: italic; }
+  .hf-linie-zeit { font-weight: 800; font-style: normal; }
+  .hf-bereich-feld:target .hf-bereich, .hf-bereich-feld.hf-ziel .hf-bereich { color: #B55709; }
+  .hf-bereich-feld { scroll-margin-top: 110px; }
   .hf-phase-titel { font-weight: 800; font-size: 15px; letter-spacing: .06em; text-transform: uppercase; color: #B55709; margin: 0 0 8px; }
   .hf-kacheln { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; margin: 0 0 8px; }
   .hf-kacheln .hf-aufgabe { margin: 0; }
@@ -93,6 +109,8 @@
   .hf-knopf:focus-visible, .hf-aufgabe:focus-within, .hf-felder input:focus-visible { outline: 3px solid #0028AA; outline-offset: 2px; }
   .hf-meldung { margin: 12px 0 0; font-weight: 600; }
   .hf-meldung.fehler { color: #b3261e; }
+  .hf-weg { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .hf-felder textarea { font: inherit; padding: 10px 12px; border: 1px solid var(--border-strong, #c4ccdb); border-radius: 6px; resize: vertical; }
   .hf-danke { border-left: 4px solid #1b7a3d; background: #e6f4ea; padding: 16px 18px; border-radius: 6px; }
   .hf-danke h2 { margin: 0 0 6px; font-size: 20px; }
   .hf-klein { font-size: 13px; color: var(--text-muted, #4a5873); }
@@ -534,9 +552,8 @@
     // Etappen je Phase aus deren eigenen Aufgaben (ein Bereich über den ganzen Tag erscheint so in jeder Phase mit seinen Zeiten),
     // dazu Spielbeginn, Ende und Uhrzeit-Zeilen der Beschreibung
     p.forEach(function (x) { x.etappen = ablaufEtappen({ aufgaben: x.aufgaben }); });
-    ablaufEtappen({ beschreibung: d.beschreibung, beginn: d.beginn, ende: d.ende, art: d.art }).forEach(function (e) {
-      nach[e.spiel ? (start == null ? 'alle' : 'waehrend') : (e.icon === 'ende' ? (start == null ? 'alle' : 'nach') : phase(e.von, e.bis))].etappen.push(e);
-    });
+    ablaufEtappen({ beschreibung: d.beschreibung }).forEach(function (e) { nach[phase(e.von, e.bis)].etappen.push(e); });
+    p.start = d.beginn ? uhr(d.beginn).replace(' Uhr', '') : ''; p.ende = d.ende ? uhr(d.ende).replace(' Uhr', '') : '';
     p.forEach(function (x) { x.etappen.sort(function (a, b) { return a.von.localeCompare(b.von) || (a.bis || '').localeCompare(b.bis || ''); }); });
     return p;
   }
@@ -544,14 +561,14 @@
     var je = {}, liste = [];
     (d.aufgaben || []).forEach(function (a) {
       if (!a.zeit_von) return;
-      var e = je[a.bereich] || (je[a.bereich] = { name: a.bereich, von: a.zeit_von, bis: a.zeit_bis || '', icon: iconFuer(a.bereich + ' ' + a.titel) });
+      var e = je[a.bereich] || (je[a.bereich] = { name: a.bereich, bereich: a.bereich, von: a.zeit_von, bis: a.zeit_bis || '', icon: iconFuer(a.bereich + ' ' + a.titel) });
       if (a.zeit_von < e.von) e.von = a.zeit_von;
       if ((a.zeit_bis || '') > e.bis) e.bis = a.zeit_bis;
     });
     Object.keys(je).forEach(function (k) { liste.push(je[k]); });
     String(d.beschreibung || '').split(/\n+/).forEach(function (z) {
       var m = z.trim().match(/^(\d{1,2}[.:]\d{2})(?:\s*[-–]\s*(\d{1,2}[.:]\d{2}))?\s*(?:Uhr)?\s*(.+)$/);
-      if (m) liste.push({ name: m[3].charAt(0).toUpperCase() + m[3].slice(1), von: hhmm(m[1]), bis: m[2] ? hhmm(m[2]) : '', icon: iconFuer(m[3]) });
+      if (m) liste.push({ name: m[3].charAt(0).toUpperCase() + m[3].slice(1), von: hhmm(m[1]), bis: m[2] ? hhmm(m[2]) : '', icon: iconFuer(m[3]), info: true });
     });
     if (d.beginn) liste.push({ name: d.art === 'heimspiel' ? 'Spielbeginn' : 'Beginn', von: uhr(d.beginn).replace(' Uhr', ''), bis: '', icon: 'spiel', spiel: true });
     if (d.ende) liste.push({ name: 'Ende', von: uhr(d.ende).replace(' Uhr', ''), bis: '', icon: 'ende' });
@@ -593,11 +610,34 @@
     if (d.teaser) h += '<p class="hf-teaser">' + esc(d.teaser).replace(/\n/g, '<br>') + '</p>';
     // Vor, während und nach dem Spiel: Zeitleiste und Kacheln je Phase (Phase einer Aufgabe = Mitte ihrer Einsatzzeit gegen Spielbeginn und -ende)
     var ph = phasen(d);
-    var zeitleiste = function (etappen) { return '<div class="hf-zeitleiste" role="list">' + etappen.map(function (e) {
-      return '<div class="hf-etappe' + (e.spiel ? ' hf-spiel' : '') + '" role="listitem"><span class="hf-etappe-icon">' + icon(e.icon) + '</span><span class="hf-etappe-zeit">' + esc(e.von + (e.bis ? '–' + e.bis : '')) + '</span><span class="hf-etappe-name">' + esc(e.name) + '</span></div>';
-    }).join('') + '</div>'; };
+    // Kompaktes Ablaufdiagramm in einer Zeile: Phasen farbig (vor dem Spiel heller Verlauf hin zum Spielbeginn, während kräftig, danach abklingend),
+    // Spielbeginn und Spielende als Markierung dazwischen. Ein Klick auf eine Etappe springt zu deren Aufgaben im Formular.
+    var phIndex = {};
+    ph.forEach(function (x, i) { phIndex[x.key] = i; });
+    var linie = function (zeit, text, art, titel) {
+      return '<span class="hf-linie hf-linie-' + art + '" title="' + esc(titel) + '"><span class="hf-linie-text"><span class="hf-linie-zeit">' + esc(zeit) + '</span><span>' + esc(text) + '</span></span></span>';
+    };
+    var etappeHtml = function (x, e) {
+      // Hinweise aus der Beschreibung (z. B. gemeinsames Frühstück): nur Info, kein Punkt zum Eintragen
+      var spanne = e.von + (e.bis ? '–' + e.bis : '') + ' Uhr';
+      if (e.info) return linie(e.von, e.name, 'info', spanne + ' ' + e.name);
+      var ziel = e.bereich ? 'hf-b-' + x.key + '-' + encodeURIComponent(e.bereich).replace(/%/g, '') : '';
+      return '<' + (ziel ? 'a href="#' + ziel + '"' : 'span') + ' class="hf-etappe" title="' + esc(spanne + ' ' + e.name + (e.bereich ? ': Aufgaben ansehen und eintragen' : '')) + '">' +
+        '<span class="hf-etappe-icon">' + icon(e.icon) + '</span><span class="hf-etappe-text"><span class="hf-etappe-zeit">' + esc(e.von) + '</span>' +
+        '<span class="hf-etappe-name">' + esc(e.name) + '</span></span></' + (ziel ? 'a' : 'span') + '>';
+    };
+    var marke = function (zeit, text, art) { return zeit ? linie(zeit, text, art, text + ' ' + zeit) : ''; };
     var mitEtappen = ph.filter(function (x) { return x.etappen.length; });
-    if (mitEtappen.length) h += '<section class="hf-karte"><h2>Ablauf</h2><div class="hf-phasen">' + mitEtappen.map(function (x) { return '<div class="hf-phase"><h3 class="hf-phase-titel">' + esc(x.titel) + '</h3>' + zeitleiste(x.etappen) + '</div>'; }).join('') + '</div></section>';
+    if (mitEtappen.length) {
+      h += '<nav class="hf-diagramm" aria-label="Ablauf">';
+      ph.forEach(function (x, i) {
+        if (x.key === 'waehrend') h += marke(ph.start, heim ? 'Spielbeginn' : 'Beginn', 'spiel');
+        if (x.key === 'nach') h += marke(ph.ende ? 'ca. ' + ph.ende : '', heim ? 'Spielende' : 'Ende', 'ende');
+        if (!x.etappen.length) return;
+        h += '<div class="hf-phase hf-phase-' + x.key + '" style="flex-grow:' + x.etappen.length + '"><span class="hf-phase-label">' + esc(x.titel) + '</span><div class="hf-phase-etappen">' + x.etappen.map(function (e) { return etappeHtml(x, e); }).join('') + '</div></div>';
+      });
+      h += '</nav>';
+    }
     if (!d.offen) { el.innerHTML = h + '<div class="hf-karte"><p class="hf-meldung">Für diesen Termin ist keine Anmeldung mehr möglich. Danke für dein Interesse!</p></div>'; return; }
     h += '<form class="hf-karte" id="hf-form" novalidate><h2>Wobei hilfst du?</h2><p class="hf-klein">Du kannst mehrere Aufgaben wählen, wenn sich die Zeiten nicht überschneiden.</p>';
     ph.filter(function (x) { return x.aufgaben.length; }).forEach(function (x) {
@@ -605,7 +645,7 @@
       var bereiche = [], je = {};
       x.aufgaben.forEach(function (a) { if (!je[a.bereich]) { je[a.bereich] = []; bereiche.push(a.bereich); } je[a.bereich].push(a); });
       bereiche.forEach(function (b) {
-        h += '<fieldset style="border:0;padding:0;margin:0"><legend class="hf-bereich">' + esc(b) + '</legend><div class="hf-kacheln">';
+        h += '<fieldset id="hf-b-' + x.key + '-' + encodeURIComponent(b).replace(/%/g, '') + '" class="hf-bereich-feld" style="border:0;padding:0;margin:0"><legend class="hf-bereich">' + esc(b) + '</legend><div class="hf-kacheln">';
         je[b].forEach(function (a) {
           var voll = a.frei <= 0, besetzt = Math.max(a.max - a.frei, 0);
           var punkte = '';   // ein Punkt je Platz: gefüllt = besetzt (ohne Namen), leer = frei
@@ -620,25 +660,31 @@
     h += '<h2 style="margin-top:24px">Über dich</h2><div class="hf-felder">' +
       '<label for="hf-vorname">Vorname<input id="hf-vorname" name="vorname" autocomplete="given-name" maxlength="80" required /></label>' +
       '<label for="hf-nachname">Nachname<input id="hf-nachname" name="nachname" autocomplete="family-name" maxlength="80" required /></label>' +
-      '<label for="hf-email" class="voll">E-Mail-Adresse<input id="hf-email" name="email" type="email" autocomplete="email" maxlength="200" required /></label>' +
-      '<label for="hf-telefon" class="voll">Mobilnummer (für kurzfristige Absprachen am Spieltag)<input id="hf-telefon" name="telefon" type="tel" autocomplete="tel" maxlength="40" /></label></div>' +
-      '<p class="hf-klein">Deine Angaben nutzen wir für die Einsatzplanung und speichern sie in unserer Kontaktverwaltung. Mehr in unserer <a href="/datenschutz.html">Datenschutzerklärung</a>.</p>' +
+      '<label for="hf-kommentar" class="voll">Kommentar (freiwillig)<textarea id="hf-kommentar" name="kommentar" maxlength="300" rows="3" placeholder="z. B. Ich bin erst ab 07:30 Uhr da. Ich bringe Kuchen mit."></textarea></label>' +
+      // Spam-Sperre: Feld, das Menschen nicht sehen; Bots füllen es aus
+      '<label class="hf-weg" aria-hidden="true">Webseite<input name="website" tabindex="-1" autocomplete="off" /></label></div>' +
+      '<p class="hf-klein">Wir gleichen deinen Namen mit unserem Ehrenamtsteam ab. Mehr in unserer <a href="/datenschutz.html">Datenschutzerklärung</a>.</p>' +
       '<button class="hf-knopf" type="submit" id="hf-senden">Ich helfe mit</button><p class="hf-meldung" id="hf-m" role="status"></p></form>';
     el.innerHTML = h;
-    var form = document.getElementById('hf-form');
+    var form = document.getElementById('hf-form'), geoeffnet = Date.now();
     form.addEventListener('submit', function (ev) {
       ev.preventDefault();
       var m = document.getElementById('hf-m'), k = document.getElementById('hf-senden');
       var aufgaben = [].slice.call(form.querySelectorAll('input[name=aufgabe]:checked')).map(function (x) { return x.value; });
-      var b = { c: plan, aufgaben: aufgaben, vorname: form.vorname.value.trim(), nachname: form.nachname.value.trim(), email: form.email.value.trim(), telefon: form.telefon.value.trim() };
+      var b = { c: plan, aufgaben: aufgaben, vorname: form.vorname.value.trim(), nachname: form.nachname.value.trim(), kommentar: form.kommentar.value.trim(), website: form.website.value, dauer_ms: Date.now() - geoeffnet };
       if (!aufgaben.length) { m.className = 'hf-meldung fehler'; m.textContent = 'Bitte mindestens eine Aufgabe wählen.'; return; }
-      if (!b.vorname || !b.nachname || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(b.email)) { m.className = 'hf-meldung fehler'; m.textContent = 'Bitte Vorname, Nachname und eine gültige E-Mail-Adresse angeben.'; return; }
+      if (!b.vorname || !b.nachname) { m.className = 'hf-meldung fehler'; m.textContent = 'Bitte Vor- und Nachnamen angeben.'; return; }
       k.disabled = true; m.className = 'hf-meldung'; m.textContent = 'Wird gesendet …';
       post('helfen-anmeldung', b).then(function (r) {
         if (!r || !r.ok) { k.disabled = false; m.className = 'hf-meldung fehler'; m.textContent = (r && r.meldung) || 'Das hat nicht geklappt. Bitte später noch einmal versuchen.'; return; }
+        var d0 = d.datum.replace(/-/g, '');
         el.innerHTML = '<div class="hf-danke" tabindex="-1" id="hf-danke"><h2>Danke, ' + esc(b.vorname) + '!</h2><p>Du hast dich für ' + esc(d.titel) + ' eingetragen:</p><ul>' +
-          (r.aufgaben || []).map(function (a) { return '<li>' + esc(a.titel) + (a.zeit_von ? ' (' + esc(zeit(a)) + ')' : '') + '</li>'; }).join('') +
-          '</ul><p>Du bekommst gleich eine Bestätigung per Mail mit Kalendereintrag. Die Schichtleitung bestätigt deinen Einsatz.</p></div>';
+          (r.aufgaben || []).map(function (a) {
+            var kal = a.zeit_von ? 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('Helfen: ' + a.titel + ' (' + d.titel + ')') + '&dates=' + d0 + 'T' + a.zeit_von.replace(':', '') + '00/' + d0 + 'T' + (a.zeit_bis || a.zeit_von).replace(':', '') + '00&ctz=Europe/Berlin&location=' + encodeURIComponent(d.ort || '') + (a.code ? '&details=' + encodeURIComponent('Absagen: ' + location.origin + location.pathname + '?absage=' + a.code) : '') : '';
+            return '<li>' + esc(a.titel) + (a.zeit_von ? ' (' + esc(zeit(a)) + ')' : '') + (kal ? ' · <a href="' + esc(kal) + '" target="_blank" rel="noopener">in den Kalender</a>' : '') +
+              (a.code ? ' · <a href="?absage=' + esc(a.code) + '">absagen</a>' : '') + '</li>';
+          }).join('') +
+          '</ul><p>Die Schichtleitung bestätigt deinen Einsatz. Speichere dir am besten den Kalendereintrag, darin steht auch der Link zum Absagen.</p></div>';
         document.getElementById('hf-danke').focus();
       }).catch(function () { k.disabled = false; m.className = 'hf-meldung fehler'; m.textContent = 'Keine Verbindung. Bitte später noch einmal versuchen.'; });
     });
