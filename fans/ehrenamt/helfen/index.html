@@ -511,12 +511,11 @@
     var zv = (d.aufgaben || []).map(function (a) { return a.zeit_von; }).filter(Boolean).sort(), zb = (d.aufgaben || []).map(function (a) { return a.zeit_bis; }).filter(Boolean).sort();
     lead(kopf(Object.assign({ code: plan }, d), zv[0], zb[zb.length - 1]));
     var h = '';
-    var ablauf = [];
-    if (d.beginn) ablauf.push((heim ? 'Spielbeginn ' : 'Beginn ') + uhr(d.beginn));
+    // Spiel, Zeit und Ort stehen im Kopf; hier nur der Ablauf aus dem Schichtplan (Beschreibung in 305)
+    var ablauf = String(d.beschreibung || '').split(/\n+/).map(function (x) { return x.trim(); }).filter(Boolean);
     if (d.ende) ablauf.push('Ende voraussichtlich ' + uhr(d.ende));
-    String(d.beschreibung || '').split(/\n+/).map(function (x) { return x.trim(); }).filter(Boolean).forEach(function (x) { ablauf.push(x); });
     if (d.teaser) h += '<p class="hf-teaser">' + esc(d.teaser).replace(/\n/g, '<br>') + '</p>';
-    h += '<section class="hf-karte"><h2>Ablauf</h2><ul class="hf-ablauf">' + ablauf.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '<li>' + esc(d.ort) + '</li></ul></section>';
+    if (ablauf.length) h += '<section class="hf-karte"><h2>Ablauf</h2><ul class="hf-ablauf">' + ablauf.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></section>';
     if (!d.offen) { el.innerHTML = h + '<div class="hf-karte"><p class="hf-meldung">Für diesen Termin ist keine Anmeldung mehr möglich. Danke für dein Interesse!</p></div>'; return; }
     var bereiche = [], je = {};
     (d.aufgaben || []).forEach(function (a) { if (!je[a.bereich]) { je[a.bereich] = []; bereiche.push(a.bereich); } je[a.bereich].push(a); });
