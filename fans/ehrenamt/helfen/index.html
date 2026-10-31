@@ -58,6 +58,10 @@
   .hf-aufgabe input { margin-top: 4px; width: 18px; height: 18px; accent-color: #B55709; flex-shrink: 0; }
   .hf-aufgabe strong { display: block; }
   .hf-aufgabe span span { font-size: 14px; color: var(--text-muted, #4a5873); }
+  .hf-aufgabe span span { display: block; }
+  .hf-plaetze { display: flex !important; flex-wrap: wrap; gap: 4px; margin: 6px 0 2px; }
+  .hf-platz { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #B55709; background: #fff; }
+  .hf-platz.hf-besetzt { background: #B55709; }
   .hf-felder { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
   .hf-felder label { display: grid; gap: 4px; font-weight: 600; font-size: 14px; }
   .hf-felder label.voll { grid-column: 1 / -1; }
@@ -490,9 +494,12 @@
     bereiche.forEach(function (b) {
       h += '<fieldset style="border:0;padding:0;margin:0"><legend class="hf-bereich">' + esc(b) + '</legend>';
       je[b].forEach(function (a) {
-        var voll = a.frei <= 0;
+        var voll = a.frei <= 0, besetzt = Math.max(a.max - a.frei, 0);
+        var punkte = '';   // ein Punkt je Platz: gefüllt = besetzt (ohne Namen), leer = frei
+        for (var i = 0; i < a.max; i++) punkte += '<span class="hf-platz' + (i < besetzt ? ' hf-besetzt' : '') + '"></span>';
         h += '<label class="hf-aufgabe' + (voll ? ' voll' : '') + '"><input type="checkbox" name="aufgabe" value="' + a.id + '"' + (voll ? ' disabled' : '') + ' /><span><strong>' + esc(a.titel) + '</strong><span>' + esc(zeit(a)) +
-          (voll ? ' · schon voll besetzt' : ' · noch ' + a.frei + (a.frei === 1 ? ' Platz' : ' Plätze') + ' frei') + (a.beschreibung ? ' · ' + esc(a.beschreibung) : '') + '</span></span></label>';
+          (a.beschreibung ? ' · ' + esc(a.beschreibung) : '') + '</span><span class="hf-plaetze" aria-label="' + besetzt + ' von ' + a.max + ' Plätzen besetzt">' + punkte + '</span>' +
+          '<span>' + besetzt + ' von ' + a.max + ' besetzt' + (voll ? ' · voll' : ' · noch ' + a.frei + ' frei') + '</span></span></label>';
       });
       h += '</fieldset>';
     });
