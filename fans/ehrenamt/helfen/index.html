@@ -531,7 +531,13 @@
     p.forEach(function (x) { x.aufgaben = []; x.etappen = []; });
     var nach = {}; p.forEach(function (x) { nach[x.key] = x; });
     (d.aufgaben || []).forEach(function (a) { nach[phase(a.zeit_von, a.zeit_bis)].aufgaben.push(a); });
-    ablaufEtappen(d).forEach(function (e) { nach[e.spiel ? (start == null ? 'alle' : 'waehrend') : (e.icon === 'ende' ? (start == null ? 'alle' : 'nach') : phase(e.von, e.bis))].etappen.push(e); });
+    // Etappen je Phase aus deren eigenen Aufgaben (ein Bereich über den ganzen Tag erscheint so in jeder Phase mit seinen Zeiten),
+    // dazu Spielbeginn, Ende und Uhrzeit-Zeilen der Beschreibung
+    p.forEach(function (x) { x.etappen = ablaufEtappen({ aufgaben: x.aufgaben }); });
+    ablaufEtappen({ beschreibung: d.beschreibung, beginn: d.beginn, ende: d.ende, art: d.art }).forEach(function (e) {
+      nach[e.spiel ? (start == null ? 'alle' : 'waehrend') : (e.icon === 'ende' ? (start == null ? 'alle' : 'nach') : phase(e.von, e.bis))].etappen.push(e);
+    });
+    p.forEach(function (x) { x.etappen.sort(function (a, b) { return a.von.localeCompare(b.von) || (a.bis || '').localeCompare(b.bis || ''); }); });
     return p;
   }
   function ablaufEtappen(d) {
