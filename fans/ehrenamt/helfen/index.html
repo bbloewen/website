@@ -50,6 +50,16 @@
   .hero-photo .hf-zeile { display: flex; gap: 8px; align-items: center; margin: 0 0 4px; }
   .hero-photo .hf-zeile a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
   .hero-photo .hf-icon { width: 18px; height: 18px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .hf-zeitleiste { display: flex; gap: 0; overflow-x: auto; padding: 4px 2px 8px; scroll-snap-type: x proximity; }
+  .hf-etappe { flex: 1 0 120px; display: grid; justify-items: center; text-align: center; gap: 4px; position: relative; padding: 0 6px; scroll-snap-align: start; }
+  .hf-etappe::before { content: ""; position: absolute; top: 22px; left: 0; right: 0; height: 2px; background: var(--border-strong, #d9dfea); z-index: 0; }
+  .hf-etappe:first-child::before { left: 50%; }
+  .hf-etappe:last-child::before { right: 50%; }
+  .hf-etappe-icon { position: relative; z-index: 1; width: 44px; height: 44px; border-radius: 50%; background: #fff; border: 2px solid #B55709; color: #B55709; display: grid; place-items: center; }
+  .hf-etappe-icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .hf-spiel .hf-etappe-icon { background: #B55709; color: #fff; }
+  .hf-etappe-zeit { font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .hf-etappe-name { font-size: 13px; color: var(--text-muted, #4a5873); line-height: 1.3; }
   .hf-teaser { font-size: 18px; margin: 0 0 20px; }
   .hf-wrap { max-width: 720px; margin: 0 auto; padding: 32px 0 48px; }
   .hf-eyebrow { font-weight: 600; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: #B55709; margin: 0 0 6px; }
@@ -480,6 +490,45 @@
       (x.ort ? '<span class="hf-zeile">' + ICON_ORT + '<a href="' + esc(karte) + '" target="_blank" rel="noopener">' + esc(x.ort) + '</a></span>' : '');
   }
   function lead(html) { var l = document.getElementById('hf-lead'); if (!l) return; l.innerHTML = html; l.hidden = !html; }
+  // Symbole der Etappen (Linien wie Lucide), Zuordnung über Stichworte im Bereich
+  var ICONS = {
+    aufbau: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+    abbau: '<path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/>',
+    catering: '<path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><path d="M6 2v2M10 2v2M14 2v2"/>',
+    einlass: '<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M13 5v2M13 17v2M13 11v2"/>',
+    kampfgericht: '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M5 3 2 6M22 6l-3-3M10 2h4"/>',
+    medien: '<path d="m16 13 5.2 3.1a.5.5 0 0 0 .8-.4V8.3a.5.5 0 0 0-.8-.4L16 11"/><rect x="2" y="6" width="14" height="12" rx="2"/>',
+    stimmung: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+    spiel: '<circle cx="12" cy="12" r="10"/><path d="M4.9 4.9a10 10 0 0 1 0 14.2M19.1 4.9a10 10 0 0 0 0 14.2M2 12h20M12 2v20"/>',
+    ende: '<path d="M4 22V4a1 1 0 0 1 1-1h11l-2 4 2 4H5"/>',
+    sonst: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>'
+  };
+  function icon(n) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + (ICONS[n] || ICONS.sonst) + '</svg>'; }
+  function iconFuer(t) {
+    t = String(t).toLowerCase();
+    var k = [['abbau', 'abbau'], ['aufbau', 'aufbau'], ['kontrolle', 'aufbau'], ['catering', 'catering'], ['frühst', 'catering'], ['verpfleg', 'catering'], ['essen', 'catering'], ['einlass', 'einlass'], ['ordner', 'einlass'], ['ticket', 'einlass'],
+      ['kampfgericht', 'kampfgericht'], ['hallensprecher', 'kampfgericht'], ['livestream', 'medien'], ['medien', 'medien'], ['scouting', 'medien'], ['stimmung', 'stimmung'], ['trommel', 'stimmung'], ['spielfeld', 'stimmung']];
+    for (var i = 0; i < k.length; i++) if (t.indexOf(k[i][0]) >= 0) return k[i][1];
+    return 'sonst';
+  }
+  function hhmm(x) { var m = String(x || '').match(/(\d{1,2})[.:](\d{2})/); return m ? ('0' + m[1]).slice(-2) + ':' + m[2] : ''; }
+  function ablaufEtappen(d) {
+    var je = {}, liste = [];
+    (d.aufgaben || []).forEach(function (a) {
+      if (!a.zeit_von) return;
+      var e = je[a.bereich] || (je[a.bereich] = { name: a.bereich, von: a.zeit_von, bis: a.zeit_bis || '', icon: iconFuer(a.bereich + ' ' + a.titel) });
+      if (a.zeit_von < e.von) e.von = a.zeit_von;
+      if ((a.zeit_bis || '') > e.bis) e.bis = a.zeit_bis;
+    });
+    Object.keys(je).forEach(function (k) { liste.push(je[k]); });
+    String(d.beschreibung || '').split(/\n+/).forEach(function (z) {
+      var m = z.trim().match(/^(\d{1,2}[.:]\d{2})(?:\s*[-–]\s*(\d{1,2}[.:]\d{2}))?\s*(?:Uhr)?\s*(.+)$/);
+      if (m) liste.push({ name: m[3].charAt(0).toUpperCase() + m[3].slice(1), von: hhmm(m[1]), bis: m[2] ? hhmm(m[2]) : '', icon: iconFuer(m[3]) });
+    });
+    if (d.beginn) liste.push({ name: d.art === 'heimspiel' ? 'Spielbeginn' : 'Beginn', von: uhr(d.beginn).replace(' Uhr', ''), bis: '', icon: 'spiel', spiel: true });
+    if (d.ende) liste.push({ name: 'Ende', von: uhr(d.ende).replace(' Uhr', ''), bis: '', icon: 'ende' });
+    return liste.sort(function (a, b) { return a.von.localeCompare(b.von) || (a.bis || '').localeCompare(b.bis || ''); });
+  }
   function fehler(t) { el.innerHTML = '<div class="hf-karte"><p class="hf-meldung fehler">' + esc(t) + '</p></div>'; }
   function post(pfad, body) { return fetch(API + pfad, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) { return r.json(); }); }
 
@@ -511,11 +560,13 @@
     var zv = (d.aufgaben || []).map(function (a) { return a.zeit_von; }).filter(Boolean).sort(), zb = (d.aufgaben || []).map(function (a) { return a.zeit_bis; }).filter(Boolean).sort();
     lead(kopf(Object.assign({ code: plan }, d), zv[0], zb[zb.length - 1]));
     var h = '';
-    // Spiel, Zeit und Ort stehen im Kopf; hier nur der Ablauf aus dem Schichtplan (Beschreibung in 305)
-    var ablauf = String(d.beschreibung || '').split(/\n+/).map(function (x) { return x.trim(); }).filter(Boolean);
-    if (d.ende) ablauf.push('Ende voraussichtlich ' + uhr(d.ende));
+    // Ablauf als waagerechte Zeitleiste: Etappen aus dem Schichtplan (je Bereich früheste bis späteste Einsatzzeit), Spielbeginn,
+    // Ende und Zeilen der Beschreibung, die mit einer Uhrzeit beginnen (z. B. „09:00-09:30 Uhr gemeinsames Frühstück“)
     if (d.teaser) h += '<p class="hf-teaser">' + esc(d.teaser).replace(/\n/g, '<br>') + '</p>';
-    if (ablauf.length) h += '<section class="hf-karte"><h2>Ablauf</h2><ul class="hf-ablauf">' + ablauf.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></section>';
+    var etappen = ablaufEtappen(d);
+    if (etappen.length) h += '<section class="hf-karte"><h2>Ablauf</h2><div class="hf-zeitleiste" role="list">' + etappen.map(function (e) {
+      return '<div class="hf-etappe' + (e.spiel ? ' hf-spiel' : '') + '" role="listitem"><span class="hf-etappe-icon">' + icon(e.icon) + '</span><span class="hf-etappe-zeit">' + esc(e.von + (e.bis ? '–' + e.bis : '')) + '</span><span class="hf-etappe-name">' + esc(e.name) + '</span></div>';
+    }).join('') + '</div></section>';
     if (!d.offen) { el.innerHTML = h + '<div class="hf-karte"><p class="hf-meldung">Für diesen Termin ist keine Anmeldung mehr möglich. Danke für dein Interesse!</p></div>'; return; }
     var bereiche = [], je = {};
     (d.aufgaben || []).forEach(function (a) { if (!je[a.bereich]) { je[a.bereich] = []; bereiche.push(a.bereich); } je[a.bereich].push(a); });
