@@ -589,12 +589,12 @@
   }
   function hhmm(x) { var m = String(x || '').match(/(\d{1,2})[.:](\d{2})/); return m ? ('0' + m[1]).slice(-2) + ':' + m[2] : ''; }
   // Bereiche der Seite: Reihenfolge aus 305, je Bereich frühester Beginn, spätestes Ende, Plätze, besetzt und was bis zur Mindestbesetzung fehlt.
-  // Programmpunkte (z. B. gemeinsames Frühstück) stehen mit ihrer Zeit dazwischen. Phase eines Bereichs = wann er beginnt, gemessen am Spiel
-  // (Spielbeginn bis 2 Stunden danach); ragt ein Bereich ins Spiel hinein, wird er nur markiert.
+  // Programmpunkte (z. B. gemeinsames Frühstück) stehen mit ihrer Zeit dazwischen. Phase eines Bereichs = wann er beginnt: „während“ ab
+  // 90 Minuten vor Anpfiff (Spielfeld, Ordner, Kampfgericht sind dann schon da) bis 2 Stunden nach Anpfiff; ragt ein Bereich hinein, wird er markiert.
   function minuten(hm) { var m = String(hm || '').match(/(\d{1,2}):(\d{2})/); return m ? +m[1] * 60 + +m[2] : null; }
   function hfBereiche(d) {
-    var start = d.beginn ? minuten(uhr(d.beginn)) : null, ende = start != null ? start + 120 : null, liste = [], je = {};
-    var phase = function (hm) { var a = minuten(hm); return start == null || a == null || a < start ? 'vor' : (a < ende ? 'waehrend' : 'nach'); };
+    var start = d.beginn ? minuten(uhr(d.beginn)) : null, ab = start != null ? start - 90 : null, ende = start != null ? start + 120 : null, liste = [], je = {};
+    var phase = function (hm) { var a = minuten(hm); return start == null || a == null || a < ab ? 'vor' : (a < ende ? 'waehrend' : 'nach'); };
     (d.aufgaben || []).forEach(function (a) {
       var b = je[a.bereich];
       if (!b) { b = je[a.bereich] = { name: a.bereich, aufgaben: [], von: '', bis: '', max: 0, besetzt: 0, fehlen: 0 }; liste.push(b); }
@@ -606,9 +606,9 @@
     (d.programmpunkte || []).forEach(function (p) { liste.push({ name: p.name, programm: true, von: p.zeit_von || '', bis: p.zeit_bis || '' }); });
     liste.forEach(function (b, i) {
       b.phase = phase(b.von); b.id = 'hf-b-' + i;
-      b.ragt = !b.programm && start != null && b.phase === 'vor' && minuten(b.bis) != null && minuten(b.bis) > start;
+      b.ragt = !b.programm && start != null && b.phase === 'vor' && minuten(b.bis) != null && minuten(b.bis) > ab;
     });
-    return { liste: liste, start: start, ende: ende };
+    return { liste: liste, start: start, ab: ab, ende: ende };
   }
   function hfBes(x) { return x.fehlen > 0 ? 'hf-rot' : (x.besetzt >= x.max ? 'hf-gruen' : 'hf-gelb'); }
   function hfBesText(x) { return x.besetzt + '/' + x.max + (x.fehlen > 0 ? ' · ' + x.fehlen + (x.fehlen === 1 ? ' fehlt' : ' fehlen') : (x.besetzt >= x.max ? ' · voll' : '')); }
@@ -653,7 +653,7 @@
     if (g.max) h += '<div class="hf-bedarf"><p>' + (g.fehlen > 0 ? '<strong class="hf-dringend">Noch ' + g.fehlen + ' Helferinnen und Helfer dringend gesucht</strong>' : '<strong>Die Mindestbesetzung steht, danke!</strong>') +
       ' <span>' + g.besetzt + ' von ' + g.max + ' Plätzen besetzt</span></p><div class="hf-balken" role="img" aria-label="' + g.besetzt + ' von ' + g.max + ' Plätzen besetzt"><span style="width:' + Math.round(g.besetzt / g.max * 100) + '%"></span></div></div>';
     // Ablauf: drei schmale Zeilen, einzeilige Kacheln; Klick springt zu den Aufgaben unten und markiert sie
-    var zusatz = { waehrend: bb.start != null ? (heim ? 'Spiel ' : '') + hfUhr(bb.start) + '–' + hfUhr(bb.ende) + ' Uhr' : '' };
+    var zusatz = { waehrend: bb.start != null ? 'ab ' + hfUhr(bb.ab) + ' · ' + (heim ? 'Spiel ' : '') + hfUhr(bb.start) + '–' + hfUhr(bb.ende) + ' Uhr' : '' };
     h += '<nav class="hf-ablauf" aria-label="Ablauf">';
     PH.forEach(function (x) {
       var kacheln = bb.liste.filter(function (b) { return b.phase === x.key; }).sort(function (a, b) { return (a.von || '99').localeCompare(b.von || '99'); });
