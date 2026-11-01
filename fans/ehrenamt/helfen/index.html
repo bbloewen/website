@@ -137,6 +137,8 @@
   .hf-lz.voll td { color: #8a94a6; }
   .hf-lz.voll label { cursor: default; }
   .hf-lbes { text-align: right !important; white-space: nowrap; width: 1%; }
+  .hf-besz { display: inline-flex; align-items: center; gap: 8px; }
+  .hf-zahl { min-width: 3.2em; text-align: right; font-variant-numeric: tabular-nums; color: #4a5873; font-size: 13px; }
   .hf-chip { font-size: 12px; font-weight: 700; border-radius: 999px; padding: 2px 8px; font-variant-numeric: tabular-nums; }
   .hf-ziel .hf-phase-titel, tbody.hf-ziel .hf-lb th { color: #B55709; }
   tbody.hf-ziel tr td, tbody.hf-ziel tr th { box-shadow: inset 0 0 0 9999px rgba(229,113,11,.06); }
@@ -627,7 +629,9 @@
   }
   function hfBes(x) { return x.fehlen > 0 ? 'hf-rot' : (x.besetzt >= x.max ? 'hf-gruen' : 'hf-gelb'); }
   // Abstufung: rot „x fehlen“ (unter Mindestbesetzung), gelb „Platz frei“, grün „komplett“ (Marko 01.11.2026)
-  function hfBesText(x) { return x.besetzt + '/' + x.max + ' · ' + (x.fehlen > 0 ? x.fehlen + (x.fehlen === 1 ? ' fehlt' : ' fehlen') : (x.besetzt >= x.max ? 'komplett' : 'Platz frei')); }
+  function hfBesText(x) { return x.besetzt + '/' + x.max + ' · ' + (x.fehlen > 0 ? x.fehlen + (x.fehlen === 1 ? ' fehlt' : ' fehlen') : (x.besetzt >= x.max ? 'komplett' : 'Plätze frei')); }
+  // Liste: Label in Farbe (dringend / Plätze frei / komplett), Zahl rechtsbündig; „x fehlen“ nur im Tooltip (Marko 01.11.2026)
+  function hfBesHtml(x) { return '<span class="hf-besz" title="' + esc(hfBesText(x)) + '"><span class="hf-chip ' + hfBes(x) + '">' + (x.fehlen > 0 ? 'dringend' : (x.besetzt >= x.max ? 'komplett' : 'Plätze frei')) + '</span><span class="hf-zahl">' + x.besetzt + '/' + x.max + '</span></span>'; }
   function hfUhr(m) { return String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); }
   function fehler(t) { el.innerHTML = '<div class="hf-karte"><p class="hf-meldung fehler">' + esc(t) + '</p></div>'; }
   function post(pfad, body) { return fetch(API + pfad, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) { return r.json(); }); }
@@ -697,12 +701,12 @@
       if (!bs.length) return;
       h += '<section class="hf-gruppe" id="hf-p-' + x.key + '">' + (x.titel ? '<h3 class="hf-phase-titel">' + esc(x.titel) + '</h3>' : '') + '<table class="hf-liste"><caption class="hf-weg">' + esc(x.titel || 'Aufgaben') + '</caption>';
       bs.forEach(function (b) {
-        h += '<tbody id="' + b.id + '"><tr class="hf-lb"><th colspan="3" scope="colgroup">' + esc(b.name) + '</th><td class="hf-lbes"><span class="hf-chip ' + hfBes(b) + '">' + esc(hfBesText(b)) + '</span></td></tr>';
+        h += '<tbody id="' + b.id + '"><tr class="hf-lb"><th colspan="3" scope="colgroup">' + esc(b.name) + '</th><td class="hf-lbes">' + hfBesHtml(b) + '</td></tr>';
         b.aufgaben.forEach(function (a) {
           var dabei = !!meine[a.id], voll = a.frei <= 0 && !dabei, idA = 'hf-a-' + a.id;
           h += '<tr class="hf-lz' + (voll ? ' voll' : '') + (dabei ? ' hf-dabei' : '') + '"><td class="hf-lhaken"><input type="checkbox" name="aufgabe" id="' + idA + '" value="' + a.id + '"' + (voll || dabei ? ' disabled' : '') + (dabei ? ' checked' : '') + ' /></td>' +
             '<td class="hf-lzeit">' + esc(zeit(a).replace(' Uhr', '')) + '</td><td><label for="' + idA + '">' + esc(a.titel) + (a.beschreibung ? '<span class="hf-klein hf-lbeschr">' + esc(a.beschreibung) + '</span>' : '') + '</label></td>' +
-            '<td class="hf-lbes">' + (dabei ? '<span class="hf-chip hf-gruen">du bist dabei</span>' : '<span class="hf-chip ' + hfBes(a) + '">' + esc(hfBesText(a)) + '</span>') + '</td></tr>';
+            '<td class="hf-lbes">' + (dabei ? '<span class="hf-besz"><span class="hf-chip hf-gruen">du bist dabei</span><span class="hf-zahl">' + a.besetzt + '/' + a.max + '</span></span>' : hfBesHtml(a)) + '</td></tr>';
         });
         h += '</tbody>';
       });
