@@ -84,6 +84,10 @@
   .hf-teaser { font-size: 18px; margin: 0 0 20px; }
   /* Bedarf, Ablauf in drei schmalen Zeilen, Liste zum Eintragen (01.11.2026) */
   .hf-bedarf { margin: 0 0 16px; }
+  .hf-ich { border-left: 4px solid #1b7a3d; background: #e6f4ea; padding: 12px 16px; border-radius: 6px; margin: 0 0 16px; }
+  .hf-ich p { margin: 0 0 4px; }
+  .hf-ich ul { margin: 4px 0 0; padding-left: 20px; }
+  .hf-lz.hf-dabei td { background: #f2faf4; }
   .hf-bedarf p { margin: 0 0 6px; display: flex; gap: 6px 14px; flex-wrap: wrap; align-items: baseline; }
   .hf-bedarf span { color: var(--text-muted, #4a5873); font-size: 14px; }
   .hf-dringend { color: #b3261e; font-size: 18px; }
@@ -549,6 +553,8 @@
   var q = new URLSearchParams(location.search);
   var plan = (q.get('p') || '').replace(/[^0-9a-f]/g, '').slice(0, 32);
   var absage = (q.get('absage') || '').replace(/[^0-9a-f]/g, '').slice(0, 32);
+  // Persönlicher Link des Helfers (?h=…): zeigt nur die eigenen Einsätze, füllt den Namen vor; andere Helfer erscheinen nie
+  var hcode = (q.get('h') || '').replace(/[^0-9a-f]/g, '').slice(0, 32);
   var el = document.getElementById('hf-inhalt');
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function tag(d) { return new Date(d + 'T12:00:00Z').toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }); }
@@ -580,12 +586,16 @@
     stimmung: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
     spiel: '<circle cx="12" cy="12" r="10"/><path d="M4.9 4.9a10 10 0 0 1 0 14.2M19.1 4.9a10 10 0 0 0 0 14.2M2 12h20M12 2v20"/>',
     ende: '<path d="M4 22V4a1 1 0 0 1 1-1h11l-2 4 2 4H5"/>',
-    sonst: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>'
+    sonst: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+    ordner: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+    vip: '<path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/><path d="M5 20h14"/>',
+    foyer: '<path d="M13 4h3a2 2 0 0 1 2 2v14"/><path d="M2 20h3M13 20h9M10 12v.01"/><path d="M13 4.56v16.16a1 1 0 0 1-1.24.97L5 20V5.56a2 2 0 0 1 1.52-1.94l4-1A2 2 0 0 1 13 4.56z"/>',
+    essen: '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>'
   };
   function icon(n) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + (ICONS[n] || ICONS.sonst) + '</svg>'; }
   function iconFuer(t) {
     t = String(t).toLowerCase();
-    var k = [['abbau', 'abbau'], ['aufbau', 'aufbau'], ['kontrolle', 'aufbau'], ['catering', 'catering'], ['frühst', 'catering'], ['verpfleg', 'catering'], ['essen', 'catering'], ['einlass', 'einlass'], ['ordner', 'einlass'], ['ticket', 'einlass'],
+    var k = [['abendessen', 'essen'], ['mittagessen', 'essen'], ['ordner', 'ordner'], ['vip', 'vip'], ['foyer', 'foyer'], ['abbau', 'abbau'], ['aufbau', 'aufbau'], ['kontrolle', 'aufbau'], ['catering', 'catering'], ['frühst', 'catering'], ['verpfleg', 'catering'], ['essen', 'catering'], ['einlass', 'einlass'], ['ordner', 'einlass'], ['ticket', 'einlass'],
       ['kampfgericht', 'kampfgericht'], ['hallensprecher', 'kampfgericht'], ['livestream', 'medien'], ['medien', 'medien'], ['scouting', 'medien'], ['stimmung', 'stimmung'], ['trommel', 'stimmung'], ['spielfeld', 'stimmung']];
     for (var i = 0; i < k.length; i++) if (t.indexOf(k[i][0]) >= 0) return k[i][1];
     return 'sonst';
@@ -641,13 +651,21 @@
   }
   ladePlan();
   function ladePlan() {
-  fetch(API + 'helfen-info?c=' + encodeURIComponent(plan)).then(function (r) { return r.json(); }).then(function (d) {
+  fetch(API + 'helfen-info?c=' + encodeURIComponent(plan) + (hcode ? '&h=' + hcode : '')).then(function (r) { return r.json(); }).then(function (d) {
     if (!d || !d.ok) { fehler((d && d.meldung) || 'Diese Helferliste gibt es nicht.'); return; }
     var heim = d.art === 'heimspiel';
     document.getElementById('hf-eyebrow').textContent = (heim ? 'Heimspiel' : 'Veranstaltung') + ' · ' + tag(d.datum);
     var zv = (d.aufgaben || []).map(function (a) { return a.zeit_von; }).filter(Boolean).sort(), zb = (d.aufgaben || []).map(function (a) { return a.zeit_bis; }).filter(Boolean).sort();
     lead(kopf(Object.assign({ code: plan }, d), zv[0], zb[zb.length - 1]));
-    var h = '';
+    var h = '', ich = d.ich || null, meine = {};
+    if (ich) {
+      (ich.einsaetze || []).forEach(function (e) { if (e.plan_code === plan) meine[e.aufgabe_id] = true; });
+      h += '<div class="hf-ich"><p><strong>Hallo ' + esc(ich.vorname || '') + '!</strong> ' + ((ich.einsaetze || []).length ? 'Du bist schon eingetragen für:' : 'Du bist für die kommenden Termine noch nirgends eingetragen.') + '</p>' +
+        ((ich.einsaetze || []).length ? '<ul>' + ich.einsaetze.map(function (e) {
+          var ziel = e.plan_code === plan ? '' : '?p=' + e.plan_code + '&h=' + hcode;
+          return '<li>' + esc(tag(e.datum)) + ' · ' + (ziel ? '<a href="' + esc(ziel) + '">' + esc(e.plan_titel) + '</a>' : esc(e.plan_titel)) + ': ' + esc(e.titel) + (e.zeit_von ? ' (' + esc(zeit(e)) + ')' : '') + '</li>';
+        }).join('') + '</ul>' : '') + '</div>';
+    }
     if (d.teaser) h += '<p class="hf-teaser">' + esc(d.teaser).replace(/\n/g, '<br>') + '</p>';
     var bb = hfBereiche(d), arbeit = bb.liste.filter(function (b) { return !b.programm; });
     var g = arbeit.reduce(function (x, b) { x.max += b.max; x.besetzt += b.besetzt; x.fehlen += b.fehlen; return x; }, { max: 0, besetzt: 0, fehlen: 0 });
@@ -679,18 +697,18 @@
       bs.forEach(function (b) {
         h += '<tbody id="' + b.id + '"><tr class="hf-lb"><th colspan="3" scope="colgroup">' + esc(b.name) + '</th><td class="hf-lbes"><span class="hf-chip ' + hfBes(b) + '">' + esc(hfBesText(b)) + '</span></td></tr>';
         b.aufgaben.forEach(function (a) {
-          var voll = a.frei <= 0, idA = 'hf-a-' + a.id;
-          h += '<tr class="hf-lz' + (voll ? ' voll' : '') + '"><td class="hf-lhaken"><input type="checkbox" name="aufgabe" id="' + idA + '" value="' + a.id + '"' + (voll ? ' disabled' : '') + ' /></td>' +
+          var dabei = !!meine[a.id], voll = a.frei <= 0 && !dabei, idA = 'hf-a-' + a.id;
+          h += '<tr class="hf-lz' + (voll ? ' voll' : '') + (dabei ? ' hf-dabei' : '') + '"><td class="hf-lhaken"><input type="checkbox" name="aufgabe" id="' + idA + '" value="' + a.id + '"' + (voll || dabei ? ' disabled' : '') + (dabei ? ' checked' : '') + ' /></td>' +
             '<td class="hf-lzeit">' + esc(zeit(a).replace(' Uhr', '')) + '</td><td><label for="' + idA + '">' + esc(a.titel) + (a.beschreibung ? '<span class="hf-klein"> · ' + esc(a.beschreibung) + '</span>' : '') + '</label></td>' +
-            '<td class="hf-lbes"><span class="hf-chip ' + hfBes(a) + '">' + esc(hfBesText(a)) + '</span></td></tr>';
+            '<td class="hf-lbes">' + (dabei ? '<span class="hf-chip hf-gruen">du bist dabei</span>' : '<span class="hf-chip ' + hfBes(a) + '">' + esc(hfBesText(a)) + '</span>') + '</td></tr>';
         });
         h += '</tbody>';
       });
       h += '</table></section>';
     });
     h += '<div class="hf-felder" style="margin-top:20px">' +
-      '<label for="hf-vorname">Vorname<input id="hf-vorname" name="vorname" autocomplete="given-name" maxlength="80" required /></label>' +
-      '<label for="hf-nachname">Nachname<input id="hf-nachname" name="nachname" autocomplete="family-name" maxlength="80" required /></label>' +
+      '<label for="hf-vorname">Vorname<input id="hf-vorname" name="vorname" autocomplete="given-name" maxlength="80" required value="' + esc(ich && ich.vorname || '') + '" /></label>' +
+      '<label for="hf-nachname">Nachname<input id="hf-nachname" name="nachname" autocomplete="family-name" maxlength="80" required value="' + esc(ich && ich.nachname || '') + '" /></label>' +
       '<label for="hf-kommentar" class="voll">Kommentar (optional)<textarea id="hf-kommentar" name="kommentar" maxlength="300" rows="2" placeholder="z. B. Ich bringe gern noch einen Kuchen mit."></textarea></label>' +
       // Spam-Sperre: Feld, das Menschen nicht sehen; Bots füllen es aus
       '<label class="hf-weg" aria-hidden="true">Webseite<input name="website" tabindex="-1" autocomplete="off" /></label></div>' +
@@ -708,8 +726,8 @@
     form.addEventListener('submit', function (ev) {
       ev.preventDefault();
       var m = document.getElementById('hf-m'), k = document.getElementById('hf-senden');
-      var aufgaben = [].slice.call(form.querySelectorAll('input[name=aufgabe]:checked')).map(function (x) { return x.value; });
-      var b = { c: plan, aufgaben: aufgaben, vorname: form.vorname.value.trim(), nachname: form.nachname.value.trim(), kommentar: form.kommentar.value.trim(), website: form.website.value, dauer_ms: Date.now() - geoeffnet };
+      var aufgaben = [].slice.call(form.querySelectorAll('input[name=aufgabe]:checked:not(:disabled)')).map(function (x) { return x.value; });
+      var b = { c: plan, h: hcode, aufgaben: aufgaben, vorname: form.vorname.value.trim(), nachname: form.nachname.value.trim(), kommentar: form.kommentar.value.trim(), website: form.website.value, dauer_ms: Date.now() - geoeffnet };
       if (!aufgaben.length) { m.className = 'hf-meldung fehler'; m.textContent = 'Bitte mindestens eine Aufgabe wählen.'; return; }
       if (!b.vorname || !b.nachname) { m.className = 'hf-meldung fehler'; m.textContent = 'Bitte Vor- und Nachnamen angeben.'; return; }
       k.disabled = true; m.className = 'hf-meldung'; m.textContent = 'Wird gesendet …';
