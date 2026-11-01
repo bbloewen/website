@@ -91,13 +91,14 @@
   .hf-balken span { display: block; height: 100%; background: #b3261e; border-radius: 4px; }
   .hf-ablauf { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; margin: 0 0 24px; }
   .hf-az { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 8px; align-items: center; padding: 5px 6px; border-radius: 8px; }
-  .hf-az-vor { background: #fff3e8; }
-  .hf-az-waehrend { background: #E5710B; }
-  .hf-az-nach { background: #eef1f6; }
+  .hf-az-0 { background: #fff3e8; }
+  .hf-az-1 { background: #E5710B; }
+  .hf-az-2 { background: #eef1f6; }
+  .hf-az-ohne { grid-template-columns: minmax(0, 1fr); background: #f3f5f9; }
   .hf-az-titel { display: grid; font-weight: 800; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #8a4204; text-decoration: none; line-height: 1.3; }
   .hf-az-titel span { text-transform: none; letter-spacing: 0; font-weight: 600; font-size: 12px; }
-  .hf-az-waehrend .hf-az-titel { color: #fff; }
-  .hf-az-nach .hf-az-titel { color: #00122D; }
+  .hf-az-1 .hf-az-titel { color: #fff; }
+  .hf-az-2 .hf-az-titel { color: #00122D; }
   .hf-az-kacheln { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
   .hf-k { display: inline-flex; align-items: center; gap: 6px; min-width: 0; padding: 4px 8px; border-radius: 6px; background: #fff; color: #00122D; text-decoration: none; font-size: 13px; white-space: nowrap; max-width: 100%; border: 1px solid transparent; }
   a.hf-k:hover, a.hf-k:focus-visible { border-color: #B55709; outline: none; }
@@ -108,7 +109,8 @@
   .hf-k-icon, .hf-k-zeit, .hf-k-bes { flex: none; }
   .hf-k-bes { font-size: 11px; font-weight: 700; border-radius: 999px; padding: 1px 6px; font-variant-numeric: tabular-nums; }
   .hf-k-programm { background: transparent; border: 1px dashed #8a4204; }
-  .hf-az-nach .hf-k-programm { border-color: #4a5873; }
+  .hf-az-2 .hf-k-programm, .hf-az-ohne .hf-k-programm { border-color: #4a5873; }
+  .hf-az-1 .hf-k-programm { border-color: #fff; color: #fff; }
   .hf-k-ragt { box-shadow: inset -4px 0 0 #E5710B; }
   .hf-k-laeuft { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.75); }
   .hf-k-laeuft .hf-k-zeit { font-weight: 600; }
@@ -164,7 +166,8 @@
   .hf-meldung { margin: 12px 0 0; font-weight: 600; }
   .hf-meldung.fehler { color: #b3261e; }
   .hf-weg { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
-  .hf-felder textarea { font: inherit; padding: 10px 12px; border: 1px solid var(--border-strong, #c4ccdb); border-radius: 6px; resize: vertical; }
+  .hf-felder input, .hf-felder textarea { font-weight: 400; }
+  .hf-felder textarea { font: inherit; font-weight: 400; padding: 10px 12px; border: 1px solid var(--border-strong, #c4ccdb); border-radius: 6px; resize: vertical; }
   .hf-danke { border-left: 4px solid #1b7a3d; background: #e6f4ea; padding: 16px 18px; border-radius: 6px; }
   .hf-danke h2 { margin: 0 0 6px; font-size: 20px; }
   .hf-klein { font-size: 13px; color: var(--text-muted, #4a5873); }
@@ -589,26 +592,26 @@
   }
   function hhmm(x) { var m = String(x || '').match(/(\d{1,2})[.:](\d{2})/); return m ? ('0' + m[1]).slice(-2) + ':' + m[2] : ''; }
   // Bereiche der Seite: Reihenfolge aus 305, je Bereich frühester Beginn, spätestes Ende, Plätze, besetzt und was bis zur Mindestbesetzung fehlt.
-  // Programmpunkte (z. B. gemeinsames Frühstück) stehen mit ihrer Zeit dazwischen. Phase eines Bereichs = wann er beginnt: „während“ ab
-  // 90 Minuten vor Anpfiff (Spielfeld, Ordner, Kampfgericht sind dann schon da) bis 2 Stunden nach Anpfiff; ragt ein Bereich hinein, wird er markiert.
+  // Programmpunkte (z. B. gemeinsames Frühstück) stehen mit ihrer Zeit dazwischen. Die Phase (Aufbau, Rund um das Spiel, Abbau …) legt 305 je Bereich fest;
+  // ohne Phasen gibt es eine einzige Gruppe ohne Phasenzeile.
   function minuten(hm) { var m = String(hm || '').match(/(\d{1,2}):(\d{2})/); return m ? +m[1] * 60 + +m[2] : null; }
   function hfBereiche(d) {
-    var start = d.beginn ? minuten(uhr(d.beginn)) : null, ab = start != null ? start - 90 : null, ende = start != null ? start + 120 : null, liste = [], je = {};
-    var phase = function (hm) { var a = minuten(hm); return start == null || a == null || a < ab ? 'vor' : (a < ende ? 'waehrend' : 'nach'); };
+    var liste = [], je = {};
     (d.aufgaben || []).forEach(function (a) {
       var b = je[a.bereich];
-      if (!b) { b = je[a.bereich] = { name: a.bereich, aufgaben: [], von: '', bis: '', max: 0, besetzt: 0, fehlen: 0 }; liste.push(b); }
+      if (!b) { b = je[a.bereich] = { name: a.bereich, phase: a.phase || '', aufgaben: [], von: '', bis: '', max: 0, besetzt: 0, fehlen: 0 }; liste.push(b); }
       var bes = Math.max(a.max - a.frei, 0); a.besetzt = bes; a.fehlen = Math.max(a.min - bes, 0);
       b.aufgaben.push(a); b.max += a.max; b.besetzt += bes; b.fehlen += a.fehlen;
       if (a.zeit_von && (!b.von || a.zeit_von < b.von)) b.von = a.zeit_von;
       var e = a.zeit_bis || a.zeit_von || ''; if (e > b.bis) b.bis = e;
     });
-    (d.programmpunkte || []).forEach(function (p) { liste.push({ name: p.name, programm: true, von: p.zeit_von || '', bis: p.zeit_bis || '' }); });
-    liste.forEach(function (b, i) {
-      b.phase = phase(b.von); b.id = 'hf-b-' + i;
-      b.ragt = !b.programm && start != null && b.phase === 'vor' && minuten(b.bis) != null && minuten(b.bis) > ab;
-    });
-    return { liste: liste, start: start, ab: ab, ende: ende };
+    (d.programmpunkte || []).forEach(function (p) { liste.push({ name: p.name, phase: p.phase || '', programm: true, von: p.zeit_von || '', bis: p.zeit_bis || '' }); });
+    liste.forEach(function (b, i) { b.id = 'hf-b-' + i; });
+    var namen = (d.phasen || []).map(function (f) { return f.name; });
+    var gruppen = namen.map(function (n, i) { return { key: 'p' + i, titel: n }; });
+    if (!gruppen.length || liste.some(function (b) { return namen.indexOf(b.phase) < 0; })) gruppen.push({ key: 'ohne', titel: '' });
+    liste.forEach(function (b) { var i = namen.indexOf(b.phase); b.gruppe = i >= 0 ? 'p' + i : 'ohne'; });
+    return { liste: liste, gruppen: gruppen };
   }
   function hfBes(x) { return x.fehlen > 0 ? 'hf-rot' : (x.besetzt >= x.max ? 'hf-gruen' : 'hf-gelb'); }
   function hfBesText(x) { return x.besetzt + '/' + x.max + (x.fehlen > 0 ? ' · ' + x.fehlen + (x.fehlen === 1 ? ' fehlt' : ' fehlen') : (x.besetzt >= x.max ? ' · voll' : '')); }
@@ -647,36 +650,31 @@
     if (d.teaser) h += '<p class="hf-teaser">' + esc(d.teaser).replace(/\n/g, '<br>') + '</p>';
     var bb = hfBereiche(d), arbeit = bb.liste.filter(function (b) { return !b.programm; });
     var g = arbeit.reduce(function (x, b) { x.max += b.max; x.besetzt += b.besetzt; x.fehlen += b.fehlen; return x; }, { max: 0, besetzt: 0, fehlen: 0 });
-    var PH = [{ key: 'vor', titel: 'Aufbau' }, { key: 'waehrend', titel: heim ? 'Rund um das Spiel' : 'Rund um die Veranstaltung' }, { key: 'nach', titel: 'Abbau' }];
-    if (bb.start == null) PH = [{ key: 'vor', titel: 'Ablauf' }];
+    var PH = bb.gruppen;
     // Bedarf auf einen Blick
     if (g.max) h += '<div class="hf-bedarf"><p>' + (g.fehlen > 0 ? '<strong class="hf-dringend">Noch ' + g.fehlen + ' Helferinnen und Helfer dringend gesucht</strong>' : '<strong>Die Mindestbesetzung steht, danke!</strong>') +
       ' <span>' + g.besetzt + ' von ' + g.max + ' Plätzen besetzt</span></p><div class="hf-balken" role="img" aria-label="' + g.besetzt + ' von ' + g.max + ' Plätzen besetzt"><span style="width:' + Math.round(g.besetzt / g.max * 100) + '%"></span></div></div>';
-    // Ablauf: drei schmale Zeilen, einzeilige Kacheln; Klick springt zu den Aufgaben unten und markiert sie
-    var zusatz = { waehrend: bb.start != null ? 'ab ' + hfUhr(bb.ab) + ' · ' + (heim ? 'Spiel ' : '') + hfUhr(bb.start) + '–' + hfUhr(bb.ende) + ' Uhr' : '' };
+    // Ablauf: eine schmale Zeile je Phase (ohne Phasen eine Zeile ohne Titel), einzeilige Kacheln; Klick springt zu den Aufgaben unten und markiert sie
     h += '<nav class="hf-ablauf" aria-label="Ablauf">';
-    PH.forEach(function (x) {
-      var kacheln = bb.liste.filter(function (b) { return b.phase === x.key; }).sort(function (a, b) { return (a.von || '99').localeCompare(b.von || '99'); });
-      if (!kacheln.length && x.key !== 'waehrend') return;
-      h += '<div class="hf-az hf-az-' + x.key + '"><a class="hf-az-titel" href="#hf-p-' + x.key + '" data-ziel="hf-p-' + x.key + '">' + esc(x.titel) + (zusatz[x.key] ? '<span>' + esc(zusatz[x.key]) + '</span>' : '') + '</a><div class="hf-az-kacheln">' +
+    PH.forEach(function (x, gi) {
+      var kacheln = bb.liste.filter(function (b) { return b.gruppe === x.key; }).sort(function (a, b) { return (a.von || '99').localeCompare(b.von || '99'); });
+      if (!kacheln.length) return;
+      h += '<div class="hf-az hf-az-' + (gi % 3) + (x.titel ? '' : ' hf-az-ohne') + '">' + (x.titel ? '<a class="hf-az-titel" href="#hf-p-' + x.key + '" data-ziel="hf-p-' + x.key + '">' + esc(x.titel) + '</a>' : '') + '<div class="hf-az-kacheln">' +
         kacheln.map(function (b) {
           var zeitT = b.von + (b.programm && b.bis ? '–' + b.bis : '');
           if (b.programm) return '<span class="hf-k hf-k-programm" title="' + esc(b.von + (b.bis ? '–' + b.bis : '') + ' Uhr ' + b.name) + '"><span class="hf-k-icon">' + icon(iconFuer(b.name)) + '</span><span class="hf-k-zeit">' + esc(zeitT) + '</span><span class="hf-k-name">' + esc(b.name) + '</span></span>';
-          return '<a class="hf-k' + (b.ragt ? ' hf-k-ragt' : '') + '" href="#' + b.id + '" data-ziel="' + b.id + '" title="' + esc(b.von + (b.bis ? '–' + b.bis : '') + ' Uhr ' + b.name + ': ' + hfBesText(b) + (b.ragt ? ' (reicht ins Spiel)' : '')) + '"><span class="hf-k-icon">' + icon(iconFuer(b.name)) + '</span><span class="hf-k-zeit">' + esc(b.von) + '</span>' +
+          return '<a class="hf-k" href="#' + b.id + '" data-ziel="' + b.id + '" title="' + esc(b.von + (b.bis ? '–' + b.bis : '') + ' Uhr ' + b.name + ': ' + hfBesText(b)) + '"><span class="hf-k-icon">' + icon(iconFuer(b.name)) + '</span><span class="hf-k-zeit">' + esc(b.von) + '</span>' +
             '<span class="hf-k-name">' + esc(b.name) + '</span><span class="hf-k-bes ' + hfBes(b) + '">' + esc(b.besetzt + '/' + b.max) + '</span></a>';
-        }).join('') + (x.key === 'waehrend' ? bb.liste.filter(function (b) { return b.ragt; }).map(function (b) {
-          // Bereiche, die vor dem Spiel beginnen und ins Spiel hineinlaufen: helle Marke mit ihrem Ende
-          return '<a class="hf-k hf-k-laeuft" href="#' + b.id + '" data-ziel="' + b.id + '" title="' + esc(b.name + ': läuft bis ' + b.bis + ' Uhr') + '"><span class="hf-k-name">' + esc(b.name) + '</span><span class="hf-k-zeit">bis ' + esc(b.bis) + '</span></a>';
-        }).join('') : '') + '</div></div>';
+        }).join('') + '</div></div>';
     });
     h += '</nav>';
     if (!d.offen) { el.innerHTML = h + '<div class="hf-karte"><p class="hf-meldung">Für diesen Termin ist keine Anmeldung mehr möglich. Danke für dein Interesse!</p></div>'; return; }
     // Anmeldung: kompakte Liste je Phase und Bereich mit Haken und Besetzung
     h += '<form class="hf-karte" id="hf-form" novalidate><h2>Wobei hilfst du?</h2><p class="hf-klein">Hake an, was passt. Mehrere Aufgaben gehen, wenn sich die Zeiten nicht überschneiden. Rot heißt: Hier fehlen noch Leute.</p>';
     PH.forEach(function (x) {
-      var bs = arbeit.filter(function (b) { return b.phase === x.key; });
+      var bs = arbeit.filter(function (b) { return b.gruppe === x.key; });
       if (!bs.length) return;
-      h += '<section class="hf-gruppe" id="hf-p-' + x.key + '"><h3 class="hf-phase-titel">' + esc(x.titel) + '</h3><table class="hf-liste"><caption class="hf-weg">' + esc(x.titel) + '</caption>';
+      h += '<section class="hf-gruppe" id="hf-p-' + x.key + '">' + (x.titel ? '<h3 class="hf-phase-titel">' + esc(x.titel) + '</h3>' : '') + '<table class="hf-liste"><caption class="hf-weg">' + esc(x.titel || 'Aufgaben') + '</caption>';
       bs.forEach(function (b) {
         h += '<tbody id="' + b.id + '"><tr class="hf-lb"><th colspan="3" scope="colgroup">' + esc(b.name) + '</th><td class="hf-lbes"><span class="hf-chip ' + hfBes(b) + '">' + esc(hfBesText(b)) + '</span></td></tr>';
         b.aufgaben.forEach(function (a) {
@@ -692,7 +690,7 @@
     h += '<div class="hf-felder" style="margin-top:20px">' +
       '<label for="hf-vorname">Vorname<input id="hf-vorname" name="vorname" autocomplete="given-name" maxlength="80" required /></label>' +
       '<label for="hf-nachname">Nachname<input id="hf-nachname" name="nachname" autocomplete="family-name" maxlength="80" required /></label>' +
-      '<label for="hf-kommentar" class="voll">Kommentar (freiwillig)<textarea id="hf-kommentar" name="kommentar" maxlength="300" rows="2" placeholder="z. B. Ich bin erst ab 07:30 Uhr da."></textarea></label>' +
+      '<label for="hf-kommentar" class="voll">Kommentar (optional)<textarea id="hf-kommentar" name="kommentar" maxlength="300" rows="2" placeholder="z. B. Ich bringe gern noch einen Kuchen mit."></textarea></label>' +
       // Spam-Sperre: Feld, das Menschen nicht sehen; Bots füllen es aus
       '<label class="hf-weg" aria-hidden="true">Webseite<input name="website" tabindex="-1" autocomplete="off" /></label></div>' +
       '<p class="hf-klein">Wir gleichen deinen Namen mit unserem Ehrenamtsteam ab. Mehr in unserer <a href="/datenschutz.html">Datenschutzerklärung</a>.</p>' +
