@@ -630,8 +630,8 @@
   function hfBes(x) { return x.fehlen > 0 ? 'hf-rot' : (x.besetzt >= x.max ? 'hf-gruen' : 'hf-gelb'); }
   // Abstufung: rot „x fehlen“ (unter Mindestbesetzung), gelb „Platz frei“, grün „komplett“ (Marko 01.11.2026)
   function hfBesText(x) { return x.besetzt + '/' + x.max + ' · ' + (x.fehlen > 0 ? x.fehlen + (x.fehlen === 1 ? ' fehlt' : ' fehlen') : (x.besetzt >= x.max ? 'komplett' : 'Plätze frei')); }
-  // Liste: Label in Farbe (dringend / Plätze frei / komplett), Zahl rechtsbündig; „x fehlen“ nur im Tooltip (Marko 01.11.2026)
-  function hfBesHtml(x) { return '<span class="hf-besz" title="' + esc(hfBesText(x)) + '"><span class="hf-chip ' + hfBes(x) + '">' + (x.fehlen > 0 ? 'dringend' : (x.besetzt >= x.max ? 'komplett' : 'Plätze frei')) + '</span><span class="hf-zahl">' + x.besetzt + '/' + x.max + '</span></span>'; }
+  // Liste: Label in Farbe (dringend / wir brauchen dich / komplett), Zahl rechtsbündig; „x fehlen“ nur im Tooltip (Marko 01.11.2026)
+  function hfBesHtml(x) { return '<span class="hf-besz" title="' + esc(hfBesText(x)) + '"><span class="hf-chip ' + hfBes(x) + '">' + (x.fehlen > 0 ? 'dringend' : (x.besetzt >= x.max ? 'komplett' : 'wir brauchen dich')) + '</span><span class="hf-zahl">' + x.besetzt + '/' + x.max + '</span></span>'; }
   function hfUhr(m) { return String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); }
   function fehler(t) { el.innerHTML = '<div class="hf-karte"><p class="hf-meldung fehler">' + esc(t) + '</p></div>'; }
   function post(pfad, body) { return fetch(API + pfad, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) { return r.json(); }); }
