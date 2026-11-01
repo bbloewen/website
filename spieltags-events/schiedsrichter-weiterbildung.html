@@ -274,7 +274,7 @@
         <div class="cc-state" id="sr-state-danke" hidden>
           <div class="tile-icon cc-danke-icon"><i data-lucide="check" class="icon-24"></i></div>
           <h2 class="t-h4">Danke, du bist angemeldet.</h2>
-          <p class="t-body">Die Bestätigung ist unterwegs an <strong id="sr-danke-mail"></strong>. Dein Ticket für das Heimspiel schicken wir dir etwa eine Stunde später in einer eigenen E-Mail. Bitte schau auch im Spam-Ordner nach, falls nichts ankommt.</p>
+          <p class="t-body">Deine Bestätigung mit dem Ticket für das Heimspiel ist unterwegs an <strong id="sr-danke-mail"></strong>. Bitte schau auch im Spam-Ordner nach, falls sie nicht in wenigen Minuten ankommt.</p>
         </div>
 
         <form id="sr-form" novalidate>
@@ -365,7 +365,7 @@
             <div class="tile-icon"><i data-lucide="ticket"></i></div>
             <h3 class="t-h4">Kostenloses Ticket</h3>
           </div>
-          <p class="t-body-sm">Etwa eine Stunde nach deiner Anmeldung schicken wir dir dein Ticket für Block F, Kategorie 3, per E-Mail.</p>
+          <p class="t-body-sm">Direkt nach deiner Anmeldung bekommst du dein Ticket für Block F, Kategorie 3, per E-Mail.</p>
           <a class="card-link mt-2" href="/saison/profis/gameday/2026-11-08-culture-city-weimar.html">Alles zum Spieltag <i data-lucide="arrow-right" class="icon-14"></i></a>
         </div>
         <div class="info-tile info-tile-row info-tile-row-divided">
@@ -396,7 +396,7 @@
         </details>
         <details>
           <summary>Wie bekomme ich mein Ticket?</summary>
-          <p class="t-body">Direkt nach der Anmeldung bekommst du eine Bestätigung per E-Mail. Etwa eine Stunde später schicken wir dir dein Ticket für das Spiel am 08.11.2026 (Block F, Kategorie 3, freie Platzwahl) in einer eigenen E-Mail. Du musst dafür nichts weiter tun.</p>
+          <p class="t-body">Direkt nach der Anmeldung bekommst du eine E-Mail mit der Bestätigung und deinem Ticket für das Spiel am 08.11.2026 (Block F, Kategorie 3, freie Platzwahl). Du musst dafür nichts weiter tun.</p>
         </details>
         <details>
           <summary>Wird die Weiterbildung für meine Lizenz angerechnet?</summary>
@@ -564,7 +564,8 @@
 (function () {
   // Anmeldung zur Schiedsrichter-Weiterbildung (Spieltags-Event am 08.11.2026).
   // Backend: n8n-Workflow „Website: Spieltags-Event - Anmeldung verarbeiten“, Webhook spieltagsevent-anmeldung.
-  // Der Workflow prüft alles noch einmal, legt den Kontakt in crm-db an oder findet ihn, stellt den Gutschein aus und schickt die Mail.
+  // Der Workflow prüft alles noch einmal, legt den Kontakt in crm-db an oder findet ihn, stellt Gutschein und Ticket aus; die Mail mit dem Ticket
+  // kommt vom Ticket-Mail-Workflow.
   var API = 'https://ticketing.basketball-loewen.com/webhook/';
   var EVENT = 'sr-weiterbildung-2026-11-08';
   var ANMELDESCHLUSS = new Date('2026-11-06T18:00:00+01:00').getTime();
