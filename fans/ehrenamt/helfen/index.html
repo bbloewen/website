@@ -125,7 +125,9 @@
   .hf-gruppe { scroll-margin-top: 110px; margin: 18px 0 0; }
   .hf-gruppe tbody { scroll-margin-top: 110px; }
   .hf-liste { width: 100%; border-collapse: collapse; }
-  .hf-liste td, .hf-liste th { padding: 7px 6px; border-bottom: 1px solid #e3e8f0; text-align: left; vertical-align: middle; }
+  .hf-liste td, .hf-liste th { padding: 7px 6px; border-bottom: 1px solid #e3e8f0; text-align: left; vertical-align: top; }
+  .hf-lbeschr { display: block; margin-top: 2px; }
+  .hf-lhaken input { margin-top: 2px !important; }
   .hf-lb th, .hf-lb td { background: #f3f5f9; font-weight: 700; padding-top: 9px; padding-bottom: 9px; }
   .hf-lhaken { width: 28px; }
   .hf-lhaken input { width: 18px; height: 18px; accent-color: #B55709; margin: 0; }
@@ -699,7 +701,7 @@
         b.aufgaben.forEach(function (a) {
           var dabei = !!meine[a.id], voll = a.frei <= 0 && !dabei, idA = 'hf-a-' + a.id;
           h += '<tr class="hf-lz' + (voll ? ' voll' : '') + (dabei ? ' hf-dabei' : '') + '"><td class="hf-lhaken"><input type="checkbox" name="aufgabe" id="' + idA + '" value="' + a.id + '"' + (voll || dabei ? ' disabled' : '') + (dabei ? ' checked' : '') + ' /></td>' +
-            '<td class="hf-lzeit">' + esc(zeit(a).replace(' Uhr', '')) + '</td><td><label for="' + idA + '">' + esc(a.titel) + (a.beschreibung ? '<span class="hf-klein"> · ' + esc(a.beschreibung) + '</span>' : '') + '</label></td>' +
+            '<td class="hf-lzeit">' + esc(zeit(a).replace(' Uhr', '')) + '</td><td><label for="' + idA + '">' + esc(a.titel) + (a.beschreibung ? '<span class="hf-klein hf-lbeschr">' + esc(a.beschreibung) + '</span>' : '') + '</label></td>' +
             '<td class="hf-lbes">' + (dabei ? '<span class="hf-chip hf-gruen">du bist dabei</span>' : '<span class="hf-chip ' + hfBes(a) + '">' + esc(hfBesText(a)) + '</span>') + '</td></tr>';
         });
         h += '</tbody>';
