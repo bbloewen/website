@@ -647,7 +647,7 @@
     if (d.teaser) h += '<p class="hf-teaser">' + esc(d.teaser).replace(/\n/g, '<br>') + '</p>';
     var bb = hfBereiche(d), arbeit = bb.liste.filter(function (b) { return !b.programm; });
     var g = arbeit.reduce(function (x, b) { x.max += b.max; x.besetzt += b.besetzt; x.fehlen += b.fehlen; return x; }, { max: 0, besetzt: 0, fehlen: 0 });
-    var PH = [{ key: 'vor', titel: heim ? 'Vor dem Spiel' : 'Vorher' }, { key: 'waehrend', titel: heim ? 'Während des Spiels' : 'Währenddessen' }, { key: 'nach', titel: heim ? 'Nach dem Spiel' : 'Danach' }];
+    var PH = [{ key: 'vor', titel: 'Aufbau' }, { key: 'waehrend', titel: heim ? 'Rund um das Spiel' : 'Rund um die Veranstaltung' }, { key: 'nach', titel: 'Abbau' }];
     if (bb.start == null) PH = [{ key: 'vor', titel: 'Ablauf' }];
     // Bedarf auf einen Blick
     if (g.max) h += '<div class="hf-bedarf"><p>' + (g.fehlen > 0 ? '<strong class="hf-dringend">Noch ' + g.fehlen + ' Helferinnen und Helfer dringend gesucht</strong>' : '<strong>Die Mindestbesetzung steht, danke!</strong>') +
