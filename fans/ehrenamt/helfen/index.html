@@ -126,7 +126,8 @@
   .hf-liste td, .hf-liste th { padding: 7px 6px; border-bottom: 1px solid #e3e8f0; text-align: left; vertical-align: top; }
   /* Auswahlliste: Schrift schwarz, nur nicht mehr wählbare Zeilen (komplett, schon dabei) dunkelgrau (Marko, 01.11.2026) */
   .hf-liste, .hf-liste label { color: #00122D; }
-  .hf-lbeschr { display: block; margin-top: 2px; color: #00122D; }
+  .hf-lbeschr { display: block; margin-top: 2px; }
+  .hf-liste .hf-lbeschr { color: #00122D; }
   .hf-lhaken input { margin-top: 2px !important; }
   .hf-lb th, .hf-lb td { background: #f3f5f9; font-weight: 700; padding-top: 9px; padding-bottom: 9px; }
   .hf-lhaken { width: 28px; }
@@ -134,7 +135,7 @@
   .hf-lzeit { width: 96px; white-space: nowrap; font-variant-numeric: tabular-nums; color: #00122D; }
   .hf-lz label { cursor: pointer; display: block; }
   .hf-lz:has(input:checked) td { background: #fff7f0; }
-  .hf-lz.voll td, .hf-lz.voll label, .hf-lz.voll .hf-lbeschr, .hf-lz.hf-dabei td, .hf-lz.hf-dabei label, .hf-lz.hf-dabei .hf-lbeschr { color: #4a5873; }
+  .hf-lz.voll td, .hf-lz.voll label, .hf-liste .hf-lz.voll .hf-lbeschr, .hf-lz.hf-dabei td, .hf-lz.hf-dabei label, .hf-liste .hf-lz.hf-dabei .hf-lbeschr { color: #4a5873; }
   .hf-lz.voll label { cursor: default; }
   .hf-lbes { text-align: right !important; white-space: nowrap; width: 1%; }
   .hf-besz { display: inline-flex; align-items: center; gap: 8px; }
