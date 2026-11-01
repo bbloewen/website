@@ -144,6 +144,22 @@
   tbody.hf-ziel tr td, tbody.hf-ziel tr th { box-shadow: inset 0 0 0 9999px rgba(229,113,11,.06); }
   .hf-gruppe.hf-ziel { outline: 2px solid #E5710B; outline-offset: 6px; border-radius: 8px; }
   tbody.hf-ziel { outline: 2px solid #E5710B; outline-offset: -2px; }
+  /* Handy: jede Aufgabe als kleine Karte – Haken links, oben Zeit und Besetzung, darunter der Titel über die ganze Breite */
+  @media (max-width: 640px) {
+    .hf-karte { padding: 16px 12px; }
+    .hf-liste, .hf-liste tbody { display: block; width: 100%; }
+    .hf-liste tr { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; grid-template-areas: "h z b" "h t t"; column-gap: 8px; row-gap: 2px; padding: 9px 4px; border-bottom: 1px solid #e3e8f0; }
+    .hf-liste td, .hf-liste th { display: block; border: 0; padding: 0; width: auto; }
+    .hf-lz .hf-lhaken { grid-area: h; padding-top: 1px; }
+    .hf-lz .hf-lzeit { grid-area: z; font-size: 13px; }
+    .hf-lz td:nth-child(3) { grid-area: t; }
+    .hf-lz .hf-lbes { grid-area: b; }
+    .hf-lz:has(input:checked) { background: #fff7f0; }
+    .hf-liste tr.hf-lb { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "n b"; background: #f3f5f9; align-items: center; }
+    .hf-liste tr.hf-lb th { grid-area: n; background: transparent; text-align: left; }
+    .hf-liste tr.hf-lb .hf-lbes { grid-area: b; background: transparent; }
+    .hf-zahl { min-width: 2.6em; font-size: 12px; }
+  }
   @media (max-width: 640px) { .hf-az { grid-template-columns: minmax(0, 1fr); } .hf-lzeit { width: 70px; font-size: 13px; } .hf-lbes .hf-chip { font-size: 11px; padding: 1px 6px; } }
   .hf-wrap { max-width: 960px; margin: 0 auto; padding: 32px 0 48px; }
   .hf-eyebrow { font-weight: 600; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: #B55709; margin: 0 0 6px; }
@@ -692,7 +708,7 @@
     h += '</nav>';
     if (!d.offen) { el.innerHTML = h + '<div class="hf-karte"><p class="hf-meldung">Für diesen Termin ist keine Anmeldung mehr möglich. Danke für dein Interesse!</p></div>'; return; }
     // Anmeldung: kompakte Liste je Phase und Bereich mit Haken und Besetzung
-    h += '<form class="hf-karte" id="hf-form" novalidate><h2>Wobei hilfst du?</h2><p class="hf-klein">Hake an, was passt. Mehrere Aufgaben gehen, wenn sich die Zeiten nicht überschneiden. Rot heißt: Hier fehlen noch Leute.</p>';
+    h += '<form class="hf-karte" id="hf-form" novalidate><h2>Wobei hilfst du?</h2><p class="hf-klein">Hake an, was passt. Mehrere Aufgaben gehen, wenn sich die Zeiten nicht überschneiden.</p>';
     PH.forEach(function (x) {
       var bs = arbeit.filter(function (b) { return b.gruppe === x.key; });
       if (!bs.length) return;
