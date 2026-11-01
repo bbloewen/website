@@ -676,9 +676,6 @@
     var bb = hfBereiche(d), arbeit = bb.liste.filter(function (b) { return !b.programm; });
     var g = arbeit.reduce(function (x, b) { x.max += b.max; x.besetzt += b.besetzt; x.fehlen += b.fehlen; return x; }, { max: 0, besetzt: 0, fehlen: 0 });
     var PH = bb.gruppen;
-    // Bedarf auf einen Blick
-    if (g.max) h += '<div class="hf-bedarf"><p>' + (g.fehlen > 0 ? '<strong class="hf-dringend">Noch ' + g.fehlen + ' Helferinnen und Helfer dringend gesucht</strong>' : '<strong>Die Mindestbesetzung steht, danke!</strong>') +
-      ' <span>' + g.besetzt + ' von ' + g.max + ' Plätzen besetzt</span></p><div class="hf-balken" role="img" aria-label="' + g.besetzt + ' von ' + g.max + ' Plätzen besetzt"><span style="width:' + Math.round(g.besetzt / g.max * 100) + '%"></span></div></div>';
     // Ablauf: eine schmale Zeile je Phase (ohne Phasen eine Zeile ohne Titel), einzeilige Kacheln; Klick springt zu den Aufgaben unten und markiert sie
     h += '<nav class="hf-ablauf" aria-label="Ablauf">';
     PH.forEach(function (x, gi) {
