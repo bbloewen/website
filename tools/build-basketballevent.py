@@ -214,7 +214,7 @@ def formular(aktion, zeit):
         <div class="cc-state" id="cc-state-danke" hidden>
           <div class="tile-icon cc-danke-icon"><i data-lucide="check" class="icon-24"></i></div>
           <h2 class="t-h4">Vielen Dank, wir haben Ihre Anmeldung erhalten.</h2>
-          <p class="t-body">Eine Bestätigung ist unterwegs an <strong id="cc-danke-mail"></strong>. Wir stimmen die Anmeldung mit {kurz} ab und melden uns mit den Tickets.</p>
+          <p class="t-body">Eine Bestätigung ist unterwegs an <strong id="cc-danke-mail"></strong>. Ihre Tickets erhalten Sie in wenigen Minuten in einer separaten E-Mail.</p>
         </div>
 
         <form id="cc-form" novalidate>
@@ -1094,6 +1094,7 @@ def schreibe_aktiv(aktion, spiel, zeit):
         "anmeldeschluss": schluss.isoformat(),
         "anmeldeschlussText": zeit["schluss_lang"],
         "empfaenger": aktion.get("empfaenger", {"cc": [], "bcc": []}),
+        "ausstellung": aktion.get("ausstellung", {"automatisch": False}),
         "seite": EINLADUNG_URL,
         "spiel": {
             "datum": zeit["datum"],

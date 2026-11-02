@@ -24,6 +24,18 @@
       "marko.fliege@basketball-loewen.com"
     ]
   },
+  "ausstellung": {
+    "automatisch": true,
+    "subevent": 16,
+    "quota": 396,
+    "items": [
+      40,
+      30
+    ],
+    "gutscheinPrefix": "FE-KU-",
+    "preisVip": 119,
+    "preisMa": 10.5
+  },
   "seite": "https://basketball-loewen.com/partner/basketballevent-einladung.html",
   "spiel": {
     "datum": "08.11.2026",
