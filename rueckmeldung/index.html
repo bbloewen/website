@@ -465,7 +465,7 @@
   }
   // Anlass mit Artikel: „das Heimspiel gegen Weimar“ aus „Basketball Löwen - Weimar“, sonst der Name der Veranstaltung
   function anlass(n) { return /\s(-|–|vs\.?|gegen)\s/.test(n || '') ? 'das Heimspiel gegen ' + String(n).replace(/^.*?\s(-|–|vs\.?|gegen)\s+/, '') : String(n || 'die Veranstaltung'); }
-  function kalender() { return API + 'kommst-du-kalender?c=' + code; }
+  function kalender() { return API + 'rueckmeldung-kalender?c=' + code; }
   function fehler(text) { inhalt.innerHTML = '<div class="rm-karte"><p class="rm-meldung fehler">' + esc(text) + '</p><p class="rm-klein" style="margin:8px 0 0">Bitte öffnen Sie den Link aus unserer E-Mail. Bei Fragen hilft Ihnen unsere Ansprechperson weiter.</p></div>'; document.getElementById('rm-spiel').textContent = ''; }
   var BISHER = { kommt: 'Sie haben zugesagt.', kommt_allein: 'Sie haben zugesagt und kommen allein.', kommt_nicht: 'Sie haben abgesagt.', weitergegeben: 'Sie haben die Karte weitergegeben.' };
   var BISHER_DU = { kommt: 'Du hast zugesagt.', kommt_allein: 'Du hast zugesagt und kommst allein.', kommt_nicht: 'Du hast abgesagt.', weitergegeben: 'Du hast die Karte weitergegeben.' };
@@ -524,7 +524,7 @@
       }
       k.disabled = true; m.className = 'rm-meldung'; m.textContent = 'Wird gesendet …';
       if (test) { vorwahl = ''; D.antwort = a; if (a === 'weitergegeben') { D.gast_vorname = g.vorname; D.gast_nachname = g.nachname; } danke(a, g.vorname + ' ' + g.nachname); return; }
-      fetch(API + 'kommst-du-antwort', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ c: code, antwort: a, gast: a === 'weitergegeben' ? g : null }) })
+      fetch(API + 'rueckmeldung-antwort', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ c: code, antwort: a, gast: a === 'weitergegeben' ? g : null }) })
         .then(function (r) { return r.json(); })
         .then(function (d) {
           if (!d || !d.ok) { k.disabled = false; m.className = 'rm-meldung fehler'; m.textContent = (d && d.meldung) || 'Das hat nicht geklappt. Bitte später noch einmal versuchen.'; return; }
@@ -539,7 +539,7 @@
   var laden = test
     ? Promise.resolve({ ok: true, offen: true, test: true, plaetze: Math.min(4, Math.max(1, Number(q.get('p')) || 1)), kategorie: 'VIP - Dauer', spiel_name: 'Basketball Löwen - Musterstadt',
         spiel_beginn: (function () { var t = new Date(Date.now() + 6 * 86400000); t.setHours(17, 0, 0, 0); return t.toISOString(); })(), ort: 'Riethsporthalle, Essener Straße 20, 99089 Erfurt', ansprache: q.get('du') ? 'Du' : 'Sie', name: 'Testperson', antwort: null })
-    : fetch(API + 'kommst-du-info?c=' + encodeURIComponent(code)).then(function (r) { return r.json(); });
+    : fetch(API + 'rueckmeldung-info?c=' + encodeURIComponent(code)).then(function (r) { return r.json(); });
   laden
     .then(function (d) {
       if (!d || !d.ok) { fehler((d && d.meldung) || 'Dieser Link ist nicht gültig.'); return; }
