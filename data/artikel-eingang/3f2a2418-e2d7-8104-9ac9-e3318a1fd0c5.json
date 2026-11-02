@@ -1,7 +1,7 @@
 {
   "notionId": "3f2a2418-e2d7-8104-9ac9-e3318a1fd0c5",
   "status": "pruefung",
-  "datum": "2026-10-30",
+  "datum": "2026-11-07",
   "team": "club",
   "slug": "tip-off-podcast-folge-3",
   "titel": "Tip-Off Folge 3: Constanze Sakriß, Spielerin, Teamärztin, Löwin",
@@ -20,5 +20,8 @@
     "Dazu: der Fehlstart der Löwen nach sechs Spielen, der Stand bei den Verletzten und ein Brain-Teaser mit drei Ex-Löwen.",
     "Nächstes Heimspiel der Profis: Sonntag, 8. November 2026, 17 Uhr, gegen Culture City Weimar in der Riethsporthalle."
   ],
-  "quellbild": "data/artikel-eingang/bilder/tip-off-podcast-folge-3.webp"
+  "quellbild": "data/artikel-eingang/bilder/tip-off-podcast-folge-3.webp",
+  "frueher": [
+    "2026-10-30_club_tip-off-podcast-folge-3.html"
+  ]
 }
