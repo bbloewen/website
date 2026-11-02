@@ -271,6 +271,15 @@
     this.voucherInfo = null; // { source:'voucher'|'giftcard', code, label, priceMode, value, category, remainingUses, balance }
     this.voucherError = null;
     this.voucherChecking = false;
+    /* Code aus dem Link (?gutschein=CODE, z. B. aus der Mail nach dem Spielbesuch): wird gemerkt und beim ersten
+       Anzeigen der Gutscheinzeile einmal automatisch eingelöst (Prüf-Webhook erlaubt nur wenige Prüfungen je Stunde) */
+    this._linkCode = null;
+    this._linkCodeTried = false;
+    try {
+      var linkCode = (new URLSearchParams(window.location.search).get('gutschein') || '').trim().toUpperCase();
+      if (/^[A-Z0-9-]{4,40}$/.test(linkCode)) sessionStorage.setItem('bl_gutschein_link', linkCode);
+      this._linkCode = sessionStorage.getItem('bl_gutschein_link');
+    } catch (e) { /* ohne sessionStorage nur ohne Merken */ }
     this.notiz = '';
     /* Dauerkarte: Mitglieder des Basketball Löwen e.V. (30 %, Nachweis nötig, als
        eigene Tarif-Option wählbar). Nicht zu verwechseln mit dem ermäßigten Satz,
@@ -2688,6 +2697,7 @@
       this.cartEl.appendChild(wrap);
       if (window.lucide) window.lucide.createIcons();
       wrap.querySelector('[data-voucher-remove]').addEventListener('click', function () {
+        try { sessionStorage.removeItem('bl_gutschein_link'); } catch (e) {}
         self.voucherCode = null;
         self.voucherInfo = null;
         self.voucherError = null;
@@ -2756,6 +2766,11 @@
       };
       wrap.querySelector('[data-voucher-apply]').addEventListener('click', apply);
       input.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); apply(); } });
+      if (this._linkCode && !this._linkCodeTried && !this.voucherChecking) {
+        this._linkCodeTried = true;
+        input.value = this._linkCode;
+        apply();
+      }
     }
   };
 

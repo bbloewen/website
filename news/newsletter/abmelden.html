@@ -235,6 +235,7 @@
         <fieldset style="border:0;padding:0;margin:0">
           <legend class="sr-only">Von welchen E-Mails möchtest du dich abmelden?</legend>
           <label class="abmelden-wahl"><input type="checkbox" name="liste" value="newsletter"> <span><b>Newsletter</b><br><span class="t-small">Neuigkeiten, Spieltage und Aktionen der Basketball Löwen Erfurt für Fans, Mitglieder und alle Interessierten.</span></span></label>
+          <label class="abmelden-wahl"><input type="checkbox" name="liste" value="ticket"> <span><b>Nach deinem Spielbesuch</b><br><span class="t-small">Kurze E-Mail nach einem Heimspiel, das du mit einem Ticket besucht hast, mit Angeboten für das nächste Spiel.</span></span></label>
           <label class="abmelden-wahl"><input type="checkbox" name="liste" value="fastbreak"> <span><b>Fastbreak</b><br><span class="t-small">Unser Newsletter für Unternehmen, Sponsoren und Partner.</span></span></label>
           <label class="abmelden-wahl"><input type="checkbox" name="liste" value="alle"> <span><b>Alle E-Mails</b><br><span class="t-small">Keine Mails mehr von uns, auch keine Einladungen oder Informationen.</span></span></label>
         </fieldset>
@@ -406,7 +407,7 @@
   var vorwahl = params.get('v');
 
   function box(wert) { return boxen.filter(function (b) { return b.value === wert; })[0]; }
-  function alleSync() {   // „Alle E-Mails“ schließt die beiden anderen ein
+  function alleSync() {   // „Alle E-Mails“ schließt die anderen ein
     var alle = box('alle').checked;
     boxen.forEach(function (b) { if (b.value !== 'alle') { b.disabled = alle; if (alle) b.checked = true; } });
   }
@@ -417,7 +418,7 @@
       alleSync();
     });
   });
-  if (vorwahl === 'fastbreak' || vorwahl === 'alle') box(vorwahl).checked = true; else box('newsletter').checked = true;
+  if (vorwahl === 'fastbreak' || vorwahl === 'ticket' || vorwahl === 'alle') box(vorwahl).checked = true;   // ticket: Link aus der Mail nach dem Spielbesuch, nur diese Liste ist vorgewählt else box('newsletter').checked = true;
   alleSync();
 
   function showResult(ok, message) {
