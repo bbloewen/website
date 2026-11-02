@@ -29,6 +29,13 @@ Zwei Stufen, gesteuert ueber "status" im Auftrag:
 
   freigegeben  noindex faellt weg, der Eintrag in data/news.json kommt dazu.
                Ab jetzt ist der Artikel verlinkt und wird indexiert.
+  zurueckgezogen  (seit 02.11.2026, Loeschen in 305) Seite, Eintrag in
+               data/news.json und Verlinkung im Spielplan werden entfernt. Der
+               Auftrag bleibt mit diesem Status liegen, damit der naechste Lauf
+               die Seite nicht wieder baut.
+"frueher" (Liste von Dateinamen, optional): Adressen, unter denen der Artikel
+vorher stand. Aendert sich in 305 das Datum, aendert sich der Dateiname; die
+alte Seite und ihr news.json-Eintrag werden dann hier entfernt.
 
 Derselbe Auftrag kann beide Male laufen; der zweite Lauf aendert nur, was sich
 unterscheidet.
@@ -74,7 +81,7 @@ ARTIKEL_DIR = REPO / "news" / "artikel"
 BILD_DIR = REPO / "assets" / "img" / "news"
 INDEX = REPO / "index.html"
 
-STATUS = ("pruefung", "freigegeben")
+STATUS = ("pruefung", "freigegeben", "zurueckgezogen")
 TEAMS = ("profis", "damen", "nachwuchs", "club", "partner")
 
 # "team" im Auftrag ist das Schlagwort im DATEINAMEN (2026-10-07_club_...). In
@@ -475,7 +482,28 @@ def bild_bereitstellen(a, schreiben):
     return True
 
 
+def alte_entfernen(namen, schreiben):
+    """Seiten unter frueheren Dateinamen samt news.json-Eintrag entfernen ("frueher" im Auftrag)."""
+    weg = []
+    for alt in namen or []:
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}_[a-z]+_[a-z0-9-]+\.html", alt or ""):
+            raise SystemExit(f"  FEHLER: ungueltiger frueherer Dateiname: {alt}")
+        datei = ARTIKEL_DIR / alt
+        geaendert = news_json_pflegen({"status": "zurueckgezogen"}, f"/news/artikel/{alt}", schreiben)
+        if datei.is_file():
+            if schreiben:
+                datei.unlink()
+            geaendert = True
+        if geaendert:
+            weg.append(alt)
+    return weg
+
+
 def pruefe(a):
+    if a.get("status") == "zurueckgezogen":
+        if not (a.get("team") in TEAMS and re.fullmatch(r"\d{4}-\d{2}-\d{2}", a.get("datum") or "") and re.fullmatch(r"[a-z0-9-]+", a.get("slug") or "")):
+            raise SystemExit("  FEHLER: zum Zurueckziehen braucht der Auftrag datum, team und slug.")
+        return
     fehlt = [f for f in PFLICHT if not a.get(f)]
     if fehlt:
         raise SystemExit(f"  FEHLER: Pflichtfelder fehlen: {', '.join(fehlt)}")
@@ -508,6 +536,20 @@ def main():
     ziel = ARTIKEL_DIR / name
     url = f"/news/artikel/{name}"
     schreiben = not args.check
+    weg = alte_entfernen(a.get("frueher"), schreiben)
+    if weg:
+        print(f"  Fruehere Adressen entfernt: {', '.join(weg)}")
+
+    if a["status"] == "zurueckgezogen":
+        seite_weg = ziel.is_file()
+        if seite_weg and schreiben:
+            ziel.unlink()
+        news_weg = news_json_pflegen(a, url, schreiben)
+        spiel_weg = spielplan_pflegen(a, url, schreiben)
+        print(f"  {name}: zurueckgezogen"
+              f"{', Seite entfernt' if seite_weg else ''}{', news.json-Eintrag entfernt' if news_weg else ''}"
+              f"{', Spielplan-Verlinkung entfernt' if spiel_weg else ''}")
+        return 1 if (args.check and (seite_weg or news_weg or spiel_weg or weg)) else 0
 
     bild_neu = bild_bereitstellen(a, schreiben)
     seite = seite_bauen(a)
