@@ -432,6 +432,17 @@
 <script src="/js/include.js?v=1787854261"></script>
 <script>
   var newsletterFormLoadedAt = Date.now();
+  // Knopf „Newsletter abonnieren“ aus unseren Mails: Vorname und Adresse stehen im Fragment (#vorname=…&email=…), gehen also nicht an den Server.
+  // Formular damit vorausfüllen, danach das Fragment aus der Adresszeile entfernen (Marko 02.11.2026)
+  (function () {
+    try {
+      var f = new URLSearchParams(String(location.hash || '').replace(/^#/, ''));
+      var vn = (f.get('vorname') || '').slice(0, 80), em = (f.get('email') || '').slice(0, 200);
+      if (vn && !document.getElementById('nl-vorname').value) document.getElementById('nl-vorname').value = vn;
+      if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em) && !document.getElementById('nl-email').value) document.getElementById('nl-email').value = em;
+      if (vn || em) history.replaceState(null, '', location.pathname + location.search);
+    } catch (e) { /* ohne Vorausfüllen */ }
+  })();
   document.getElementById('newsletter-form').addEventListener('submit', function (e) {
     e.preventDefault();
     var form = e.target;
