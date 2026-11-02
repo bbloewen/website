@@ -23,12 +23,16 @@
   .hero-photo.hero-rueckmeldung h1 { white-space: normal; max-width: 24ch; }
   .rm-wrap { max-width: 680px; margin: 0 auto; }
   .rm-kurz { display: none; }
+  /* Zeitpunkt mit Kalenderlink, darunter der Ort mit Symbol und Google-Maps-Link, wie auf der Helferseite (Marko 02.11.2026) */
+  .hero-photo .rm-zeile { display: flex; gap: 8px; align-items: flex-start; margin: 0 0 4px; }
+  .hero-photo .rm-zeile a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+  .hero-photo .rm-icon { margin-top: .2em; margin-top: calc((1lh - 18px) / 2); width: 18px; height: 18px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   /* Handy: alles auf einen Bildschirm, „Rückmeldung senden“ ohne Scrollen sichtbar (Marko 02.11.2026) */
   @media (max-width: 599px) {
     .hero-photo.hero-rueckmeldung.hero-half { min-height: 0; padding: 14px 0 12px; }
     .hero-photo.hero-rueckmeldung .eyebrow { display: none; }
     .hero-photo.hero-rueckmeldung h1 { font-size: 22px; line-height: 1.2; margin: 0 0 4px; }
-    .hero-photo.hero-rueckmeldung p.lead { font-size: 14px; line-height: 1.35; margin: 0; }
+    .hero-photo.hero-rueckmeldung .lead { font-size: 14px; line-height: 1.35; margin: 0; }
     .rm-lang { display: none; }
     .rm-kurz { display: inline; }
     main > .section.rm-section { padding: 12px 0 16px; }
@@ -274,7 +278,7 @@
     <div class="container">
     <span class="eyebrow">Rückmeldung</span>
     <h1 id="rm-titel">Rückmeldung</h1>
-    <p class="lead" id="rm-spiel"></p>
+    <div class="lead" id="rm-spiel"></div>
     </div>
   </section>
   <section class="section rm-section">
@@ -549,8 +553,17 @@
       D = d; du = String(d.ansprache || '').toLowerCase() === 'du';
       document.getElementById('rm-titel').textContent = 'Rückmeldung für ' + anlass(d.spiel_name);
       document.title = 'Rückmeldung für ' + anlass(d.spiel_name) + ' — Basketball Löwen Erfurt';
-      var kurz = new Date(d.spiel_beginn).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' }) + ', ' + new Date(d.spiel_beginn).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }) + ' Uhr · Riethsporthalle';
-      document.getElementById('rm-spiel').innerHTML = '<span class="rm-lang">' + esc(wann(d.spiel_beginn) + ' · Riethsporthalle, Essener Straße 20, 99089 Erfurt') + '</span><span class="rm-kurz">' + esc(kurz) + '</span>';
+      // Zeitpunkt mit Kalenderlink, Zeilenumbruch, Ort mit Ortssymbol und Google-Maps-Link (seitenweit so, Marko 02.11.2026)
+      var ORT = 'Riethsporthalle, Essener Straße 20, 99089 Erfurt';
+      var b = new Date(d.spiel_beginn), e = new Date(b.getTime() + 2 * 3600000), utc = function (x) { return x.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, ''); };
+      var kal = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('Basketball Löwen: ' + d.spiel_name) + '&dates=' + utc(b) + '/' + utc(e) + '&ctz=Europe/Berlin&location=' + encodeURIComponent(ORT);
+      var karte = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(ORT);
+      var kurz = b.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' }) + ', ' + b.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }) + ' Uhr';
+      var ICON_KAL = '<svg class="rm-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
+      var ICON_ORT = '<svg class="rm-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+      document.getElementById('rm-spiel').innerHTML =
+        '<span class="rm-zeile">' + ICON_KAL + '<a href="' + esc(kal) + '" target="_blank" rel="noopener" aria-label="' + esc(wann(d.spiel_beginn)) + ', in den Kalender eintragen"><span class="rm-lang">' + esc(wann(d.spiel_beginn)) + '</span><span class="rm-kurz">' + esc(kurz) + '</span></a></span>' +
+        '<span class="rm-zeile">' + ICON_ORT + '<a href="' + esc(karte) + '" target="_blank" rel="noopener"><span class="rm-lang">' + esc(ORT) + '</span><span class="rm-kurz">Riethsporthalle</span></a></span>';
       if (!d.offen) { fehler('Das Spiel hat schon begonnen. Eine Rückmeldung ist nicht mehr möglich.'); document.getElementById('rm-spiel').textContent = wann(d.spiel_beginn) + ' · ' + d.spiel_name; return; }
       formular();
     })
