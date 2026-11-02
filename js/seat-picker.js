@@ -414,7 +414,7 @@
      Hinweis (letztere wirken hier pauschal, die Anzahl abgedeckter Tickets ist unbekannt). */
   SeatPicker.prototype._voucherHint = function () {
     var info = this.voucherInfo;
-    if (!info || info.source === 'giftcard' || !info.categories || !info.categories.length) return '';
+    if (!info || info.source === 'giftcard' || !info.categories || !info.categories.length || voucherNurCode(info)) return '';
     var remaining = (info.remainingUses == null) ? Infinity : info.remainingUses;
     var covered = 0;
     var used = 0;
@@ -2642,6 +2642,9 @@
      Gutschein-Webhooks (s. VOUCHER_CHECK_URL) — für die Warenkorb-Anzeige. Zeigt
      bewusst nicht mehr den eingegebenen Code selbst (steht schon im Eingabefeld),
      nur noch Betrag + kurze Kategorie-/Tarif-Angabe. */
+  /* Code ohne Rabatt (0 %), z. B. aus der Mail nach dem Spielbesuch: dient nur zum Zählen der Aktivierungen. Kein „0 %“ und keine
+     Restnutzungen anzeigen, nur dass der Code hinterlegt ist (Marko 02.11.2026). */
+  function voucherNurCode(info) { return !!info && info.source === 'voucher' && info.priceMode === 'percent' && Number(info.value) === 0; }
   function labelForVoucherInfo(info) {
     if (info.source === 'giftcard') return 'Guthaben ' + fmtEUR(info.balance) + ' €';
     var amount = info.priceMode === 'percent' ? (info.value + ' %') : (fmtEUR(info.value) + ' €');
@@ -2682,7 +2685,7 @@
       var hasMatch = !categoryBound || this._voucherMatchingUnits().length > 0;
       wrap.innerHTML =
         '<div class="seatplan-voucher-applied">' +
-          '<span><i data-lucide="tag" style="width:14px;height:14px"></i> Gutschein: ' + this.voucherInfo.label + '</span>' +
+          '<span><i data-lucide="tag" style="width:14px;height:14px"></i> ' + (voucherNurCode(this.voucherInfo) ? 'Dein Code aus unserer E-Mail ist hinterlegt.' : 'Gutschein: ' + this.voucherInfo.label) + '</span>' +
           '<button type="button" data-voucher-remove>entfernen</button>' +
         '</div>' +
         (hasMatch ? '' : '<p class="seatplan-voucher-error">Dieser Gutschein gilt nicht für deine aktuelle Auswahl.</p>');

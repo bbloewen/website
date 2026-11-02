@@ -783,6 +783,14 @@
             }
           }
 
+          // Code ohne Rabatt (0 %, z. B. aus der Mail nach dem Spielbesuch): keine Zeile „Gutschein 0,00 €“, keine Restnutzungen, nur der Hinweis (Marko 02.11.2026)
+          if (result.source === 'voucher' && result.voucherMode === 'percent' && Number(result.voucherValue) === 0) {
+            renderSummary();
+            voucherMsg.textContent = 'Dein Code aus unserer E-Mail ist hinterlegt.';
+            voucherMsg.className = 'voucher-message success';
+            if (voucherHint) voucherHint.textContent = '';
+            return;
+          }
           var amount = formatMoney(result.discountAmount);
           var label = result.source === 'giftcard'
             ? ('Guthaben ' + amount)
