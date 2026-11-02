@@ -1,7 +1,7 @@
 {
   "notionId": "408a2418-e2d7-80c2-9f39-df74d3cd584f",
   "status": "pruefung",
-  "datum": "2026-11-02",
+  "datum": "2026-11-05",
   "team": "nachwuchs",
   "slug": "waid",
   "titel": "Wenn mal alle mitspielen – Eine Reportage über die WAID Basketball Löwen",
@@ -20,5 +20,8 @@
     "Hintergrund ist die Zusammenarbeit zwischen dem Förderverein Basketball e.V. und dem Christophoruswerk Erfurt, die seit Januar 2023 in einer langfristigen Kooperationsvereinbarung festgehalten ist.",
     "Die Reportage entstand vor den Nationalen Spielen von Special Olympics in Saarbrücken. Dort hat das WAID-Team inzwischen Gold gewonnen."
   ],
-  "quellbild": "data/artikel-eingang/bilder/waid.jpg"
+  "quellbild": "data/artikel-eingang/bilder/waid.jpg",
+  "frueher": [
+    "2026-11-02_nachwuchs_waid.html"
+  ]
 }
