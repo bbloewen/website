@@ -121,6 +121,25 @@
   .hf-gelb { background: #fff3e8; color: #8a4204; }
   .hf-gruen { background: #e6f4ea; color: #1b7a3d; }
   .hf-gruppe { scroll-margin-top: 110px; margin: 18px 0 0; }
+  /* Bausteine (Phasen) eingeklappt, Klick auf den Kopf oder oben im Ablauf klappt auf (Vorschlag André, Marko 02.11.2026) */
+  .hf-bs { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 4px 12px; width: 100%; text-align: left; font: inherit; color: inherit; background: #fff; border: 1px solid var(--border-strong, #c4ccdb); border-radius: 12px; padding: 14px 16px; cursor: pointer; }
+  .hf-bs:hover { background: #f7f8fb; }
+  .hf-bs:focus-visible { outline: 3px solid #0028AA; outline-offset: 2px; }
+  .hf-bs-name { font-weight: 800; font-size: 17px; grid-column: 1; }
+  .hf-bs-zeit { grid-column: 1; grid-row: 2; font-size: 14px; color: var(--text-secondary, #4a5873); white-space: nowrap; }
+  .hf-bs .hf-besz { grid-column: 2; grid-row: 1 / span 2; }
+  .hf-bs-pfeil { grid-column: 3; grid-row: 1 / span 2; width: 10px; height: 10px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); margin: -4px 4px 0; opacity: .6; }
+  .hf-offen > .hf-phase-kopf .hf-bs { background: #f3f5f9; border-radius: 12px 12px 0 0; }
+  .hf-offen > .hf-phase-kopf .hf-bs-pfeil { transform: rotate(-135deg); margin-top: 4px; }
+  .hf-phase-kopf { margin: 0; }
+  .hf-bs-inhalt { border: 1px solid var(--border-strong, #c4ccdb); border-top: 0; border-radius: 0 0 12px 12px; padding: 4px 12px 12px; }
+  .hf-gruppe-ohne .hf-bs-inhalt { border: 0; padding: 0; }
+  .hf-haken { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; margin: 12px 0 0; }
+  .hf-haken input { width: 18px; height: 18px; margin-top: 2px; flex: none; }
+  .hf-team-namen { display: flex; flex-wrap: wrap; gap: 4px 6px; margin-top: 4px; }
+  .hf-name { font-size: 13px; font-weight: 600; background: #f3f5f9; border-radius: 999px; padding: 2px 10px; }
+  .hf-name.du { background: #e6f4ea; color: #1b6e3a; }
+  .hf-name.frei { background: transparent; color: var(--text-secondary, #4a5873); font-weight: 400; padding-left: 0; }
   .hf-gruppe tbody { scroll-margin-top: 110px; }
   .hf-liste { width: 100%; border-collapse: collapse; }
   .hf-liste td, .hf-liste th { padding: 7px 6px; border-bottom: 1px solid #e3e8f0; text-align: left; vertical-align: top; }
@@ -574,8 +593,10 @@
   var q = new URLSearchParams(location.search);
   var plan = (q.get('p') || '').replace(/[^0-9a-f]/g, '').slice(0, 32);
   var absage = (q.get('absage') || '').replace(/[^0-9a-f]/g, '').slice(0, 32);
-  // Persönlicher Link des Helfers (?h=…): zeigt nur die eigenen Einsätze, füllt den Namen vor; andere Helfer erscheinen nie
+  // Persönlicher Link des Helfers (?h=…): zeigt die eigenen Einsätze und füllt den Namen vor. Mit &wer=1 die Übersicht „Wer ist dabei?“ (Migration 237):
+  // volle Vornamen nur für Helfer, die bei diesem Termin eingetragen sind, und nur mit Einwilligung; sonst und öffentlich Anfangsbuchstabe und Punkte.
   var hcode = (q.get('h') || '').replace(/[^0-9a-f]/g, '').slice(0, 32);
+  var wer = q.get('wer') === '1' && !!hcode;
   var el = document.getElementById('hf-inhalt');
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function tag(d) { return new Date(d + 'T12:00:00Z').toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }); }
@@ -650,6 +671,32 @@
   // Liste: Label in Farbe (dringend / wir brauchen dich / komplett), Zahl rechtsbündig; „x fehlen“ nur im Tooltip (Marko 01.11.2026)
   function hfBesHtml(x) { return '<span class="hf-besz" title="' + esc(hfBesText(x)) + '"><span class="hf-chip ' + hfBes(x) + '">' + (x.fehlen > 0 ? 'dringend' : (x.besetzt >= x.max ? 'komplett' : 'wir brauchen dich')) + '</span><span class="hf-zahl">' + x.besetzt + '/' + x.max + '</span></span>'; }
   function hfUhr(m) { return String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); }
+  // Namen unter der Aufgabe: öffentlich Anfangsbuchstabe und Punkte, auf der persönlichen Seite eingetragener Helfer der Vorname mit Einwilligung
+  function hfNamen(n, leer) {
+    n = n || []; if (!n.length) return leer ? '<span class="hf-team-namen"><span class="hf-name frei">noch frei</span></span>' : '';
+    return '<span class="hf-team-namen">' + n.map(function (x) { return '<span class="hf-name' + (x.du ? ' du' : '') + '">' + esc(x.du ? x.name + ' (du)' : x.name) + '</span>'; }).join('') + '</span>';
+  }
+  // Übersicht „Wer ist dabei?“: je Baustein, Bereich und Aufgabe die Vornamen (d.team kommt nur über den persönlichen Link eingetragener Helfer)
+  function hfTeam(d, bb) {
+    var back = '<p><a href="?p=' + esc(plan) + '&amp;h=' + esc(hcode) + '">← Zurück zur Helferseite</a></p>';
+    if (!d.team_voll) return '<div class="hf-karte"><h2>Wer ist dabei?</h2><p>Die Übersicht siehst du über deinen persönlichen Link, sobald du dich für diesen Termin eingetragen hast.</p>' + back + '</div>';
+    var je = {}; d.team.forEach(function (t) { je[t.aufgabe_id] = t.namen || []; });
+    var h = '<div class="hf-karte"><h2>Wer ist dabei?</h2><p class="hf-klein">Vornamen siehst du nur von Helfern, die dem zugestimmt haben, sonst den Anfangsbuchstaben. Auf der öffentlichen Seite stehen nur Anfangsbuchstaben.</p>';
+    bb.gruppen.forEach(function (x) {
+      var bs = bb.liste.filter(function (b) { return !b.programm && b.gruppe === x.key; }); if (!bs.length) return;
+      h += '<section class="hf-gruppe">' + (x.titel ? '<h3 class="hf-phase-titel">' + esc(x.titel) + '</h3>' : '') + '<table class="hf-liste"><caption class="hf-weg">' + esc(x.titel || 'Aufgaben') + '</caption>';
+      bs.forEach(function (b) {
+        h += '<tbody><tr class="hf-lb"><th colspan="3" scope="colgroup">' + esc(b.name) + '</th><td class="hf-lbes">' + hfBesHtml(b) + '</td></tr>';
+        b.aufgaben.forEach(function (a) {
+          var n = je[a.id] || [];
+          h += '<tr class="hf-lz"><td class="hf-lhaken"></td><td class="hf-lzeit">' + esc(zeit(a).replace(' Uhr', '')) + '</td><td>' + esc(a.titel) + hfNamen(n, true) + '</td><td class="hf-lbes">' + hfBesHtml(a) + '</td></tr>';
+        });
+        h += '</tbody>';
+      });
+      h += '</table></section>';
+    });
+    return h + back + '</div>';
+  }
   function fehler(t) { el.innerHTML = '<div class="hf-karte"><p class="hf-meldung fehler">' + esc(t) + '</p></div>'; }
   function post(pfad, body) { return fetch(API + pfad, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) { return r.json(); }); }
 
@@ -687,8 +734,9 @@
         ((ich.einsaetze || []).length ? '<ul>' + ich.einsaetze.map(function (e) {
           var ziel = e.plan_code === plan ? '' : '?p=' + e.plan_code + '&h=' + hcode;
           return '<li>' + esc(tag(e.datum)) + ' · ' + (ziel ? '<a href="' + esc(ziel) + '">' + esc(e.plan_titel) + '</a>' : esc(e.plan_titel)) + ': ' + esc(e.titel) + (e.zeit_von ? ' (' + esc(zeit(e)) + ')' : '') + '</li>';
-        }).join('') + '</ul>' : '') + '</div>';
+        }).join('') + '</ul>' : '') + (d.team_voll && !wer ? '<p style="margin-top:8px"><a href="?p=' + esc(plan) + '&amp;h=' + esc(hcode) + '&amp;wer=1">Wer ist dabei? Zur Übersicht</a></p>' : '') + '</div>';
     }
+    if (wer) { el.innerHTML = h + hfTeam(d, hfBereiche(d)); return; }
     if (d.teaser) h += '<p class="hf-teaser">' + esc(d.teaser).replace(/\n/g, '<br>') + '</p>';
     var bb = hfBereiche(d), arbeit = bb.liste.filter(function (b) { return !b.programm; });
     var g = arbeit.reduce(function (x, b) { x.max += b.max; x.besetzt += b.besetzt; x.fehlen += b.fehlen; return x; }, { max: 0, besetzt: 0, fehlen: 0 });
@@ -710,21 +758,29 @@
     if (!d.offen) { el.innerHTML = h + '<div class="hf-karte"><p class="hf-meldung">Für diesen Termin ist keine Anmeldung mehr möglich. Danke für dein Interesse!</p></div>'; return; }
     // Anmeldung: kompakte Liste je Phase und Bereich mit Haken und Besetzung
     h += '<form class="hf-karte" id="hf-form" novalidate><h2>Wobei hilfst du?</h2><p class="hf-klein">Hake an, was passt. Mehrere Aufgaben gehen, wenn sich die Zeiten nicht überschneiden.</p>';
+    var teamJe = {}; (d.team || []).forEach(function (t) { teamJe[t.aufgabe_id] = t.namen || []; });
+    var mitTitel = PH.filter(function (x) { return x.titel && arbeit.some(function (b) { return b.gruppe === x.key; }); }).length;
     PH.forEach(function (x) {
       var bs = arbeit.filter(function (b) { return b.gruppe === x.key; });
       if (!bs.length) return;
-      h += '<section class="hf-gruppe" id="hf-p-' + x.key + '">' + (x.titel ? '<h3 class="hf-phase-titel">' + esc(x.titel) + '</h3>' : '') + '<table class="hf-liste"><caption class="hf-weg">' + esc(x.titel || 'Aufgaben') + '</caption>';
+      // Baustein: eingeklappt, außer es gibt nur einen oder man ist dort schon eingetragen
+      var su = bs.reduce(function (y, b) { y.max += b.max; y.besetzt += b.besetzt; y.fehlen += b.fehlen; if (b.von && (!y.von || b.von < y.von)) y.von = b.von; if (b.bis && b.bis > y.bis) y.bis = b.bis; return y; }, { max: 0, besetzt: 0, fehlen: 0, von: '', bis: '' });
+      var auf = !x.titel || mitTitel < 2 || bs.some(function (b) { return b.aufgaben.some(function (a) { return meine[a.id]; }); });
+      h += '<section class="hf-gruppe' + (x.titel ? '' : ' hf-gruppe-ohne') + (auf ? ' hf-offen' : '') + '" id="hf-p-' + x.key + '">' +
+        (x.titel ? '<h3 class="hf-phase-kopf"><button type="button" class="hf-bs" aria-expanded="' + auf + '" aria-controls="hf-pi-' + x.key + '"><span class="hf-bs-name">' + esc(x.titel) + '</span>' +
+          (su.von ? '<span class="hf-bs-zeit">' + esc(su.von + (su.bis ? '–' + su.bis : '') + ' Uhr') + '</span>' : '') + hfBesHtml(su) + '<span class="hf-bs-pfeil" aria-hidden="true"></span></button></h3>' : '') +
+        '<div class="hf-bs-inhalt" id="hf-pi-' + x.key + '"' + (auf ? '' : ' hidden') + '><table class="hf-liste"><caption class="hf-weg">' + esc(x.titel || 'Aufgaben') + '</caption>';
       bs.forEach(function (b) {
         h += '<tbody id="' + b.id + '"><tr class="hf-lb"><th colspan="3" scope="colgroup">' + esc(b.name) + '</th><td class="hf-lbes">' + hfBesHtml(b) + '</td></tr>';
         b.aufgaben.forEach(function (a) {
           var dabei = !!meine[a.id], voll = a.frei <= 0 && !dabei, idA = 'hf-a-' + a.id;
           h += '<tr class="hf-lz' + (voll ? ' voll' : '') + (dabei ? ' hf-dabei' : '') + '"><td class="hf-lhaken"><input type="checkbox" name="aufgabe" id="' + idA + '" value="' + a.id + '"' + (voll || dabei ? ' disabled' : '') + (dabei ? ' checked' : '') + ' /></td>' +
-            '<td class="hf-lzeit">' + esc(zeit(a).replace(' Uhr', '')) + '</td><td><label for="' + idA + '">' + esc(a.titel) + (a.beschreibung ? '<span class="hf-klein hf-lbeschr">' + esc(a.beschreibung) + '</span>' : '') + '</label></td>' +
+            '<td class="hf-lzeit">' + esc(zeit(a).replace(' Uhr', '')) + '</td><td><label for="' + idA + '">' + esc(a.titel) + (a.beschreibung ? '<span class="hf-klein hf-lbeschr">' + esc(a.beschreibung) + '</span>' : '') + '</label>' + hfNamen(teamJe[a.id], false) + '</td>' +
             '<td class="hf-lbes">' + (dabei ? '<span class="hf-besz"><span class="hf-chip hf-gruen">du bist dabei</span><span class="hf-zahl">' + a.besetzt + '/' + a.max + '</span></span>' : hfBesHtml(a)) + '</td></tr>';
         });
         h += '</tbody>';
       });
-      h += '</table></section>';
+      h += '</table></div></section>';
     });
     h += '<div class="hf-felder" style="margin-top:20px">' +
       '<label for="hf-vorname">Vorname<input id="hf-vorname" name="vorname" autocomplete="given-name" maxlength="80" required value="' + esc(ich && ich.vorname || '') + '" /></label>' +
@@ -732,14 +788,21 @@
       '<label for="hf-kommentar" class="voll">Kommentar (optional)<textarea id="hf-kommentar" name="kommentar" maxlength="300" rows="2" placeholder="z. B. Ich bringe gern noch einen Kuchen mit."></textarea></label>' +
       // Spam-Sperre: Feld, das Menschen nicht sehen; Bots füllen es aus
       '<label class="hf-weg" aria-hidden="true">Webseite<input name="website" tabindex="-1" autocomplete="off" /></label></div>' +
-      '<p class="hf-klein">Wir gleichen deinen Namen mit unserem Ehrenamtsteam ab. Mehr in unserer <a href="/datenschutz.html">Datenschutzerklärung</a>.</p>' +
+      '<label class="hf-haken"><input type="checkbox" name="datenschutz" id="hf-datenschutz" required /><span>Ich bestätige die <a href="/datenschutz.html" target="_blank" rel="noopener">Datenschutzbestimmungen</a>. Wir gleichen deinen Namen mit unserem Ehrenamtsteam ab.</span></label>' +
+      '<label class="hf-haken"><input type="checkbox" name="vorname_sichtbar" id="hf-vorname-sichtbar" /><span>Optional: Ich bin damit einverstanden, dass andere Helfer meinen Vornamen auf ihrer persönlichen Helferseite sehen. (Auf der öffentlichen Seite steht nur dein Anfangsbuchstabe.)</span></label>' +
       '<button class="hf-knopf" type="submit" id="hf-senden">Ich helfe mit</button><p class="hf-meldung" id="hf-m" role="status"></p></form>';
     el.innerHTML = h;
-    // Klick auf Phase oder Kachel: zur Gruppe springen und sie hervorheben
+    function hfAuf(sec, auf) {
+      if (!sec) return; var b = sec.querySelector('.hf-bs'), i = sec.querySelector('.hf-bs-inhalt'); if (!b || !i) return;
+      sec.classList.toggle('hf-offen', auf); b.setAttribute('aria-expanded', auf ? 'true' : 'false'); i.hidden = !auf;
+    }
+    [].forEach.call(el.querySelectorAll('.hf-bs'), function (b) { b.addEventListener('click', function () { var sec = b.closest('.hf-gruppe'); hfAuf(sec, !sec.classList.contains('hf-offen')); }); });
+    // Klick auf Phase oder Kachel: Baustein aufklappen, zur Gruppe springen und sie hervorheben
     [].forEach.call(el.querySelectorAll('.hf-ablauf [data-ziel]'), function (a) {
       a.addEventListener('click', function () {
         [].forEach.call(el.querySelectorAll('.hf-ziel'), function (x) { x.classList.remove('hf-ziel'); });
-        var z = document.getElementById(a.getAttribute('data-ziel')); if (z) z.classList.add('hf-ziel');
+        var z = document.getElementById(a.getAttribute('data-ziel')); if (!z) return;
+        hfAuf(z.classList.contains('hf-gruppe') ? z : z.closest('.hf-gruppe'), true); z.classList.add('hf-ziel');
       });
     });
     var form = document.getElementById('hf-form'), geoeffnet = Date.now();
@@ -747,9 +810,11 @@
       ev.preventDefault();
       var m = document.getElementById('hf-m'), k = document.getElementById('hf-senden');
       var aufgaben = [].slice.call(form.querySelectorAll('input[name=aufgabe]:checked:not(:disabled)')).map(function (x) { return x.value; });
-      var b = { c: plan, h: hcode, aufgaben: aufgaben, vorname: form.vorname.value.trim(), nachname: form.nachname.value.trim(), kommentar: form.kommentar.value.trim(), website: form.website.value, dauer_ms: Date.now() - geoeffnet };
+      var b = { c: plan, h: hcode, aufgaben: aufgaben, vorname: form.vorname.value.trim(), nachname: form.nachname.value.trim(), kommentar: form.kommentar.value.trim(), website: form.website.value, dauer_ms: Date.now() - geoeffnet,
+        datenschutz: form.datenschutz.checked, vorname_sichtbar: form.vorname_sichtbar.checked };
       if (!aufgaben.length) { m.className = 'hf-meldung fehler'; m.textContent = 'Bitte mindestens eine Aufgabe wählen.'; return; }
       if (!b.vorname || !b.nachname) { m.className = 'hf-meldung fehler'; m.textContent = 'Bitte Vor- und Nachnamen angeben.'; return; }
+      if (!b.datenschutz) { m.className = 'hf-meldung fehler'; m.textContent = 'Bitte bestätige die Datenschutzbestimmungen.'; form.datenschutz.focus(); return; }
       k.disabled = true; m.className = 'hf-meldung'; m.textContent = 'Wird gesendet …';
       post('helfen-anmeldung', b).then(function (r) {
         if (!r || !r.ok) { k.disabled = false; m.className = 'hf-meldung fehler'; m.textContent = (r && r.meldung) || 'Das hat nicht geklappt. Bitte später noch einmal versuchen.'; return; }
