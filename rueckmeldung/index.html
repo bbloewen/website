@@ -37,7 +37,6 @@
     .rm-kurz { display: inline; }
     main > .section.rm-section { padding: 12px 0 16px; }
     .rm-karte.rm-intro { display: none; }
-    .rm-test { font-size: 12px; margin: 0 0 8px !important; }
     .rm-optionen { gap: 6px; margin: 0 0 10px; }
     .rm-optionen legend { font-size: 15px; margin: 0 0 6px; }
     .rm-option { padding: 10px 12px; gap: 10px; }
@@ -466,12 +465,6 @@
   function anlass(n) { return /\s(-|–|vs\.?|gegen)\s/.test(n || '') ? 'das Heimspiel gegen ' + String(n).replace(/^.*?\s(-|–|vs\.?|gegen)\s+/, '') : String(n || 'die Veranstaltung'); }
   function kalender() { return API + 'kommst-du-kalender?c=' + code; }
   function fehler(text) { inhalt.innerHTML = '<div class="rm-karte"><p class="rm-meldung fehler">' + esc(text) + '</p><p class="rm-klein" style="margin:8px 0 0">Bitte öffnen Sie den Link aus unserer E-Mail. Bei Fragen hilft Ihnen unsere Ansprechperson weiter.</p></div>'; document.getElementById('rm-spiel').textContent = ''; }
-  function anrede() {
-    if (du && D.vorname) return 'Hallo ' + D.vorname + ',';
-    if (!du && D.anrede === 'Frau' && D.nachname) return 'Sehr geehrte Frau ' + D.nachname + ',';
-    if (!du && D.anrede === 'Herr' && D.nachname) return 'Sehr geehrter Herr ' + D.nachname + ',';
-    return 'Guten Tag' + (D.name ? ' ' + D.name : '') + ',';
-  }
   var BISHER = { kommt: 'Sie haben zugesagt.', kommt_allein: 'Sie haben zugesagt und kommen allein.', kommt_nicht: 'Sie haben abgesagt.', weitergegeben: 'Sie haben die Karte weitergegeben.' };
   var BISHER_DU = { kommt: 'Du hast zugesagt.', kommt_allein: 'Du hast zugesagt und kommst allein.', kommt_nicht: 'Du hast abgesagt.', weitergegeben: 'Du hast die Karte weitergegeben.' };
   function danke(antwort, gast) {
@@ -491,14 +484,13 @@
   }
   function formular() {
     var plaetze = Number(D.plaetze) || 1;
-    var karte = w('deiner Dauerkarte', 'Ihrer Dauerkarte') + ' (' + plaetze + (plaetze === 1 ? ' Platz' : ' Plätze') + (/vip/i.test(D.kategorie || '') ? ' im VIP-Bereich' : '') + ')';
     var bisher = D.antwort ? (du ? BISHER_DU : BISHER)[D.antwort] + (D.antwort === 'weitergegeben' && D.gast_vorname ? ' (an ' + D.gast_vorname + ' ' + D.gast_nachname + ')' : '') : '';
     var wahl = vorwahl || D.antwort || '';
     var opt = function (wert, titel, text) {
       return '<label class="rm-option"><input type="radio" name="antwort" value="' + wert + '"' + (wahl === wert ? ' checked' : '') + ' /><span><strong>' + titel + '</strong>' + (text ? '<span>' + text + '</span>' : '') + '</span></label>';
     };
-    var h = '<div class="rm-karte rm-intro"><p>' + esc(anrede()) + '</p><p>' + w('kommst du', 'kommen Sie') + ' zum ' + esc(anlass(D.spiel_name).replace(/^das /, '')) + '? Mit ' + esc(karte) + ' ' + w('bist du', 'sind Sie') + ' herzlich willkommen.</p>' +
-      (bisher ? '<p><strong>Bisher:</strong> ' + esc(bisher) + '</p>' : '') + '</div>';
+    // Keine Anrede und keine Einleitung: Spiel, Zeit und Ort stehen oben im Hero (Marko 02.11.2026)
+    var h = bisher ? '<div class="rm-karte rm-intro"><p><strong>Bisher:</strong> ' + esc(bisher) + '</p></div>' : '';
     h += '<form id="rm-form" novalidate><fieldset class="rm-optionen"><legend>' + w('Deine Antwort', 'Ihre Antwort') + '<span class="rm-kurz" style="font-weight:400"> · ' + esc(plaetze + (plaetze === 1 ? ' Platz' : ' Plätze')) + '</span></legend>' +
       // Karten mit mehreren Plätzen: „Wir kommen zu zweit / Ich komme allein / Wir kommen nicht“ (Marko 02.11.2026)
       (plaetze >= 2
@@ -549,7 +541,6 @@
   laden
     .then(function (d) {
       if (!d || !d.ok) { fehler((d && d.meldung) || 'Dieser Link ist nicht gültig.'); return; }
-      if (d.test) document.getElementById('rm-inhalt').insertAdjacentHTML('beforebegin', '<p class="rm-meldung rm-test" role="note" style="margin:0 0 12px">Testansicht: So sieht die Seite für Gäste aus. Es wird nichts gespeichert.</p>');
       D = d; du = String(d.ansprache || '').toLowerCase() === 'du';
       document.getElementById('rm-titel').textContent = 'Rückmeldung für ' + anlass(d.spiel_name);
       document.title = 'Rückmeldung für ' + anlass(d.spiel_name) + ' — Basketball Löwen Erfurt';
