@@ -64,7 +64,9 @@
 (function () {
   var API = 'https://ticketing.basketball-loewen.com/webhook/';
   var q = new URLSearchParams(location.search);
-  var code = (q.get('c') || '').replace(/[^0-9a-f]/g, '').slice(0, 32);
+  // Testansicht (?c=test, dazu p=Plätze, du=1): zeigt die Seite wie in der Mail, speichert nichts. Für Testmails und zum Ausprobieren (Marko 02.11.2026)
+  var test = q.get('c') === 'test';
+  var code = test ? 'test' : (q.get('c') || '').replace(/[^0-9a-f]/g, '').slice(0, 32);
   var vorwahl = q.get('a') || '';
   var inhalt = document.getElementById('rm-inhalt');
   var D = null, du = false;
@@ -96,7 +98,7 @@
     } else {
       h += '<h2>Danke, wir haben ' + esc(gast) + ' eingetragen.</h2><p>' + w('Gib bitte die Eintrittskarte an diese Person weiter.', 'Bitte geben Sie die Eintrittskarte an diese Person weiter.') + ' Sie bekommt von uns eine kurze Willkommensmail mit den Infos zum Spieltag.</p>';
     }
-    h += '<p class="rm-klein">' + w('Du kannst deine Antwort bis zum Spielbeginn ändern: ', 'Sie können Ihre Antwort bis zum Spielbeginn ändern: ') + '<a href="?c=' + esc(code) + '">Antwort ändern</a></p></div>';
+    h += '<p class="rm-klein">' + w('Du kannst deine Antwort bis zum Spielbeginn ändern: ', 'Sie können Ihre Antwort bis zum Spielbeginn ändern: ') + '<a href="?c=' + esc(code) + (test ? '&p=' + esc(D.plaetze) + (du ? '&du=1' : '') : '') + '">Antwort ändern</a></p></div>';
     inhalt.innerHTML = h;
     var el = document.getElementById('rm-danke'); if (el) el.focus();
   }
@@ -140,6 +142,7 @@
         m.className = 'rm-meldung fehler'; m.textContent = 'Bitte Vorname, Nachname und eine gültige E-Mail-Adresse der Person angeben, die kommt.'; return;
       }
       k.disabled = true; m.className = 'rm-meldung'; m.textContent = 'Wird gesendet …';
+      if (test) { vorwahl = ''; D.antwort = a; if (a === 'weitergegeben') { D.gast_vorname = g.vorname; D.gast_nachname = g.nachname; } danke(a, g.vorname + ' ' + g.nachname); return; }
       fetch(API + 'kommst-du-antwort', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ c: code, antwort: a, gast: a === 'weitergegeben' ? g : null }) })
         .then(function (r) { return r.json(); })
         .then(function (d) {
@@ -152,10 +155,14 @@
     });
   }
   if (!code) { fehler('Dieser Link ist nicht vollständig. Bitte öffnen Sie den Link aus unserer Mail.'); return; }
-  fetch(API + 'kommst-du-info?c=' + encodeURIComponent(code))
-    .then(function (r) { return r.json(); })
+  var laden = test
+    ? Promise.resolve({ ok: true, offen: true, test: true, plaetze: Math.min(4, Math.max(1, Number(q.get('p')) || 1)), kategorie: 'VIP - Dauer', spiel_name: 'Basketball Löwen - Testspiel',
+        spiel_beginn: new Date(Date.now() + 6 * 86400000).toISOString(), ansprache: q.get('du') ? 'Du' : 'Sie', name: 'Testperson', antwort: null })
+    : fetch(API + 'kommst-du-info?c=' + encodeURIComponent(code)).then(function (r) { return r.json(); });
+  laden
     .then(function (d) {
       if (!d || !d.ok) { fehler((d && d.meldung) || 'Dieser Link ist nicht gültig.'); return; }
+      if (d.test) document.getElementById('rm-inhalt').insertAdjacentHTML('beforebegin', '<p class="rm-meldung" role="note" style="margin:0 0 12px">Testansicht: So sieht die Seite für Gäste aus. Es wird nichts gespeichert.</p>');
       D = d; du = String(d.ansprache || '').toLowerCase() === 'du';
       document.getElementById('rm-titel').textContent = w('Deine Rückmeldung', 'Ihre Rückmeldung');
       document.getElementById('rm-spiel').textContent = wann(d.spiel_beginn) + ' · ' + d.spiel_name + ' · Riethsporthalle, Essener Straße 20, 99089 Erfurt';
