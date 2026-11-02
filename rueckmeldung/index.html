@@ -22,6 +22,27 @@
   .hero-photo.hero-rueckmeldung { --hero-photo-url: url('/assets/img/heimspiel-hero.webp'); }
   .hero-photo.hero-rueckmeldung h1 { white-space: normal; max-width: 24ch; }
   .rm-wrap { max-width: 680px; margin: 0 auto; }
+  .rm-kurz { display: none; }
+  /* Handy: alles auf einen Bildschirm, „Rückmeldung senden“ ohne Scrollen sichtbar (Marko 02.11.2026) */
+  @media (max-width: 599px) {
+    .hero-photo.hero-rueckmeldung.hero-half { min-height: 0; padding: 14px 0 12px; }
+    .hero-photo.hero-rueckmeldung .eyebrow { display: none; }
+    .hero-photo.hero-rueckmeldung h1 { font-size: 22px; line-height: 1.2; margin: 0 0 4px; }
+    .hero-photo.hero-rueckmeldung p.lead { font-size: 14px; line-height: 1.35; margin: 0; }
+    .rm-lang { display: none; }
+    .rm-kurz { display: inline; }
+    main > .section.rm-section { padding: 12px 0 16px; }
+    .rm-karte.rm-intro { display: none; }
+    .rm-test { font-size: 12px; margin: 0 0 8px !important; }
+    .rm-optionen { gap: 6px; margin: 0 0 10px; }
+    .rm-optionen legend { font-size: 15px; margin: 0 0 6px; }
+    .rm-option { padding: 10px 12px; gap: 10px; }
+    .rm-option input { margin-top: 2px; }
+    .rm-option span { display: none; }
+    .rm-knopf { width: 100%; position: sticky; bottom: 8px; box-shadow: 0 4px 14px rgba(0,18,45,.25); }
+    .rm-danke { padding: 12px 14px; }
+    .feedback-widget { display: none; }
+  }
   .rm-karte { border: 1px solid var(--border-strong, #d9dfea); border-radius: 10px; padding: 20px; margin: 0 0 20px; }
   .rm-optionen { border: 0; padding: 0; margin: 0 0 16px; display: grid; gap: 10px; }
   .rm-optionen legend { font-weight: 800; font-size: 18px; margin: 0 0 10px; }
@@ -255,7 +276,7 @@
     <p class="lead" id="rm-spiel"></p>
     </div>
   </section>
-  <section class="section">
+  <section class="section rm-section">
     <div class="container">
       <div class="rm-wrap">
         <div id="rm-inhalt" aria-live="polite"><p>Wird geladen …</p></div>
@@ -470,9 +491,9 @@
     var opt = function (wert, titel, text) {
       return '<label class="rm-option"><input type="radio" name="antwort" value="' + wert + '"' + (wahl === wert ? ' checked' : '') + ' /><span><strong>' + titel + '</strong>' + (text ? '<span>' + text + '</span>' : '') + '</span></label>';
     };
-    var h = '<div class="rm-karte"><p>' + esc(anrede()) + '</p><p>' + w('kommst du', 'kommen Sie') + ' zum ' + esc(anlass(D.spiel_name).replace(/^das /, '')) + '? Mit ' + esc(karte) + ' ' + w('bist du', 'sind Sie') + ' herzlich willkommen.</p>' +
+    var h = '<div class="rm-karte rm-intro"><p>' + esc(anrede()) + '</p><p>' + w('kommst du', 'kommen Sie') + ' zum ' + esc(anlass(D.spiel_name).replace(/^das /, '')) + '? Mit ' + esc(karte) + ' ' + w('bist du', 'sind Sie') + ' herzlich willkommen.</p>' +
       (bisher ? '<p><strong>Bisher:</strong> ' + esc(bisher) + '</p>' : '') + '</div>';
-    h += '<form id="rm-form" novalidate><fieldset class="rm-optionen"><legend>' + w('Deine Antwort', 'Ihre Antwort') + '</legend>' +
+    h += '<form id="rm-form" novalidate><fieldset class="rm-optionen"><legend>' + w('Deine Antwort', 'Ihre Antwort') + '<span class="rm-kurz" style="font-weight:400"> · ' + esc(plaetze + (plaetze === 1 ? ' Platz' : ' Plätze')) + '</span></legend>' +
       // Karten mit mehreren Plätzen: „Wir kommen zu zweit / Ich komme allein / Wir kommen nicht“ (Marko 02.11.2026)
       (plaetze >= 2
         ? opt('kommt', 'Wir kommen ' + ({ 2: 'zu zweit', 3: 'zu dritt', 4: 'zu viert' }[plaetze] || 'zu ' + plaetze), '') + opt('kommt_allein', 'Ich komme allein', '') + opt('kommt_nicht', 'Wir kommen nicht', '')
@@ -522,11 +543,12 @@
   laden
     .then(function (d) {
       if (!d || !d.ok) { fehler((d && d.meldung) || 'Dieser Link ist nicht gültig.'); return; }
-      if (d.test) document.getElementById('rm-inhalt').insertAdjacentHTML('beforebegin', '<p class="rm-meldung" role="note" style="margin:0 0 12px">Testansicht: So sieht die Seite für Gäste aus. Es wird nichts gespeichert.</p>');
+      if (d.test) document.getElementById('rm-inhalt').insertAdjacentHTML('beforebegin', '<p class="rm-meldung rm-test" role="note" style="margin:0 0 12px">Testansicht: So sieht die Seite für Gäste aus. Es wird nichts gespeichert.</p>');
       D = d; du = String(d.ansprache || '').toLowerCase() === 'du';
       document.getElementById('rm-titel').textContent = 'Rückmeldung für ' + anlass(d.spiel_name);
       document.title = 'Rückmeldung für ' + anlass(d.spiel_name) + ' — Basketball Löwen Erfurt';
-      document.getElementById('rm-spiel').textContent = wann(d.spiel_beginn) + ' · Riethsporthalle, Essener Straße 20, 99089 Erfurt';
+      var kurz = new Date(d.spiel_beginn).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' }) + ', ' + new Date(d.spiel_beginn).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }) + ' Uhr · Riethsporthalle';
+      document.getElementById('rm-spiel').innerHTML = '<span class="rm-lang">' + esc(wann(d.spiel_beginn) + ' · Riethsporthalle, Essener Straße 20, 99089 Erfurt') + '</span><span class="rm-kurz">' + esc(kurz) + '</span>';
       if (!d.offen) { fehler('Das Spiel hat schon begonnen. Eine Rückmeldung ist nicht mehr möglich.'); document.getElementById('rm-spiel').textContent = wann(d.spiel_beginn) + ' · ' + d.spiel_name; return; }
       formular();
     })
