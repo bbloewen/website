@@ -36,6 +36,16 @@ Disallow: /assets/img/spieler/
 Disallow: /assets/img/staff/
 Disallow: /assets/img/verantwortliche/
 Disallow: /assets/presse/fotos/
+# Zwischenstufen und Werkzeuge gehören nicht in den Index. Beides ist auf GitHub
+# Pages erreichbar, steht aber bewusst nicht in der Sitemap (Fund 03.11.2026):
+#   /data/spieltagsinfo/  die Heft-Fragmente, die tools/build-spieltagsinfo-fragment.py
+#                         erzeugt — ihr Inhalt steht fertig auf der Spieltagsseite,
+#                         die Zwischenstufe wäre derselbe Text ein zweites Mal.
+#   /tools/               Druckvorlagen und die Python-Generatoren des Repos.
+# Die übrigen Dateien unter /data/ bleiben frei: Seiten laden ihre JSON von dort
+# nach, und Googlebot muss sie zum Rendern abrufen können.
+Disallow: /data/spieltagsinfo/
+Disallow: /tools/
 Allow: /
 
 Sitemap: https://basketball-loewen.com/sitemap.xml
