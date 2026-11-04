@@ -23,12 +23,12 @@ BEGIN:VEVENT
 UID:nbbl-2026-11-29@basketball-loewen.com
 DTSTAMP:20261011T000000Z
 SEQUENCE:0
-DTSTART;TZID=Europe/Berlin:20261129T150000
-DTEND;TZID=Europe/Berlin:20261129T170000
-SUMMARY:CATL Basketball Löwen Erfurt: Gegner noch offen
-DESCRIPTION:Auswärtsspiel · NBBL (U19)\nGegner und Uhrzeit werden von der
-  Liga noch festgelegt.\nAlle Infos: https://basketball-loewen.com/saison/s
- pielplan.html?team=nbbl
+DTSTART;VALUE=DATE:20261129
+DTEND;VALUE=DATE:20261130
+SUMMARY:CATL Basketball Löwen Erfurt – Dresden Titans
+LOCATION:Herzog-Ernst-Schule\, Gotha
+DESCRIPTION:Heimspiel · NBBL (U19)\nAlle Infos: https://basketball-loewen.
+ com/saison/spielplan.html?team=nbbl
 URL:https://basketball-loewen.com/saison/spielplan.html?team=nbbl
 STATUS:CONFIRMED
 TRANSP:OPAQUE

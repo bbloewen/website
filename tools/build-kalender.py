@@ -124,7 +124,7 @@ def spiele():
     for s in saison["nbbl"]["spiele"]:
         heim = bool(s.get("heim"))
         if heim:
-            ort = RIETH if dmy(s["datum"]) in proB_heimtage else SUEDPARK
+            ort = s.get("ort") or (RIETH if dmy(s["datum"]) in proB_heimtage else SUEDPARK)
         else:
             ort = s.get("ort", "")
         add("nbbl", s, heim, ort, f"{BASE}/saison/spielplan.html?team=nbbl")

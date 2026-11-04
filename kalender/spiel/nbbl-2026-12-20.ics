@@ -23,12 +23,12 @@ BEGIN:VEVENT
 UID:nbbl-2026-12-20@basketball-loewen.com
 DTSTAMP:20261011T000000Z
 SEQUENCE:0
-DTSTART;TZID=Europe/Berlin:20261220T150000
-DTEND;TZID=Europe/Berlin:20261220T170000
-SUMMARY:CATL Basketball Löwen Erfurt: Gegner noch offen
-DESCRIPTION:Auswärtsspiel · NBBL (U19)\nGegner und Uhrzeit werden von der
-  Liga noch festgelegt.\nAlle Infos: https://basketball-loewen.com/saison/s
- pielplan.html?team=nbbl
+DTSTART;TZID=Europe/Berlin:20261220T130000
+DTEND;TZID=Europe/Berlin:20261220T150000
+SUMMARY:CATL Basketball Löwen Erfurt – Mitteldeutsche Basketball Academy
+LOCATION:Sporthalle am Südpark\, Erfurt
+DESCRIPTION:Heimspiel · NBBL (U19)\nAlle Infos: https://basketball-loewen.
+ com/saison/spielplan.html?team=nbbl
 URL:https://basketball-loewen.com/saison/spielplan.html?team=nbbl
 STATUS:CONFIRMED
 TRANSP:OPAQUE

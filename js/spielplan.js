@@ -36,10 +36,10 @@
       // Default-Heimspielstätte für alle Teams (Profis, Damen, NBBL) ist die
       // Riethsporthalle, solange für ein konkretes Spiel nichts anderes bekannt ist
       // (Marko, 10.08.2026 — Damen spielen ebenfalls dort).
-      details: g.heim ? 'Heimspiel der Basketball Löwen Erfurt in der ' + (g.suedpark ? 'Sporthalle am Südpark.' : 'Riethsporthalle.') : 'Auswärtsspiel der Basketball Löwen Erfurt.',
+      details: g.heim ? 'Heimspiel der Basketball Löwen Erfurt in der ' + (g.ort ? g.ort + '.' : g.suedpark ? 'Sporthalle am Südpark.' : 'Riethsporthalle.') : 'Auswärtsspiel der Basketball Löwen Erfurt.',
       ctz: 'Europe/Berlin'
     };
-    if (g.heim) params.location = g.suedpark ? 'Sporthalle am Südpark, Erfurt' : 'Essener Straße 20, 99089 Erfurt';
+    if (g.heim) params.location = g.ort ? g.ort : g.suedpark ? 'Sporthalle am Südpark, Erfurt' : 'Essener Straße 20, 99089 Erfurt';
     return 'https://calendar.google.com/calendar/render?' + new URLSearchParams(params).toString();
   }
 
@@ -91,7 +91,9 @@
       // Default-Heimspielstätte für alle Teams ist die Riethsporthalle, solange für
       // ein konkretes Spiel nichts anderes bekannt ist (Marko, 10.08.2026 — Damen
       // spielen ebenfalls dort).
-      venueHTML = g.suedpark
+      venueHTML = g.ort
+        ? '<div class="fixture-venue-line"><a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(g.ort) + '" target="_blank" rel="noopener"><i data-lucide="map-pin" style="width:14px;height:14px"></i> ' + g.ort + '</a></div>'
+        : g.suedpark
         ? '<div class="fixture-venue-line"><a href="' + SUEDPARK_MAPS_URL + '" target="_blank" rel="noopener"><i data-lucide="map-pin" style="width:14px;height:14px"></i> Sporthalle am Südpark</a></div>'
         : '<div class="fixture-venue-line"><a href="' + RIETHSPORTHALLE_MAPS_URL + '" target="_blank" rel="noopener"><i data-lucide="map-pin" style="width:14px;height:14px"></i> Riethsporthalle</a></div>';
       statusHTML = '<span class="venue-heim">Heimspiel</span>';
@@ -258,7 +260,7 @@
 
   Promise.all([
     fetch('/data/heimspiele.json?v=1791549139').then(function (r) { return r.json(); }),
-    fetch('/data/spielplan-saison.json?v=1792864171').then(function (r) { return r.json(); })
+    fetch('/data/spielplan-saison.json?v=1793798681').then(function (r) { return r.json(); })
   ]).then(function (results) {
     var heim = results[0], saison = results[1];
 
