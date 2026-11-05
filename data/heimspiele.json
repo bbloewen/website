@@ -1,5 +1,5 @@
 {
-  "hinweis": "Heimspiele Profis (Basketball Löwen Erfurt), Saison 2026/ 27 ProB. Quelle: basketball-loewen.com/saison/profis/spielplan. Alle Spiele in der Riethsporthalle, Essener Straße 20, 99089 Erfurt. slug = interner Schlüssel (steckt in der pretix-Zuordnung, frueher auch im ?spiel=-Parameter der inzwischen entfernten tickets/einzelticket.html) — NICHT umdefinieren. seiteSlug = fester Adressbestandteil der eigenen Spieltagsseite saison/profis/gameday/<seiteSlug>.html (Schema <slug>-<gegner-kurzform>, Sponsorennamen wie 'Porsche'/'Hessing'/'Bayer' bewusst weggelassen); wird von tools/build-spieltagsseiten.py nur einmalig erzeugt, wenn das Feld fehlt, und danach nie mehr angetastet — Marko-Vorgabe 25.08.2026, da eine sich aendernde Adresse Rankings/Links zerstoert. EINMALIGE AUSNAHME 26.08.2026: Die Seiten sind von saison/spiel/ nach saison/profis/gameday/ umgezogen, damit sie unter dem immergruenen Gameday-Hub liegen. Zulaessig war das nur, weil die Seiten einen Tag alt waren, kein Ranking und keine Klicks hatten und noch nicht oeffentlich angekuendigt waren — genau die Bedingungen, unter denen die Regel nichts zu schuetzen hat. Der seiteSlug selbst blieb unberuehrt. subeventId ist die pretix-Zuordnung des zugehörigen Subevents in der Serie saison2627 (Dauerkarte+Einzelticket vereinheitlicht, 05.08.2026); wird ein Spiel verlegt, müssen Datum, slug und Subevent gemeinsam nachgezogen werden. ticketUrl zeigt seit 25.08.2026 auf die eigene Spieltagsseite (saison/profis/gameday/<seiteSlug>.html, tickets/einzelticket.html wurde geloescht) und steht ABSICHTLICH nur bei Spielen, fuer die der Vorverkauf schon freigegeben ist — ihr Vorhandensein ist zugleich das Signal fuer die Phase 'Vorverkauf' auf der Spieltagsseite. Der eigentliche Kauf (Saalplan/Warenkorb/Kasse) lebt seit 27.08.2026 nicht mehr auf der Spieltagsseite, sondern auf dem Gameday-Hub (saison/profis/gameday/, tools/build-gameday-hub.py) fuer das jeweils naechste Spiel; tickets.html wurde deshalb geloescht. spielberichtUrl zeigt bei ALLEN Spielen auf dieselbe Spieltagsseite (sie ist der einzige Heimatort des Spiels, Bericht inklusive, unabhaengig von der aktuellen Phase). Optionales Feld `stehplatzBuchbar: false` je Spiel schaltet den Stehplatz-Verkauf für genau dieses Spiel aus (Preisliste durchgestrichen, Grafik nicht anklickbar, Direktwahl-Dropdown ohne die Option) — pretix bleibt dabei unverändert aktiv, das ist eine reine Website-Einstellung (s. #222). Fehlt das Feld, ist Stehplatz buchbar. Optionales Feld `zahlungPausiert: true` je Spiel lässt Saalplan, Warenkorb und Kasse-Formular auf der Spieltagsseite und in tickets/checkout.html weiterhin bedienbar (zum Ausprobieren des Buchungswegs), blockiert dort aber den Übergang zu tickets/payment.html und blendet die Gutschein-Einlösung aus — für Spiele, deren Vorverkauf noch nicht offiziell freigegeben ist, aber schon eine eigene Seite hat (Marko, 27.08.2026, nachdem eine echte PayPal-Zahlung fürs 1. Heimspiel einging, bevor der Verkauf freigegeben war). Fehlt das Feld, läuft die Kasse normal durch.",
+  "hinweis": "Heimspiele Profis (Basketball Löwen Erfurt), Saison 2026/ 27 ProB. Quelle: basketball-loewen.com/saison/profis/spielplan. Alle Spiele in der Riethsporthalle, Essener Straße 20, 99089 Erfurt. slug = interner Schlüssel (steckt in der pretix-Zuordnung, frueher auch im ?spiel=-Parameter der inzwischen entfernten tickets/einzelticket.html) — NICHT umdefinieren. seiteSlug = fester Adressbestandteil der eigenen Spieltagsseite saison/profis/gameday/<seiteSlug>.html (Schema <slug>-<gegner-kurzform>, Sponsorennamen wie 'Porsche'/'Hessing'/'Bayer' bewusst weggelassen); wird von tools/build-spieltagsseiten.py nur einmalig erzeugt, wenn das Feld fehlt, und danach nie mehr angetastet — Marko-Vorgabe 25.08.2026, da eine sich aendernde Adresse Rankings/Links zerstoert. EINMALIGE AUSNAHME 26.08.2026: Die Seiten sind von saison/spiel/ nach saison/profis/gameday/ umgezogen, damit sie unter dem immergruenen Gameday-Hub liegen. Zulaessig war das nur, weil die Seiten einen Tag alt waren, kein Ranking und keine Klicks hatten und noch nicht oeffentlich angekuendigt waren — genau die Bedingungen, unter denen die Regel nichts zu schuetzen hat. Der seiteSlug selbst blieb unberuehrt. subeventId ist die pretix-Zuordnung des zugehörigen Subevents in der Serie saison2627 (Dauerkarte+Einzelticket vereinheitlicht, 05.08.2026); wird ein Spiel verlegt, müssen Datum, slug und Subevent gemeinsam nachgezogen werden. ticketUrl zeigt auf die eigene Spieltagsseite (saison/profis/gameday/<seiteSlug>.html); ihr Vorhandensein ist das Signal fuer die Phase 'Vorverkauf' und blendet auf dieser Seite den Kaufbereich ein (Saalplan/Warenkorb/Kasse, tools/build-spieltagsseiten.py, Anker #tickets). Seit 05.11.2026 ist der Vorverkauf fuer ALLE Spiele offen (Marko), ticketUrl steht bei jedem Spiel, 'Vorverkauf starten' gibt es nicht mehr. Der Gameday-Hub (saison/profis/gameday/, tools/build-gameday-hub.py) zeigt weiter das jeweils naechste Spiel mit demselben Kaufbereich. Regel fuer die Knoepfe: 'Tickets kaufen' fuehrt auf der ganzen Website zum Hub, nur das Ticket-Icon im Spielplan fuehrt direkt zur Seite eines anderen Spiels. Neue Dauerkarten reservieren nur Spiele, die noch nicht gespielt sind (n8n-Workflow Dauerkartenbestellung), ticketUrl schliesst kein Spiel mehr aus. spielberichtUrl zeigt bei ALLEN Spielen auf dieselbe Spieltagsseite (sie ist der einzige Heimatort des Spiels, Bericht inklusive, unabhaengig von der aktuellen Phase). Optionales Feld `stehplatzBuchbar: false` je Spiel schaltet den Stehplatz-Verkauf für genau dieses Spiel aus (Preisliste durchgestrichen, Grafik nicht anklickbar, Direktwahl-Dropdown ohne die Option) — pretix bleibt dabei unverändert aktiv, das ist eine reine Website-Einstellung (s. #222). Fehlt das Feld, ist Stehplatz buchbar. Optionales Feld `zahlungPausiert: true` je Spiel lässt Saalplan, Warenkorb und Kasse-Formular auf der Spieltagsseite und in tickets/checkout.html weiterhin bedienbar (zum Ausprobieren des Buchungswegs), blockiert dort aber den Übergang zu tickets/payment.html und blendet die Gutschein-Einlösung aus — für Spiele, deren Vorverkauf noch nicht offiziell freigegeben ist, aber schon eine eigene Seite hat (Marko, 27.08.2026, nachdem eine echte PayPal-Zahlung fürs 1. Heimspiel einging, bevor der Verkauf freigegeben war). Fehlt das Feld, läuft die Kasse normal durch.",
   "spiele": [
     {
       "datum": "11.10.2026",
@@ -92,6 +92,8 @@
       "slug": "2026-11-13",
       "seiteSlug": "2026-11-13-dresden-titans",
       "subeventId": 28,
+      "ticketUrl": "/saison/profis/gameday/2026-11-13-dresden-titans.html",
+      "vorverkaufAb": "2026-11-05",
       "spielberichtUrl": "/saison/profis/gameday/2026-11-13-dresden-titans.html",
       "stehplatzBuchbar": false,
       "livestream": "https://sporteurope.tv/basketball-loewen-erfurt/catl-basketball-loewen-vs-dresden-titans"
@@ -105,6 +107,8 @@
       "slug": "2026-11-20",
       "seiteSlug": "2026-11-20-fc-bayern-basketball",
       "subeventId": 18,
+      "ticketUrl": "/saison/profis/gameday/2026-11-20-fc-bayern-basketball.html",
+      "vorverkaufAb": "2026-11-05",
       "spielberichtUrl": "/saison/profis/gameday/2026-11-20-fc-bayern-basketball.html",
       "stehplatzBuchbar": false,
       "livestream": "https://sporteurope.tv/basketball-loewen-erfurt/catl-basketball-loewen-vs-fc-bayern-basketball-ii"
@@ -118,6 +122,8 @@
       "slug": "2026-12-06",
       "seiteSlug": "2026-12-06-bg-leitershofen",
       "subeventId": 15,
+      "ticketUrl": "/saison/profis/gameday/2026-12-06-bg-leitershofen.html",
+      "vorverkaufAb": "2026-11-05",
       "spielberichtUrl": "/saison/profis/gameday/2026-12-06-bg-leitershofen.html",
       "stehplatzBuchbar": false,
       "livestream": "https://sporteurope.tv/basketball-loewen-erfurt/catl-basketball-loewen-vs-bg-hessing-leitershofen"
@@ -131,6 +137,8 @@
       "slug": "2026-12-13",
       "seiteSlug": "2026-12-13-tsv-oberhaching-tropics",
       "subeventId": 21,
+      "ticketUrl": "/saison/profis/gameday/2026-12-13-tsv-oberhaching-tropics.html",
+      "vorverkaufAb": "2026-11-05",
       "spielberichtUrl": "/saison/profis/gameday/2026-12-13-tsv-oberhaching-tropics.html",
       "stehplatzBuchbar": false,
       "livestream": "https://sporteurope.tv/basketball-loewen-erfurt/catl-basketball-loewen-vs-tsv-oberhaching-tropics"
@@ -144,6 +152,8 @@
       "slug": "2027-01-03",
       "seiteSlug": "2027-01-03-dragons-rhoendorf",
       "subeventId": 22,
+      "ticketUrl": "/saison/profis/gameday/2027-01-03-dragons-rhoendorf.html",
+      "vorverkaufAb": "2026-11-05",
       "spielberichtUrl": "/saison/profis/gameday/2027-01-03-dragons-rhoendorf.html",
       "stehplatzBuchbar": false,
       "livestream": "https://sporteurope.tv/basketball-loewen-erfurt/catl-basketball-loewen-vs-dragons-rhoendorf"
@@ -157,6 +167,8 @@
       "slug": "2027-01-17",
       "seiteSlug": "2027-01-17-skyliners-juniors",
       "subeventId": 24,
+      "ticketUrl": "/saison/profis/gameday/2027-01-17-skyliners-juniors.html",
+      "vorverkaufAb": "2026-11-05",
       "spielberichtUrl": "/saison/profis/gameday/2027-01-17-skyliners-juniors.html",
       "stehplatzBuchbar": false,
       "livestream": "https://sporteurope.tv/basketball-loewen-erfurt/catl-basketball-loewen-vs-skyliners-juniors"
@@ -170,6 +182,8 @@
       "slug": "2027-01-31",
       "seiteSlug": "2027-01-31-bbc-coburg",
       "subeventId": 17,
+      "ticketUrl": "/saison/profis/gameday/2027-01-31-bbc-coburg.html",
+      "vorverkaufAb": "2026-11-05",
       "spielberichtUrl": "/saison/profis/gameday/2027-01-31-bbc-coburg.html",
       "stehplatzBuchbar": false,
       "livestream": "https://sporteurope.tv/basketball-loewen-erfurt/catl-basketball-loewen-vs-bbc-coburg"
@@ -183,6 +197,8 @@
       "slug": "2027-02-14",
       "seiteSlug": "2027-02-14-sv-fellbach-flashers",
       "subeventId": 23,
+      "ticketUrl": "/saison/profis/gameday/2027-02-14-sv-fellbach-flashers.html",
+      "vorverkaufAb": "2026-11-05",
       "spielberichtUrl": "/saison/profis/gameday/2027-02-14-sv-fellbach-flashers.html",
       "stehplatzBuchbar": false,
       "livestream": "https://sporteurope.tv/basketball-loewen-erfurt/catl-basketball-loewen-vs-sv-fellbach-flashers"
@@ -196,6 +212,8 @@
       "slug": "2027-03-07",
       "seiteSlug": "2027-03-07-giants-leverkusen",
       "subeventId": 27,
+      "ticketUrl": "/saison/profis/gameday/2027-03-07-giants-leverkusen.html",
+      "vorverkaufAb": "2026-11-05",
       "spielberichtUrl": "/saison/profis/gameday/2027-03-07-giants-leverkusen.html",
       "stehplatzBuchbar": false,
       "livestream": "https://sporteurope.tv/basketball-loewen-erfurt/catl-basketball-loewen-vs-bayer-giants-leverkusen"
@@ -209,6 +227,8 @@
       "slug": "2027-03-21",
       "seiteSlug": "2027-03-21-tv-langen",
       "subeventId": 19,
+      "ticketUrl": "/saison/profis/gameday/2027-03-21-tv-langen.html",
+      "vorverkaufAb": "2026-11-05",
       "spielberichtUrl": "/saison/profis/gameday/2027-03-21-tv-langen.html",
       "stehplatzBuchbar": false,
       "livestream": "https://sporteurope.tv/basketball-loewen-erfurt/catl-basketball-loewen-vs-tv-langen"
@@ -222,6 +242,8 @@
       "slug": "2027-03-28",
       "seiteSlug": "2027-03-28-ahorn-camp-baskets",
       "subeventId": 25,
+      "ticketUrl": "/saison/profis/gameday/2027-03-28-ahorn-camp-baskets.html",
+      "vorverkaufAb": "2026-11-05",
       "spielberichtUrl": "/saison/profis/gameday/2027-03-28-ahorn-camp-baskets.html",
       "stehplatzBuchbar": false,
       "livestream": "https://sporteurope.tv/basketball-loewen-erfurt/catl-basketball-loewen-vs-ahorn-camp-baskets"

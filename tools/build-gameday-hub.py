@@ -124,7 +124,7 @@ def kurz_datum(s):
 
 # Der Hub bleibt auf einem Spiel stehen, bis es 4 Stunden nach Anpfiff vorbei ist (Marko,
 # 11.10.2026) -- vorher bis Mitternacht des Spieltags. Dann rueckt das naechste Heimspiel nach,
-# und tools/vorverkauf-starten.py eroeffnet dafuer den Vorverkauf. Ohne Uhrzeit im Datensatz
+# (der Vorverkauf ist seit 05.11.2026 fuer alle Spiele offen). Ohne Uhrzeit im Datensatz
 # gilt 12:00 als Anpfiff.
 UMSCHALT_NACH_ANPFIFF = timedelta(hours=4)
 BERLIN = ZoneInfo("Europe/Berlin")

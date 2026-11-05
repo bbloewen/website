@@ -29,7 +29,7 @@ on:
       - data/heimspiele.json
   schedule:
     - cron: '20 4 * * *'
-    # Gameday-Hub umstellen und Vorverkauf eroeffnen, 4 Stunden nach Anpfiff (Marko, 11.10.2026).
+    # Gameday-Hub umstellen, 4 Stunden nach Anpfiff (Marko, 11.10.2026; der Vorverkauf ist seit 05.11.2026 fuer alle Spiele offen).
     # Heimspiele beginnen 14:30-19:30 Ortszeit, das Umschalten faellt also zwischen 18:30 und
     # 23:30 Ortszeit = 16:30-22:30 UTC. Alle 20 Minuten in diesem Fenster; ein Lauf ohne
     # Aenderung committet nichts (s. unten). GitHub verzoegert geplante Laeufe gelegentlich
@@ -71,7 +71,6 @@ jobs:
       # die von build-partials.py gerade eingefuegten Header/Footer wieder leeren.
       - name: Spieltagsseiten, Startseiten-Widget, Partials, Head-Meta und Sitemap neu bauen
         run: |
-          python3 tools/vorverkauf-starten.py
           # Boxscore-Links (Spiel-ID des Liga-Livetickers) der naechsten Spiele eintragen, VOR den Seiten.
           python3 tools/livescore-ids.py
           # Dauerkartenpreise VOR dem Hub: der Hub liest die data-base-Werte aus tickets/dauerkarte.html.
