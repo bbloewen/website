@@ -1397,21 +1397,46 @@ Heiko Kühnst lädt seine Mandanten zum Heimspiel am 08.11.2026 gegen Culture Ci
 - **André aus den Admin-Teams entfernt (02.11.2026, Marko):** Er stand zusätzlich in „Administrators“ (`xxl` Team 1) und „Administratoren“ (`lev` Team 2) und ist dort per `DELETE /teams/<id>/members/3/` raus. Er ist nur noch im Ticketing-Team. Admins bleiben: rechnung@ (Shop-Konto).
 - **Navigation in der Mail:** Anmelden, oben den Veranstalter wählen (XXL/LEV), links „Geräte“; der Admin-Modus von pretix ist nicht nötig. Es gibt einen dritten Entwurf der Mail mit diesem Absatz (der vorherige ohne Navigation ist überholt).
 
-### 03.11.2026: Umbuchung Bargfleth (EFFZS) von 08.11. auf 13.11.
+### 03.11.2026: Umbuchung Käufer B. (EFFZS) von 08.11. auf 13.11.
 - Anfrage über tickets@ (Käufer wollte irrtümlich das Spiel gegen Weimar am 08.11. gebucht, statt Freitag 13.11.). Bestellung `EFFZS`, 3 Fanblock-Plätze (Block A, Reihe 5, Plätze 6 bis 8, 10,50/8,00/10,50 €, 29,00 € bezahlt).
-- Vorgehen wie bei Kwisdorf/Klein: Plätze im Spiel 13.11. (Subevent 28) per `seats/` als frei bestätigt, `orders/EFFZS/change/` mit `patch_positions` (Subevent 28, gleiche Sitze, gleiche Preise, `notify:false`), `regenerate_secrets/`, `paypal_zahlungen` Zeile 552 (eventLabel, spielDatum, pretixSubeventId), Webhook `pretix.event.order.changed.seat`, Marker `[ticket-mail-versendet]` entfernt, Ticket-Mail per Webhook `order.paid` + `source:direct`. Versand durch `zNGWzRFz3ebzsDkD` (Ausführung 240118, rund 40 s); die Mail liegt im Konto von rechnung@ und war im Gmail-Index nicht abrufbar.
+- Vorgehen wie bei früheren Umbuchungen: Plätze im Spiel 13.11. (Subevent 28) per `seats/` als frei bestätigt, `orders/EFFZS/change/` mit `patch_positions` (Subevent 28, gleiche Sitze, gleiche Preise, `notify:false`), `regenerate_secrets/`, `paypal_zahlungen` Zeile 552 (eventLabel, spielDatum, pretixSubeventId), Webhook `pretix.event.order.changed.seat`, Marker `[ticket-mail-versendet]` entfernt, Ticket-Mail per Webhook `order.paid` + `source:direct`. Versand durch `zNGWzRFz3ebzsDkD` (Ausführung 240118, rund 40 s); die Mail liegt im Konto von rechnung@ und war im Gmail-Index nicht abrufbar.
 - Antwortentwurf an den Käufer mit Marko in CC liegt in Gmail (Marko sendet selbst).
 
 ### 03.11.2026: Partnergutschein Thuringia Bulls (THB-DJG1KC, Bestellung WHZQZ)
-- Anfrage von Ali Jamili (Reha-Sport-Bildung e.V., Thuringia Bulls) über tickets@: 2 Karten Block C fürs Weimar-Spiel am 08.11. Marko: Partnergutscheine (100 %) für Turing, Shia, Bulls (Thuringia Bulls), THB.
+- Anfrage eines Vertreters des Partnervereins Thuringia Bulls über tickets@: 2 Karten Block C fürs Weimar-Spiel am 08.11. Marko: Partnergutscheine (100 %) für Turing, Shia, Bulls (Thuringia Bulls), THB.
 - Gutschein `THB-DJG1KC` (pretix-ID 578): 100 %, 2 Nutzungen, Artikel 31 (Block C (K2) - Einzel), Spiel 16, gültig bis 08.11. 23:59:59, Tag `partner_thuringia-bulls`. Für weitere Partner dasselbe Muster mit eigenem Tag `partner_<name>` und Präfix.
 - Bestellung per `einzelticket-paypal-order-erstellen` (2 Zeilen Block C Kat. II à 12,00 € minus Gutschein 100 %), Bestellung `WHZQZ`, bezahlt (free), Plätze Block C Reihe 7 Platz 17 und 18, Ticket-Mail ging automatisch raus. Antwortentwurf an Ali (Du) mit Marko in CC liegt in Gmail.
 
 ### 03.11.2026: Gäste Weimar (08.11.): 10 Freikarten + 10 VIP-Tickets in Block D
-- Anfrage André Grenzdörffer: Weimar will 10 Freikarten (Liga) und 10 VIP-Flanierkarten, beide im Gästeblock D; Rechnung für VIP (79 € netto) stellt André manuell. Auf den VIP-Tickets soll VIP stehen.
+- Anfrage aus der Geschäftsstelle: Weimar will 10 Freikarten (Liga) und 10 VIP-Flanierkarten, beide im Gästeblock D; Rechnung für VIP (79 € netto) stellt André manuell. Auf den VIP-Tickets soll VIP stehen.
 - **Freikarten:** Gutschein `GF-0DL6J7` (pretix-ID 579, 100 %, 10 Nutzungen, Artikel 29 Block D Einzel, Spiel 16, bis 08.11. 23:59:59, Tag `gastefans` wie bei Kims Gäste-Gutscheinen). Bestellung `BBUQW` über `einzelticket-paypal-order-erstellen` (10 Zeilen Block D mit `seatGuid`, Block D Reihe 8 Platz 1 bis 10), Käufer André, Ticket-Mail an André zum Weiterleiten. Beim ersten Versuch stürzte die TEMP-Ausführung ab (n8n kurz nicht erreichbar), nur der Gutschein war angelegt; die Bestellung wurde mit demselben Gutschein neu ausgelöst.
 - **VIP in Block D:** Artikel 40 (VIP - Einzel) mit Block-D-Plätzen. Über den Bestellweg der Website geht das nicht, `Sitzwahl anwenden` verlangt Sitz im Zonen-/Reihenbereich des Produkts (VIP = Block B Reihe 1 bis 5). pretix selbst prüft Sitz und Produkt nicht gegeneinander (Seat.product ist bei allen Sitzen null). Deshalb Bestellung direkt per `POST …/orders/` (Status `p`, `payment_provider: free`, 10 Positionen Item 40, Subevent 16, Sitz je Position, Preis 0,00, `send_email:false`): Bestellung `N97EL`, Block D Reihe 7 Platz 8 bis 17. Die Position zählt gegen das VIP-Kontingent 80 (40 frei vor der Buchung).
 - **Ticket-Text:** Das PDF zeigt "VIP - Einzel" und "Block D, Reihe 7, Platz 8" (Layout 9). Die Mail nennt VIP unter "Freie Platzwahl in deinem gewählten Block", obwohl die Sitze fest sind.
 - **Wichtig:** Eine per API angelegte, bezahlte Bestellung löst die Ticket-Mail bereits über den pretix-Webhook aus (Ausführung ca. 20 s nach dem Anlegen), ein zusätzlicher Webhook mit `source:direct` ist dann nicht nötig und kann eine zweite Mail auslösen.
 - Antwortentwurf an André liegt in Gmail.
+
+### 03.11.2026: Gutschein Sparkasse-Kontakt (Unternehmerforum)
+- Marko wollte einem Kontakt der Sparkasse (Unternehmerforum) ursprünglich für den 18.10. einen Gutschein schicken, das Spiel war schon vorbei. Neu: ein Gutschein für die zwei nächsten Heimspiele (08.11. Weimar, 13.11. Dresden), nur Block B und C.
+- Gutschein `SPK-3MDHKP` (pretix-ID 580): 100 %, 2 Nutzungen, Teilveranstaltung leer, gültig bis 13.11.2026 23:59:59, Tag `einladung`, Kontingent 407 (neues Filter-Kontingent „Gutschein-Filter: <name>-sparkasse (2026-11-03)“, Items 35 und 31, unbegrenzt, Spiel 16 nur als Pflichtangabe), Kommentar mit `[items:35,31]`. Prüf-Webhook liefert `valid:true`, `itemIds [35,31]`, 2 Nutzungen.
+- Mailentwurf an Marko (zum Weiterleiten an den Kontakt, Sie-Form) liegt in Gmail.- Nachtrag (Marko): Der Kontakt darf eine Begleitung mitbringen. `SPK-3MDHKP` von 2 auf **4 Nutzungen** (2 Personen × 2 Spiele) erhöht, Kommentar angepasst. Prüf-Webhook: `remainingUses 4`.
+
+### 04.11.2026: Umbuchung Käuferin S. (MTREX, ET-P68DBU) von 08.11. auf 13.11.
+- Käuferin wollte Tickets für den 13.11. und landete über „Ticket buchen“ beim Weimar-Spiel am 08.11. (der Shop für das nächste Heimspiel öffnet erst nach dem letzten Heimspiel). Bestellung `MTREX`, 2 × Block E Reihe 8 Platz 10 (ermäßigt 14,00 €) und 11 (normal 16,00 €), 30,00 € bezahlt.
+- Vorgehen wie bei EFFZS: Plätze am 13.11. (Subevent 28) als frei geprüft, `change/` mit `patch_positions` (Subevent 28, gleiche Sitze und Preise, `notify:false`), `regenerate_secrets/`, `paypal_zahlungen` Zeile 516, Sitz-Sync, Marker `[ticket-mail-versendet]` entfernt, Ticket-Mail über `order.paid` + `source:direct`. Antwortentwurf (Sie, Marko in CC) liegt in Gmail.
+- Dieselbe Verwechslung gab es bei EFFZS und früheren Umbuchungen: „Ticket buchen“ beim 13.11. führt vor Shop-Öffnung zum 08.11. Marko will das über den Hinweis in der Antwort lösen, nicht über eine Änderung der Seite.
+
+### 04.11.2026: Übungsleiter-Karte Trainerin T.
+- Eine Trainerin (U12 und U14 weiblich, Spielgemeinschaft Basketball Löwen und USV Erfurt, Adresse @basketball-loewen.com) bat über tickets@ um ihre Freikarte für die Heimspiele. Marko: Übungsleiterticket ausstellen.
+- Vorprüfung: keine Bestellung zur E-Mail, kein Gutschein auf ihren Namen (451 Gutscheine geprüft). Ausgestellt über den Trainer-Workflow `x5VZtGVpSGlbHL4M` (Name, E-Mail, Verein, Funktion): Gutschein `UL-DK-NYZPP2` (Tag `uebungsleiter_dauerkarte`, 14 Nutzungen), Bestellung `MHU3D` (Stehplatz - Dauer, 14 Positionen, 0,00 €), Ticket-Mail angestoßen (HTTP 200).
+
+### 05.11.2026: Übungsleiter-Karte Trainer S. (BC Erfurt)
+- Anfrage „Saisonkarte für Trainer“ über tickets@ von einem Trainer (BC Erfurt, U10). Marko: Saisonkarte ausstellen. Vorprüfung: keine Bestellung zur E-Mail, kein Gutschein auf den Namen (540 Gutscheine geprüft).
+- Ausgestellt über `x5VZtGVpSGlbHL4M`: Gutschein `UL-DK-5YXWEK` (14 Nutzungen), Bestellung `33SFK` (Stehplatz - Dauer, 14 Positionen, 0,00 €), Ticket-Mail angestoßen.
+
+### 05.11.2026: Vorverkauf für alle Heimspiele, Kaufbereich je Spieltagsseite
+- **Anlass:** Käuferinnen klickten auf der Seite eines späteren Spiels „Tickets kaufen“ und landeten im Hub, der immer nur das nächste Spiel verkauft (drei Fälle am 03./04.11.2026). Marko: Vorverkauf für alle Spiele offen, Kaufbereich auf der Spieltagsseite des jeweiligen Spiels.
+- **Website (Commits `ef0b9c6d`, `53497b50`):** `ticketUrl` + `vorverkaufAb` bei allen 14 Spielen. `tools/build-spieltagsseiten.py` blendet für noch nicht beendete Spiele (4 h nach Anpfiff) den Kaufbereich aus `build-gameday-hub.py` (`kauf_bereich()`) direkt unter dem Hero ein (Anker `#tickets`, `seat-picker.css`); vergangene Spiele ohne. `tools/vorverkauf-starten.py` und sein Workflow-Schritt entfernt. Angebots-Schema (`build-head-meta.py`): URL = Spieltagsseite des Spiels.
+- **Knopfregel:** „Tickets kaufen“ führt überall zum Gameday-Hub, nur das Ticket-Icon im Spielplan führt direkt zur Seite des Spiels (außer für das Spiel des Hubs); in der Seitensuche hat nur der Hub das Suchwort „Tickets“.
+- **Dauerkarte:** n8n `HyUXW4kbhaQVbG0A`, Knoten „Ausgeschlossene Subevents ermitteln“ (Version `9cbb9bec`): ausgeschlossen wird nur noch, was gespielt ist (Datum vor heute). Eine neue Dauerkarte reserviert nur die noch ungespielten Spiele. Getestet mit den echten Spieldaten: heute `[26,20]`. Sitzkonflikte mit schon verkauften Einzeltickets fängt weiter die Bestellung ab (Nachtrag-Alarm).
+- **pretix:** alle 14 Subevents geprüft (gleicher Sitzplan, gleiche Kontingentgrößen, keine Preis-Überschreibungen, kein Verkaufsfenster).
 
