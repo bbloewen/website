@@ -56,6 +56,11 @@ SITZWAHL_STANDARD = True
 # auf Sitzwahl). Das Hub-Skript und die Spieltagsseiten bauen sonst unveraendert weiter.
 KAUF_PAUSIERT = False
 
+# Stylesheet des Kaufbereichs (Saalplan, Preise, Warenkorb). Der Kaufbereich steht auf dem Hub und,
+# seit 05.11.2026, auf der Spieltagsseite jedes Spiels mit gesetzter ticketUrl; beide Seiten
+# binden dieses Stylesheet mit derselben Fassungsnummer ein (build-spieltagsseiten.py liest die Konstante).
+SEAT_PICKER_CSS = '<link rel="stylesheet" href="/css/seat-picker.css?v=1792495207" />'
+
 # Die Dauerkarten-Preisbox in der Spalte neben den weiteren Heimspielen. Bewusst
 # eine Auswahl, nicht die volle Liste -- die ganze Preistabelle steht auf
 # tickets/dauerkarte.html, hierher gehoert nur der Anreiss.
@@ -695,7 +700,7 @@ def seite(liste, jetzt):
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
 <link rel="stylesheet" href="/css/site.css?v=1792352138" />
-<link rel="stylesheet" href="/css/seat-picker.css?v=1792495207" />
+{SEAT_PICKER_CSS}
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.

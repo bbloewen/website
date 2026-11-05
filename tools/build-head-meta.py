@@ -354,10 +354,10 @@ def _spiel_event_node(g, mainEntityOfPage_url):
     # validFrom. Google liest es als "Datum, ab dem Karten verkauft werden", das
     # Angebot darf also vor dem Verkaufsstart schon in den Daten stehen.
     #
-    # Offer.url zeigt auf den Game-Day-Hub, nicht auf die ticketUrl aus
-    # data/heimspiele.json: seit dem Umbau vom 27.08.2026 laeuft der
-    # Einzelticket-Kauf ausschliesslich dort. Die ticketUrl dient hier nur noch
-    # als Schalter "Vorverkauf laeuft schon".
+    # Offer.url: Hat das Spiel eine ticketUrl, steht der Kaufbereich seit 05.11.2026 auf seiner
+    # eigenen Spieltagsseite (tools/build-spieltagsseiten.py, kauf_bereich()), die Offer-Adresse
+    # ist dann diese Seite. Ohne ticketUrl zeigt sie auf den Game-Day-Hub (Kauf dort seit
+    # 27.08.2026, davor nirgends fuer andere Spiele).
     #
     # AggregateOffer statt Offer, weil es fuer ein Spiel zwoelf Preise gibt --
     # von der Kinderkarte in Kategorie 3 bis VIP. Ein einzelner price waere eine
@@ -369,7 +369,7 @@ def _spiel_event_node(g, mainEntityOfPage_url):
         low, high, anzahl = einzelticket_preise()
         node["offers"] = {
             "@type": "AggregateOffer",
-            "url": BASE + "saison/profis/gameday/",
+            "url": BASE + (g["ticketUrl"].lstrip("/") if g.get("ticketUrl") else "saison/profis/gameday/"),
             "availability": "https://schema.org/InStock",
             "priceCurrency": "EUR",
             "lowPrice": f"{low:.2f}",

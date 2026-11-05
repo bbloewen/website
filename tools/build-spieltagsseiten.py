@@ -21,12 +21,15 @@ Daten in data/heimspiele.json: Endstand + Viertelstaende ("ergebnis": "71 : 95",
 data/news.json --, das Spieltagsinfo-Band ("spieltagsinfo") und Zurueck/Weiter zwischen den
 Heimspielen. Die frueheren Heimspiel-Infos-Kacheln (Termin/Halle/Tickets) entfallen.
 
-Der Ticketkauf selbst (Saalplan/Kategorien/Kasse) lebt seit 27.08.2026 nicht
-mehr hier, sondern auf dem Gameday-Hub (tools/build-gameday-hub.py): weil
-ohnehin immer nur für ein Spiel gleichzeitig der Verkauf offen ist, ist der Hub
-in dem Moment schon die Kaufseite -- eine zusätzliche Spieltagsseite dafür war
-nur ein Umweg. Diese Seite hier zeigt vor dem Spiel nur noch, ob und wo gekauft
-werden kann, und verweist dafür auf den Hub.
+Der Ticketkauf (Saalplan/Kategorien/Kasse) steht seit 05.11.2026 wieder auf der Seite des
+jeweiligen Spiels: Ist bei einem noch nicht beendeten Spiel `ticketUrl` in data/heimspiele.json
+gesetzt, blendet diese Seite den Kaufbereich ein (kauf_bereich() aus tools/build-gameday-hub.py,
+unter dem Anker #tickets), und das Ticket-Icon im Spielplan fuehrt dorthin. "Vorverkauf starten"
+gibt es nicht mehr: ticketUrl ist bei allen Spielen gesetzt. Der Gameday-Hub (saison/profis/gameday/)
+bleibt die immergruene Adresse und zeigt wie bisher das jeweils naechste Spiel mit demselben Kaufbereich.
+Zwischen 27.08. und 05.11.2026 lag der Kauf nur auf dem Hub; die Seiten anderer Spiele verwiesen
+mit "Tickets kaufen" dorthin, und der Hub verkauft immer nur das naechste Spiel (Verwechslungen,
+Umbuchungen).
 
 Bericht-Block: redaktioneller Inhalt (Ergebnis, Rückblick, Impressionen), den
 dieses Skript NIE überschreibt. Bei jedem Lauf wird die Seite komplett neu
@@ -53,11 +56,13 @@ Aufruf:
 
 import argparse
 import html
+import importlib.util
 import json
 import re
 import sys
 import unicodedata
 from datetime import datetime
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from seo_common import REPO, gcal_link
@@ -65,6 +70,18 @@ from seo_common import REPO, gcal_link
 QUELLE = REPO / "data" / "heimspiele.json"
 ZIEL_DIR = REPO / "saison" / "profis" / "gameday"
 BERLIN = ZoneInfo("Europe/Berlin")
+
+
+def _hub_modul():
+    """build-gameday-hub.py hat einen Bindestrich im Namen -- per Pfad laden, damit der
+    Kaufbereich und die Umschaltregel (naechstes(), spielende()) nur an einer Stelle stehen."""
+    spec = importlib.util.spec_from_file_location("hub", Path(__file__).with_name("build-gameday-hub.py"))
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
+
+
+HUB = _hub_modul()
 
 MONATE = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli",
           "August", "September", "Oktober", "November", "Dezember"]
@@ -115,6 +132,14 @@ def phase_of(game, today):
     if game.get("ticketUrl"):
         return "vorverkauf"
     return "angekuendigt"
+
+
+def kauf_offen(game, jetzt=None):
+    """Zeigt die Seite dieses Spiels den Kaufbereich? Ja, solange ticketUrl gesetzt ist und das
+    Spiel nicht 4 Stunden nach Anpfiff vorbei ist (dieselbe Grenze wie beim Gameday-Hub)."""
+    if not game.get("ticketUrl") or not game.get("subeventId"):
+        return False
+    return HUB.spielende(game) > (jetzt or HUB.jetzt_berlin())
 
 
 def sichere_seitenslugs(daten):
@@ -658,7 +683,7 @@ def weiter_section(vorher, naechstes):
         slug = naechstes["seiteSlug"]
         knoepfe = [f'<a class="btn btn-primary" style="color:#fff" href="/saison/profis/gameday/{slug}.html">Zur Spieltagsseite</a>']
         if naechstes.get("ticketUrl"):
-            knoepfe.append('<a class="btn btn-ghost" href="/saison/profis/gameday/"><i data-lucide="ticket" class="icon-16"></i> Tickets</a>')
+            knoepfe.append(f'<a class="btn btn-ghost" href="/saison/profis/gameday/{slug}.html#tickets"><i data-lucide="ticket" class="icon-16"></i> Tickets</a>')
         band = f"""<div class="spiel-naechstes">
           <div class="spiel-naechstes-text">
             <span class="eyebrow">Nächstes Heimspiel</span>
@@ -698,7 +723,7 @@ def kalender_menue(google_link, d):
 
 
 def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html=LEER_FOOTER,
-               seo_block=LEER_SEO, gameday_extra="", vorher=None, naechstes=None, news=None):
+               seo_block=LEER_SEO, gameday_extra="", vorher=None, naechstes=None, news=None, hub_slug=None):
     news = news if news is not None else lade_news()
     d = parse_dmy(game["datum"])
     gegner = html.escape(game["gegner"])
@@ -741,23 +766,36 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
     # Punkt, wie im Eyebrow des Gameday-Hubs.
     eyebrow = "Heimspiel · Basketball Löwen Erfurt vs."
 
-    # Ein einziger Hero-CTA auf allen Spieltagsseiten (Marko, 27.08.2026):
-    # "Tickets kaufen" fuehrt immer zum Gameday-Hub -- der Kauf selbst lebt
-    # dort (s. kauf_bereich() in tools/build-gameday-hub.py), nicht mehr hier.
-    # Ersetzt den vorherigen, bis Weihnachten befristeten Dauerkarte-CTA.
+    # Hero-CTA (Marko, 05.11.2026): Steht auf dieser Seite der Kaufbereich, springt "Tickets kaufen"
+    # dorthin (#tickets). Sonst fuehrt der Knopf zum Gameday-Hub, der immer das naechste Spiel
+    # verkauft -- bei einem anderen Spiel heisst er deshalb "Tickets fürs nächste Heimspiel", damit
+    # niemand aus Versehen Karten fuer das falsche Spiel kauft (Umbuchungen 03./04.11.2026).
+    kauf_hier = kauf_offen(game)
+    if kauf_hier:
+        cta_ziel, cta_text = "#tickets", "Tickets kaufen"
+    elif hub_slug == game["seiteSlug"]:
+        cta_ziel, cta_text = "/saison/profis/gameday/", "Tickets kaufen"
+    else:
+        cta_ziel, cta_text = "/saison/profis/gameday/", "Tickets fürs nächste Heimspiel"
     tickets_cta = (
         '        <div style="display:flex;align-items:center;justify-content:center">\n'
-        '          <a class="btn btn-primary" style="color:#fff" href="/saison/profis/gameday/">'
-        '<i data-lucide="ticket" class="icon-16"></i> Tickets kaufen</a>\n'
+        f'          <a class="btn btn-primary" style="color:#fff" href="{cta_ziel}">'
+        f'<i data-lucide="ticket" class="icon-16"></i> {cta_text}</a>\n'
         '        </div>\n'
     )
 
     # Aufbau seit 11.10.2026 (Marko): Hero traegt Termin, Halle und Tickets -- die drei
     # Heimspiel-Infos-Kacheln entfallen. Danach: Endstand, Berichte-Teaser, Spieltagsinfo,
     # Zurueck/Weiter. Nach dem Spiel steht das Ergebnis ganz oben.
+    kauf_section = ""
+    seat_picker_css = (HUB.SEAT_PICKER_CSS + "\n") if kauf_hier else ""
+    if kauf_hier:
+        kauf_section = ('  <div id="tickets" style="scroll-margin-top:84px">\n'
+                        + HUB.kauf_bereich(game, True, HUB.jetzt_berlin().date()).rstrip("\n") + "\n  </div>\n")
     if phase in ("angekuendigt", "vorverkauf"):
         # Vor dem Spiel (Marko, 12.10.2026): Vorbericht, Gegner, Spieltagsinfo, Endstand, Nachbericht.
         sections = [
+            kauf_section,
             story_section(game, phase, news, teil="vor"),
             gegner_section(game),
             spieltagsinfo_section(game),
@@ -768,6 +806,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
     else:
         # Am Spieltag und danach: Endstand, Nachbericht, Vorbericht, Gegner, Spieltagsinfo.
         sections = [
+            kauf_section,
             ergebnis_section(game, phase),
             story_section(game, phase, news),
             gegner_section(game),
@@ -819,7 +858,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
 <link rel="stylesheet" href="/css/site.css?v=1792352138" />
-<script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
+{seat_picker_css}<script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
      Cookiefrei, kein Zugriff auf den Endgeraetespeicher (im Skript geprueft:
@@ -875,6 +914,8 @@ def main():
     geschrieben, unveraendert = [], []
     news = lade_news()
     spiele = sorted(daten["spiele"], key=lambda g: parse_dmy(g["datum"]))
+    hub_aktuell, _kommt = HUB.naechstes([g for g in spiele if g.get("seiteSlug")], HUB.jetzt_berlin())
+    hub_slug = hub_aktuell["seiteSlug"]
     for pos, game in enumerate(spiele):
         vorher = spiele[pos - 1] if pos > 0 else None
         naechstes = spiele[pos + 1] if pos + 1 < len(spiele) else None
@@ -885,7 +926,7 @@ def main():
         footer_html = extract_platzhalter(pfad, "footer", LEER_FOOTER)
         gameday_extra = extract_gameday_extra(pfad)
         seo_block = extract_seo_block(pfad)
-        neu = build_page(game, phase, bericht, header_html, footer_html, seo_block, gameday_extra, vorher, naechstes, news)
+        neu = build_page(game, phase, bericht, header_html, footer_html, seo_block, gameday_extra, vorher, naechstes, news, hub_slug)
         alt = pfad.read_text(encoding="utf-8") if pfad.exists() else None
         if neu == alt:
             unveraendert.append((game["seiteSlug"], phase))

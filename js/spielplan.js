@@ -144,7 +144,16 @@
        Liga-Marke | frei | Icons -- nur die vorhandenen, ohne Leerplaetze. Jede Karte hat immer
        alle drei Zeilen, damit alle gleich hoch sind. Raster und Mobil-Umbruch: css/site.css,
        Abschnitt "Spielplan-Karte v3". */
-    var iconsHTML = (g === naechstesHeimspiel ? '<a class="cal-link" href="/saison/profis/gameday/" title="Zum Gameday"><i data-lucide="ticket" style="width:20px;height:20px"></i></a>' : '') +
+    /* Ticket-Icon (Marko, 05.11.2026): Das aktuelle Heimspiel fuehrt wie bisher zum Gameday-Hub,
+       jedes andere noch nicht beendete Heimspiel mit gesetzter ticketUrl zum Kaufbereich auf seiner
+       eigenen Spieltagsseite (#tickets). Der Vorverkauf ist fuer alle Spiele offen. */
+    var ticketIcon = '';
+    if (g === naechstesHeimspiel) {
+      ticketIcon = '<a class="cal-link" href="/saison/profis/gameday/" title="Zum Gameday"><i data-lucide="ticket" style="width:20px;height:20px"></i></a>';
+    } else if (g.heim && g.ticketUrl && spielEnde(g) > Date.now()) {
+      ticketIcon = '<a class="cal-link" href="' + g.ticketUrl + '#tickets" title="Tickets für dieses Spiel"><i data-lucide="ticket" style="width:20px;height:20px"></i></a>';
+    }
+    var iconsHTML = ticketIcon +
       berichteHTML +
       kalenderMenuHTML(g);
     // Reihenfolge der Links: Livestream/Replay zuerst, dann "Zum Spiel" (Marko, 11.10.2026)
@@ -200,6 +209,11 @@
      dort schon in naechstes(), hier reicht der clientseitige Vergleich mit
      window.__spielplanToday (Marko, 27.08.2026). */
   var naechstesHeimspiel = null;
+  /* Ende eines Spiels fuer die Ticket-Icons: 4 Stunden nach Anpfiff (wie der Gameday-Hub). */
+  function spielEnde(g) {
+    var t = (g.zeit || '12:00').split(':').map(Number);
+    return new Date(g.date.getFullYear(), g.date.getMonth(), g.date.getDate(), t[0], t[1]).getTime() + 4 * 3600 * 1000;
+  }
 
   function applyFilter(filter) {
     if (typeof filter === 'string') currentTeamFilter = filter;
@@ -296,10 +310,6 @@
        (tools/build-gameday-hub.py, naechstes()): ein Spiel zaehlt, bis es 4 Stunden nach
        Anpfiff vorbei ist, danach rueckt das naechste nach (Marko, 11.10.2026). Das rechnet
        der Browser selbst, die Seite muss dafuer nicht neu gebaut werden. */
-    function spielEnde(g) {
-      var t = (g.zeit || '12:00').split(':').map(Number);
-      return new Date(g.date.getFullYear(), g.date.getMonth(), g.date.getDate(), t[0], t[1]).getTime() + 4 * 3600 * 1000;
-    }
     for (var ni = 0; ni < alleGames.length; ni++) {
       if (alleGames[ni].heim && alleGames[ni].spielberichtUrl && spielEnde(alleGames[ni]) > Date.now()) {
         naechstesHeimspiel = alleGames[ni];
