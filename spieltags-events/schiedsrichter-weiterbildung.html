@@ -298,7 +298,7 @@
             <input type="email" id="sr-email" name="email" autocomplete="email" maxlength="160" required />
           </div>
           <div class="field">
-            <label for="sr-telefon">Telefon</label>
+            <label for="sr-telefon">Telefon (optional)</label>
             <input type="tel" id="sr-telefon" name="telefon" autocomplete="tel" maxlength="40" />
           </div>
           <div class="field">
@@ -613,13 +613,14 @@
       vorname: form.vorname.value.trim(),
       nachname: form.nachname.value.trim(),
       email: form.email.value.trim(),
-      telefon: form.telefon.value.trim(),
       verein: form.verein.value.trim(),
       datenschutz: true,
       quelle: quelle,
       website: form.website.value,
       elapsedMs: Date.now() - geladen
     };
+    // Telefon ist freiwillig: nur mitschicken, wenn ausgefüllt (leere Werte brachen früher die Kontaktanlage).
+    if (form.telefon.value.trim()) payload.telefon = form.telefon.value.trim();
 
     fetch(API + 'spieltagsevent-anmeldung', {
       method: 'POST',
