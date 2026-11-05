@@ -28,7 +28,7 @@ Anker #tickets). Der Vorverkauf ist fuer alle Spiele offen, "Vorverkauf starten"
 Regel fuer die Knoepfe (Marko, 05.11.2026): "Tickets kaufen" fuehrt auf der ganzen Website zum
 Gameday-Hub, der immer das naechste Spiel verkauft. Ausnahme: wer ausdruecklich in einem Spiel ist
 (Ticket-Icon im Spielplan, js/spielplan.js; Kaufbereich auf der Seite des Spiels) kauft fuer genau
-dieses Spiel. Seiten mit Kaufbereich haben keinen Hero-Knopf "Tickets kaufen" mehr. Zwischen 27.08. und 05.11.2026 lag der Kauf nur auf dem Hub.
+dieses Spiel. Der Hero-Knopf "Tickets kaufen" springt auf Seiten mit Kaufbereich zu #tickets. Zwischen 27.08. und 05.11.2026 lag der Kauf nur auf dem Hub.
 
 Bericht-Block: redaktioneller Inhalt (Ergebnis, Rückblick, Impressionen), den
 dieses Skript NIE überschreibt. Bei jedem Lauf wird die Seite komplett neu
@@ -765,14 +765,14 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
     # Punkt, wie im Eyebrow des Gameday-Hubs.
     eyebrow = "Heimspiel · Basketball Löwen Erfurt vs."
 
-    # Hero-CTA (Marko, 05.11.2026): "Tickets kaufen" fuehrt auf der ganzen Website zum Gameday-Hub. Steht auf
-    # dieser Seite der Kaufbereich (kuenftiges Spiel), entfaellt der Knopf ganz: die Karten gibt es direkt
-    # darunter (Marko, 05.11.2026; ein Hub-Knopf haette bei jedem anderen Spiel das naechste Spiel verkauft,
-    # Test mit Frau M.). Bei vergangenen Spielen bleibt er und fuehrt zum Hub.
+    # Hero-CTA (Marko, 05.11.2026): Steht auf dieser Seite der Kaufbereich (kuenftiges Spiel), springt
+    # "Tickets kaufen" dorthin (#tickets) -- derselbe Spieltag, nicht der Hub, der bei jedem anderen Spiel das
+    # naechste Spiel verkauft haette (Test mit Frau M.). Bei vergangenen Spielen fuehrt der Knopf zum Hub.
+    # Im Spielplan fuehrt das Ticket-Symbol beim aktuellen Spiel zum Hub, bei allen anderen zur Seite des Spiels.
     kauf_hier = kauf_offen(game)
-    tickets_cta = "" if kauf_hier else (
+    tickets_cta = (
         '        <div style="display:flex;align-items:center;justify-content:center">\n'
-        '          <a class="btn btn-primary" style="color:#fff" href="/saison/profis/gameday/">'
+        f'          <a class="btn btn-primary" style="color:#fff" href="{"#tickets" if kauf_hier else "/saison/profis/gameday/"}">'
         '<i data-lucide="ticket" class="icon-16"></i> Tickets kaufen</a>\n'
         '        </div>\n'
     )
