@@ -1,11 +1,11 @@
 {
-  "_hinweis": "Wunschliste der Spendenaktion CATL Löwenpark (Briefing Valentin Kern, Stand November 2026). Beträge sind Richtwerte; die Reihenfolge bestimmt, in welcher Folge Wünsche als finanziert gelten.",
-  "ziel": 146000,
+  "_hinweis": "Wunschliste der Spendenaktion CATL Löwenpark (Briefing Valentin Kern, Stand November 2026, angepasst 05.11.2026: ohne Wandkörbe und Kochinseln, Standkörbe zusammen 30.000 €). Beträge sind Richtwerte; die Reihenfolge bestimmt, in welcher Folge Wünsche als finanziert gelten.",
+  "ziel": 125500,
   "bereiche": [
     {
       "id": "halle",
       "name": "Halle und Sportgeräte",
-      "text": "Hier werden Würfe geübt, Spiele gewonnen und Freundschaften geschlossen. Sechs höhenverstellbare Wandkörbe sorgen dafür, dass auch die Jüngsten treffen."
+      "text": "Hier werden Würfe geübt, Spiele gewonnen und Freundschaften geschlossen. Zwei wettkampftaugliche Standkörbe machen die Halle bereit für Training und Spiel."
     },
     {
       "id": "kueche",
@@ -79,141 +79,99 @@
     },
     {
       "nr": 9,
-      "bereich": "halle",
-      "bezeichnung": "Wandkorb 1 von 6 (höhenverstellbar, ausfahrbar)",
-      "betrag": 4000
-    },
-    {
-      "nr": 10,
       "bereich": "lernraum",
       "bezeichnung": "Bildschirm für Workshops",
       "betrag": 2250
     },
     {
-      "nr": 11,
+      "nr": 10,
       "bereich": "lernraum",
       "bezeichnung": "Regale",
       "betrag": 2250
     },
     {
-      "nr": 12,
+      "nr": 11,
       "bereich": "kabinen",
       "bezeichnung": "Kabine 1: Bänke, Haken und Spinde",
       "betrag": 4500
     },
     {
-      "nr": 13,
+      "nr": 12,
       "bereich": "kueche",
       "bezeichnung": "Gewerbespülmaschine",
       "betrag": 4500
     },
     {
-      "nr": 14,
-      "bereich": "halle",
-      "bezeichnung": "Wandkorb 2 von 6",
-      "betrag": 4000
-    },
-    {
-      "nr": 15,
+      "nr": 13,
       "bereich": "lernraum",
       "bezeichnung": "Tische und Stühle",
       "betrag": 9000
     },
     {
-      "nr": 16,
+      "nr": 14,
       "bereich": "fitness",
       "bezeichnung": "Gummiboden",
       "betrag": 4500
     },
     {
-      "nr": 17,
-      "bereich": "halle",
-      "bezeichnung": "Wandkorb 3 von 6",
-      "betrag": 4000
-    },
-    {
-      "nr": 18,
+      "nr": 15,
       "bereich": "kabinen",
       "bezeichnung": "Kabine 2: Bänke, Haken und Spinde",
       "betrag": 4500
     },
     {
-      "nr": 19,
+      "nr": 16,
       "bereich": "fitness",
       "bezeichnung": "Ausdauergeräte (Ruder- und Radergometer)",
       "betrag": 5500
     },
     {
-      "nr": 20,
-      "bereich": "kueche",
-      "bezeichnung": "Kochinseln in Kinderhöhe",
-      "betrag": 10000
-    },
-    {
-      "nr": 21,
-      "bereich": "halle",
-      "bezeichnung": "Wandkorb 4 von 6",
-      "betrag": 4000
-    },
-    {
-      "nr": 22,
+      "nr": 17,
       "bereich": "fitness",
       "bezeichnung": "Racks, Hantelbänke und Langhanteln",
       "betrag": 7500
     },
     {
-      "nr": 23,
+      "nr": 18,
       "bereich": "lernraum",
       "bezeichnung": "Akustik und Licht",
       "betrag": 5500
     },
     {
-      "nr": 24,
+      "nr": 19,
       "bereich": "kabinen",
       "bezeichnung": "Kabine 3: Bänke, Haken und Spinde",
       "betrag": 4500
     },
     {
-      "nr": 25,
+      "nr": 20,
       "bereich": "kueche",
       "bezeichnung": "Herd und Kombidämpfer",
       "betrag": 10000
     },
     {
-      "nr": 26,
-      "bereich": "halle",
-      "bezeichnung": "Wandkorb 5 von 6",
-      "betrag": 4000
-    },
-    {
-      "nr": 27,
+      "nr": 21,
       "bereich": "halle",
       "bezeichnung": "Anzeigetafel mit Shotclock",
       "betrag": 7500
     },
     {
-      "nr": 28,
+      "nr": 22,
       "bereich": "kabinen",
       "bezeichnung": "Kabine 4: Bänke, Haken und Spinde",
       "betrag": 4500
     },
     {
-      "nr": 29,
-      "bereich": "halle",
-      "bezeichnung": "Wandkorb 6 von 6",
-      "betrag": 4000
-    },
-    {
-      "nr": 30,
+      "nr": 23,
       "bereich": "halle",
       "bezeichnung": "Standkorb 1 von 2 (wettkampftauglich)",
-      "betrag": 8250
+      "betrag": 15000
     },
     {
-      "nr": 31,
+      "nr": 24,
       "bereich": "halle",
       "bezeichnung": "Standkorb 2 von 2",
-      "betrag": 8250
+      "betrag": 15000
     }
   ]
 }
