@@ -195,6 +195,11 @@
   .ak-gutschein-form input { flex: 1 1 240px; font-size: 1.3rem; padding: 14px 16px; min-height: 56px; border: 2px solid #00122d; border-radius: 10px; text-transform: uppercase; background: #fff; color: #00122d; }
   .ak-gutschein-form .btn { font-size: 1.2rem; padding: 14px 20px; min-height: 56px; }
   .ak-gutschein-info { display: flex; justify-content: space-between; align-items: center; gap: 12px; background: #e8f4ee; border: 2px solid #1f6a43; border-radius: 10px; padding: 12px 16px; font-size: 1.15rem; color: #00122d; }
+  /* Letzte Tickets (Nachdruck): kleiner Knopf oben und nach jedem Verkauf, nur in der neuen Kassen-App. */
+  .ak-tickets-row { display: none; justify-content: flex-end; margin: 0 0 8px; }
+  .ak-tickets-row.ak-tickets-visible { display: flex; }
+  .ak-tickets-row .btn { padding: 6px 14px; font-size: .95rem; min-height: 40px; }
+  .ak-naechster.ak-tickets-nach { font-size: 1.05rem; padding: 12px; }
   .ak-gutschein-info button { font-size: 1rem; padding: 10px 14px; min-height: 44px; }
   .ak-gutschein-fehler { color: #b3392c; font-size: 1.1rem; margin: 0; }
 </style>
@@ -202,6 +207,7 @@
 <body>
 <div class="ak-wrap">
   <div class="ak-hinweise" id="ak-hinweise" aria-live="polite"></div>
+  <div class="ak-tickets-row" id="ak-tickets-row"><button type="button" class="btn btn-outline-orange" id="ak-tickets">Letzte Tickets</button></div>
   <p class="t-body-sm ak-fehler" id="ak-fehler" hidden></p>
 
   <div id="ak-blockwahl">
@@ -238,6 +244,7 @@
   <div class="ak-status" id="ak-status"></div>
   <button class="btn btn-primary ak-naechster" id="ak-erneut">Ticket erneut anlegen</button>
   <button class="btn btn-outline-orange ak-naechster" id="ak-naechster">Nächster Verkauf</button>
+  <button class="btn btn-outline-orange ak-naechster ak-tickets-nach" id="ak-tickets-nach">Letzte Tickets (erneut drucken)</button>
   <div class="ak-diag-row"><button type="button" class="ak-diag" id="ak-diag" aria-label="Kassen-Einstellungen"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="7" x2="21" y2="7"/><circle cx="9" cy="7" r="2.2" fill="var(--bg-page,#fff)"/><line x1="3" y1="17" x2="21" y2="17"/><circle cx="15" cy="17" r="2.2" fill="var(--bg-page,#fff)"/></svg></button></div>
 </div>
 
@@ -249,13 +256,19 @@
 </div>
 
 <script src="/js/seat-picker.js?v=1793638197"></script>
-<script src="opi-bridge.js?v=9"></script>
+<script src="opi-bridge.js?v=10"></script>
 <script>
   (function () {
     var b = document.getElementById('ak-diag');
     if (b && window.OpiBridge && window.OpiBridge.isAvailable()) {
       b.classList.add('ak-diag-visible');
       b.addEventListener('click', function () { window.OpiBridge.openDiagnose(); });
+    }
+    // Letzte Tickets: nur in der neuen Ticketing-App (die bewahrt die Tickets auf).
+    var t = document.getElementById('ak-tickets');
+    if (t && window.OpiBridge && window.OpiBridge.ticketsAvailable && window.OpiBridge.ticketsAvailable()) {
+      document.getElementById('ak-tickets-row').classList.add('ak-tickets-visible');
+      t.addEventListener('click', function () { window.OpiBridge.tickets(); });
     }
   })();
 </script>
@@ -793,6 +806,8 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('ak-naechster').style.display = 'none';
     document.getElementById('ak-naechster').textContent = 'Nächster Verkauf';
     document.getElementById('ak-erneut').style.display = 'none';
+    document.getElementById('ak-tickets-nach').style.display = 'none';
+    if (window.OpiBridge && window.OpiBridge.onPrintResult) window.OpiBridge.onPrintResult(null);
     document.getElementById('ak-tarif-panels').innerHTML = '';
     document.getElementById('ak-blockwahl').classList.remove('ak-hidden');
     document.getElementById('ak-mehr').hidden = true;
@@ -868,6 +883,9 @@ document.addEventListener('DOMContentLoaded', function () {
   var bestellLaeuft = false;
   var naechsterEl = document.getElementById('ak-naechster');
   var erneutEl = document.getElementById('ak-erneut');
+  var ticketsNachEl = document.getElementById('ak-tickets-nach');
+  var ticketsAn = !!(window.OpiBridge && window.OpiBridge.ticketsAvailable && window.OpiBridge.ticketsAvailable());
+  ticketsNachEl.addEventListener('click', function () { window.OpiBridge.tickets(); });
   var ctaEl = document.getElementById('seatplan-cta');
   var barEl = document.getElementById('ak-bar');
   // Kartenzahlung = SumUp (Kartenleser). Der S-Cube ist seit dem 27.10.2026 auch hier ganz raus (Marko): In einer App ohne
@@ -941,6 +959,7 @@ document.addEventListener('DOMContentLoaded', function () {
     naechsterEl.style.display = 'none';
     naechsterEl.textContent = 'Nächster Verkauf';
     erneutEl.style.display = 'none';
+    ticketsNachEl.style.display = 'none';
 
     var cart = {
       productType: 'abendkasse',
@@ -966,6 +985,28 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     var inApp = !!(window.OpiBridge && window.OpiBridge.isAvailable());
+    // Angaben fuer "Letzte Tickets" in der App (Inhalt, Summe, Zahlart). Nachwuchs-Spende steht nicht im Titel.
+    var druckMeta = {
+      titel: summary.lines.filter(function (l) { return l.type !== 'nachwuchs'; }).map(function (l) {
+        return (l.qty || 1) + '× ' + l.label;
+      }).join(', ').slice(0, 160),
+      summe: gratis ? '0,00 €' : fmtEUR(gesamt) + ' €',
+      zahlart: cart.zahlart
+    };
+    // Druckfehler sichtbar machen: die App meldet, ob der Drucker das Ticket angenommen hat.
+    if (inApp && window.OpiBridge.onPrintResult) {
+      window.OpiBridge.onPrintResult(function (res) {
+        window.OpiBridge.onPrintResult(null);
+        if (res && res.ok) return;
+        statusEl.className = 'ak-status ak-status-error';
+        statusEl.textContent = 'Druck fehlgeschlagen: ' + ((res && res.error) || 'Der Drucker antwortet nicht') + '. ' +
+          (res && res.gespeichert
+            ? 'Das Ticket ist gespeichert: „Letzte Tickets“ öffnen und erneut drucken.'
+            : 'Das Ticket in pretix drucken.');
+        ticketsNachEl.style.display = ticketsAn ? 'block' : 'none';
+        naechsterEl.style.display = 'block';
+      });
+    }
     var pay = { state: bar ? 'bar' : ((inApp && !gratis) ? 'offen' : 'keine'), message: '', unklar: false };   // offen | ok | fehler | keine | bar
     var order = { state: pay.state === 'offen' ? 'wartet' : 'offen', message: '', paid: false };  // wartet | offen | ok | fehler
 
@@ -1018,6 +1059,7 @@ document.addEventListener('DOMContentLoaded', function () {
       // Bezahlt, aber Bestellung gescheitert (nichts angelegt): Anlegen darf wiederholt werden,
       // ohne erneut zu kassieren.
       erneutEl.style.display = (order.state === 'fehler' && !order.paid && pay.state === 'ok') ? 'block' : 'none';
+      ticketsNachEl.style.display = (ticketsAn && order.state === 'ok') ? 'block' : 'none';
       naechsterEl.style.display = 'block';
     }
 
@@ -1043,7 +1085,7 @@ document.addEventListener('DOMContentLoaded', function () {
           return r.blob().then(function (blob) {
             if (inApp) {
               // In der Kassen-App druckt die native Huelle (AirPrint) - window.open geht dort nicht.
-              window.OpiBridge.printPdf(blob).catch(function () {});
+              window.OpiBridge.printPdf(blob, druckMeta).catch(function () {});
             } else {
               // Eigener Tab, der den Druckdialog automatisch oeffnet (Marko, 01.10.2026).
               var pdfWindow = window.open(URL.createObjectURL(blob), '_blank');

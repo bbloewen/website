@@ -31,6 +31,12 @@
     }
   };
 
+  // Ergebnis eines Drucks (nur neue App): { ok, gespeichert, error }. Die Seite meldet sich mit onPrintResult an.
+  var printResultHandler = null;
+  global.opiPrintResult = function (result) {
+    if (printResultHandler) printResultHandler(result || {});
+  };
+
   function send(action, amount) {
     if (!available) {
       return Promise.reject(new Error('Keine Terminal-Anbindung in dieser Ansicht.'));
@@ -92,20 +98,37 @@
     },
     // Ticket-PDF an die native App zum Drucken geben (AirPrint, vorher einmal ein Drucker
     // gewaehlt). In einer WKWebView funktioniert window.open + print() nicht, deshalb der Umweg.
-    printPdf: function (blob) {
+    // meta (optional): { titel, summe, zahlart } - damit die App das Ticket unter "Letzte Tickets"
+    // aufbewahrt (nur Ticketing, 7 Tage). Die App speichert VOR dem Drucken.
+    printPdf: function (blob, meta) {
       if (!available) {
         return Promise.reject(new Error('Kein nativer Druck in dieser Ansicht.'));
       }
+      meta = meta || {};
       return new Promise(function (resolve, reject) {
         var reader = new FileReader();
         reader.onload = function () {
           var base64 = String(reader.result).split(',')[1] || '';
-          global.webkit.messageHandlers.opiBridge.postMessage({ action: 'printPdf', data: base64 });
+          global.webkit.messageHandlers.opiBridge.postMessage({
+            action: 'printPdf', data: base64,
+            titel: meta.titel || '', summe: meta.summe || '', zahlart: meta.zahlart || ''
+          });
           resolve(true);
         };
         reader.onerror = function () { reject(new Error('PDF konnte nicht gelesen werden.')); };
         reader.readAsDataURL(blob);
       });
+    },
+    // Meldet, ob der Druck geklappt hat: callback({ ok, gespeichert, error }). Nur neue App; null meldet ab.
+    onPrintResult: function (callback) {
+      printResultHandler = typeof callback === 'function' ? callback : null;
+    },
+    // Liste "Letzte Tickets" der App oeffnen (nur Ticketing mit neuer App, window.__ticketsAvailable).
+    ticketsAvailable: function () {
+      return available && !!global.__ticketsAvailable;
+    },
+    tickets: function () {
+      if (available) global.webkit.messageHandlers.opiBridge.postMessage({ action: 'tickets' });
     },
     // amount als Zahl (Euro, z. B. 12.5). Liefert ein Promise, das mit den
     // Terminal-Feldern (approvalCode, cardCircuit, receiptNumber, ...) aufgeloest
