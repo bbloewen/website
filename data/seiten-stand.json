@@ -66,8 +66,8 @@
       "lastmod": "2026-11-02"
     },
     "index.html": {
-      "hash": "325c6571b474dd9f8e6e57e4ec210cd19147dbbf",
-      "lastmod": "2026-11-05"
+      "hash": "6fe1564cf1735a0d3b27254992ccea4670673941",
+      "lastmod": "2026-11-08"
     },
     "kontakt.html": {
       "hash": "a76cac3a53fdcee62055445265dd6254714aa7fd",
@@ -82,12 +82,12 @@
       "lastmod": "2026-08-08"
     },
     "news/aktuelles.html": {
-      "hash": "1e67a60cad9526f4a2005dbf45f5d17f35972f8c",
-      "lastmod": "2026-11-02"
+      "hash": "8f9c2ccb14da653ce55ee18a9883f1feaf613c2c",
+      "lastmod": "2026-11-08"
     },
     "news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html": {
-      "hash": "77021bc59cec5c62c1a6ef65c6882e5147f74ee9",
-      "lastmod": "2026-11-02"
+      "hash": "fde24c95d4a000bc77de9d5b2285df63baeec6ef",
+      "lastmod": "2026-11-08"
     },
     "news/artikel/2025-04-29_profis_achtelfinale-aus.html": {
       "hash": "c38eb425968ac35de960a97abce9a1fde0a3192a",
@@ -218,8 +218,12 @@
       "lastmod": "2026-11-02"
     },
     "news/artikel/2026-11-03_nachwuchs_riethspatzen.html": {
-      "hash": "18a9dec10e17025ef4511730f811eb2f14a4b1e2",
-      "lastmod": "2026-11-02"
+      "hash": "006540e12dfc15652f9f01e0b602620e3ac76a81",
+      "lastmod": "2026-11-08"
+    },
+    "news/artikel/2026-11-08_profis_basketball-loewen-erfurt-empfangen-culture-city-weimar-zum-e.html": {
+      "hash": "ac762269706b2b02ec150b73f889f316d920672c",
+      "lastmod": "2026-11-08"
     },
     "news/newsletter/index.html": {
       "hash": "4caad0fb0b2a0fd640456d7f98fa89ad0d374cb4",
@@ -270,8 +274,8 @@
       "lastmod": "2026-10-16"
     },
     "saison/profis.html": {
-      "hash": "435e37bb164d90b33a0500fa8f22c870a10b34ff",
-      "lastmod": "2026-10-24"
+      "hash": "2a5396bcfdebaefc60f97da6baf8988985b1fa40",
+      "lastmod": "2026-11-08"
     },
     "saison/profis/gameday/2026-10-11-bba-ludwigsburg.html": {
       "hash": "4e70722b1db6ab6bed39f958eb62bd6d9a8f6f76",
