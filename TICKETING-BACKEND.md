@@ -1440,3 +1440,15 @@ Heiko Kühnst lädt seine Mandanten zum Heimspiel am 08.11.2026 gegen Culture Ci
 - **Dauerkarte:** n8n `HyUXW4kbhaQVbG0A`, Knoten „Ausgeschlossene Subevents ermitteln“ (Version `9cbb9bec`): ausgeschlossen wird nur noch, was gespielt ist (Datum vor heute). Eine neue Dauerkarte reserviert nur die noch ungespielten Spiele. Getestet mit den echten Spieldaten: heute `[26,20]`. Sitzkonflikte mit schon verkauften Einzeltickets fängt weiter die Bestellung ab (Nachtrag-Alarm).
 - **pretix:** alle 14 Subevents geprüft (gleicher Sitzplan, gleiche Kontingentgrößen, keine Preis-Überschreibungen, kein Verkaufsfenster).
 
+
+## Sitzumbuchung nach Ticketversand: feste Abfolge mit neuen QR-Codes (08.11.2026, Fall Zahn JKWDQ)
+- **Fall:** Bestellung JKWDQ (3× Block B Kat. I, Weimar) kam am 18.10. um 22:09 Uhr mit den Auto-Sitzen Reihe 6, Platz 1 bis 3 (Mail 1). Um 22:22 Uhr Umbuchung auf Reihe 3, Platz 8 bis 10 (Mail 2, richtiges PDF), aber **ohne `regenerate_secrets`**: die QR-Codes blieben gleich, das PDF aus Mail 1 blieb am Einlass gültig. Reihe 6, Platz 1 bis 3, 8, 9 gehörten seit 02.11. rechtmäßig Bestellung DJJ97 (10 Karten). Am 08.11. zeigte ein Gast das Ticket aus Mail 1, die QR wurden angenommen (16:44 Uhr), vor Ort saßen zwei Gruppen auf denselben Plätzen. In pretix gab es keine Doppelbuchung.
+- **Regel:** Wird eine Bestellung umgebucht (Sitz oder Spiel), nachdem eine Ticket-Mail rausging, gehören die neuen QR-Codes immer dazu. Feste Abfolge:
+  1. Zielsitze per `subevents/<id>/seats/` als frei prüfen.
+  2. `POST …/orders/<code>/change/` mit `patch_positions` (`seat`, ggf. `subevent`), `notify:false`, `reissue_invoice:false`.
+  3. **`POST …/orders/<code>/regenerate_secrets/`** (Positionen und Bestellgeheimnis bekommen neue Codes; das Feld `regenerate_secrets` im Change-Aufruf wird ignoriert). Danach sind die alten Tickets am Einlass ungültig.
+  4. Sitz-Sync per Webhook `pretix.event.order.changed.seat`; bei Spielwechsel `paypal_zahlungen` anpassen.
+  5. Marker `[ticket-mail-versendet]` im Bestellkommentar entfernen.
+  6. Ticket-Mail neu: Webhook `pretix-order-event` mit `order.paid` und `source:"direct"`, `hinweis` mit dem Satz „Bitte verwenden Sie nur diese Tickets, frühere Tickets sind nicht mehr gültig“.
+- **Warum Schritt 3 Pflicht ist:** Frei gewordene Sitze werden regulär weiterverkauft. Ein altes PDF mit den früheren Sitzen kommt sonst am Einlass durch und kollidiert vor Ort mit dem neuen Inhaber.
+- **Entschuldigung:** Gutschein `FREI-657VNL` (ID 731, Tag `entschuldigung`), 3 Nutzungen, 100 %, Filter-Kontingent 409 (Items 35 und 33 = Block B und Block E Kat. I Einzel, `[items:35,33]` im Kommentar), gültig bis 17.01.2027. Es gibt keinen automatisierten Umbuchungsablauf, alle Schritte laufen von Hand per API.

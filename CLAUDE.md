@@ -46,3 +46,4 @@ bleiben unberührt.
   (Status Text fertig → Bereit zum Review → Freigegeben → Veröffentlicht, setzt nur der Workflow).
   Immer „Basketball Löwen Erfurt“ in Titel/Lead und erster Nennung, eigene Links in Notion voll ausschreiben.
 - **Datum nie raten:** Wochentag und Datum ausrechnen und bestätigen lassen.
+- **Umbuchung nach Ticketversand:** Nach jeder Sitz- oder Spielumbuchung einer Bestellung, deren Ticket-Mail schon raus ist, `POST …/orders/<code>/regenerate_secrets/` ausführen (Fall Zahn 08.11.2026: altes PDF blieb am Einlass gültig und kollidierte mit dem neuen Inhaber der freigegebenen Sitze). Feste Abfolge in `TICKETING-BACKEND.md`, Abschnitt „Sitzumbuchung nach Ticketversand“.
