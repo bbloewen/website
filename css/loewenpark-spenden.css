@@ -18,25 +18,11 @@
 .ls-kennzahlen span, .ls-erklaerung { color: var(--text-secondary); font-size: 14px; }
 .ls-erklaerung { margin-top: 16px; }
 
-.ls-bereich + .ls-bereich { margin-top: 40px; }
-.ls-bereich-kopf { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-.ls-bereich-summe { color: var(--text-muted); font-size: 14px; white-space: nowrap; }
-.ls-bereich-text { color: var(--text-secondary); margin: 8px 0 0; }
-.ls-wuensche { list-style: none; margin: 16px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
-.ls-wunsch { display: flex; gap: 12px; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: #fff; }
-.ls-wunsch { flex-direction: column; padding: 0; overflow: hidden; gap: 0; }
-.ls-wunsch .ls-wunsch-text { padding: 14px 16px 16px; }
-.ls-wunsch-bild { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; }
-.ls-bild-ersatz { display: grid; place-items: center; background: var(--bg-subtle); color: var(--color-brand-navy); }
-.ls-wunsch-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; }
 .ls-wunsch-name { font-weight: 600; line-height: 1.3; }
 .ls-wunsch-betrag { color: var(--text-secondary); font-size: 14px; }
 .ls-status { font-size: 13px; color: var(--text-muted); display: inline-flex; align-items: center; gap: 4px; }
 .ls-status-ok, .ls-status-arbeit { color: var(--color-success); font-weight: 600; }
-.ls-wunsch .ls-balken { height: 8px; margin-top: 4px; }
-.ls-finanziert { background: var(--bg-subtle); }
-.ls-finanziert .ls-wunsch-name, .ls-finanziert .ls-wunsch-betrag { text-decoration: line-through; color: var(--text-muted); }
-.ls-arbeit { border-color: var(--color-heart-green); }
+.ls-bild-ersatz { display: grid; place-items: center; background: var(--bg-subtle); color: var(--color-brand-navy); }
 
 .ls-beispiele { list-style: none; padding: 0; margin: 20px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
 .ls-beispiele li { background: #fff; border-radius: var(--radius-lg); padding: 18px; display: flex; flex-direction: column; gap: 4px; }
@@ -70,8 +56,6 @@
 @media (max-width: 767px) {
   .ls-kennzahlen { grid-template-columns: 1fr 1fr 1fr; }
   .ls-kennzahlen strong { font-size: 17px; }
-  .ls-wunsch .ls-wunsch-text { padding: 10px 12px 12px; }
-  .ls-wuensche { gap: 8px; }
   .ls-leiste { display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: rgba(255,255,255,.96); box-shadow: 0 -4px 16px rgba(0,18,45,.1); }
   .ls-seite { padding-bottom: 72px; }
   /* Feedback-Knopf über die Spendenleiste heben */
@@ -111,7 +95,7 @@
 .ls-zeile-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .ls-zeile-bereich { font-size: 13px; color: var(--text-muted); }
 .ls-zeile-rechts { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; white-space: nowrap; }
-.ls-zeile.ls-finanziert .ls-wunsch-name { text-decoration: line-through; color: var(--text-muted); }
+.ls-zeile.ls-finanziert .ls-wunsch-name, .ls-zeile.ls-finanziert .ls-wunsch-betrag { text-decoration: line-through; color: var(--text-muted); }
 .ls-zeile.ls-arbeit { background: rgba(27,138,61,.06); }
 .ls-zusammen { grid-template-columns: 32px 1fr; cursor: pointer; }
 .ls-zusammen .ls-wunsch-name { color: var(--color-success); font-weight: 600; }

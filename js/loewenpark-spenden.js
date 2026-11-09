@@ -49,8 +49,7 @@
       '<p class="ls-klein">' + (akt ? 'Stand: ' + akt + '. ' : '') + 'Überweisungen erscheinen nach Eingang auf unserem Konto, in der Regel nach ein bis drei Werktagen.</p>';
   }
 
-  // Ansicht der Wunschliste: flache Liste in Finanzierungsreihenfolge (Standard) oder Kacheln je Bereich (?ansicht=kacheln)
-  var ANSICHT = /[?&]ansicht=kacheln\b/.test(location.search) ? 'kacheln' : 'liste';
+  // Wunschliste als flache Liste in Finanzierungsreihenfolge (Marko 09.11.2026: besser fürs Handy als Kacheln)
   var KURZ = 8;   // so viele Zeilen zeigt die Liste, bevor „Alle Wünsche anzeigen“ kommt
   var LS = { filter: '', alle: false, daten: null, liste: null };
 
@@ -64,24 +63,6 @@
       : '<span class="' + klasse + ' ls-bild-ersatz" aria-hidden="true"><i data-lucide="' + (BEREICH_ICON[w.bereich] || 'heart') + '" class="icon-20"></i></span>';
   }
   function bereichName(daten, id) { var b = daten.liste.bereiche.filter(function (x) { return x.id === id; })[0]; return b ? b.name : ''; }
-
-  function karteHtml(w) {
-    return '<li class="ls-wunsch ls-' + w.status + '" data-status="' + w.status + '">' + bild(w, 'ls-wunsch-bild') +
-      '<span class="ls-wunsch-text"><span class="ls-wunsch-name">' + esc(w.bezeichnung) + '</span>' +
-      '<span class="ls-wunsch-betrag">' + euro(w.betrag) + '</span>' + statusText(w) +
-      (w.status === 'arbeit' ? balken(w.anteil * w.betrag, w.betrag, w.bezeichnung + ': ' + Math.floor(w.anteil * 100) + ' % finanziert') : '') + '</span></li>';
-  }
-  function kachelnHtml(daten, liste) {
-    return daten.liste.bereiche.map(function (b) {
-      var eigene = liste.filter(function (w) { return w.bereich === b.id; });
-      var summe = eigene.reduce(function (s, w) { return s + w.betrag; }, 0);
-      var fertig = eigene.filter(function (w) { return w.status === 'finanziert'; }).length;
-      return '<section class="ls-bereich" aria-labelledby="ls-b-' + b.id + '"><div class="ls-bereich-kopf">' +
-        '<h3 class="t-h4" id="ls-b-' + b.id + '">' + esc(b.name) + '</h3><span class="ls-bereich-summe">' + fertig + ' von ' + eigene.length + ' · ' + euro(summe) + '</span></div>' +
-        (b.text ? '<p class="t-body-sm ls-bereich-text">' + esc(b.text) + '</p>' : '') +
-        '<ul class="ls-wuensche">' + eigene.map(karteHtml).join('') + '</ul></section>';
-    }).join('');
-  }
 
   // Flache Liste: oben die fünf Bereiche als Filter mit eigenem Balken, dann der Wunsch, der gerade finanziert wird, dann alle Wünsche der Reihe nach
   function bereicheHtml(daten, liste) {
@@ -127,12 +108,11 @@
       (LS.filter ? '<button type="button" class="btn-link ls-mehr" data-ls-filter="">Alle Bereiche zeigen</button>' : '');
   }
   function listeHtml(daten, liste) {
-    return ANSICHT === 'kacheln' ? kachelnHtml(daten, liste) : bereicheHtml(daten, liste) + naechsterHtml(daten, liste) + flachHtml(daten, liste);
+    return bereicheHtml(daten, liste) + naechsterHtml(daten, liste) + flachHtml(daten, liste);
   }
   function listeZeichnen() {
     var el = document.getElementById('ls-liste');
     if (!el || !LS.daten) return;
-    el.className = 'ls-liste ls-ansicht-' + ANSICHT;
     el.innerHTML = listeHtml(LS.daten, LS.liste);
     icons();
   }
