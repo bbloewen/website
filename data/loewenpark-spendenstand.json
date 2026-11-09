@@ -1,9 +1,9 @@
 {
   "_hinweis": "Spendenstand der Aktion CATL Löwenpark. Wird vom n8n-Workflow überschrieben (nur Summe, Zahl der Spenderinnen und Spender, Zeitstempel und Namen von Spendern, die der Nennung zugestimmt haben). manuellerZuschlag = Einnahmen außerhalb von Konto und PayPal, z. B. Spendenbox.",
-  "start": null,
+  "start": "2026-11-01",
   "summe": 0,
   "anzahlSpender": 0,
   "manuellerZuschlag": 0,
-  "aktualisiert": null,
+  "aktualisiert": "2026-11-09T16:50:43.540Z",
   "spender": []
 }
