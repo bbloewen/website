@@ -61,8 +61,30 @@
   /* Feedback-Knopf über die Spendenleiste heben */
   body:has(.ls-leiste) .feedback-widget { bottom: calc(84px + env(safe-area-inset-bottom)); }
 }
+.ls-teaser { margin-top: 48px; padding: 28px; border-radius: var(--radius-lg); background: var(--bg-subtle); border: 1px solid var(--border); }
+.ls-teaser h3 { margin: 6px 0 8px; }
+.ls-teaser-intro { color: var(--text-secondary); margin: 0 0 18px; }
 .ls-teaser .ls-summe strong { font-size: 26px; }
-.ls-teaser-naechste { color: var(--text-secondary); margin: 10px 0 0; }
+.ls-teaser-label { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin: 18px 0 10px; }
+.ls-teaser-wuensche { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.ls-teaser-wuensche li { background: #fff; border-radius: var(--radius-lg); overflow: hidden; display: flex; flex-direction: column; gap: 2px; padding-bottom: 12px; }
+.ls-teaser-wuensche .ls-wunsch-name, .ls-teaser-wuensche .ls-wunsch-betrag { padding: 0 12px; font-size: 14px; }
+.ls-teaser-wuensche .ls-wunsch-name { hyphens: auto; overflow-wrap: anywhere; }
+.ls-teaser-bild { width: 100%; height: auto; aspect-ratio: 4 / 3; margin-bottom: 8px; }
+.ls-teaser-wuensche [data-status] img { filter: none; opacity: 1; }
+.ls-teaser-schritte { list-style: none; margin: 20px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; counter-reset: schritt; }
+.ls-teaser-schritte li { counter-increment: schritt; display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: var(--text-secondary); }
+.ls-teaser-schritte li::before { content: counter(schritt); flex: 0 0 26px; height: 26px; border-radius: var(--radius-full); background: var(--color-heart-green); color: #fff; font-weight: 700; display: grid; place-items: center; font-size: 13px; }
+.ls-teaser-schritte strong { color: var(--text-primary); display: block; }
+.ls-teaser-knoepfe { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+.ls-teaser .ls-gruen { background: var(--color-heart-green); border-color: var(--color-heart-green); color: #fff; gap: 8px; }
+@media (max-width: 600px) {
+  .ls-teaser { padding: 20px; }
+  .ls-teaser-wuensche { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .ls-teaser-wuensche .ls-wunsch-name, .ls-teaser-wuensche .ls-wunsch-betrag { padding: 0 8px; font-size: 12px; }
+  .ls-teaser-schritte { grid-template-columns: 1fr; }
+  .ls-teaser-knoepfe .btn { width: 100%; justify-content: center; }
+}
 
 /* Zustände der Illustrationen (LIESMICH zum Bildsatz): offen grau, in Arbeit halb, finanziert in Farbe */
 [data-status="offen"] img { filter: grayscale(1); opacity: .5; }

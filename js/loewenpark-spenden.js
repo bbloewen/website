@@ -125,11 +125,18 @@
       (anonym ? '<p class="t-body-sm ls-anonym">' + (namen.length ? 'und ' : '') + anonym.toLocaleString('de-DE') + ' ' + (anonym === 1 ? 'Spenderin oder Spender' : 'Spenderinnen und Spender') + ', die nicht genannt werden möchten.</p>' : '');
   }
 
+  // Teaser auf der Löwenpark-Seite: Stand (oder „gerade gestartet“) und die nächsten drei Wünsche mit Bild
   function teaserHtml(daten, liste) {
-    var naechste = liste.filter(function (w) { return w.status !== 'finanziert'; }).slice(0, 3);
-    return '<p class="ls-summe"><strong>' + euro(daten.gesamt) + '</strong> <span>von ' + euro(daten.liste.ziel) + ' für die Einrichtung</span></p>' +
-      balken(daten.gesamt, daten.liste.ziel, 'Spendenstand Einrichtung CATL Löwenpark') +
-      (naechste.length ? '<p class="t-body-sm ls-teaser-naechste">Als Nächstes: ' + naechste.map(function (w) { return esc(w.bezeichnung) + ' (' + euro(w.betrag) + ')'; }).join(' · ') + '</p>' : '');
+    var offen = liste.filter(function (w) { return w.status !== 'finanziert'; });
+    var naechste = offen.slice(0, 3);
+    var erfuellt = liste.length - offen.length;
+    var kopf = daten.gesamt > 0
+      ? '<p class="ls-summe"><strong>' + euro(daten.gesamt) + '</strong> <span>von ' + euro(daten.liste.ziel) + ' gesammelt · ' + erfuellt + ' von ' + liste.length + ' Wünschen erfüllt</span></p>' +
+        balken(daten.gesamt, daten.liste.ziel, 'Spendenstand Einrichtung CATL Löwenpark')
+      : '<p class="ls-summe"><strong>' + liste.length + ' Wünsche</strong> <span>für zusammen ' + euro(daten.liste.ziel) + '. Die Aktion ist gerade gestartet.</span></p>';
+    return kopf + (naechste.length ? '<p class="ls-teaser-label">Als Nächstes auf der Liste</p><ul class="ls-teaser-wuensche">' + naechste.map(function (w) {
+      return '<li data-status="' + w.status + '">' + bild(w, 'ls-teaser-bild') + '<span class="ls-wunsch-name">' + esc(w.bezeichnung) + '</span><span class="ls-wunsch-betrag">' + euro(w.betrag) + '</span></li>';
+    }).join('') + '</ul>' : '');
   }
 
   // Verwendungszweck und PayPal-Zusatz: Stichwort LÖWENPARK, mit Zustimmung zur Nennung der gewünschte Name
