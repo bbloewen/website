@@ -1,6 +1,6 @@
 {
   "_hinweis": "Wunschliste der Spendenaktion CATL Löwenpark (Briefing Valentin Kern, Stand November 2026). Beträge sind Richtwerte; die Reihenfolge bestimmt, in welcher Folge Wünsche als finanziert gelten. Bilder: Illustrationen aus dem Drive-Ordner zur Spendenseite (LIESMICH), offen = grau, finanziert = farbig.",
-  "ziel": 146000,
+  "ziel": 199500,
   "bereiche": [
     {
       "id": "halle",
@@ -236,14 +236,14 @@
       "nr": 30,
       "bereich": "halle",
       "bezeichnung": "Standkorb 1 von 2 (wettkampftauglich)",
-      "betrag": 8250,
+      "betrag": 35000,
       "bild": "/assets/img/spenden-loewenpark/standkorb.svg"
     },
     {
       "nr": 31,
       "bereich": "halle",
       "bezeichnung": "Standkorb 2 von 2",
-      "betrag": 8250,
+      "betrag": 35000,
       "bild": "/assets/img/spenden-loewenpark/standkorb.svg"
     }
   ]
