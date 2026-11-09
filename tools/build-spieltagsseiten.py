@@ -767,10 +767,13 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
 
     # Hero-CTA (Marko, 05.11.2026): Steht auf dieser Seite der Kaufbereich (kuenftiges Spiel), springt
     # "Tickets kaufen" dorthin (#tickets) -- derselbe Spieltag, nicht der Hub, der bei jedem anderen Spiel das
-    # naechste Spiel verkauft haette (Test mit Frau M.). Bei vergangenen Spielen fuehrt der Knopf zum Hub.
+    # naechste Spiel verkauft haette (Test mit Frau M.).
     # Im Spielplan fuehrt das Ticket-Symbol beim aktuellen Spiel zum Hub, bei allen anderen zur Seite des Spiels.
+    # Beendete Spiele (Ergebnis eingetragen oder Spieltag vorbei) zeigen keinen Kaufen-Knopf mehr im Hero
+    # (Marko, 09.11.2026); das Ergebnis traegt der n8n-Workflow „Spieltag Profis: Ergebnis und Spielbericht“ ein.
     kauf_hier = kauf_offen(game)
-    tickets_cta = (
+    spiel_vorbei = bool(game.get("ergebnis")) or phase == "danach"
+    tickets_cta = "" if spiel_vorbei and not kauf_hier else (
         '        <div style="display:flex;align-items:center;justify-content:center">\n'
         f'          <a class="btn btn-primary" style="color:#fff" href="{"#tickets" if kauf_hier else "/saison/profis/gameday/"}">'
         '<i data-lucide="ticket" class="icon-16"></i> Tickets kaufen</a>\n'
