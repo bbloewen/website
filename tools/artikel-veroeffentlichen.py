@@ -331,22 +331,44 @@ def spielplan_pflegen(a, url, schreiben):
 
     Zweite Stelle, an der ein Artikel verlinkt wird, und zwar an news.json
     vorbei: das Dokument-Icon im Startseiten-Widget und im Spielplan liest
-    spielberichtUrl bzw. nachberichtUrl aus data/spielplan-saison.json. Ohne
-    diesen Schritt bliebe ein Vorbericht in der Pruefstufe ueber das Widget
-    doch erreichbar -- beim Leverkusen-Spiel genau so aufgefallen.
+    spielberichtUrl bzw. nachberichtUrl aus data/spielplan-saison.json, die
+    Spieltagsseite eines Heimspiels vorberichtUrl bzw. nachberichtUrl aus
+    data/heimspiele.json. Ohne diesen Schritt bliebe ein Vorbericht in der
+    Pruefstufe ueber das Widget doch erreichbar -- beim Leverkusen-Spiel genau
+    so aufgefallen.
 
     Der Auftrag nennt dafuer "spiel": { "datum": "04.10.2026", "feld":
-    "spielberichtUrl" }. Die Datei haelt ein Spiel je Zeile, deshalb wird hier
-    zeilenweise ersetzt und nicht neu serialisiert -- ein json.dumps() wuerde
-    die ganze Datei umformatieren.
+    "spielberichtUrl" }. "spielberichtUrl" heisst Vorbericht, "nachberichtUrl"
+    Spielbericht. Gesucht wird in beiden Dateien: Auswaertsspiele stehen in
+    spielplan-saison.json (profisAuswaerts), Heimspiele in heimspiele.json.
     """
     spiel = a.get("spiel")
     if not spiel:
         return False
     feld = spiel.get("feld", "spielberichtUrl")
-    if feld not in ("spielberichtUrl", "nachberichtUrl"):
-        raise SystemExit('  FEHLER: spiel.feld muss spielberichtUrl oder nachberichtUrl sein.')
+    if feld not in ("spielberichtUrl", "nachberichtUrl", "vorberichtUrl"):
+        raise SystemExit('  FEHLER: spiel.feld muss spielberichtUrl, vorberichtUrl oder nachberichtUrl sein.')
 
+    auswaerts = auswaertsspiel_pflegen(a, url, spiel["datum"], feld, schreiben)
+    heim = heimspiel_pflegen(a, url, spiel["datum"], feld, schreiben)
+    if auswaerts is None and heim is None:
+        # Ein Vorbericht zu einem anderen Termin (z. B. Damen, NBBL) findet
+        # keine Zeile. Das ist kein Grund, den ganzen Lauf scheitern zu lassen.
+        print(f'  Hinweis: kein Profi-Spiel am {spiel["datum"]} -- keine Verlinkung im Spielplan.')
+        return False
+    return bool(auswaerts) or bool(heim)
+
+
+def auswaertsspiel_pflegen(a, url, datum, feld, schreiben):
+    """data/spielplan-saison.json, Block profisAuswaerts. None = kein Spiel an dem Tag.
+
+    Die Datei haelt ein Spiel je Zeile, deshalb wird hier zeilenweise ersetzt
+    und nicht neu serialisiert -- ein json.dumps() wuerde die ganze Datei
+    umformatieren.
+    """
+    if feld == "vorberichtUrl":
+        # Im Spielplan heisst der Vorbericht spielberichtUrl.
+        feld = "spielberichtUrl"
     t = SPIELPLAN.read_text(encoding="utf-8")
     zeilen = t.split("\n")
     # Nur im Block "profisAuswaerts" suchen. Die Datei fuehrt auch Damen und
@@ -355,18 +377,14 @@ def spielplan_pflegen(a, url, schreiben):
     von = next((i for i, z in enumerate(zeilen) if '"profisAuswaerts"' in z), None)
     if von is None:
         print("  WARNUNG: kein Block profisAuswaerts in data/spielplan-saison.json.", file=sys.stderr)
-        return False
+        return None
     bis = next((i for i in range(von + 1, len(zeilen)) if zeilen[i].strip() in ("]", "],")), len(zeilen))
-    treffer = [i for i in range(von + 1, bis) if f'"datum": "{spiel["datum"]}"' in zeilen[i]]
+    treffer = [i for i in range(von + 1, bis) if f'"datum": "{datum}"' in zeilen[i]]
     if not treffer:
-        # Heimspiele stehen in data/heimspiele.json und haben eine eigene
-        # Spieltagsseite; ein Vorbericht zu einem anderen Termin findet ebenfalls
-        # keine Zeile. Beides ist kein Grund, den ganzen Lauf scheitern zu lassen.
-        print(f'  Hinweis: kein Auswaertsspiel am {spiel["datum"]} -- keine Verlinkung im Spielplan.')
-        return False
+        return None
     if len(treffer) > 1:
         raise SystemExit(
-            f'  FEHLER: {len(treffer)} Auswaertsspiele am {spiel["datum"]} in '
+            f'  FEHLER: {len(treffer)} Auswaertsspiele am {datum} in '
             "data/spielplan-saison.json (erwartet: hoechstens eines)."
         )
     i = treffer[0]
@@ -381,6 +399,59 @@ def spielplan_pflegen(a, url, schreiben):
     if schreiben:
         zeilen[i] = neu
         SPIELPLAN.write_text("\n".join(zeilen), encoding="utf-8")
+    return True
+
+
+def heimspiel_pflegen(a, url, datum, feld, schreiben):
+    """data/heimspiele.json: Vorbericht -> vorberichtUrl, Spielbericht -> nachberichtUrl.
+
+    None = kein Heimspiel an dem Tag. spielberichtUrl zeigt dort per Konvention
+    auf die Spieltagsseite selbst und wird nie angefasst; ein Auftrag mit
+    feld "spielberichtUrl" (= Vorbericht) landet deshalb in vorberichtUrl.
+    Zurueckziehen/Pruefung entfernt das Feld nur, wenn es auf genau diesen
+    Artikel zeigt -- ein von Hand gesetzter anderer Bericht bleibt stehen.
+    Geschrieben wird mit indent=2/ensure_ascii=False, so wie die Datei angelegt ist.
+    """
+    ziel = "nachberichtUrl" if feld == "nachberichtUrl" else "vorberichtUrl"
+    roh = HEIMSPIELE.read_text(encoding="utf-8")
+    d = json.loads(roh)
+    treffer = [s for s in d["spiele"] if s.get("datum") == datum]
+    if not treffer:
+        return None
+    if len(treffer) > 1:
+        raise SystemExit(
+            f"  FEHLER: {len(treffer)} Heimspiele am {datum} in data/heimspiele.json "
+            "(erwartet: hoechstens eines)."
+        )
+    s = treffer[0]
+    vorher = s.get(ziel)
+    if a["status"] == "freigegeben":
+        if vorher == url:
+            return False
+        if vorher:
+            print(f"  WARNUNG: {ziel} am Heimspiel {datum} war {vorher}, wird ersetzt.", file=sys.stderr)
+        if ziel in s:
+            s[ziel] = url
+        else:
+            # Neben spielberichtUrl einsortieren, wie bei den von Hand gepflegten Spielen.
+            neu = {}
+            for k, v in s.items():
+                neu[k] = v
+                if k == "spielberichtUrl":
+                    neu[ziel] = url
+            if ziel not in neu:
+                neu[ziel] = url
+            s.clear()
+            s.update(neu)
+    else:
+        if vorher != url:
+            return False
+        del s[ziel]
+    if schreiben:
+        HEIMSPIELE.write_text(
+            json.dumps(d, ensure_ascii=False, indent=2) + ("\n" if roh.endswith("\n") else ""),
+            encoding="utf-8",
+        )
     return True
 
 

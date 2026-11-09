@@ -69,7 +69,7 @@ Skill `news-artikel`.
 | `quellbild` | — | Pfad des Originals unter `data/artikel-eingang/bilder/` (JPG, PNG oder WebP). Das Skript wandelt es nach `bild` um (Breite höchstens 2400 px, Qualität 82) und **löscht das Original danach**. Fehlt das Feld, muss `bild` schon unter `assets/img/news/` liegen. Ein **Hochformat** (JPG/PNG) baut das Skript seit 11.10.2026 selbst ins Hero-Format um: 2400 × 900, Foto mittig (oberer Teil), seitlich weich in eine unscharfe Vergrößerung auslaufend. |
 | `heroPosition` | — | CSS `background-position` des Heros, Standard `center center`; z. B. `center 30%`, wenn die Szene im oberen Bildteil liegt |
 | `markdown` | ja | Fließtext: `##` Zwischenüberschrift, `>` Zitat, `-` Liste, `[Text](URL)`, `**fett**` |
-| `spiel` | — | `{"datum": "04.10.2026", "feld": "spielberichtUrl"}` — verlinkt den Artikel beim Spiel im Spielplan und im Startseiten-Widget |
+| `spiel` | — | `{"datum": "04.10.2026", "feld": "spielberichtUrl"}` — verlinkt den Artikel beim Profi-Spiel an diesem Tag. `feld`: `spielberichtUrl` (oder `vorberichtUrl`) = Vorbericht, `nachberichtUrl` = Spielbericht. Auswärtsspiel: gleichnamiges Feld in `data/spielplan-saison.json` (Spielplan, Startseiten-Widget). Heimspiel: `vorberichtUrl` bzw. `nachberichtUrl` in `data/heimspiele.json` (Berichtskarte auf der Spieltagsseite); dort bleibt `spielberichtUrl` immer die Spieltagsseite selbst. Zurückziehen entfernt die Verlinkung wieder |
 
 ## So muss die Notion-Seite aussehen
 

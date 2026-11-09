@@ -75,7 +75,8 @@ danach die Kette laufen. Zwei Stufen über das Feld `status`: `pruefung` schreib
 die Seite mit `noindex` und ohne jede Verlinkung (erreichbar, wer die Adresse
 hat — die schreibt n8n nach Notion zurück), `freigegeben` nimmt `noindex`
 heraus und trägt den Artikel in `data/news.json` und, falls es um ein Spiel
-geht, in `data/spielplan-saison.json` ein. Felder: siehe
+geht, beim Spiel ein: Auswärtsspiele in `data/spielplan-saison.json`, Heimspiele
+als `vorberichtUrl`/`nachberichtUrl` in `data/heimspiele.json`. Felder: siehe
 `data/artikel-eingang/README.md`. Die Seitenvorlage liegt unter
 `tools/vorlagen/news-artikel.html.vorlage` — bewusst **ohne** `.html`-Endung,
 sonst würden `build-partials.py` sie vollschreiben und `build-sitemap.py` sie
