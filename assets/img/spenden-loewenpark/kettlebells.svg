@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Drei Kettlebells und eine Kurzhantel">
+<rect width="400" height="300" rx="24" fill="#F4F6F9"/><circle cx="200" cy="150" r="112" fill="#FDF1E6"/><rect x="36" y="246" width="328" height="4" rx="2" fill="#DDE1E9"/>
+<g stroke-linecap="round" fill="none">
+<path d="M108 196 C106 140 158 140 156 196" stroke="#00122D" stroke-width="12"/>
+<path d="M196 208 C194 164 236 164 234 208" stroke="#00122D" stroke-width="10"/>
+<path d="M270 220 C269 188 299 188 298 220" stroke="#00122D" stroke-width="8"/>
+</g>
+<circle cx="132" cy="210" r="36" fill="#00122D"/><rect x="108" y="240" width="48" height="6" rx="3" fill="#00122D"/>
+<circle cx="215" cy="219" r="27" fill="#E5710B"/><rect x="197" y="240" width="36" height="6" rx="3" fill="#E5710B"/>
+<circle cx="284" cy="227" r="19" fill="#00122D"/><rect x="271" y="240" width="26" height="6" rx="3" fill="#00122D"/>
+<g font-family="Lexend, Arial, sans-serif" font-weight="700" text-anchor="middle">
+<text x="132" y="220" font-size="26" fill="#E5710B">16</text>
+<text x="215" y="227" font-size="20" fill="#00122D">12</text>
+<text x="284" y="233" font-size="15" fill="#E5710B">8</text>
+</g>
+<rect x="314" y="234" width="46" height="5" rx="2" fill="#8A96AA"/>
+<rect x="318" y="224" width="9" height="22" rx="3" fill="#33415A"/>
+<rect x="347" y="224" width="9" height="22" rx="3" fill="#33415A"/>
+</svg>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Kabine mit Spinden, Bank und Trikot am Haken">
+<rect width="400" height="300" rx="24" fill="#F4F6F9"/><circle cx="200" cy="150" r="112" fill="#FDF1E6"/><rect x="36" y="246" width="328" height="4" rx="2" fill="#DDE1E9"/>
+<g fill="#00122D"><rect x="68" y="54" width="82" height="160" rx="5"/><rect x="154" y="54" width="82" height="160" rx="5"/><rect x="240" y="54" width="82" height="160" rx="5"/></g>
+<g stroke="#33415A" stroke-width="4" stroke-linecap="round">
+<path d="M90 70 H128 M90 80 H128 M176 70 H214 M176 80 H214 M262 70 H300 M262 80 H300"/>
+</g>
+<g fill="#E5710B"><rect x="136" y="120" width="6" height="22" rx="3"/><rect x="222" y="120" width="6" height="22" rx="3"/><rect x="308" y="120" width="6" height="22" rx="3"/></g>
+<path d="M173 104 L182 96 L192 102 Q200 108 208 102 L218 96 L227 104 L220 114 L214 110 L214 150 L186 150 L186 110 L180 114 Z" fill="#E5710B"/>
+<rect x="199" y="90" width="2" height="10" fill="#C9D1DC"/>
+<text x="200" y="138" font-family="Lexend, Arial, sans-serif" font-weight="700" font-size="20" text-anchor="middle" fill="#FFFFFF">7</text>
+<rect x="56" y="206" width="288" height="13" rx="5" fill="#F0B27A"/>
+<rect x="78" y="219" width="10" height="27" rx="2" fill="#33415A"/>
+<rect x="312" y="219" width="10" height="27" rx="2" fill="#33415A"/>
+<rect x="250" y="194" width="52" height="12" rx="4" fill="#FFFFFF" stroke="#C9D1DC" stroke-width="2"/>
+<rect x="250" y="198" width="52" height="3" fill="#0028AA"/>
+</svg>

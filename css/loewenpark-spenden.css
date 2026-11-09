@@ -24,7 +24,10 @@
 .ls-bereich-text { color: var(--text-secondary); margin: 8px 0 0; }
 .ls-wuensche { list-style: none; margin: 16px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
 .ls-wunsch { display: flex; gap: 12px; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: #fff; }
-.ls-wunsch-icon { flex: 0 0 40px; height: 40px; border-radius: var(--radius-full); display: grid; place-items: center; background: var(--bg-subtle); color: var(--color-brand-navy); }
+.ls-wunsch { flex-direction: column; padding: 0; overflow: hidden; gap: 0; }
+.ls-wunsch .ls-wunsch-text { padding: 14px 16px 16px; }
+.ls-wunsch-bild { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; }
+.ls-bild-ersatz { display: grid; place-items: center; background: var(--bg-subtle); color: var(--color-brand-navy); }
 .ls-wunsch-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; }
 .ls-wunsch-name { font-weight: 600; line-height: 1.3; }
 .ls-wunsch-betrag { color: var(--text-secondary); font-size: 14px; }
@@ -33,7 +36,6 @@
 .ls-wunsch .ls-balken { height: 8px; margin-top: 4px; }
 .ls-finanziert { background: var(--bg-subtle); }
 .ls-finanziert .ls-wunsch-name, .ls-finanziert .ls-wunsch-betrag { text-decoration: line-through; color: var(--text-muted); }
-.ls-finanziert .ls-wunsch-icon { background: var(--color-success-bg); color: var(--color-success); }
 .ls-arbeit { border-color: var(--color-heart-green); }
 
 .ls-beispiele { list-style: none; padding: 0; margin: 20px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
@@ -68,7 +70,7 @@
 @media (max-width: 767px) {
   .ls-kennzahlen { grid-template-columns: 1fr 1fr 1fr; }
   .ls-kennzahlen strong { font-size: 17px; }
-  .ls-wunsch { padding: 12px; }
+  .ls-wunsch .ls-wunsch-text { padding: 10px 12px 12px; }
   .ls-wuensche { gap: 8px; }
   .ls-leiste { display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: rgba(255,255,255,.96); box-shadow: 0 -4px 16px rgba(0,18,45,.1); }
   .ls-seite { padding-bottom: 72px; }
@@ -77,3 +79,56 @@
 }
 .ls-teaser .ls-summe strong { font-size: 26px; }
 .ls-teaser-naechste { color: var(--text-secondary); margin: 10px 0 0; }
+
+/* Zustände der Illustrationen (LIESMICH zum Bildsatz): offen grau, in Arbeit halb, finanziert in Farbe */
+[data-status="offen"] img { filter: grayscale(1); opacity: .5; }
+[data-status="arbeit"] img { filter: grayscale(.55); opacity: .85; }
+[data-status="finanziert"] img { filter: none; opacity: 1; }
+
+/* Flache Liste (Standardansicht) */
+.ls-bereiche { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin-bottom: 28px; }
+.ls-bereich-knopf { text-align: left; font: inherit; color: inherit; background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px; display: flex; flex-direction: column; gap: 6px; cursor: pointer; }
+.ls-bereich-knopf:hover { border-color: var(--color-heart-green); }
+.ls-bereich-knopf.is-active { border-color: var(--color-heart-green); box-shadow: 0 0 0 2px var(--color-heart-green) inset; }
+.ls-bk-name { font-weight: 700; line-height: 1.25; }
+.ls-bk-zahl { font-size: 13px; color: var(--text-secondary); }
+.ls-bereich-knopf .ls-balken { height: 6px; margin-top: auto; }
+
+.ls-naechster { display: grid; grid-template-columns: 220px 1fr; gap: 24px; align-items: center; padding: 20px; border: 2px solid var(--color-heart-green); border-radius: var(--radius-lg); background: #fff; margin-bottom: 28px; }
+.ls-naechster-bild { width: 100%; height: auto; border-radius: var(--radius-md); }
+.ls-naechster .ls-naechster-bild { filter: none; opacity: 1; }
+.ls-naechster-text h3 { margin: 4px 0 2px; }
+.ls-naechster-bereich { color: var(--text-secondary); margin: 0 0 12px; }
+.ls-naechster-text .ls-balken { margin-bottom: 10px; }
+.ls-fertig { display: block; text-align: center; }
+
+.ls-flach { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--border); }
+.ls-zeile { display: grid; grid-template-columns: 32px 72px 1fr auto; gap: 14px; align-items: center; padding: 10px 4px; border-bottom: 1px solid var(--border); }
+.ls-zeile-nr { width: 28px; height: 28px; border-radius: var(--radius-full); display: grid; place-items: center; font-size: 13px; font-weight: 700; color: var(--text-secondary); background: var(--bg-subtle); }
+.ls-finanziert .ls-zeile-nr, .ls-zusammen .ls-zeile-nr { background: var(--color-success-bg); color: var(--color-success); }
+.ls-arbeit .ls-zeile-nr { background: var(--color-heart-green); color: #fff; }
+.ls-zeile-bild { width: 72px; height: 54px; border-radius: 8px; }
+.ls-zeile-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ls-zeile-bereich { font-size: 13px; color: var(--text-muted); }
+.ls-zeile-rechts { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; white-space: nowrap; }
+.ls-zeile.ls-finanziert .ls-wunsch-name { text-decoration: line-through; color: var(--text-muted); }
+.ls-zeile.ls-arbeit { background: rgba(27,138,61,.06); }
+.ls-zusammen { grid-template-columns: 32px 1fr; cursor: pointer; }
+.ls-zusammen .ls-wunsch-name { color: var(--color-success); font-weight: 600; }
+.ls-mehr { margin-top: 16px; margin-right: 12px; }
+
+@media (max-width: 900px) {
+  .ls-bereiche { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+}
+@media (max-width: 600px) {
+  /* Bereiche als waagerecht wischbare Leiste, damit die Liste nicht nach unten rutscht */
+  .ls-bereiche { display: flex; overflow-x: auto; gap: 8px; margin: 0 -16px 20px; padding: 0 16px 4px; scroll-snap-type: x proximity; }
+  .ls-bereich-knopf { flex: 0 0 150px; padding: 10px 12px; scroll-snap-align: start; }
+  .ls-bk-name { font-size: 14px; }
+  .ls-naechster { grid-template-columns: 96px 1fr; gap: 14px; padding: 14px; align-items: start; }
+  .ls-naechster-text h3 { font-size: 17px; }
+  .ls-zeile { grid-template-columns: 28px 56px 1fr; gap: 10px; }
+  .ls-zusammen { grid-template-columns: 28px 1fr; }
+  .ls-zeile-bild { width: 56px; height: 42px; }
+  .ls-zeile-rechts { grid-column: 3; align-items: center; flex-direction: row; gap: 10px; }
+}

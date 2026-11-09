@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Kraftstation mit Langhantel und Hantelbank">
+<rect width="400" height="300" rx="24" fill="#F4F6F9"/><circle cx="200" cy="150" r="112" fill="#FDF1E6"/><rect x="36" y="246" width="328" height="4" rx="2" fill="#DDE1E9"/>
+
+<rect x="112" y="46" width="14" height="200" rx="3" fill="#00122D"/><rect x="274" y="46" width="14" height="200" rx="3" fill="#00122D"/>
+<rect x="112" y="46" width="176" height="12" rx="3" fill="#00122D"/>
+<rect x="126" y="122" width="12" height="8" fill="#E5710B"/><rect x="262" y="122" width="12" height="8" fill="#E5710B"/>
+<rect x="66" y="114" width="268" height="7" rx="3" fill="#8A96AA"/>
+<rect x="82" y="92" width="12" height="52" rx="3" fill="#E5710B"/><rect x="96" y="100" width="9" height="36" rx="3" fill="#33415A"/>
+<rect x="306" y="92" width="12" height="52" rx="3" fill="#E5710B"/><rect x="295" y="100" width="9" height="36" rx="3" fill="#33415A"/>
+<rect x="148" y="190" width="112" height="14" rx="6" fill="#E5710B"/><rect x="152" y="204" width="104" height="6" fill="#33415A"/>
+<rect x="160" y="210" width="9" height="36" fill="#00122D"/><rect x="240" y="210" width="9" height="36" fill="#00122D"/>
+</svg>

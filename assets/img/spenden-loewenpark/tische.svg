@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Tisch mit zwei Stühlen, Buch und Becher">
+<rect width="400" height="300" rx="24" fill="#F4F6F9"/><circle cx="200" cy="150" r="112" fill="#FDF1E6"/><rect x="36" y="246" width="328" height="4" rx="2" fill="#DDE1E9"/>
+
+<rect x="58" y="196" width="40" height="9" rx="3" fill="#00122D"/><rect x="92" y="150" width="7" height="55" rx="3" fill="#00122D"/><rect x="61" y="205" width="6" height="41" fill="#33415A"/><rect x="89" y="205" width="6" height="41" fill="#33415A"/><rect x="302" y="196" width="40" height="9" rx="3" fill="#00122D"/><rect x="302" y="150" width="7" height="55" rx="3" fill="#00122D"/><rect x="305" y="205" width="6" height="41" fill="#33415A"/><rect x="333" y="205" width="6" height="41" fill="#33415A"/>
+<rect x="110" y="160" width="180" height="12" rx="4" fill="#F0B27A"/>
+<rect x="124" y="172" width="9" height="74" fill="#00122D"/><rect x="267" y="172" width="9" height="74" fill="#00122D"/>
+<rect x="140" y="146" width="56" height="14" rx="2" fill="#0028AA"/><rect x="144" y="149" width="48" height="3" fill="#FFFFFF"/>
+<rect x="230" y="132" width="22" height="28" rx="4" fill="#E5710B"/><path d="M252 140 q10 0 10 8 q0 8 -10 8" stroke="#E5710B" stroke-width="4" fill="none"/>
+</svg>

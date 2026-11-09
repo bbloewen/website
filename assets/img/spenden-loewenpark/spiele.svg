@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Spielbrett mit Figuren und Würfeln">
+<rect width="400" height="300" rx="24" fill="#F4F6F9"/><circle cx="200" cy="150" r="112" fill="#FDF1E6"/><rect x="36" y="246" width="328" height="4" rx="2" fill="#DDE1E9"/>
+
+<polygon points="200,130 330,180 200,230 70,180" fill="#FFFFFF" stroke="#00122D" stroke-width="5" stroke-linejoin="round"/>
+<g stroke="#C9D1DC" stroke-width="2.5"><path d="M135 155 L265 205 M265 155 L135 205 M167.5 142.5 L297.5 192.5 M232.5 142.5 L102.5 192.5"/></g>
+<polygon points="200,130 232.5,142.5 200,155 167.5,142.5" fill="#E5710B" opacity=".85"/>
+<polygon points="200,205 232.5,217.5 200,230 167.5,217.5" fill="#0028AA" opacity=".85"/>
+<path d="M149 188 Q160 154 171 188 Z" fill="#E5710B"/><circle cx="160" cy="158" r="8" fill="#E5710B"/><path d="M225 172 Q236 138 247 172 Z" fill="#00122D"/><circle cx="236" cy="142" r="8" fill="#00122D"/><path d="M195 212 Q206 178 217 212 Z" fill="#0028AA"/><circle cx="206" cy="182" r="8" fill="#0028AA"/>
+<g><rect x="286" y="210" width="30" height="30" rx="6" fill="#FFFFFF" stroke="#00122D" stroke-width="3"/><g fill="#00122D"><circle cx="294" cy="218" r="3"/><circle cx="301" cy="225" r="3"/><circle cx="308" cy="232" r="3"/></g>
+<rect x="322" y="220" width="26" height="26" rx="5" fill="#E5710B"/><g fill="#FFFFFF"><circle cx="329" cy="227" r="2.6"/><circle cx="341" cy="239" r="2.6"/></g></g>
+</svg>

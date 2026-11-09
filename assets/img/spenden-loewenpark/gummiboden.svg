@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Gummiboden mit Hantelscheibe">
+<rect width="400" height="300" rx="24" fill="#F4F6F9"/><circle cx="200" cy="150" r="112" fill="#FDF1E6"/><rect x="36" y="246" width="328" height="4" rx="2" fill="#DDE1E9"/>
+
+<polygon points="200,150 350,206 200,262 50,206" fill="#00122D"/>
+<g stroke="#33415A" stroke-width="3"><path d="M150 168.7 L300 224.7 M250 168.7 L100 224.7 M100 187.3 L250 243.3 M300 187.3 L150 243.3"/></g>
+<ellipse cx="228" cy="196" rx="44" ry="17" fill="#1C2D4A"/><ellipse cx="228" cy="190" rx="44" ry="17" fill="#E5710B"/>
+<ellipse cx="228" cy="190" rx="9" ry="3.5" fill="#00122D"/>
+
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Regal mit Büchern, Boxen und Ball">
+<rect width="400" height="300" rx="24" fill="#F4F6F9"/><circle cx="200" cy="150" r="112" fill="#FDF1E6"/><rect x="36" y="246" width="328" height="4" rx="2" fill="#DDE1E9"/>
+
+<rect x="104" y="46" width="192" height="200" rx="6" fill="none" stroke="#00122D" stroke-width="8"/>
+<g fill="#00122D"><rect x="104" y="108" width="192" height="7"/><rect x="104" y="174" width="192" height="7"/></g>
+<g><rect x="118" y="64" width="12" height="44" fill="#E5710B"/><rect x="132" y="70" width="12" height="38" fill="#0028AA"/><rect x="146" y="60" width="12" height="48" fill="#33415A"/><rect x="160" y="68" width="12" height="40" fill="#E5710B" opacity=".7"/></g>
+<circle cx="250" cy="89" r="18" fill="#E5710B"/><g stroke="#00122D" stroke-width="2.0" fill="none" stroke-linecap="round"><path d="M232 89 H268 M250 71 V107"/><path d="M238.84 74.96 Q246.76 89 238.84 103.04 M261.16 74.96 Q253.24 89 261.16 103.04"/></g>
+<rect x="118" y="132" width="70" height="42" rx="4" fill="#E5710B"/><rect x="140" y="140" width="26" height="7" rx="3" fill="#FFFFFF"/>
+<rect x="198" y="132" width="84" height="42" rx="4" fill="#33415A"/><rect x="226" y="140" width="28" height="7" rx="3" fill="#FFFFFF"/>
+<g><rect x="118" y="196" width="56" height="44" rx="4" fill="#0028AA"/><path d="M216 240 L234 196 L252 240 Z" fill="#E5710B"/><rect x="258" y="210" width="26" height="30" rx="4" fill="#33415A"/></g>
+</svg>

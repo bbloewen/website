@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Rudergerät">
+<rect width="400" height="300" rx="24" fill="#F4F6F9"/><circle cx="200" cy="150" r="112" fill="#FDF1E6"/><rect x="36" y="246" width="328" height="4" rx="2" fill="#DDE1E9"/>
+
+<rect x="60" y="222" width="250" height="9" rx="4" fill="#00122D"/>
+<rect x="64" y="231" width="10" height="15" fill="#33415A"/>
+<circle cx="306" cy="200" r="34" fill="#00122D"/><circle cx="306" cy="200" r="20" fill="#33415A"/><circle cx="306" cy="200" r="8" fill="#E5710B"/>
+<rect x="290" y="232" width="34" height="14" rx="4" fill="#33415A"/>
+<rect x="244" y="194" width="10" height="34" rx="3" fill="#33415A" transform="rotate(-25 249 211)"/>
+<rect x="246" y="196" width="22" height="9" rx="3" fill="#E5710B" transform="rotate(-25 257 200)"/>
+<rect x="126" y="206" width="50" height="14" rx="6" fill="#E5710B"/><rect x="138" y="218" width="26" height="6" fill="#33415A"/>
+<path d="M272 182 L214 170" stroke="#8A96AA" stroke-width="3" stroke-linecap="round"/>
+<rect x="198" y="164" width="22" height="10" rx="4" fill="#00122D"/>
+</svg>

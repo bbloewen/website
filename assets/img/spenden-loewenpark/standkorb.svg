@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Freistehende Korbanlage">
+<rect width="400" height="300" rx="24" fill="#F4F6F9"/><circle cx="200" cy="150" r="112" fill="#FDF1E6"/><rect x="36" y="246" width="328" height="4" rx="2" fill="#DDE1E9"/>
+
+<rect x="228" y="208" width="114" height="38" rx="6" fill="#00122D"/><rect x="226" y="208" width="16" height="38" rx="5" fill="#E5710B"/>
+<rect x="294" y="84" width="12" height="126" rx="4" fill="#00122D"/>
+<g stroke="#00122D" stroke-width="7" stroke-linecap="round"><path d="M300 88 L186 82 M300 132 L186 122 M300 88 L186 122"/></g>
+<polygon points="150,40 186,52 186,178 150,166" fill="#FFFFFF" stroke="#00122D" stroke-width="6" stroke-linejoin="round"/>
+<polygon points="160,111 176,116 176,145 160,140" fill="none" stroke="#E5710B" stroke-width="4" stroke-linejoin="round"/>
+<path d="M150 160 L134 162" stroke="#00122D" stroke-width="6" stroke-linecap="round"/>
+<g stroke="#8A96AA" stroke-width="2.5" stroke-linecap="round" fill="none"><path d="M136 166 L124 214 M74 166 L86 214 M118 170 L110 214 M92 170 L100 214 M86 214 L124 214 M78 182 L132 182 M82 198 L128 198"/></g>
+<ellipse cx="105" cy="164" rx="33" ry="8" fill="none" stroke="#E5710B" stroke-width="6"/>
+<circle cx="190" cy="226" r="20" fill="#E5710B"/><g stroke="#00122D" stroke-width="2.2" fill="none" stroke-linecap="round"><path d="M170 226 H210 M190 206 V246"/><path d="M177.6 210.4 Q186.4 226 177.6 241.6 M202.4 210.4 Q193.6 226 202.4 241.6"/></g>
+</svg>

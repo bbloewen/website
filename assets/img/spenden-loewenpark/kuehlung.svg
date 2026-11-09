@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Zweitüriger Gewerbekühlschrank">
+<rect width="400" height="300" rx="24" fill="#F4F6F9"/><circle cx="200" cy="150" r="112" fill="#FDF1E6"/><rect x="36" y="246" width="328" height="4" rx="2" fill="#DDE1E9"/>
+
+<rect x="128" y="36" width="144" height="200" rx="10" fill="#C9D1DC"/>
+<rect x="128" y="36" width="144" height="24" rx="10" fill="#33415A"/><rect x="128" y="50" width="144" height="10" fill="#33415A"/>
+<rect x="148" y="42" width="30" height="12" rx="3" fill="#E5710B"/>
+<rect x="198" y="60" width="4" height="176" fill="#8A96AA"/>
+<rect x="184" y="96" width="7" height="70" rx="3" fill="#00122D"/><rect x="209" y="96" width="7" height="70" rx="3" fill="#00122D"/>
+<rect x="134" y="236" width="12" height="10" fill="#00122D"/><rect x="254" y="236" width="12" height="10" fill="#00122D"/>
+<g stroke="#0028AA" stroke-width="3" stroke-linecap="round"><path d="M240 120 V150 M227 127 L253 143 M227 143 L253 127"/></g>
+</svg>

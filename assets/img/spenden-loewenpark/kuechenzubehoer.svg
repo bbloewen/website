@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Töpfe, Geschirr und Küchenutensilien">
+<rect width="400" height="300" rx="24" fill="#F4F6F9"/><circle cx="200" cy="150" r="112" fill="#FDF1E6"/><rect x="36" y="246" width="328" height="4" rx="2" fill="#DDE1E9"/>
+
+<rect x="78" y="58" width="244" height="8" rx="4" fill="#00122D"/>
+<g stroke="#33415A" stroke-width="5" stroke-linecap="round" fill="none">
+<path d="M112 66 V130"/><path d="M164 66 V128"/><path d="M216 66 V118"/><path d="M268 66 V112"/></g>
+<ellipse cx="112" cy="140" rx="16" ry="11" fill="#E5710B"/>
+<rect x="152" y="126" width="24" height="34" rx="5" fill="#00122D"/>
+<ellipse cx="216" cy="136" rx="14" ry="22" fill="none" stroke="#8A96AA" stroke-width="4"/>
+<path d="M262 112 L262 168 Q278 150 274 112 Z" fill="#C9D1DC" stroke="#33415A" stroke-width="3"/>
+<g fill="#FFFFFF" stroke="#C9D1DC" stroke-width="2"><ellipse cx="120" cy="240" rx="40" ry="8"/><ellipse cx="120" cy="231" rx="40" ry="8"/><ellipse cx="120" cy="222" rx="40" ry="8"/><ellipse cx="120" cy="213" rx="40" ry="8"/></g>
+<rect x="210" y="196" width="96" height="50" rx="10" fill="#E5710B"/><rect x="202" y="188" width="112" height="10" rx="4" fill="#00122D"/>
+<rect x="196" y="206" width="16" height="8" rx="3" fill="#E5710B"/><rect x="304" y="206" width="16" height="8" rx="3" fill="#E5710B"/>
+</svg>

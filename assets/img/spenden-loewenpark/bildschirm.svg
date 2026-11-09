@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Großer Bildschirm auf Rollständer">
+<rect width="400" height="300" rx="24" fill="#F4F6F9"/><circle cx="200" cy="150" r="112" fill="#FDF1E6"/><rect x="36" y="246" width="328" height="4" rx="2" fill="#DDE1E9"/>
+
+<rect x="86" y="54" width="228" height="134" rx="10" fill="#00122D"/>
+<rect x="98" y="66" width="204" height="110" rx="5" fill="#1C2D4A"/>
+<rect x="114" y="82" width="70" height="10" rx="4" fill="#E5710B"/>
+<g fill="#8A96AA"><rect x="114" y="102" width="92" height="6" rx="3"/><rect x="114" y="116" width="78" height="6" rx="3"/><rect x="114" y="130" width="86" height="6" rx="3"/></g>
+<g fill="#E5710B"><rect x="232" y="132" width="12" height="28" rx="2"/><rect x="250" y="116" width="12" height="44" rx="2"/><rect x="268" y="100" width="12" height="60" rx="2"/></g>
+<rect x="194" y="188" width="12" height="46" fill="#33415A"/><rect x="146" y="232" width="108" height="8" rx="4" fill="#00122D"/>
+<circle cx="154" cy="242" r="5" fill="#33415A"/><circle cx="246" cy="242" r="5" fill="#33415A"/>
+</svg>

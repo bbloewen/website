@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Haubenspülmaschine mit Tellern">
+<rect width="400" height="300" rx="24" fill="#F4F6F9"/><circle cx="200" cy="150" r="112" fill="#FDF1E6"/><rect x="36" y="246" width="328" height="4" rx="2" fill="#DDE1E9"/>
+
+<rect x="56" y="152" width="90" height="10" rx="3" fill="#00122D"/><rect x="64" y="162" width="8" height="84" fill="#33415A"/>
+<rect x="254" y="152" width="90" height="10" rx="3" fill="#00122D"/><rect x="328" y="162" width="8" height="84" fill="#33415A"/>
+<rect x="146" y="150" width="108" height="96" rx="6" fill="#C9D1DC"/>
+<rect x="140" y="62" width="120" height="92" rx="10" fill="#DCE2EA" stroke="#C9D1DC" stroke-width="4"/>
+<rect x="170" y="74" width="60" height="9" rx="4" fill="#00122D"/>
+<rect x="166" y="172" width="68" height="40" rx="6" fill="#33415A"/><circle cx="216" cy="192" r="6" fill="#E5710B"/>
+<g fill="#FFFFFF" stroke="#C9D1DC" stroke-width="2"><ellipse cx="100" cy="146" rx="30" ry="6"/><ellipse cx="100" cy="139" rx="30" ry="6"/><ellipse cx="100" cy="132" rx="30" ry="6"/><ellipse cx="100" cy="125" rx="30" ry="6"/></g>
+<g fill="#E5710B"><circle cx="290" cy="140" r="5"/><circle cx="306" cy="128" r="7"/><circle cx="292" cy="116" r="4"/></g>
+</svg>

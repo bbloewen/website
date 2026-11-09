@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Kochinsel in Kinderhöhe mit Schneidebrett und Topf">
+<rect width="400" height="300" rx="24" fill="#F4F6F9"/><circle cx="200" cy="150" r="112" fill="#FDF1E6"/><rect x="36" y="246" width="328" height="4" rx="2" fill="#DDE1E9"/>
+<rect x="82" y="160" width="236" height="86" rx="6" fill="#00122D"/>
+<rect x="70" y="148" width="260" height="16" rx="6" fill="#C9D1DC"/>
+<rect x="96" y="174" width="98" height="60" rx="5" fill="#1C2D4A"/>
+<rect x="206" y="174" width="98" height="60" rx="5" fill="#1C2D4A"/>
+<rect x="178" y="198" width="6" height="16" rx="3" fill="#E5710B"/>
+<rect x="216" y="198" width="6" height="16" rx="3" fill="#E5710B"/>
+<rect x="100" y="137" width="92" height="12" rx="4" fill="#F0B27A"/>
+<path d="M114 143 L158 133 Q166 137 158 143 Z" fill="#E5710B"/>
+<path d="M158 133 L170 126 M160 137 L172 134" stroke="#3E8E5A" stroke-width="3.5" stroke-linecap="round"/>
+<circle cx="178" cy="138" r="8" fill="#D9472B"/>
+<path d="M176 130 L180 127" stroke="#3E8E5A" stroke-width="3" stroke-linecap="round"/>
+<rect x="226" y="108" width="74" height="40" rx="9" fill="#33415A"/>
+<rect x="216" y="116" width="14" height="7" rx="3" fill="#33415A"/>
+<rect x="296" y="116" width="14" height="7" rx="3" fill="#33415A"/>
+<rect x="222" y="101" width="82" height="9" rx="4" fill="#00122D"/>
+<rect x="256" y="93" width="14" height="9" rx="3" fill="#E5710B"/>
+<g stroke="#8A96AA" stroke-width="3.5" stroke-linecap="round" fill="none">
+<path d="M246 86 Q238 74 246 62 Q254 50 246 38"/><path d="M280 86 Q272 74 280 62 Q288 50 280 40"/>
+</g>
+</svg>
