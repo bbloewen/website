@@ -72,6 +72,13 @@
       "zeit": "17:00",
       "gegner": "Culture City Weimar",
       "livescore": "https://live.2basketballbundesliga.de/g/2006180",
+      "ergebnis": "69 : 74",
+      "viertel": [
+        "20 : 25",
+        "17 : 20",
+        "13 : 11",
+        "19 : 18"
+      ],
       "ligaId": 588,
       "gegnerUrl": "https://www.culturecity.de/",
       "slug": "2026-11-08",
