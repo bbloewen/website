@@ -13,6 +13,17 @@
       "topNews": false
     },
     {
+      "datum": "05.11.2026",
+      "kategorie": "Nachwuchs",
+      "tint": "tint-orange",
+      "icon": "newspaper",
+      "titel": "Wenn mal alle mitspielen — Eine Reportage über die WAID Basketball Löwen",
+      "kurztext": "Basketball Löwen Erfurt: Reportage über das Inklusionsteam WAID Basketball Löwen, einen Trainingsnachmittag, an dem alle mitspielen.",
+      "url": "/news/artikel/2026-11-05_nachwuchs_waid.html",
+      "bild": "/assets/img/news/waid.webp",
+      "topNews": false
+    },
+    {
       "datum": "16.10.2026",
       "kategorie": "Club",
       "tint": "tint-orange",
