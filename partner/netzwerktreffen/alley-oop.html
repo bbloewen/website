@@ -340,7 +340,7 @@ window.goatcounter = { path: function (p) {
               <input type="tel" id="cc-tel" name="telefon" autocomplete="tel" />
             </div>
           </div>
-          <!-- Begleitpersonen: beliebig viele, je mit Namen und E-Mail, jede bekommt ihr eigenes Ticket (Florian, 02.11.2026) -->
+          <!-- Begleitpersonen: beliebig viele, je mit Namen (fürs Namensschild), E-Mail freiwillig; alle Tickets kommen in einer Mail an den Gast, Begleitpersonen mit Adresse in Kopie (Marko, 10.11.2026) -->
           <fieldset class="cc-begleiter" id="cc-begleiter">
             <legend class="t-body-sm fett">Begleitpersonen</legend>
             <div id="cc-begleiter-liste"></div>
@@ -384,7 +384,7 @@ window.goatcounter = { path: function (p) {
         </details>
         <details>
           <summary>Darf ich jemanden mitbringen?</summary>
-          <p class="t-body">Ja. Tragen Sie Ihre Begleitpersonen bei der Anmeldung mit Namen und E-Mail-Adresse ein. Jede Person bekommt ihr eigenes Ticket per E-Mail.</p>
+          <p class="t-body">Ja. Tragen Sie Ihre Begleitpersonen bei der Anmeldung mit Namen ein, der Name kommt auf das Namensschild. Die E-Mail-Adresse der Begleitung ist freiwillig. Jede Person hat ihr eigenes Ticket, alle Tickets kommen in einer E-Mail an Sie; Begleitpersonen mit E-Mail-Adresse bekommen sie in Kopie.</p>
         </details>
         <details>
           <summary>Bis wann muss ich mich anmelden, und was, wenn alles voll ist?</summary>
@@ -614,7 +614,7 @@ window.goatcounter = { path: function (p) {
     div.innerHTML = '<div class="cc-row">' +
       '<div class="field"><label for="cc-bg-vn-' + n + '">Vorname *</label><input type="text" id="cc-bg-vn-' + n + '" data-bg-feld="vorname" autocomplete="off" required /></div>' +
       '<div class="field"><label for="cc-bg-nn-' + n + '">Nachname *</label><input type="text" id="cc-bg-nn-' + n + '" data-bg-feld="nachname" autocomplete="off" required /></div></div>' +
-      '<div class="cc-row"><div class="field"><label for="cc-bg-m-' + n + '">E-Mail *</label><input type="email" id="cc-bg-m-' + n + '" data-bg-feld="email" autocomplete="off" required /></div>' +
+      '<div class="cc-row"><div class="field"><label for="cc-bg-m-' + n + '">E-Mail (freiwillig, für eine Kopie)</label><input type="email" id="cc-bg-m-' + n + '" data-bg-feld="email" autocomplete="off" /></div>' +
       '<div class="field cc-begleiter-weg"><button type="button" class="btn btn-secondary" data-bg-weg="' + n + '" aria-label="Begleitperson ' + n + ' entfernen">Entfernen</button></div></div>';
     bgListe.appendChild(div);
     if (vor) { var f = div.querySelectorAll('[data-bg-feld]'); f[0].value = vor.vorname || ''; f[1].value = vor.nachname || ''; f[2].value = vor.email || ''; }
@@ -652,7 +652,7 @@ window.goatcounter = { path: function (p) {
         var titel = document.querySelector('#cc-state-danke h2'), text = document.getElementById('cc-danke-text');
         if (d.status === 'abgesagt') { titel.textContent = 'Schade, dass es nicht klappt.'; text.textContent = 'Wir haben Ihre Absage erhalten. Falls sich Ihre Pläne ändern, können Sie über den Link in Ihrer Einladung bis zum Anmeldeschluss wieder zusagen.'; }
         else if (d.warteliste && d.status === 'warteliste') { text.textContent = 'Alle Plätze sind im Moment vergeben, Sie stehen auf der Warteliste. Sobald ein Platz frei wird, bekommen Sie Ihr Ticket per E-Mail.'; }
-        else if (d.warteliste) { text.textContent = 'Sie sind angemeldet, Ihr Ticket kommt per E-Mail. Für einen Teil Ihrer Begleitpersonen ist im Moment kein Platz frei, sie stehen auf der Warteliste.'; }
+        else if (d.warteliste) { text.textContent = 'Sie sind angemeldet, Ihre Tickets kommen per E-Mail. Für einen Teil Ihrer Begleitpersonen ist im Moment kein Platz frei, sie stehen auf der Warteliste.'; }
         form.hidden = true; document.getElementById('cc-state-danke').hidden = false;
       })
       .catch(function (err) { fehler.textContent = err.message + ' Bitte versuchen Sie es noch einmal oder schreiben Sie an andre.grenzdoerffer@basketball-loewen.com.'; knopf.disabled = false; absageKnopf.disabled = false; });
