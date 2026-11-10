@@ -605,8 +605,8 @@ window.goatcounter = { path: function (p) {
   var form = document.getElementById('cc-form');
   var fehler = document.getElementById('cc-error');
   var knopf = document.getElementById('cc-submit');
-  var SCHLUSS = new Date('2026-11-20T00:00:00+01:00');   // Anmeldeschluss: Donnerstag, 19.11.2026 (eine Woche vorher)
-  if (new Date() >= SCHLUSS) { form.hidden = true; document.getElementById('cc-state-zu').hidden = false; }
+  /* Anmeldeschluss steht nur als Hinweis auf der Seite (Donnerstag, 19.11.2026, eine Woche vorher). Das Formular bleibt bis zum Abend der Veranstaltung offen
+     (Marko, 10.11.2026); geschlossen wird nur, wenn 305 die Veranstaltung als nicht mehr offen meldet. */
   var bgListe = document.getElementById('cc-begleiter-liste'), bgNr = 0;
   function begleiterZeile(vor) {
     var n = ++bgNr, div = document.createElement('div');
