@@ -42,8 +42,9 @@ bleiben unberührt.
 - **Generatoren** (`tools/*.py`) lesen nur git-getrackte Dateien: neue Dateien erst `git add`, dann bauen.
   `tools/bauen.sh` verändert nebenbei Pressepakete (`assets/presse/*.zip`) und Instagram-Archivseiten;
   die gehören nicht in fremde PRs.
-- **News-Artikel** laufen über den Skill `.claude/skills/news-artikel` und die Notion-Mediaplanung
-  (Status Text fertig → Bereit zum Review → Freigegeben → Veröffentlicht, setzt nur der Workflow).
+- **News-Artikel** laufen über den Skill `.claude/skills/news-artikel` und Löwen OS 305 (Website → Mediaplanung/Artikel;
+  Zur Prüfung → Freigeben → Veröffentlicht setzt die Automatik). Notion ist seit 02.11.2026 nur Spiegel, ein Status dort
+  bewirkt nichts. „Freigabe durch“ am Artikel: dann darf nur diese Person freigeben.
   Immer „Basketball Löwen Erfurt“ in Titel/Lead und erster Nennung, eigene Links in Notion voll ausschreiben.
 - **Datum nie raten:** Wochentag und Datum ausrechnen und bestätigen lassen.
 - **Umbuchung nach Ticketversand:** Nach jeder Sitz- oder Spielumbuchung einer Bestellung, deren Ticket-Mail schon raus ist, `POST …/orders/<code>/regenerate_secrets/` ausführen (Fall Zahn 08.11.2026: altes PDF blieb am Einlass gültig und kollidierte mit dem neuen Inhaber der freigegebenen Sitze). Feste Abfolge in `TICKETING-BACKEND.md`, Abschnitt „Sitzumbuchung nach Ticketversand“.

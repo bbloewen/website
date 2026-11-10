@@ -1,23 +1,37 @@
 # Artikel-Eingang
 
-Hier legt der n8n-Workflow **„Website: News-Artikel aus Notion veröffentlichen"**
-je Artikel eine Auftragsdatei ab. Der GitHub-Workflow
+Hier legt **Löwen OS 305** (crm-db, Tabellen `mediaplan` und `artikel`) je Artikel eine
+Auftragsdatei ab. Geschrieben wird sie vom n8n-Workflow **„305: Website (Mediaplanung,
+Newsartikel)“** (`XCiGF4dCG99mvKhu`). Der GitHub-Workflow
 `.github/workflows/news-veroeffentlichen.yml` baut daraus mit
 `tools/artikel-veroeffentlichen.py` die fertige Seite.
 
-**Nicht von Hand pflegen** — Quelle ist die Notion-Datenbank „Inhalte-Kalender"
-unter 🗓️ Mediaplanung. Was hier liegt, wird bei jedem Lauf erneut verarbeitet;
-das Skript ist idempotent.
+**Nicht von Hand pflegen.** Quelle ist der Artikel in 305 (Bereich Website → Artikel).
+Was hier liegt, wird bei jedem Lauf erneut verarbeitet; das Skript ist idempotent.
 
-## Die Status-Kette in Notion
+**Notion ist seit 02.11.2026 nur noch Spiegel.** Die frühere Strecke „Website: News-Artikel
+aus Notion veröffentlichen“ (n8n `slyQfEyuRkujoQHz`) ist abgeschaltet; ein Status, der in
+Notion gesetzt wird, bewirkt nichts. Ältere Aufträge heißen noch `<notionId>.json`, neue
+`305-<artikel-id>.json`.
 
-| Status | wer setzt ihn | was passiert |
+## Die Status-Kette in 305
+
+| Status am Artikel | wer setzt ihn | was passiert |
 |---|---|---|
-| Geplant / In Arbeit / Entwurf | Mensch | nichts, die Automatik schaut weg |
-| **Text fertig** | Mensch | n8n baut aus Notion-Text, Termin, Team und Drive-Bild einen Auftrag mit `"status": "pruefung"`; die Action legt den Entwurf an (noindex, unverlinkt), die URL steht im Feld `Link` |
-| **Bereit zum Review** | Automatik | der Entwurf ist online; eine E-Mail „Artikel bereit zum Review und Freigabe" geht an die Redaktion |
-| **Freigegeben** | Mensch | ab dem Termin setzt n8n `"status": "freigegeben"`, der Artikel wird verlinkt und indexierbar (liegt der Termin schon zurück: sofort) |
-| **Veröffentlicht** | Automatik | fertig |
+| Entwurf | Mensch (mit KI-Chat) | nichts, der Text entsteht in 305 |
+| **Prüfung** | Knopf „Zur Prüfung“ | 305 schreibt den Auftrag mit `"status": "pruefung"`, die Action legt den Entwurf an (noindex, unverlinkt); die Adresse steht am Artikel und in der Mediaplanung |
+| **Freigegeben** | Knopf „Freigeben“ | ab dem Termin (mit Uhrzeit auf die Minute, sonst ab Mitternacht; liegt er zurück: sofort) setzt der Workflow im nächsten 10-Minuten-Lauf `"status": "freigegeben"`, der Artikel wird verlinkt und indexierbar |
+| **Veröffentlicht** | Automatik | sobald der Artikel in `data/news.json` steht |
+
+**„Freigabe durch“:** Steht an Artikel oder Mediaplan-Zeile eine Mailadresse, kann nur diese
+Person freigeben; leer heißt, die berechtigten Personen in 305 (in der Regel Marko).
+
+Ein veröffentlichter Artikel wird in 305 geändert und mit „aktualisieren“ neu an die Website
+gegeben; „löschen“ zieht ihn zurück (Seite, `news.json` und Spielplan-Link verschwinden).
+
+**Zwei Aufträge gleichzeitig** (zwei Freigaben im selben Lauf) können die Action an einem
+Push-Konflikt scheitern lassen (10.11.2026). Dann `gh workflow run news-veroeffentlichen.yml
+-R bbloewen/website --ref main` anstoßen.
 
 Das Team „Club" erscheint als Kategorie „Club" (Eyebrow und Kachel-Label, wie in der Navigation) ohne Feed-Team
 (`team` fehlt = allgemein), alle anderen Teams übernehmen ihren Feed-Schlüssel.
@@ -71,44 +85,15 @@ Skill `news-artikel`.
 | `markdown` | ja | Fließtext: `##` Zwischenüberschrift, `>` Zitat, `-` Liste, `[Text](URL)`, `**fett**` |
 | `spiel` | — | `{"datum": "04.10.2026", "feld": "spielberichtUrl"}` — verlinkt den Artikel beim Profi-Spiel an diesem Tag. `feld`: `spielberichtUrl` (oder `vorberichtUrl`) = Vorbericht, `nachberichtUrl` = Spielbericht. Auswärtsspiel: gleichnamiges Feld in `data/spielplan-saison.json` (Spielplan, Startseiten-Widget). Heimspiel: `vorberichtUrl` bzw. `nachberichtUrl` in `data/heimspiele.json` (Berichtskarte auf der Spieltagsseite); dort bleibt `spielberichtUrl` immer die Spieltagsseite selbst. Zurückziehen entfernt die Verlinkung wieder |
 
-## So muss die Notion-Seite aussehen
+## Bild
 
-Der n8n-Workflow liest den Seiteninhalt als Markdown und zerlegt ihn nach festen
-Regeln. Was nicht passt, wird nicht geraten: der Artikel geht zurück auf
-**Entwurf**, und unter dem Seitentext steht ein Absatz „Automatik: …" mit dem
-Grund.
+Das Hero-Bild kommt in 305 an den Artikel (Upload oder Link aus Google Drive/Fotos) und liegt
+als Original unter `data/artikel-eingang/bilder/`; das Skript wandelt es in das WebP unter
+`assets/img/news/` um (siehe Feld `quellbild`).
 
-| Im Text | wird zu |
-|---|---|
-| `## Artikel` als Überschrift | alles **davor** (Hinweisboxen, Notizen) wird ignoriert; fehlt sie, zählt die ganze Seite |
-| `**Überschrift:** …` | H1 der Seite (ohne diese Zeile: Titel mit Punkt) |
-| `**Lead:** …` | Vorspann unter der H1 — **Pflicht** |
-| `Meta-Description: …` (irgendwo, auch in einer Box) | Beschreibung für Suchmaschinen und Teilen; ohne: die ersten 155 Zeichen des Leads |
-| Box mit „Das Wichtigste in Kürze" und `- `-Punkten | Kurzfassung oben auf der Seite |
-| `###` oder `##` | Zwischenüberschrift |
-| `>` | Zitat |
-| `[Text](URL)` | Link (eigene Adressen relativ, fremde mit neuem Tab) |
-| alle anderen Boxen | ignoriert |
-
-Weitere Pflichtangaben stehen in den **Eigenschaften** der Zeile: `Termin`
-(= Veröffentlichungsdatum, steht im Dateinamen), `Team`, `Titel`; optional
-`Top-News`. Typografie gleicht das Skript an: gerade und deutsche
-Anführungszeichen, `–` und `-` als Gedankenstrich `—`.
-
-**Bild:** in Drive als `News_<JJJJ-MM-TT>_<Kurzname>.<jpg|png|webp>` ablegen,
-mit **demselben Datum wie `Termin`**. Aus dem Kurzname wird die Adresse der
-Seite (`News_2026-09-21_Saisonstart-Neunte-Saison.jpg` → `…/2026-09-21_profis_saisonstart-neunte-saison.html`).
-Liegen mehrere Dateien mit demselben Datum, bricht die Automatik ab und sagt
-welche.
-
-**Vorberichte und Spielberichte** zu **Auswärtsspielen** verlinkt die
-Automatik auch im Spielplan und im Startseiten-Widget, wenn der Kurzname mit
-`vorbericht` bzw. `spielbericht` beginnt, das Team „Profis" ist und `Termin`
-auf den Spieltag fällt. Bei Heimspielen gibt es einen Hinweis statt einer
-Verlinkung — die haben ihre eigene Spieltagsseite.
-
-**Neu bauen:** Wer nach der Prüfung noch am Text ändern will, leert das Feld
-`Link` und setzt den Status erneut auf „Text fertig".
+**Vorberichte und Spielberichte** zu **Auswärtsspielen** verlinkt die Automatik auch im
+Spielplan und im Startseiten-Widget (Feld `spiel`). Bei Heimspielen gibt es einen Hinweis statt
+einer Verlinkung — die haben ihre eigene Spieltagsseite.
 
 Das Feld `bild` bestimmt die Hero-CSS-Klasse (`hero-news-<Dateiname ohne
 Endung>`) und darüber auch den Namen des Share-Bildes. Das ist kein Zufall,
