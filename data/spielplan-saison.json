@@ -42,7 +42,7 @@
       { "datum": "10.10.2026", "zeit": "14:00", "gegner": "SCIENCE CITY JENA", "heim": true, "ergebnis": "71 : 95" },
       { "datum": "18.10.2026", "zeit": "16:00", "gegner": "SG Junior Löwen Braunschweig", "heim": false, "ort": "Braunschweig", "ergebnis": "99 : 46" },
       { "datum": "25.10.2026", "zeit": "13:00", "gegner": "Sartorius Juniors", "heim": true, "ergebnis": "71 : 87" },
-      { "datum": "08.11.2026", "zeit": "13:00", "gegner": "NINERS CHEMNITZ ACADEMY", "heim": true },
+      { "datum": "08.11.2026", "zeit": "13:00", "gegner": "NINERS CHEMNITZ ACADEMY", "heim": true, "ergebnis": "84 : 98" },
       { "datum": "15.11.2026", "gegner": "Mitteldeutsche Basketball Academy", "heim": false, "ort": "Dreifelderhalle der Sportschulen Halle, Halle (Saale)" },
       { "datum": "22.11.2026", "gegner": "Sartorius Juniors", "heim": true, "ort": "Herzog-Ernst-Schule, Gotha", "ergebnis": "71 : 87" },
       { "datum": "29.11.2026", "gegner": "Dresden Titans", "heim": true, "ort": "Herzog-Ernst-Schule, Gotha" },
