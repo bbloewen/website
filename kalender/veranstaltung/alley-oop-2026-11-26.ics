@@ -1,0 +1,38 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Basketball Löwen Erfurt//Veranstaltungen//DE
+CALSCALE:GREGORIAN
+BEGIN:VTIMEZONE
+TZID:Europe/Berlin
+BEGIN:DAYLIGHT
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+TZNAME:CEST
+DTSTART:19700329T020000
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+TZNAME:CET
+DTSTART:19701025T030000
+RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:alley-oop-2026-11-26@basketball-loewen.com
+DTSTAMP:20261110T000000Z
+SEQUENCE:0
+DTSTART;TZID=Europe/Berlin:20261126T183000
+DTEND;TZID=Europe/Berlin:20261126T210000
+SUMMARY:Alley Oop – CATL & Basketball Löwen
+LOCATION:CATL\, Robert-Bosch-Straße 1\, 99310 Arnstadt
+DESCRIPTION:Netzwerkabend von CATL und den Basketball Löwen. Einlass ab 18
+  Uhr\, Beginn 18:30 Uhr. Bitte Personalausweis oder Reisepass mitbringen.\
+ nMehr Infos: https://basketball-loewen.com/partner/netzwerktreffen/alley-o
+ op.html
+URL:https://basketball-loewen.com/partner/netzwerktreffen/alley-oop.html
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+END:VEVENT
+END:VCALENDAR
