@@ -121,6 +121,18 @@
     {
       "datum": "08.11.2026",
       "kategorie": "Spielbericht",
+      "tint": "tint-blue",
+      "icon": "trophy",
+      "titel": "69:74 gegen Weimar: Basketball Löwen Erfurt drehen das Spiel, unterliegen am Ende aber knapp",
+      "kurztext": "Basketball Löwen Erfurt unterliegen Culture City Weimar 69:74. Ilias mit 16 Punkten, Léonar mit 10 Punkten und 11 Rebounds. Freitag gegen Dresden.",
+      "url": "/news/artikel/2026-11-08_profis_69-74-gegen-weimar-basketball-loewen-erfurt-drehen-das-spiel.html",
+      "bild": "/assets/img/news/305-28725-20261110143424.webp",
+      "topNews": false,
+      "team": "profis"
+    },
+    {
+      "datum": "08.11.2026",
+      "kategorie": "Spielbericht",
       "tint": "tint-orange",
       "icon": "calendar",
       "titel": "Basketball Löwen Erfurt empfangen Culture City Weimar zum ersten Thüringen-Derby",

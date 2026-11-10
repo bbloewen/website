@@ -66,7 +66,7 @@
       "lastmod": "2026-11-02"
     },
     "index.html": {
-      "hash": "23c10c7b79f016361bf19dee462f61c30ba2353c",
+      "hash": "f62a392f72f589db90b575e159d53b8100c57b26",
       "lastmod": "2026-11-10"
     },
     "kontakt.html": {
@@ -82,12 +82,12 @@
       "lastmod": "2026-08-08"
     },
     "news/aktuelles.html": {
-      "hash": "8f9c2ccb14da653ce55ee18a9883f1feaf613c2c",
-      "lastmod": "2026-11-08"
+      "hash": "2ccf91857a8f012177ac5ce3fb96d9ad6a72e3ed",
+      "lastmod": "2026-11-10"
     },
     "news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html": {
-      "hash": "fde24c95d4a000bc77de9d5b2285df63baeec6ef",
-      "lastmod": "2026-11-08"
+      "hash": "853dbcd2bb8cd40133f3252e8009f608103c0ccb",
+      "lastmod": "2026-11-10"
     },
     "news/artikel/2025-04-29_profis_achtelfinale-aus.html": {
       "hash": "c38eb425968ac35de960a97abce9a1fde0a3192a",
@@ -221,9 +221,13 @@
       "hash": "006540e12dfc15652f9f01e0b602620e3ac76a81",
       "lastmod": "2026-11-08"
     },
+    "news/artikel/2026-11-08_profis_69-74-gegen-weimar-basketball-loewen-erfurt-drehen-das-spiel.html": {
+      "hash": "f126fb6eb2d3b9d098601ee8b1b896a8e3375bad",
+      "lastmod": "2026-11-10"
+    },
     "news/artikel/2026-11-08_profis_basketball-loewen-erfurt-empfangen-culture-city-weimar-zum-e.html": {
-      "hash": "ac762269706b2b02ec150b73f889f316d920672c",
-      "lastmod": "2026-11-08"
+      "hash": "083e79729a7611880221218eb4a4e52061300077",
+      "lastmod": "2026-11-10"
     },
     "news/newsletter/index.html": {
       "hash": "4caad0fb0b2a0fd640456d7f98fa89ad0d374cb4",
@@ -274,8 +278,8 @@
       "lastmod": "2026-10-16"
     },
     "saison/profis.html": {
-      "hash": "2a5396bcfdebaefc60f97da6baf8988985b1fa40",
-      "lastmod": "2026-11-08"
+      "hash": "14d96fb7f0f9d672ad8c063581f53feb5fbe312b",
+      "lastmod": "2026-11-10"
     },
     "saison/profis/gameday/2026-10-11-bba-ludwigsburg.html": {
       "hash": "ec65bc74b9fa6dbebf16bb7f4a85e73244bf1dc8",
@@ -286,8 +290,8 @@
       "lastmod": "2026-11-09"
     },
     "saison/profis/gameday/2026-11-08-culture-city-weimar.html": {
-      "hash": "4c932a96aeb1d62553ff0f24407cbeed3b20b4c7",
-      "lastmod": "2026-11-09"
+      "hash": "464634894b172a188e1e2d513db91455d625b8ed",
+      "lastmod": "2026-11-10"
     },
     "saison/profis/gameday/2026-11-13-dresden-titans.html": {
       "hash": "ddc06d100e3b02f76db32836073b599698c89f2b",
