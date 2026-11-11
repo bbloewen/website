@@ -10,6 +10,9 @@
 # Seit 12.10.2026 laeuft build-dauerkartenpreise.py mit: die Dauerkartenpreise sinken 4 Stunden
 # nach jedem Heimspiel (Marko), der 20-Minuten-Takt am Abend faengt das ab.
 #
+# Seit 11.11.2026 gleicht tools/sync-nbbl-spielplan.py den NBBL-Spielplan mit der Liga ab
+# (taeglich und abends alle 20 Minuten, dadurch kommen auch Endstaende zeitnah).
+#
 # Seit 04.10.2026 laeuft build-next-game.py mit. Das Spieltags-Widget im
 # Startseiten-Hero haengt genauso am Kalender wie die Spieltagsseiten: welches
 # Spiel "aktuell" ist, endet am Dienstag nach dem Spieltag. Die statische
@@ -79,6 +82,9 @@ jobs:
           python3 tools/build-dauerkartenpreise.py
           python3 tools/build-spieltagsseiten.py
           python3 tools/build-gameday-hub.py
+          # NBBL-Spielplan mit der Liga abgleichen (Verlegungen, Hallen, Endstaende), VOR dem Kalender
+          # (Marko, 11.11.2026: 5 von 8 Terminen der B-Division waren veraltet). Laeuft bei Netzfehlern durch.
+          python3 tools/sync-nbbl-spielplan.py
           python3 tools/build-kalender.py
           python3 tools/build-next-game.py
           python3 tools/build-partials.py
