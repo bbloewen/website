@@ -80,15 +80,15 @@ STATUS:CONFIRMED
 TRANSP:OPAQUE
 END:VEVENT
 BEGIN:VEVENT
-UID:nbbl-2026-11-15@basketball-loewen.com
+UID:nbbl-2026-11-11@basketball-loewen.com
 DTSTAMP:20261011T000000Z
 SEQUENCE:0
-DTSTART;VALUE=DATE:20261115
-DTEND;VALUE=DATE:20261116
-SUMMARY:Mitteldeutsche Basketball Academy – CATL Basketball Löwen Erfurt
-LOCATION:Dreifelderhalle der Sportschulen Halle\, Halle (Saale)
-DESCRIPTION:Auswärtsspiel · NBBL (U19)\nAlle Infos: https://basketball-lo
- ewen.com/saison/spielplan.html?team=nbbl
+DTSTART;TZID=Europe/Berlin:20261111T190000
+DTEND;TZID=Europe/Berlin:20261111T210000
+SUMMARY:CATL Basketball Löwen Erfurt – Mitteldeutsche Basketball Academy
+LOCATION:Herzog-Ernst-Schule\, Gotha
+DESCRIPTION:Heimspiel · NBBL (U19)\nAlle Infos: https://basketball-loewen.
+ com/saison/spielplan.html?team=nbbl
 URL:https://basketball-loewen.com/saison/spielplan.html?team=nbbl
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -97,8 +97,8 @@ BEGIN:VEVENT
 UID:nbbl-2026-11-22@basketball-loewen.com
 DTSTAMP:20261011T000000Z
 SEQUENCE:0
-DTSTART;VALUE=DATE:20261122
-DTEND;VALUE=DATE:20261123
+DTSTART;TZID=Europe/Berlin:20261122T130000
+DTEND;TZID=Europe/Berlin:20261122T150000
 SUMMARY:CATL Basketball Löwen Erfurt – Sartorius Juniors
 LOCATION:Herzog-Ernst-Schule\, Gotha
 DESCRIPTION:Heimspiel · NBBL (U19)\nAlle Infos: https://basketball-loewen.
@@ -111,8 +111,8 @@ BEGIN:VEVENT
 UID:nbbl-2026-11-29@basketball-loewen.com
 DTSTAMP:20261011T000000Z
 SEQUENCE:0
-DTSTART;VALUE=DATE:20261129
-DTEND;VALUE=DATE:20261130
+DTSTART;TZID=Europe/Berlin:20261129T123000
+DTEND;TZID=Europe/Berlin:20261129T143000
 SUMMARY:CATL Basketball Löwen Erfurt – Dresden Titans
 LOCATION:Herzog-Ernst-Schule\, Gotha
 DESCRIPTION:Heimspiel · NBBL (U19)\nAlle Infos: https://basketball-loewen.
@@ -122,27 +122,13 @@ STATUS:CONFIRMED
 TRANSP:OPAQUE
 END:VEVENT
 BEGIN:VEVENT
-UID:nbbl-2026-12-06@basketball-loewen.com
+UID:nbbl-2026-12-12@basketball-loewen.com
 DTSTAMP:20261011T000000Z
 SEQUENCE:0
-DTSTART;TZID=Europe/Berlin:20261206T150000
-DTEND;TZID=Europe/Berlin:20261206T170000
-SUMMARY:CATL Basketball Löwen Erfurt: Gegner noch offen
-DESCRIPTION:Auswärtsspiel · NBBL (U19)\nGegner und Uhrzeit werden von der
-  Liga noch festgelegt.\nAlle Infos: https://basketball-loewen.com/saison/s
- pielplan.html?team=nbbl
-URL:https://basketball-loewen.com/saison/spielplan.html?team=nbbl
-STATUS:CONFIRMED
-TRANSP:OPAQUE
-END:VEVENT
-BEGIN:VEVENT
-UID:nbbl-2026-12-13@basketball-loewen.com
-DTSTAMP:20261011T000000Z
-SEQUENCE:0
-DTSTART;VALUE=DATE:20261213
-DTEND;VALUE=DATE:20261214
+DTSTART;TZID=Europe/Berlin:20261212T160000
+DTEND;TZID=Europe/Berlin:20261212T180000
 SUMMARY:NINERS CHEMNITZ ACADEMY – CATL Basketball Löwen Erfurt
-LOCATION:Richard-Hartmann-Halle\, Chemnitz
+LOCATION:Schulzentrum Sport\, Chemnitz
 DESCRIPTION:Auswärtsspiel · NBBL (U19)\nAlle Infos: https://basketball-lo
  ewen.com/saison/spielplan.html?team=nbbl
 URL:https://basketball-loewen.com/saison/spielplan.html?team=nbbl
@@ -153,12 +139,12 @@ BEGIN:VEVENT
 UID:nbbl-2026-12-20@basketball-loewen.com
 DTSTAMP:20261011T000000Z
 SEQUENCE:0
-DTSTART;TZID=Europe/Berlin:20261220T130000
-DTEND;TZID=Europe/Berlin:20261220T150000
-SUMMARY:CATL Basketball Löwen Erfurt – Mitteldeutsche Basketball Academy
-LOCATION:Sporthalle am Südpark\, Erfurt
-DESCRIPTION:Heimspiel · NBBL (U19)\nAlle Infos: https://basketball-loewen.
- com/saison/spielplan.html?team=nbbl
+DTSTART;TZID=Europe/Berlin:20261220T160000
+DTEND;TZID=Europe/Berlin:20261220T180000
+SUMMARY:Mitteldeutsche Basketball Academy – CATL Basketball Löwen Erfurt
+LOCATION:SH Ihmelsstraße unten\, Leipzig
+DESCRIPTION:Auswärtsspiel · NBBL (U19)\nAlle Infos: https://basketball-lo
+ ewen.com/saison/spielplan.html?team=nbbl
 URL:https://basketball-loewen.com/saison/spielplan.html?team=nbbl
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -178,11 +164,11 @@ STATUS:CONFIRMED
 TRANSP:OPAQUE
 END:VEVENT
 BEGIN:VEVENT
-UID:nbbl-2027-01-17@basketball-loewen.com
+UID:nbbl-2027-01-15@basketball-loewen.com
 DTSTAMP:20261011T000000Z
 SEQUENCE:0
-DTSTART;VALUE=DATE:20270117
-DTEND;VALUE=DATE:20270118
+DTSTART;TZID=Europe/Berlin:20270115T193000
+DTEND;TZID=Europe/Berlin:20270115T213000
 SUMMARY:Dresden Titans – CATL Basketball Löwen Erfurt
 LOCATION:Gymnasium Tolkewitz\, Dresden
 DESCRIPTION:Auswärtsspiel · NBBL (U19)\nAlle Infos: https://basketball-lo

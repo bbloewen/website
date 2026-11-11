@@ -23,8 +23,8 @@ BEGIN:VEVENT
 UID:nbbl-2026-11-29@basketball-loewen.com
 DTSTAMP:20261011T000000Z
 SEQUENCE:0
-DTSTART;VALUE=DATE:20261129
-DTEND;VALUE=DATE:20261130
+DTSTART;TZID=Europe/Berlin:20261129T123000
+DTEND;TZID=Europe/Berlin:20261129T143000
 SUMMARY:CATL Basketball Löwen Erfurt – Dresden Titans
 LOCATION:Herzog-Ernst-Schule\, Gotha
 DESCRIPTION:Heimspiel · NBBL (U19)\nAlle Infos: https://basketball-loewen.

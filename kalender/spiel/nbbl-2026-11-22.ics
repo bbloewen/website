@@ -23,8 +23,8 @@ BEGIN:VEVENT
 UID:nbbl-2026-11-22@basketball-loewen.com
 DTSTAMP:20261011T000000Z
 SEQUENCE:0
-DTSTART;VALUE=DATE:20261122
-DTEND;VALUE=DATE:20261123
+DTSTART;TZID=Europe/Berlin:20261122T130000
+DTEND;TZID=Europe/Berlin:20261122T150000
 SUMMARY:CATL Basketball Löwen Erfurt – Sartorius Juniors
 LOCATION:Herzog-Ernst-Schule\, Gotha
 DESCRIPTION:Heimspiel · NBBL (U19)\nAlle Infos: https://basketball-loewen.
