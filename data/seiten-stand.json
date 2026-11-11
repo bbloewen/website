@@ -66,7 +66,7 @@
       "lastmod": "2026-11-02"
     },
     "index.html": {
-      "hash": "580c4c9cabf6599e74b40d1f0038488c2fe3d1ca",
+      "hash": "ceef83bea508a16c0befe302959c310384d4007f",
       "lastmod": "2026-11-11"
     },
     "kontakt.html": {
@@ -82,11 +82,11 @@
       "lastmod": "2026-08-08"
     },
     "news/aktuelles.html": {
-      "hash": "2e41eb7b1f4a9c8d5be7eba7896f5a0987249fb3",
+      "hash": "0fe017a66c1d72cf44c8c764921a76f202feed6f",
       "lastmod": "2026-11-11"
     },
     "news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html": {
-      "hash": "68df54540715bfa48ac8c300116ac9cfdd361f0c",
+      "hash": "0ac309c0375c2c6dd5e91e26465494bffab1da2c",
       "lastmod": "2026-11-11"
     },
     "news/artikel/2025-04-29_profis_achtelfinale-aus.html": {
@@ -238,7 +238,11 @@
       "lastmod": "2026-11-10"
     },
     "news/artikel/2026-11-09_partner_catl-holt-den-sieg-beim-loewen-sponsorenturnier.html": {
-      "hash": "61f1e2209e27f764836eb9b4e6a69ca21670deff",
+      "hash": "72d2945fcd97666426c72c58e58e8ebeab5a2681",
+      "lastmod": "2026-11-11"
+    },
+    "news/artikel/2026-11-11_profis_thueringen-sachsen-derby-basketball-loewen-erfurt-empfangen-.html": {
+      "hash": "e3e3c8f3e8a2f1fd865df9d8614ee3b747dda70e",
       "lastmod": "2026-11-11"
     },
     "news/newsletter/index.html": {
@@ -290,7 +294,7 @@
       "lastmod": "2026-11-11"
     },
     "saison/profis.html": {
-      "hash": "6bf48cbacf65493eb0d871df48b63a9de9f507cc",
+      "hash": "68d21bc4eb98f71360c3d9e0fa6f14d773946e68",
       "lastmod": "2026-11-11"
     },
     "saison/profis/gameday/2026-10-11-bba-ludwigsburg.html": {
