@@ -62,9 +62,11 @@
       "lat": 50.9923938,
       "lng": 11.0191781,
       "qr": "/assets/img/freiplaetze/qr-nordpark.svg",
-      "beschreibung": "Öffentlicher Basketballplatz mit Tartanbelag im Nordpark, kombiniert mit einem Bolzplatz.",
-      "zugang": "oeffentlich",
-      "oeffentlichkeit": "Ein öffentlicher Sportplatz in Erfurt, der allen offensteht: kein Verein nötig, keine Gebühr, keine Öffnungszeiten — ein Ort, an dem Kinder draußen Sport treiben können."
+      "beschreibung": "Basketballplatz mit Tartanbelag im Nordpark, kombiniert mit einem Bolzplatz.",
+      "zugang": "eingeschraenkt",
+      "zugangHinweis": "Leider nicht öffentlich zugänglich",
+      "zugangDetail": "Der Platz ist derzeit abgeschlossen. Sobald er wieder frei zugänglich ist, nehmen wir ihn gern zurück in die Übersicht der offenen Plätze.",
+      "oeffentlichkeit": "Der Platz liegt im Nordpark, ist aktuell aber abgeschlossen und nicht frei zugänglich."
     },
     {
       "name": "Freiplatz am LÖWENPARK",
