@@ -90,10 +90,11 @@
      scheiterte erst nach der PayPal-Zahlung). Liefert null, wenn sich kein Item bestimmen lässt (dann gilt
      weiterhin die reine Kategorie-Prüfung). */
   var BLOCK_ITEM_BY_KEY = { 'Block A': 28, 'Block B': 35, 'Block C': 31, 'Block CS': 32, 'Block D': 29, 'Block E': 33,
-    'Block F': 30, 'VIP': 40, 'Fanblock': 27, 'Rollstuhlplatz': 34, 'Stehplatz': 23 };
+    'Block F': 30, 'VIP': 40, 'Fanblock': 27, 'Rollstuhlplatz': 34, 'Stehplatz': 23, 'VIP-Baseline': 114 };
   function blockItemId(zoneId, category) {
     var key;
     if (zoneId === 'STEHPLATZ' || category === 'Stehplatz') key = 'Stehplatz';
+    else if (zoneId === 'VIPBASELINE' || category === 'VIP-Baseline') key = 'VIP-Baseline';
     else if (zoneId === 'ROLLSTUHL' || category === 'Rollstuhlplatz') key = 'Rollstuhlplatz';
     else if (category === 'Fanblock' || category === 'VIP') key = category;
     else if (category === 'C unten') key = 'Block CS';
@@ -250,6 +251,14 @@
     // Nicht buchbar kann pro Spiel gesetzt werden (Website-seitig, pretix bleibt aktiv) —
     // dann: Preisliste durchgestrichen, Grafik nicht anklickbar, Dropdown ohne Option.
     this.standingBookable = opts.standingBookable !== false;
+    /* VIP-Baseline (11.11.2026, Marko): virtueller VIP-Bereich hinter der Baseline, 20 Plaetze je Spiel ohne Sitz,
+       Preis wie VIP. Wie der Rollstuhlplatz eine Pseudo-Zone in blockCounts (Schluessel "VIPBASELINE::VIP-Baseline"),
+       nicht im Sitzplan eingezeichnet, nur ueber Direktwahl und Verfuegbarkeitsliste erreichbar. Die Option erscheint erst,
+       wenn der Sitzstatus fuer dieses Spiel eine Restzahl liefert (vipBaselineAvailable); null/fehlend = nicht im Angebot. */
+    this.vipBaselinePrice = opts.vipBaselinePrice || 0;
+    this.vipBaselineCapacity = opts.vipBaselineCapacity || 20;
+    this.vipBaselineAvailable = null;
+    this.vipBaselineOffered = false;
     /* Einzelticket mit echter Sitzwahl (Marko, 18.10.2026): laeuft im Modus "seats" wie die
        Dauerkarte, liefert aber Zeilen im Format des Einzelticket-Workflows (type 'block', qty 1,
        zusaetzlich seatGuid), damit Preisberechnung, Gutscheine und Betragspruefung dort
@@ -578,6 +587,12 @@
             stehplatzCounts.normal = self.standingAvailable;
           }
         }
+        if (typeof status.vipBaselineAvailable === 'number') {
+          self.vipBaselineAvailable = status.vipBaselineAvailable;
+          self.vipBaselineOffered = true;
+          var baselineCounts = self.blockCounts['VIPBASELINE::VIP-Baseline'];
+          if (baselineCounts && baselineCounts.normal > self.vipBaselineAvailable) baselineCounts.normal = self.vipBaselineAvailable;
+        }
         self.seatStatusLoaded = true;
         if (!self.plan) return; // Plan rendert gleich selbst und liest den Status dann mit
         self._dropTakenSelections();
@@ -741,6 +756,10 @@
       if (self.standing && self.standingPrice && self.standingBookable) {
         var sa = self._availabilityHint('STEHPLATZ', 'Stehplatz');
         if (sa) items.push({ label: 'Stehplatz', a: sa });
+      }
+      if (self.vipBaselinePrice && self.vipBaselineOffered) {
+        var va = self._availabilityHint('VIPBASELINE', 'VIP-Baseline');
+        if (va) items.push({ label: 'VIP-Baseline', a: va });
       }
       if (!items.length) return '';
       return '<p class="seatplan-avail-head">Verfügbarkeit</p><ul class="seatplan-avail" aria-label="Verfügbarkeit">' + items.map(function (it) {
@@ -1091,6 +1110,10 @@
     if (zoneId === 'STEHPLATZ') {
       return typeof this.standingAvailable === 'number' ? this.standingAvailable : (this.standing ? this.standing.capacity : 0);
     }
+    // VIP-Baseline: Restzahl kommt wie beim Stehplatz live vom Sitzstatus (kleinerer Wert aus Baseline- und VIP-Kontingent).
+    if (zoneId === 'VIPBASELINE') {
+      return typeof this.vipBaselineAvailable === 'number' ? this.vipBaselineAvailable : this.vipBaselineCapacity;
+    }
     // Rollstuhlplatz ist im Modus "blocks" (Einzelticket) EIN gemeinsames Kontingent
     // über alle Blöcke mit Rollstuhlplätzen hinweg (Marko, 11.08.2026: "ist eigentlich
     // egal, wo die Personen sitzen") — Pseudo-Zone "ROLLSTUHL" statt eines echten
@@ -1129,6 +1152,14 @@
      Kategorie aber immer schon explizit im data-zone-Schlüssel (s. _renderDirectAddRow). */
   SeatPicker.prototype._quickAddBlock = function (zoneId, qty, category) {
     var self = this;
+    // VIP-Baseline (11.11.2026): Pseudo-Zone wie der Rollstuhlplatz, ein Tarif (normal), kein Sitz.
+    if (zoneId === 'VIPBASELINE' || category === 'VIP-Baseline') {
+      if (!this.vipBaselinePrice || !this.vipBaselineOffered) return;
+      var vbKey = 'VIPBASELINE::VIP-Baseline';
+      var vbCounts = this.blockCounts[vbKey] || {};
+      this._setBlockCount(vbKey, 'VIP-Baseline', 'VIP-Baseline', { normal: this.vipBaselinePrice }, 'normal', (vbCounts.normal || 0) + qty, this._blockFreeCount('VIPBASELINE', 'VIP-Baseline'));
+      return;
+    }
     if (zoneId === 'STEHPLATZ') {
       if (!this.standing || !this.standingPrice || !this.standingBookable) return;
       var stehplatzFree = this._blockFreeCount('STEHPLATZ', 'Stehplatz');
@@ -1207,7 +1238,7 @@
      Block-Detailansicht mehr. Schlüssel-Format wie überall: "zoneId" bei genau einer
      kaufbaren Kategorie, sonst "zoneId::category" (s. splitZoneKey). */
   SeatPicker.prototype._isSeatZone = function (zoneId, category) {
-    if (!this.mixed || zoneId === 'STEHPLATZ' || zoneId === 'ROLLSTUHL') return false;
+    if (!this.mixed || zoneId === 'STEHPLATZ' || zoneId === 'ROLLSTUHL' || zoneId === 'VIPBASELINE') return false;
     var cat = category;
     if (!cat) {
       var pc = this._purchasableCategories(zoneId);
@@ -3103,6 +3134,10 @@
     // selektierbar", Marko).
     if (this.standing && this.standingPrice && this.standingBookable) {
       entries.push({ value: 'STEHPLATZ', label: 'Stehplatz' });
+    }
+    // VIP-Baseline (11.11.2026): immer sichtbar, solange der Sitzstatus fuer dieses Spiel eine Restzahl liefert.
+    if (this.vipBaselinePrice && this.vipBaselineOffered) {
+      entries.push({ value: 'VIPBASELINE::VIP-Baseline', label: 'VIP-Baseline' });
     }
     if (!entries.length) return;
     // Alphabetisch nach Anzeigetext, nicht nach Block-Buchstabe (Marko, 11.08.2026).

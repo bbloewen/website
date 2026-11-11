@@ -290,6 +290,7 @@
             <div class="price-row" style="text-decoration:line-through;opacity:.55"><span>Stehplatz</span><strong>8,00 €</strong></div>
             <div class="price-row"><span>Rollstuhlfahrer (inkl. Begleitkarte)<br><span class="t-caption" style="color:var(--text-muted)">nur Block A, D, E, F</span></span><strong>8,00 €</strong></div>
             <div class="price-row"><span>VIP</span><strong>119,00 €</strong></div>
+            <div class="price-row"><span>VIP-Baseline<br><span class="t-caption" style="color:var(--text-muted)">virtueller VIP-Bereich hinter der Baseline, ohne Sitzplatznummer</span></span><strong>119,00 €</strong></div>
           </div>
           <div class="buy-thumb-col">
             <div id="seatplan-root"></div>
@@ -373,7 +374,7 @@
   </section>
 
   <script src="/js/voucher-utils.js?v=1786873000"></script>
-  <script src="/js/seat-picker.js?v=1793638197"></script>
+  <script src="/js/seat-picker.js?v=1794421045"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       var game = {"gegner": "Dresden Titans", "datum": "13.11.2026", "zeit": "18:30", "subeventId": 28, "stehplatzBuchbar": false, "zahlungPausiert": false};
@@ -395,7 +396,7 @@
         planUrl: '/assets/seating/riethsporthalle-seatingplan.json?v=1792494646',
         seatStatusUrl: "https://ticketing.basketball-loewen.com/webhook/einzelticket-sitzplatz-status?subevent=28",
         pretixEvent: 'saison2627',
-        pretixItemCategoryMap: {"23": "Stehplatz", "24": "Kategorie I", "25": "Kategorie II", "27": "Fanblock", "28": "Kategorie III", "29": "Kategorie II", "30": "Kategorie III", "31": "Kategorie II", "32": "C unten", "33": "Kategorie I", "34": "Rollstuhlplatz", "35": "Kategorie I", "40": "VIP"},
+        pretixItemCategoryMap: {"23": "Stehplatz", "24": "Kategorie I", "25": "Kategorie II", "27": "Fanblock", "28": "Kategorie III", "29": "Kategorie II", "30": "Kategorie III", "31": "Kategorie II", "32": "C unten", "33": "Kategorie I", "34": "Rollstuhlplatz", "35": "Kategorie I", "40": "VIP", "114": "VIP-Baseline"},
         reservedSeats: [
           { zone: 'A', rows: ['1'], excludeSeatNumbers: ['1', '2', '3', '4', '5', '6', '7', '16', '17', '18', '19', '20'] }
         ],
@@ -415,6 +416,9 @@
         },
         standingPrice: 8,
         standingBookable: game.stehplatzBuchbar !== false,
+        /* VIP-Baseline (11.11.2026, Marko): 20 Plaetze je Spiel ohne Sitz, Preis wie VIP; erscheint, sobald der Sitzstatus eine Restzahl liefert. */
+        vipBaselinePrice: 119,
+        vipBaselineCapacity: 20,
         cartEl: document.getElementById('seatplan-cart'),
         totalEl: document.getElementById('seatplan-total'),
         ctaEl: document.getElementById('seatplan-cta'),

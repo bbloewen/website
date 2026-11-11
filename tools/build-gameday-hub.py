@@ -308,7 +308,7 @@ PRETIX_ITEM_CATEGORY_MAP = {
     23: "Stehplatz", 24: "Kategorie I", 25: "Kategorie II",
     27: "Fanblock", 28: "Kategorie III",
     29: "Kategorie II", 30: "Kategorie III", 31: "Kategorie II", 32: "C unten",
-    33: "Kategorie I", 34: "Rollstuhlplatz", 35: "Kategorie I", 40: "VIP",
+    33: "Kategorie I", 34: "Rollstuhlplatz", 35: "Kategorie I", 40: "VIP", 114: "VIP-Baseline",
 }
 
 PREISLISTE_HTML = """            <h3 class="t-h4 mb-3">Preise</h3>
@@ -323,7 +323,8 @@ PREISLISTE_HTML = """            <h3 class="t-h4 mb-3">Preise</h3>
             <div class="price-row"><span>Fanblock (ermäßigt)</span><strong>8,00 €</strong></div>
             <div class="price-row"{stehplatz_class}><span>Stehplatz</span><strong>8,00 €</strong></div>
             <div class="price-row"><span>Rollstuhlfahrer (inkl. Begleitkarte)<br><span class="t-caption" style="color:var(--text-muted)">nur Block A, D, E, F</span></span><strong>8,00 €</strong></div>
-            <div class="price-row"><span>VIP</span><strong>119,00 €</strong></div>"""
+            <div class="price-row"><span>VIP</span><strong>119,00 €</strong></div>
+            <div class="price-row"><span>VIP-Baseline<br><span class="t-caption" style="color:var(--text-muted)">virtueller VIP-Bereich hinter der Baseline, ohne Sitzplatznummer</span></span><strong>119,00 €</strong></div>"""
 
 WISSENSWERTES_HTML = """      <span class="eyebrow" style="display:block;margin-top:40px;margin-bottom:16px">Wissenswertes</span>
       <div class="grid-3">
@@ -489,7 +490,7 @@ def kauf_bereich(aktuell, kommt, heute):
   </section>
 
   <script src="/js/voucher-utils.js?v=1786873000"></script>
-  <script src="/js/seat-picker.js?v=1793638197"></script>
+  <script src="/js/seat-picker.js?v=1794421045"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {{
       var game = {game_json};
@@ -531,6 +532,9 @@ def kauf_bereich(aktuell, kommt, heute):
         }},
         standingPrice: 8,
         standingBookable: game.stehplatzBuchbar !== false,
+        /* VIP-Baseline (11.11.2026, Marko): 20 Plaetze je Spiel ohne Sitz, Preis wie VIP; erscheint, sobald der Sitzstatus eine Restzahl liefert. */
+        vipBaselinePrice: 119,
+        vipBaselineCapacity: 20,
         cartEl: document.getElementById('seatplan-cart'),
         totalEl: document.getElementById('seatplan-total'),
         ctaEl: document.getElementById('seatplan-cta'),
