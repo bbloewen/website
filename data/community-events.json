@@ -190,15 +190,15 @@
     },
     {
       "notionId": "414a2418-e2d7-81fd-af3f-e9729ff06d27",
-      "name": "Tombola Möbel Höffner 14.11.2026",
+      "name": "Tombola bei Möbel Höffner",
       "category": "Vereinsfest",
       "status": "In Planung",
       "start": "2026-11-14T10:00:00.000+01:00",
       "end": "2026-11-14T18:00:00.000+01:00",
       "isDatetime": true,
-      "description": "Tombola des Basketball Löwen e.V. bei Möbel Höffner Erfurt: Los 1 €, 50 Gewinne, Hauptgewinn Gutschein über 500 €.",
-      "location": "",
-      "heroImage": ""
+      "description": "Mitmachen und gewinnen für den CATL LÖWENPARK: Beim Aktionstag „Azubis leiten ihr Möbelhaus“ verkauft der Basketball Löwen e.V. bei <a href=\"https://www.google.com/maps/search/?api=1&query=M%C3%B6bel+H%C3%B6ffner+Im+Gro%C3%9Fen+Felde+3+99097+Erfurt\" target=\"_blank\" rel=\"noopener\">Möbel Höffner in Erfurt-Waltersleben</a> Lose für unsere Tombola. Ein Los kostet 1 €, 50 Gewinne warten, alle gestiftet von Möbel Höffner, Hauptgewinn ist ein Gutschein über 500 €. Der Reinertrag fließt in die Ausstattung des <a href=\"/trainieren/loewenpark.html\">CATL LÖWENPARK</a>.",
+      "location": "Möbel Höffner, Im Großen Felde 3, 99097 Erfurt",
+      "heroImage": "https://basketball-loewen.com/assets/img/tombola-hoeffner-2026-kachel.webp"
     }
   ]
 }
