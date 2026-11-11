@@ -331,3 +331,133 @@ def bild_masse(url):
                     ergebnis = ""
     _MASSE_CACHE[url] = ergebnis
     return ergebnis
+
+
+# ---------------------------------------------------------------------------
+# Hero-Bild einer Seite fuer das Share-Bild (og:image)
+#
+# Bis 11.11.2026 bekamen nur News-Artikel ein eigenes Share-Bild, alle anderen
+# Seiten das Standardbild. Marko: Beim Teilen soll immer das Hero-Bild der
+# geteilten Seite erscheinen. build-head-meta.py (og:image) und
+# build-share-images.py (Zuschnitt) leiten es beide hier ab, damit Name und
+# Datei nicht auseinanderlaufen.
+# ---------------------------------------------------------------------------
+
+HERO_STANDARD = "/assets/img/hero-basketball.webp"   # Rueckfall in site.css (.hero-photo)
+_HERO_CSS_RE = re.compile(
+    r"\.hero-photo\.(hero-[a-z0-9-]+)\s*\{[^}]*?--hero-photo-url:\s*url\('([^']+)'\)"
+    r"(?:[^}]*?background-position:\s*([^;}]+))?", re.M)
+_HERO_TAG_RE = re.compile(r"<section\b[^>]*\bclass=\"[^\"]*\bhero-photo\b[^\"]*\"[^>]*>", re.S)
+
+
+def _position(wert):
+    """CSS background-position -> (x, y) als Anteil 0..1; None = Standardanker."""
+    if not wert:
+        return None, None
+    teile = wert.split()
+    if len(teile) == 1:
+        teile = teile * 2 if teile[0] == "center" else [teile[0], "center"]
+
+    def anteil(t):
+        if t == "center":
+            return 0.5
+        if t in ("top", "left"):
+            return 0.0
+        if t in ("bottom", "right"):
+            return 1.0
+        if t.endswith("%"):
+            try:
+                return max(0.0, min(1.0, float(t[:-1]) / 100))
+            except ValueError:
+                return None
+        return None
+    return anteil(teile[0]), anteil(teile[1])
+
+
+_hero_klassen = None
+
+
+def hero_klassen():
+    """{hero-klasse: (bildpfad, background-position)} aus css/site.css."""
+    global _hero_klassen
+    if _hero_klassen is None:
+        css = (REPO / "css" / "site.css").read_text(encoding="utf-8")
+        _hero_klassen = {}
+        for m in _HERO_CSS_RE.finditer(css):
+            _hero_klassen.setdefault(m.group(1), (m.group(2), (m.group(3) or "").strip()))
+    return _hero_klassen
+
+
+def seiten_hero(text):
+    """Hero-Bild einer Seite: (Pfad unter REPO, Anker-x, Anker-y) oder None ohne Hero.
+
+    Reihenfolge wie im Browser: Slider (erstes Bild) > Inline-Stil > Hero-Klasse > Rueckfall.
+    """
+    tag = _HERO_TAG_RE.search(text)
+    if not tag:
+        return None
+    tag_text = tag.group(0)
+    position = ""
+    bild = None
+    if "data-hero-slider" in tag_text:
+        rest = text[tag.end():tag.end() + 4000]
+        m = re.search(r'<div class="hero-slide[^"]*"(?:\s+style="([^"]*)")?\s+data-bg="([^"]+)"', rest)
+        if m:
+            bild = m.group(2) if re.search(r"\.\w{3,4}$", m.group(2)) else m.group(2) + ".webp"
+            p = re.search(r"background-position:\s*([^;\"]+)", m.group(1) or "")
+            position = p.group(1).strip() if p else ""
+    if not bild:
+        m = re.search(r"--hero-photo-url:\s*url\(['\"]?([^'\")]+)", tag_text)
+        if m:
+            bild = m.group(1)
+    if not bild:
+        klassen = re.search(r'class="([^"]*)"', tag_text).group(1).split()
+        # Seiteneigene <style>-Regeln (z. B. fans/ehrenamt/helfen) vor site.css
+        eigene = {m.group(1): (m.group(2), (m.group(3) or "").strip())
+                  for m in _HERO_CSS_RE.finditer(text.split("<body", 1)[0])}
+        for k in klassen:
+            treffer = eigene.get(k) or hero_klassen().get(k)
+            if treffer:
+                bild, position = treffer
+                break
+    if not bild:
+        bild = HERO_STANDARD
+    if not position:
+        p = re.search(r"background-position:\s*([^;\"]+)", tag_text)
+        position = p.group(1).strip() if p else ""
+    pfad = REPO / bild.split("?")[0].lstrip("/")
+    if pfad.name in HERO_SCHARF:
+        pfad = pfad.with_name(HERO_SCHARF[pfad.name])
+        position = ""
+    if not pfad.exists():
+        return None
+    x, y = _position(position)
+    return pfad, x, y
+
+
+# Unscharfe Hero-Hintergruende: auf der Seite liegt das scharfe Teamfoto darueber,
+# im Share-Bild waere nur der Weichzeichner zu sehen. Dafuer das scharfe Foto.
+HERO_SCHARF = {
+    "team-prob-hero-blur.webp": "team-prob-callout.webp",
+    "team-damen-hero-blur.webp": "team-damen-offiziell.webp",
+}
+
+
+def hero_share_name(pfad):
+    """Dateiname des Share-Bildes zu einem Hero-Bild, z. B. seite-hero-tickets-halle.jpg."""
+    rel = pfad.relative_to(REPO / "assets" / "img").with_suffix("")
+    return "seite-" + "-".join(rel.parts) + ".jpg"
+
+
+def seiten_heros():
+    """{share-dateiname: (Quellpfad, x, y)} fuer alle git-getrackten Seiten mit Hero."""
+    out = {}
+    for rel in tracked_html():
+        text = read(rel)
+        tag = _HERO_TAG_RE.search(text)
+        if tag and "hero-news-" in tag.group(0):
+            continue        # News-Heros haben eigene Share-Bilder (news-<bild>.jpg)
+        h = seiten_hero(text)
+        if h:
+            out.setdefault(hero_share_name(h[0]), h)
+    return out

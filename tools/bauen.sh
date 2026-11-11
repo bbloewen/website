@@ -21,7 +21,7 @@ for s in build-lucide-icons build-galerie-thumbs build-galerie-html build-dauerk
          build-next-game build-team-news build-newsletter-archiv build-freundeskreis \
          build-spielplan-liste build-kalender build-news-list build-podcast build-article-nav build-freiplaetze \
          build-community-events build-pressefotos build-partials build-bildmasse \
-         build-head-meta build-sitemap; do
+         build-share-images build-head-meta build-sitemap; do
   printf '%s\n' "$s"
   python3 "tools/$s.py" $F
 done

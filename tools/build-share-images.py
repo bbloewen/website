@@ -20,14 +20,15 @@ from pathlib import Path
 
 from PIL import Image
 
-from seo_common import REPO
+from seo_common import REPO, seiten_heros
 
 OUT_DIR = REPO / "assets" / "img" / "share"
 SIZE = (1200, 630)
 QUALITY = 82
 
-# Standard-Share-Bild für alle Seiten ohne eigenes Motiv
-DEFAULT_SOURCE = REPO / "assets" / "img" / "hero-startseite-alt.webp"
+# Standard-Share-Bild für Seiten ohne Hero: das erste Bild des Startseiten-Sliders
+# (bis 11.11.2026 hero-startseite-alt.webp, ein altes Motiv)
+DEFAULT_SOURCE = REPO / "assets" / "img" / "startseite-hero-1.webp"
 DEFAULT_NAME = "og-default.jpg"
 
 # Einzelne Unterseiten mit eigenem Hero-Bild, aber ohne News-Artikel-Struktur
@@ -68,6 +69,8 @@ ANCHOR_OVERRIDES = {
     # Vier Personen stehen im unteren Bilddrittel vor dem Wandlogo; der
     # Hochformat-Standardanker (0.12) schnitt sie am unteren Rand an.
     "damen-regionalliga": 0.45,
+    # Teamfoto Löwinnen (Share-Bild der Damen-Seite): Köpfe am oberen Rand
+    "team-damen-offiziell": 0.12,
 }
 
 def news_sources():
@@ -76,10 +79,12 @@ def news_sources():
     return {p.stem: p for p in sorted(news_dir.glob("*.webp"))}
 
 
-def crop_to(src: Path, dest: Path):
+def crop_to(src: Path, dest: Path, ax=None, ay=None):
     """Auf 1200x630 beschneiden und als JPG speichern.
 
-    Horizontal wird mittig geschnitten, vertikal nach Anker (siehe default_anchor).
+    Horizontal mittig, vertikal nach Anker (siehe default_anchor). Seiten-Heros
+    geben ax/ay aus ihrer CSS-background-position mit, damit das Share-Bild
+    denselben Ausschnitt zeigt wie der Hero auf der Seite.
     """
     with Image.open(src) as im:
         im = im.convert("RGB")
@@ -88,11 +93,11 @@ def crop_to(src: Path, dest: Path):
         ratio = w / h
         if ratio > target_ratio:            # zu breit -> links/rechts beschneiden
             new_w = int(h * target_ratio)
-            left = (w - new_w) // 2
+            left = int(round((w - new_w) * (0.5 if ax is None else ax)))
             im = im.crop((left, 0, left + new_w, h))
         else:                               # zu hoch -> oben/unten beschneiden
             new_h = int(w / target_ratio)
-            anchor = ANCHOR_OVERRIDES.get(src.stem, default_anchor(ratio))
+            anchor = ANCHOR_OVERRIDES.get(src.stem, default_anchor(ratio) if ay is None else ay)
             top = int(round((h - new_h) * anchor))
             im = im.crop((0, top, w, top + new_h))
         im = im.resize(SIZE, Image.LANCZOS)
@@ -106,27 +111,29 @@ def main():
     ap.add_argument("--check", action="store_true")
     args = ap.parse_args()
 
-    jobs = [(DEFAULT_SOURCE, OUT_DIR / DEFAULT_NAME)]
+    jobs = [(DEFAULT_SOURCE, OUT_DIR / DEFAULT_NAME, None, 0.6)]
     for stem, src in news_sources().items():
-        jobs.append((src, OUT_DIR / f"news-{stem}.jpg"))
+        jobs.append((src, OUT_DIR / f"news-{stem}.jpg", None, None))
     for name, src in STATIC_PAGE_SOURCES.items():
-        jobs.append((src, OUT_DIR / f"{name}.jpg"))
+        jobs.append((src, OUT_DIR / f"{name}.jpg", None, None))
+    for name, (src, ax, ay) in seiten_heros().items():
+        jobs.append((src, OUT_DIR / name, ax, ay))
 
-    missing_src = [s for s, _ in jobs if not s.exists()]
+    missing_src = [j[0] for j in jobs if not j[0].exists()]
     if missing_src:
         for s in missing_src:
             print(f"FEHLT als Quelle: {s.relative_to(REPO)}", file=sys.stderr)
         return 1
 
     if args.check:
-        for src, dest in jobs:
+        for src, dest, _, _ in jobs:
             state = "vorhanden" if dest.exists() else "FEHLT"
             print(f"  {state:10} {dest.relative_to(REPO)}  <- {src.relative_to(REPO)}")
         return 0
 
     total = 0
-    for src, dest in jobs:
-        size = crop_to(src, dest)
+    for src, dest, ax, ay in jobs:
+        size = crop_to(src, dest, ax, ay)
         total += size
         print(f"  {dest.relative_to(REPO)}  {size // 1024} KB")
     print(f"\n{len(jobs)} Share-Bilder, zusammen {total // 1024} KB")

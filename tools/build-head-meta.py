@@ -25,7 +25,8 @@ from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from seo_common import (BASE, REPO, artikel_datum, attr, canonical_url,
-                        indexable_pages, read, text_of, tracked_html)
+                        hero_share_name, indexable_pages, read, seiten_hero,
+                        text_of, tracked_html)
 
 START = "<!-- SEO:auto START (tools/build-head-meta.py — nicht von Hand ändern) -->"
 END = "<!-- SEO:auto END -->"
@@ -213,12 +214,16 @@ def jsonld(nodes):
 
 
 def share_image(rel, text):
-    """Seitenspezifisches Share-Bild, sonst das Standardbild."""
+    """Seitenspezifisches Share-Bild: Sonderfall, News-Hero, Seiten-Hero, sonst Standardbild."""
     if rel in STATIC_PAGE_IMAGES:
         return f"{BASE}assets/img/share/{STATIC_PAGE_IMAGES[rel]}"
     m = HERO_NEWS_RE.search(text)
     if m and (REPO / "assets" / "img" / "share" / f"news-{m.group(1)}.jpg").exists():
         return f"{BASE}assets/img/share/news-{m.group(1)}.jpg"
+    # Jede andere Seite mit Hero: dessen Bild (seit 11.11.2026, vorher Standardbild)
+    h = seiten_hero(text)
+    if h and (REPO / "assets" / "img" / "share" / hero_share_name(h[0])).exists():
+        return f"{BASE}assets/img/share/{hero_share_name(h[0])}"
     return DEFAULT_IMAGE
 
 
@@ -684,9 +689,37 @@ def seiten_mit_vorschau():
     seiten = list(indexable_pages())
     vorhanden = {rel for rel, _ in seiten}
     for rel in tracked_html():
-        if rel.startswith("news/artikel/") and rel not in vorhanden:
-                    seiten.append((rel, read(rel)))
+        if rel in vorhanden:
+            continue
+        if rel.startswith("news/artikel/"):
+            seiten.append((rel, read(rel)))
     return seiten
+
+
+IMG_RE = re.compile(r'(<meta (?:property="og:image"|name="twitter:image") content=")[^"]*(")')
+
+
+def noindex_bilder_nachziehen(schreiben):
+    """noindex-Seiten mit Block (z. B. die Alley-Oop-Landingpage, die per Einladung
+    geteilt wird): Ihr Block wurde einmal geschrieben und dann nicht mehr angefasst,
+    weil er Eigenes traegt (robots noindex). Nur og:image und twitter:image werden
+    hier nachgezogen, alles andere bleibt (11.11.2026)."""
+    vorhanden = {rel for rel, _ in seiten_mit_vorschau()}
+    geaendert = []
+    for rel in tracked_html():
+        if rel in vorhanden:
+            continue
+        text = read(rel)
+        m = BLOCK_RE.search(text)
+        if not m:
+            continue
+        bild = share_image(rel, text)
+        block = IMG_RE.sub(lambda x: x.group(1) + bild + x.group(2), m.group(0))
+        if block != m.group(0):
+            geaendert.append(rel)
+            if schreiben:
+                (REPO / rel).write_text(text[:m.start()] + block + text[m.end():], encoding="utf-8")
+    return geaendert
 
 
 def main():
@@ -712,6 +745,8 @@ def main():
             changed.append(rel)
             if not args.check:
                 (REPO / rel).write_text(new, encoding="utf-8")
+
+    changed += noindex_bilder_nachziehen(not args.check)
 
     for p in problems:
         print(f"  ACHTUNG {p}", file=sys.stderr)
