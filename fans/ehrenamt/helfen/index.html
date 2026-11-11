@@ -697,6 +697,37 @@
     });
     return h + back + '</div>';
   }
+  // Helferpunkte (Migration 395, Marko 11.11.2026): Stand und Einlösen als Wertgutschein, nur mit persönlichem Link und wenn 305 sie freigeschaltet hat
+  function hfEur(v) { return Number(v || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'; }
+  function hfZahl(v) { return Number(v || 0).toLocaleString('de-DE'); }
+  function hfDatum(d) { var x = String(d || '').slice(0, 10).split('-'); return x.length === 3 ? x[2] + '.' + x[1] + '.' + x[0] : ''; }
+  function hfGutscheine(liste) {
+    if (!liste || !liste.length) return '';
+    return '<h3 style="margin:16px 0 6px">Deine Gutscheine</h3><ul>' + liste.map(function (g) {
+      return '<li><strong style="letter-spacing:1px">' + esc(g.code) + '</strong> · ' + esc(hfEur(g.betrag)) + ' · gültig bis ' + esc(hfDatum(g.gueltig_bis)) + '</li>';
+    }).join('') + '</ul><p class="hf-klein">Einlösen beim Ticketkauf auf <a href="/tickets/">basketball-loewen.com/tickets</a> im Feld „Gutschein“, für Einzeltickets und Dauerkarten.</p>';
+  }
+  function hfPunkte(p) {
+    var stand = Math.max(Number(p.stand) || 0, 0);
+    var h = '<div class="hf-karte" id="hf-punkte"><h2>Deine Helferpunkte</h2>' +
+      '<p><strong>' + esc(hfZahl(stand)) + ' Punkte</strong> = ' + esc(hfEur(p.wert)) + ' · aus ' + esc(p.tage) + (Number(p.tage) === 1 ? ' Helfertag' : ' Helfertagen') +
+      (p.geplant ? ', ' + esc(p.geplant) + ' weitere geplant' : '') + '</p>' +
+      '<p class="hf-klein">Für jeden Helfertag gibt es Punkte, ein Punkt ist ' + esc(p.cent_je_punkt) + ' Cent wert. Du löst sie als Gutschein für Tickets ein.</p>';
+    if (p.kann_einloesen) h += '<button type="button" class="hf-knopf" id="hf-punkte-einloesen" data-wert="' + esc(hfEur(p.wert)) + '" data-punkte="' + esc(hfZahl(stand)) + '">Als Gutschein über ' + esc(hfEur(p.wert)) + ' einlösen</button><p class="hf-meldung" id="hf-punkte-m" role="status" aria-live="polite"></p>';
+    else h += '<p class="hf-klein">Einlösen geht ab ' + esc(hfZahl(p.mindestens)) + ' Punkten.</p>';
+    return h + hfGutscheine(p.einloesungen) + '</div>';
+  }
+  document.addEventListener('click', function (ev) {
+    var k = ev.target.closest && ev.target.closest('#hf-punkte-einloesen'); if (!k) return;
+    if (!confirm('Alle ' + k.getAttribute('data-punkte') + ' Punkte jetzt in einen Gutschein über ' + k.getAttribute('data-wert') + ' umwandeln?')) return;
+    var m = document.getElementById('hf-punkte-m'); k.disabled = true; m.className = 'hf-meldung'; m.textContent = 'Der Gutschein wird angelegt …';
+    post('helfen-punkte-einloesen', { h: hcode }).then(function (d) {
+      if (!d || !d.ok) { k.disabled = false; m.className = 'hf-meldung fehler'; m.textContent = (d && d.meldung) || 'Das hat nicht geklappt.'; return; }
+      var karte = document.getElementById('hf-punkte');
+      karte.innerHTML = '<h2>Dein Gutschein ist da.</h2><p>Code <strong style="font-size:1.2em;letter-spacing:2px">' + esc(d.code) + '</strong> über ' + esc(hfEur(d.betrag)) + ', gültig bis ' + esc(hfDatum(d.gueltig_bis)) + '. Wir haben ihn dir auch per Mail geschickt.</p>' +
+        hfGutscheine((d.stand && d.stand.einloesungen) || []);
+    }).catch(function () { k.disabled = false; m.className = 'hf-meldung fehler'; m.textContent = 'Keine Verbindung. Bitte später noch einmal versuchen.'; });
+  });
   function fehler(t) { el.innerHTML = '<div class="hf-karte"><p class="hf-meldung fehler">' + esc(t) + '</p></div>'; }
   function post(pfad, body) { return fetch(API + pfad, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) { return r.json(); }); }
 
@@ -735,6 +766,7 @@
           var ziel = e.plan_code === plan ? '' : '?p=' + e.plan_code + '&h=' + hcode;
           return '<li>' + esc(tag(e.datum)) + ' · ' + (ziel ? '<a href="' + esc(ziel) + '">' + esc(e.plan_titel) + '</a>' : esc(e.plan_titel)) + ': ' + esc(e.titel) + (e.zeit_von ? ' (' + esc(zeit(e)) + ')' : '') + '</li>';
         }).join('') + '</ul>' : '') + (d.team_voll && !wer ? '<p style="margin-top:8px"><a href="?p=' + esc(plan) + '&amp;h=' + esc(hcode) + '&amp;wer=1">Wer ist dabei? Zur Übersicht</a></p>' : '') + '</div>';
+      if (ich.punkte && !wer) h += hfPunkte(ich.punkte);
     }
     if (wer) { el.innerHTML = h + hfTeam(d, hfBereiche(d)); return; }
     if (d.teaser) h += '<p class="hf-teaser">' + esc(d.teaser).replace(/\n/g, '<br>') + '</p>';
