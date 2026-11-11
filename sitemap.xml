@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://basketball-loewen.com/</loc>
-    <lastmod>2026-11-10</lastmod>
+    <lastmod>2026-11-11</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
@@ -102,12 +102,12 @@
   </url>
   <url>
     <loc>https://basketball-loewen.com/news/aktuelles.html</loc>
-    <lastmod>2026-11-10</lastmod>
+    <lastmod>2026-11-11</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://basketball-loewen.com/news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html</loc>
-    <lastmod>2026-11-10</lastmod>
+    <lastmod>2026-11-11</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -287,12 +287,17 @@
   </url>
   <url>
     <loc>https://basketball-loewen.com/news/artikel/2026-11-08_profis_69-74-gegen-weimar-basketball-loewen-erfurt-drehen-das-spiel.html</loc>
-    <lastmod>2026-11-10</lastmod>
+    <lastmod>2026-11-11</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://basketball-loewen.com/news/artikel/2026-11-08_profis_basketball-loewen-erfurt-empfangen-culture-city-weimar-zum-e.html</loc>
     <lastmod>2026-11-10</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://basketball-loewen.com/news/artikel/2026-11-09_partner_catl-holt-den-sieg-beim-loewen-sponsorenturnier.html</loc>
+    <lastmod>2026-11-11</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -472,7 +477,7 @@
   </url>
   <url>
     <loc>https://basketball-loewen.com/trainieren/baskidball.html</loc>
-    <lastmod>2026-11-10</lastmod>
+    <lastmod>2026-11-11</lastmod>
     <priority>0.7</priority>
   </url>
   <url>

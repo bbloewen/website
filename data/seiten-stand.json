@@ -66,8 +66,8 @@
       "lastmod": "2026-11-02"
     },
     "index.html": {
-      "hash": "da71cbc5945dce6122e683e7fc6f8c6934adb8d8",
-      "lastmod": "2026-11-10"
+      "hash": "dc48c5604177f4d93ffa10b7cd0134caaf74be42",
+      "lastmod": "2026-11-11"
     },
     "kontakt.html": {
       "hash": "a76cac3a53fdcee62055445265dd6254714aa7fd",
@@ -82,12 +82,12 @@
       "lastmod": "2026-08-08"
     },
     "news/aktuelles.html": {
-      "hash": "c0afde2219f25c801a6e3c77ebf48a88de9f21d9",
-      "lastmod": "2026-11-10"
+      "hash": "2e41eb7b1f4a9c8d5be7eba7896f5a0987249fb3",
+      "lastmod": "2026-11-11"
     },
     "news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html": {
-      "hash": "853dbcd2bb8cd40133f3252e8009f608103c0ccb",
-      "lastmod": "2026-11-10"
+      "hash": "68df54540715bfa48ac8c300116ac9cfdd361f0c",
+      "lastmod": "2026-11-11"
     },
     "news/artikel/2025-04-29_profis_achtelfinale-aus.html": {
       "hash": "c38eb425968ac35de960a97abce9a1fde0a3192a",
@@ -230,12 +230,16 @@
       "lastmod": "2026-11-10"
     },
     "news/artikel/2026-11-08_profis_69-74-gegen-weimar-basketball-loewen-erfurt-drehen-das-spiel.html": {
-      "hash": "f126fb6eb2d3b9d098601ee8b1b896a8e3375bad",
-      "lastmod": "2026-11-10"
+      "hash": "3f16dc0dae898c4d4305f8d30bf7bcc252bc7563",
+      "lastmod": "2026-11-11"
     },
     "news/artikel/2026-11-08_profis_basketball-loewen-erfurt-empfangen-culture-city-weimar-zum-e.html": {
       "hash": "1b0a2ead2fc4a46f446ad77910b22787363044c2",
       "lastmod": "2026-11-10"
+    },
+    "news/artikel/2026-11-09_partner_catl-holt-den-sieg-beim-loewen-sponsorenturnier.html": {
+      "hash": "61f1e2209e27f764836eb9b4e6a69ca21670deff",
+      "lastmod": "2026-11-11"
     },
     "news/newsletter/index.html": {
       "hash": "4caad0fb0b2a0fd640456d7f98fa89ad0d374cb4",
@@ -346,7 +350,7 @@
       "lastmod": "2026-11-05"
     },
     "saison/profis/gameday/index.html": {
-      "hash": "dc24d99e8e7c20b31f597d8595464ad410efd53d",
+      "hash": "8e0fe168c9755b989656ba64714182c9b1a61e92",
       "lastmod": "2026-11-11"
     },
     "saison/profis/gameday/spieltagsinfo/ausgabe-1/index.html": {
@@ -378,8 +382,8 @@
       "lastmod": "2026-11-08"
     },
     "trainieren/baskidball.html": {
-      "hash": "8cf39b66f3a7d0219ca432daade2e3e6cbcdfdd5",
-      "lastmod": "2026-11-10"
+      "hash": "7a0a2ca7f5f5e12b7ab440187088024022d9ad35",
+      "lastmod": "2026-11-11"
     },
     "trainieren/court-hunt.html": {
       "hash": "30ed5c49486ea6bacb6107bb6e78e29f308d825b",
