@@ -289,6 +289,10 @@ window.initNav = function initNav() {
     };
     setHeroWrapHeight();
     window.addEventListener('resize', setHeroWrapHeight);
+    /* Wächst der Hero nach dem Laden (Formular im Hero, z. B. weitere Begleitpersonen bei
+       Alley Oop), müssen Wrapper-Höhe und negativer Rand mitwachsen, sonst schiebt sich die
+       nächste Section über den unteren Teil des Formulars (Marko 11.11.2026). */
+    if (window.ResizeObserver) new ResizeObserver(setHeroWrapHeight).observe(hero);
   }
 
   /* Heroes mit Formular oder Infobox (Klasse hero-static, z. B. crestcom-Einladung) blenden
