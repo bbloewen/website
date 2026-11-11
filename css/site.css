@@ -2606,14 +2606,21 @@ a.league-chip-light:hover { background: var(--bg-subtle); }
 }
 .footer-col img { height: 48px; margin-bottom: 16px; }
 .footer-brand-mark { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 16px; }
-.footer-brand-mark img { height: 64px; width: 68px; margin-bottom: 0; flex-shrink: 0; }
+.footer-brand-mark img { height: 61px; width: 65px; margin-bottom: 0; flex-shrink: 0; }
+/* Claim „Gemeinsam stark“ (11.11.2026): beide Zeilen gleich breit, das Logo genau so hoch wie der
+   Schriftzug (Oberkante GEMEINSAM bis Grundlinie STARK). text-box schneidet den Zeilenraum auf die
+   Versalhöhe; ohne Unterstützung (ältere Browser) greift die knappe line-height als Näherung. */
 .footer-brand-wordmark {
-  display: flex; flex-direction: column; align-items: flex-start; height: 60px; justify-content: space-between;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 7px;
   font-family: var(--font-display); font-weight: var(--weight-black);
   letter-spacing: var(--tracking-display); color: #fff; text-transform: uppercase;
 }
-.footer-brand-wordmark .line-1 { font-size: 26.25px; line-height: 1; display: block; }
-.footer-brand-wordmark .line-2 { font-size: 33.3px; line-height: 1; display: block; }
+.footer-brand-wordmark .line-1 { font-size: 26.25px; line-height: .78; display: block; }
+.footer-brand-wordmark .line-2 { font-size: 50.33px; line-height: .78; display: block; }
+@supports (text-box: trim-both cap alphabetic) {
+  .footer-brand-wordmark .line-1,
+  .footer-brand-wordmark .line-2 { line-height: 1; text-box: trim-both cap alphabetic; }
+}
 .footer-col p { font-size: 14px; max-width: 34ch; line-height: 1.6; font-weight: var(--weight-light); }
 .footer-col h4 {
   color: #fff; font-weight: var(--weight-semibold); font-size: 14px;
