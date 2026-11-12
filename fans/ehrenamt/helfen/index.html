@@ -705,7 +705,7 @@
     if (!liste || !liste.length) return '';
     return '<h3 style="margin:16px 0 6px">Deine Gutscheine</h3><ul>' + liste.map(function (g) {
       return '<li><strong style="letter-spacing:1px">' + esc(g.code) + '</strong> · ' + esc(hfEur(g.betrag)) + ' · gültig bis ' + esc(hfDatum(g.gueltig_bis)) + '</li>';
-    }).join('') + '</ul><p class="hf-klein">Einlösen beim Ticketkauf auf <a href="/tickets/">basketball-loewen.com/tickets</a> im Feld „Gutschein“, für Einzeltickets und Dauerkarten.</p>';
+    }).join('') + '</ul><p class="hf-klein">Einlösen beim Ticketkauf über <a href="/saison/profis/gameday/">Game Day</a> im Feld „Gutschein“, für Einzeltickets und Dauerkarten.</p>';
   }
   function hfPunkte(p) {
     var stand = Math.max(Number(p.stand) || 0, 0);
