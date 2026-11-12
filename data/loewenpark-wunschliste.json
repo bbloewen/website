@@ -1,5 +1,5 @@
 {
-  "_hinweis": "Wunschliste der Spendenaktion CATL Löwenpark (Briefing Valentin Kern, Stand November 2026, Reihenfolge nach Dringlichkeit seit 10.11.2026). Beträge sind Richtwerte; die Reihenfolge bestimmt, in welcher Folge Wünsche als finanziert gelten. Bilder: Illustrationen aus dem Drive-Ordner zur Spendenseite (LIESMICH), offen = grau, finanziert = farbig.",
+  "_hinweis": "Wunschliste der Spendenaktion CATL Löwenpark (Briefing Valentin Kern, Stand November 2026, Reihenfolge nach Inhalten seit 12.11.2026: Standkörbe, Fitness, Kabinen, übrige Halle, Küche, Gemeinschaftsbereich). Beträge sind Richtwerte; die Reihenfolge bestimmt, in welcher Folge Wünsche als finanziert gelten. Bilder: Illustrationen aus dem Drive-Ordner zur Spendenseite (LIESMICH), offen = grau, finanziert = farbig.",
   "ziel": 175500,
   "bereiche": [
     {
@@ -13,14 +13,14 @@
       "text": "Kraft, Ausdauer und das gute Gefühl, an sich selbst zu arbeiten."
     },
     {
-      "id": "kueche",
-      "name": "Küche",
-      "text": "Jeder Nachmittag beginnt mit einer gemeinsamen Mahlzeit, die die Kinder selbst zubereiten."
-    },
-    {
       "id": "kabinen",
       "name": "Kabinen",
       "text": "Ankommen, umziehen, Teil des Teams sein."
+    },
+    {
+      "id": "kueche",
+      "name": "Küche",
+      "text": "Jeder Nachmittag beginnt mit einer gemeinsamen Mahlzeit, die die Kinder selbst zubereiten."
     },
     {
       "id": "lernraum",
@@ -80,94 +80,94 @@
     },
     {
       "nr": 8,
-      "bereich": "kueche",
-      "bezeichnung": "Töpfe, Messer, Geschirr und Besteck für 100 Kinder",
-      "betrag": 4000,
-      "bild": "/assets/img/spenden-loewenpark/kuechenzubehoer.svg"
-    },
-    {
-      "nr": 9,
-      "bereich": "kueche",
-      "bezeichnung": "Kühl- und Gefriergeräte",
-      "betrag": 3500,
-      "bild": "/assets/img/spenden-loewenpark/kuehlung.svg"
-    },
-    {
-      "nr": 10,
-      "bereich": "kueche",
-      "bezeichnung": "Gewerbespülmaschine",
-      "betrag": 4500,
-      "bild": "/assets/img/spenden-loewenpark/spuelmaschine.svg"
-    },
-    {
-      "nr": 11,
-      "bereich": "kueche",
-      "bezeichnung": "Kochinseln in Kinderhöhe",
-      "betrag": 10000,
-      "bild": "/assets/img/spenden-loewenpark/kochinsel.svg"
-    },
-    {
-      "nr": 12,
-      "bereich": "kueche",
-      "bezeichnung": "Herd und Kombidämpfer",
-      "betrag": 10000,
-      "bild": "/assets/img/spenden-loewenpark/herd.svg"
-    },
-    {
-      "nr": 13,
-      "bereich": "halle",
-      "bezeichnung": "Bälle in verschiedenen Größen",
-      "betrag": 2500,
-      "bild": "/assets/img/spenden-loewenpark/baelle.svg"
-    },
-    {
-      "nr": 14,
-      "bereich": "halle",
-      "bezeichnung": "Ballwagen, Leibchen und Kleingeräte",
-      "betrag": 1500,
-      "bild": "/assets/img/spenden-loewenpark/kleingeraete.svg"
-    },
-    {
-      "nr": 15,
-      "bereich": "halle",
-      "bezeichnung": "Musikanlage",
-      "betrag": 1500,
-      "bild": "/assets/img/spenden-loewenpark/musikanlage.svg"
-    },
-    {
-      "nr": 16,
-      "bereich": "halle",
-      "bezeichnung": "Anzeigetafel mit Shotclock",
-      "betrag": 7500,
-      "bild": "/assets/img/spenden-loewenpark/anzeigetafel.svg"
-    },
-    {
-      "nr": 17,
       "bereich": "kabinen",
       "bezeichnung": "Kabine 1: Bänke, Haken und Spinde",
       "betrag": 4500,
       "bild": "/assets/img/spenden-loewenpark/kabine.svg"
     },
     {
-      "nr": 18,
+      "nr": 9,
       "bereich": "kabinen",
       "bezeichnung": "Kabine 2: Bänke, Haken und Spinde",
       "betrag": 4500,
       "bild": "/assets/img/spenden-loewenpark/kabine.svg"
     },
     {
-      "nr": 19,
+      "nr": 10,
       "bereich": "kabinen",
       "bezeichnung": "Kabine 3: Bänke, Haken und Spinde",
       "betrag": 4500,
       "bild": "/assets/img/spenden-loewenpark/kabine.svg"
     },
     {
-      "nr": 20,
+      "nr": 11,
       "bereich": "kabinen",
       "bezeichnung": "Kabine 4: Bänke, Haken und Spinde",
       "betrag": 4500,
       "bild": "/assets/img/spenden-loewenpark/kabine.svg"
+    },
+    {
+      "nr": 12,
+      "bereich": "halle",
+      "bezeichnung": "Bälle in verschiedenen Größen",
+      "betrag": 2500,
+      "bild": "/assets/img/spenden-loewenpark/baelle.svg"
+    },
+    {
+      "nr": 13,
+      "bereich": "halle",
+      "bezeichnung": "Ballwagen, Leibchen und Kleingeräte",
+      "betrag": 1500,
+      "bild": "/assets/img/spenden-loewenpark/kleingeraete.svg"
+    },
+    {
+      "nr": 14,
+      "bereich": "halle",
+      "bezeichnung": "Musikanlage",
+      "betrag": 1500,
+      "bild": "/assets/img/spenden-loewenpark/musikanlage.svg"
+    },
+    {
+      "nr": 15,
+      "bereich": "halle",
+      "bezeichnung": "Anzeigetafel mit Shotclock",
+      "betrag": 7500,
+      "bild": "/assets/img/spenden-loewenpark/anzeigetafel.svg"
+    },
+    {
+      "nr": 16,
+      "bereich": "kueche",
+      "bezeichnung": "Töpfe, Messer, Geschirr und Besteck für 100 Kinder",
+      "betrag": 4000,
+      "bild": "/assets/img/spenden-loewenpark/kuechenzubehoer.svg"
+    },
+    {
+      "nr": 17,
+      "bereich": "kueche",
+      "bezeichnung": "Kühl- und Gefriergeräte",
+      "betrag": 3500,
+      "bild": "/assets/img/spenden-loewenpark/kuehlung.svg"
+    },
+    {
+      "nr": 18,
+      "bereich": "kueche",
+      "bezeichnung": "Gewerbespülmaschine",
+      "betrag": 4500,
+      "bild": "/assets/img/spenden-loewenpark/spuelmaschine.svg"
+    },
+    {
+      "nr": 19,
+      "bereich": "kueche",
+      "bezeichnung": "Kochinseln in Kinderhöhe",
+      "betrag": 10000,
+      "bild": "/assets/img/spenden-loewenpark/kochinsel.svg"
+    },
+    {
+      "nr": 20,
+      "bereich": "kueche",
+      "bezeichnung": "Herd und Kombidämpfer",
+      "betrag": 10000,
+      "bild": "/assets/img/spenden-loewenpark/herd.svg"
     },
     {
       "nr": 21,
