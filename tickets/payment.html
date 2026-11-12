@@ -602,7 +602,7 @@
                  Bestaetigung. Verhindert, dass PayPal ohne Order-ID abbricht und die
                  Seite zum erneuten Klick einlaedt (Doppelbestellungen). */
               if (!data.orderId && data.pretixOrderCode) {
-                sessionStorage.setItem('bl_order', JSON.stringify({ orderNumber: data.reference, cart: cart, buyer: buyer, paymentMethod: 'kostenlos' }));
+                sessionStorage.setItem('bl_order', JSON.stringify({ orderNumber: data.reference, pretixOrderCode: data.pretixOrderCode || '', cart: cart, buyer: buyer, paymentMethod: 'kostenlos' }));
                 window.location.href = '/tickets/confirmation.html';
                 return new Promise(function () {});
               }
@@ -617,7 +617,7 @@
               body: JSON.stringify({ reference: currentReference })
             }).then(function (res) { return res.json(); }).then(function (result) {
               if (!result.ok) throw new Error(result.error || 'Die Zahlung konnte nicht bestätigt werden.');
-              var order = { orderNumber: result.reference, cart: cart, buyer: buyer, paymentMethod: 'paypal' };
+              var order = { orderNumber: result.reference, pretixOrderCode: result.pretixOrderCode || '', cart: cart, buyer: buyer, paymentMethod: 'paypal' };
               sessionStorage.setItem('bl_order', JSON.stringify(order));
               window.location.href = '/tickets/confirmation.html';
             });

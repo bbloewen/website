@@ -311,6 +311,17 @@
           </div>
         </div>
 
+        <div class="card hidden" id="confirmation-pdf-card" style="padding:20px 24px;margin-top:20px">
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <span><i data-lucide="ticket" class="icon-18" style="color:var(--color-brand-orange);flex-shrink:0;margin-top:2px"></i></span>
+            <div style="flex:1;min-width:0">
+              <p class="t-body-sm" style="margin:0 0 12px">Du möchtest deine Tickets ausdrucken? Hier bekommst du sie direkt als PDF.</p>
+              <button type="button" class="btn btn-secondary btn-sm" id="confirmation-pdf-btn">Tickets drucken (PDF)</button>
+              <p class="t-caption" id="confirmation-pdf-status" role="status" aria-live="polite" style="margin:10px 0 0;color:var(--text-muted)"></p>
+            </div>
+          </div>
+        </div>
+
         <div style="text-align:center;margin-top:28px">
           <a class="btn btn-primary btn-sm" href="/">Zurück zur Startseite</a>
         </div>
@@ -543,6 +554,47 @@
     if (buyer.notiz) {
       confirmationNotizEl.textContent = 'Notiz zur Bestellung: ' + buyer.notiz;
       confirmationNotizEl.classList.remove('hidden');
+    }
+
+    /* Tickets drucken (PDF), Marko 12.11.2026: nur Einzeltickets mit pretix-Bestellung. Der Server gibt das PDF nur heraus,
+       wenn Referenz und pretix-Bestellnummer zur selben bezahlten Bestellung gehören. Sind die Karten noch nicht fertig, wird
+       automatisch noch einige Male nachgefragt. Fenster vorab öffnen, sonst blockt der Browser das Pop-up. */
+    if (!isFanshop && !isDauerkarte && !isClub100 && order.pretixOrderCode && order.orderNumber) {
+      var pdfCard = document.getElementById('confirmation-pdf-card'), pdfBtn = document.getElementById('confirmation-pdf-btn'), pdfStatus = document.getElementById('confirmation-pdf-status');
+      pdfCard.classList.remove('hidden');
+      if (window.lucide) window.lucide.createIcons();
+      var pdfRef = order.orderNumber, pdfCode = order.pretixOrderCode;
+      var pdfHolen = function (fenster, versuch) {
+        return fetch('https://ticketing.basketball-loewen.com/webhook/einzelticket-pdf', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reference: pdfRef, order_code: pdfCode })
+        }).then(function (r) { return r.json(); }).then(function (d) {
+          if (d.ok && d.pdf) {
+            var bin = atob(d.pdf), arr = new Uint8Array(bin.length);
+            for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+            var url = URL.createObjectURL(new Blob([arr], { type: 'application/pdf' }));
+            if (fenster && !fenster.closed) fenster.location.href = url;
+            else { var a = document.createElement('a'); a.href = url; a.download = d.dateiname || 'Tickets.pdf'; document.body.appendChild(a); a.click(); a.remove(); }
+            pdfStatus.textContent = 'Deine Tickets sind geöffnet. Du kannst sie jetzt ausdrucken oder speichern.';
+            pdfBtn.disabled = false;
+            return;
+          }
+          if (d.spaeter && versuch < 6) {
+            pdfStatus.textContent = 'Deine Tickets werden gerade erstellt, einen Moment bitte …';
+            return new Promise(function (ok) { setTimeout(ok, 8000); }).then(function () { return pdfHolen(fenster, versuch + 1); });
+          }
+          throw new Error(d.error || 'Das PDF konnte gerade nicht geladen werden.');
+        }).catch(function (e) {
+          if (fenster && !fenster.closed) { try { fenster.close(); } catch (e2) {} }
+          var meldung = e && e.message && !(e instanceof TypeError) ? e.message : 'Das PDF konnte gerade nicht geladen werden.';
+          pdfStatus.textContent = meldung + ' Deine Tickets kommen auf jeden Fall per E-Mail.';
+          pdfBtn.disabled = false;
+        });
+      };
+      pdfBtn.addEventListener('click', function () {
+        var fenster = null; try { fenster = window.open('', '_blank'); } catch (e) { fenster = null; }
+        pdfBtn.disabled = true; pdfStatus.textContent = 'PDF wird geladen …';
+        pdfHolen(fenster, 0);
+      });
     }
 
     sessionStorage.removeItem('bl_cart');
