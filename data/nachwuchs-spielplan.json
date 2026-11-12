@@ -55,7 +55,7 @@
         },
         {
           "datum": "2026-12-20",
-          "zeit": "12:30",
+          "zeit": "10:30",
           "heim": false,
           "gegner": "Dresden Titans",
           "ergebnis": null,
@@ -181,7 +181,7 @@
           "datum": "2026-11-01",
           "zeit": "09:00",
           "heim": true,
-          "gegner": "SV Zörbig III",
+          "gegner": "SV Zörbig Farmers",
           "ergebnis": "75:104",
           "abgesagt": false
         },
