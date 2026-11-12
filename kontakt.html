@@ -264,9 +264,15 @@
               <label for="betreff">Betreff</label>
               <input type="text" id="betreff" name="betreff" placeholder="Worum geht's?" />
             </div>
-            <div class="field">
-              <label for="name">Name</label>
-              <input type="text" id="name" name="name" required autocomplete="name" />
+            <div class="form-row">
+              <div class="field">
+                <label for="vorname">Vorname</label>
+                <input type="text" id="vorname" name="vorname" required autocomplete="given-name" />
+              </div>
+              <div class="field">
+                <label for="nachname">Nachname</label>
+                <input type="text" id="nachname" name="nachname" required autocomplete="family-name" />
+              </div>
             </div>
             <div class="field">
               <label for="email">E-Mail</label>
@@ -486,7 +492,9 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         betreff: document.getElementById('betreff').value.trim(),
-        name: document.getElementById('name').value.trim(),
+        name: [document.getElementById('vorname').value.trim(), document.getElementById('nachname').value.trim()].filter(Boolean).join(' '),
+        vorname: document.getElementById('vorname').value.trim(),
+        nachname: document.getElementById('nachname').value.trim(),
         email: document.getElementById('email').value.trim(),
         telefon: document.getElementById('telefon').value.trim(),
         nachricht: document.getElementById('nachricht').value.trim(),

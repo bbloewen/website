@@ -269,9 +269,15 @@ window.goatcounter = { path: function (p) {
 
           <div id="cc-vote-form">
             <input type="text" id="cc-vote-website" class="cc-hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
-            <div class="field">
-              <label for="cc-vote-name">Ihr Name (optional)</label>
-              <input type="text" id="cc-vote-name" maxlength="60" autocomplete="name" />
+            <div class="cc-row">
+              <div class="field">
+                <label for="cc-vote-vorname">Vorname (optional)</label>
+                <input type="text" id="cc-vote-vorname" maxlength="40" autocomplete="given-name" />
+              </div>
+              <div class="field">
+                <label for="cc-vote-nachname">Nachname (optional)</label>
+                <input type="text" id="cc-vote-nachname" maxlength="40" autocomplete="family-name" />
+              </div>
             </div>
             <div class="cc-vote-btns">
               <button type="button" class="btn btn-primary btn-lg" data-antwort="ja">Ich bin dabei</button>
@@ -514,7 +520,9 @@ window.goatcounter = { path: function (p) {
         body: JSON.stringify({
           aktion: AKTION,
           umfrage: id,
-          name: document.getElementById('cc-vote-name').value.trim(),
+          name: [document.getElementById('cc-vote-vorname').value.trim(), document.getElementById('cc-vote-nachname').value.trim()].filter(Boolean).join(' ').slice(0, 60),
+          vorname: document.getElementById('cc-vote-vorname').value.trim(),
+          nachname: document.getElementById('cc-vote-nachname').value.trim(),
           antwort: antwort,
           website: document.getElementById('cc-vote-website').value,
           elapsedMs: Date.now() - geladen

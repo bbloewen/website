@@ -2927,7 +2927,9 @@
             '<i data-lucide="check" style="width:14px;height:14px"></i> Mitgliedschaft von ' + escapeHtml(s.memberName) + ' bestätigt</div>';
         } else if (isMemberTarif) {
           memberBlock = '<div class="seatplan-member-check">' +
-            '<input type="text" placeholder="Vor- und Nachname" data-member-name="' + guid + '" value="' + escapeHtml(s.memberName || '') + '"' + (s.memberChecking ? ' disabled' : '') + '>' +
+            // Vor- und Nachname getrennt (Marko 12.11.2026); geprüft wird der zusammengesetzte Name wie bisher
+            '<input type="text" placeholder="Vorname" aria-label="Vorname des Mitglieds" autocomplete="given-name" data-member-name="' + guid + '" data-member-teil="vorname" value="' + escapeHtml(s.memberVorname || '') + '"' + (s.memberChecking ? ' disabled' : '') + '>' +
+            '<input type="text" placeholder="Nachname" aria-label="Nachname des Mitglieds" autocomplete="family-name" data-member-name="' + guid + '" data-member-teil="nachname" value="' + escapeHtml(s.memberNachname || '') + '"' + (s.memberChecking ? ' disabled' : '') + '>' +
             '<button type="button" data-member-check="' + guid + '"' + (s.memberChecking ? ' disabled' : '') + '>' + (s.memberChecking ? 'Wird geprüft …' : 'Jetzt prüfen') + '</button>' +
             (s.memberCheckError ? '<p class="seatplan-member-check-error">' + s.memberCheckError + '</p>' : '') +
             '</div>';
@@ -2981,17 +2983,21 @@
         btn.addEventListener('click', function () {
           var guid = this.dataset.memberCheck;
           var s = self.selected[guid];
-          var input = self.cartEl.querySelector('[data-member-name="' + guid + '"]');
-          var name = input ? input.value.trim() : '';
-          if (!name || s.memberChecking) return;
+          var vIn = self.cartEl.querySelector('[data-member-name="' + guid + '"][data-member-teil="vorname"]');
+          var nIn = self.cartEl.querySelector('[data-member-name="' + guid + '"][data-member-teil="nachname"]');
+          var vorname = vIn ? vIn.value.trim() : '', nachname = nIn ? nIn.value.trim() : '';
+          var name = [vorname, nachname].filter(Boolean).join(' ');
+          if (!vorname || !nachname || s.memberChecking) return;
           s.memberName = name;
+          s.memberVorname = vorname;
+          s.memberNachname = nachname;
           s.memberChecking = true;
           s.memberCheckError = null;
           self._renderCart();
           fetch(MITGLIEDSRABATT_PRUEFEN_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: name, saison: MITGLIEDSRABATT_SAISON })
+            body: JSON.stringify({ name: name, vorname: vorname, nachname: nachname, saison: MITGLIEDSRABATT_SAISON })
           })
             .then(function (r) { return r.json(); })
             .then(function (result) {

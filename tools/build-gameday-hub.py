@@ -490,7 +490,7 @@ def kauf_bereich(aktuell, kommt, heute):
   </section>
 
   <script src="/js/voucher-utils.js?v=1786873000"></script>
-  <script src="/js/seat-picker.js?v=1794421045"></script>
+  <script src="/js/seat-picker.js?v=1794521791"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {{
       var game = {game_json};
