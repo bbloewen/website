@@ -237,7 +237,10 @@
           <label class="abmelden-wahl"><input type="checkbox" name="liste" value="newsletter"> <span><b>Newsletter</b><br><span class="t-small">Neuigkeiten, Spieltage und Aktionen der Basketball Löwen Erfurt für Fans, Mitglieder und alle Interessierten.</span></span></label>
           <label class="abmelden-wahl"><input type="checkbox" name="liste" value="ticket"> <span><b>Nach deinem Spielbesuch</b><br><span class="t-small">Kurze E-Mail nach einem Heimspiel, das du mit einem Ticket besucht hast, mit Angeboten für das nächste Spiel.</span></span></label>
           <label class="abmelden-wahl"><input type="checkbox" name="liste" value="fastbreak"> <span><b>Fastbreak</b><br><span class="t-small">Unser Newsletter für Unternehmen, Sponsoren und Partner.</span></span></label>
-          <label class="abmelden-wahl"><input type="checkbox" name="liste" value="alle"> <span><b>Alle E-Mails</b><br><span class="t-small">Keine Mails mehr von uns, auch keine Einladungen oder Informationen.</span></span></label>
+          <label class="abmelden-wahl"><input type="checkbox" name="liste" value="einladung"> <span><b>Einladungen</b><br><span class="t-small">Persönliche Einladungen zu Veranstaltungen, Netzwerktreffen und Spieltags-Events.</span></span></label>
+          <label class="abmelden-wahl"><input type="checkbox" name="liste" value="info"> <span><b>Informationen</b><br><span class="t-small">Einzelne Infos von uns, zum Beispiel zu Terminen, Änderungen oder deiner Mitgliedschaft.</span></span></label>
+          <label class="abmelden-wahl"><input type="checkbox" name="liste" value="umfrage"> <span><b>Umfragen</b><br><span class="t-small">Kurze Umfragen, mit denen du uns hilfst, besser zu werden.</span></span></label>
+          <label class="abmelden-wahl"><input type="checkbox" name="liste" value="alle"> <span><b>Alle E-Mails</b><br><span class="t-small">Keine Mails mehr von uns, außer Pflichtmails wie Tickets, Rechnungen oder Bestätigungen.</span></span></label>
         </fieldset>
         <p class="t-small" id="abmelden-fehler" role="alert" style="color:#B3261E;margin:12px 0 0" hidden></p>
         <button class="btn btn-primary" type="submit" id="abmelden-knopf" style="margin-top:20px">Abmelden</button>
@@ -418,7 +421,7 @@
       alleSync();
     });
   });
-  if (vorwahl === 'fastbreak' || vorwahl === 'ticket' || vorwahl === 'alle') box(vorwahl).checked = true;   // ticket: Link aus der Mail nach dem Spielbesuch, nur diese Liste ist vorgewählt else box('newsletter').checked = true;
+  if (['fastbreak', 'ticket', 'einladung', 'info', 'umfrage', 'alle'].indexOf(vorwahl) >= 0) box(vorwahl).checked = true;   // ticket: Link aus der Mail nach dem Spielbesuch, nur diese Liste ist vorgewählt else box('newsletter').checked = true;
   alleSync();
 
   function showResult(ok, message) {
