@@ -107,7 +107,14 @@
       "vorverkaufAb": "2026-11-05",
       "spielberichtUrl": "/saison/profis/gameday/2026-11-13-dresden-titans.html",
       "stehplatzBuchbar": false,
-      "livestream": "https://sporteurope.tv/basketball-loewen-erfurt/catl-basketball-loewen-vs-dresden-titans"
+      "livestream": "https://sporteurope.tv/basketball-loewen-erfurt/catl-basketball-loewen-vs-dresden-titans",
+      "ergebnis": "66 : 91",
+      "viertel": [
+        "16 : 21",
+        "17 : 24",
+        "14 : 22",
+        "19 : 24"
+      ]
     },
     {
       "datum": "20.11.2026",
