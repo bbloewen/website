@@ -830,7 +830,8 @@ document.addEventListener('DOMContentLoaded', function () {
       seatStatusUrl: 'https://ticketing.basketball-loewen.com/webhook/einzelticket-sitzplatz-status?subevent=' + game.subeventId,
       pretixEvent: 'saison2627',
       reservedSeats: [
-        { zone: 'A', rows: ['1'], excludeSeatNumbers: ['1', '2', '3', '4', '5', '6', '7', '16', '17', '18', '19', '20'] }
+        { zone: 'A', rows: ['1'], excludeSeatNumbers: ['1', '2', '3', '4', '5', '6', '7', '16', '17', '18', '19', '20'] },
+        { zone: 'B', rows: ['6'], maxSeatNumber: 1 }
       ],
       nvSeats: [
         { zone: 'A', rows: ['1', '2', '3'], maxSeatNumber: 7 }

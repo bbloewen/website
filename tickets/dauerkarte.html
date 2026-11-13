@@ -595,7 +595,9 @@
       // keine EA-Reservierung. Platz 8-15 (16.09.2026, Marko: 8 Ehrenamtliche bekommen
       // dort per EA-DK-Gutschein je einen Platz) ebenfalls freigegeben.
       reservedSeats: [
-        { zone: 'A', rows: ['1'], excludeSeatNumbers: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'] }
+        { zone: 'A', rows: ['1'], excludeSeatNumbers: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'] },
+        // Block B, Reihe 6, Platz 1: für Ehrenamtliche reserviert (13.11.2026)
+        { zone: 'B', rows: ['6'], maxSeatNumber: 1 }
       ],
       // "Nicht verfügbar" (NV): Plätze, die der Verein separat vergeben will, zählen mit
       // in die Gesamtzahl, sind aber nicht buchbar — s. seat-picker.js _isBlocked/nv.

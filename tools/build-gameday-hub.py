@@ -514,7 +514,8 @@ def kauf_bereich(aktuell, kommt, heute):
         pretixEvent: 'saison2627',
         pretixItemCategoryMap: {json.dumps(PRETIX_ITEM_CATEGORY_MAP)},
         reservedSeats: [
-          {{ zone: 'A', rows: ['1'], excludeSeatNumbers: ['1', '2', '3', '4', '5', '6', '7', '16', '17', '18', '19', '20'] }}
+          {{ zone: 'A', rows: ['1'], excludeSeatNumbers: ['1', '2', '3', '4', '5', '6', '7', '16', '17', '18', '19', '20'] }},
+          {{ zone: 'B', rows: ['6'], maxSeatNumber: 1 }}
         ],
         nvSeats: [
           {{ zone: 'A', rows: ['1', '2', '3'], maxSeatNumber: 7 }}
