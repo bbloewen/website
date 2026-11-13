@@ -17,6 +17,14 @@
       "cover": "01-titel-cover.webp",
       "pdf": "ausgabe-2-spieltagsinfo.pdf",
       "seiten": 26
+    },
+    {
+      "nr": 3,
+      "titel": "Löwen gegen Dresden",
+      "beschreibung": "Freitagabend in der Riethsporthalle: Kader der Löwen und der Dresden Titans, Ligatabelle und Spielplan sowie Neues aus dem Verein.",
+      "cover": "01-titel-cover.webp",
+      "pdf": "ausgabe-3-spieltagsinfo.pdf",
+      "seiten": 24
     }
   ]
 }
