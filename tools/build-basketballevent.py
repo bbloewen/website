@@ -231,17 +231,23 @@ def formular(aktion, zeit):
           </div>
           <div class="cc-row">
             <div class="field">
-              <label for="cc-ap-name">Ansprechpartner *</label>
-              <input type="text" id="cc-ap-name" name="ansprechpartner" autocomplete="name" required />
+              <label for="cc-ap-vorname">Vorname Ansprechpartner *</label>
+              <input type="text" id="cc-ap-vorname" name="ap_vorname" autocomplete="given-name" required />
             </div>
+            <div class="field">
+              <label for="cc-ap-nachname">Nachname Ansprechpartner *</label>
+              <input type="text" id="cc-ap-nachname" name="ap_nachname" autocomplete="family-name" required />
+            </div>
+          </div>
+          <div class="cc-row">
             <div class="field">
               <label for="cc-ap-mail">E-Mail *</label>
               <input type="email" id="cc-ap-mail" name="ap_email" autocomplete="email" required />
             </div>
-          </div>
-          <div class="field">
-            <label for="cc-ap-tel">Telefon</label>
-            <input type="tel" id="cc-ap-tel" name="ap_telefon" autocomplete="tel" />
+            <div class="field">
+              <label for="cc-ap-tel">Telefon</label>
+              <input type="tel" id="cc-ap-tel" name="ap_telefon" autocomplete="tel" />
+            </div>
           </div>
           <!-- Beides einzeln abwählbar (Marko, 19.10.2026): Bei der crestcom-Aktion
                verlangte das Formular immer VIP UND Mitarbeitende. VST wollte nur die
@@ -256,10 +262,16 @@ def formular(aktion, zeit):
               <input type="checkbox" id="cc-gf-same" name="gf_same" />
               <label for="cc-gf-same">Der Ansprechpartner ist die Geschäftsführung</label>
             </div>
-            <div class="cc-row" id="cc-gf-row">
-              <div class="field">
-                <label for="cc-gf-name">Geschäftsführung *</label>
-                <input type="text" id="cc-gf-name" name="gf_name" required />
+            <div id="cc-gf-row">
+              <div class="cc-row">
+                <div class="field">
+                  <label for="cc-gf-vorname">Vorname Geschäftsführung *</label>
+                  <input type="text" id="cc-gf-vorname" name="gf_vorname" required />
+                </div>
+                <div class="field">
+                  <label for="cc-gf-nachname">Nachname Geschäftsführung *</label>
+                  <input type="text" id="cc-gf-nachname" name="gf_nachname" required />
+                </div>
               </div>
               <div class="field">
                 <label for="cc-gf-mail">E-Mail Geschäftsführung</label>
@@ -475,7 +487,7 @@ def skript_einladung(aktion, spiel, zeit):
 
   function zeigeFelder() {{
     vipBlock.hidden = !willVip.checked;
-    form.gf_name.required = willVip.checked && !form.gf_same.checked;
+    form.gf_vorname.required = form.gf_nachname.required = willVip.checked && !form.gf_same.checked;
     maBlock.hidden = !willMa.checked;
     maInput.required = willMa.checked;
     zeigeSumme();
@@ -495,7 +507,7 @@ def skript_einladung(aktion, spiel, zeit):
   var gfRow = document.getElementById('cc-gf-row');
   form.gf_same.addEventListener('change', function () {{
     gfRow.hidden = form.gf_same.checked;
-    form.gf_name.required = willVip.checked && !form.gf_same.checked;
+    form.gf_vorname.required = form.gf_nachname.required = willVip.checked && !form.gf_same.checked;
   }});
   document.getElementById('cc-minus').addEventListener('click', function () {{ setze((parseInt(maInput.value, 10) || MA_MIN) - 1); }});
   document.getElementById('cc-plus').addEventListener('click', function () {{ setze((parseInt(maInput.value, 10) || MA_MIN - 1) + 1); }});
@@ -523,9 +535,11 @@ def skript_einladung(aktion, spiel, zeit):
     errorBox.classList.add('visible');
   }}
 
+  // Vor- und Nachname getrennt (Marko 12.11.2026); an den Server gehen zusätzlich die zusammengesetzten Namen wie bisher
+  function voll(a, b) {{ return [a.value.trim(), b.value.trim()].filter(Boolean).join(' '); }}
   var FELDNAMEN = {{
-    firma: 'Firma', ansprechpartner: 'Ansprechpartner', ap_email: 'E-Mail des Ansprechpartners',
-    gf_name: 'Geschäftsführung', gf_email: 'E-Mail der Geschäftsführung',
+    firma: 'Firma', ap_vorname: 'Vorname des Ansprechpartners', ap_nachname: 'Nachname des Ansprechpartners', gf_vorname: 'Vorname der Geschäftsführung', gf_nachname: 'Nachname der Geschäftsführung', ap_email: 'E-Mail des Ansprechpartners',
+    ansprechpartner: 'Ansprechpartner', gf_name: 'Geschäftsführung', gf_email: 'E-Mail der Geschäftsführung',
     mitarbeitende: 'Anzahl Mitarbeitende', datenschutz: 'Einverständnis zum Datenschutz',
     auswahl: 'die Auswahl (VIP-Tickets oder Tickets für Mitarbeitende)'
   }};
@@ -542,10 +556,12 @@ def skript_einladung(aktion, spiel, zeit):
 
     var fehlt = [];
     if (!form.firma.value.trim()) fehlt.push(FELDNAMEN.firma);
-    if (!form.ansprechpartner.value.trim()) fehlt.push(FELDNAMEN.ansprechpartner);
+    if (!form.ap_vorname.value.trim()) fehlt.push(FELDNAMEN.ap_vorname);
+    if (!form.ap_nachname.value.trim()) fehlt.push(FELDNAMEN.ap_nachname);
     if (!MAILMUSTER.test(form.ap_email.value.trim())) fehlt.push(FELDNAMEN.ap_email);
     var gfGleich = form.gf_same.checked;
-    if (willVip.checked && !gfGleich && !form.gf_name.value.trim()) fehlt.push(FELDNAMEN.gf_name);
+    if (willVip.checked && !gfGleich && !form.gf_vorname.value.trim()) fehlt.push(FELDNAMEN.gf_vorname);
+    if (willVip.checked && !gfGleich && !form.gf_nachname.value.trim()) fehlt.push(FELDNAMEN.gf_nachname);
     if (willVip.checked && !gfGleich && form.gf_email.value.trim() && !MAILMUSTER.test(form.gf_email.value.trim())) fehlt.push(FELDNAMEN.gf_email);
     var n = anzahlMa();
     if (willMa.checked && !(n >= MA_MIN && n <= maMax)) fehlt.push(FELDNAMEN.mitarbeitende);
@@ -559,11 +575,15 @@ def skript_einladung(aktion, spiel, zeit):
     var payload = {{
       aktion: AKTION,
       firma: form.firma.value.trim(),
-      ansprechpartner: form.ansprechpartner.value.trim(),
+      ansprechpartner: voll(form.ap_vorname, form.ap_nachname),
+      ap_vorname: form.ap_vorname.value.trim(),
+      ap_nachname: form.ap_nachname.value.trim(),
       ap_email: form.ap_email.value.trim(),
       ap_telefon: form.ap_telefon.value.trim(),
       vip: willVip.checked,
-      gf_name: willVip.checked ? (gfGleich ? form.ansprechpartner.value.trim() : form.gf_name.value.trim()) : '',
+      gf_name: willVip.checked ? (gfGleich ? voll(form.ap_vorname, form.ap_nachname) : voll(form.gf_vorname, form.gf_nachname)) : '',
+      gf_vorname: willVip.checked ? (gfGleich ? form.ap_vorname.value.trim() : form.gf_vorname.value.trim()) : '',
+      gf_nachname: willVip.checked ? (gfGleich ? form.ap_nachname.value.trim() : form.gf_nachname.value.trim()) : '',
       gf_email: willVip.checked ? (gfGleich ? form.ap_email.value.trim() : form.gf_email.value.trim()) : '',
       mitarbeitende: n,
       anmerkung: '',
@@ -905,9 +925,15 @@ def baue_umfrage(aktion, spiel, zeit):
 
           <div id="cc-vote-form">
             <input type="text" id="cc-vote-website" class="cc-hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
-            <div class="field">
-              <label for="cc-vote-name">Ihr Name (optional)</label>
-              <input type="text" id="cc-vote-name" maxlength="60" autocomplete="name" />
+            <div class="cc-row">
+              <div class="field">
+                <label for="cc-vote-vorname">Vorname (optional)</label>
+                <input type="text" id="cc-vote-vorname" maxlength="40" autocomplete="given-name" />
+              </div>
+              <div class="field">
+                <label for="cc-vote-nachname">Nachname (optional)</label>
+                <input type="text" id="cc-vote-nachname" maxlength="40" autocomplete="family-name" />
+              </div>
             </div>
             <div class="cc-vote-btns">
               <button type="button" class="btn btn-primary btn-lg" data-antwort="ja">Ich bin dabei</button>
@@ -1035,7 +1061,9 @@ def skript_umfrage(aktion):
         body: JSON.stringify({{
           aktion: AKTION,
           umfrage: id,
-          name: document.getElementById('cc-vote-name').value.trim(),
+          name: [document.getElementById('cc-vote-vorname').value.trim(), document.getElementById('cc-vote-nachname').value.trim()].filter(Boolean).join(' ').slice(0, 60),
+          vorname: document.getElementById('cc-vote-vorname').value.trim(),
+          nachname: document.getElementById('cc-vote-nachname').value.trim(),
           antwort: antwort,
           website: document.getElementById('cc-vote-website').value,
           elapsedMs: Date.now() - geladen
