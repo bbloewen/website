@@ -66,7 +66,7 @@
       "lastmod": "2026-11-02"
     },
     "index.html": {
-      "hash": "5598f5a7617142be827e1fe9c439e07e90a0d6aa",
+      "hash": "807920d78d2d8ff8f7743d769bac2407ee549178",
       "lastmod": "2026-11-13"
     },
     "kontakt.html": {
@@ -306,55 +306,55 @@
       "lastmod": "2026-11-09"
     },
     "saison/profis/gameday/2026-11-08-culture-city-weimar.html": {
-      "hash": "464634894b172a188e1e2d513db91455d625b8ed",
-      "lastmod": "2026-11-10"
+      "hash": "bbb251bfbb9307070d3964223b1d16f83a4d6e54",
+      "lastmod": "2026-11-13"
     },
     "saison/profis/gameday/2026-11-13-dresden-titans.html": {
-      "hash": "fed1253057e9e2ddba2f413db2225545f8133ada",
+      "hash": "3ca0411c9c851933021d1dd745c6b33463b70b6e",
       "lastmod": "2026-11-13"
     },
     "saison/profis/gameday/2026-11-20-fc-bayern-basketball.html": {
-      "hash": "69865ce92da19972809c3acdfb3dfe6ed207beba",
-      "lastmod": "2026-11-11"
+      "hash": "efbdcc3213b9ed12f1d038e5b3e64d36c9191798",
+      "lastmod": "2026-11-13"
     },
     "saison/profis/gameday/2026-12-06-bg-leitershofen.html": {
-      "hash": "be109734a8d741c65bca57e74afe0cd65db53ca1",
-      "lastmod": "2026-11-11"
+      "hash": "9e144b80018144a58a69768904d402790c39403a",
+      "lastmod": "2026-11-13"
     },
     "saison/profis/gameday/2026-12-13-tsv-oberhaching-tropics.html": {
-      "hash": "1e1d79254669bf0f3640127bb8f67221d40baff3",
-      "lastmod": "2026-11-11"
+      "hash": "d3f6f2274555495e636a1a409eb5afc352536019",
+      "lastmod": "2026-11-13"
     },
     "saison/profis/gameday/2027-01-03-dragons-rhoendorf.html": {
-      "hash": "050212572e13d67bea3c2365280b202b3e261a38",
-      "lastmod": "2026-11-11"
+      "hash": "7572085f600bc255f87009a452993b519d4db150",
+      "lastmod": "2026-11-13"
     },
     "saison/profis/gameday/2027-01-17-skyliners-juniors.html": {
-      "hash": "06f6f9ad1a83000269e13fbe760bb855d717a5a5",
-      "lastmod": "2026-11-11"
+      "hash": "c7dd967b30b48ece10b535b34da20736c935eec2",
+      "lastmod": "2026-11-13"
     },
     "saison/profis/gameday/2027-01-31-bbc-coburg.html": {
-      "hash": "29a12694541bb1e9176a81b9776c447131f2efad",
-      "lastmod": "2026-11-11"
+      "hash": "3d90c3bdfcab07c9fc3d1fce2b27b18490ce99de",
+      "lastmod": "2026-11-13"
     },
     "saison/profis/gameday/2027-02-14-sv-fellbach-flashers.html": {
-      "hash": "ee2c31707a0aea083b820f48100e4e13b5a54027",
-      "lastmod": "2026-11-11"
+      "hash": "ca11e59eb496fe9f76dbd8159bfc8e432132c2ae",
+      "lastmod": "2026-11-13"
     },
     "saison/profis/gameday/2027-03-07-giants-leverkusen.html": {
-      "hash": "1fa2d942a8a2280ae030f0ca67be6b9f4752bb67",
-      "lastmod": "2026-11-11"
+      "hash": "6c2783d4ff809b0d91500e5cf4cefc1e72c89de3",
+      "lastmod": "2026-11-13"
     },
     "saison/profis/gameday/2027-03-21-tv-langen.html": {
-      "hash": "6caa13e5b718289f825795fdb330887a02ae9ad0",
-      "lastmod": "2026-11-11"
+      "hash": "24a1cc01177776bdf99ba06a28e67884503910b4",
+      "lastmod": "2026-11-13"
     },
     "saison/profis/gameday/2027-03-28-ahorn-camp-baskets.html": {
-      "hash": "10bfb4a73897ac35316d2c601f0768f197b1ee2b",
-      "lastmod": "2026-11-11"
+      "hash": "b3bace281527a5174a945511ddc972a27b1186c0",
+      "lastmod": "2026-11-13"
     },
     "saison/profis/gameday/index.html": {
-      "hash": "dd835541e4385003d758ab5d604ed86abb684609",
+      "hash": "a75f56efa4574a4cc5ada337cd930fef40e3ff7c",
       "lastmod": "2026-11-13"
     },
     "saison/profis/gameday/spieltagsinfo/ausgabe-1/index.html": {
@@ -365,9 +365,13 @@
       "hash": "ae59bec2b44ef50c5f89ec7e725c6b9bcf8f7470",
       "lastmod": "2026-10-19"
     },
+    "saison/profis/gameday/spieltagsinfo/ausgabe-3/index.html": {
+      "hash": "3bc1cf5c2c766fe69a82eab00cbf36b26577255a",
+      "lastmod": "2026-11-13"
+    },
     "saison/spielplan.html": {
-      "hash": "da99cac9f371a2b7879cd35cfac762cda3221903",
-      "lastmod": "2026-11-10"
+      "hash": "4844094bee72a35e11a62dd8fc7309181eca7597",
+      "lastmod": "2026-11-13"
     },
     "saison/tabelle.html": {
       "hash": "d14ac9b49c3ca19cbad2274a79a17d85c0980000",
