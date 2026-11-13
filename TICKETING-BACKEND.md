@@ -1469,3 +1469,10 @@ Heiko Kühnst lädt seine Mandanten zum Heimspiel am 08.11.2026 gegen Culture Ci
 - **Ticket-Mail** (`zNGWzRFz3ebzsDkD`): Tabelle `EINZELTICKET_CATEGORY_LABEL` hat `114: 'VIP-Baseline'` (sonst stünde „Item 114“ in der Mail).
 - **Getestet:** lokal mit dem unveränderten Original-Code (Warenkörbe mit und ohne Baseline, mit Stehplatz, Block D, Gutscheinen), im Browser (Direktwahl, Obergrenze 20, Warenkorbzeile, Übergabe an die Kasse), pretix-Testbestellung (Item 114 ohne Sitz, Nachwuchs als Zusatz, Ticket-Mail, PDF), Testbestellung danach storniert. **Nicht getestet:** eine echte PayPal-Zahlung mit Baseline.
 - **Offen:** Kontingent-Angleich (Formel „belegt + freie Sitze“) darf VIP nicht auf 81 zurücksetzen (81 Sitze + 20 Baseline); Dashboard-Auslastung VIP (101); Layout 12 für Item 114 wäre per pretix-Oberfläche möglich (zeigt den Produktnamen fett statt „Freie Platzwahl“).
+
+## Einzelticket: keine Bestätigungsmail mehr, Widerspruchshinweis in der Ticket-Mail (13.11.2026)
+
+Anlass: Website-Feedback von André (09.11.): Die Mail „Deine Ticket-Bestellung ist bestätigt“ kam immer nach den Tickets und wiederholte nur Auswahl, Gutschein und Gesamtbetrag; ihr Satz „Dein Ticket … in einer separaten E-Mail“ war damit falsch. Entscheidung (Marko): eine Mail je Kauf.
+- `BmpBkKdzzSZaBnZE`: Knoten „E-Mail: Ticket bestaetigt“ entfernt, „Bestellung aktualisieren: bezahlt“ geht direkt auf „Antwort: Erfolg“.
+- `zNGWzRFz3ebzsDkD`, Knoten „Ticket-Mail senden“: der einzige eigene Inhalt der Bestätigung, der Widerspruchshinweis für das Angebot nach dem Spiel (§ 7 Abs. 3 UWG), steht jetzt in der Ticket-Mail, gleicher Wortlaut, nur bei Online-Bestellungen ohne Dauerkarte (Bedingung `!isSeason && orderSummary`; `orderSummary` gibt es nur mit Zeile in „PayPal-Zahlungen“/„Lastschriften-Tickets“).
+- Nebenwirkung: Kommt die Ticket-Mail nicht an (Wächter, PDF-Fehler), hat der Kunde keine Mail mehr; es greifen nur die Alarm-Mails an die IT. Dauerkarten-Bestätigung (`HyUXW4kbhaQVbG0A`) unverändert.
