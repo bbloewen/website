@@ -44,6 +44,7 @@
     .rm-option { padding: 10px 12px; gap: 10px; }
     .rm-option input { margin-top: 2px; }
     .rm-option > span > span { display: none; }
+    .rm-option > span > span.rm-anzahl { display: block; }
     .rm-knopf { width: 100%; position: sticky; bottom: 8px; box-shadow: 0 4px 14px rgba(0,18,45,.25); }
     .rm-danke { padding: 12px 14px; }
     .feedback-widget { display: none; }
@@ -52,6 +53,8 @@
   .rm-optionen { border: 0; padding: 0; margin: 0 0 16px; display: grid; gap: 10px; }
   .rm-optionen legend { font-weight: 800; font-size: 18px; margin: 0 0 10px; }
   .rm-option { display: flex; gap: 12px; align-items: flex-start; border: 2px solid var(--border-strong, #d9dfea); border-radius: 8px; padding: 14px 16px; cursor: pointer; }
+  .rm-anzahl select { margin-top: 6px; font: inherit; padding: 6px 8px; border: 1px solid var(--border-strong, #d9dfea); border-radius: 6px; background: #fff; }
+  .rm-frage { margin: 0 0 4px; font-weight: 600; }
   .rm-option:has(input:checked) { border-color: #B55709; background: #fff7f0; }
   .rm-option input { margin-top: 4px; width: 18px; height: 18px; accent-color: #B55709; flex-shrink: 0; }
   .rm-option strong { display: block; }
@@ -486,8 +489,12 @@
   }
   function formular() {
     var plaetze = Number(D.plaetze) || 1;
-    var bisher = D.antwort ? (du ? BISHER_DU : BISHER)[D.antwort] + (D.antwort === 'weitergegeben' && D.gast_vorname ? ' (an ' + D.gast_vorname + ' ' + D.gast_nachname + ')' : '') : '';
-    var wahl = vorwahl || D.antwort || '';
+    // Ab drei Plätzen (mehrere VIP-Dauerkarten derselben Adresse, Marko 14.11.2026): „Wir kommen mit … Personen“ statt „allein“
+    var weniger = plaetze >= 3 && (D.antwort === 'kommt_allein' || (D.antwort === 'kommt' && Number(D.personen) > 0 && Number(D.personen) < plaetze));
+    var bisher = D.antwort ? (weniger ? w('Du hast zugesagt', 'Sie haben zugesagt') + ' (' + Number(D.personen || 1) + (Number(D.personen || 1) === 1 ? ' Person).' : ' Personen).') : (du ? BISHER_DU : BISHER)[D.antwort]) + (D.antwort === 'weitergegeben' && D.gast_vorname ? ' (an ' + D.gast_vorname + ' ' + D.gast_nachname + ')' : '') : '';
+    var wahl = vorwahl || (weniger ? 'personen' : D.antwort) || '';
+    var anzahlWahl = '<select id="rm-personen" aria-label="' + w('Mit wie vielen Personen kommst du?', 'Mit wie vielen Personen kommen Sie?') + '">' +
+      Array.from({ length: Math.max(0, plaetze - 1) }, function (_, i) { var n = i + 1; return '<option value="' + n + '"' + (weniger && Number(D.personen || 1) === n ? ' selected' : '') + '>' + n + (n === 1 ? ' Person' : ' Personen') + '</option>'; }).join('') + '</select>';
     var opt = function (wert, titel, text) {
       return '<label class="rm-option"><input type="radio" name="antwort" value="' + wert + '"' + (wahl === wert ? ' checked' : '') + ' /><span><strong>' + titel + '</strong>' + (text ? '<span>' + text + '</span>' : '') + '</span></label>';
     };
@@ -495,7 +502,12 @@
     var h = bisher ? '<div class="rm-karte rm-intro"><p><strong>Bisher:</strong> ' + esc(bisher) + '</p></div>' : '';
     h += '<form id="rm-form" novalidate><fieldset class="rm-optionen"><legend>' + w('Deine Antwort', 'Ihre Antwort') + '<span class="rm-kurz" style="font-weight:400"> · ' + esc(plaetze + (plaetze === 1 ? ' Platz' : ' Plätze')) + '</span></legend>' +
       // Karten mit mehreren Plätzen, Reihenfolge laut Marko (02.11.2026): Ich komme allein, Wir kommen nicht, Wir kommen zu zweit, weitergegeben
-      (plaetze >= 2
+      (plaetze >= 3
+        ? '<p class="rm-frage">' + w('Du hast ', 'Sie haben ') + plaetze + ' Plätze. Mit wie vielen Personen ' + w('kommst du?', 'kommen Sie?') + '</p>' +
+          opt('kommt', 'Wir kommen mit ' + plaetze + ' Personen', '') +
+          '<label class="rm-option"><input type="radio" name="antwort" value="personen"' + (wahl === 'personen' ? ' checked' : '') + ' /><span><strong>Wir kommen mit weniger Personen</strong><span class="rm-anzahl">' + anzahlWahl + '</span></span></label>' +
+          opt('kommt_nicht', 'Wir kommen nicht', '')
+        : plaetze >= 2
         ? opt('kommt_allein', 'Ich komme allein', '') + opt('kommt_nicht', 'Wir kommen nicht', '') + opt('kommt', 'Wir kommen ' + ({ 2: 'zu zweit', 3: 'zu dritt', 4: 'zu viert' }[plaetze] || 'zu ' + plaetze), '')
         : opt('kommt', 'Ich komme', '') + opt('kommt_nicht', 'Ich komme nicht', '')) +
       opt('weitergegeben', (plaetze >= 2 ? 'Wir haben' : 'Ich habe') + ' die Karte weitergegeben', w('Nenn uns bitte, wer an deiner Stelle kommt.', 'Nennen Sie uns bitte, wer an Ihrer Stelle kommt.')) +
@@ -509,7 +521,7 @@
     inhalt.innerHTML = h;
     var form = document.getElementById('rm-form'), gast = document.getElementById('rm-gast');
     function gastZeigen() { var a = (form.querySelector('input[name=antwort]:checked') || {}).value; gast.hidden = a !== 'weitergegeben'; }
-    form.addEventListener('change', gastZeigen); gastZeigen();
+    form.addEventListener('change', function (ev) { if (ev.target.id === 'rm-personen') { var r = form.querySelector('input[value="personen"]'); if (r) r.checked = true; } gastZeigen(); }); gastZeigen();
     // Ein Klick in der Mail: Zusage oder Absage speichert diese Seite sofort (per Skript, nicht beim Aufruf des Links, damit Link-Scanner nichts auslösen)
     if (['kommt', 'kommt_allein', 'kommt_nicht'].indexOf(vorwahl) >= 0 && form.querySelector('input[value="' + vorwahl + '"]') && D.antwort !== vorwahl) setTimeout(function () { form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit', { cancelable: true })); }, 0);
     form.addEventListener('submit', function (ev) {
@@ -517,18 +529,20 @@
       var m = document.getElementById('rm-meldung'), k = document.getElementById('rm-senden');
       var a = (form.querySelector('input[name=antwort]:checked') || {}).value;
       if (!a) { m.className = 'rm-meldung fehler'; m.textContent = 'Bitte eine Antwort wählen.'; return; }
+      var personen = a === 'personen' ? Number(document.getElementById('rm-personen').value) : null;
+      if (a === 'personen') a = 'kommt';
       var feld = function (id) { return document.getElementById(id).value.trim(); };
       var g = { vorname: feld('rm-vorname'), nachname: feld('rm-nachname'), email: feld('rm-email') };
       if (a === 'weitergegeben' && (!g.vorname || !g.nachname || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(g.email))) {
         m.className = 'rm-meldung fehler'; m.textContent = 'Bitte Vorname, Nachname und eine gültige E-Mail-Adresse der Person angeben, die kommt.'; return;
       }
       k.disabled = true; m.className = 'rm-meldung'; m.textContent = 'Wird gesendet …';
-      if (test) { vorwahl = ''; D.antwort = a; if (a === 'weitergegeben') { D.gast_vorname = g.vorname; D.gast_nachname = g.nachname; } danke(a, g.vorname + ' ' + g.nachname); return; }
-      fetch(API + 'rueckmeldung-antwort', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ c: code, antwort: a, gast: a === 'weitergegeben' ? g : null }) })
+      if (test) { vorwahl = ''; D.antwort = a; D.personen = personen; if (a === 'weitergegeben') { D.gast_vorname = g.vorname; D.gast_nachname = g.nachname; } danke(a, g.vorname + ' ' + g.nachname); return; }
+      fetch(API + 'rueckmeldung-antwort', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ c: code, antwort: a, personen: personen, gast: a === 'weitergegeben' ? g : null }) })
         .then(function (r) { return r.json(); })
         .then(function (d) {
           if (!d || !d.ok) { k.disabled = false; m.className = 'rm-meldung fehler'; m.textContent = (d && d.meldung) || 'Das hat nicht geklappt. Bitte später noch einmal versuchen.'; return; }
-          vorwahl = ''; D.antwort = a;
+          vorwahl = ''; D.antwort = a; D.personen = personen;
           if (a === 'weitergegeben') { D.gast_vorname = g.vorname; D.gast_nachname = g.nachname; }
           danke(a, g.vorname + ' ' + g.nachname);
         })
@@ -537,7 +551,7 @@
   }
   if (!code) { fehler('Dieser Link ist nicht vollständig. Bitte öffnen Sie den Link aus unserer Mail.'); return; }
   var laden = test
-    ? Promise.resolve({ ok: true, offen: true, test: true, plaetze: Math.min(4, Math.max(1, Number(q.get('p')) || 1)), kategorie: 'VIP - Dauer', spiel_name: 'Basketball Löwen - Musterstadt',
+    ? Promise.resolve({ ok: true, offen: true, test: true, plaetze: Math.min(8, Math.max(1, Number(q.get('p')) || 1)), kategorie: 'VIP - Dauer', spiel_name: 'Basketball Löwen - Musterstadt',
         spiel_beginn: (function () { var t = new Date(Date.now() + 6 * 86400000); t.setHours(17, 0, 0, 0); return t.toISOString(); })(), ort: 'Riethsporthalle, Essener Straße 20, 99089 Erfurt', ansprache: q.get('du') ? 'Du' : 'Sie', name: 'Testperson', antwort: null })
     : fetch(API + 'rueckmeldung-info?c=' + encodeURIComponent(code)).then(function (r) { return r.json(); });
   laden
