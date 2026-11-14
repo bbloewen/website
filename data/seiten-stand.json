@@ -66,8 +66,8 @@
       "lastmod": "2026-11-02"
     },
     "index.html": {
-      "hash": "5f1b09bb7211e2be8d0729c48865e23471e6bce9",
-      "lastmod": "2026-11-13"
+      "hash": "1912ed2febe553a54a9bac188a9fc63bf6d97bdb",
+      "lastmod": "2026-11-14"
     },
     "kontakt.html": {
       "hash": "bcdee5b2d09949e6743a2841214ca41fc525ff7f",
@@ -82,12 +82,12 @@
       "lastmod": "2026-08-08"
     },
     "news/aktuelles.html": {
-      "hash": "b29867ce232804882e582cee4164e858412dccbe",
-      "lastmod": "2026-11-12"
+      "hash": "f75ecd300bafd9554a638e7c184818fb0117e855",
+      "lastmod": "2026-11-14"
     },
     "news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html": {
-      "hash": "0ac309c0375c2c6dd5e91e26465494bffab1da2c",
-      "lastmod": "2026-11-11"
+      "hash": "06e9d8ef6d33bb4340d94153a7ae257748b7ecdc",
+      "lastmod": "2026-11-14"
     },
     "news/artikel/2025-04-29_profis_achtelfinale-aus.html": {
       "hash": "c38eb425968ac35de960a97abce9a1fde0a3192a",
@@ -242,8 +242,12 @@
       "lastmod": "2026-11-11"
     },
     "news/artikel/2026-11-11_profis_thueringen-sachsen-derby-basketball-loewen-erfurt-empfangen-.html": {
-      "hash": "e3e3c8f3e8a2f1fd865df9d8614ee3b747dda70e",
-      "lastmod": "2026-11-11"
+      "hash": "8ccd64757596eee1fd3d49beb231dd216530c295",
+      "lastmod": "2026-11-14"
+    },
+    "news/artikel/2026-11-13_profis_66-91-gegen-dresden-basketball-loewen-erfurt-unterliegen-den.html": {
+      "hash": "4bd4ea0a9ccae6a253428ec357297c2e439a4396",
+      "lastmod": "2026-11-14"
     },
     "news/newsletter/index.html": {
       "hash": "4caad0fb0b2a0fd640456d7f98fa89ad0d374cb4",
@@ -294,8 +298,8 @@
       "lastmod": "2026-11-11"
     },
     "saison/profis.html": {
-      "hash": "68d21bc4eb98f71360c3d9e0fa6f14d773946e68",
-      "lastmod": "2026-11-11"
+      "hash": "78cc64726e01907d2c6ef4a24423cc703c5d1ad5",
+      "lastmod": "2026-11-14"
     },
     "saison/profis/gameday/2026-10-11-bba-ludwigsburg.html": {
       "hash": "ec65bc74b9fa6dbebf16bb7f4a85e73244bf1dc8",
@@ -310,7 +314,7 @@
       "lastmod": "2026-11-13"
     },
     "saison/profis/gameday/2026-11-13-dresden-titans.html": {
-      "hash": "e741f7c87772b1e7dff76a93eedc0a084a1b4d32",
+      "hash": "a63e32f726ffd400b71119a7e8ca31a6400c2df3",
       "lastmod": "2026-11-14"
     },
     "saison/profis/gameday/2026-11-20-fc-bayern-basketball.html": {
