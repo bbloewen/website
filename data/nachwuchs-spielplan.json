@@ -112,7 +112,7 @@
           "zeit": "11:00",
           "heim": true,
           "gegner": "Dresden Titans",
-          "ergebnis": null,
+          "ergebnis": "87:63",
           "abgesagt": false
         },
         {
@@ -260,7 +260,7 @@
           "zeit": "15:00",
           "heim": false,
           "gegner": "Team Leipzig",
-          "ergebnis": null,
+          "ergebnis": "66:71",
           "abgesagt": false
         },
         {
@@ -394,7 +394,7 @@
           "zeit": "11:30",
           "heim": false,
           "gegner": "Dresden Titans 2",
-          "ergebnis": null,
+          "ergebnis": "65:61",
           "abgesagt": false
         },
         {
