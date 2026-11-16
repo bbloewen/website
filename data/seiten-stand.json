@@ -66,7 +66,7 @@
       "lastmod": "2026-11-02"
     },
     "index.html": {
-      "hash": "8d2b36e84845f9352955289fda5c2e64e313fc8d",
+      "hash": "b35e5ec7ab20f72a08cee3f7573e0e5748149ec2",
       "lastmod": "2026-11-16"
     },
     "kontakt.html": {
@@ -82,12 +82,12 @@
       "lastmod": "2026-08-08"
     },
     "news/aktuelles.html": {
-      "hash": "f75ecd300bafd9554a638e7c184818fb0117e855",
-      "lastmod": "2026-11-14"
+      "hash": "c9b3408406e8fb49b7f9ce15b298f7c805edaa2a",
+      "lastmod": "2026-11-16"
     },
     "news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html": {
-      "hash": "06e9d8ef6d33bb4340d94153a7ae257748b7ecdc",
-      "lastmod": "2026-11-14"
+      "hash": "683ba5ad0b0034b678674a9b62c281ba240d90e8",
+      "lastmod": "2026-11-16"
     },
     "news/artikel/2025-04-29_profis_achtelfinale-aus.html": {
       "hash": "c38eb425968ac35de960a97abce9a1fde0a3192a",
@@ -246,8 +246,12 @@
       "lastmod": "2026-11-14"
     },
     "news/artikel/2026-11-13_profis_66-91-gegen-dresden-basketball-loewen-erfurt-unterliegen-den.html": {
-      "hash": "4bd4ea0a9ccae6a253428ec357297c2e439a4396",
-      "lastmod": "2026-11-14"
+      "hash": "60dae2151ebe924b42bf8dc99906b08d947b0d36",
+      "lastmod": "2026-11-16"
+    },
+    "news/artikel/2026-11-15_profis_56-64-in-frankfurt-basketball-loewen-erfurt-kaempfen-sich-zu.html": {
+      "hash": "de9b202ddbef0d5190867d954e0665f5f48e788f",
+      "lastmod": "2026-11-16"
     },
     "news/newsletter/index.html": {
       "hash": "4caad0fb0b2a0fd640456d7f98fa89ad0d374cb4",
@@ -298,8 +302,8 @@
       "lastmod": "2026-11-11"
     },
     "saison/profis.html": {
-      "hash": "78cc64726e01907d2c6ef4a24423cc703c5d1ad5",
-      "lastmod": "2026-11-14"
+      "hash": "4ba232f06371a25713c07a5bede83c2ed19905f0",
+      "lastmod": "2026-11-16"
     },
     "saison/profis/gameday/2026-10-11-bba-ludwigsburg.html": {
       "hash": "ec65bc74b9fa6dbebf16bb7f4a85e73244bf1dc8",
