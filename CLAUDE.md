@@ -39,6 +39,9 @@ bleiben unberührt.
 
 - **n8n:** Änderungen an einem aktiven Workflow wirken erst nach `publish_workflow`. HTTP-Knoten bekommen
   ihre Zugangsdaten nicht automatisch, `credentials` mit ID mitgeben. Temporäre Test-Workflows danach archivieren.
+  Jede Änderung in n8n (neu, geändert, ein-/ausgeschaltet, archiviert) auch in der Notion-Tabelle
+  „n8n-Workflows (Übersicht)“ (`collection://41ba2418-e2d7-8122-a9e2-000be32bb69d`) nachtragen: Beschreibung,
+  Auslöser, Status, „Zuletzt geändert“.
 - **Generatoren** (`tools/*.py`) lesen nur git-getrackte Dateien: neue Dateien erst `git add`, dann bauen.
   `tools/bauen.sh` verändert nebenbei Pressepakete (`assets/presse/*.zip`) und Instagram-Archivseiten;
   die gehören nicht in fremde PRs.
