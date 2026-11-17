@@ -384,7 +384,7 @@ window.goatcounter = { path: function (p) {
         </details>
         <details>
           <summary>Darf ich jemanden mitbringen?</summary>
-          <p class="t-body">Ja. Tragen Sie Ihre Begleitpersonen bei der Anmeldung mit Namen ein, der Name kommt auf das Namensschild. Die E-Mail-Adresse der Begleitung ist freiwillig. Jede Person hat ihr eigenes Ticket, alle Tickets kommen in einer E-Mail an Sie; Begleitpersonen mit E-Mail-Adresse bekommen sie in Kopie.</p>
+          <p class="t-body">Ja. Tragen Sie Ihre Begleitpersonen bei der Anmeldung mit Namen ein, der Name kommt auf das Namensschild, auf Wunsch mit Unternehmen oder Institution. Die E-Mail-Adresse der Begleitung ist freiwillig. Jede Person hat ihr eigenes Ticket, alle Tickets kommen in einer E-Mail an Sie; Begleitpersonen mit E-Mail-Adresse bekommen sie in Kopie.</p>
         </details>
         <details>
           <summary>Bis wann muss ich mich anmelden, und was, wenn alles voll ist?</summary>
@@ -618,10 +618,12 @@ window.goatcounter = { path: function (p) {
     div.innerHTML = '<div class="cc-row">' +
       '<div class="field"><label for="cc-bg-vn-' + n + '">Vorname *</label><input type="text" id="cc-bg-vn-' + n + '" data-bg-feld="vorname" autocomplete="off" required /></div>' +
       '<div class="field"><label for="cc-bg-nn-' + n + '">Nachname *</label><input type="text" id="cc-bg-nn-' + n + '" data-bg-feld="nachname" autocomplete="off" required /></div></div>' +
-      '<div class="cc-row"><div class="field"><label for="cc-bg-m-' + n + '">E-Mail (freiwillig, für eine Kopie)</label><input type="email" id="cc-bg-m-' + n + '" data-bg-feld="email" autocomplete="off" /></div>' +
-      '<div class="field cc-begleiter-weg"><button type="button" class="btn btn-secondary" data-bg-weg="' + n + '" aria-label="Begleitperson ' + n + ' entfernen">Entfernen</button></div></div>';
+      // Unternehmen oder Institution der Begleitperson, freiwillig (Marko 17.11.2026, fürs Namensschild; gespeichert über Migration 484)
+      '<div class="cc-row"><div class="field"><label for="cc-bg-f-' + n + '">Unternehmen oder Institution (freiwillig)</label><input type="text" id="cc-bg-f-' + n + '" data-bg-feld="firma" autocomplete="off" /></div>' +
+      '<div class="field"><label for="cc-bg-m-' + n + '">E-Mail (freiwillig, für eine Kopie)</label><input type="email" id="cc-bg-m-' + n + '" data-bg-feld="email" autocomplete="off" /></div></div>' +
+      '<div class="cc-row"><div class="field cc-begleiter-weg"><button type="button" class="btn btn-secondary" data-bg-weg="' + n + '" aria-label="Begleitperson ' + n + ' entfernen">Entfernen</button></div></div>';
     bgListe.appendChild(div);
-    if (vor) { var f = div.querySelectorAll('[data-bg-feld]'); f[0].value = vor.vorname || ''; f[1].value = vor.nachname || ''; f[2].value = vor.email || ''; }
+    if (vor) { ['vorname', 'nachname', 'firma', 'email'].forEach(function (k) { var el = div.querySelector('[data-bg-feld="' + k + '"]'); if (el) el.value = vor[k] || ''; }); }
     else div.querySelector('input').focus();
   }
   document.getElementById('cc-begleiter-neu').addEventListener('click', function () { begleiterZeile(); });
@@ -638,7 +640,7 @@ window.goatcounter = { path: function (p) {
       document.getElementById('cc-unter').textContent = sie ? 'schön, dass Sie da sind. Mit einem Klick sagen Sie zu oder ab, Begleitpersonen können Sie gleich mit angeben.'
         : 'schön, dass du da bist. Mit einem Klick sagst du zu oder ab, Begleitpersonen kannst du gleich mit angeben.';
       setze('cc-vorname', d.vorname); setze('cc-nachname', d.nachname); setze('cc-mail', d.email); setze('cc-firma', d.firma);
-      (d.begleitpersonen || []).forEach(function (b) { var teile = String(b.name || '').split(' '); begleiterZeile({ vorname: teile.shift(), nachname: teile.join(' '), email: b.email }); });
+      (d.begleitpersonen || []).forEach(function (b) { var teile = String(b.name || '').split(' '); begleiterZeile({ vorname: teile.shift(), nachname: teile.join(' '), email: b.email, firma: b.firma }); });
       var stand = document.getElementById('cc-stand');
       var texte = { angemeldet: 'Sie sind angemeldet. Hier können Sie Ihre Begleitpersonen ändern oder absagen.', warteliste: 'Sie stehen auf der Warteliste. Sobald ein Platz frei wird, bekommen Sie Ihr Ticket per E-Mail.',
         abgesagt: 'Sie haben abgesagt. Falls sich Ihre Pläne ändern, können Sie hier wieder zusagen.' };
