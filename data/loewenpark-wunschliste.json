@@ -1,6 +1,6 @@
 {
   "_hinweis": "Wunschliste der Spendenaktion CATL Löwenpark (Briefing Valentin Kern, Stand November 2026). Beträge sind Richtwerte; die Reihenfolge bestimmt, in welcher Folge Wünsche als finanziert gelten. Bilder: Illustrationen aus dem Drive-Ordner zur Spendenseite (LIESMICH), offen = grau, finanziert = farbig.",
-  "ziel": 165500,
+  "ziel": 181000,
   "bereiche": [
     {
       "id": "halle",
@@ -203,6 +203,20 @@
       "bezeichnung": "Akustik und Licht",
       "betrag": 5500,
       "bild": "/assets/img/spenden-loewenpark/akustik.svg"
+    },
+    {
+      "nr": 26,
+      "bereich": "halle",
+      "bezeichnung": "Automatische Wurfmaschine (Rebound- und Passmaschine)",
+      "betrag": 10000,
+      "bild": "/assets/img/spenden-loewenpark/wurfmaschine.svg"
+    },
+    {
+      "nr": 27,
+      "bereich": "halle",
+      "bezeichnung": "Trinkwassersprudler für die Halle (gekühlt, still und sprudelnd)",
+      "betrag": 5500,
+      "bild": "/assets/img/spenden-loewenpark/wassersprudler.svg"
     }
   ]
 }
