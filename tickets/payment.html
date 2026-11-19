@@ -591,18 +591,10 @@
 
     /* PayPal-Pause (Marko 19.11.2026): PayPal hat das Händlerkonto der Tickets gesperrt
        (PAYEE_ACCOUNT_RESTRICTED, Dokumente in Prüfung). Solange PAYPAL_PAUSE true ist,
-       laden Einzelticket und Fanshop-Gutschein kein PayPal, sondern zeigen einen Hinweis.
-       Kostenlose Bestellungen (Gutschein deckt alles) laufen weiter. Zum Freischalten
-       PAYPAL_PAUSE = false setzen. */
+       laden Einzelticket und Fanshop-Gutschein kein PayPal; Zahlart ist dann nur die Kartenzahlung
+       über SumUp (sumupEinrichten). Kostenlose Bestellungen laufen weiter. Zum Freischalten
+       PAYPAL_PAUSE = false setzen, dann sind PayPal und Karte wählbar. */
     var PAYPAL_PAUSE = true;
-    function paypalPauseHinweis(container) {
-      var pmPaypal = document.getElementById('pm-paypal');
-      if (pmPaypal) pmPaypal.style.display = 'none';
-      container.innerHTML = '<div class="card" role="status" style="padding:18px 20px;border-left:4px solid var(--color-brand-orange)">' +
-        '<p class="t-body" style="margin:0 0 6px;font-weight:var(--weight-bold)">Die Online-Zahlung ist gerade vorübergehend nicht möglich.</p>' +
-        '<p class="t-body-sm" style="margin:0">Wir arbeiten daran und sind bald wieder für dich da. Tickets bekommst du bis dahin an der Abendkasse in der Riethsporthalle. Fragen? Schreib uns an <a href="mailto:tickets@basketball-loewen.com">tickets@basketball-loewen.com</a>.</p>' +
-        '</div>';
-    }
 
     if (cart.productType === 'einzelticket' && !isFreeOrder) {
       document.getElementById('pay-btn').classList.add('hidden');
@@ -657,7 +649,14 @@
         }).render('#paypal-button-container');
       };
       if (PAYPAL_PAUSE) paypalContainer.classList.add('hidden'); else document.body.appendChild(sdkScript);
-      sumupEinrichten();
+      sumupEinrichten({
+        orderUrl: EINZELTICKET_ORDER_CREATE_URL,
+        captureUrl: 'https://ticketing.basketball-loewen.com/webhook/einzelticket-paypal-capture-erfassen',
+        kontakt: 'tickets@basketball-loewen.com',
+        fertig: function (result) {
+          sessionStorage.setItem('bl_order', JSON.stringify({ orderNumber: result.reference, pretixOrderCode: result.pretixOrderCode || '', cart: cart, buyer: buyer, paymentMethod: 'karte' }));
+        }
+      });
     }
 
     /* Kartenzahlung über SumUp (Marko 19.11.2026, Konto XXL Baskets GmbH M14JMCT9). Derselbe
@@ -665,7 +664,7 @@
        einen SumUp-Checkout an. Das Kartenfeld kommt von SumUp (gateway.sumup.com); nach 'success'
        prüft der Capture-Webhook den Checkout bei SumUp (nur PAID mit passendem Betrag) und legt
        erst dann die pretix-Bestellung an. */
-    function sumupEinrichten() {
+    function sumupEinrichten(opt) {
       var pmSumup = document.getElementById('pm-sumup');
       var block = document.getElementById('sumup-block');
       var startBtn = document.getElementById('sumup-start');
@@ -696,7 +695,7 @@
         meldung.classList.add('hidden');
         startBtn.disabled = true;
         startBtn.textContent = 'Kartenzahlung wird vorbereitet …';
-        fetch(EINZELTICKET_ORDER_CREATE_URL, {
+        fetch(opt.orderUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ buyer: buyer, cart: cart, zahlart: 'sumup' })
@@ -737,16 +736,16 @@
         });
       }
       function bestaetigen() {
-        fetch('https://ticketing.basketball-loewen.com/webhook/einzelticket-paypal-capture-erfassen', {
+        fetch(opt.captureUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ reference: reference })
         }).then(function (res) { return res.json(); }).then(function (result) {
           if (!result.ok) throw new Error(result.error || 'Die Zahlung konnte nicht bestätigt werden.');
-          sessionStorage.setItem('bl_order', JSON.stringify({ orderNumber: result.reference, pretixOrderCode: result.pretixOrderCode || '', cart: cart, buyer: buyer, paymentMethod: 'karte' }));
+          opt.fertig(result);
           window.location.href = '/tickets/confirmation.html';
         }).catch(function (err) {
-          fehler((err && err.message) + ' Deine Bestellnummer: ' + reference + '. Bitte schreib uns an tickets@basketball-loewen.com, wir kümmern uns sofort darum.');
+          fehler((err && err.message) + ' Deine Bestellnummer: ' + reference + '. Bitte schreib uns an ' + opt.kontakt + ', wir kümmern uns sofort darum.');
         });
       }
     }
@@ -800,7 +799,15 @@
           }
         }).render('#paypal-button-container');
       };
-      if (PAYPAL_PAUSE) paypalPauseHinweis(paypalContainerFanshop); else document.body.appendChild(sdkScriptFanshop);
+      if (PAYPAL_PAUSE) paypalContainerFanshop.classList.add('hidden'); else document.body.appendChild(sdkScriptFanshop);
+      sumupEinrichten({
+        orderUrl: GUTSCHEIN_ORDER_CREATE_URL,
+        captureUrl: GUTSCHEIN_CAPTURE_URL,
+        kontakt: 'info@basketball-loewen.com',
+        fertig: function (result) {
+          sessionStorage.setItem('bl_order', JSON.stringify({ orderNumber: result.reference, cart: cart, buyer: buyer, paymentMethod: 'karte', giftcardSecret: result.giftcardSecret || '' }));
+        }
+      });
     }
 
     var sepaFields = document.getElementById('sepa-fields');
