@@ -264,14 +264,6 @@
           "abgesagt": false
         },
         {
-          "datum": "2026-11-21",
-          "zeit": "14:00",
-          "heim": true,
-          "gegner": "NINERS Chemnitz",
-          "ergebnis": null,
-          "abgesagt": false
-        },
-        {
           "datum": "2026-11-22",
           "zeit": "09:30",
           "heim": false,
@@ -316,6 +308,14 @@
           "zeit": "15:00",
           "heim": true,
           "gegner": "Team Leipzig",
+          "ergebnis": null,
+          "abgesagt": false
+        },
+        {
+          "datum": "2027-02-26",
+          "zeit": "18:00",
+          "heim": true,
+          "gegner": "NINERS Chemnitz",
           "ergebnis": null,
           "abgesagt": false
         },
