@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Trinkwassersprudler mit Glas, still und sprudelnd">
+<rect width="400" height="300" rx="24" fill="#F4F6F9"/><circle cx="200" cy="150" r="112" fill="#FDF1E6"/><rect x="36" y="246" width="328" height="4" rx="2" fill="#DDE1E9"/>
+<rect x="132" y="52" width="136" height="194" rx="14" fill="#00122D"/>
+<rect x="148" y="70" width="104" height="34" rx="6" fill="#33415A"/><circle cx="172" cy="87" r="7" fill="#7FB6E8"/><circle cx="200" cy="87" r="7" fill="#E5710B"/><circle cx="228" cy="87" r="7" fill="#F4F6F9"/>
+<rect x="148" y="118" width="104" height="96" rx="8" fill="#F4F6F9"/>
+<rect x="186" y="118" width="28" height="16" rx="3" fill="#33415A"/>
+<path d="M200 134 V150" stroke="#7FB6E8" stroke-width="5" stroke-linecap="round"/>
+<path d="M180 158 L184 206 H216 L220 158 Z" fill="#DCEBFA" stroke="#00122D" stroke-width="4" stroke-linejoin="round"/>
+<path d="M183 176 H217 L215 204 H185 Z" fill="#7FB6E8"/>
+<g fill="#F4F6F9"><circle cx="193" cy="194" r="3"/><circle cx="205" cy="186" r="2.5"/><circle cx="199" cy="198" r="2"/><circle cx="209" cy="196" r="3"/></g>
+<rect x="148" y="214" width="104" height="8" rx="3" fill="#33415A"/>
+<g fill="#7FB6E8"><circle cx="292" cy="96" r="8"/><circle cx="312" cy="72" r="5"/><circle cx="300" cy="128" r="6"/><circle cx="104" cy="110" r="6"/><circle cx="92" cy="84" r="4"/></g>
+</svg>

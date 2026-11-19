@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Automatische Basketball-Wurfmaschine mit Fangnetz">
+<rect width="400" height="300" rx="24" fill="#F4F6F9"/><circle cx="200" cy="150" r="112" fill="#FDF1E6"/><rect x="36" y="246" width="328" height="4" rx="2" fill="#DDE1E9"/>
+<g stroke="#00122D" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+<path d="M150 40 L250 40 L222 128 L178 128 Z"/><path d="M164 62 L236 62 M171 84 L229 84 M178 106 L222 106"/><path d="M178 40 L190 128 M222 40 L210 128 M200 40 V128"/>
+<path d="M200 128 V150"/></g>
+<rect x="156" y="150" width="88" height="80" rx="10" fill="#00122D"/><rect x="170" y="164" width="40" height="22" rx="4" fill="#33415A"/><circle cx="226" cy="175" r="6" fill="#E5710B"/>
+<path d="M244 176 L282 160" stroke="#00122D" stroke-width="10" stroke-linecap="round"/>
+<g fill="#33415A"><circle cx="172" cy="238" r="9"/><circle cx="228" cy="238" r="9"/></g>
+<circle cx="316" cy="132" r="22" fill="#E5710B"/><g stroke="#00122D" stroke-width="2.4" fill="none" stroke-linecap="round"><path d="M294 132 H338 M316 110 V154"/><path d="M302.36 114.84 Q312.04 132 302.36 149.16 M329.64 114.84 Q319.96 132 329.64 149.16"/></g>
+<g stroke="#E5710B" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 10" fill="none"><path d="M286 156 Q294 146 298 142"/></g>
+<circle cx="200" cy="28" r="14" fill="#E5710B"/><g stroke="#00122D" stroke-width="2" fill="none" stroke-linecap="round"><path d="M186 28 H214 M200 14 V42"/></g>
+</svg>
