@@ -575,6 +575,21 @@
        wird die pretix-Order angelegt. */
     var EINZELTICKET_ORDER_CREATE_URL = 'https://ticketing.basketball-loewen.com/webhook/einzelticket-paypal-order-erstellen';
 
+    /* PayPal-Pause (Marko 19.11.2026): PayPal hat das Händlerkonto der Tickets gesperrt
+       (PAYEE_ACCOUNT_RESTRICTED, Dokumente in Prüfung). Solange PAYPAL_PAUSE true ist,
+       laden Einzelticket und Fanshop-Gutschein kein PayPal, sondern zeigen einen Hinweis.
+       Kostenlose Bestellungen (Gutschein deckt alles) laufen weiter. Zum Freischalten
+       PAYPAL_PAUSE = false setzen. */
+    var PAYPAL_PAUSE = true;
+    function paypalPauseHinweis(container) {
+      var pmPaypal = document.getElementById('pm-paypal');
+      if (pmPaypal) pmPaypal.style.display = 'none';
+      container.innerHTML = '<div class="card" role="status" style="padding:18px 20px;border-left:4px solid var(--color-brand-orange)">' +
+        '<p class="t-body" style="margin:0 0 6px;font-weight:var(--weight-bold)">Die Online-Zahlung ist gerade vorübergehend nicht möglich.</p>' +
+        '<p class="t-body-sm" style="margin:0">Wir arbeiten daran und sind bald wieder für dich da. Tickets bekommst du bis dahin an der Abendkasse in der Riethsporthalle. Fragen? Schreib uns an <a href="mailto:tickets@basketball-loewen.com">tickets@basketball-loewen.com</a>.</p>' +
+        '</div>';
+    }
+
     if (cart.productType === 'einzelticket' && !isFreeOrder) {
       document.getElementById('pay-btn').classList.add('hidden');
       var paypalContainer = document.getElementById('paypal-button-container');
@@ -627,7 +642,7 @@
           }
         }).render('#paypal-button-container');
       };
-      document.body.appendChild(sdkScript);
+      if (PAYPAL_PAUSE) paypalPauseHinweis(paypalContainer); else document.body.appendChild(sdkScript);
     }
 
     /* Fanshop-Gutschein: echte PayPal-Buttons wie beim Einzelticket. Nur wenn der
@@ -679,7 +694,7 @@
           }
         }).render('#paypal-button-container');
       };
-      document.body.appendChild(sdkScriptFanshop);
+      if (PAYPAL_PAUSE) paypalPauseHinweis(paypalContainerFanshop); else document.body.appendChild(sdkScriptFanshop);
     }
 
     var sepaFields = document.getElementById('sepa-fields');
