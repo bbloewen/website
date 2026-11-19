@@ -1,6 +1,6 @@
 {
   "_hinweis": "Wunschliste der Spendenaktion CATL Löwenpark (Briefing Valentin Kern, Stand November 2026). Beträge sind Richtwerte; die Reihenfolge bestimmt, in welcher Folge Wünsche als finanziert gelten. Bilder: Illustrationen aus dem Drive-Ordner zur Spendenseite (LIESMICH), offen = grau, finanziert = farbig.",
-  "ziel": 181000,
+  "ziel": 188500,
   "bereiche": [
     {
       "id": "halle",
@@ -217,6 +217,13 @@
       "bezeichnung": "Trinkwassersprudler für die Halle (gekühlt, still und sprudelnd)",
       "betrag": 5500,
       "bild": "/assets/img/spenden-loewenpark/wassersprudler.svg"
+    },
+    {
+      "nr": 28,
+      "bereich": "kabinen",
+      "bezeichnung": "Kältebecken zur Regeneration (Eisbad mit Kühlgerät)",
+      "betrag": 7500,
+      "bild": "/assets/img/spenden-loewenpark/kaeltebecken.svg"
     }
   ]
 }

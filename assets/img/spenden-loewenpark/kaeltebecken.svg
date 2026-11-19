@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Kältebecken mit Kühlgerät für die Regeneration in der Kabine">
+<rect width="400" height="300" rx="24" fill="#F4F6F9"/><circle cx="200" cy="150" r="112" fill="#FDF1E6"/><rect x="36" y="246" width="328" height="4" rx="2" fill="#DDE1E9"/>
+<path d="M92 126 H268 L260 236 H100 Z" fill="#00122D"/>
+<path d="M104 140 H256 L250 222 H110 Z" fill="#7FB6E8"/>
+<path d="M104 140 Q130 132 156 140 T208 140 T256 140" fill="none" stroke="#DCEBFA" stroke-width="5" stroke-linecap="round"/>
+<g fill="#F4F6F9"><rect x="136" y="154" width="22" height="22" rx="4" transform="rotate(-12 147 165)"/><rect x="196" y="160" width="20" height="20" rx="4" transform="rotate(14 206 170)"/><rect x="164" y="186" width="18" height="18" rx="4" transform="rotate(6 173 195)"/></g>
+<rect x="84" y="118" width="192" height="12" rx="6" fill="#33415A"/>
+<rect x="286" y="168" width="58" height="68" rx="8" fill="#33415A"/><rect x="296" y="180" width="38" height="14" rx="3" fill="#00122D"/><circle cx="324" cy="187" r="3.5" fill="#E5710B"/>
+<g stroke="#F4F6F9" stroke-width="3" stroke-linecap="round"><path d="M298 206 H332 M298 214 H332 M298 222 H332"/></g>
+<path d="M286 210 H262" stroke="#00122D" stroke-width="6" stroke-linecap="round"/>
+<g stroke="#7FB6E8" stroke-width="4" stroke-linecap="round" fill="none"><path d="M178 58 V98 M160 68 L196 88 M196 68 L160 88"/><path d="M228 42 V70 M216 49 L240 63 M240 49 L216 63"/></g>
+<path d="M314 120 V150" stroke="#00122D" stroke-width="5" stroke-linecap="round"/><circle cx="314" cy="156" r="9" fill="#00122D"/><circle cx="314" cy="156" r="5" fill="#7FB6E8"/><path d="M314 124 V150" stroke="#7FB6E8" stroke-width="2.5" stroke-linecap="round"/>
+</svg>
