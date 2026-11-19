@@ -323,6 +323,15 @@
               </span>
             </label>
 
+            <label class="payment-method-card hidden" id="pm-sumup">
+              <input type="radio" name="paymethod" value="sumup">
+              <span class="payment-method-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-brand-blue)" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg></span>
+              <span>
+                <strong>Kartenzahlung</strong>
+                <span class="t-caption">Mit Kredit- oder Debitkarte, sicher über unseren Zahlungsdienstleister SumUp.</span>
+              </span>
+            </label>
+
             <label class="payment-method-card hidden" id="pm-sepa">
               <input type="radio" name="paymethod" value="sepa">
               <span class="payment-method-icon"><i data-lucide="landmark" class="icon-16" style="color:var(--color-brand-blue)"></i></span>
@@ -356,6 +365,11 @@
 
             <button class="btn btn-primary btn-sm" type="submit" id="pay-btn" style="width:100%;justify-content:center">Jetzt bezahlen</button>
             <div id="paypal-button-container" class="hidden" style="margin-top:4px"></div>
+            <div id="sumup-block" class="hidden" style="margin-top:4px">
+              <button class="btn btn-primary btn-sm" type="button" id="sumup-start" style="width:100%;justify-content:center">Weiter zur Kartenzahlung</button>
+              <div id="sumup-card" style="margin-top:12px"></div>
+              <p id="sumup-meldung" class="t-body-sm hidden" role="alert" style="margin-top:10px;color:var(--color-error, #b42318)"></p>
+            </div>
           </form>
         </div>
       </div>
@@ -642,7 +656,99 @@
           }
         }).render('#paypal-button-container');
       };
-      if (PAYPAL_PAUSE) paypalPauseHinweis(paypalContainer); else document.body.appendChild(sdkScript);
+      if (PAYPAL_PAUSE) paypalContainer.classList.add('hidden'); else document.body.appendChild(sdkScript);
+      sumupEinrichten();
+    }
+
+    /* Kartenzahlung über SumUp (Marko 19.11.2026, Konto XXL Baskets GmbH M14JMCT9). Derselbe
+       Order-Webhook wie PayPal, mit zahlart 'sumup': n8n prüft Preis, Sitze und Gutschein und legt
+       einen SumUp-Checkout an. Das Kartenfeld kommt von SumUp (gateway.sumup.com); nach 'success'
+       prüft der Capture-Webhook den Checkout bei SumUp (nur PAID mit passendem Betrag) und legt
+       erst dann die pretix-Bestellung an. */
+    function sumupEinrichten() {
+      var pmSumup = document.getElementById('pm-sumup');
+      var block = document.getElementById('sumup-block');
+      var startBtn = document.getElementById('sumup-start');
+      var meldung = document.getElementById('sumup-meldung');
+      var ppContainer = document.getElementById('paypal-button-container');
+      pmSumup.classList.remove('hidden');
+      function zeige(zahlart) {
+        var karte = zahlart === 'sumup';
+        block.classList.toggle('hidden', !karte);
+        if (!PAYPAL_PAUSE) ppContainer.classList.toggle('hidden', karte);
+      }
+      if (PAYPAL_PAUSE) {
+        document.getElementById('pm-paypal').style.display = 'none';
+        pmSumup.querySelector('input').checked = true;
+        zeige('sumup');
+      } else {
+        zeige('paypal');
+      }
+      document.querySelectorAll('input[name="paymethod"]').forEach(function (r) {
+        r.addEventListener('change', function () { if (this.checked) zeige(this.value); });
+      });
+      function fehler(text) {
+        meldung.textContent = text;
+        meldung.classList.remove('hidden');
+      }
+      var reference = null;
+      startBtn.addEventListener('click', function () {
+        meldung.classList.add('hidden');
+        startBtn.disabled = true;
+        startBtn.textContent = 'Kartenzahlung wird vorbereitet …';
+        fetch(EINZELTICKET_ORDER_CREATE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ buyer: buyer, cart: cart, zahlart: 'sumup' })
+        }).then(function (res) { return res.json(); }).then(function (data) {
+          if (!data.ok) throw new Error(data.error || 'Die Bestellung konnte nicht vorbereitet werden.');
+          if (!data.checkoutId && data.pretixOrderCode) {
+            sessionStorage.setItem('bl_order', JSON.stringify({ orderNumber: data.reference, pretixOrderCode: data.pretixOrderCode || '', cart: cart, buyer: buyer, paymentMethod: 'kostenlos' }));
+            window.location.href = '/tickets/confirmation.html';
+            return;
+          }
+          reference = data.reference;
+          return ladeSumup().then(function () {
+            startBtn.classList.add('hidden');
+            window.SumUpCard.mount({
+              id: 'sumup-card',
+              checkoutId: data.checkoutId,
+              locale: 'de-DE',
+              onResponse: function (type) {
+                if (type === 'success') bestaetigen();
+                else if (type === 'error' || type === 'fail') fehler('Die Kartenzahlung wurde nicht abgeschlossen. Es wurde nichts abgebucht. Bitte prüfe deine Angaben oder versuche es mit einer anderen Karte.');
+              }
+            });
+          });
+        }).catch(function (err) {
+          startBtn.disabled = false;
+          startBtn.textContent = 'Weiter zur Kartenzahlung';
+          fehler((err && err.message) || 'Die Kartenzahlung konnte gerade nicht vorbereitet werden. Bitte versuche es gleich noch einmal.');
+        });
+      });
+      function ladeSumup() {
+        if (window.SumUpCard) return Promise.resolve();
+        return new Promise(function (ok, nein) {
+          var sc = document.createElement('script');
+          sc.src = 'https://gateway.sumup.com/gateway/ecom/card/v2/sdk.js';
+          sc.onload = ok;
+          sc.onerror = function () { nein(new Error('Das Kartenzahlungsfeld konnte nicht geladen werden. Bitte lade die Seite neu.')); };
+          document.body.appendChild(sc);
+        });
+      }
+      function bestaetigen() {
+        fetch('https://ticketing.basketball-loewen.com/webhook/einzelticket-paypal-capture-erfassen', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reference: reference })
+        }).then(function (res) { return res.json(); }).then(function (result) {
+          if (!result.ok) throw new Error(result.error || 'Die Zahlung konnte nicht bestätigt werden.');
+          sessionStorage.setItem('bl_order', JSON.stringify({ orderNumber: result.reference, pretixOrderCode: result.pretixOrderCode || '', cart: cart, buyer: buyer, paymentMethod: 'karte' }));
+          window.location.href = '/tickets/confirmation.html';
+        }).catch(function (err) {
+          fehler((err && err.message) + ' Deine Bestellnummer: ' + reference + '. Bitte schreib uns an tickets@basketball-loewen.com, wir kümmern uns sofort darum.');
+        });
+      }
     }
 
     /* Fanshop-Gutschein: echte PayPal-Buttons wie beim Einzelticket. Nur wenn der
