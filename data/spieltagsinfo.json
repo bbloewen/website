@@ -25,6 +25,14 @@
       "cover": "01-titel-cover.webp",
       "pdf": "ausgabe-3-spieltagsinfo.pdf",
       "seiten": 24
+    },
+    {
+      "nr": 4,
+      "titel": "Löwen gegen Bayern II",
+      "beschreibung": "Freitagabend in der Riethsporthalle: Kader der Löwen und des FC Bayern Basketball II, Ligatabelle und Spielplan, das letzte Heimspiel der Dreier-Aktion für die Erfurt Crowd, der Half-Court-Shot um ein Trikot und der Baufortschritt am CATL LÖWENPARK.",
+      "cover": "01-titel-cover.webp",
+      "pdf": "ausgabe-4-spieltagsinfo.pdf",
+      "seiten": 25
     }
   ]
 }

@@ -314,56 +314,56 @@
       "lastmod": "2026-11-09"
     },
     "saison/profis/gameday/2026-11-08-culture-city-weimar.html": {
-      "hash": "bbb251bfbb9307070d3964223b1d16f83a4d6e54",
-      "lastmod": "2026-11-13"
+      "hash": "976bcd308cc9d567faa7aee31a6243b47016f083",
+      "lastmod": "2026-11-20"
     },
     "saison/profis/gameday/2026-11-13-dresden-titans.html": {
       "hash": "a63e32f726ffd400b71119a7e8ca31a6400c2df3",
       "lastmod": "2026-11-14"
     },
     "saison/profis/gameday/2026-11-20-fc-bayern-basketball.html": {
-      "hash": "da97d524001dd101b7e8e0299cf1e486fc9d573c",
-      "lastmod": "2026-11-13"
+      "hash": "559742d85d5aecacf1d6e070660cd6c9cfc046c4",
+      "lastmod": "2026-11-20"
     },
     "saison/profis/gameday/2026-12-06-bg-leitershofen.html": {
-      "hash": "a075ba7e6a4e57e7fac80e6dce2d9f5b17dd4238",
-      "lastmod": "2026-11-13"
+      "hash": "c088504e98e62b1d3d8ced0b571c539147e0c39d",
+      "lastmod": "2026-11-20"
     },
     "saison/profis/gameday/2026-12-13-tsv-oberhaching-tropics.html": {
-      "hash": "f342639f8a9dc84e9b867524f3f4ede41c618e69",
-      "lastmod": "2026-11-13"
+      "hash": "0ad046566f6559292888f4a4ccf23ca6b8693ab2",
+      "lastmod": "2026-11-20"
     },
     "saison/profis/gameday/2027-01-03-dragons-rhoendorf.html": {
-      "hash": "c32a95642740905029db7247823194c3b54c837c",
-      "lastmod": "2026-11-13"
+      "hash": "e9e4209d018dcbfca6cba0c33369c23e98557e63",
+      "lastmod": "2026-11-20"
     },
     "saison/profis/gameday/2027-01-17-skyliners-juniors.html": {
-      "hash": "87ba88c281046274cba70261ee44756da5b2b7ca",
-      "lastmod": "2026-11-15"
+      "hash": "c77833fff343f37eebdb1a2ed86ce69e8b9f430c",
+      "lastmod": "2026-11-20"
     },
     "saison/profis/gameday/2027-01-31-bbc-coburg.html": {
-      "hash": "aaf75d1bb22a02a1cf0f9f744fd546cb8290fec7",
-      "lastmod": "2026-11-13"
+      "hash": "4d001dfb0084c532d8420cc3555c62175951ea1f",
+      "lastmod": "2026-11-20"
     },
     "saison/profis/gameday/2027-02-14-sv-fellbach-flashers.html": {
-      "hash": "facc9a6993729117ea0c70c1eb36d750c9de9e59",
-      "lastmod": "2026-11-13"
+      "hash": "a681c7f003e208c22c3b5f9dd339c73abe610a02",
+      "lastmod": "2026-11-20"
     },
     "saison/profis/gameday/2027-03-07-giants-leverkusen.html": {
-      "hash": "e4d0aac6c20295c0c4806f00b2eb8527cb024c85",
-      "lastmod": "2026-11-13"
+      "hash": "354550c99d31c3f4c7cab6d72433f17b0bb2e6eb",
+      "lastmod": "2026-11-20"
     },
     "saison/profis/gameday/2027-03-21-tv-langen.html": {
-      "hash": "affa891de0452411f656c4fe256e6a878a891919",
-      "lastmod": "2026-11-13"
+      "hash": "0e529930a43999af8e74cce12319ed1d22288e4d",
+      "lastmod": "2026-11-20"
     },
     "saison/profis/gameday/2027-03-28-ahorn-camp-baskets.html": {
-      "hash": "eb318e7861ebb56461927341d28421d796793f33",
-      "lastmod": "2026-11-13"
+      "hash": "877dbf3464317ecaa3cda838983e0d98756bf8fa",
+      "lastmod": "2026-11-20"
     },
     "saison/profis/gameday/index.html": {
-      "hash": "a38106dfa334d3daf7eccfe5335c13fee177a151",
-      "lastmod": "2026-11-19"
+      "hash": "88b111467c6b4725984301832984b0c3b67c12b1",
+      "lastmod": "2026-11-20"
     },
     "saison/profis/gameday/spieltagsinfo/ausgabe-1/index.html": {
       "hash": "9ac979d2779af1d4d917512e6335e6b8dd52e426",
@@ -376,6 +376,14 @@
     "saison/profis/gameday/spieltagsinfo/ausgabe-3/index.html": {
       "hash": "3bc1cf5c2c766fe69a82eab00cbf36b26577255a",
       "lastmod": "2026-11-13"
+    },
+    "saison/profis/gameday/spieltagsinfo/ausgabe-4/index.html": {
+      "hash": "7adbdae96d8c00a7c6a6e6bd5aade043144fea4e",
+      "lastmod": "2026-11-20"
+    },
+    "saison/profis/gameday/spieltagsinfo/index.html": {
+      "hash": "449d0795bedce4e3d0f5ae0a9742568382c5313a",
+      "lastmod": "2026-11-20"
     },
     "saison/spielplan.html": {
       "hash": "eadce880b42592ef7f8cd6e6f405c3010762814b",
