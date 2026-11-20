@@ -132,7 +132,14 @@
       "vorverkaufAb": "2026-11-05",
       "spielberichtUrl": "/saison/profis/gameday/2026-11-20-fc-bayern-basketball.html",
       "stehplatzBuchbar": false,
-      "livestream": "https://sporteurope.tv/basketball-loewen-erfurt/catl-basketball-loewen-vs-fc-bayern-basketball-ii"
+      "livestream": "https://sporteurope.tv/basketball-loewen-erfurt/catl-basketball-loewen-vs-fc-bayern-basketball-ii",
+      "ergebnis": "104 : 78",
+      "viertel": [
+        "28 : 15",
+        "33 : 21",
+        "16 : 21",
+        "27 : 21"
+      ]
     },
     {
       "datum": "06.12.2026",
