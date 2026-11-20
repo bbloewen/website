@@ -66,7 +66,7 @@
       "lastmod": "2026-11-02"
     },
     "index.html": {
-      "hash": "b0110c59a797e8a2b0fbb0f6da2e585b5f43ff75",
+      "hash": "1fe209547d3f75eb9bc3ca2a88a51ae2f17b5ddf",
       "lastmod": "2026-11-20"
     },
     "kontakt.html": {
@@ -82,12 +82,12 @@
       "lastmod": "2026-08-08"
     },
     "news/aktuelles.html": {
-      "hash": "c9b3408406e8fb49b7f9ce15b298f7c805edaa2a",
-      "lastmod": "2026-11-16"
+      "hash": "c56c6cd80431d0e9f4a96fc2d0d19d303bc414ae",
+      "lastmod": "2026-11-20"
     },
     "news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html": {
-      "hash": "683ba5ad0b0034b678674a9b62c281ba240d90e8",
-      "lastmod": "2026-11-16"
+      "hash": "abd5d791b806bcc0736e142d571b4b888e6d4cb4",
+      "lastmod": "2026-11-20"
     },
     "news/artikel/2025-04-29_profis_achtelfinale-aus.html": {
       "hash": "c38eb425968ac35de960a97abce9a1fde0a3192a",
@@ -250,8 +250,12 @@
       "lastmod": "2026-11-16"
     },
     "news/artikel/2026-11-15_profis_56-64-in-frankfurt-basketball-loewen-erfurt-kaempfen-sich-zu.html": {
-      "hash": "de9b202ddbef0d5190867d954e0665f5f48e788f",
-      "lastmod": "2026-11-16"
+      "hash": "b6a72f99ca0d264a73cef87d765c6cf6c0a77b70",
+      "lastmod": "2026-11-20"
+    },
+    "news/artikel/2026-11-20_profis_freitagabend-in-der-riethsporthalle-basketball-loewen-erfurt.html": {
+      "hash": "b59eda78bc18fe187aca00fe84f7b7310571dc70",
+      "lastmod": "2026-11-20"
     },
     "news/newsletter/index.html": {
       "hash": "4caad0fb0b2a0fd640456d7f98fa89ad0d374cb4",
@@ -302,8 +306,8 @@
       "lastmod": "2026-11-11"
     },
     "saison/profis.html": {
-      "hash": "4ba232f06371a25713c07a5bede83c2ed19905f0",
-      "lastmod": "2026-11-16"
+      "hash": "f13727f1e196880d7a5d80352ee5977934cc6345",
+      "lastmod": "2026-11-20"
     },
     "saison/profis/gameday/2026-10-11-bba-ludwigsburg.html": {
       "hash": "ec65bc74b9fa6dbebf16bb7f4a85e73244bf1dc8",
