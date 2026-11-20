@@ -105,6 +105,20 @@
     return BLOCK_ITEM_BY_KEY[key] || null;
   }
 
+  /* Pretix-Dauerkarten-Item je Block — gleiche Zuordnung wie BLOCK_ITEM_MAP/resolveBlockKey im n8n-Workflow
+     "Dauerkartenbestellung verarbeiten". Fall U17-RWUF4E (20.11.2026): Ein Gutschein für Block E Dauer (41)
+     rabattierte auch Block B Dauer (44), weil beide "Kategorie I" sind; die Seite zeigte 0 €, pretix lehnte ab. */
+  var DK_ITEM_BY_KEY = { 'Block A': 37, 'Block B': 44, 'Block C': 42, 'Block CS': 46, 'Block D': 43, 'Block E': 41,
+    'Block F': 45, 'VIP': 47, 'Fanblock': 38, 'Rollstuhlplatz': 39 };
+  function dkItemId(s) {
+    if (!s) return null;
+    var key;
+    if (s.category === 'Fanblock' || s.category === 'VIP' || s.category === 'Rollstuhlplatz') key = s.category;
+    else if (s.category === 'C unten') key = 'Block CS';
+    else key = s.zoneLabel || s.block || s.category;
+    return DK_ITEM_BY_KEY[key] || null;
+  }
+
   /* An welcher Kante die Reihen eines Blocks ausgerichtet sind. Steht als align_edge
      in den Zonendaten, weil es pro Blockseite unterschiedlich ist: A/B/F richten sich
      an der rechten Kante aus ("trailing"), C/D/E an der linken ("leading"). Fällt die
@@ -379,6 +393,10 @@
         var s = self.selected[guid];
         if (!allUnits && categories.indexOf(s.category) === -1) return;
         if (!tarifOk(s.tarif)) return;
+        if (self.dkDiscount && info.itemIds && info.itemIds.length) {
+          var dkId = dkItemId(s);
+          if (dkId === null || info.itemIds.indexOf(dkId) === -1) return;
+        }
         units.push({ qty: 1, unitPrice: s.price });
       });
     }
