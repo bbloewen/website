@@ -142,6 +142,18 @@
     },
     {
       "datum": "20.11.2026",
+      "kategorie": "Spielbericht",
+      "tint": "tint-blue",
+      "icon": "trophy",
+      "titel": "104:75 gegen den FC Bayern: Basketball Löwen Erfurt feiern deutlichen Heimsieg",
+      "kurztext": "Basketball Löwen Erfurt schlagen FC Bayern Basketball II mit 104:75. Anthony (25 Punkte) und Ilias (20 Punkte) führen die Löwen zum Heimsieg.",
+      "url": "/news/artikel/2026-11-20_profis_104-75-gegen-den-fc-bayern-basketball-loewen-erfurt-feiern-d.html",
+      "bild": "/assets/img/news/305-99319-20261121130459.webp",
+      "topNews": false,
+      "team": "profis"
+    },
+    {
+      "datum": "20.11.2026",
       "kategorie": "Vorbericht",
       "tint": "tint-orange",
       "icon": "calendar",

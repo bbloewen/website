@@ -66,8 +66,8 @@
       "lastmod": "2026-11-02"
     },
     "index.html": {
-      "hash": "825aed506cfc4ab59ca10e91c3f074655ab51f26",
-      "lastmod": "2026-11-20"
+      "hash": "4e71a02059c4fd7ae056bce6a9f3e030fece38f4",
+      "lastmod": "2026-11-21"
     },
     "kontakt.html": {
       "hash": "bcdee5b2d09949e6743a2841214ca41fc525ff7f",
@@ -82,12 +82,12 @@
       "lastmod": "2026-08-08"
     },
     "news/aktuelles.html": {
-      "hash": "c56c6cd80431d0e9f4a96fc2d0d19d303bc414ae",
-      "lastmod": "2026-11-20"
+      "hash": "ddc915bcf39320e2e31d61d028ea508f2fa024bc",
+      "lastmod": "2026-11-21"
     },
     "news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html": {
-      "hash": "abd5d791b806bcc0736e142d571b4b888e6d4cb4",
-      "lastmod": "2026-11-20"
+      "hash": "572d5efdb404bc45688aaa7f8fcede8179ec01fa",
+      "lastmod": "2026-11-21"
     },
     "news/artikel/2025-04-29_profis_achtelfinale-aus.html": {
       "hash": "c38eb425968ac35de960a97abce9a1fde0a3192a",
@@ -253,9 +253,13 @@
       "hash": "b6a72f99ca0d264a73cef87d765c6cf6c0a77b70",
       "lastmod": "2026-11-20"
     },
+    "news/artikel/2026-11-20_profis_104-75-gegen-den-fc-bayern-basketball-loewen-erfurt-feiern-d.html": {
+      "hash": "7b29b9b6f3fb149e40688a0a0c4680c0fbcf9718",
+      "lastmod": "2026-11-21"
+    },
     "news/artikel/2026-11-20_profis_freitagabend-in-der-riethsporthalle-basketball-loewen-erfurt.html": {
-      "hash": "b59eda78bc18fe187aca00fe84f7b7310571dc70",
-      "lastmod": "2026-11-20"
+      "hash": "1ded1463fdb7aa9466e04626a3451158335a0661",
+      "lastmod": "2026-11-21"
     },
     "news/newsletter/index.html": {
       "hash": "4caad0fb0b2a0fd640456d7f98fa89ad0d374cb4",
@@ -306,8 +310,8 @@
       "lastmod": "2026-11-11"
     },
     "saison/profis.html": {
-      "hash": "f13727f1e196880d7a5d80352ee5977934cc6345",
-      "lastmod": "2026-11-20"
+      "hash": "7f73553c57ebdefc52c4a1799902a5d59f4f98e5",
+      "lastmod": "2026-11-21"
     },
     "saison/profis/gameday/2026-10-11-bba-ludwigsburg.html": {
       "hash": "ec65bc74b9fa6dbebf16bb7f4a85e73244bf1dc8",
@@ -326,7 +330,7 @@
       "lastmod": "2026-11-14"
     },
     "saison/profis/gameday/2026-11-20-fc-bayern-basketball.html": {
-      "hash": "a2fb60fb9509580e57637d7d8a43ea4d488904d5",
+      "hash": "c8d3deb2025fcb50a3e96b7981e2c3d2f62bc3e8",
       "lastmod": "2026-11-21"
     },
     "saison/profis/gameday/2026-12-06-bg-leitershofen.html": {
