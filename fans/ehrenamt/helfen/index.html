@@ -697,7 +697,7 @@
     });
     return h + back + '</div>';
   }
-  // Helferpunkte (Migration 395, Marko 11.11.2026): Stand und Einlösen als Wertgutschein, nur mit persönlichem Link und wenn 305 sie freigeschaltet hat
+  // Löwenpunkte (bis 22.11.2026 Helferpunkte, Migration 395, Marko 11.11.2026): Stand und Einlösen als Wertgutschein, nur mit persönlichem Link und wenn 305 sie freigeschaltet hat
   function hfEur(v) { return Number(v || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'; }
   function hfZahl(v) { return Number(v || 0).toLocaleString('de-DE'); }
   function hfDatum(d) { var x = String(d || '').slice(0, 10).split('-'); return x.length === 3 ? x[2] + '.' + x[1] + '.' + x[0] : ''; }
@@ -709,10 +709,10 @@
   }
   function hfPunkte(p) {
     var stand = Math.max(Number(p.stand) || 0, 0);
-    var h = '<div class="hf-karte" id="hf-punkte"><h2>Deine Helferpunkte</h2>' +
+    var h = '<div class="hf-karte" id="hf-punkte"><h2>Deine Löwenpunkte</h2>' +
       '<p><strong>' + esc(hfZahl(stand)) + ' Punkte</strong> = ' + esc(hfEur(p.wert)) + ' · aus ' + esc(p.tage) + (Number(p.tage) === 1 ? ' Helfertag' : ' Helfertagen') +
       (p.geplant ? ', ' + esc(p.geplant) + ' weitere geplant' : '') + '</p>' +
-      '<p class="hf-klein">Für jeden Helfertag gibt es Punkte, ein Punkt ist ' + esc(p.cent_je_punkt) + ' Cent wert. Du löst sie als Gutschein für Tickets ein.</p>';
+      '<p class="hf-klein">Für jeden Helfertag gibt es Löwenpunkte, ein Punkt ist ' + esc(p.cent_je_punkt) + ' Cent wert. Du löst sie als Gutschein für Tickets ein.</p>';
     if (p.kann_einloesen) h += '<button type="button" class="hf-knopf" id="hf-punkte-einloesen" data-wert="' + esc(hfEur(p.wert)) + '" data-punkte="' + esc(hfZahl(stand)) + '">Als Gutschein über ' + esc(hfEur(p.wert)) + ' einlösen</button><p class="hf-meldung" id="hf-punkte-m" role="status" aria-live="polite"></p>';
     else h += '<p class="hf-klein">Einlösen geht ab ' + esc(hfZahl(p.mindestens)) + ' Punkten.</p>';
     return h + hfGutscheine(p.einloesungen) + '</div>';
