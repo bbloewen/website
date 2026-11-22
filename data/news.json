@@ -236,6 +236,18 @@
       "topNews": false
     },
     {
+      "datum": "12.10.2026",
+      "kategorie": "Profis",
+      "tint": "tint-orange",
+      "icon": "newspaper",
+      "titel": "Erster Heimsieg der Basketball Löwen Erfurt im MDR Thüringen Journal",
+      "kurztext": "Basketball Löwen Erfurt im MDR Thüringen Journal: der Beitrag zum ersten Heimsieg, 76:74 gegen die Porsche BBA Ludwigsburg in der Riethsporthalle.",
+      "url": "/news/artikel/2026-10-12_profis_mdr-thueringen-journal-erster-heimsieg.html",
+      "bild": "/assets/img/news/305-109027-20261122090038.webp",
+      "topNews": false,
+      "team": "profis"
+    },
+    {
       "datum": "09.10.2026",
       "kategorie": "Vorbericht",
       "tint": "tint-orange",
