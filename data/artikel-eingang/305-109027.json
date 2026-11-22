@@ -2,7 +2,7 @@
   "status": "pruefung",
   "datum": "2026-10-12",
   "team": "profis",
-  "slug": "erster-heimsieg-der-basketball-loewen-erfurt-im-mdr-thuering",
+  "slug": "mdr-thueringen-journal-erster-heimsieg",
   "titel": "Erster Heimsieg der Basketball Löwen Erfurt im MDR Thüringen Journal",
   "lead": "Das MDR Thüringen Journal hat über den ersten Heimsieg der Basketball Löwen Erfurt berichtet: 76:74 gegen die Porsche BBA Ludwigsburg am 11. Oktober 2026 in der Riethsporthalle.",
   "beschreibung": "Basketball Löwen Erfurt im MDR Thüringen Journal: der Beitrag zum ersten Heimsieg, 76:74 gegen die Porsche BBA Ludwigsburg in der Riethsporthalle.",
@@ -19,5 +19,8 @@
     "Der Beitrag ist in der ARD Mediathek abrufbar."
   ],
   "quellbild": "data/artikel-eingang/bilder/305-109027-20261122090038.webp",
-  "artikelId": 109027
+  "artikelId": 109027,
+  "frueher": [
+    "2026-10-12_profis_erster-heimsieg-der-basketball-loewen-erfurt-im-mdr-thuering.html"
+  ]
 }
