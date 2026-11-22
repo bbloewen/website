@@ -2029,6 +2029,7 @@ a.impact-stat:hover { border-color: var(--color-brand-orange); box-shadow: var(-
 .hero-photo.hero-u19 { --hero-photo-url: url('/assets/img/team-nbbl-hero.webp'); background-position: center 55%; }
 
 /* Hero-Varianten für einzelne News-Artikel mit echtem Pressefoto */
+.hero-photo.hero-news-305-109027-20261122090038 { --hero-photo-url: url('/assets/img/news/305-109027-20261122090038.webp'); background-position: center center; }
 .hero-photo.hero-news-305-99319-20261121130459 { --hero-photo-url: url('/assets/img/news/305-99319-20261121130459.webp'); background-position: center center; }
 .hero-photo.hero-news-305-98244-20261120153358 { --hero-photo-url: url('/assets/img/news/305-98244-20261120153358.webp'); background-position: center center; }
 .hero-photo.hero-news-305-68534-20261116182548 { --hero-photo-url: url('/assets/img/news/305-68534-20261116182548.webp'); background-position: center center; }
