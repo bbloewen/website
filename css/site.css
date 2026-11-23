@@ -3355,9 +3355,9 @@ a.training-group-header:hover { color: var(--color-brand-orange); }
 .cc-names { margin: 0 0 20px; padding-left: 20px; }
 
 /* Anzeige (Partnerbanner) nach dem Vorbild bamberg.basketball (Marko 23.11.2026): kleines „Anzeige“ mittig
-   darüber, Banner mittig mit fester Höchstbreite, Link mit rel="sponsored". Markup:
+   darüber, Banner mittig mit Höchstbreite 760 px, Link mit rel="sponsored". Markup:
    <aside class="anzeige" aria-label="Anzeige"><span class="anzeige-label">Anzeige</span><a …><img …></a></aside> */
-.anzeige { display: block; max-width: 970px; margin: 0 auto 28px; text-align: center; }
+.anzeige { display: block; max-width: 760px; margin: 0 auto 28px; text-align: center; }
 .anzeige-label { display: block; font-size: 11px; line-height: 1.4; letter-spacing: .02em; color: var(--text-muted); margin-bottom: 6px; }
 .anzeige a { display: block; }
 .anzeige img { display: block; width: 100%; height: auto; }
