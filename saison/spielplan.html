@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<link rel="stylesheet" href="/css/site.css?v=1795436823" />
+<link rel="stylesheet" href="/css/site.css?v=1795436954" />
 <script data-goatcounter="https://goatcounter-production-5d8c.up.railway.app/count"
         async src="//goatcounter-production-5d8c.up.railway.app/count.js"></script>
 <!-- ANALYTICS:ahrefs — Vergleichstest neben GoatCounter, gestartet 25.08.2026.
@@ -263,11 +263,14 @@
   <section class="section">
     <div class="container">
       <!-- Partnerbanner Kallinich Media (Marko 23.11.2026): Spielplan statt Tabelle, weil die Seite mehr Besuche hat
-           (GoatCounter 23.10.–22.11.2026: Spielplan 2.291, Tabelle 931). Gezeigt wird der Mittelteil mit dem Schriftzug, mittig und schmaler als die Seite (Vorbild Bamberg). -->
+           (GoatCounter 23.10.–22.11.2026: Spielplan 2.291, Tabelle 931). Ganzes Banner über die Breite des Inhaltsbereichs, „Anzeige“ mittig darüber; auf Handys nur der Mittelteil mit dem Schriftzug. -->
       <aside class="anzeige" aria-label="Anzeige">
         <span class="anzeige-label">Anzeige</span>
         <a href="https://www.kallinich-media.de/" target="_blank" rel="sponsored noopener">
-          <img src="/assets/img/kallinich-banner-spielplan-mobil.webp" width="1040" height="50" alt="Kallinich Media – die Agentur, die die Löwen sichtbar macht" />
+          <picture>
+            <source media="(max-width: 700px)" srcset="/assets/img/kallinich-banner-spielplan-mobil.webp" width="1040" height="50" />
+            <img src="/assets/img/kallinich-banner-spielplan.webp" width="1920" height="50" alt="Kallinich Media – die Agentur, die die Löwen sichtbar macht" />
+          </picture>
         </a>
       </aside>
       <div class="filter-row" id="spielplan-filter">
