@@ -42,6 +42,7 @@ CATEGORY_ICON = {
     "Straßenfest": ("flag", "tint-blue"),
     "Turnier": ("trophy", "tint-orange"),
     "Vereinsfest": ("party-popper", "tint-violet"),
+    "Auswärtsspieltag": ("bus", "tint-orange"),
 }
 FALLBACK_DESCRIPTION = "Die Basketball Löwen Erfurt sind mit dabei — Details folgen in Kürze."
 
