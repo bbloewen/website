@@ -98,8 +98,11 @@ PUBLISHER = {
 # (99089) und gar keine Strasse; die Halle liegt in der 99096.
 LOEWENPARK = {
     "@type": "SportsActivityLocation",
-    "name": "LÖWENPARK",
-    "alternateName": "CATL LÖWENPARK",
+    # Marko, 24.11.2026: Der Ort heisst CATL LÖWENPARK, nicht "Löwenpark
+    # Erfurt". Der volle Markenname gehoert deshalb in name, die Kurzform nur
+    # noch als alternateName.
+    "name": "CATL LÖWENPARK",
+    "alternateName": "LÖWENPARK",
     "description": "Sanierte Sporthalle am Erfurter Südpark — Trainingsstandort "
                    "der Basketball Löwen Erfurt für Nachwuchsleistungssport, "
                    "Damenbasketball, BasKIDball und Feriencamps.",
