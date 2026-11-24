@@ -273,7 +273,7 @@
   window.__spielplanToday = today;
 
   Promise.all([
-    fetch('/data/heimspiele.json?v=1795203902').then(function (r) { return r.json(); }),
+    fetch('/data/heimspiele.json?v=1795515547').then(function (r) { return r.json(); }),
     fetch('/data/spielplan-saison.json?v=1794762003').then(function (r) { return r.json(); })
   ]).then(function (results) {
     var heim = results[0], saison = results[1];
