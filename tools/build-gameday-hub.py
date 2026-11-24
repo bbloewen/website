@@ -182,6 +182,21 @@ def hero(s, heute):
     lang = len(s["gegner"]) > 28
     h1_groesse = "clamp(17px,3.2vw,36px)" if lang else "clamp(22px,3.4vw,40px)"
     kw_nowrap = ' style="white-space:nowrap"' if lang else ""
+    # Liveticker und Livestream direkt im Hero: Die Search Console zaehlt fuer
+    # "basketball loewen erfurt liveticker" 161 Impressionen auf Position 5,2 und
+    # fuer "... livestream" 96 auf 2,5 (90 Tage bis 22.11.2026) -- beide landen auf
+    # dieser Seite, auf der bis zum 24.11.2026 keines der beiden Woerter stand.
+    # Die Adressen stehen je Spiel in data/heimspiele.json (livescore, livestream),
+    # es wird hier nichts erfunden.
+    live = []
+    if s.get("livescore"):
+        live.append(f'<a href="{esc(s["livescore"])}" target="_blank" rel="noopener">'
+                    f'<i data-lucide="activity" class="icon-16"></i> Liveticker</a>')
+    if s.get("livestream"):
+        live.append(f'<a href="{esc(s["livestream"])}" target="_blank" rel="noopener">'
+                    f'<i data-lucide="video" class="icon-16"></i> Livestream</a>')
+    live_zeile = ('<p class="hero-live-links">' + " · ".join(live) + "</p>") if live else ""
+
     return f"""  <section class="hero-photo hero-tickets hero-half">
     <div class="container">
       <div class="hero-lg-grid">
@@ -194,6 +209,7 @@ def hero(s, heute):
           <h1 style="font-size:{h1_groesse};white-space:normal">Basketball Löwen Erfurt vs. <span class="kw"{kw_nowrap}>{esc(s['gegner'])}<span class="swoosh" aria-hidden="true"></span></span>.</h1>
           {zeit_zeile}
           <a class="hero-location" href="{MAPS}" target="_blank" rel="noopener"><i data-lucide="map-pin" class="icon-16"></i> Riethsporthalle, Essener Straße 20, 99089 Erfurt</a>
+          {live_zeile}
         </div>
         <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px">
           {knopf}
@@ -664,13 +680,15 @@ def seite(liste, jetzt):
     heute = jetzt.date()
     aktuell, kommt = naechstes(liste, jetzt)
     zeit = f", {aktuell['zeit']} Uhr" if aktuell.get("zeit") else ""
-    description = (f"Sport-Events in Erfurt: Heimspiel der Basketball Löwen gegen "
-                   f"{aktuell['gegner']} am {aktuell['datum']}{zeit} in der Riethsporthalle. Tickets & Dauerkarte.")
+    description = (f"Heimspiel der Basketball Löwen Erfurt gegen {aktuell['gegner']} am "
+                   f"{aktuell['datum']}{zeit} in der Riethsporthalle: Tickets, Liveticker, "
+                   f"Livestream und das Ergebnis.")
     if len(description) > 155:
         # Lange Gegnernamen ("TSG Schöller SI Ravens Reutlingen") sprengen auch die zweite
         # Fassung -- dann ohne Gegner, damit die Google-Vorschau nicht abschneidet.
-        description = (f"Sport-Events in Erfurt: Heimspiele der Basketball Löwen in der "
-                       f"Riethsporthalle, nächstes Spiel am {aktuell['datum']}. Tickets & Dauerkarte.")
+        description = (f"Heimspiele der Basketball Löwen Erfurt in der Riethsporthalle, "
+                       f"nächstes Spiel am {aktuell['datum']}: Tickets, Liveticker, Livestream "
+                       f"und das Ergebnis.")
 
     # rstrip, damit der zweite Lauf dasselbe Ergebnis liefert: das \s* der Regex
     # zieht sonst den Zeilenumbruch mit, den die Vorlage selbst schon setzt, und
@@ -696,7 +714,7 @@ def seite(liste, jetzt):
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="format-detection" content="telephone=no" />
-<title>Heimspiele in Erfurt — Game Day in der Riethsporthalle</title>
+<title>Game Day in Erfurt: Tickets, Liveticker, Livestream</title>
 <meta name="description" content="{esc(description)}" />
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png" />
