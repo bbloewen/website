@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-23T16:00:43.096+01:00",
+  "generatedAt": "2026-11-24T16:00:43.010+01:00",
   "publishFrom": "2026-08-22",
   "events": [
     {
@@ -224,6 +224,102 @@
       "location": "Erfurter Weihnachtsmarkt, Erfurt",
       "heroImage": "https://basketball-loewen.com/assets/img/vereinshuette-2026-foto-kachel.webp",
       "url": "https://buergerstiftung-erfurt.de/vereinshuette/"
+    },
+    {
+      "notionId": "3a0a2418-e2d7-8100-ba92-e54d5231356e",
+      "name": "Auswärtsspiel @ BBC Coburg",
+      "category": "Auswärtsspieltag",
+      "status": "Genehmigt",
+      "start": "2026-12-18",
+      "end": null,
+      "isDatetime": false,
+      "description": "",
+      "location": "",
+      "heroImage": ""
+    },
+    {
+      "notionId": "3a0a2418-e2d7-8103-9722-ed87a7a786ac",
+      "name": "Auswärtsspiel @ BG Hessing Leitershofen",
+      "category": "Auswärtsspieltag",
+      "status": "Genehmigt",
+      "start": "2027-01-10",
+      "end": null,
+      "isDatetime": false,
+      "description": "",
+      "location": "",
+      "heroImage": ""
+    },
+    {
+      "notionId": "3a0a2418-e2d7-81f1-9732-ed5539cd5285",
+      "name": "Auswärtsspiel @ TSG Schöller SI Ravens Reutlingen",
+      "category": "Auswärtsspieltag",
+      "status": "Genehmigt",
+      "start": "2027-01-23",
+      "end": null,
+      "isDatetime": false,
+      "description": "",
+      "location": "",
+      "heroImage": ""
+    },
+    {
+      "notionId": "3a0a2418-e2d7-81f4-92d2-ca0d502e84cf",
+      "name": "Auswärtsspiel @ Dresden Titans",
+      "category": "Auswärtsspieltag",
+      "status": "Genehmigt",
+      "start": "2027-01-27",
+      "end": null,
+      "isDatetime": false,
+      "description": "",
+      "location": "",
+      "heroImage": ""
+    },
+    {
+      "notionId": "3a0a2418-e2d7-8166-a8d0-fb4a70d19d1e",
+      "name": "Auswärtsspiel @ TSV Oberhaching Tropics",
+      "category": "Auswärtsspieltag",
+      "status": "Genehmigt",
+      "start": "2027-02-07",
+      "end": null,
+      "isDatetime": false,
+      "description": "",
+      "location": "",
+      "heroImage": ""
+    },
+    {
+      "notionId": "3a0a2418-e2d7-8129-bccc-c0583e27dc38",
+      "name": "Auswärtsspiel @ Porsche BBA Ludwigsburg",
+      "category": "Auswärtsspieltag",
+      "status": "Genehmigt",
+      "start": "2027-02-27",
+      "end": null,
+      "isDatetime": false,
+      "description": "",
+      "location": "",
+      "heroImage": ""
+    },
+    {
+      "notionId": "3a0a2418-e2d7-81b8-82ce-fddd98030e65",
+      "name": "Auswärtsspiel @ Culture City Weimar",
+      "category": "Auswärtsspieltag",
+      "status": "Genehmigt",
+      "start": "2027-03-14",
+      "end": null,
+      "isDatetime": false,
+      "description": "",
+      "location": "",
+      "heroImage": ""
+    },
+    {
+      "notionId": "3a0a2418-e2d7-81c9-9daa-c70c9076417d",
+      "name": "Auswärtsspiel @ FC Bayern Basketball II",
+      "category": "Auswärtsspieltag",
+      "status": "Genehmigt",
+      "start": "2027-04-03",
+      "end": null,
+      "isDatetime": false,
+      "description": "",
+      "location": "",
+      "heroImage": ""
     }
   ]
 }
