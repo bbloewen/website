@@ -1,5 +1,5 @@
 {
-  "hinweis": "Kader der Profimannschaft. Einmalig am 24.11.2026 aus den Panini-Karten in saison/profis.html gezogen, seitdem ist diese Datei die gepflegte Quelle: tools/build-spielerseiten.py baut daraus die Spielerseiten unter saison/profis/spieler/ UND den Kader-Block auf saison/profis.html. Das Alter rechnet js/player-age.js im Browser aus geburtsjahr und geburtsmonat, damit es nie veraltet. 'seite': false nimmt einen Spieler aus den Einzelseiten, er bleibt dann nur als Karte im Kader.",
+  "hinweis": "Kader der Profimannschaft. Einmalig am 24.11.2026 aus den Panini-Karten in saison/profis.html gezogen, seitdem ist diese Datei die gepflegte Quelle: tools/build-spielerseiten.py baut daraus die Spielerseiten unter saison/profis/spieler/ UND den Kader-Block auf saison/profis.html. Das Alter rechnet js/player-age.js im Browser aus geburtsjahr und geburtsmonat, damit es nie veraltet. 'seite': false nimmt einen Spieler aus den Einzelseiten, er bleibt dann nur als Karte im Kader. Marko, 24.11.2026: Minderjaehrige bekommen keine eigene Seite. Beim naechsten Geburtstag also pruefen, ob der Schalter wieder weg kann — und bei neuen jungen Spielern gleich setzen.",
   "spieler": [
     {
       "nr": 0,
@@ -149,7 +149,7 @@
         "1,97 m · 94 kg",
         "Vorheriger Verein: Eigene Jugend"
       ],
-      "seite": true
+      "seite": false
     },
     {
       "nr": 12,
@@ -168,7 +168,7 @@
         "1,90 m · 83 kg",
         "Vorheriger Verein: <a href=\"https://www.big-gotha.de/rockets/\" target=\"_blank\" rel=\"noopener\">Rockets Gotha (JBBL)</a>"
       ],
-      "seite": true
+      "seite": false
     },
     {
       "nr": 13,

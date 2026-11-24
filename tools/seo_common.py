@@ -12,6 +12,7 @@ Inhalt. Wir legen uns site-weit auf die Verzeichnisform fest.
 """
 
 import html
+import json
 import re
 import subprocess
 from datetime import date, datetime, timedelta
@@ -41,6 +42,31 @@ NOINDEX_RE = re.compile(r'<meta\s+name=["\']robots["\']\s+content=["\'][^"\']*no
 AUSGENOMMEN = ("partials/", "tools/druck/", "data/")
 
 
+def weiterleitungen():
+    """Die Wegweiser aus tools/build-weiterleitungen.py, als Menge von Pfaden.
+
+    Sie sehen aus wie Seiten, sind aber keine: Ihr ganzer Zweck ist das
+    rel=canonical auf das Ziel. Liefe build-head-meta.py darueber, setzte es
+    ein zweites Canonical auf die Weiterleitung selbst und machte damit genau
+    das Signal kaputt, um dessentwillen die Datei existiert; build-sitemap.py
+    traegt sie sonst als eigene Adressen ein (beides passiert am 24.11.2026,
+    kurz nachdem die 67 Wegweiser entstanden waren).
+    """
+    pfad = REPO / "data" / "weiterleitungen.json"
+    if not pfad.exists():
+        return set()
+    out = set()
+    for von in json.loads(pfad.read_text(encoding="utf-8"))["weiterleitungen"]:
+        rel = von.lstrip("/")
+        if rel.endswith("/") or not rel:
+            rel += "index.html"
+        out.add(rel)
+    return out
+
+
+_WEITERLEITUNGEN = None
+
+
 def tracked_html():
     """Von Git verfolgte HTML-Dateien, ohne partials/ und Druckvorlagen.
 
@@ -48,6 +74,9 @@ def tracked_html():
     tools/familienrabatt-rechner.html) landen so nie versehentlich in Sitemap,
     Canonicals oder Share-Tags.
     """
+    global _WEITERLEITUNGEN
+    if _WEITERLEITUNGEN is None:
+        _WEITERLEITUNGEN = weiterleitungen()
     out = subprocess.run(
         ["git", "ls-files", "-z", "*.html"],
         cwd=REPO, capture_output=True, text=True, check=True,
@@ -59,6 +88,7 @@ def tracked_html():
     return sorted(
         f for f in out.split("\0")
         if f and not f.startswith(AUSGENOMMEN) and (REPO / f).is_file()
+        and f not in _WEITERLEITUNGEN
     )
 
 
