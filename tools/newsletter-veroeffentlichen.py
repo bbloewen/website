@@ -124,7 +124,7 @@ def seite(a):
         if x:
             rubriken += x
             grau = not grau
-    gruss = du(b.get("gruss") if b.get("gruss") is not None else "Immer am Ball\neuer Marko\nBasketball Löwen Erfurt")
+    gruss = du(b.get("gruss") if b.get("gruss") is not None else "Viele Grüße vom Parkett\neuer Marko\nBasketball Löwen Erfurt")
     fuss = (f'<section class="section" style="padding:28px 0"><div class="container container-narrow">'
             + (f'<p class="t-body"><b>{esc(gruss.splitlines()[0])}</b><br>' + "<br>".join(esc(x) for x in gruss.splitlines()[1:]) + "</p>" if gruss.strip() else "")
             + '<p class="t-body mt-4"><a href="/news/newsletter/">Alle Ausgaben und Anmeldung zur Löwen-Post</a></p></div></section>')
