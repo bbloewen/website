@@ -227,6 +227,39 @@ def _spieltagsinfo_bilder():
 STATIC_PAGE_IMAGES.update(_spieltagsinfo_bilder())
 
 
+def spieler_seite(rel):
+    """Person-Knoten fuer eine Spielerseite (tools/build-spielerseiten.py).
+
+    Google kennt fuer eine Sportlerin oder einen Sportler keinen eigenen Typ,
+    Person mit memberOf auf das Team ist die uebliche Auszeichnung. Das
+    Geburtsdatum bleibt absichtlich draussen: Wir kennen nur Jahr und Monat,
+    und ein erfundener Tag waere eine Falschangabe ueber eine echte Person.
+    """
+    pfad = REPO / "data" / "kader-profis.json"
+    if not pfad.exists():
+        return []
+    slug = rel.rsplit("/", 1)[-1].removesuffix(".html")
+    for s in json.loads(pfad.read_text(encoding="utf-8"))["spieler"]:
+        if s.get("slug") != slug:
+            continue
+        knoten = {
+            "@type": "Person",
+            "name": s["name"],
+            "jobTitle": "Basketballspieler",
+            "url": canonical_url(rel),
+            "image": BASE + s["foto"].lstrip("/"),
+            "height": s["groesse"],
+            "memberOf": {
+                "@type": "SportsTeam",
+                "name": "Basketball Löwen Erfurt",
+                "url": BASE + "saison/profis.html",
+            },
+            "mainEntityOfPage": {"@type": "WebPage", "@id": canonical_url(rel)},
+        }
+        return [knoten]
+    return []
+
+
 def jsonld(nodes):
     """@graph-Block als <script>-Tag. < wird maskiert, damit kein Tag entsteht."""
     payload = json.dumps(
@@ -623,6 +656,9 @@ def nodes_for(rel, text, page_title, social_title, description, image):
     # gezeigt. Die Buchungsseite steht ohnehin auf noindex.
     if rel == "trainieren/loewenpark.html":
         nodes.append(LOEWENPARK)
+
+    if rel.startswith("saison/profis/spieler/"):
+        nodes.extend(spieler_seite(rel))
 
     if rel == "trainieren/freiplaetze.html":
         nodes.extend(freiplaetze())

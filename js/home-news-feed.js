@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
       return {
         date: publishDate(a),
         dateLabel: a.datum,
-        image: a.bild,
+        image: a.thumb || a.bild,
         headline: a.titel,
         teaser: a.kurztext,
         url: a.url,

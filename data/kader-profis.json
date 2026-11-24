@@ -1,0 +1,346 @@
+{
+  "hinweis": "Kader der Profimannschaft. Einmalig am 24.11.2026 aus den Panini-Karten in saison/profis.html gezogen, seitdem ist diese Datei die gepflegte Quelle: tools/build-spielerseiten.py baut daraus die Spielerseiten unter saison/profis/spieler/ UND den Kader-Block auf saison/profis.html. Das Alter rechnet js/player-age.js im Browser aus geburtsjahr und geburtsmonat, damit es nie veraltet. 'seite': false nimmt einen Spieler aus den Einzelseiten, er bleibt dann nur als Karte im Kader.",
+  "spieler": [
+    {
+      "nr": 0,
+      "name": "Anthony Watkins",
+      "slug": "anthony-watkins",
+      "position": "Shooting Guard",
+      "groesse": "1,92 m",
+      "geburtsjahr": 2000,
+      "geburtsmonat": 10,
+      "foto": "/assets/img/players/anthony.webp",
+      "fotoBreite": 342,
+      "fotoHoehe": 389,
+      "fotoAlt": "Anthony",
+      "fotoTitel": "Anthony",
+      "steckbrief": [
+        "1,92 m · 94 kg",
+        "Vorheriger Verein: <a href=\"https://www.ssv-lok-bernau.de/\" target=\"_blank\" rel=\"noopener\">SSV Lok Bernau</a>"
+      ],
+      "seite": true,
+      "aktionsfoto": "/assets/img/players/anthony-aktion.webp",
+      "aktionsfotoBreite": 684,
+      "aktionsfotoHoehe": 778,
+      "aktionsfotoAlt": "Anthony Watkins am Ball beim Heimspiel gegen die TSG Schöller SI Ravens Reutlingen"
+    },
+    {
+      "nr": 2,
+      "name": "Tim Claßen",
+      "slug": "tim-classen",
+      "position": "Point Guard",
+      "groesse": "1,95 m",
+      "geburtsjahr": 2007,
+      "geburtsmonat": 10,
+      "foto": "/assets/img/players/tim.webp",
+      "fotoBreite": 342,
+      "fotoHoehe": 389,
+      "fotoAlt": "Tim",
+      "fotoTitel": "Tim",
+      "steckbrief": [
+        "1,95 m · 86 kg",
+        "Vorheriger Verein: <a href=\"https://www.berlindreams.com/\" target=\"_blank\" rel=\"noopener\">Berlin Dreams</a>"
+      ],
+      "seite": true,
+      "aktionsfoto": "/assets/img/players/tim-aktion.webp",
+      "aktionsfotoBreite": 684,
+      "aktionsfotoHoehe": 778,
+      "aktionsfotoAlt": "Tim Claßen am Ball beim Heimspiel gegen die TSG Schöller SI Ravens Reutlingen"
+    },
+    {
+      "nr": 4,
+      "name": "Ilias Amin",
+      "slug": "ilias-amin",
+      "position": "Point Guard",
+      "groesse": "1,95 m",
+      "geburtsjahr": 2006,
+      "geburtsmonat": 6,
+      "foto": "/assets/img/players/ilias.webp",
+      "fotoBreite": 342,
+      "fotoHoehe": 389,
+      "fotoAlt": "Ilias",
+      "fotoTitel": "Ilias",
+      "steckbrief": [
+        "1,95 m · 85 kg",
+        "Vorheriger Verein: <a href=\"https://syntainics-mbc.de/\" target=\"_blank\" rel=\"noopener\">SYNTAINICS MBC</a>"
+      ],
+      "seite": true,
+      "aktionsfoto": "/assets/img/players/ilias-aktion.webp",
+      "aktionsfotoBreite": 684,
+      "aktionsfotoHoehe": 778,
+      "aktionsfotoAlt": "Ilias Amin am Ball beim Heimspiel gegen die TSG Schöller SI Ravens Reutlingen"
+    },
+    {
+      "nr": 5,
+      "name": "Luca Förster",
+      "slug": "luca-foerster",
+      "position": "Shooting Guard",
+      "groesse": "1,85 m",
+      "geburtsjahr": 2007,
+      "geburtsmonat": 7,
+      "foto": "/assets/img/players/luca.webp",
+      "fotoBreite": 342,
+      "fotoHoehe": 389,
+      "fotoAlt": "Luca",
+      "fotoTitel": "Luca",
+      "steckbrief": [
+        "1,85 m · 81 kg",
+        "Vorheriger Verein: Eigene Jugend"
+      ],
+      "seite": true
+    },
+    {
+      "nr": 8,
+      "name": "Léonar Fliege",
+      "slug": "leonar-fliege",
+      "position": "Power Forward",
+      "groesse": "2,05 m",
+      "geburtsjahr": 2007,
+      "geburtsmonat": 7,
+      "foto": "/assets/img/players/leonar.webp",
+      "fotoBreite": 342,
+      "fotoHoehe": 389,
+      "fotoAlt": "Léonar",
+      "fotoTitel": "Léonar",
+      "steckbrief": [
+        "2,05 m · 95 kg",
+        "Vorheriger Verein: <a href=\"https://www.big-gotha.de/rockets/\" target=\"_blank\" rel=\"noopener\">Rockets Gotha (JBBL)</a>",
+        "Fun-Fact: Ist auch Franzose"
+      ],
+      "seite": true,
+      "aktionsfoto": "/assets/img/players/leonar-aktion.webp",
+      "aktionsfotoBreite": 684,
+      "aktionsfotoHoehe": 778,
+      "aktionsfotoAlt": "Léonar Fliege am Ball beim Heimspiel gegen die TSG Schöller SI Ravens Reutlingen"
+    },
+    {
+      "nr": 9,
+      "name": "Derek Emelifeonwu",
+      "slug": "derek-emelifeonwu",
+      "position": "Point Guard",
+      "groesse": "1,89 m",
+      "geburtsjahr": 2000,
+      "geburtsmonat": 9,
+      "foto": "/assets/img/players/derek.webp",
+      "fotoBreite": 342,
+      "fotoHoehe": 389,
+      "fotoAlt": "Derek",
+      "fotoTitel": "Derek",
+      "steckbrief": [
+        "1,89 m · 94 kg",
+        "Vorheriger Verein: <a href=\"https://www.nbl1.com.au/club/mackay-basketball\" target=\"_blank\" rel=\"noopener\">Mackay Meteors</a>"
+      ],
+      "seite": true
+    },
+    {
+      "nr": 10,
+      "name": "Oliver Jentzsch",
+      "slug": "oliver-jentzsch",
+      "position": "Point Guard",
+      "groesse": "1,97 m",
+      "geburtsjahr": 2009,
+      "geburtsmonat": 7,
+      "foto": "/assets/img/players/oliver.webp",
+      "fotoBreite": 342,
+      "fotoHoehe": 389,
+      "fotoAlt": "Oliver",
+      "fotoTitel": "Oliver",
+      "steckbrief": [
+        "1,97 m · 94 kg",
+        "Vorheriger Verein: Eigene Jugend"
+      ],
+      "seite": true
+    },
+    {
+      "nr": 12,
+      "name": "Bastian Rehbein",
+      "slug": "bastian-rehbein",
+      "position": "Small Forward",
+      "groesse": "1,90 m",
+      "geburtsjahr": 2009,
+      "geburtsmonat": 8,
+      "foto": "/assets/img/players/bastian.webp",
+      "fotoBreite": 342,
+      "fotoHoehe": 389,
+      "fotoAlt": "Bastian",
+      "fotoTitel": "Bastian",
+      "steckbrief": [
+        "1,90 m · 83 kg",
+        "Vorheriger Verein: <a href=\"https://www.big-gotha.de/rockets/\" target=\"_blank\" rel=\"noopener\">Rockets Gotha (JBBL)</a>"
+      ],
+      "seite": true
+    },
+    {
+      "nr": 13,
+      "name": "Friedrich Radefeld",
+      "slug": "friedrich-radefeld",
+      "position": "Power Forward",
+      "groesse": "2,01 m",
+      "geburtsjahr": 2004,
+      "geburtsmonat": 8,
+      "foto": "/assets/img/players/friedrich.webp",
+      "fotoBreite": 342,
+      "fotoHoehe": 389,
+      "fotoAlt": "Friedrich",
+      "fotoTitel": "Friedrich",
+      "steckbrief": [
+        "2,01 m · 90 kg",
+        "Vorheriger Verein: Bereits seit letzter Saison bei den Löwen"
+      ],
+      "seite": true
+    },
+    {
+      "nr": 14,
+      "name": "Jeremie Fotso-Sighom",
+      "slug": "jeremie-fotso-sighom",
+      "position": "Small Forward",
+      "groesse": "1,80 m",
+      "geburtsjahr": 2008,
+      "geburtsmonat": 8,
+      "foto": "/assets/img/players/jeremie.webp",
+      "fotoBreite": 342,
+      "fotoHoehe": 389,
+      "fotoAlt": "Jeremie",
+      "fotoTitel": "Jeremie",
+      "steckbrief": [
+        "1,80 m · 99 kg",
+        "Vorheriger Verein: Eigene Jugend"
+      ],
+      "seite": true
+    },
+    {
+      "nr": 15,
+      "name": "Jacob Hadi",
+      "slug": "jacob-hadi",
+      "position": "Small Forward",
+      "groesse": "2,02 m",
+      "geburtsjahr": 2002,
+      "geburtsmonat": 12,
+      "foto": "/assets/img/players/jacob.webp",
+      "fotoBreite": 342,
+      "fotoHoehe": 389,
+      "fotoAlt": "Jacob",
+      "fotoTitel": "Jacob",
+      "steckbrief": [
+        "2,02 m · 86 kg",
+        "Vorheriger Verein: <a href=\"https://www.dolphins.se/\" target=\"_blank\" rel=\"noopener\">Norrköping Dolphins</a>"
+      ],
+      "seite": true,
+      "aktionsfoto": "/assets/img/players/jacob-aktion.webp",
+      "aktionsfotoBreite": 684,
+      "aktionsfotoHoehe": 778,
+      "aktionsfotoAlt": "Jacob Hadi beim Sprungwurf im Heimspiel gegen die TSG Schöller SI Ravens Reutlingen"
+    },
+    {
+      "nr": 21,
+      "name": "Jasper Brand",
+      "slug": "jasper-brand",
+      "position": "Power Forward",
+      "groesse": "2,07 m",
+      "geburtsjahr": 2005,
+      "geburtsmonat": 4,
+      "foto": "/assets/img/players/jasper.webp",
+      "fotoBreite": 342,
+      "fotoHoehe": 389,
+      "fotoAlt": "Jasper",
+      "fotoTitel": "Jasper",
+      "steckbrief": [
+        "2,07 m · 98 kg",
+        "Vorheriger Verein: <a href=\"https://www.bggoettingen.de/\" target=\"_blank\" rel=\"noopener\">Sartorius Juniors Göttingen</a>"
+      ],
+      "seite": true,
+      "aktionsfoto": "/assets/img/players/jasper-aktion.webp",
+      "aktionsfotoBreite": 684,
+      "aktionsfotoHoehe": 778,
+      "aktionsfotoAlt": "Jasper Brand am Ball beim Heimspiel gegen die TSG Schöller SI Ravens Reutlingen"
+    },
+    {
+      "nr": 22,
+      "name": "Luke-Johan Kiraly",
+      "slug": "luke-johan-kiraly",
+      "position": "Small Forward",
+      "groesse": "1,88 m",
+      "geburtsjahr": 2007,
+      "geburtsmonat": 5,
+      "foto": "/assets/img/players/luke-johan.webp",
+      "fotoBreite": 342,
+      "fotoHoehe": 389,
+      "fotoAlt": "Luke-Johan",
+      "fotoTitel": "Luke-Johan",
+      "steckbrief": [
+        "1,88 m · 88 kg",
+        "Vorheriger Verein: <a href=\"https://www.big-gotha.de/rockets/\" target=\"_blank\" rel=\"noopener\">Rockets Gotha (JBBL)</a>"
+      ],
+      "seite": true
+    },
+    {
+      "nr": 44,
+      "name": "Marko Bacak",
+      "slug": "marko-bacak",
+      "position": "Center",
+      "groesse": "2,10 m",
+      "geburtsjahr": 1995,
+      "geburtsmonat": 11,
+      "foto": "/assets/img/players/marko.webp",
+      "fotoBreite": 342,
+      "fotoHoehe": 389,
+      "fotoAlt": "Marko",
+      "fotoTitel": "Marko",
+      "steckbrief": [
+        "2,10 m · 110 kg",
+        "Vorheriger Verein: <a href=\"https://epgbasketskoblenz.de/\" target=\"_blank\" rel=\"noopener\">EPG Baskets Koblenz</a>"
+      ],
+      "seite": true,
+      "aktionsfoto": "/assets/img/players/marko-aktion.webp",
+      "aktionsfotoBreite": 684,
+      "aktionsfotoHoehe": 778,
+      "aktionsfotoAlt": "Marko Bacak jubelt beim Heimspiel gegen Porsche BBA Ludwigsburg"
+    },
+    {
+      "nr": 52,
+      "name": "Jordan Zimmermann",
+      "slug": "jordan-zimmermann",
+      "position": "Small Forward",
+      "groesse": "1,86 m",
+      "geburtsjahr": 2004,
+      "geburtsmonat": 11,
+      "foto": "/assets/img/players/jordan.webp",
+      "fotoBreite": 342,
+      "fotoHoehe": 389,
+      "fotoAlt": "Jordan",
+      "fotoTitel": "Jordan",
+      "steckbrief": [
+        "1,86 m · 85 kg",
+        "Vorheriger Verein: Bereits seit letzter Saison bei den Löwen"
+      ],
+      "seite": true,
+      "aktionsfoto": "/assets/img/players/jordan-aktion.webp",
+      "aktionsfotoBreite": 684,
+      "aktionsfotoHoehe": 778,
+      "aktionsfotoAlt": "Jordan Zimmermann beim Heimspiel gegen die TSG Schöller SI Ravens Reutlingen"
+    },
+    {
+      "nr": 53,
+      "name": "Samuel Nellessen",
+      "slug": "samuel-nellessen",
+      "position": "Small Forward",
+      "groesse": "1,98 m",
+      "geburtsjahr": 2004,
+      "geburtsmonat": 10,
+      "foto": "/assets/img/players/samuel.webp",
+      "fotoBreite": 342,
+      "fotoHoehe": 389,
+      "fotoAlt": "Samuel",
+      "fotoTitel": "Samuel",
+      "steckbrief": [
+        "1,98 m · 100 kg",
+        "Vorheriger Verein: <a href=\"https://www.dragons.de/\" target=\"_blank\" rel=\"noopener\">Dragons Rhöndorf</a>"
+      ],
+      "seite": true,
+      "aktionsfoto": "/assets/img/players/samuel-aktion.webp",
+      "aktionsfotoBreite": 684,
+      "aktionsfotoHoehe": 778,
+      "aktionsfotoAlt": "Samuel Nellessen am Ball beim Heimspiel gegen Porsche BBA Ludwigsburg"
+    }
+  ]
+}

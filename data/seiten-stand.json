@@ -10,16 +10,16 @@
       "lastmod": "2026-08-25"
     },
     "club/jobs.html": {
-      "hash": "6022096f024003014d134fc1407a3da6c9bbe7be",
-      "lastmod": "2026-11-13"
+      "hash": "d011d100e8623bb7713519d94b9d3e5d910a6d26",
+      "lastmod": "2026-11-24"
     },
     "club/kinderschutz.html": {
       "hash": "fa86d507ff0a328870481048e28e82750d480a47",
       "lastmod": "2026-08-23"
     },
     "club/organisation.html": {
-      "hash": "32e17b3ebec1d846c079f91920689092aed59e05",
-      "lastmod": "2026-09-26"
+      "hash": "3c621466dc8339b57491ca1475f720c8f5b9bf76",
+      "lastmod": "2026-11-24"
     },
     "club/soziales-engagement.html": {
       "hash": "92715f06a863c0a8179e392c96474f5b05723571",
@@ -66,7 +66,7 @@
       "lastmod": "2026-11-02"
     },
     "index.html": {
-      "hash": "90ee87fc4abb09690f85f603e1b41fa50bc71585",
+      "hash": "eff082b4a328e2b850f28877e6762945159aa7e0",
       "lastmod": "2026-11-24"
     },
     "kontakt.html": {
@@ -82,7 +82,7 @@
       "lastmod": "2026-08-08"
     },
     "news/aktuelles.html": {
-      "hash": "6b154e466381e4e204cecc0c9e605cf14f0e1315",
+      "hash": "cb5a03d13a8aa5f77fb7ddf0a7f9084d2fdc4f8c",
       "lastmod": "2026-11-24"
     },
     "news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html": {
@@ -310,16 +310,16 @@
       "lastmod": "2026-10-19"
     },
     "saison/nachwuchs.html": {
-      "hash": "12766e86a028f5aa88933b6dee313eae7910c457",
-      "lastmod": "2026-11-23"
+      "hash": "d8d84bf071fcd735fd705b721bf875fe8e402ffb",
+      "lastmod": "2026-11-24"
     },
     "saison/nbbl.html": {
       "hash": "85af4a0280efda187f3fba6f3fc8f21f71cd28b4",
       "lastmod": "2026-11-22"
     },
     "saison/profis.html": {
-      "hash": "7f73553c57ebdefc52c4a1799902a5d59f4f98e5",
-      "lastmod": "2026-11-21"
+      "hash": "1bdc516f51b3b865902d4244f99e59b07fefa79c",
+      "lastmod": "2026-11-24"
     },
     "saison/profis/gameday/2026-10-11-bba-ludwigsburg.html": {
       "hash": "ec65bc74b9fa6dbebf16bb7f4a85e73244bf1dc8",
@@ -401,13 +401,77 @@
       "hash": "449d0795bedce4e3d0f5ae0a9742568382c5313a",
       "lastmod": "2026-11-20"
     },
+    "saison/profis/spieler/anthony-watkins.html": {
+      "hash": "bdb1eed474c867157300e6aa68263ed21c759749",
+      "lastmod": "2026-11-24"
+    },
+    "saison/profis/spieler/bastian-rehbein.html": {
+      "hash": "ca03fba072682a7936c9697531235e888037695f",
+      "lastmod": "2026-11-24"
+    },
+    "saison/profis/spieler/derek-emelifeonwu.html": {
+      "hash": "db72f206ab76efcc4f8d2547f6c504b0f5fe85d4",
+      "lastmod": "2026-11-24"
+    },
+    "saison/profis/spieler/friedrich-radefeld.html": {
+      "hash": "8bd1355605e0f5256569f9e6e3a7cee552bf39a5",
+      "lastmod": "2026-11-24"
+    },
+    "saison/profis/spieler/ilias-amin.html": {
+      "hash": "79d76a5ab7a29f21075d47d229486ec75c9b4296",
+      "lastmod": "2026-11-24"
+    },
+    "saison/profis/spieler/jacob-hadi.html": {
+      "hash": "105e2742c8203d6ae4404578b6ce3a2dcbed9c62",
+      "lastmod": "2026-11-24"
+    },
+    "saison/profis/spieler/jasper-brand.html": {
+      "hash": "c5af815926c46f5dc846eeecc44a665269fcc3b7",
+      "lastmod": "2026-11-24"
+    },
+    "saison/profis/spieler/jeremie-fotso-sighom.html": {
+      "hash": "36b8c4195fe6b70a31fcbda20926d51aee0f5937",
+      "lastmod": "2026-11-24"
+    },
+    "saison/profis/spieler/jordan-zimmermann.html": {
+      "hash": "734fe5cd88f8251ff3da42649a82ba18da33ade3",
+      "lastmod": "2026-11-24"
+    },
+    "saison/profis/spieler/leonar-fliege.html": {
+      "hash": "e7ef086bcffbaec1b97d139ea01f107954b6e1ed",
+      "lastmod": "2026-11-24"
+    },
+    "saison/profis/spieler/luca-foerster.html": {
+      "hash": "624927b1bd3a4e2c6cfe25e27d93bc9bd8d09a1c",
+      "lastmod": "2026-11-24"
+    },
+    "saison/profis/spieler/luke-johan-kiraly.html": {
+      "hash": "4e29c8ac1c1100e4c1e6b2150edd0fcbf96cdeb6",
+      "lastmod": "2026-11-24"
+    },
+    "saison/profis/spieler/marko-bacak.html": {
+      "hash": "66dd6efa7990df689d695ab4ec3c88c0faedbc2a",
+      "lastmod": "2026-11-24"
+    },
+    "saison/profis/spieler/oliver-jentzsch.html": {
+      "hash": "a1193468871695b0d381a931c789c22c856cdd6d",
+      "lastmod": "2026-11-24"
+    },
+    "saison/profis/spieler/samuel-nellessen.html": {
+      "hash": "9b344399c2d2a6cde2495d996d5712d40fd41ac9",
+      "lastmod": "2026-11-24"
+    },
+    "saison/profis/spieler/tim-classen.html": {
+      "hash": "7f91cb7013f34b0006bdec4dfcaeb71f2e0ee3b3",
+      "lastmod": "2026-11-24"
+    },
     "saison/spielplan.html": {
       "hash": "9dc7c1ad3d09003bbf9db54132c23f585927d4de",
       "lastmod": "2026-11-24"
     },
     "saison/tabelle.html": {
-      "hash": "e1652e9d7973ad25894eaf17d0e87ac27bffe501",
-      "lastmod": "2026-11-22"
+      "hash": "c77f41167d837728a610ca3b342736d57e7ff64b",
+      "lastmod": "2026-11-24"
     },
     "satzung.html": {
       "hash": "abb47c9a7d85d0508e315798cf2cf58b8131c8eb",
@@ -422,7 +486,7 @@
       "lastmod": "2026-11-20"
     },
     "trainieren/baskidball.html": {
-      "hash": "eefdb21f0ef521b187add5f08ad10dfd5e630a6a",
+      "hash": "3f75bf2447552457b7fe92186416ae500a95c169",
       "lastmod": "2026-11-24"
     },
     "trainieren/court-hunt.html": {
@@ -470,8 +534,8 @@
       "lastmod": "2026-11-13"
     },
     "trainieren/loewenpark.html": {
-      "hash": "3ee5941884041f5ca9957b342b2cd039de9d8236",
-      "lastmod": "2026-11-12"
+      "hash": "10c04b7076374c405673682926a422e22cbe1682",
+      "lastmod": "2026-11-24"
     },
     "trainieren/schulprogramm.html": {
       "hash": "5bfed0548dcd14b2b3f4e003dcd1a259c923909f",
@@ -482,8 +546,8 @@
       "lastmod": "2026-10-12"
     },
     "trainieren/trainingszeiten.html": {
-      "hash": "01f853ea67c53e4f0851822c7c6ec7f28bdabe8c",
-      "lastmod": "2026-10-19"
+      "hash": "4f298282fc5c5375fe676f3aba72bce9b0467c4d",
+      "lastmod": "2026-11-24"
     }
   }
 }

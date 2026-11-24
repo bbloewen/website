@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!shown.length) { compact.closest('.info-tile').style.display = 'none'; return; }
       compact.innerHTML = shown.map(function (a) {
         return '<a class="insta-sidebar-item" href="' + a.url + '">' +
-          (a.bild ? '<img src="' + a.bild + '" alt="" loading="lazy" />' : '') +
+          (a.bild ? '<img src="' + (a.thumb || a.bild) + '" alt="" loading="lazy" />' : '') +
           '<span><strong style="display:block;font-weight:var(--weight-bold);color:var(--text-primary);margin-bottom:2px">' + a.titel + '</strong>' + a.datum + '</span>' +
         '</a>';
       }).join('');

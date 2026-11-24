@@ -3362,3 +3362,17 @@ a.training-group-header:hover { color: var(--color-brand-orange); }
 .anzeige-label { display: block; font-size: 11px; line-height: 1.4; letter-spacing: .02em; color: var(--text-muted); margin-bottom: 6px; }
 .anzeige a { display: block; }
 .anzeige img { display: block; width: 100%; height: auto; }
+
+/* Spielerseiten (saison/profis/spieler/, tools/build-spielerseiten.py).
+   Zwei Fotos nebeneinander, auf dem Handy untereinander. Das Portraet ist
+   342x389, das Aktionsfoto 684x778 — beide bekommen dieselbe Hoehe, damit die
+   Reihe ruhig wirkt, und object-fit: cover statt Verzerrung. */
+.spieler-fotos { display: flex; gap: 16px; margin: 24px 0 28px; flex-wrap: wrap; }
+.spieler-fotos img {
+  flex: 1 1 260px; min-width: 0; max-height: 360px; width: 100%;
+  object-fit: cover; border-radius: 12px; background: var(--color-blue-50);
+}
+.spieler-daten { margin-bottom: 24px; }
+@media (max-width: 599px) {
+  .spieler-fotos img { max-height: 300px; }
+}
