@@ -92,7 +92,7 @@ def rubrik(r, grau):
     c = r.get("cta") or {}
     if url(c.get("link")) and str(c.get("text") or "").strip():
         klasse = "btn btn-primary" if c.get("stil") == "voll" else "btn btn-outline-orange"
-        h += f'<div style="text-align:center;margin-top:20px"><a class="{klasse}" href="{esc(url(c["link"]))}">{esc(du(c["text"]))}</a></div>'
+        h += f'<div style="text-align:center;margin-top:28px"><a class="{klasse}" href="{esc(url(c["link"]))}">{esc(du(c["text"]))}</a></div>'
     hintergrund = "background:#EEF1F6;" if grau else ""
     return f'<section class="section" style="{hintergrund}padding:32px 0"><div class="container container-narrow">{h}</div></section>'
 
