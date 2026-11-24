@@ -211,6 +211,19 @@
       "description": "Gemeinsam auswärts: Wir fahren mit dem Bus zum Spiel unserer Basketball Löwen bei den Ahorn Camp Baskets und bringen Erfurter Stimmung in die Sporthalle Speyer-Nord. Sprungball ist um 19:00 Uhr. Die Anmeldung für die Busfahrt läuft über Thomas, dort gibt es auch alle Infos zur Abfahrt.",
       "location": "Sporthalle Speyer-Nord, Birkenweg 10, 67346 Speyer",
       "heroImage": "https://basketball-loewen.com/assets/img/auswaertsfahrt-speyer-2026-kachel.webp"
+    },
+    {
+      "notionId": "422a2418-e2d7-8155-8983-c6f485e096f4",
+      "name": "Vereinshütte auf dem Erfurter Weihnachtsmarkt",
+      "category": "Straßenfest",
+      "status": "Genehmigt",
+      "start": "2026-12-17T10:00:00.000+01:00",
+      "end": "2026-12-17T21:00:00.000+01:00",
+      "isDatetime": true,
+      "description": "Einen Tag lang gehört die Vereinshütte auf dem Erfurter Weihnachtsmarkt unserem Förderverein Basketball. Komm vorbei, triff die Basketball Löwen bei weihnachtlicher Stimmung und erfahre, was der Förderverein für den Basketball in Erfurt bewegt. Die Vereinshütte stellt die BürgerStiftung Erfurt gemeinnützigen Vereinen zur Verfügung. <span class=\"t-caption\" style=\"color:var(--text-muted)\">Foto: Ansgar Koreng, <a href=\"https://creativecommons.org/licenses/by/4.0/deed.de\" target=\"_blank\" rel=\"noopener\">CC BY 4.0</a></span>",
+      "location": "Erfurter Weihnachtsmarkt, Erfurt",
+      "heroImage": "https://basketball-loewen.com/assets/img/vereinshuette-weihnachtsmarkt-2026-kachel.webp",
+      "url": "https://buergerstiftung-erfurt.de/vereinshuette/"
     }
   ]
 }
