@@ -26,7 +26,7 @@ import html
 import json
 import re
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from urllib.parse import quote, urlencode
 from zoneinfo import ZoneInfo
 
@@ -45,6 +45,14 @@ CATEGORY_ICON = {
     "Auswärtsspieltag": ("bus", "tint-orange"),
 }
 FALLBACK_DESCRIPTION = "Die Basketball Löwen Erfurt sind mit dabei — Details folgen in Kürze."
+
+# Geschaetzte Dauer eines Community-Termins, fuer endDate im Event, wenn in
+# den Daten kein Ende steht (Notion laesst das Endfeld oft leer). Drei Stunden
+# ist der Mittelwert der gepflegten Termine. Google erlaubt bei unbekanntem
+# Ende ausdruecklich eine Schaetzung und meldet ein fehlendes endDate sonst als
+# Mangel — gleiche Begruendung und gleiches Vorgehen wie SPIELDAUER in
+# tools/build-head-meta.py (Search Console, 24.11.2026: "Feld endDate fehlt").
+TERMINDAUER = timedelta(hours=3)
 
 
 def berliner_zeit(wert):
@@ -165,6 +173,16 @@ def events_schreiben(seite, events):
 TAG_RE = re.compile(r"<[^>]+>")
 
 
+def geschaetztes_ende(start):
+    """startDate + TERMINDAUER, mit dem Offset der Startangabe. Faellt die
+    Startangabe nicht zu parsen, geben wir None zurueck -- dann steht lieber
+    kein endDate da als ein falsches."""
+    try:
+        return (datetime.fromisoformat(start) + TERMINDAUER).isoformat()
+    except (TypeError, ValueError):
+        return None
+
+
 def event_ldjson(ev):
     """Ein Event-Objekt nach schema.org, gleiche Bauart wie die SportsEvent-
     Objekte auf den Gameday-Seiten (tools/build-head-meta.py-Aequivalent
@@ -179,8 +197,9 @@ def event_ldjson(ev):
         "eventStatus": "https://schema.org/EventScheduled",
         "organizer": {"@type": "Organization", "name": "Basketball Löwen Erfurt", "url": BASE},
     }
-    if ev.get("end"):
-        obj["endDate"] = ev["end"]
+    ende = ev.get("end") or geschaetztes_ende(ev.get("start"))
+    if ende:
+        obj["endDate"] = ende
     if ev.get("heroImage"):
         obj["image"] = ev["heroImage"]
     location = ev.get("location") or ""
