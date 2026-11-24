@@ -181,10 +181,17 @@ def main():
 
     # 2. Einzelseiten
     ZIELORDNER.mkdir(parents=True, exist_ok=True)
-    geschrieben = unveraendert = uebersprungen = 0
+    geschrieben = unveraendert = uebersprungen = geloescht = 0
     for s in spieler:
         if not s.get("seite", True):
             uebersprungen += 1
+            # Die Datei muss weg, nicht nur ungebaut bleiben: Wer den Schalter
+            # umlegt, will die Seite aus dem Netz haben, nicht nur aus dem Lauf.
+            weg = ZIELORDNER / f'{s["slug"]}.html'
+            if weg.is_file():
+                geloescht += 1
+                if not args.check:
+                    weg.unlink()
             continue
         ziel = ZIELORDNER / f'{s["slug"]}.html'
         neu = seite(s, vorlage)
@@ -199,8 +206,8 @@ def main():
     stand = "zu schreiben" if args.check else "geschrieben"
     print(f"  Kader-Block {'zu ändern' if block_geaendert else 'unverändert'}; "
           f"{geschrieben} Spielerseite(n) {stand}, {unveraendert} unverändert, "
-          f"{uebersprungen} ohne eigene Seite")
-    return 1 if (args.check and (geschrieben or block_geaendert)) else 0
+          f"{uebersprungen} ohne eigene Seite ({geloescht} davon zu entfernen)")
+    return 1 if (args.check and (geschrieben or block_geaendert or geloescht)) else 0
 
 
 if __name__ == "__main__":
