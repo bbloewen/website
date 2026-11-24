@@ -193,6 +193,22 @@ STATIC_PAGE_IMAGES = {
 }
 
 
+def _freiplatz_bilder():
+    """Gegenstueck zu _freiplatz_quellen() in tools/build-share-images.py:
+    jede Freiplatz-Seite teilt das Foto ihres Platzes, Court-Hunt das Hero der
+    Uebersicht. Vorher fiel beides auf das Standardbild zurueck."""
+    pfad = REPO / "data" / "freiplaetze.json"
+    if not pfad.exists():
+        return {}
+    out = {"trainieren/court-hunt.html": "court-hunt.jpg"}
+    for platz in json.loads(pfad.read_text(encoding="utf-8"))["freiplaetze"]:
+        out[f"trainieren/freiplatz/{platz['slug']}.html"] = f"freiplatz-{platz['slug']}.jpg"
+    return out
+
+
+STATIC_PAGE_IMAGES.update(_freiplatz_bilder())
+
+
 def _spieltagsinfo_bilder():
     """Share-Bilder der Spieltagsinfo: Uebersicht = neueste Ausgabe, je Ausgabe das eigene Titelbild.
     (Quelle und Zuschnitt: tools/build-share-images.py, dort dieselbe Ableitung.)"""

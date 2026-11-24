@@ -36,6 +36,27 @@ STATIC_PAGE_SOURCES = {
     "presse": REPO / "assets" / "img" / "hero-presse.webp",
 }
 
+# Freiplatz- und Court-Hunt-Seiten: Sie haben keinen Hero, aus dem sich ein
+# Teilbild ableiten liesse. Ohne Zuordnung bekamen sie das Standardbild (der
+# Dunk aus og-default.jpg) — egal, welchen Platz jemand bei WhatsApp teilte,
+# es erschien immer dasselbe Motiv (Marko, 24.11.2026). Quelle ist jetzt das
+# Foto des Platzes aus data/freiplaetze.json, ersatzweise das Hero der
+# Uebersichtsseite (Nordpark hat kein eigenes Foto).
+def _freiplatz_quellen():
+    import json
+    pfad = REPO / "data" / "freiplaetze.json"
+    if not pfad.exists():
+        return {}
+    ersatz = REPO / "assets" / "img" / "hero-freiplaetze.webp"
+    out = {"court-hunt": ersatz}
+    for platz in json.loads(pfad.read_text(encoding="utf-8"))["freiplaetze"]:
+        foto = platz.get("foto")
+        out[f"freiplatz-{platz['slug']}"] = REPO / foto.lstrip("/") if foto else ersatz
+    return out
+
+
+STATIC_PAGE_SOURCES.update(_freiplatz_quellen())
+
 # Spieltagsinfo: je Ausgabe das Titelbild (assets/spieltagsinfo/ausgabe-N/<cover>)
 def _spieltagsinfo_quellen():
     import json

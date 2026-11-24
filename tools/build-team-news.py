@@ -58,7 +58,7 @@ def card_html(a):
 
 
 def compact_html(a):
-    img = f'<img src="{esc(a["bild"])}" alt="" loading="lazy" />' if a.get("bild") else ""
+    img = f'<img src="{esc(a.get("thumb") or a["bild"])}" alt="" loading="lazy" />' if a.get("bild") else ""
     return (
         f'<a class="insta-sidebar-item" href="{esc(a["url"])}">{img}'
         f'<span><strong style="display:block;font-weight:var(--weight-bold);color:var(--text-primary);margin-bottom:2px">{esc(a["titel"])}</strong>{esc(a["datum"])}</span></a>'
