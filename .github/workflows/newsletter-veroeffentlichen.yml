@@ -1,0 +1,64 @@
+# Baut die Webfassung einer Löwen-Post-Ausgabe, sobald n8n sie nach dem Versand ablegt (Marko 24.11.2026).
+#
+# Ablauf:
+#   1. 305 versendet die Löwen-Post (Versandliste mit Bausteinen, crm-db Migration 520).
+#   2. n8n („305: Website“) findet versendete Ausgaben ohne Webfassung (loewen_post_archiv_offen, Migration 521)
+#      und legt data/newsletter-eingang/<JJJJ-MM>.json ab.
+#   3. Dieser Lauf baut news/newsletter/<JJJJ-MM>_ausgabe-<nr>.html, trägt die Ausgabe in
+#      data/newsletter-archiv.json ein und füllt „Vergangene Ausgaben“ (tools/newsletter-veroeffentlichen.py).
+#   4. n8n vermerkt die Adresse in der Mediaplanung (loewen_post_archiv_vermerken), Status veroeffentlicht.
+
+name: Löwen-Post veroeffentlichen
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - data/newsletter-eingang/*.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: newsletter-veroeffentlichen
+  cancel-in-progress: false
+
+jobs:
+  veroeffentlichen:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Webfassung bauen
+        run: |
+          pip install --quiet --disable-pip-version-check pillow
+          python3 tools/newsletter-veroeffentlichen.py
+          # neue Seiten erst tracken, sonst sehen die Generatoren sie nicht (Sitemap, SEO-Block)
+          git add -A news/newsletter data/newsletter-archiv.json
+          sh tools/bauen.sh
+          git checkout -- assets/presse/pakete/ 2>/dev/null || true
+
+      - name: Aenderungen committen
+        run: |
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nichts zu veroeffentlichen."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Löwen-Post: Webfassung und Archiv gebaut"
+          for versuch in 1 2 3 4; do
+            git push && exit 0
+            echo "Push abgelehnt (Versuch $versuch), hole Aenderungen und versuche es erneut."
+            git pull --rebase origin main || { git rebase --abort 2>/dev/null; exit 1; }
+          done
+          exit 1
