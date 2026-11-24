@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- Vorschau (Marko 24.11.2026): nirgends verlinkt, nicht in Suchmaschinen und nicht in der Sitemap. -->
+<meta name="robots" content="noindex, nofollow" />
+<title>Vorschau: 3D-Highlights — Basketball Löwen</title>
+<link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
+<link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
+<link rel="stylesheet" href="/css/spiel-3d.css?v=1" />
+<style>
+/* Ein dunkler Hallen-Look wie der Abschnitt auf der Spieltagsseite (bewusst nur ein Thema). Inhalt: Kopf, Bühne mit Liste, Erklärung. */
+:root {
+  color-scheme: dark;
+  --color-brand-orange: #E5710B; --color-brand-navy: #00122D; --color-brand-blue: #0028AA;
+  --grund: #00122D; --text: rgba(255,255,255,.86); --text-stark: #ffffff; --leise: rgba(255,255,255,.62); --linie: rgba(255,255,255,.14);
+  --font-base: 'Lexend', system-ui, sans-serif;
+  --space-2: 8px; --space-4: 16px; --space-6: 24px; --space-8: 32px;
+  --radius-md: 8px; --radius-lg: 16px; --radius-full: 9999px;
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, .35);
+}
+html, body { background: var(--grund); color: var(--text); }
+body { font-family: var(--font-base); font-size: 16px; line-height: 1.55; }
+.huelle { max-width: 1200px; margin: 0 auto; padding-block: 40px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.eyebrow { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #FF9A3D; }
+h1 { margin: 6px 0 0; font-size: clamp(28px, 5vw, 48px); line-height: 1.05; font-weight: 900; color: var(--text-stark); text-wrap: balance; }
+h1 .zahl { color: #FF9A3D; font-variant-numeric: tabular-nums; }
+.kopf { max-width: 760px; margin-bottom: var(--space-6); }
+.kopf p { margin: 12px 0 0; color: var(--text); }
+.prototyp { display: inline-flex; gap: 6px; align-items: center; margin-top: 14px; padding: 4px 10px; border: 1px solid var(--linie); border-radius: var(--radius-full); font-size: 12px; color: var(--leise); }
+.erklaerung { margin-top: var(--space-8); display: grid; gap: var(--space-6); grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.erklaerung div { min-width: 0; }
+.erklaerung h2 { margin: 0 0 6px; font-size: 15px; color: var(--text-stark); }
+.erklaerung p { margin: 0; font-size: 14px; color: var(--leise); max-width: 60ch; }
+</style>
+</head>
+<body>
+<div class="huelle">
+  <header class="kopf">
+    <span class="eyebrow">Best of in 3D · Heimspiel 20.11.2026</span>
+    <h1>Basketball Löwen <span class="zahl">104 : 75</span> FC Bayern Basketball II</h1>
+    <p>Die besten Szenen der Löwen, gebaut aus den Daten des Liga-Livetickers: wer wann von wo geworfen hat. Die Bewegungen sind animiert.</p>
+    <span class="prototyp">Prototyp für die Spieltagsseite auf basketball-loewen.com</span>
+  </header>
+  <div class="spiel-3d" data-spiel-3d="/data/spiel-3d/2006196.json">
+    <div class="spiel-3d-buehne"></div>
+    <ol class="spiel-3d-liste">
+          <li><span class="s3l-kopf">1. Viertel, noch 9:22 · 5:2</span><span class="s3l-text">Dreier von Anthony, Vorlage Ilias</span></li>
+          <li><span class="s3l-kopf">1. Viertel, noch 8:29 · 9:3</span><span class="s3l-text">Dunk von Anthony</span></li>
+          <li><span class="s3l-kopf">1. Viertel, noch 2:47 · 24:8</span><span class="s3l-text">Dunk von Marko, Vorlage Tim</span></li>
+          <li><span class="s3l-kopf">2. Viertel, noch 7:32 · 41:20</span><span class="s3l-text">Dreier von Ilias, Vorlage Anthony</span></li>
+          <li><span class="s3l-kopf">2. Viertel, noch 6:51 · 46:21</span><span class="s3l-text">Dreier von Jacob, Vorlage Ilias</span></li>
+          <li><span class="s3l-kopf">2. Viertel, noch 5:01 · 54:26</span><span class="s3l-text">Dunk von Marko, Vorlage Jacob</span></li>
+          <li><span class="s3l-kopf">2. Viertel, noch 1:45 · 57:30</span><span class="s3l-text">Dreier von Ilias, Vorlage Marko</span></li>
+          <li><span class="s3l-kopf">3. Viertel, noch 6:42 · 70:42</span><span class="s3l-text">Dreier von Jacob, Vorlage Anthony</span></li>
+    </ol>
+  </div>
+  <section class="erklaerung" aria-label="So entsteht die Szene">
+    <div><h2>Was aus dem Ticker stammt</h2><p>Werfer, Vorlage, Wurfart, Wurfposition auf dem Feld, Treffer oder daneben, Spielzeit und Spielstand. Die Liga liefert das für jede Aktion des Spiels.</p></div>
+    <div><h2>Was animiert ist</h2><p>Laufwege, Körperbewegung, Ballflug, Verteidiger und Kamera. Der Ticker kennt keine Bewegungen, deshalb ist jede Szene eine Nachstellung.</p></div>
+    <div><h2>Wie die Auswahl entsteht</h2><p>Dunks, Dreier, Führungswechsel, Schlussphase und Blocks bekommen Punkte; die acht besten Szenen laufen nacheinander, höchstens zwei je Spieler.</p></div>
+  </section>
+</div>
+
+<script type="module" src="/js/spiel-3d.js?v=2"></script>
+</body>
+</html>

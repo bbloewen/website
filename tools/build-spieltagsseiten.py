@@ -868,7 +868,9 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
             kauf_section,
             ergebnis_section(game, phase),
             story_section(game, phase, news),
-            highlights_3d_section(game) if phase == "danach" else "",
+            # Nur mit "highlights3d": true in heimspiele.json (Marko 24.11.2026: erst ansehen, noch nirgends einbinden;
+            # Vorschau unter /vorschau/spiel-3d.html, nicht verlinkt, noindex).
+            highlights_3d_section(game) if phase == "danach" and game.get("highlights3d") else "",
             gegner_section(game),
             spieltagsinfo_section(game),
             bericht_section(bericht_inhalt) if phase == "danach" else "",
