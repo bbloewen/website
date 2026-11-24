@@ -104,7 +104,11 @@ LOEWENPARK = {
                    "der Basketball Löwen Erfurt für Nachwuchsleistungssport, "
                    "Damenbasketball, BasKIDball und Feriencamps.",
     "url": BASE + "trainieren/loewenpark.html",
-    "image": DEFAULT_IMAGE,
+    # Echtes Bild der Halle statt des Standard-Teilbilds: Google zeigt es im
+    # Unternehmensprofil und in lokalen Ergebnissen, ein Logo-Platzhalter waere
+    # dort verschenkt (24.11.2026).
+    "image": BASE + "assets/img/share/seite-news-loewenpark-dach.jpg",
+    "hasMap": "https://maps.google.com/?cid=17483735935586458406",
     "mainEntityOfPage": {
         "@type": "WebPage",
         "@id": BASE + "trainieren/loewenpark.html",
