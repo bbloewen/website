@@ -332,6 +332,15 @@
               </span>
             </label>
 
+            <label class="payment-method-card hidden" id="pm-ueberweisung">
+              <input type="radio" name="paymethod" value="ueberweisung">
+              <span class="payment-method-icon"><i data-lucide="landmark" class="icon-16" style="color:var(--color-brand-blue)"></i></span>
+              <span>
+                <strong>Überweisung</strong>
+                <span class="t-caption">Wir schicken dir die Überweisungsdaten per E-Mail.</span>
+              </span>
+            </label>
+
             <label class="payment-method-card hidden" id="pm-sepa">
               <input type="radio" name="paymethod" value="sepa">
               <span class="payment-method-icon"><i data-lucide="landmark" class="icon-16" style="color:var(--color-brand-blue)"></i></span>
@@ -369,6 +378,14 @@
               <button class="btn btn-primary btn-sm" type="button" id="sumup-start" style="width:100%;justify-content:center">Weiter zur Kartenzahlung</button>
               <div id="sumup-card" style="margin-top:12px"></div>
               <p id="sumup-meldung" class="t-body-sm hidden" role="alert" style="margin-top:10px;color:var(--color-error, #b42318)"></p>
+            </div>
+            <div id="ueberweisung-block" class="hidden" style="margin-top:4px">
+              <div id="ueberweisung-inhalt">
+                <p class="t-body-sm" style="margin-bottom:10px">Wir reservieren deine Plätze für zwei Tage und schicken dir jetzt eine E-Mail mit den Überweisungsdaten an <strong id="ueberweisung-email"></strong>. Sobald dein Geld bei uns eingegangen ist, bekommst du die Tickets per E-Mail.</p>
+                <p class="t-caption" style="color:var(--text-muted);margin-bottom:14px">Wichtig: Auch bei einer Echtzeitüberweisung kann es sein, dass unsere Prüfung etwas länger dauert und die Zahlung nicht mehr rechtzeitig vor dem Spiel bei uns ankommt. Wir können nur garantieren, dass die Tickets rechtzeitig rausgehen, wenn du mindestens drei bis vier Tage vor dem Spiel überweist. Sonst zahle bitte mit Karte.</p>
+                <button class="btn btn-primary btn-sm" type="button" id="ueberweisung-start" style="width:100%;justify-content:center">Überweisungsdaten per E-Mail senden</button>
+                <p id="ueberweisung-meldung" class="t-body-sm hidden" role="alert" style="margin-top:10px;color:var(--color-error, #b42318)"></p>
+              </div>
             </div>
           </form>
         </div>
@@ -657,6 +674,10 @@
           sessionStorage.setItem('bl_order', JSON.stringify({ orderNumber: result.reference, pretixOrderCode: result.pretixOrderCode || '', cart: cart, buyer: buyer, paymentMethod: 'karte' }));
         }
       });
+      ueberweisungEinrichten({
+        orderUrl: EINZELTICKET_ORDER_CREATE_URL,
+        captureUrl: 'https://ticketing.basketball-loewen.com/webhook/einzelticket-paypal-capture-erfassen'
+      });
     }
 
     /* Kartenzahlung über SumUp (Marko 19.11.2026, Konto XXL Baskets GmbH M14JMCT9). Derselbe
@@ -674,7 +695,7 @@
       function zeige(zahlart) {
         var karte = zahlart === 'sumup';
         block.classList.toggle('hidden', !karte);
-        if (!PAYPAL_PAUSE) ppContainer.classList.toggle('hidden', karte);
+        if (!PAYPAL_PAUSE) ppContainer.classList.toggle('hidden', karte || zahlart === 'ueberweisung');
       }
       if (PAYPAL_PAUSE) {
         document.getElementById('pm-paypal').style.display = 'none';
@@ -748,6 +769,76 @@
           fehler((err && err.message) + ' Deine Bestellnummer: ' + reference + '. Bitte schreib uns an ' + opt.kontakt + ', wir kümmern uns sofort darum.');
         });
       }
+    }
+
+    /* Überweisung (Marko 24.11.2026): Die Seite zeigt keine Kontodaten und keinen QR-Code. Nach der Bestätigung legt n8n die
+       Bestellung als unbezahlt an (Plätze zwei Tage reserviert, Order-Webhook mit zahlart 'ueberweisung', danach der Capture-Webhook
+       mit zahlart 'ueberweisung') und schickt die Überweisungsdaten samt QR-Code per E-Mail an die Käuferadresse. Angeboten wird sie nur,
+       wenn das Spiel noch mindestens drei Tage entfernt ist; der Server prüft das noch einmal. Zahlungseingang und Ticketversand
+       ordnet der Workflow „Ticketing: Überweisung Zahlungsabgleich und Ablauf“ zu (Verwendungszweck „Ticketing ET-…“). */
+    function ueberweisungEinrichten(opt) {
+      var pm = document.getElementById('pm-ueberweisung');
+      var block = document.getElementById('ueberweisung-block');
+      var startBtn = document.getElementById('ueberweisung-start');
+      var meldung = document.getElementById('ueberweisung-meldung');
+      var m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(String(cart.spielDatum || ''));
+      if (!m || !buyer || !buyer.email) return;
+      var jetzt = new Date();
+      var heute = Date.UTC(jetzt.getFullYear(), jetzt.getMonth(), jetzt.getDate());
+      if ((Date.UTC(+m[3], +m[2] - 1, +m[1]) - heute) / 86400000 < 3) return;
+      pm.classList.remove('hidden');
+      document.getElementById('ueberweisung-email').textContent = buyer.email;
+      document.querySelectorAll('input[name="paymethod"]').forEach(function (r) {
+        r.addEventListener('change', function () { block.classList.toggle('hidden', this.value !== 'ueberweisung'); });
+      });
+      function fehler(text) {
+        meldung.textContent = text;
+        meldung.classList.remove('hidden');
+      }
+      startBtn.addEventListener('click', function () {
+        meldung.classList.add('hidden');
+        startBtn.disabled = true;
+        startBtn.textContent = 'Plätze werden reserviert …';
+        var reference = null;
+        fetch(opt.orderUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ buyer: buyer, cart: cart, zahlart: 'ueberweisung' })
+        }).then(function (res) { return res.json(); }).then(function (data) {
+          if (!data.ok) throw new Error(data.error || 'Die Bestellung konnte nicht vorbereitet werden.');
+          reference = data.reference;
+          return fetch(opt.captureUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reference: reference, zahlart: 'ueberweisung' })
+          });
+        }).then(function (res) { return res.json(); }).then(function (result) {
+          if (!result.ok) throw new Error(result.error || 'Die Plätze konnten nicht reserviert werden.');
+          var inhalt = document.getElementById('ueberweisung-inhalt');
+          inhalt.innerHTML = '';
+          var kopf = document.createElement('p');
+          kopf.className = 't-body-sm';
+          kopf.style.marginBottom = '10px';
+          kopf.innerHTML = '<strong>Danke! Wir haben dir die Überweisungsdaten per E-Mail geschickt.</strong>';
+          var text = document.createElement('p');
+          text.className = 't-body-sm';
+          text.style.marginBottom = '10px';
+          text.textContent = 'Deine Plätze sind bis ' + (result.fristText || 'in zwei Tagen') + ' für dich reserviert. Bitte überweise ' + String(Number(result.betrag).toFixed(2)).replace('.', ',') + ' € mit dem Verwendungszweck aus der E-Mail. Sobald das Geld bei uns eingegangen ist, schicken wir dir die Tickets. Deine Bestellnummer: ' + result.reference + '.';
+          var hinweis = document.createElement('p');
+          hinweis.className = 't-caption';
+          hinweis.style.color = 'var(--text-muted)';
+          hinweis.textContent = 'Keine E-Mail bekommen? Schau bitte im Spam-Ordner nach oder schreib uns an tickets@basketball-loewen.com.';
+          inhalt.appendChild(kopf);
+          inhalt.appendChild(text);
+          inhalt.appendChild(hinweis);
+          document.getElementById('payment-method-heading').textContent = 'Überweisung angefordert';
+          document.querySelectorAll('.payment-method-card').forEach(function (k) { k.style.display = 'none'; });
+        }).catch(function (err) {
+          startBtn.disabled = false;
+          startBtn.textContent = 'Überweisungsdaten per E-Mail senden';
+          fehler((err && err.message) || 'Das hat gerade nicht geklappt. Bitte versuche es gleich noch einmal oder zahle mit Karte.');
+        });
+      });
     }
 
     /* Fanshop-Gutschein: echte PayPal-Buttons wie beim Einzelticket. Nur wenn der
