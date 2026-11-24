@@ -46,6 +46,13 @@ Disallow: /assets/presse/fotos/
 # nach, und Googlebot muss sie zum Rendern abrufen können.
 Disallow: /data/spieltagsinfo/
 Disallow: /tools/
+#   /kalender/            die .ics-Dateien zum Eintragen eines Spiels oder Camps in den
+#                         eigenen Kalender. Sie sind Downloads, keine Seiten. Google hat
+#                         alle 77 gecrawlt und als "Gecrawlt - zurzeit nicht indexiert"
+#                         gefuehrt (Search Console, 24.11.2026) - das waren saemtliche
+#                         Meldungen dieser Art. Der Link auf der Seite funktioniert
+#                         weiter, robots.txt haelt nur Crawler ab, nicht Besucher.
+Disallow: /kalender/
 Allow: /
 
 Sitemap: https://basketball-loewen.com/sitemap.xml
