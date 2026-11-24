@@ -196,6 +196,14 @@ def event_ldjson(ev):
         "startDate": ev["start"],
         "eventStatus": "https://schema.org/EventScheduled",
         "organizer": {"@type": "Organization", "name": "Basketball Löwen Erfurt", "url": BASE},
+        # performer: Googles Event-Doku kennt nur performer und meldet es sonst
+        # als fehlend (Search Console, 24.11.2026, 15 Elemente auf dieser Seite).
+        # Auftretende sind bei einem Community-Termin immer wir selbst -- wir sind
+        # die, die dort erscheinen, Veranstalter ist je nach Termin ein anderer.
+        # PerformingGroup statt SportsTeam: Google erwartet bei Event eine Person
+        # oder PerformingGroup, SportsTeam passt nur zum SportsEvent der
+        # Spieltagsseiten (tools/build-head-meta.py).
+        "performer": {"@type": "PerformingGroup", "name": "Basketball Löwen Erfurt", "url": BASE},
     }
     ende = ev.get("end") or geschaetztes_ende(ev.get("start"))
     if ende:
