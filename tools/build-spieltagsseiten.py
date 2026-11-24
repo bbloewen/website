@@ -383,6 +383,69 @@ def ergebnis_section(game, phase):
 """
 
 
+def _stand_v(pfad):
+    """Cache-Buster aus dem Dateiinhalt (nicht mtime: git setzt die Zeit beim Auschecken neu, --check bliebe nicht stabil)."""
+    import hashlib
+    try:
+        return str(int(hashlib.md5(pfad.read_bytes()).hexdigest()[:8], 16))
+    except OSError:
+        return "0"
+
+
+def highlights_3d_section(game):
+    """Best-of in 3D (Prototyp 24.11.2026, Marko): nur wenn tools/build-spiel-3d.py für das Spiel
+    data/spiel-3d/<liveticker-id>.json geschrieben hat. Die Liste steht als HTML in der Seite (lesbar
+    ohne JavaScript), js/spiel-3d.js macht daraus Knöpfe und lädt die Szene erst beim Hinscrollen."""
+    m = re.search(r"/g/(\d+)", game.get("livescore") or "")
+    if not m:
+        return ""
+    datei = REPO / "data" / "spiel-3d" / f"{m.group(1)}.json"
+    if not datei.exists():
+        return ""
+    try:
+        d = json.loads(datei.read_text("utf-8"))
+    except ValueError:
+        return ""
+    if not d.get("highlights"):
+        return ""
+    arten = {"dreier": "Dreier", "sprungwurf": "Sprungwurf", "korbleger": "Korbleger", "dunk": "Dunk",
+             "alleyoop": "Alley-Oop", "tipin": "Tip-In"}
+    zeilen = []
+    for h in d["highlights"]:
+        q = h["viertel"]
+        viertel = f"{q}. Viertel" if q <= 4 else f"Verlängerung {q - 4}"
+        uhr = f"{h['rest'] // 60}:{h['rest'] % 60:02d}"
+        if h["ergebnis"] == "geblockt" and h.get("blocker"):
+            text = f"Block von {h['blocker']['name']}"
+        else:
+            text = f"{arten.get(h['art'], 'Wurf')} von {h['werfer']['name']}"
+            if h.get("vorlage"):
+                text += f", Vorlage {h['vorlage']['name']}"
+        stand = f"{h['stand'][0]}:{h['stand'][1]}"
+        zeilen.append(f'          <li><span class="s3l-kopf">{viertel}, noch {uhr} · {stand}</span>'
+                      f'<span class="s3l-text">{html.escape(text)}</span></li>')
+    v_js = _stand_v(REPO / "js" / "spiel-3d.js")
+    v_css = _stand_v(REPO / "css" / "spiel-3d.css")
+    return f"""  <section class="section section-dark spiel-3d-section" id="highlights-3d">
+    <link rel="stylesheet" href="/css/spiel-3d.css?v={v_css}" />
+    <div class="container">
+      <div class="spiel-3d-kopf">
+        <span class="eyebrow">Best of in 3D</span>
+        <h2>Die Highlights, nachgestellt</h2>
+        <p class="t-body">Die besten Szenen der Löwen, gebaut aus den Daten des Liga-Livetickers: wer wann von wo geworfen hat. Die Bewegungen sind animiert.</p>
+      </div>
+      <div class="spiel-3d" data-spiel-3d="/data/spiel-3d/{m.group(1)}.json">
+        <div class="spiel-3d-buehne"></div>
+        <ol class="spiel-3d-liste">
+{chr(10).join(zeilen)}
+        </ol>
+      </div>
+    </div>
+    <script type="module" src="/js/spiel-3d.js?v={v_js}"></script>
+  </section>
+"""
+
+
 def artikel_aus_datei(url):
     """Notfall, falls der Artikel noch nicht in data/news.json steht (die Veroeffentlichung
     traegt ihn erst nach der Freigabe ein): Titel und Beschreibung aus dem <head> der Seite."""
@@ -805,6 +868,7 @@ def build_page(game, phase, bericht_inhalt, header_html=LEER_HEADER, footer_html
             kauf_section,
             ergebnis_section(game, phase),
             story_section(game, phase, news),
+            highlights_3d_section(game) if phase == "danach" else "",
             gegner_section(game),
             spieltagsinfo_section(game),
             bericht_section(bericht_inhalt) if phase == "danach" else "",
