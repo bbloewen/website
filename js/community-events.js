@@ -15,7 +15,8 @@ function initCommunityEvents(containerId, jsonPath) {
     'Straßenfest': { icon: 'flag', tint: 'tint-blue' },
     'Turnier': { icon: 'trophy', tint: 'tint-orange' },
     'Vereinsfest': { icon: 'party-popper', tint: 'tint-violet' },
-    'Auswärtsspieltag': { icon: 'bus', tint: 'tint-orange' }
+    'Auswärtsspieltag': { icon: 'bus', tint: 'tint-orange' },
+    'Fan-Event': { icon: 'bus', tint: 'tint-orange' }
   };
   var FALLBACK_DESCRIPTION = 'Die Basketball Löwen Erfurt sind mit dabei — Details folgen in Kürze.';
 
