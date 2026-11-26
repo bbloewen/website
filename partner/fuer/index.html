@@ -275,10 +275,12 @@ body { background: #fff; color: var(--color-brand-navy); }
     headline($('pf-h1'), firma + (zurueck ? ' wird wieder *löwenstark*.' : ' wird *löwenstark*.'));
     if (tm.name) { txt($('pf-person-name'), tm.name); txt($('pf-person-rolle'), (tm.rolle ? tm.rolle + ', ' : '') + 'Basketball Löwen'); }
     if (tm.foto && /^\/assets\/img\//.test(tm.foto)) $('pf-person-foto').src = tm.foto;
-    var auf = b.aufhaenger || 'Wir suchen löwenstarke Partner aus der Region.';
+    var auf = d.art === 'rueckgewinnung' ? T('Schön, dass du reinschaust.', 'Schön, dass Sie reinschauen.') : (b.aufhaenger || 'Wir suchen löwenstarke Partner aus der Region.');
     txt($('pf-lead'), gruss + ' ' + auf.charAt(0).toLowerCase() + auf.slice(1) + ' ' +
-      T(d.video ? 'Wir haben dir dazu ein kurzes Video aufgenommen.' : 'Hier siehst du, was wir uns vorstellen.',
-        d.video ? 'Wir haben Ihnen dazu ein kurzes Video aufgenommen.' : 'Hier sehen Sie, was wir uns vorstellen.'));
+      (d.art === 'rueckgewinnung'
+        ? T(d.video ? 'Ich habe dir eine kurze Nachricht aufgenommen.' : 'Ich würde mich freuen, wenn du wieder dabei bist.', d.video ? 'Ich habe Ihnen eine kurze Nachricht aufgenommen.' : 'Ich würde mich freuen, wenn Sie wieder dabei sind.')
+        : T(d.video ? 'Wir haben dir dazu ein kurzes Video aufgenommen.' : 'Hier siehst du, was wir uns vorstellen.',
+            d.video ? 'Wir haben Ihnen dazu ein kurzes Video aufgenommen.' : 'Hier sehen Sie, was wir uns vorstellen.')));
     videoEinbauen(d.video);
     txt($('pf-cta-unter'), '15 Minuten mit ' + mit + T(', per Telefon oder bei dir vor Ort.', ', per Telefon oder bei Ihnen vor Ort.'));
 
