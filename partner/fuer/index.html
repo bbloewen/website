@@ -745,6 +745,7 @@ main#main { background: #fff; color: var(--color-brand-navy); }
       nutzen: [{ titel: 'Neue Kunden', text: 'Im VIP-Bereich sitzen Entscheider aus Bau, Industrie, Handwerk und Logistik.' }, { titel: 'Ansehen in der Region', text: 'Sichtbar bei jedem Heimspiel und im Livestream.' }, { titel: 'Vorsprung vor der Konkurrenz', text: 'Ein Partner der Löwen hat in Erfurt ein Gesicht.' }, { titel: 'Mitarbeiter und Azubis', text: 'Tickets fürs Team und ein Auftritt auf dem Spielfeld.' }] },
     termin: { mit: 'André' } };
   if (!CODE) return fehler();
+  if (LOKAL && CODE === 'muster' && sp.get('f')) { MUSTER.firma = sp.get('f').slice(0, 40); MUSTER.bande_zeile = (sp.get('z') || MUSTER.bande_zeile).slice(0, 80); MUSTER.anrede_name = sp.get('n') || MUSTER.anrede_name; }
   if (LOKAL && CODE === 'muster') return zeigen(Object.assign({}, MUSTER, sp.get('a') === 'du' ? { ansprache: 'du', anrede_name: 'Stefan' } : {},
     sp.get('r') ? { art: 'rueckgewinnung', termin: { mit: 'Marko', name: 'Marko Fliege', rolle: 'Kaufmännischer Leiter', foto: '/assets/img/verantwortliche/mf-1.webp' } } : {}));
   fetch(API + 'partner-seite?c=' + encodeURIComponent(CODE), { cache: 'no-store' })
