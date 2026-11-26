@@ -652,6 +652,11 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     if (!CODE || LOKAL || VORSCHAU) return;
     try { fetch(API + 'partner-ereignis', { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: CODE, art: art, quelle: QUELLE, geraet: geraet() }) }).catch(function () {}); } catch (e) {}
   }
+  // Präsentation im Call (Migration 542): Start und jede gezeigte Folie werden gemeldet, damit 305 zeigt, ob alle Folien durchgeklickt wurden
+  function meldenCall(art, folie) {
+    if (!CODE || LOKAL) return;
+    try { fetch(API + 'partner-ereignis', { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: CODE, art: art, quelle: folie || 'call', geraet: geraet() }) }).catch(function () {}); } catch (e) {}
+  }
   function T(duText, sieText) { return du ? duText : sieText; }
   function txt(el, s) { el.textContent = s; return el; }
   function neu(tag, cls, s) { var e = document.createElement(tag); if (cls) e.className = cls; if (s != null) e.textContent = s; return e; }
@@ -978,7 +983,7 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     dv.appendChild(neu('span', null, (tm.rolle ? tm.rolle + ', ' : '') + 'Basketball Löwen')); p.appendChild(im); p.appendChild(dv); box.appendChild(p);
   }
 
-  // Präsentation im Call: sechs Folien, Pfeiltasten oder Knöpfe, Esc schließt. Zählt nichts.
+  // Präsentation im Call: sechs Folien, Pfeiltasten oder Knöpfe, Esc schließt. Zählt keinen Besuch, meldet aber Start und Folien (305 zeigt „x von 6 Folien“).
   function callStarten(d, firma) {
     var P = d.paket || {}, b = d.branche || {}, tm = d.termin || {};
     var wrap = neu('div', 'pf-call'); wrap.setAttribute('role', 'region'); wrap.setAttribute('aria-label', 'Präsentation für ' + firma);
@@ -1008,12 +1013,13 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     var i = 0;
     function zeige(n) {
       i = Math.max(0, Math.min(folien.length - 1, n)); buehne.textContent = ''; var innen = neu('div', 'pf-call-innen'); folien[i](innen); buehne.appendChild(innen); buehne.scrollTop = 0;
+      meldenCall('call_folie', 'f' + (i + 1));
       zahl.textContent = (i + 1) + ' / ' + folien.length; zur.disabled = i === 0; vor.disabled = i === folien.length - 1; requestAnimationFrame(bandeSetzen);
     }
     var schliessen = function () { wrap.remove(); document.removeEventListener('keydown', taste); document.body.style.overflow = ''; };
     function taste(e) { if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); zeige(i + 1); } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); zeige(i - 1); } else if (e.key === 'Escape') schliessen(); }
     zur.addEventListener('click', function () { zeige(i - 1); }); vor.addEventListener('click', function () { zeige(i + 1); }); aus.addEventListener('click', schliessen);
-    document.addEventListener('keydown', taste); document.body.style.overflow = 'hidden'; document.body.appendChild(wrap); zeige(0); vor.focus();
+    document.addEventListener('keydown', taste); document.body.style.overflow = 'hidden'; document.body.appendChild(wrap); meldenCall('call_start'); zeige(0); vor.focus();
   }
 
   function fehler() { $('pf-laden').hidden = true; $('pf-fehler').hidden = false; }
