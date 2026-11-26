@@ -116,7 +116,7 @@ main#main { background: #fff; color: var(--color-brand-navy); }
 .pf-form fieldset { border: 1px solid #e3e6ec; border-radius: 14px; padding: 14px 16px 6px; margin: 0 0 14px; }
 .pf-form legend { font-weight: 800; padding: 0 6px; }
 .pf-form label { display: block; font-size: 14px; font-weight: 600; margin: 0 0 4px; }
-.pf-form input[type=text], .pf-form input[type=email], .pf-form select { width: 100%; box-sizing: border-box; min-height: 46px; border: 1px solid #c5ccd8; border-radius: 10px; padding: 10px 12px; font: 400 16px 'Lexend', sans-serif; color: #00122D; background: #fff; margin: 0 0 12px; }
+.pf-form input[type=text], .pf-form input[type=email], .pf-form input[type=tel], .pf-form select { width: 100%; box-sizing: border-box; min-height: 46px; border: 1px solid #c5ccd8; border-radius: 10px; padding: 10px 12px; font: 400 16px 'Lexend', sans-serif; color: #00122D; background: #fff; margin: 0 0 12px; }
 .pf-form .pf-zwei { display: grid; grid-template-columns: 1fr; gap: 0 12px; }
 @media (min-width: 520px) { .pf-form .pf-zwei { grid-template-columns: 1fr 1fr; } .pf-form .pf-titel { grid-template-columns: 110px 1fr 1fr; } }
 .pf-form .pf-check { display: flex; gap: 10px; align-items: flex-start; font-weight: 400; font-size: 14px; line-height: 1.45; margin: 0 0 12px; }
@@ -922,7 +922,8 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     f.innerHTML = '<fieldset><legend>' + T('Angebot annehmen', 'Angebot annehmen') + '</legend>' +
       '<div class="pf-zwei"><div><label for="pf-an-name">Vor- und Nachname</label><input type="text" id="pf-an-name" maxlength="120" autocomplete="name" required /></div>' +
       '<div><label for="pf-an-funktion">Funktion</label><input type="text" id="pf-an-funktion" maxlength="120" autocomplete="organization-title" placeholder="z. B. Geschäftsführung" /></div></div>' +
-      '<label for="pf-an-email">E-Mail für den Vertrag</label><input type="email" id="pf-an-email" maxlength="200" autocomplete="email" required />' +
+      '<div class="pf-zwei"><div><label for="pf-an-email">E-Mail für den Vertrag</label><input type="email" id="pf-an-email" maxlength="200" autocomplete="email" required /></div>' +
+      '<div><label for="pf-an-telefon">Telefon für Rückfragen</label><input type="tel" id="pf-an-telefon" maxlength="30" autocomplete="tel" required /></div></div>' +
       '<label for="pf-an-rechnung">Rechnungsanschrift (wenn abweichend oder neu)</label><textarea id="pf-an-rechnung" maxlength="500" rows="3" autocomplete="street-address"></textarea>' +
       '<label for="pf-an-anmerkung">Anmerkung (optional)</label><textarea id="pf-an-anmerkung" maxlength="2000" rows="2"></textarea>' +
       '<label class="pf-check"><input type="checkbox" id="pf-an-ok" required /> <span>' + T('Ich nehme das Angebot an. Den Vertrag bekomme ich per E-Mail zur Unterschrift.', 'Ich nehme das Angebot an. Den Vertrag erhalte ich per E-Mail zur Unterschrift.') + '</span></label>' +
@@ -951,9 +952,10 @@ main#main { background: #fff; color: var(--color-brand-navy); }
       var z = zug(); if (z.length !== 2) return fehlerZeigen('pf-an-fehler', T('Bitte wähle genau zwei Zugaben.', 'Bitte wählen Sie genau zwei Zugaben.'));
       if (wert('pf-an-name').length < 3) return fehlerZeigen('pf-an-fehler', 'Bitte Vor- und Nachnamen angeben.');
       if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(wert('pf-an-email'))) return fehlerZeigen('pf-an-fehler', 'Bitte eine gültige E-Mail-Adresse angeben. An sie geht der Vertrag zur Unterschrift.');
+      if (!/^[+0-9 ()\/.-]{6,30}$/.test(wert('pf-an-telefon'))) return fehlerZeigen('pf-an-fehler', 'Bitte eine Telefonnummer für Rückfragen zum Vertrag angeben.');
       if (!$('pf-an-ok').checked) return fehlerZeigen('pf-an-fehler', T('Bitte bestätige, dass du das Angebot annimmst.', 'Bitte bestätigen Sie, dass Sie das Angebot annehmen.'));
       var btn = $('pf-an-senden'); btn.disabled = true; btn.textContent = 'Einen Moment …';
-      angebotSenden({ aktion: 'annehmen', zugaben: z, vip_extra: vipN, name: wert('pf-an-name'), funktion: wert('pf-an-funktion'), email: wert('pf-an-email'), rechnung_adresse: wert('pf-an-rechnung'), feedback: wert('pf-an-anmerkung'), bestaetigt: true }, function (r) {
+      angebotSenden({ aktion: 'annehmen', zugaben: z, vip_extra: vipN, name: wert('pf-an-name'), funktion: wert('pf-an-funktion'), email: wert('pf-an-email'), telefon: wert('pf-an-telefon'), rechnung_adresse: wert('pf-an-rechnung'), feedback: wert('pf-an-anmerkung'), bestaetigt: true }, function (r) {
         if (r && r.ok) return abschluss(r);
         btn.disabled = false; btn.textContent = 'Angebot annehmen'; fehlerZeigen('pf-an-fehler', (r && r.meldung) || 'Das hat nicht geklappt. Bitte später noch einmal versuchen.');
       });
