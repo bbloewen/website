@@ -888,17 +888,7 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     });
     box.appendChild(fs);
     if (offen) box.appendChild(neu('p', 'pf-hinweis', T('Wähle genau zwei aus.', 'Wählen Sie genau zwei aus.')));
-    var vipN = a.vip_extra || 0;
-    if (offen) {
-      var vb = neu('div', 'pf-vip'); var vl = document.createElement('label'); vl.htmlFor = 'pf-vip-n'; vl.textContent = 'Weitere VIP-Dauerkarten'; vl.appendChild(neu('span', null, 'je ' + euro(P.vip_preis || a.vip_preis) + ' netto für die Saison'));
-      var stp = neu('div', 'pf-stepper');
-      var minus = neu('button', null, '−'); minus.type = 'button'; minus.setAttribute('aria-label', 'Eine VIP-Dauerkarte weniger');
-      var inp = document.createElement('input'); inp.type = 'number'; inp.id = 'pf-vip-n'; inp.min = '0'; inp.max = '10'; inp.value = String(vipN); inp.inputMode = 'numeric';
-      var plus = neu('button', null, '+'); plus.type = 'button'; plus.setAttribute('aria-label', 'Eine VIP-Dauerkarte mehr');
-      stp.appendChild(minus); stp.appendChild(inp); stp.appendChild(plus); vb.appendChild(vl); vb.appendChild(stp); box.appendChild(vb);
-      var setze = function (n) { vipN = Math.max(0, Math.min(10, n | 0)); inp.value = String(vipN); summe(); };
-      minus.addEventListener('click', function () { setze(vipN - 1); }); plus.addEventListener('click', function () { setze(vipN + 1); }); inp.addEventListener('change', function () { setze(Number(inp.value)); });
-    }
+    var vipN = 0;   // VIP-Karten ohne Preis (Steuerberatung): eine inklusive, eine zweite nur als Zugabe
     var sb = neu('div', 'pf-summe'); box.appendChild(sb);
     function summe() {
       var preis = Number(a.preis || P.preis || 5000), vp = Number(a.vip_preis || P.vip_preis || 700);
@@ -907,7 +897,6 @@ main#main { background: #fff; color: var(--color-brand-navy); }
       var zeile = function (l, r, kl) { var tr = document.createElement('tr'); if (kl) tr.className = kl; tr.appendChild(neu('td', null, l)); tr.appendChild(neu('td', 'num', r)); tb.appendChild(tr); };
       zeile('Löwenstarker Partner, ' + (a.start_text || 'eine Saison'), euro(preis));
       zeile('Zwei Zugaben', 'inklusive');
-      if (vipN > 0) zeile(vipN + ' weitere VIP-Dauerkarte' + (vipN === 1 ? '' : 'n') + ' × ' + euro(vp), euro(vipN * vp));
       zeile('Summe netto', euro(preis + vipN * vp), 'ges');
       sb.appendChild(tb); sb.appendChild(neu('p', null, 'Alle Preise netto zuzüglich Umsatzsteuer. Keine Rabatte, dafür zwei Zugaben nach Wahl.'));
     }
@@ -1006,7 +995,7 @@ main#main { background: #fff; color: var(--color-brand-navy); }
       function (el) { h(el, 'Das Paket: Löwenstarker *Partner*.'); el.appendChild(neu('p', 'pf-call-unter', 'Der Kern ist für alle Partner gleich.')); el.appendChild(liste(P.kern || [])); },
       function (el) { h(el, 'Zwei *Zugaben* nach Wahl.'); el.appendChild(liste(P.zugaben || [])); },
       function (el) { h(el, 'Der *Preis*.'); var pr = neu('p', 'pf-call-preis', euro(P.preis || 5000)); pr.appendChild(neu('small', null, 'netto für die Saison')); el.appendChild(pr);
-        el.appendChild(neu('p', 'pf-call-unter', 'Keine Rabatte, dafür zwei Zugaben nach Wahl. Jede weitere VIP-Dauerkarte ' + euro(P.vip_preis || 700) + '.')); },
+        el.appendChild(neu('p', 'pf-call-unter', 'Keine Rabatte, dafür zwei Zugaben nach Wahl.')); },
       function (el) { h(el, 'So geht es *weiter*.'); var ol = neu('ol', 'pf-call-schritte');
         [['Heute', 'Das Angebot steht auf ' + T('deiner', 'Ihrer') + ' Seite, mit den Zugaben aus diesem Gespräch.'], ['Annehmen', 'Ein Klick auf der Seite, dann kommt der Vertrag zur Unterschrift online.'], ['Willkommen', (tm.mit || 'André') + ' bringt den Spielball als Abschlussgeschenk vorbei.'], ['Start', 'Die Bande läuft beim nächsten Heimspiel.']]
           .forEach(function (x) { var li = document.createElement('li'); li.appendChild(neu('b', null, x[0])); li.appendChild(document.createTextNode(x[1])); ol.appendChild(li); });
