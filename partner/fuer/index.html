@@ -55,6 +55,17 @@ main#main { background: #fff; color: var(--color-brand-navy); }
 .pf-buehne-titel { font-weight: 900; font-size: clamp(22px, 5.6vw, 30px); line-height: 1.2; margin: 18px 0 6px; }
 .pf-buehne-titel span { color: #B55709; }
 .pf-buehne-text { font-size: 15px; line-height: 1.55; font-weight: 300; color: #3d4757; margin: 0 0 10px; }
+.pf-folie { position: absolute; inset: 0; border: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 16px; color: #fff; text-align: center;
+  background: radial-gradient(110% 100% at 100% 0%, #0028AA 0%, #00122D 100%); font-family: 'Lexend', sans-serif; }
+.pf-video .pf-folie-logo { position: static; inset: auto; width: clamp(56px, 14vw, 96px); height: auto; object-fit: contain; }
+.pf-folie-titel { font-weight: 900; font-size: clamp(18px, 4.6vw, 28px); line-height: 1.2; }
+.pf-folie-play { display: block; flex: none; width: 64px; height: 64px; border-radius: 50%; background: #E5710B; position: relative; box-shadow: 0 6px 20px rgba(0,0,0,.35); }
+.pf-folie-play::after { content: ''; position: absolute; left: 26px; top: 19px; border-left: 20px solid #fff; border-top: 13px solid transparent; border-bottom: 13px solid transparent; }
+.pf-folie-unter { font-size: 14px; color: #c9cfdb; }
+.pf-folie:hover .pf-folie-play, .pf-folie:focus-visible .pf-folie-play { background: #c8620a; }
+.pf-folie:focus-visible { outline: 3px solid #F09E4C; outline-offset: -3px; }
+.pf-bande-lauf span.l { display: inline-flex; align-items: center; padding: 0 18px; }
+.pf-bande-lauf span.l img { height: calc(var(--bh, 30px) * .82); width: auto; display: block; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 .pf-video-platz { display: flex; align-items: center; justify-content: center; text-align: center; color: #c9cfdb; font-size: 15px; padding: 16px; border: 2px dashed #3a4a6b; border-radius: 14px; position: absolute; inset: 0; }
 .pf-panel { padding: 40px 20px; }
@@ -585,7 +596,18 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     });
   }
 
-  function videoEinbauen(url) {
+  // Vorschaufolie vor dem Video (Marko 26.11.2026): nicht gleich das Gesicht im ersten Bild, sondern Logo, Titel und Play-Knopf. Erst der Klick lädt das Video.
+  function folie(box, firma, start) {
+    var f = document.createElement('button'); f.type = 'button'; f.className = 'pf-folie'; f.setAttribute('aria-label', T('Video abspielen', 'Video abspielen'));
+    var logo = document.createElement('img'); logo.src = '/assets/logo/loewen-logo-4c.svg'; logo.alt = ''; logo.width = 600; logo.height = 565; logo.className = 'pf-folie-logo';
+    var t = neu('span', 'pf-folie-titel', T('Ein Video für ', 'Ein Video für ') + firma);
+    var play = neu('span', 'pf-folie-play'); play.setAttribute('aria-hidden', 'true');
+    var u = neu('span', 'pf-folie-unter', 'Video ansehen');
+    f.appendChild(logo); f.appendChild(t); f.appendChild(play); f.appendChild(u);
+    f.addEventListener('click', function () { f.remove(); start(); });
+    box.appendChild(f);
+  }
+  function videoEinbauen(url, firma) {
     var box = $('pf-video');
     if (!url) {
       if (!(VORSCHAU || LOKAL)) return;
@@ -602,19 +624,25 @@ main#main { background: #fff; color: var(--color-brand-navy); }
       v.addEventListener('timeupdate', function () { if (!halb && v.duration && v.currentTime / v.duration >= 0.5) { halb = true; melden('video_halb'); } });
       v.addEventListener('ended', function () { melden('video_ende'); });
       v.addEventListener('loadedmetadata', function () { if (v.videoHeight > v.videoWidth) box.classList.add('hoch'); });
+      v.preload = 'none'; v.style.visibility = 'hidden';
       box.appendChild(v);
+      folie(box, firma, function () { v.style.visibility = ''; v.play().catch(function () {}); });
     } else {
       var src = url;
       var yt = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([\w-]{11})/);
       var vm = url.match(/vimeo\.com\/(\d+)/);
       if (yt) src = 'https://www.youtube-nocookie.com/embed/' + yt[1] + '?rel=0';
       else if (vm) src = 'https://player.vimeo.com/video/' + vm[1] + '?dnt=1';
-      var f = document.createElement('iframe');
-      f.src = src; f.title = T('Video für dich', 'Video für Sie'); f.loading = 'lazy';
-      f.allow = 'autoplay; fullscreen; picture-in-picture'; f.setAttribute('allowfullscreen', '');
-      box.appendChild(f);
+      folie(box, firma, function () {
+        var f = document.createElement('iframe');
+        f.src = src + (/heygen\.com\/embeds\//.test(src) ? (src.indexOf('?') < 0 ? '?' : '&') + 'autoplay=1' : (yt ? '&autoplay=1' : (vm ? '&autoplay=1' : '')));
+        f.title = T('Video für dich', 'Video für Sie');
+        f.allow = 'autoplay; fullscreen; picture-in-picture'; f.setAttribute('allowfullscreen', '');
+        box.appendChild(f);
+        melden('video_start');
+      });
     }
-    var h = $('pf-video-hinweis'); h.hidden = false; txt(h, T('Eine Minute, mit Ton am besten.', 'Eine Minute, mit Ton am besten.'));
+    var h = $('pf-video-hinweis'); h.hidden = false; txt(h, 'Mit Ton am besten.');
   }
 
   function zeigen(d) {
@@ -633,7 +661,7 @@ main#main { background: #fff; color: var(--color-brand-navy); }
         ? T(d.video ? 'Ich habe dir eine kurze Nachricht aufgenommen.' : 'Ich würde mich freuen, wenn du wieder dabei bist.', d.video ? 'Ich habe Ihnen eine kurze Nachricht aufgenommen.' : 'Ich würde mich freuen, wenn Sie wieder dabei sind.')
         : T(d.video ? 'Wir haben dir dazu ein kurzes Video aufgenommen.' : 'Hier siehst du, was wir uns vorstellen.',
             d.video ? 'Wir haben Ihnen dazu ein kurzes Video aufgenommen.' : 'Hier sehen Sie, was wir uns vorstellen.')));
-    videoEinbauen(d.video);
+    videoEinbauen(d.video, firma);
     txt($('pf-weg1-titel'), '15 Minuten mit ' + mit);
     txt($('pf-cta-unter'), 'Am Telefon, online oder vor Ort.');
     txt($('pf-termin-h2'), T('Lass uns sprechen.', 'Lassen Sie uns sprechen.'));
@@ -651,7 +679,8 @@ main#main { background: #fff; color: var(--color-brand-navy); }
 
     headline($('pf-bande-titel'), T('Deine *LED-Bande* bei den Basketball Löwen.', 'Ihre *LED-Bande* bei den Basketball Löwen.'));
     var lauf = $('pf-bande-lauf'); var zeile = d.bande_zeile || '';
-    for (var i = 0; i < 4; i++) { lauf.appendChild(neu('span', null, firma)); if (zeile) lauf.appendChild(neu('span', 'z', zeile)); }
+    var bandenLogo = function () { var w = neu('span', 'l'); var im = document.createElement('img'); im.src = '/assets/logo/loewen-logo-4c.svg'; im.alt = ''; w.appendChild(im); return w; };
+    for (var i = 0; i < 4; i++) { lauf.appendChild(neu('span', null, firma)); if (zeile) lauf.appendChild(neu('span', 'z', zeile)); lauf.appendChild(bandenLogo()); }
     txt($('pf-bande-text'), T('So könnte ' + firma + ' bei jedem Heimspiel der Profis in der Riethsporthalle und im Livestream zu sehen sein. Die Gestaltung machen wir gemeinsam mit dir.',
       'So könnte ' + firma + ' bei jedem Heimspiel der Profis in der Riethsporthalle und im Livestream zu sehen sein. Die Gestaltung machen wir gemeinsam mit Ihnen.'));
 
@@ -745,6 +774,7 @@ main#main { background: #fff; color: var(--color-brand-navy); }
       nutzen: [{ titel: 'Neue Kunden', text: 'Im VIP-Bereich sitzen Entscheider aus Bau, Industrie, Handwerk und Logistik.' }, { titel: 'Ansehen in der Region', text: 'Sichtbar bei jedem Heimspiel und im Livestream.' }, { titel: 'Vorsprung vor der Konkurrenz', text: 'Ein Partner der Löwen hat in Erfurt ein Gesicht.' }, { titel: 'Mitarbeiter und Azubis', text: 'Tickets fürs Team und ein Auftritt auf dem Spielfeld.' }] },
     termin: { mit: 'André' } };
   if (!CODE) return fehler();
+  if (LOKAL && CODE === 'muster' && sp.get('v')) MUSTER.video = sp.get('v');
   if (LOKAL && CODE === 'muster' && sp.get('f')) { MUSTER.firma = sp.get('f').slice(0, 40); MUSTER.bande_zeile = (sp.get('z') || MUSTER.bande_zeile).slice(0, 80); MUSTER.anrede_name = sp.get('n') || MUSTER.anrede_name; }
   if (LOKAL && CODE === 'muster') return zeigen(Object.assign({}, MUSTER, sp.get('a') === 'du' ? { ansprache: 'du', anrede_name: 'Stefan' } : {},
     sp.get('r') ? { art: 'rueckgewinnung', termin: { mit: 'Marko', name: 'Marko Fliege', rolle: 'Kaufmännischer Leiter', foto: '/assets/img/verantwortliche/mf-1.webp' } } : {}));
