@@ -75,61 +75,63 @@ body { margin: 0; background: #e9ecf1; color: var(--navy); font-family: 'Lexend'
 </head>
 <body>
 <div class="leiste"><span id="info">Postkarte A6 quer · Druck randlos, beidseitig an der kurzen Kante wenden</span><button type="button" id="drucken">Drucken oder als PDF speichern</button></div>
-<main class="seiten" id="seiten" hidden>
+<main class="seiten" id="seiten" hidden></main>
+<template id="vorlage">
   <div>
     <p class="seite-titel">Vorderseite</p>
     <section class="karte vorne" aria-label="Vorderseite der Postkarte">
       <img class="halle" src="/assets/img/hero-tickets-halle.webp" width="2000" height="1333" alt="Heimspiel der Basketball Löwen in der Riethsporthalle" />
       <div class="schatten"></div>
-      <div class="bande" id="bande" aria-hidden="true"><div class="bande-lauf" id="bande-lauf"></div></div>
+      <div class="bande" data-f="bande" aria-hidden="true"><div class="bande-lauf" data-f="bande-lauf"></div></div>
       <div class="logo"><img src="/assets/logo/loewen-logo-4c.svg" width="600" height="565" alt="Basketball Löwen" /></div>
-      <h1 id="satz"></h1>
+      <h1 data-f="satz"></h1>
     </section>
   </div>
   <div>
     <p class="seite-titel">Rückseite</p>
     <section class="karte hinten" aria-label="Rückseite der Postkarte">
-      <div class="hand" id="hand"></div>
+      <div class="hand" data-f="hand"></div>
       <div class="trenner" aria-hidden="true"></div>
       <div class="rechts">
         <p class="fuer">Persönlich für</p>
-        <div class="name" id="name"></div>
-        <div class="firma" id="firma"></div>
-        <div class="qr" id="qr" role="img" aria-label="QR-Code zur persönlichen Seite"></div>
-        <div class="qr-text" id="qr-text"></div>
-        <div class="qr-url" id="qr-url"></div>
+        <div class="name" data-f="name"></div>
+        <div class="firma" data-f="firma"></div>
+        <div class="qr" data-f="qr" role="img" aria-label="QR-Code zur persönlichen Seite"></div>
+        <div class="qr-text" data-f="qr-text"></div>
+        <div class="qr-url" data-f="qr-url"></div>
         <div class="marke"><img src="/assets/logo/loewen-logo-4c.svg" width="600" height="565" alt="" /><span>Basketball Löwen · <b>Gemeinsam stark.</b></span></div>
       </div>
     </section>
   </div>
-</main>
+</template>
 <div class="fehler" id="fehler" hidden>Diese Postkarte gibt es nicht. Bitte den Link aus 305 nehmen (Kasten „Persönliche Seite“ › „Postkarte drucken“).</div>
 <script>
 (function () {
   var API = 'https://ticketing.basketball-loewen.com/webhook/';
   var sp = new URLSearchParams(location.search);
-  var CODE = (sp.get('c') || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 16);
+  // eine oder mehrere Karten: ?c=code oder ?c=code1,code2,… (Sammeldruck einer Kampagne aus 305, Migration 553)
+  var CODES = (sp.get('c') || '').toLowerCase().split(',').map(function (x) { return x.replace(/[^a-z0-9]/g, '').slice(0, 16); }).filter(Boolean).slice(0, 200);
   var LOKAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
   var VON = sp.get('von') === 'andre' ? { name: 'André Grenzdörffer', kurz: 'André', rolle: 'Head of Partnerships' } : { name: 'Marko Fliege', kurz: 'Marko', rolle: 'Kaufmännischer Leiter' };
   var $ = function (id) { return document.getElementById(id); };
   function neu(tag, cls, s) { var e = document.createElement(tag); if (cls) e.className = cls; if (s != null) e.textContent = s; return e; }
   function satzSetzen(el, s) { el.textContent = ''; String(s).split(/(\*[^*]+\*)/).forEach(function (t) { if (/^\*[^*]+\*$/.test(t)) el.appendChild(neu('span', null, t.slice(1, -1))); else if (t) el.appendChild(document.createTextNode(t)); }); }
-  function bandeSetzen() {
-    var box = document.querySelector('.vorne'), img = box.querySelector('img.halle'), b = $('bande');
+  function bandeSetzen(box) {
+    var img = box.querySelector('img.halle'), b = box.querySelector('[data-f="bande"]');
     var W = box.clientWidth, H = box.clientHeight, iw = img.naturalWidth || 2000, ih = img.naturalHeight || 1333;
     var k = Math.max(W / iw, H / ih), rh = ih * k, oy = (rh - H) * 0.70;
     b.style.top = Math.round(0.756 * rh - oy) + 'px'; b.style.height = Math.round(Math.max(18, 0.064 * rh)) + 'px';
   }
-  function zeigen(d) {
+  function zeigen(d, code) {
+    var frag = $('vorlage').content.cloneNode(true), f = function (n) { return frag.querySelector('[data-f="' + n + '"]'); };
     var du = d.ansprache === 'du', T = function (a, b) { return du ? a : b; };
     var firma = d.firma || 'Ihr Unternehmen', b = d.branche || {};
     var apotheke = /apothek/i.test((b.name || '') + ' ' + firma);
-    document.title = 'Postkarte: ' + firma + ' — Basketball Löwen';
-    satzSetzen($('satz'), b.postkarte || ('*' + firma + '* wird löwenstark.'));
-    var lauf = $('bande-lauf'), logo = function () { var w = neu('span', 'l'); var im = document.createElement('img'); im.src = '/assets/logo/loewen-logo-4c.svg'; im.alt = ''; w.appendChild(im); return w; };
+    satzSetzen(f('satz'), b.postkarte || ('*' + firma + '* wird löwenstark.'));
+    var lauf = f('bande-lauf'), logo = function () { var w = neu('span', 'l'); var im = document.createElement('img'); im.src = '/assets/logo/loewen-logo-4c.svg'; im.alt = ''; w.appendChild(im); return w; };
     for (var i = 0; i < 3; i++) { lauf.appendChild(neu('span', null, firma)); if (d.bande_zeile) lauf.appendChild(neu('span', 'z', d.bande_zeile)); lauf.appendChild(logo()); }
     // Rückseite: handschriftlicher Gruß
-    var h = $('hand');
+    var h = f('hand');
     h.appendChild(neu('p', null, d.anrede_name ? (du ? 'Hallo ' + d.anrede_name + ',' : 'Guten Tag, ' + d.anrede_name + ',') : T('Hallo,', 'Guten Tag,')));
     h.appendChild(neu('p', null, T('ich war heute bei dir' + (apotheke ? ' in der Apotheke' : '') + ' und habe deinem Team diese Karte für dich dagelassen.',
       'ich war heute bei Ihnen' + (apotheke ? ' in der Apotheke' : '') + ' und habe Ihrem Team diese Karte für Sie dagelassen.')));
@@ -138,22 +140,28 @@ body { margin: 0; background: #e9ecf1; color: var(--navy); font-family: 'Lexend'
     h.appendChild(neu('p', null, 'Herzliche Grüße'));
     h.appendChild(neu('p', 'unterschrift', VON.kurz === 'Marko' && du ? 'Marko' : VON.name));
     h.appendChild(neu('div', 'gedruckt', VON.name + ' · ' + VON.rolle + ', Basketball Löwen'));
-    $('name').textContent = d.anrede_name ? (du ? d.anrede_name : d.anrede_name) : '';
-    $('firma').textContent = firma;
-    var url = 'https://basketball-loewen.com/partner/fuer/?c=' + CODE + '&q=flyer';
-    $('qr-text').textContent = T('Dein Video: einfach scannen', 'Ihr Video: einfach scannen');
-    $('qr-url').textContent = 'basketball-loewen.com/partner/fuer/?c=' + CODE;
-    try { var q = qrcode(0, 'M'); q.addData(url); q.make(); $('qr').innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true }); } catch (e) { $('qr').textContent = url; }
-    $('seiten').hidden = false;
-    var im = document.querySelector('.vorne img.halle'); if (im.complete) bandeSetzen(); else im.addEventListener('load', bandeSetzen); bandeSetzen();
+    f('name').textContent = d.anrede_name || '';
+    f('firma').textContent = firma;
+    var url = 'https://basketball-loewen.com/partner/fuer/?c=' + code + '&q=flyer';
+    f('qr-text').textContent = T('Dein Video: einfach scannen', 'Ihr Video: einfach scannen');
+    f('qr-url').textContent = 'basketball-loewen.com/partner/fuer/?c=' + code;
+    try { var q = qrcode(0, 'M'); q.addData(url); q.make(); f('qr').innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true }); } catch (e) { f('qr').textContent = url; }
+    var vorne = frag.querySelector('.vorne'); frag.querySelectorAll('.seite-titel').forEach(function (t) { t.textContent += ' · ' + firma; });
+    $('seiten').appendChild(frag); $('seiten').hidden = false;
+    var im = vorne.querySelector('img.halle'); if (im.complete) bandeSetzen(vorne); else im.addEventListener('load', function () { bandeSetzen(vorne); }); bandeSetzen(vorne);
   }
   $('drucken').addEventListener('click', function () { window.print(); });
   var MUSTER = { ok: true, firma: 'Sonnen-Apotheke', ansprache: 'sie', anrede_name: 'Frau Muster', bande_zeile: 'Ihre Apotheke in Erfurt.', branche: { name: 'Apotheken', postkarte: 'Wir bringen Erfurt in Bewegung. Sie halten Erfurt *gesund*.' } };
   function fehler() { $('fehler').hidden = false; }
-  if (!CODE) return fehler();
-  if (LOKAL && CODE === 'muster') return zeigen(MUSTER);
-  fetch(API + 'partner-seite?c=' + encodeURIComponent(CODE), { cache: 'no-store' }).then(function (r) { return r.json(); })
-    .then(function (d) { if (d && d.ok) zeigen(d); else fehler(); }).catch(fehler);
+  if (!CODES.length) return fehler();
+  if (LOKAL && CODES[0] === 'muster') { zeigen(MUSTER, 'muster'); if (CODES[1] === 'muster') zeigen(Object.assign({}, MUSTER, { firma: 'Anger-Apotheke', anrede_name: 'Herr Beispiel' }), 'muster'); return; }
+  // nacheinander laden, damit die Reihenfolge (Route) erhalten bleibt
+  var fehlt = 0, n = 0;
+  (function weiter(i) {
+    if (i >= CODES.length) { $('info').textContent = n + (n === 1 ? ' Postkarte' : ' Postkarten') + ' · A6 quer, randlos, beidseitig an der kurzen Kante wenden' + (fehlt ? ' · ' + fehlt + ' nicht gefunden' : ''); if (!n) fehler(); else document.title = n === 1 ? 'Postkarte — Basketball Löwen' : n + ' Postkarten — Basketball Löwen'; return; }
+    fetch(API + 'partner-seite?c=' + encodeURIComponent(CODES[i]), { cache: 'no-store' }).then(function (r) { return r.json(); })
+      .then(function (d) { if (d && d.ok) { zeigen(d, CODES[i]); n++; } else fehlt++; }).catch(function () { fehlt++; }).then(function () { weiter(i + 1); });
+  })(0);
 })();
 </script>
 </body>
