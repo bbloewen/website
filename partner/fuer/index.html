@@ -57,12 +57,19 @@ main#main { background: #fff; color: var(--color-brand-navy); }
 .pf-buehne-text { font-size: 15px; line-height: 1.55; font-weight: 300; color: #3d4757; margin: 0 0 10px; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 .pf-video-platz { display: flex; align-items: center; justify-content: center; text-align: center; color: #c9cfdb; font-size: 15px; padding: 16px; border: 2px dashed #3a4a6b; border-radius: 14px; position: absolute; inset: 0; }
-.pf-wege { display: grid; gap: 14px; margin-top: 18px; }
+.pf-panel { padding: 40px 20px; }
+@media (min-width: 640px) { .pf-panel { padding: 56px; } }
+.pf-panel .pf-person { margin: 6px 0 22px; }
+.pf-wege { display: grid; gap: 14px; max-width: 720px; margin: 0 auto; }
 @media (min-width: 640px) { .pf-wege { grid-template-columns: 1fr 1fr; } }
-.pf-weg { border: 1px solid #e3e6ec; border-radius: 14px; padding: 18px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.pf-weg { background: #fff; border: 1px solid var(--color-orange-100, #FBDDC0); border-radius: 16px; padding: 22px 18px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.pf-weg-icon { width: 30px; height: 30px; color: #B55709; }
 .pf-weg h3 { font-weight: 800; font-size: 18px; margin: 0; }
-.pf-weg p { margin: 0 0 6px; font-size: 15px; line-height: 1.5; font-weight: 300; }
+.pf-panel .pf-weg p { margin: 0 0 8px; font-size: 15px; line-height: 1.45; font-weight: 300; max-width: 30ch; }
+.pf-weg .btn { margin-top: auto; }
 .pf-weg .pf-danke { margin-top: 6px; }
+.pf-panel .pf-form { margin-top: 22px; }
+.pf-panel .pf-form fieldset { background: #fff; }
 .pf-video { position: relative; border-radius: 14px; overflow: hidden; background: #00122D; aspect-ratio: 16 / 9; margin: 6px 0 18px; }
 .pf-video.hoch { aspect-ratio: 9 / 16; max-width: 360px; margin-left: auto; margin-right: auto; }
 .pf-video video, .pf-video iframe, .pf-video img { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; object-fit: cover; }
@@ -349,31 +356,31 @@ main#main { background: #fff; color: var(--color-brand-navy); }
       </div>
     </section>
 
-    <section class="pf-sek" id="termin">
-      <div class="pf-wrap">
-        <div class="pf-mitte">
-          <p class="pf-eyebrow">Nächster Schritt</p>
-          <h2 class="pf-h2">15 Minuten, die sich <span class="pf-or">lohnen</span>.</h2>
+    <section class="section" id="termin">
+      <div class="container">
+        <div class="cta-panel pf-panel">
+          <span class="eyebrow">Nächster Schritt</span>
+          <h2 class="t-h2" id="pf-termin-h2">Lass uns sprechen.</h2>
           <div class="pf-person">
             <img id="pf-person-foto" src="/assets/img/verantwortliche/ag-1.webp" width="600" height="894" alt="" loading="lazy" />
             <div><b id="pf-person-name">André Grenzdörffer</b><span id="pf-person-rolle">Head of Partnerships, Basketball Löwen</span></div>
           </div>
-          <p class="pf-text" id="pf-termin-text"></p>
-        </div>
-        <div class="pf-wege">
-          <div class="pf-weg">
-            <h3>Termin buchen</h3>
-            <p id="pf-cta-unter"></p>
-            <button type="button" class="pf-cta" data-termin>Termin buchen</button>
-            <div class="pf-danke" id="pf-danke" role="status" hidden></div>
+          <div class="pf-wege">
+            <div class="pf-weg">
+              <i data-lucide="calendar-clock" class="pf-weg-icon" aria-hidden="true"></i>
+              <h3 id="pf-weg1-titel">15 Minuten mit André</h3>
+              <p id="pf-cta-unter"></p>
+              <button type="button" class="btn btn-primary" data-termin>Termin buchen</button>
+              <div class="pf-danke" id="pf-danke" role="status" hidden></div>
+            </div>
+            <div class="pf-weg" id="pf-weg-spiel" hidden>
+              <i data-lucide="ticket" class="pf-weg-icon" aria-hidden="true"></i>
+              <h3>Zwei Tickets geschenkt</h3>
+              <p id="pf-spiel-text"></p>
+              <button type="button" class="btn btn-ghost" id="pf-spiel-auf" aria-expanded="false" aria-controls="pf-spiel-form">Tickets sichern</button>
+              <div class="pf-danke" id="pf-spiel-danke" role="status" hidden></div>
+            </div>
           </div>
-          <div class="pf-weg" id="pf-weg-spiel" hidden>
-            <h3>Live beim Spiel</h3>
-            <p id="pf-spiel-text"></p>
-            <button type="button" class="pf-cta pf-cta-zwei" id="pf-spiel-auf" aria-expanded="false" aria-controls="pf-spiel-form">Plätze gleich buchen</button>
-            <div class="pf-danke" id="pf-spiel-danke" role="status" hidden></div>
-          </div>
-        </div>
         <form class="pf-form" id="pf-spiel-form" novalidate hidden>
           <label for="pf-spiel-wahl">Heimspiel</label>
           <select id="pf-spiel-wahl" required></select>
@@ -400,8 +407,9 @@ main#main { background: #fff; color: var(--color-brand-navy); }
           <div class="pf-falle" aria-hidden="true"><label for="pf-webseite">Webseite</label><input type="text" id="pf-webseite" tabindex="-1" autocomplete="off" /></div>
           <label class="pf-check"><input type="checkbox" id="pf-einwilligung" required /> <span id="pf-einw-text"></span></label>
           <div class="pf-fehler-box" id="pf-spiel-fehler" role="alert" hidden></div>
-          <div class="pf-mitte"><button type="submit" class="pf-cta" id="pf-spiel-senden">Plätze gleich buchen</button></div>
+          <div class="pf-mitte"><button type="submit" class="btn btn-primary" id="pf-spiel-senden">Tickets sichern</button></div>
         </form>
+        </div>
       </div>
     </section>
   </div>
@@ -626,7 +634,9 @@ main#main { background: #fff; color: var(--color-brand-navy); }
         : T(d.video ? 'Wir haben dir dazu ein kurzes Video aufgenommen.' : 'Hier siehst du, was wir uns vorstellen.',
             d.video ? 'Wir haben Ihnen dazu ein kurzes Video aufgenommen.' : 'Hier sehen Sie, was wir uns vorstellen.')));
     videoEinbauen(d.video);
-    txt($('pf-cta-unter'), '15 Minuten mit ' + mit + T(', per Telefon, online oder bei dir vor Ort.', ', per Telefon, online oder bei Ihnen vor Ort.'));
+    txt($('pf-weg1-titel'), '15 Minuten mit ' + mit);
+    txt($('pf-cta-unter'), 'Am Telefon, online oder vor Ort.');
+    txt($('pf-termin-h2'), T('Lass uns sprechen.', 'Lassen Sie uns sprechen.'));
 
     if (b.nutzen && b.nutzen.length) {
       $('pf-nutzen-sek').hidden = false;
@@ -645,9 +655,6 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     txt($('pf-bande-text'), T('So könnte ' + firma + ' bei jedem Heimspiel der Profis in der Riethsporthalle und im Livestream zu sehen sein. Die Gestaltung machen wir gemeinsam mit dir.',
       'So könnte ' + firma + ' bei jedem Heimspiel der Profis in der Riethsporthalle und im Livestream zu sehen sein. Die Gestaltung machen wir gemeinsam mit Ihnen.'));
 
-    txt($('pf-termin-text'), zurueck
-      ? T('Ich würde mich freuen, wenn du wieder dabei bist. Lass uns 15 Minuten sprechen, ich habe mir etwas für dich überlegt.', 'Ich würde mich freuen, wenn Sie wieder dabei sind. Lassen Sie uns 15 Minuten sprechen, ich habe mir etwas für Sie überlegt.')
-      : T('Wir haben uns überlegt, wie ' + firma + ' bei uns sichtbar wird. Das zeige ich dir in 15 Minuten, und du entscheidest in Ruhe.', 'Wir haben uns überlegt, wie ' + firma + ' bei uns sichtbar wird. Das zeige ich Ihnen in 15 Minuten, und Sie entscheiden in Ruhe.'));
 
     $('pf-laden').hidden = true; $('pf-inhalt').hidden = false;
     bandeSetzen();
@@ -671,12 +678,11 @@ main#main { background: #fff; color: var(--color-brand-navy); }
   function spielVorbereiten(d, firma, mit) {
     var heute = new Date(); heute.setHours(0, 0, 0, 0);
     var morgen = new Date(heute.getTime() + 864e5), bis = new Date(heute.getTime() + 60 * 864e5);
-    var text = T('Komm mit einer Begleitung zu einem der nächsten Heimspiele. ' + mit + ' nimmt sich in der Halbzeit 15 Minuten für euch, dazu gibt es eine kleine Überraschung.',
-      'Kommen Sie mit einer Begleitung zu einem der nächsten Heimspiele. ' + mit + ' nimmt sich in der Halbzeit 15 Minuten für Sie, dazu gibt es eine kleine Überraschung.');
+    var text = T('Komm mit Begleitung zum Heimspiel. ' + mit + ' trifft euch in der Halbzeit.', 'Kommen Sie mit Begleitung zum Heimspiel. ' + mit + ' trifft Sie in der Halbzeit.');
     txt($('pf-spiel-text'), text);
     var ew = $('pf-einw-text'); ew.textContent = T('Ich bin einverstanden, dass die Basketball Löwen die Angaben für die Einladung speichern und die Karten per E-Mail schicken. ', 'Ich bin einverstanden, dass die Basketball Löwen die Angaben für die Einladung speichern und die Karten per E-Mail schicken. ');
     var a = document.createElement('a'); a.href = '/datenschutz.html#partnerseite'; a.textContent = 'Datenschutz'; a.target = '_blank'; a.rel = 'noopener'; ew.appendChild(a);
-    if (d.spielbesuch_angefragt) { $('pf-weg-spiel').hidden = false; $('pf-spiel-auf').hidden = true; var dk = $('pf-spiel-danke'); dk.hidden = false; txt(dk, T('Dein Spielbesuch ist angefragt. Die Karten kommen per E-Mail.', 'Ihr Spielbesuch ist angefragt. Die Karten kommen per E-Mail.')); return; }
+    if (d.spielbesuch_angefragt) { $('pf-weg-spiel').hidden = false; $('pf-spiel-auf').hidden = true; var dk = $('pf-spiel-danke'); dk.hidden = false; txt(dk, T('Deine Tickets sind reserviert. Sie kommen per E-Mail.', 'Ihre Tickets sind reserviert. Sie kommen per E-Mail.')); return; }
     fetch('/data/heimspiele.json', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) {
       var spiele = (j.spiele || []).filter(function (g) { var iso = isoAus(g.datum); if (!iso || g.ergebnis || !g.subeventId) return false; var t = new Date(iso + 'T12:00:00'); return t >= morgen && t <= bis; }).slice(0, 3);
       if (!spiele.length) return;
@@ -709,10 +715,10 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     var fertig = function (r) {
       if (r && r.ok) {
         $('pf-spiel-form').hidden = true; var dk = $('pf-spiel-danke'); dk.hidden = false;
-        txt(dk, T('Danke, wir freuen uns auf euch! Die Karten kommen in den nächsten Tagen per E-Mail. ', 'Vielen Dank, wir freuen uns auf Sie! Die Karten kommen in den nächsten Tagen per E-Mail. ') + ((D.termin && D.termin.mit) || 'André') + T(' meldet sich vorher noch kurz bei dir.', ' meldet sich vorher noch kurz bei Ihnen.'));
+        txt(dk, T('Danke, wir freuen uns auf euch! Die Tickets kommen in den nächsten Tagen per E-Mail. ', 'Vielen Dank, wir freuen uns auf Sie! Die Tickets kommen in den nächsten Tagen per E-Mail. ') + ((D.termin && D.termin.mit) || 'André') + T(' meldet sich vorher noch kurz bei dir.', ' meldet sich vorher noch kurz bei Ihnen.'));
         return;
       }
-      btn.disabled = false; btn.textContent = 'Plätze gleich buchen'; zeige((r && r.meldung) || 'Das hat nicht geklappt. Bitte später noch einmal versuchen.');
+      btn.disabled = false; btn.textContent = 'Tickets sichern'; zeige((r && r.meldung) || 'Das hat nicht geklappt. Bitte später noch einmal versuchen.');
     };
     if (LOKAL || VORSCHAU) return fertig({ ok: true });
     fetch(API + 'partner-spielbesuch', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(daten) })
