@@ -46,7 +46,7 @@
       { "datum": "11.11.2026", "zeit": "19:00", "gegner": "Mitteldeutsche Basketball Academy", "heim": true, "ort": "Herzog-Ernst-Schule, Gotha", "ergebnis": "73 : 80" },
       { "datum": "22.11.2026", "zeit": "13:00", "gegner": "Sartorius Juniors", "heim": true, "ort": "Herzog-Ernst-Schule, Gotha", "ergebnis": "106 : 102" },
       { "datum": "29.11.2026", "zeit": "12:30", "gegner": "Dresden Titans", "heim": true, "ort": "Herzog-Ernst-Schule, Gotha" },
-      { "datum": "12.12.2026", "zeit": "16:00", "gegner": "NINERS CHEMNITZ ACADEMY", "heim": false, "ort": "Schulzentrum Sport, Chemnitz" },
+      { "datum": "12.12.2026", "zeit": "15:00", "gegner": "NINERS CHEMNITZ ACADEMY", "heim": false, "ort": "Schulzentrum Sport, Chemnitz" },
       { "datum": "20.12.2026", "zeit": "16:00", "gegner": "Mitteldeutsche Basketball Academy", "heim": false, "ort": "SH Ihmelsstraße unten, Leipzig" },
       { "datum": "12.01.2027", "zeit": "19:00", "gegner": "Sartorius Juniors", "heim": false, "ort": "Sartorius Basketball Lab, Göttingen" },
       { "datum": "15.01.2027", "zeit": "19:30", "gegner": "Dresden Titans", "heim": false, "ort": "Gymnasium Tolkewitz, Dresden" },
