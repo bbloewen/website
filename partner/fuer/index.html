@@ -42,15 +42,15 @@ main#main { background: #fff; color: var(--color-brand-navy); }
 .pf-mitte { text-align: center; }
 .pf-hero { padding: 24px 0 8px; }
 .pf-halle { padding: 0 0 8px; border-bottom: 1px solid #eef0f4; }
-.pf-halle-bild { position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: #00122D; }
-@media (min-width: 560px) { .pf-halle-bild { aspect-ratio: 16 / 10; } }
-@media (min-width: 900px) { .pf-halle-bild { aspect-ratio: 3 / 2; max-width: 1100px; margin: 0 auto; } }
-.pf-halle-bild img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; }
+.pf-halle-bild { position: relative; height: 480px; overflow: hidden; background: #00122D; border-radius: 0 0 28px 28px; }   /* Höhe wie .hero-photo der Website */
+@media (min-width: 1440px) { .pf-halle-bild { height: 620px; } }
+@media (min-width: 2000px) { .pf-halle-bild { height: 760px; } }
+.pf-halle-bild img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 70%; }
 /* LED-Bande an der vorderen Spielfeldkante (Bandenhöhe leicht überzeichnet, damit der Name lesbar ist) */
-.pf-halle-bande { position: absolute; left: 0; right: 0; top: 75.6%; height: 6.4%; background: #05070c; overflow: hidden; display: flex; align-items: center; box-shadow: 0 0 0 1px #1b1f2a, 0 6px 18px rgba(0,0,0,.45); }
+.pf-halle-bande { position: absolute; left: 0; right: 0; top: 75.6%; height: 6.4%; min-height: 22px; background: #05070c; overflow: hidden; display: flex; align-items: center; box-shadow: 0 0 0 1px #1b1f2a, 0 6px 18px rgba(0,0,0,.45); }
 .pf-halle-bande::after { content: ''; position: absolute; inset: 0; pointer-events: none; background-image: radial-gradient(rgba(0,0,0,.5) 35%, transparent 36%); background-size: 3px 3px; }
-.pf-halle-bande .pf-bande-lauf span { font-size: clamp(13px, 3.6vw, 34px); padding: 0 22px; }
-.pf-halle-bande .pf-bande-lauf span.z { font-size: clamp(10px, 2.2vw, 20px); }
+.pf-halle-bande .pf-bande-lauf span { font-size: calc(var(--bh, 30px) * .68); padding: 0 22px; }
+.pf-halle-bande .pf-bande-lauf span.z { font-size: calc(var(--bh, 30px) * .42); }
 .pf-halle .pf-vorschau { top: 12px; right: 12px; }
 .pf-buehne-titel { font-weight: 900; font-size: clamp(22px, 5.6vw, 30px); line-height: 1.2; margin: 18px 0 6px; }
 .pf-buehne-titel span { color: #B55709; }
@@ -650,6 +650,7 @@ main#main { background: #fff; color: var(--color-brand-navy); }
       : T('Wir haben uns überlegt, wie ' + firma + ' bei uns sichtbar wird. Das zeige ich dir in 15 Minuten, und du entscheidest in Ruhe.', 'Wir haben uns überlegt, wie ' + firma + ' bei uns sichtbar wird. Das zeige ich Ihnen in 15 Minuten, und Sie entscheiden in Ruhe.'));
 
     $('pf-laden').hidden = true; $('pf-inhalt').hidden = false;
+    bandeSetzen();
     spielVorbereiten(d, firma, mit);
     melden('besuch');
   }
@@ -717,6 +718,19 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     fetch(API + 'partner-spielbesuch', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(daten) })
       .then(function (r) { return r.json(); }).then(fertig).catch(function () { fertig(null); });
   });
+
+  // Die Bande sitzt im Foto an der vorderen Spielfeldkante (75,6 % bis 82 % der Bildhöhe). Weil das Bild per object-fit: cover
+  // beschnitten wird, rechnen wir die Lage aus der gerenderten Größe nach (object-position 50 % 70 %).
+  function bandeSetzen() {
+    var box = document.querySelector('.pf-halle-bild'), img = box && box.querySelector('img'), b = box && box.querySelector('.pf-halle-bande');
+    if (!img || !b) return;
+    var W = box.clientWidth, H = box.clientHeight, iw = img.naturalWidth || 2000, ih = img.naturalHeight || 1333;
+    var k = Math.max(W / iw, H / ih), rh = ih * k, oy = (rh - H) * 0.70;
+    var hoehe = Math.max(22, 0.064 * rh), oben = 0.756 * rh - oy;
+    b.style.top = Math.round(oben) + 'px'; b.style.height = Math.round(hoehe) + 'px'; b.style.setProperty('--bh', Math.round(hoehe) + 'px');
+  }
+  window.addEventListener('resize', bandeSetzen);
+  (function () { var im = document.querySelector('.pf-halle-bild img'); if (im) { if (im.complete) bandeSetzen(); else im.addEventListener('load', bandeSetzen); } bandeSetzen(); })();
 
   function fehler() { $('pf-laden').hidden = true; $('pf-fehler').hidden = false; }
   // Lokale Vorschau ohne Server (nur localhost): ?c=muster
