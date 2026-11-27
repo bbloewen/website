@@ -1129,7 +1129,7 @@ main#main { background: #fff; color: var(--color-brand-navy); }
         var t = neu('div', 't'); t.appendChild(neu('b', null, titel)); if (unter) t.appendChild(neu('span', null, unter));
         r.appendChild(cb); r.appendChild(t); r.appendChild(preis); leistListe.appendChild(r);
       };
-      var pText = function (txt2) { return neu('span', 'p', txt2); }, pRabatt = function (alt, neuP) { var x = neu('span', 'p'); x.appendChild(neu('s', null, euro(alt))); x.appendChild(document.createTextNode(euro(neuP))); return x; };
+      var pText = function (txt2) { return neu('span', 'p', txt2); }, pRabatt = function (alt, neuP) { var x = neu('span', 'p'); if (Number(alt) === Number(neuP)) { x.textContent = euro(neuP); return x; } x.appendChild(neu('s', null, euro(alt))); x.appendChild(document.createTextNode(euro(neuP))); return x; };
       (P.standard || []).forEach(function (x) { zeile(x.titel, '', pText('inklusive'), true); });
       korb.forEach(function (e, idx) { var b = bsK(e.k); if (b && e.inkl) zeile(b.titel, (b.text ? b.text + ' · ' : '') + 'Wahlleistung im Paket', pText('Wert ' + euro(b.listenpreis)), false, idx); });
       korb.forEach(function (e, idx) { var b = bsK(e.k); if (b && !e.inkl) zeile(b.titel, 'zusätzlich zum Paket, ' + b.rabatt + ' % Rabatt', pRabatt(b.listenpreis, b.aufpreis), false, idx); });
