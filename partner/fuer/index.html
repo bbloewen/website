@@ -194,6 +194,15 @@ main#main { background: #fff; color: var(--color-brand-navy); }
 .ang-opt button:focus-visible { outline: 3px solid #0028AA; outline-offset: 2px; }
 .ang-opt.aus { opacity: .5; } .ang-opt.aus button { border-color: #9aa3b2; color: #6b7280; cursor: default; }
 .ang-hinweis { font-size: 14px; color: #4a5568; margin: -4px 0 12px; }
+.ang-dialog { border: 0; border-radius: 16px; padding: 22px; max-width: 520px; width: calc(100% - 32px); box-shadow: 0 20px 60px rgba(0,18,45,.35); }
+.ang-dialog::backdrop { background: rgba(0,18,45,.55); }
+.ang-dialog h3 { margin: 0 0 6px; font-size: 19px; font-weight: 800; } .ang-dialog p { margin: 0 0 12px; font-size: 14px; color: #4a5568; }
+.ang-dialog label { display: flex; gap: 10px; align-items: center; border: 1px solid #e3e6ec; border-radius: 12px; padding: 10px 12px; margin: 0 0 8px; font-size: 15px; }
+.ang-dialog label input { width: 20px; height: 20px; } .ang-dialog label span { flex: 1; } .ang-dialog label em { font-style: normal; color: #4a5568; white-space: nowrap; }
+.ang-dialog .knoepfe { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+.ang-dialog .knoepfe button { min-height: 44px; padding: 0 16px; border-radius: 999px; font: 600 14px 'Lexend', sans-serif; cursor: pointer; border: 1px solid #0028AA; background: #fff; color: #0028AA; }
+.ang-dialog .knoepfe button.haupt { background: #E5710B; border-color: #E5710B; color: #00122D; }
+.ang-dialog .knoepfe button:disabled { opacity: .45; cursor: default; }
 .ang-hero .pf-wrap > div:first-child { flex: 1 1 420px; }
 .pf-summe { border-radius: 16px; background: #00122D; color: #fff; padding: 18px 20px; margin: 0 0 22px; }
 .pf-summe table { width: 100%; border-collapse: collapse; font-size: 15px; }
@@ -939,12 +948,21 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     else lg.appendChild(neu('b', 'k', firma));
     // Vorteile bleiben, mit dem Firmennamen
     if ($('pf-nutzen-sek').hidden === false) { var h = $('pf-nutzen-h2'); h.textContent = ''; headline(h, 'Vorteile für *' + firma + '*.'); var eyb = $('pf-nutzen-sek').querySelector('.pf-eyebrow'); if (eyb) eyb.hidden = true; }
-    // ganz unten: Fragen und Termin, ohne Ticket-Weg
+    // ganz unten: „Noch Fragen dazu?“ mit zwei Boxen (Online-Termin, Frage schreiben), ohne Person und ohne Ticket-Weg
     $('termin').hidden = false;
     txt($('pf-termin-h2'), 'Noch Fragen dazu?');
-    var eb = document.querySelector('#termin .eyebrow'); if (eb) eb.textContent = 'Ihr Ansprechpartner';
+    var eb = document.querySelector('#termin .eyebrow'); if (eb) eb.hidden = true;
+    var pp = document.querySelector('#termin .pf-person'); if (pp) pp.hidden = true;
     var ws = $('pf-weg-spiel'); if (ws) ws.remove();
-    document.querySelector('.pf-wege').classList.add('einzeln');
+    txt($('pf-weg1-titel'), '15 Minuten mit ' + ((d.termin || {}).mit || 'André') + ' buchen');
+    txt($('pf-cta-unter'), 'Online-Termin, 15 Minuten.');
+    var wege = document.querySelector('.pf-wege');
+    if (!$('ang-frage-weg')) {
+      var w2 = neu('div', 'pf-weg'); w2.id = 'ang-frage-weg'; w2.innerHTML = '<i data-lucide="message-square" class="pf-weg-icon" aria-hidden="true"></i>';
+      w2.appendChild(neu('h3', null, 'Fragen zum Angebot schreiben')); w2.appendChild(neu('p', null, 'Wir antworten per E-Mail.'));
+      var fk = neu('button', 'btn btn-ghost', 'Frage schreiben'); fk.type = 'button'; fk.id = 'ang-frage-knopf'; fk.setAttribute('aria-expanded', 'false'); w2.appendChild(fk);
+      wege.appendChild(w2); if (window.lucide) window.lucide.createIcons();
+    }
     $('angebot').hidden = false; $('ang-preis-sek').hidden = false;
   }
   function htmlEsc(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -983,7 +1001,9 @@ main#main { background: #fff; color: var(--color-brand-navy); }
         '<div class="ang-cta"><button type="submit" class="pf-cta" id="pf-an-senden">Angebot annehmen</button></div></fieldset>';
       sb.appendChild(f);
       setTimeout(function () {
-        var rf = $('pf-an-rfirma'); if (rf && !rf.value && D && D.firma) rf.value = D.firma;
+        var vb = (D && D.vorbelegung) || {}, setz = function (id, v) { var e = $(id); if (e && !e.value && v) e.value = v; };
+        setz('pf-an-name', vb.name); setz('pf-an-funktion', vb.funktion); setz('pf-an-email', vb.email); setz('pf-an-telefon', vb.telefon);
+        setz('pf-an-rfirma', vb.rechnung_firma || (D && D.firma)); setz('pf-an-rstrasse', vb.rechnung_strasse); setz('pf-an-rplz', vb.rechnung_plz); setz('pf-an-rort', vb.rechnung_ort); setz('pf-an-rmail', vb.rechnung_email);
         var em = $('pf-an-email'), rm = $('pf-an-rmail'); if (em && rm) em.addEventListener('change', function () { if (!rm.value) rm.value = em.value; });
       }, 0);
     }
@@ -1011,22 +1031,14 @@ main#main { background: #fff; color: var(--color-brand-navy); }
   }
   // Fragen oder Absage stehen unten im Abschnitt „Noch Fragen dazu?“
   function nebenwegeUnten(tm, nachAntwort) {
-    var ziel = document.querySelector('#termin .pf-panel'); if (!ziel || ziel.querySelector('.pf-nebenwege')) return;
-    var neben = neu('div', 'pf-nebenwege');
-    var fb = neu('button', 'pf-link', 'Frage zum Angebot schreiben'); fb.type = 'button'; var nein = neu('button', 'pf-link', 'Passt gerade nicht'); nein.type = 'button';
-    neben.appendChild(fb); neben.appendChild(nein); ziel.appendChild(neben);
-    var klein = function (id, label, knopf) { var g = document.createElement('form'); g.className = 'pf-form'; g.noValidate = true; g.hidden = true;
-      g.innerHTML = '<label for="' + id + '-text">' + label + '</label><textarea id="' + id + '-text" maxlength="2000" rows="3"></textarea><div class="pf-fehler-box" id="' + id + '-fehler" role="alert" hidden></div><div class="pf-mitte"><button type="submit" class="btn btn-ghost" id="' + id + '-senden">' + knopf + '</button></div>';
-      ziel.appendChild(g); return g; };
-    var fbF = klein('pf-fb', T('Was möchtest du wissen oder anders haben?', 'Was möchten Sie wissen oder anders haben?'), 'Absenden');
-    var neinF = klein('pf-nein', T('Magst du uns sagen, warum? (optional)', 'Mögen Sie uns sagen, warum? (optional)'), 'Angebot ablehnen');
-    fb.addEventListener('click', function () { fbF.hidden = !fbF.hidden; neinF.hidden = true; if (!fbF.hidden) $('pf-fb-text').focus(); });
-    nein.addEventListener('click', function () { neinF.hidden = !neinF.hidden; fbF.hidden = true; if (!neinF.hidden) $('pf-nein-text').focus(); });
-    var fehler = function (id, m) { var e = $(id); e.hidden = false; e.textContent = m; };
-    fbF.addEventListener('submit', function (e) { e.preventDefault(); if (!wert('pf-fb-text')) return fehler('pf-fb-fehler', 'Bitte etwas schreiben.');
-      angebotSenden({ aktion: 'feedback', feedback: wert('pf-fb-text') }, function (r) { if (r && r.ok) { fbF.innerHTML = '<p class="pf-danke">' + T('Danke! ', 'Vielen Dank! ') + htmlEsc(tm.mit || 'André') + T(' meldet sich bei dir.', ' meldet sich bei Ihnen.') + '</p>'; return; } fehler('pf-fb-fehler', (r && r.meldung) || 'Das hat nicht geklappt.'); }); });
-    neinF.addEventListener('submit', function (e) { e.preventDefault();
-      angebotSenden({ aktion: 'ablehnen', grund: wert('pf-nein-text') }, function (r) { if (r && r.ok) { neben.remove(); neinF.remove(); fbF.remove(); nachAntwort(r); return; } fehler('pf-nein-fehler', (r && r.meldung) || 'Das hat nicht geklappt.'); }); });
+    var ziel = document.querySelector('#termin .pf-panel'); if (!ziel || $('pf-fb-text')) return;
+    var g = document.createElement('form'); g.className = 'pf-form'; g.noValidate = true; g.hidden = true;
+    g.innerHTML = '<label for="pf-fb-text">' + T('Was möchtest du wissen oder anders haben?', 'Was möchten Sie wissen oder anders haben?') + '</label><textarea id="pf-fb-text" maxlength="2000" rows="3"></textarea><div class="pf-fehler-box" id="pf-fb-fehler" role="alert" hidden></div><div class="pf-mitte"><button type="submit" class="btn btn-primary" id="pf-fb-senden">Absenden</button></div>';
+    ziel.appendChild(g);
+    var knopf = $('ang-frage-knopf');
+    if (knopf) knopf.addEventListener('click', function () { g.hidden = !g.hidden; knopf.setAttribute('aria-expanded', String(!g.hidden)); if (!g.hidden) $('pf-fb-text').focus(); });
+    g.addEventListener('submit', function (e) { e.preventDefault(); var fe = $('pf-fb-fehler'); fe.hidden = true; if (!wert('pf-fb-text')) { fe.hidden = false; fe.textContent = 'Bitte etwas schreiben.'; return; }
+      angebotSenden({ aktion: 'feedback', feedback: wert('pf-fb-text') }, function (r) { if (r && r.ok) { g.innerHTML = '<p class="pf-danke">' + T('Danke! Wir melden uns bei dir.', 'Vielen Dank! Wir melden uns bei Ihnen.') + '</p>'; return; } fe.hidden = false; fe.textContent = (r && r.meldung) || 'Das hat nicht geklappt.'; }); });
   }
   function angebotZeigen(d, firma, gruss) {
     if (d.paket_art === 'club100' || (d.angebot && d.angebot.paket === 'club100')) return angebotClub100(d, firma, gruss);
@@ -1068,60 +1080,74 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     angebotModus(d, firma, htmlEsc(firma) + ' im Löwen-Club der <span>100</span>.', 'Club 100 Basismitgliedschaft, Saison ' + (rg.saison || ''));
     box.textContent = '';
     if (a.persoenlich) box.appendChild(neu('p', 'pf-lead', a.persoenlich));
-    // Konfigurator: „Ihre Leistungen“ ist das Angebot. Feste Leistungen sind angehakt und gesperrt; Bausteine und Zusatzleistungen wandern beim Hinzufügen nach oben.
-    // Die ersten zwei Bausteine sind inklusive, jeder weitere zum Club-Preis. Was sich nur einmal buchen lässt, wird unten ausgegraut, sobald es im Angebot ist.
-    var korb = [];
-    (a.bausteine && a.bausteine.length ? a.bausteine : (P.bausteine_standard || ['dk2', 'dk2'])).slice(0, 2).forEach(function (k) { korb.push(k); });
-    Object.keys(a.extras || {}).forEach(function (k) { for (var n = 0; n < Number(a.extras[k] || 0); n++) korb.push(k); });
+    // Konfigurator: „Ihre Leistungen“ ist das Angebot. Feste Leistungen mit grünem Haken; Wahlleistungen im Paket bis zum Budget (inklusive, Wert steht dabei),
+    // darüber hinaus zum Club-Preis. Passt eine neue Wahl nicht ins Budget, fragt ein Fenster, welche Wahloption dafür abgewählt wird (oder: zusätzlich buchen).
+    var BUDGET = Number(P.budget || 392), korb = [];
+    (a.bausteine && a.bausteine.length ? a.bausteine : (P.bausteine_standard || [])).forEach(function (k) { korb.push({ k: k, inkl: true }); });
+    Object.keys(a.extras || {}).forEach(function (k) { for (var n = 0; n < Number(a.extras[k] || 0); n++) korb.push({ k: k, inkl: false }); });
     var bsK = function (k) { return BS.filter(function (b) { return b.k === k; })[0]; }, apK = function (k) { return AP.filter(function (x) { return x.k === k; })[0]; };
+    var genutzt = function () { return korb.filter(function (e) { return e.inkl; }).reduce(function (s2, e) { return s2 + Number(bsK(e.k).listenpreis); }, 0); };
+    var anzahl = function (k) { return korb.filter(function (e) { return e.k === k; }).length; };
     var bLeist = neu('div', 'ang-block'); bLeist.appendChild(neu('h2', null, 'Ihre Leistungen')); box.appendChild(bLeist);
     var leistListe = neu('div'); bLeist.appendChild(leistListe);
-    var bWahl = neu('div', 'ang-block'); var bZus = neu('div', 'ang-block');
+    var bWahl = neu('div', 'ang-block'), bZus = neu('div', 'ang-block');
     if (offen) {
       bWahl.appendChild(neu('h2', null, 'Bausteine Ihrer Wahl'));
-      bWahl.appendChild(neu('p', 'ang-hinweis', 'Zwei Bausteine sind enthalten, jeder weitere kostet nur die Hälfte. Ein Baustein lässt sich auch mehrfach wählen.'));
-      bZus.appendChild(neu('h2', null, 'Einmalig für den Rest der Saison buchen'));
+      bWahl.appendChild(neu('p', 'ang-hinweis', 'Im Paket sind Wahlleistungen im Wert von ' + euro(BUDGET) + ' enthalten. Tauschen Sie oben ab oder wählen Sie hier dazu; was über das Paket hinausgeht, kostet den Club-Preis.'));
+      bZus.appendChild(neu('h2', null, 'Einmalig für den Rest der Saison hinzubuchen'));
       bZus.appendChild(neu('p', 'ang-hinweis', 'Einmalige Leistungen außerhalb der Mitgliedschaft, nur für die Saison ' + (rg.saison || '') + ', zum Club-Preis.'));
       box.appendChild(bWahl); box.appendChild(bZus);
     }
     var wahlListe = neu('div'), zusListe = neu('div'); bWahl.appendChild(wahlListe); bZus.appendChild(zusListe);
-    var bausteineImKorb = function () { return korb.filter(function (k) { return !!bsK(k); }); };
-    var auswahl = function () { var bs = bausteineImKorb(), ex = {}; bs.slice(2).forEach(function (k) { ex[k] = (ex[k] || 0) + 1; }); korb.forEach(function (k) { if (apK(k)) ex[k] = 1; }); return { bausteine: bs.slice(0, 2), extras: ex }; };
+    var auswahl = function () { var bs = [], ex = {}; korb.forEach(function (e) { if (e.inkl) bs.push(e.k); else ex[e.k] = (ex[e.k] || 0) + 1; }); return { bausteine: bs, extras: ex }; };
+    var dialog = document.createElement('dialog'); dialog.className = 'ang-dialog'; document.body.appendChild(dialog);
+    var hinzufuegen = function (b) {
+      var frei = BUDGET - genutzt(), wertB = Number(b.listenpreis);
+      if (wertB <= frei) { korb.push({ k: b.k, inkl: true }); return zeichnenKorb(); }
+      var inkl = korb.map(function (e, idx) { return { e: e, idx: idx }; }).filter(function (x) { return x.e.inkl; });
+      dialog.innerHTML = '';
+      dialog.appendChild(neu('h3', null, b.titel + ' hinzufügen'));
+      dialog.appendChild(neu('p', null, 'Das passt nicht mehr ins Paket. Welche der Wahloptionen wollen Sie hierfür abwählen?'));
+      inkl.forEach(function (x) { var bb = bsK(x.e.k); var l = document.createElement('label'); var cb = document.createElement('input'); cb.type = 'checkbox'; cb.value = x.idx;
+        l.appendChild(cb); l.appendChild(neu('span', null, bb.titel)); l.appendChild(neu('em', null, 'Wert ' + euro(bb.listenpreis))); dialog.appendChild(l); });
+      var kn = neu('div', 'knoepfe'); var ab = neu('button', null, 'Abbrechen'); ab.type = 'button'; var dazu = neu('button', null, 'Zusätzlich für ' + euro(b.aufpreis) + ' buchen'); dazu.type = 'button';
+      var tausch = neu('button', 'haupt', 'Tauschen'); tausch.type = 'button'; tausch.disabled = true; kn.appendChild(ab); kn.appendChild(dazu); kn.appendChild(tausch); dialog.appendChild(kn);
+      var gewaehlt = function () { return Array.prototype.slice.call(dialog.querySelectorAll('input:checked')).map(function (c) { return Number(c.value); }); };
+      dialog.addEventListener('change', function () { var weg = gewaehlt().reduce(function (s2, idx) { return s2 + Number(bsK(korb[idx].k).listenpreis); }, 0); tausch.disabled = !(wertB <= frei + weg); });
+      ab.addEventListener('click', function () { dialog.close(); });
+      dazu.addEventListener('click', function () { korb.push({ k: b.k, inkl: false }); dialog.close(); zeichnenKorb(); });
+      tausch.addEventListener('click', function () { var weg = gewaehlt().sort(function (x, y) { return y - x; }); weg.forEach(function (idx) { korb.splice(idx, 1); }); korb.push({ k: b.k, inkl: true }); dialog.close(); zeichnenKorb(); });
+      if (dialog.showModal) dialog.showModal(); else dialog.setAttribute('open', '');
+    };
     var zeilen;
     var zeichnenKorb = function () {
       leistListe.innerHTML = '';
       var zeile = function (titel, unter, preis, fest, idx) {
         var r = neu(fest || !offen ? 'div' : 'label', 'ang-zeile' + (fest ? ' fest' : '')); var cb;
         if (fest || !offen) { cb = neu('span'); cb.innerHTML = HAKEN; cb.style.cssText = 'width:22px;height:22px;color:#1f8a4c;flex:none;display:inline-flex'; }
-        else { cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = true; cb.setAttribute('aria-label', titel + ' aus dem Angebot nehmen'); }
+        else { cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = true; cb.setAttribute('aria-label', titel + ' abwählen'); cb.addEventListener('change', function () { korb.splice(idx, 1); zeichnenKorb(); }); }
         var t = neu('div', 't'); t.appendChild(neu('b', null, titel)); if (unter) t.appendChild(neu('span', null, unter));
         r.appendChild(cb); r.appendChild(t); r.appendChild(preis); leistListe.appendChild(r);
-        if (!fest && offen) cb.addEventListener('change', function () { korb.splice(idx, 1); zeichnenKorb(); });
       };
-      var inkl = function () { return neu('span', 'p', 'inklusive'); };
-      (P.standard || []).forEach(function (x) { zeile(x.titel, '', inkl(), true); });
-      var nB = 0;
-      korb.forEach(function (k, idx) {
-        var b = bsK(k), x = apK(k);
-        if (b) { nB++; if (nB <= 2) zeile(b.titel, 'Baustein ' + nB + ' von 2, im Paket enthalten', inkl(), false, idx);
-          else { var pr = neu('span', 'p'); pr.appendChild(neu('s', null, euro(b.listenpreis))); pr.appendChild(document.createTextNode(euro(b.aufpreis))); zeile(b.titel, 'weiterer Baustein, ' + b.rabatt + ' % Rabatt', pr, false, idx); } }
-        else if (x) { var pr2 = neu('span', 'p'); pr2.appendChild(neu('s', null, euro(x.listenpreis))); pr2.appendChild(document.createTextNode(euro(x.preis))); zeile(x.titel, x.hinweis || 'zusätzlich gebucht', pr2, false, idx); }
-      });
-      if (offen && nB < 2) leistListe.appendChild(neu('p', 'ang-hinweis', 'Noch ' + (2 - nB) + (2 - nB === 1 ? ' Baustein' : ' Bausteine') + ' frei: unten auswählen.'));
-      // Auswahl unten
+      var pText = function (txt2) { return neu('span', 'p', txt2); }, pRabatt = function (alt, neuP) { var x = neu('span', 'p'); x.appendChild(neu('s', null, euro(alt))); x.appendChild(document.createTextNode(euro(neuP))); return x; };
+      (P.standard || []).forEach(function (x) { zeile(x.titel, '', pText('inklusive'), true); });
+      korb.forEach(function (e, idx) { var b = bsK(e.k); if (b && e.inkl) zeile(b.titel, (b.text ? b.text + ' · ' : '') + 'Wahlleistung im Paket', pText('Wert ' + euro(b.listenpreis)), false, idx); });
+      korb.forEach(function (e, idx) { var b = bsK(e.k); if (b && !e.inkl) zeile(b.titel, 'zusätzlich zum Paket, ' + b.rabatt + ' % Rabatt', pRabatt(b.listenpreis, b.aufpreis), false, idx); });
+      korb.forEach(function (e, idx) { var x = apK(e.k); if (x) zeile(x.titel, (x.hinweis ? x.hinweis + ' ' : '') + 'Einmalig für die Saison ' + (rg.saison || '') + '.', pRabatt(x.listenpreis, x.preis), false, idx); });
+      if (offen) { var fr = BUDGET - genutzt(); leistListe.appendChild(neu('p', 'ang-hinweis', 'Wahlleistungen im Paket: ' + euro(genutzt()) + ' von ' + euro(BUDGET) + (fr > 0 ? ', noch ' + euro(fr) + ' frei.' : '.'))); }
       wahlListe.innerHTML = ''; zusListe.innerHTML = '';
       BS.forEach(function (b) {
-        var o = neu('div', 'ang-opt'); var t = neu('div', 't'); t.appendChild(neu('b', null, b.titel)); o.appendChild(t);
-        var pr = neu('span', 'p'); if (nB < 2) pr.textContent = 'inklusive'; else { pr.appendChild(neu('s', null, euro(b.listenpreis))); pr.appendChild(document.createTextNode(euro(b.aufpreis))); } o.appendChild(pr);
-        var btn = neu('button', null, 'Hinzufügen'); btn.type = 'button'; btn.setAttribute('aria-label', b.titel + ' hinzufügen'); btn.addEventListener('click', function () { korb.push(b.k); zeichnenKorb(); });
-        o.appendChild(btn); wahlListe.appendChild(o);
+        var voll = b.max && anzahl(b.k) >= b.max;
+        var o = neu('div', 'ang-opt' + (voll ? ' aus' : '')); var t = neu('div', 't'); t.appendChild(neu('b', null, b.titel)); if (b.text) t.appendChild(neu('span', null, b.text)); o.appendChild(t);
+        o.appendChild(neu('span', 'p', 'Wert ' + euro(b.listenpreis)));
+        var btn = neu('button', null, voll ? 'Im Angebot' : 'Hinzufügen'); btn.type = 'button'; btn.disabled = !!voll; btn.setAttribute('aria-label', b.titel + (voll ? ' ist im Angebot' : ' hinzufügen'));
+        btn.addEventListener('click', function () { hinzufuegen(b); }); o.appendChild(btn); wahlListe.appendChild(o);
       });
       AP.forEach(function (x) {
-        var drin = korb.indexOf(x.k) >= 0; var o = neu('div', 'ang-opt' + (drin ? ' aus' : '')); var t = neu('div', 't'); t.appendChild(neu('b', null, x.titel)); if (x.hinweis) t.appendChild(neu('span', null, x.hinweis)); o.appendChild(t);
-        var pr = neu('span', 'p'); pr.appendChild(neu('s', null, euro(x.listenpreis))); pr.appendChild(document.createTextNode(euro(x.preis))); o.appendChild(pr);
+        var drin = anzahl(x.k) > 0; var o = neu('div', 'ang-opt' + (drin ? ' aus' : '')); var t = neu('div', 't'); t.appendChild(neu('b', null, x.titel)); if (x.hinweis) t.appendChild(neu('span', null, x.hinweis)); o.appendChild(t);
+        o.appendChild(pRabatt(x.listenpreis, x.preis));
         var btn = neu('button', null, drin ? 'Im Angebot' : 'Hinzufügen'); btn.type = 'button'; btn.disabled = drin; btn.setAttribute('aria-label', x.titel + (drin ? ' ist im Angebot' : ' hinzufügen'));
-        btn.addEventListener('click', function () { if (korb.indexOf(x.k) < 0) { korb.push(x.k); zeichnenKorb(); } });
-        o.appendChild(btn); zusListe.appendChild(o);
+        btn.addEventListener('click', function () { if (!anzahl(x.k)) { korb.push({ k: x.k, inkl: false }); zeichnenKorb(); } }); o.appendChild(btn); zusListe.appendChild(o);
       });
       if (window.__angPreis) window.__angPreis();
     };
@@ -1144,7 +1170,6 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     pb.form.addEventListener('submit', function (e) {
       e.preventDefault(); if (!annahmePruefen()) return;
       var btn = $('pf-an-senden'); btn.disabled = true; btn.textContent = 'Einen Moment …';
-      if (auswahl().bausteine.length < 2) { var xb = $('pf-an-fehler'); xb.hidden = false; xb.textContent = 'Bitte zwei Bausteine wählen.'; return; }
       angebotSenden(Object.assign({ aktion: 'annehmen', bausteine: auswahl().bausteine, extras: extras() }, annahmeDaten()), function (r) { if (r && r.ok) return fertig(r); btn.disabled = false; btn.textContent = 'Angebot annehmen'; var x = $('pf-an-fehler'); x.hidden = false; x.textContent = (r && r.meldung) || 'Das hat nicht geklappt. Bitte später noch einmal versuchen.'; });
     });
     if (!(LOKAL || VORSCHAU)) angebotSenden({ aktion: 'ansicht', geraet: geraet() }, function () {});
