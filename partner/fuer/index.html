@@ -1068,7 +1068,6 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     angebotModus(d, firma, htmlEsc(firma) + ' im Löwen-Club der <span>100</span>.', 'Club 100 Basismitgliedschaft, Saison ' + (rg.saison || ''));
     box.textContent = '';
     if (a.persoenlich) box.appendChild(neu('p', 'pf-lead', a.persoenlich));
-    var b1 = neu('div', 'ang-block'); b1.appendChild(neu('h2', null, 'Ihre Leistungen')); b1.appendChild(liste((P.standard || []).map(function (x) { return { name: x.titel }; }))); box.appendChild(b1);
     // Konfigurator: „Ihre Leistungen“ ist das Angebot. Feste Leistungen sind angehakt und gesperrt; Bausteine und Zusatzleistungen wandern beim Hinzufügen nach oben.
     // Die ersten zwei Bausteine sind inklusive, jeder weitere zum Club-Preis. Was sich nur einmal buchen lässt, wird unten ausgegraut, sobald es im Angebot ist.
     var korb = [];
@@ -1092,8 +1091,9 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     var zeichnenKorb = function () {
       leistListe.innerHTML = '';
       var zeile = function (titel, unter, preis, fest, idx) {
-        var r = neu('label', 'ang-zeile' + (fest ? ' fest' : '')); var cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = true; cb.disabled = fest || !offen;
-        if (!fest) cb.setAttribute('aria-label', titel + ' aus dem Angebot nehmen');
+        var r = neu(fest || !offen ? 'div' : 'label', 'ang-zeile' + (fest ? ' fest' : '')); var cb;
+        if (fest || !offen) { cb = neu('span'); cb.innerHTML = HAKEN; cb.style.cssText = 'width:22px;height:22px;color:#1f8a4c;flex:none;display:inline-flex'; }
+        else { cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = true; cb.setAttribute('aria-label', titel + ' aus dem Angebot nehmen'); }
         var t = neu('div', 't'); t.appendChild(neu('b', null, titel)); if (unter) t.appendChild(neu('span', null, unter));
         r.appendChild(cb); r.appendChild(t); r.appendChild(preis); leistListe.appendChild(r);
         if (!fest && offen) cb.addEventListener('change', function () { korb.splice(idx, 1); zeichnenKorb(); });
