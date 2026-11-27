@@ -710,11 +710,10 @@
   function hfPunkte(p) {
     var stand = Math.max(Number(p.stand) || 0, 0);
     var h = '<div class="hf-karte" id="hf-punkte"><h2>Deine Löwenpunkte</h2>' +
-      '<p><strong>' + esc(hfZahl(stand)) + ' Punkte</strong> = ' + esc(hfEur(p.wert)) + ' · aus ' + esc(p.tage) + (Number(p.tage) === 1 ? ' Helfertag' : ' Helfertagen') +
+      '<p><strong>' + esc(hfZahl(stand)) + ' Punkte</strong> · aus ' + esc(p.tage) + (Number(p.tage) === 1 ? ' Helfertag' : ' Helfertagen') +
       (p.geplant ? ', ' + esc(p.geplant) + ' weitere geplant' : '') + '</p>' +
-      '<p class="hf-klein">Für jeden Helfertag gibt es Löwenpunkte, ein Punkt ist ' + esc(p.cent_je_punkt) + ' Cent wert. Du löst sie als Gutschein für Tickets ein.</p>';
-    if (p.kann_einloesen) h += '<button type="button" class="hf-knopf" id="hf-punkte-einloesen" data-wert="' + esc(hfEur(p.wert)) + '" data-punkte="' + esc(hfZahl(stand)) + '">Als Gutschein über ' + esc(hfEur(p.wert)) + ' einlösen</button><p class="hf-meldung" id="hf-punkte-m" role="status" aria-live="polite"></p>';
-    else h += '<p class="hf-klein">Einlösen geht ab ' + esc(hfZahl(p.mindestens)) + ' Punkten.</p>';
+      // Marko 27.11.2026: Punktwert und Einlösen bleiben vorerst verborgen. Die Helfer sammeln erst und lernen das System kennen, wir sehen, wie viel zusammenkommt.
+      '<p class="hf-klein">Für jeden Helfertag sammelst du Löwenpunkte. Wofür du sie einlösen kannst, erfährst du bald.</p>';
     return h + hfGutscheine(p.einloesungen) + '</div>';
   }
   document.addEventListener('click', function (ev) {
