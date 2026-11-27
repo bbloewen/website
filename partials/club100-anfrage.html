@@ -1,0 +1,61 @@
+<section class="section" id="mitmachen" style="scroll-margin-top:96px">
+  <div class="container container-narrow">
+    <div class="cta-panel c100-anfrage">
+      <span class="eyebrow">Mitmachen</span>
+      <h2 class="t-h2">Mitglied im Löwen-Club der 100 werden</h2>
+      <p class="t-h3" style="margin:4px auto 4px;color:var(--text-primary)">Basismitgliedschaft ab 49,00 € im Monat <span class="t-body-sm" style="color:var(--text-secondary)">(netto, zzgl. MwSt.)</span></p>
+      <p class="t-body-sm" style="margin:0 auto 12px">Abgerechnet einmal pro Saison (1. Juli bis 30. Juni). Wer während der Saison einsteigt, zahlt nur die restlichen Monate.</p>
+      <p class="t-body-sm" style="margin:0 auto 24px">Dazu gehören Ihr Logo mit Link auf der Seite des Clubs, die Erlaubnis, Namen und Logo der Basketball Löwen auf Ihrer Website zu nutzen, ein Besuch im VIP-Bereich, Einladungen zu unseren Netzwerkveranstaltungen und Leistungen Ihrer Wahl, zum Beispiel Dauerkarten.</p>
+      <form class="form-panel c100-form" id="c100-form" novalidate>
+        <h3 class="t-h4" style="margin:0 0 6px">Persönliches Angebot anfordern</h3>
+        <p class="t-body-sm" style="margin:0 0 18px">Sie bekommen Ihr Angebot in wenigen Minuten per E-Mail und stellen die Leistungen dort selbst zusammen.</p>
+        <div class="form-row">
+          <div class="field"><label for="c100-name">Vor- und Nachname</label><input type="text" id="c100-name" name="name" required autocomplete="name" /></div>
+          <div class="field"><label for="c100-firma">Firma</label><input type="text" id="c100-firma" name="firma" required autocomplete="organization" /></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label for="c100-email">E-Mail</label><input type="email" id="c100-email" name="email" required autocomplete="email" /></div>
+          <div class="field"><label for="c100-telefon">Telefon</label><input type="tel" id="c100-telefon" name="telefon" required autocomplete="tel" /></div>
+        </div>
+        <div class="c100-hp" aria-hidden="true"><label for="c100-website">Website</label><input type="text" id="c100-website" name="website" tabindex="-1" autocomplete="off" /></div>
+        <button type="submit" class="btn btn-primary" id="c100-senden">Persönliches Angebot anfordern</button>
+        <p class="t-caption" style="margin:12px 0 0;color:var(--text-muted)">Wir nutzen Ihre Angaben nur für das Angebot und die Rückfragen dazu. Mehr in der <a href="/datenschutz.html">Datenschutzerklärung</a>.</p>
+        <div class="form-status" id="c100-status" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+  </div>
+  <style>
+    .c100-form { text-align: left; max-width: 640px; margin: 0 auto; background: #fff; }
+    .c100-form .btn { width: 100%; justify-content: center; }
+    .c100-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  </style>
+  <script>
+  (function () {
+    var f = document.getElementById('c100-form'); if (!f || f.dataset.gebunden) return; f.dataset.gebunden = '1';
+    var st = document.getElementById('c100-status'), btn = document.getElementById('c100-senden');
+    var zeig = function (art, text) { st.className = 'form-status visible ' + art; st.textContent = text; };
+    f.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var w = function (n) { return (f.elements[n].value || '').trim(); };
+      if (!/\S+\s+\S+/.test(w('name'))) return zeig('error', 'Bitte Vor- und Nachnamen eintragen.');
+      if (w('firma').length < 2) return zeig('error', 'Bitte die Firma eintragen.');
+      if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(w('email'))) return zeig('error', 'Bitte eine gültige E-Mail-Adresse eintragen.');
+      if (w('telefon').replace(/\D/g, '').length < 6) return zeig('error', 'Bitte eine Telefonnummer eintragen.');
+      btn.disabled = true; btn.textContent = 'Einen Moment …';
+      var seite = /sponsoring/.test(location.pathname) ? 'sponsoring' : 'club-100';
+      fetch('https://ticketing.basketball-loewen.com/webhook/club100-anfrage', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: w('name'), firma: w('firma'), email: w('email'), telefon: w('telefon'), website: w('website'), seite: seite }) })
+        .then(function (r) { return r.json(); })
+        .then(function (r) {
+          if (r && r.ok) { f.querySelectorAll('.form-row, .c100-hp, #c100-senden').forEach(function (x) { x.hidden = true; x.style.display = 'none'; });
+            zeig('success', 'Vielen Dank! Ihr persönliches Angebot ist unterwegs: Sie bekommen es in wenigen Minuten per E-Mail.');
+            if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: 'club100-anfrage-' + seite, title: 'Club 100: Angebot angefordert', event: true });
+            return; }
+          btn.disabled = false; btn.textContent = 'Persönliches Angebot anfordern';
+          zeig('error', (r && r.meldung) || 'Das hat nicht geklappt. Bitte später noch einmal versuchen.');
+        })
+        .catch(function () { btn.disabled = false; btn.textContent = 'Persönliches Angebot anfordern'; zeig('error', 'Das hat nicht geklappt. Bitte später noch einmal versuchen oder schreiben Sie an info@basketball-loewen.com.'); });
+    });
+  })();
+  </script>
+</section>

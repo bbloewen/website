@@ -36,6 +36,11 @@ PARTIALS = {
     "header": REPO / "partials" / "header.html",
     "footer": REPO / "partials" / "footer.html",
 }
+# Bausteine, die nur auf einzelnen Seiten stehen: eingebaut, wo der Platzhalter steht, sonst still uebersprungen.
+# club100-anfrage: Kasten „Persönliches Angebot anfordern“ (Club-100- und Sponsoring-Seite, Marko 27.11.2026)
+OPTIONAL = {
+    "club100-anfrage": REPO / "partials" / "club100-anfrage.html",
+}
 
 # Die Insta-Archivseiten unter news/insta-archiv/ wurden am 19.10.2026 geloescht
 # (Marko: seit wir genug eigene News schreiben, reicht der Feed in der Seitenspalte;
@@ -78,6 +83,7 @@ def main():
     args = ap.parse_args()
 
     inhalte = {n: p.read_text(encoding="utf-8") for n, p in PARTIALS.items()}
+    optional = {n: p.read_text(encoding="utf-8") for n, p in OPTIONAL.items()}
     geaendert, unveraendert, probleme = [], [], []
 
     for rel in tracked_html():
@@ -96,6 +102,10 @@ def main():
             neu = ergebnis
         if neu is None:
             continue
+        for name, inhalt in optional.items():
+            ergebnis = apply_partial(neu, name, inhalt)
+            if ergebnis is not None:
+                neu = ergebnis
         if neu == alt:
             unveraendert.append(rel)
         else:
