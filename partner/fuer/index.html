@@ -836,7 +836,7 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     bandeSetzen();
     spielVorbereiten(d, firma, mit);
     melden('besuch');
-    if (CALL) callStarten(d, firma);
+    if (CALL && !(d.paket_art === 'club100' || (d.angebot && d.angebot.paket === 'club100'))) callStarten(d, firma);   // Club 100 ohne Präsentation (Marko 27.11.2026)
   }
 
   // Termin: bis die Buchung aus Andrés Kalender angeschlossen ist, meldet der Klick das Interesse; André ruft am nächsten Werktag an.
@@ -1198,21 +1198,23 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     var aus = neu('button', null, 'Schließen'); aus.type = 'button';
     nav.appendChild(zur); nav.appendChild(zahl); nav.appendChild(vor); nav.appendChild(aus); leiste.appendChild(nav); wrap.appendChild(leiste);
     var h = function (el, s) { var x = neu('h2'); headline(x, s); el.appendChild(x); return x; };
+    // Kundenpräsentation (Marko 27.11.2026): Lust machen, keine internen Hinweise (keine Rabatt-Sätze, kein Abschlussgeschenk, keine internen Mails)
     var folien = [
-      function (el) { h(el, T('So sieht *' + firma + '* bei jedem Heimspiel aus.', 'So sieht *' + firma + '* bei jedem Heimspiel aus.'));
-        var bild = document.querySelector('.pf-halle-bild').cloneNode(true); var v = bild.querySelector('.pf-vorschau'); if (v) v.remove(); el.appendChild(bild);
-        el.appendChild(neu('p', 'pf-call-unter', 'LED-Bande an der Spielfeldkante, vor den Zuschauern in der Riethsporthalle und im Livestream.')); },
+      function (el) { h(el, 'So sieht *' + firma + '* bei jedem Heimspiel aus.');
+        var bild = document.querySelector('.pf-halle-bild').cloneNode(true); var v = bild.querySelector('.pf-vorschau'); if (v) v.remove(); el.appendChild(bild); },
       function (el) { h(el, 'Darum passt ' + firma + ' zu den *Löwen*.'); var g = neu('div', 'pf-nutzen');
         (b.nutzen || []).slice(0, 4).forEach(function (n, i) { var k = neu('div', 'pf-karte'); var hh = neu('h3'); hh.appendChild(neu('span', null, String(i + 1))); hh.appendChild(document.createTextNode(n.titel || '')); k.appendChild(hh); k.appendChild(neu('p', null, n.text || '')); g.appendChild(k); });
         el.appendChild(g); },
-      function (el) { h(el, 'Das Paket: Löwenstarker *Partner*.'); el.appendChild(neu('p', 'pf-call-unter', 'Der Kern ist für alle Partner gleich.')); el.appendChild(liste(P.kern || [])); },
-      function (el) { h(el, 'Zwei *Zugaben* nach Wahl.'); el.appendChild(liste(P.zugaben || [])); },
-      function (el) { h(el, 'Der *Preis*.'); var pr = neu('p', 'pf-call-preis', euro(P.preis || 5000)); pr.appendChild(neu('small', null, 'netto für die Saison')); el.appendChild(pr);
-        el.appendChild(neu('p', 'pf-call-unter', 'Keine Rabatte, dafür zwei Zugaben nach Wahl.')); },
-      function (el) { h(el, 'So geht es *weiter*.'); var ol = neu('ol', 'pf-call-schritte');
-        [['Heute', 'Das Angebot steht auf ' + T('deiner', 'Ihrer') + ' Seite, mit den Zugaben aus diesem Gespräch.'], ['Annehmen', 'Ein Klick auf der Seite, dann kommt der Vertrag zur Unterschrift online.'], ['Willkommen', (tm.mit || 'André') + ' bringt den Spielball als Abschlussgeschenk vorbei.'], ['Start', 'Die Bande läuft beim nächsten Heimspiel.']]
+      function (el) { h(el, 'Löwenstarker *Partner*.'); el.appendChild(liste(P.kern || [])); },
+      function (el) { h(el, T('Deine', 'Ihre') + ' *Optionen*.'); el.appendChild(liste(P.zugaben || [])); },
+      function (el) { h(el, 'Das *Gesamtpaket*.'); el.appendChild(liste((P.kern || []).map(function (x) { return { name: x.name }; }).concat([{ name: T('Zwei Optionen deiner Wahl', 'Zwei Optionen Ihrer Wahl') }])));
+        var pr = neu('p', 'pf-call-preis', euro(P.preis || 5000)); pr.appendChild(neu('small', null, 'netto pro Saison')); el.appendChild(pr); },
+      function (el) { h(el, 'So könnte es *weitergehen*.'); var ol = neu('ol', 'pf-call-schritte');
+        [[T('Zusage', 'Zusage'), T('Wenn du zusagst, schicken wir dir ein individuelles Angebot.', 'Wenn Sie zusagen, schicken wir Ihnen ein individuelles Angebot.')],
+         ['Vertrag', T('Nimmst du es an, bekommst du direkt den Vertrag, und wir freuen uns auf die Partnerschaft.', 'Nehmen Sie es an, bekommen Sie direkt den Vertrag, und wir freuen uns auf die Partnerschaft.')],
+         ['Saisonende', T('Am Ende der Saison sprechen wir gemeinsam darüber, wie es in der nächsten Saison weitergeht.', 'Am Ende der Saison sprechen wir gemeinsam darüber, wie es in der nächsten Saison weitergeht.')]]
           .forEach(function (x) { var li = document.createElement('li'); li.appendChild(neu('b', null, x[0])); li.appendChild(document.createTextNode(x[1])); ol.appendChild(li); });
-        el.appendChild(ol); var fr = neu('h2'); headline(fr, 'Passt das für *' + firma + '*?'); el.appendChild(fr); }
+        el.appendChild(ol); }
     ];
     var i = 0;
     function zeige(n) {
