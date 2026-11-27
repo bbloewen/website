@@ -5,165 +5,164 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="robots" content="noindex, nofollow, noai, noimageai" />
 <meta name="referrer" content="no-referrer" />
-<title>Postkarte — Basketball Löwen</title>
+<title>Postkarten drucken — Basketball Löwen</title>
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
-<!-- Postkarte zur persönlichen Partnerseite (Migration 546, Marko 26.11.2026). Interne Druckseite, nicht verlinkt.
-     ?c=<code> holt Firma, Ansprache, Begrüßung, Bandenzeile und Postkartensatz aus 305 (partner-seite, zählt nichts).
-     Vorderseite: Halle mit der LED-Bande der Firma und dem Satz der Branchenkarte. Rückseite: handschriftlicher Gruß, QR-Code zur Seite (Herkunft Postkarte).
-     ?von=marko|andre wählt, wer unterschreibt (wer die Karte persönlich abgibt). Druck: A6 quer (148 × 105 mm), randlos, beidseitig an der kurzen Kante. -->
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap" />
+<!-- Postkarten nach dem neuen Standard (Migration 557, Marko 27.11.2026; Postkarten-Übergabe 2026-11-27, Referenz druck.py und felder.json).
+     Interne Druckseite, nicht verlinkt. ?c=<code>,<code> (persönliche Seiten) holt je Karte die Felder aus 305 (Endpunkt postkarte, zählt nichts).
+     ?modus=einzel: je Karte A4 hoch, Seite 1 vorne, Seite 2 hinten, 148 × 105 mm mittig, ohne Schnittmarken.
+     ?modus=bogen (Standard): zwei Karten je A4 mit 3 mm Beschnitt und Schnittmarken, Seite 1 Vorderseiten, Seite 2 Rückseiten an denselben Stellen.
+     Beidseitig drucken, Wenden an der langen Kante, Größe 100 %. ?von=marko|andre setzt den Absender (sonst der Absender der Kampagne).
+     Motive: /assets/postkarte/motive/<Position>.webp, Standardtexte der Vorderseite: /data/postkarten.json. -->
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="/js/qr-loewe.js?v=1795780000"></script>
 <style>
-:root { --navy: #00122D; --orange: #E5710B; --orange-text: #B55709; }
 * { box-sizing: border-box; }
-body { margin: 0; background: #e9ecf1; color: var(--navy); font-family: 'Lexend', sans-serif; }
+body { margin: 0; font-family: 'Lexend', sans-serif; color: #00122D; background: #e9ecf1; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 .leiste { position: sticky; top: 0; z-index: 5; display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 12px 16px; background: #fff; border-bottom: 1px solid #dfe3ea; font-size: 14px; }
-.leiste button { min-height: 44px; padding: 0 20px; border-radius: 999px; border: 0; background: var(--orange); color: var(--navy); font: 700 15px 'Lexend', sans-serif; cursor: pointer; }
-.leiste button:focus-visible { outline: 3px solid #0028AA; outline-offset: 2px; }
-.leiste span { color: #5b6475; }
-.seiten { display: grid; gap: 28px; justify-content: center; padding: 28px 16px 60px; }
-.karte { width: 148mm; height: 105mm; position: relative; overflow: hidden; background: #fff; box-shadow: 0 10px 30px rgba(0,18,45,.18); }
-.seite-titel { font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: #5b6475; margin: 0 0 6px; }
-/* Vorderseite */
-.vorne img.halle { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 70%; }
-.vorne .schatten { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,18,45,.86) 0%, rgba(0,18,45,.55) 34%, rgba(0,18,45,0) 58%); }
-.vorne .logo { position: absolute; left: 6mm; top: 5.5mm; width: 15mm; height: 15mm; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; }
-.vorne .logo img { width: 12mm; height: auto; display: block; }
-.vorne h1 { position: absolute; left: 25mm; right: 7mm; top: 6mm; margin: 0; color: #fff; font-weight: 900; font-size: 15.5pt; line-height: 1.12; letter-spacing: -.01em; }
-.vorne h1 span { color: var(--orange); }
-.bande { position: absolute; left: 0; right: 0; height: 9mm; background: #05070c; overflow: hidden; display: flex; align-items: center; box-shadow: 0 0 0 .3mm #1b1f2a, 0 1.5mm 4mm rgba(0,0,0,.45); }
-.bande::after { content: ''; position: absolute; inset: 0; background-image: radial-gradient(rgba(0,0,0,.5) 35%, transparent 36%); background-size: .7mm .7mm; }
-.bande-lauf { display: flex; white-space: nowrap; transform: translateX(-6mm); }
-.bande-lauf span { padding: 0 5mm; font: 900 13pt/1 'Lexend', sans-serif; letter-spacing: .04em; text-transform: uppercase; color: #fff; text-shadow: 0 0 2mm rgba(255,255,255,.55); }
-.bande-lauf span.z { color: #F09E4C; font-size: 8pt; font-weight: 700; align-self: center; text-shadow: 0 0 2mm rgba(240,158,76,.6); }
-.bande-lauf span.l { display: inline-flex; align-items: center; padding: 0 4mm; }
-.bande-lauf span.l img { height: 7mm; width: auto; }
-.vorne .unten { position: absolute; left: 6mm; bottom: 4mm; color: #fff; font-size: 7pt; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
-/* Rückseite */
-.hinten { display: grid; grid-template-columns: 1fr .3mm 52mm; gap: 0 6mm; padding: 7mm 7mm 6mm 8mm; }
-.hinten .trenner { background: #cfd5df; }
-.hand { font-family: 'Caveat', cursive; font-weight: 500; font-size: 15.5pt; line-height: 1.12; color: #1d2c6b; }
-.hand p { margin: 0 0 1.6mm; }
-.hand .unterschrift { font-weight: 700; font-size: 21pt; margin: 1mm 0 0; color: #1d2c6b; }
-.gedruckt { font-family: 'Lexend', sans-serif; font-size: 6pt; color: #5b6475; margin-top: .5mm; }
-.rechts { display: flex; flex-direction: column; }
-.rechts .fuer { font-size: 6.5pt; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--orange-text); margin: 0 0 1.2mm; }
-.rechts .name { font-weight: 800; font-size: 10pt; line-height: 1.2; }
-.rechts .firma { font-weight: 300; font-size: 9pt; line-height: 1.25; margin: 0 0 3mm; }
-.qr { width: 27mm; height: 27mm; }
-.qr svg { width: 100%; height: 100%; display: block; }
-.qr-text { font-size: 7pt; font-weight: 700; margin: 1.6mm 0 .6mm; }
-.qr-url { font-size: 5.5pt; color: #5b6475; word-break: break-all; }
-.marke { margin-top: auto; display: flex; align-items: center; gap: 2mm; font-size: 6pt; font-weight: 600; white-space: nowrap; }
-.marke img { width: 8mm; height: auto; }
-.marke b { color: var(--orange-text); }
-.fehler { max-width: 520px; margin: 60px auto; text-align: center; font-size: 16px; }
-@page { size: 148mm 105mm; margin: 0; }
-@media print {
-  body { background: #fff; }
-  .leiste, .seite-titel { display: none !important; }
-  .seiten { display: block; padding: 0; }
-  .karte { box-shadow: none; page-break-after: always; break-after: page; }
-  .vorne * , .hinten * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .vorne, .bande, .schatten { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-}
-[hidden] { display: none !important; }
+.leiste .knoepfe { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.leiste button, .leiste a.umschalten { min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid #c9d0db; background: #fff; color: #00122D; font: 600 14px 'Lexend', sans-serif; cursor: pointer; display: inline-flex; align-items: center; text-decoration: none; }
+.leiste a.umschalten[aria-current="true"] { background: #00122D; color: #fff; border-color: #00122D; }
+.leiste button.druck { background: #E5710B; border-color: #E5710B; color: #00122D; font-weight: 700; }
+.leiste button:focus-visible, .leiste a:focus-visible { outline: 3px solid #0028AA; outline-offset: 2px; }
+.hinweis { color: #4a5568; max-width: 640px; }
+.warnung { margin: 12px 16px 0; padding: 10px 14px; border-radius: 8px; background: #fff4e5; border: 1px solid #f0c48a; color: #6b3b00; font-size: 14px; }
+.warnung:empty { display: none; }
+.seiten { display: grid; gap: 24px; justify-content: center; padding: 24px 16px 60px; }
+@media screen and (max-width: 860px) { .seiten { zoom: .45; } }
+
+@page { size: 210mm 297mm; margin: 0; }
+.pg { width: 210mm; height: 297mm; position: relative; overflow: hidden; background: #fff; box-shadow: 0 8px 28px rgba(0,18,45,.16); }
+@media print { body { background: #fff; } .leiste, .warnung { display: none !important; } .seiten { display: block; padding: 0; zoom: 1; } .pg { box-shadow: none; page-break-after: always; break-after: page; } .ueberlauf { outline: none !important; } }
+.cd { position: absolute; overflow: hidden; }
+.t { position: absolute; width: 148mm; height: 105mm; }
+.f { position: absolute; }
+/* Vorderseite (felder.json → vorderseite) */
+.h { position: absolute; left: 8mm; top: 12mm; width: 52mm; font-weight: 900; font-size: 6.8mm; line-height: 1.8; letter-spacing: -.01em; color: #00122D; }
+.h b { font-weight: 900; background: #00122D; color: #E5710B; padding: .14em .2em; border-radius: .14em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.n { position: absolute; left: 11mm; top: 87.2mm; font-weight: 800; font-size: 5mm; letter-spacing: .05em; text-transform: uppercase; color: #fff; white-space: nowrap; }
+.n.nc { text-transform: none; letter-spacing: .02em; }
+.c { position: absolute; left: 11mm; top: 94mm; font-weight: 400; font-size: 3.5mm; color: #F09E4C; white-space: nowrap; }
+/* Rückseite (felder.json → rueckseite) */
+.anrede { left: 8mm; top: 11mm; width: 60mm; height: 5mm; font-weight: 300; font-size: 3.1mm; line-height: 1.5; white-space: nowrap; overflow: hidden; }
+.msg { left: 8mm; top: 20.3mm; width: 60mm; height: 40.7mm; font-weight: 300; font-size: 3.1mm; line-height: 1.5; white-space: pre-wrap; overflow: hidden; }
+.intro { left: 8mm; top: 63.3mm; width: 60mm; font-weight: 300; font-size: 3.1mm; line-height: 1.3; white-space: nowrap; }
+.code { left: 8mm; top: 67.5mm; width: 60mm; text-align: center; font-weight: 800; font-size: 5.4mm; letter-spacing: .05em; line-height: 1.3; white-space: nowrap; }
+.abschied { left: 8mm; top: 78.4mm; width: 60mm; font-weight: 300; font-size: 3.1mm; line-height: 1.3; white-space: nowrap; }
+.sig { left: 8mm; top: 82.9mm; width: 60mm; height: 5mm; font-weight: 600; font-size: 3.4mm; line-height: 1.3; white-space: nowrap; overflow: hidden; }
+.adr, .ql { left: 80mm; width: 60mm; font-weight: 400; font-size: 3.3mm; line-height: 8mm; white-space: pre-wrap; overflow: hidden; }
+.adr { top: 28.2mm; height: 16mm; }
+.ql { top: 44.2mm; height: 8mm; white-space: nowrap; }
+.qrimg { left: 97mm; top: 58mm; width: 26mm; height: 26mm; }
+.url { left: 80mm; top: 85.2mm; width: 60mm; text-align: center; font-weight: 400; font-size: 2.2mm; line-height: 1.3; white-space: nowrap; }
+.ft { left: 0; top: 92.4mm; width: 148mm; text-align: center; font-weight: 400; font-size: 3.5mm; line-height: 1.1; color: #2B3A55; }
+.sw { left: 59mm; top: 96.2mm; width: 30mm; height: 3.2mm; }
+.m { position: absolute; background: #000; }
+.ueberlauf { outline: .6mm solid #d12f2f; outline-offset: .4mm; }
+.leer { padding: 40px 16px; text-align: center; color: #4a5568; }
 </style>
 </head>
 <body>
-<div class="leiste"><span id="info">Postkarte A6 quer · Druck randlos, beidseitig an der kurzen Kante wenden</span><button type="button" id="drucken">Drucken oder als PDF speichern</button></div>
-<main class="seiten" id="seiten" hidden></main>
-<template id="vorlage">
-  <div>
-    <p class="seite-titel">Vorderseite</p>
-    <section class="karte vorne" aria-label="Vorderseite der Postkarte">
-      <img class="halle" src="/assets/img/hero-tickets-halle.webp" width="2000" height="1333" alt="Heimspiel der Basketball Löwen in der Riethsporthalle" />
-      <div class="schatten"></div>
-      <div class="bande" data-f="bande" aria-hidden="true"><div class="bande-lauf" data-f="bande-lauf"></div></div>
-      <div class="logo"><img src="/assets/logo/loewen-logo-4c.svg" width="600" height="565" alt="Basketball Löwen" /></div>
-      <h1 data-f="satz"></h1>
-    </section>
+<div class="leiste" role="region" aria-label="Druck">
+  <div class="knoepfe">
+    <a class="umschalten" id="m-bogen" href="#">Bogen mit Schnittmarken</a>
+    <a class="umschalten" id="m-einzel" href="#">Einzelkarte</a>
+    <button type="button" class="druck" id="drucken">Drucken</button>
   </div>
-  <div>
-    <p class="seite-titel">Rückseite</p>
-    <section class="karte hinten" aria-label="Rückseite der Postkarte">
-      <div class="hand" data-f="hand"></div>
-      <div class="trenner" aria-hidden="true"></div>
-      <div class="rechts">
-        <p class="fuer">Persönlich für</p>
-        <div class="name" data-f="name"></div>
-        <div class="firma" data-f="firma"></div>
-        <div class="qr" data-f="qr" role="img" aria-label="QR-Code zur persönlichen Seite"></div>
-        <div class="qr-text" data-f="qr-text"></div>
-        <div class="qr-url" data-f="qr-url"></div>
-        <div class="marke"><img src="/assets/logo/loewen-logo-4c.svg" width="600" height="565" alt="" /><span>Basketball Löwen · <b>Gemeinsam stark.</b></span></div>
-      </div>
-    </section>
-  </div>
-</template>
-<div class="fehler" id="fehler" hidden>Diese Postkarte gibt es nicht. Bitte den Link aus 305 nehmen (Kasten „Persönliche Seite“ › „Postkarte drucken“).</div>
+  <span class="hinweis" id="hinweis">A4, beidseitig, Wenden an der langen Kante, Größe 100 % (nicht „an Seite anpassen“). Papier 160 g.</span>
+</div>
+<div class="warnung" id="warnung" role="status"></div>
+<main class="seiten" id="seiten"><p class="leer">Lade …</p></main>
 <script>
 (function () {
   var API = 'https://ticketing.basketball-loewen.com/webhook/';
-  var sp = new URLSearchParams(location.search);
-  // eine oder mehrere Karten: ?c=code oder ?c=code1,code2,… (Sammeldruck einer Kampagne aus 305, Migration 553)
-  var CODES = (sp.get('c') || '').toLowerCase().split(',').map(function (x) { return x.replace(/[^a-z0-9]/g, '').slice(0, 16); }).filter(Boolean).slice(0, 200);
-  var LOKAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
-  var VON = sp.get('von') === 'andre' ? { name: 'André Grenzdörffer', kurz: 'André', rolle: 'Head of Partnerships' } : { name: 'Marko Fliege', kurz: 'Marko', rolle: 'Kaufmännischer Leiter' };
-  var $ = function (id) { return document.getElementById(id); };
-  function neu(tag, cls, s) { var e = document.createElement(tag); if (cls) e.className = cls; if (s != null) e.textContent = s; return e; }
-  function satzSetzen(el, s) { el.textContent = ''; String(s).split(/(\*[^*]+\*)/).forEach(function (t) { if (/^\*[^*]+\*$/.test(t)) el.appendChild(neu('span', null, t.slice(1, -1))); else if (t) el.appendChild(document.createTextNode(t)); }); }
-  function bandeSetzen(box) {
-    var img = box.querySelector('img.halle'), b = box.querySelector('[data-f="bande"]');
-    var W = box.clientWidth, H = box.clientHeight, iw = img.naturalWidth || 2000, ih = img.naturalHeight || 1333;
-    var k = Math.max(W / iw, H / ih), rh = ih * k, oy = (rh - H) * 0.70;
-    b.style.top = Math.round(0.756 * rh - oy) + 'px'; b.style.height = Math.round(Math.max(18, 0.064 * rh)) + 'px';
+  var q = new URLSearchParams(location.search);
+  var CODES = (q.get('c') || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean).slice(0, 40);
+  var MODUS = q.get('modus') === 'einzel' ? 'einzel' : 'bogen';
+  var VON = { marko: 'Marko Fliege', andre: 'André Grenzdörffer' }[q.get('von') || ''] || '';
+  var seiten = document.getElementById('seiten'), warnung = document.getElementById('warnung'), FEHLT = '';
+  ['bogen', 'einzel'].forEach(function (m) {
+    var a = document.getElementById('m-' + m), u = new URLSearchParams(location.search); u.set('modus', m);
+    a.href = '?' + u.toString(); if (m === MODUS) a.setAttribute('aria-current', 'true');
+  });
+  document.getElementById('drucken').addEventListener('click', function () { window.print(); });
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function vorne(c, o, beschnitt) {
+    var h = esc(c.headline).replace(/\*(.+?)\*/g, '<b>$1</b>');
+    return '<div class="cd" style="width:' + (148 + 2 * o) + 'mm;height:' + (105 + 2 * o) + 'mm">' +
+      '<img src="' + esc(c.motiv) + '" alt="" style="position:absolute;left:' + (beschnitt ? 0 : -3) + 'mm;top:' + (beschnitt ? 0 : -3) + 'mm;width:154mm;height:111mm">' +
+      '<div class="t" style="left:' + o + 'mm;top:' + o + 'mm"><div class="h">' + h + '</div><div class="n' + (c.bar_name_uppercase === false ? ' nc' : '') + '">' + esc(c.bar_name) + '</div><div class="c">' + esc(c.claim) + '</div></div></div>';
   }
-  function zeigen(d, code) {
-    var frag = $('vorlage').content.cloneNode(true), f = function (n) { return frag.querySelector('[data-f="' + n + '"]'); };
-    var du = d.ansprache === 'du', T = function (a, b) { return du ? a : b; };
-    var firma = d.firma || 'Ihr Unternehmen', b = d.branche || {};
-    var apotheke = /apothek/i.test((b.name || '') + ' ' + firma);
-    satzSetzen(f('satz'), b.postkarte || ('*' + firma + '* wird löwenstark.'));
-    var lauf = f('bande-lauf'), logo = function () { var w = neu('span', 'l'); var im = document.createElement('img'); im.src = '/assets/logo/loewen-logo-4c.svg'; im.alt = ''; w.appendChild(im); return w; };
-    for (var i = 0; i < 3; i++) { lauf.appendChild(neu('span', null, firma)); if (d.bande_zeile) lauf.appendChild(neu('span', 'z', d.bande_zeile)); lauf.appendChild(logo()); }
-    // Rückseite: handschriftlicher Gruß
-    var h = f('hand');
-    h.appendChild(neu('p', null, d.anrede_name ? (du ? 'Hallo ' + d.anrede_name + ',' : 'Guten Tag, ' + d.anrede_name + ',') : T('Hallo,', 'Guten Tag,')));
-    h.appendChild(neu('p', null, T('ich war heute bei dir' + (apotheke ? ' in der Apotheke' : '') + ' und habe deinem Team diese Karte für dich dagelassen.',
-      'ich war heute bei Ihnen' + (apotheke ? ' in der Apotheke' : '') + ' und habe Ihrem Team diese Karte für Sie dagelassen.')));
-    h.appendChild(neu('p', null, T('Wir haben uns überlegt, wie ' + firma + ' bei den Basketball Löwen aussehen könnte. Scann einfach den Code, dort wartet ein kurzes Video auf dich.',
-      'Wir haben uns überlegt, wie ' + (apotheke && !/^die /i.test(firma) ? 'die ' : '') + firma + ' bei den Basketball Löwen aussehen könnte. Scannen Sie einfach den Code, dort wartet ein kurzes Video auf Sie.')));
-    h.appendChild(neu('p', null, 'Herzliche Grüße'));
-    h.appendChild(neu('p', 'unterschrift', VON.kurz === 'Marko' && du ? 'Marko' : VON.name));
-    h.appendChild(neu('div', 'gedruckt', VON.name + ' · ' + VON.rolle + ', Basketball Löwen'));
-    f('name').textContent = d.anrede_name || '';
-    f('firma').textContent = firma;
-    // Kurzlink /g/<CODE> (Migration 554), sonst der lange Link
-    var url = d.kurz ? 'https://basketball-loewen.com/g/' + d.kurz : 'https://basketball-loewen.com/partner/fuer/?c=' + code + '&q=flyer';
-    f('qr-text').textContent = T('Dein Video: einfach scannen', 'Ihr Video: einfach scannen');
-    f('qr-url').textContent = url.replace('https://', '');
-    var qrBox = f('qr'); qrLoewe(url, 1040).then(function (src) { var im = document.createElement('img'); im.src = src; im.alt = ''; im.style.width = '100%'; im.style.height = '100%'; qrBox.appendChild(im); });
-    var vorne = frag.querySelector('.vorne'); frag.querySelectorAll('.seite-titel').forEach(function (t) { t.textContent += ' · ' + firma; });
-    $('seiten').appendChild(frag); $('seiten').hidden = false;
-    var im = vorne.querySelector('img.halle'); if (im.complete) bandeSetzen(vorne); else im.addEventListener('load', function () { bandeSetzen(vorne); }); bandeSetzen(vorne);
+  function hinten(b, o, nr) {
+    return '<div class="cd" style="width:' + (148 + 2 * o) + 'mm;height:' + (105 + 2 * o) + 'mm">' +
+      '<img src="/assets/postkarte/rueckseite.svg" alt="" style="position:absolute;left:' + (o ? 0 : -3) + 'mm;top:' + (o ? 0 : -3) + 'mm;width:154mm;height:111mm">' +
+      '<div class="t" style="left:' + o + 'mm;top:' + o + 'mm">' +
+      '<div class="f anrede">' + esc(b.anrede) + '</div><div class="f msg" data-pruefen="' + nr + '">' + esc(b.msg) + '</div>' +
+      '<div class="f intro"></div><div class="f code"></div>' +
+      '<div class="f abschied">' + esc(b.abschied) + '</div><div class="f sig">' + esc(b.sig) + '</div>' +
+      '<div class="f adr" data-pruefen="' + nr + '">' + esc([b.adr1, b.adr2].filter(Boolean).join('\n')) + '</div><div class="f ql">' + esc(b.url) + '</div>' +
+      '<img class="f qrimg" data-qr="' + esc('https://' + b.url) + '" alt="QR-Code zu ' + esc(b.url) + '"><div class="f url">' + esc(b.url) + '</div>' +
+      '<div class="f ft">Gemeinsam stark.</div><img class="f sw" src="/assets/postkarte/swoosh.webp" alt=""></div></div>';
   }
-  $('drucken').addEventListener('click', function () { window.print(); });
-  var MUSTER = { ok: true, firma: 'Sonnen-Apotheke', ansprache: 'sie', anrede_name: 'Frau Muster', bande_zeile: 'Ihre Apotheke in Erfurt.', branche: { name: 'Apotheken', postkarte: 'Wir bringen Erfurt in Bewegung. Sie halten Erfurt *gesund*.' } };
-  function fehler() { $('fehler').hidden = false; }
-  if (!CODES.length) return fehler();
-  if (LOKAL && CODES[0] === 'muster') { zeigen(MUSTER, 'muster'); if (CODES[1] === 'muster') zeigen(Object.assign({}, MUSTER, { firma: 'Anger-Apotheke', anrede_name: 'Herr Beispiel' }), 'muster'); return; }
-  // nacheinander laden, damit die Reihenfolge (Route) erhalten bleibt
-  var fehlt = 0, n = 0;
-  (function weiter(i) {
-    if (i >= CODES.length) { $('info').textContent = n + (n === 1 ? ' Postkarte' : ' Postkarten') + ' · A6 quer, randlos, beidseitig an der kurzen Kante wenden' + (fehlt ? ' · ' + fehlt + ' nicht gefunden' : ''); if (!n) fehler(); else document.title = n === 1 ? 'Postkarte — Basketball Löwen' : n + ' Postkarten — Basketball Löwen'; return; }
-    fetch(API + 'partner-seite?c=' + encodeURIComponent(CODES[i]), { cache: 'no-store' }).then(function (r) { return r.json(); })
-      .then(function (d) { if (d && d.ok) { zeigen(d, CODES[i]); n++; } else fehlt++; }).catch(function () { fehlt++; }).then(function () { weiter(i + 1); });
-  })(0);
+  function marken(x0, y0) {
+    var s = '', tx = x0 + 3, ty = y0 + 3;
+    [[tx, ty], [tx + 148, ty], [tx, ty + 105], [tx + 148, ty + 105]].forEach(function (p) {
+      var px = p[0], py = p[1], hx = px === tx ? px - 9 : px + 4, vy = py === ty ? py - 9 : py + 4;
+      s += '<div class="m" style="left:' + hx + 'mm;top:' + (py - .12) + 'mm;width:5mm;height:.25mm"></div><div class="m" style="left:' + (px - .12) + 'mm;top:' + vy + 'mm;width:.25mm;height:5mm"></div>';
+    });
+    return s;
+  }
+  function setzen(jobs) {
+    var h = '';
+    if (MODUS === 'einzel') {
+      jobs.forEach(function (j, i) {
+        h += '<div class="pg" aria-label="Karte ' + (i + 1) + ' vorne"><div style="position:absolute;left:31mm;top:96mm">' + vorne(j.vorne, 0, false) + '</div></div>';
+        h += '<div class="pg" aria-label="Karte ' + (i + 1) + ' hinten"><div style="position:absolute;left:31mm;top:96mm">' + hinten(j.hinten, 0, i) + '</div></div>';
+      });
+    } else {
+      var pos = [[28, 26], [28, 26 + 111 + 34]];
+      for (var i = 0; i < jobs.length; i += 2) {
+        var v = '', b = '';
+        jobs.slice(i, i + 2).forEach(function (j, k) {
+          v += '<div style="position:absolute;left:' + pos[k][0] + 'mm;top:' + pos[k][1] + 'mm">' + vorne(j.vorne, 3, true) + '</div>' + marken(pos[k][0], pos[k][1]);
+          b += '<div style="position:absolute;left:' + pos[k][0] + 'mm;top:' + pos[k][1] + 'mm">' + hinten(j.hinten, 3, i + k) + '</div>' + marken(pos[k][0], pos[k][1]);
+        });
+        h += '<div class="pg" aria-label="Bogen ' + (i / 2 + 1) + ' Vorderseiten">' + v + '</div><div class="pg" aria-label="Bogen ' + (i / 2 + 1) + ' Rückseiten">' + b + '</div>';
+      }
+    }
+    seiten.innerHTML = h;
+    [].slice.call(document.querySelectorAll('[data-qr]')).forEach(function (im) { qrLoewe(im.getAttribute('data-qr'), 1040).then(function (src) { im.src = src; }); });
+    // Zu lange Texte nie verkleinern: rot markieren und melden
+    var lang = [];
+    function pruefen() {
+      lang = [];
+      [].slice.call(document.querySelectorAll('[data-pruefen]')).forEach(function (el) {
+        var zu = el.scrollHeight > el.clientHeight + 1;
+        el.classList.toggle('ueberlauf', zu);
+        if (zu) { var n = jobs[Number(el.getAttribute('data-pruefen'))]; if (n && lang.indexOf(n.hinten.adr1) < 0) lang.push(n.hinten.adr1 || n.hinten.code); }
+      });
+      warnung.textContent = [lang.length ? 'Zu langer Text auf ' + lang.length + (lang.length === 1 ? ' Karte' : ' Karten') + ' (rot markiert): ' + lang.join(', ') + '. Bitte in 305 kürzen.' : '', FEHLT].filter(Boolean).join(' ');
+    }
+    (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(pruefen);
+  }
+  if (!CODES.length) { seiten.innerHTML = '<p class="leer">Keine Karten gewählt. Die Postkarten werden in 305 unter Vertrieb › Kampagnen gedruckt.</p>'; return; }
+  Promise.all([
+    fetch('/data/postkarten.json?v=1').then(function (r) { return r.json(); }),
+    fetch(API + 'postkarte?c=' + encodeURIComponent(CODES.join(',')), { cache: 'no-store' }).then(function (r) { return r.json(); })
+  ]).then(function (res) {
+    var karten = {}; (res[0].karten || []).forEach(function (k) { karten[k.id] = k; });
+    var fehlen = [], jobs = [];
+    (res[1].karten || []).forEach(function (d) {
+      if (!d.ok) { fehlen.push(d.code); return; }
+      var std = karten[d.karte_id] || karten['partner-herz'];
+      jobs.push({ vorne: { motiv: std.motiv, headline: d.headline || std.headline, bar_name: d.balken || std.bar_name, bar_name_uppercase: std.bar_name_uppercase, claim: d.claim || std.claim },
+        hinten: { anrede: d.anrede, msg: d.msg, abschied: d.abschied, sig: VON || d.sig, adr1: d.adr1, adr2: d.adr2, url: d.url, code: d.code } });
+    });
+    if (!jobs.length) { seiten.innerHTML = '<p class="leer">Zu diesen Codes gibt es keine Karte (mehr).</p>'; return; }
+    if (fehlen.length) FEHLT = 'Ohne Karte (Seite abgeschaltet oder unbekannt): ' + fehlen.join(', ') + '.';
+    setzen(jobs);
+    document.getElementById('hinweis').textContent = jobs.length + (jobs.length === 1 ? ' Karte' : ' Karten') + ' · ' + (MODUS === 'bogen' ? Math.ceil(jobs.length / 2) + ' A4-Bögen' : jobs.length + ' A4-Blätter') + ' · beidseitig, Wenden an der langen Kante, Größe 100 %, Papier 160 g.';
+  }).catch(function () { seiten.innerHTML = '<p class="leer">Die Karten konnten nicht geladen werden. Bitte später noch einmal versuchen.</p>'; });
 })();
 </script>
 </body>

@@ -1,0 +1,132 @@
+{
+ "version": "2026-11-27",
+ "hinweis": "Postkarten-Standard (Übergabe 2026-11-27). Motive fest, Texte editierbar in 305 (Kampagne). Quelle: postkarten-uebergabe-305.zip",
+ "karten": [
+  {
+   "id": "gutschein",
+   "position": "n01",
+   "headline": "Schenk ein *Heimspiel*",
+   "bar_name": "Gutschein",
+   "bar_name_uppercase": true,
+   "claim": "Gemeinsam stark.",
+   "motiv": "/assets/postkarte/motive/n01.webp"
+  },
+  {
+   "id": "freundeskreis",
+   "position": "n02",
+   "headline": "Werde Teil im *Freundeskreis*",
+   "bar_name": "Freundeskreis",
+   "bar_name_uppercase": true,
+   "claim": "Gemeinsam stark.",
+   "motiv": "/assets/postkarte/motive/n02.webp"
+  },
+  {
+   "id": "spielplan",
+   "position": "n03",
+   "headline": "Alle *Heimspiele* im Überblick",
+   "bar_name": "Spielplan",
+   "bar_name_uppercase": true,
+   "claim": "Gemeinsam stark.",
+   "motiv": "/assets/postkarte/motive/n03.webp"
+  },
+  {
+   "id": "club100",
+   "position": "n04",
+   "headline": "Werde *Teil* der Hundert",
+   "bar_name": "Club 100",
+   "bar_name_uppercase": true,
+   "claim": "Gemeinsam stark.",
+   "motiv": "/assets/postkarte/motive/n04.webp"
+  },
+  {
+   "id": "court-hunt",
+   "position": "n05",
+   "headline": "Finde den *Court* in deiner Stadt",
+   "bar_name": "Court Hunt",
+   "bar_name_uppercase": true,
+   "claim": "Gemeinsam stark.",
+   "motiv": "/assets/postkarte/motive/n05.webp"
+  },
+  {
+   "id": "baskidball",
+   "position": "n06",
+   "headline": "Der erste *Korb* gehört dir",
+   "bar_name": "BasKIDball",
+   "bar_name_uppercase": false,
+   "claim": "Gemeinsam stark.",
+   "motiv": "/assets/postkarte/motive/n06.webp"
+  },
+  {
+   "id": "feriencamp",
+   "position": "n07",
+   "headline": "Ferien mit *Ball* und Spaß",
+   "bar_name": "Feriencamp",
+   "bar_name_uppercase": true,
+   "claim": "Gemeinsam stark.",
+   "motiv": "/assets/postkarte/motive/n07.webp"
+  },
+  {
+   "id": "fanclub",
+   "position": "n08",
+   "headline": "Werde *Mitglied* im Fanclub",
+   "bar_name": "Fanclub",
+   "bar_name_uppercase": true,
+   "claim": "Gemeinsam stark.",
+   "motiv": "/assets/postkarte/motive/n08.webp"
+  },
+  {
+   "id": "schul-ag",
+   "position": "n09",
+   "headline": "Die Löwen machen *Schule*",
+   "bar_name": "SCHUL-AG",
+   "bar_name_uppercase": true,
+   "claim": "Gemeinsam stark.",
+   "motiv": "/assets/postkarte/motive/n09.webp"
+  },
+  {
+   "id": "sport-vernetzt",
+   "position": "n10",
+   "headline": "Sport *vernetzt* uns alle",
+   "bar_name": "Sport vernetzt",
+   "bar_name_uppercase": true,
+   "claim": "Gemeinsam stark.",
+   "motiv": "/assets/postkarte/motive/n10.webp"
+  },
+  {
+   "id": "partner-apotheke",
+   "position": "s1",
+   "headline": "Rezept für *Teamgeist*",
+   "bar_name": "Partner Apotheke",
+   "bar_name_uppercase": true,
+   "claim": "Gemeinsam stark.",
+   "motiv": "/assets/postkarte/motive/s1.webp"
+  },
+  {
+   "id": "partner-hebebuehnen",
+   "position": "s2",
+   "headline": "Mit uns *hoch* hinaus",
+   "bar_name": "Partner Hebebühnen",
+   "bar_name_uppercase": true,
+   "claim": "Gemeinsam stark.",
+   "motiv": "/assets/postkarte/motive/s2.webp"
+  },
+  {
+   "id": "partner-lager",
+   "position": "s3",
+   "headline": "Wir halten das *Lager* voll",
+   "bar_name": "Partner Lager",
+   "bar_name_uppercase": true,
+   "claim": "Gemeinsam stark.",
+   "motiv": "/assets/postkarte/motive/s3.webp"
+  },
+  {
+   "id": "partner-herz",
+   "position": "s4",
+   "headline": "Aus ganzem *Herzen* dabei",
+   "bar_name": "Partner Herz",
+   "bar_name_uppercase": true,
+   "claim": "Gemeinsam stark.",
+   "motiv": "/assets/postkarte/motive/s4.webp"
+  }
+ ]
+}
