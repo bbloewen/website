@@ -160,6 +160,29 @@ main#main { background: #fff; color: var(--color-brand-navy); }
 .pf-stepper { display: inline-flex; align-items: center; gap: 6px; }
 .pf-stepper button { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #00122D; background: #fff; font: 700 20px 'Lexend', sans-serif; cursor: pointer; color: #00122D; }
 .pf-stepper input { width: 56px; min-height: 44px; text-align: center; border: 1px solid #c5ccd8; border-radius: 10px; font: 600 18px 'Lexend', sans-serif; color: #00122D; }
+.ang-hero { background: radial-gradient(110% 100% at 100% 0%, #0028AA 0%, #00122D 100%); color: #fff; padding: 34px 0 30px; }
+.ang-hero .pf-wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; max-width: 960px; }
+.ang-hero .ang-eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: #F09E4C; margin: 0 0 8px; }
+.ang-hero h1 { font-weight: 900; font-size: clamp(24px, 4.4vw, 36px); line-height: 1.12; margin: 0; color: #fff; }
+.ang-hero h1 span { color: #F09E4C; }
+.ang-hero .ang-sub { margin: 8px 0 0; font-size: 15px; color: #c9d3ea; font-weight: 300; }
+.ang-hero .ang-logos { display: flex; align-items: center; gap: 12px; background: #fff; border-radius: 14px; padding: 12px 16px; }
+.ang-hero .ang-logos img { height: 52px; width: auto; max-width: 180px; object-fit: contain; display: block; }
+.ang-hero .ang-logos span { font: 800 18px 'Lexend', sans-serif; color: #00122D; }
+.ang-hero .ang-logos b { font: 800 18px 'Lexend', sans-serif; color: #00122D; }
+.ang-block { margin: 0 0 26px; }
+.ang-block h2 { font-weight: 800; font-size: 20px; margin: 0 0 10px; }
+.pf-summe .ang-cta { display: flex; justify-content: center; margin: 16px 0 4px; }
+.pf-summe .pf-form { max-width: none; margin: 16px 0 0; }
+.pf-summe .pf-form fieldset { border-color: #3a4a6b; background: transparent; }
+.pf-summe .pf-form legend, .pf-summe .pf-form label { color: #fff; }
+.pf-summe .pf-form textarea, .pf-summe .pf-form input { background: #fff; color: #00122D; }
+.pf-summe .pf-fehler-box { color: #00122D; }
+.pf-summe .ang-bed { margin: 12px 0 0; font-size: 13px; line-height: 1.55; color: #c9cfdb; }
+.pf-summe tr.mwst td { color: #c9cfdb; font-size: 14px; }
+.pf-wege.einzeln { grid-template-columns: minmax(0, 420px); justify-content: center; }
+.pf-extras label.pf-extra { display: flex; font-weight: 400; }
+.ang-hero .pf-wrap > div:first-child { flex: 1 1 420px; }
 .pf-summe { border-radius: 16px; background: #00122D; color: #fff; padding: 18px 20px; margin: 0 0 22px; }
 .pf-summe table { width: 100%; border-collapse: collapse; font-size: 15px; }
 .pf-summe td { padding: 4px 0; }
@@ -413,6 +436,12 @@ main#main { background: #fff; color: var(--color-brand-navy); }
   </div>
 
   <div id="pf-inhalt" hidden>
+    <section class="ang-hero" id="ang-hero" aria-labelledby="ang-h1" hidden>
+      <div class="pf-wrap">
+        <div><p class="ang-eyebrow">Angebot für</p><h1 id="ang-h1"></h1><p class="ang-sub" id="ang-sub"></p></div>
+        <div class="ang-logos" id="ang-logos"><img src="/assets/logo/loewen-logo-4c.svg" alt="Basketball Löwen" /></div>
+      </div>
+    </section>
     <section class="pf-halle" aria-labelledby="pf-h1">
       <h1 class="sr-only" id="pf-h1"></h1>
       <div class="pf-halle-bild">
@@ -446,6 +475,10 @@ main#main { background: #fff; color: var(--color-brand-navy); }
         <p class="pf-text" id="pf-einleitung" hidden></p>
         <div class="pf-nutzen" id="pf-nutzen"></div>
       </div>
+    </section>
+
+    <section class="pf-sek" id="ang-preis-sek" hidden>
+      <div class="pf-wrap" id="ang-preis"></div>
     </section>
 
     <section class="section" id="termin">
@@ -879,220 +912,187 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     fetch(API + 'partner-angebot', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({ code: CODE }, daten)) })
       .then(function (r) { return r.json(); }).then(fertig).catch(function () { fertig(null); });
   }
-  function angebotZeigen(d, firma, gruss) {
-    if (d.paket_art === 'club100' || (d.angebot && d.angebot.paket === 'club100')) return angebotClub100(d, firma, gruss);
-    var a = d.angebot, P = d.paket || {}, box = $('pf-angebot'), tm = d.termin || {};
-    box.textContent = ''; $('angebot').hidden = false;
-    // Seite stellt das Angebot nach vorn: Termin-Bereich entfällt, der Ansprechpartner steht im Angebot
-    terminImAngebot();
-    if (d.video) txt($('pf-lead'), gruss + ' hier ist noch einmal das Video vom Anfang.'); else $('pf-lead').hidden = true;
-    box.appendChild(neu('p', 'pf-eyebrow', T('Dein Angebot', 'Ihr Angebot')));
-    var h2 = neu('h2', 'pf-h2'); h2.id = 'pf-angebot-h2'; headline(h2, firma + ' wird löwenstarker *Partner*.'); box.appendChild(h2);
-    if (a.persoenlich) box.appendChild(neu('p', 'pf-lead', a.persoenlich));
-    var st = neu('div', 'pf-angebot-status'); st.setAttribute('role', 'status'); st.hidden = true; box.appendChild(st);
-    var fertigText = function (x) {
-      st.hidden = false;
-      if (x.status === 'angenommen') { st.className = 'pf-angebot-status gut'; st.textContent = T('Danke, du hast das Angebot angenommen. Den Vertrag bekommst du in den nächsten Tagen per E-Mail zur Unterschrift. Willkommen bei den Löwen!', 'Vielen Dank, Sie haben das Angebot angenommen. Den Vertrag erhalten Sie in den nächsten Tagen per E-Mail zur Unterschrift. Willkommen bei den Löwen!'); }
-      else if (x.status === 'abgelehnt') { st.className = 'pf-angebot-status neutral'; st.textContent = T('Danke für deine Rückmeldung. ' + (tm.mit || 'André') + ' meldet sich noch einmal kurz bei dir.', 'Vielen Dank für Ihre Rückmeldung. ' + (tm.mit || 'André') + ' meldet sich noch einmal kurz bei Ihnen.'); }
-    };
-    box.appendChild(neu('h3', 'pf-h2', 'Das ist drin')).style.fontSize = '20px';
-    box.appendChild(liste(P.kern || []));
-    var offen = a.status === 'offen';
-    var gewaehlt = (a.status === 'offen' ? (a.zugaben && a.zugaben.length ? a.zugaben : a.vorschlag) : a.zugaben) || [];
-    var fs = document.createElement('fieldset'); fs.className = 'pf-zugaben';
-    fs.appendChild(neu('legend', null, offen ? T('Zwei Zugaben nach deiner Wahl', 'Zwei Zugaben nach Ihrer Wahl') : 'Zugaben'));
-    (P.zugaben || []).forEach(function (z) {
-      if (!offen && gewaehlt.indexOf(z.k) < 0) return;
-      var l = document.createElement('label'); l.className = 'pf-zugabe';
-      var cb = document.createElement('input'); cb.type = 'checkbox'; cb.value = z.k; cb.name = 'zugabe'; cb.checked = gewaehlt.indexOf(z.k) >= 0; cb.disabled = !offen;
-      var dv = document.createElement('div'); dv.appendChild(neu('b', null, z.name)); dv.appendChild(neu('span', null, W(z.text)));
-      l.appendChild(cb); l.appendChild(dv); fs.appendChild(l);
-    });
-    box.appendChild(fs);
-    if (offen) box.appendChild(neu('p', 'pf-hinweis', T('Wähle genau zwei aus.', 'Wählen Sie genau zwei aus.')));
-    var vipN = 0;   // VIP-Karten ohne Preis (Steuerberatung): eine inklusive, eine zweite nur als Zugabe
-    var sb = neu('div', 'pf-summe'); box.appendChild(sb);
-    function summe() {
-      var preis = Number(a.preis || P.preis || 5000), vp = Number(a.vip_preis || P.vip_preis || 700);
-      sb.innerHTML = '';
+  // ---------- Angebotsseite (Marko 27.11.2026): seriös und knapp wie ein Angebot ----------
+  // Blauer Kopf „Angebot für“ mit beiden Logos, Leistungen, Vorteile, Preisbox mit Bedingungen und Annahme, ganz unten „Noch Fragen dazu?“ mit Termin.
+  function datumKurz(iso) { var m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? m[3] + '.' + m[2] + '.' + m[1].slice(2) : ''; }
+  function angebotModus(d, firma, titelHtml, sub) {
+    document.querySelector('.pf-halle').hidden = true;
+    document.querySelector('.pf-hero').hidden = true;
+    var hero = $('ang-hero'); hero.hidden = false;
+    $('ang-h1').innerHTML = titelHtml; txt($('ang-sub'), sub || '');
+    var lg = $('ang-logos');
+    lg.querySelectorAll('.k').forEach(function (x) { x.remove(); });
+    var x = neu('span', 'k', '×'); x.setAttribute('aria-hidden', 'true'); lg.appendChild(x);
+    if (d.logo && /^https:\/\//.test(d.logo)) { var im = document.createElement('img'); im.className = 'k'; im.alt = firma; im.src = d.logo; im.onerror = function () { im.replaceWith(neu('b', 'k', firma)); }; lg.appendChild(im); }
+    else lg.appendChild(neu('b', 'k', firma));
+    // Vorteile bleiben, mit dem Firmennamen
+    if ($('pf-nutzen-sek').hidden === false) { var h = $('pf-nutzen-h2'); h.textContent = ''; headline(h, 'Vorteile für *' + firma + '*.'); }
+    // ganz unten: Fragen und Termin, ohne Ticket-Weg
+    $('termin').hidden = false;
+    txt($('pf-termin-h2'), 'Noch Fragen dazu?');
+    var eb = document.querySelector('#termin .eyebrow'); if (eb) eb.textContent = 'Ihr Ansprechpartner';
+    var ws = $('pf-weg-spiel'); if (ws) ws.remove();
+    document.querySelector('.pf-wege').classList.add('einzeln');
+    $('angebot').hidden = false; $('ang-preis-sek').hidden = false;
+  }
+  function htmlEsc(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  // Preisbox: Zeilen, Summe netto, Umsatzsteuer, brutto, Bedingungen und (bei offenem Angebot) das Formular mit „Angebot annehmen“
+  function preisBox(ziel, zeilen, bedingungen, offen) {
+    var sb = neu('div', 'pf-summe'); ziel.appendChild(sb);
+    var tabelle = neu('div'); sb.appendChild(tabelle);
+    var bed = neu('p', 'ang-bed', bedingungen); sb.appendChild(bed);
+    var zeichnen = function (z) {
+      tabelle.innerHTML = '';
       var tb = document.createElement('table'); var cap = document.createElement('caption'); cap.className = 'sr-only'; cap.textContent = 'Preis des Angebots'; tb.appendChild(cap);
       var zeile = function (l, r, kl) { var tr = document.createElement('tr'); if (kl) tr.className = kl; tr.appendChild(neu('td', null, l)); tr.appendChild(neu('td', 'num', r)); tb.appendChild(tr); };
-      zeile('Löwenstarker Partner, ' + (a.start_text || 'eine Saison'), euro(preis));
-      zeile('Zwei Zugaben', 'inklusive');
-      zeile('Summe netto', euro(preis + vipN * vp), 'ges');
-      sb.appendChild(tb); sb.appendChild(neu('p', null, 'Alle Preise netto zuzüglich Umsatzsteuer. Keine Rabatte, dafür zwei Zugaben nach Wahl.'));
+      var netto = 0; z.forEach(function (x) { zeile(x[0], euro(x[1])); netto += Number(x[1]); });
+      netto = Math.round(netto * 100) / 100; var ust = Math.round(netto * 19) / 100;
+      zeile('Summe netto', euro(netto), 'ges'); zeile('zzgl. 19 % Umsatzsteuer', euro(ust), 'mwst'); zeile('Gesamtbetrag', euro(netto + ust), 'mwst');
+      tabelle.appendChild(tb);
+    };
+    zeichnen(zeilen);
+    var f = null;
+    if (offen) {
+      f = document.createElement('form'); f.className = 'pf-form'; f.noValidate = true; f.id = 'pf-annehmen';
+      f.innerHTML = '<fieldset><legend>Angebot annehmen</legend>' +
+        '<div class="pf-zwei"><div><label for="pf-an-name">Vor- und Nachname</label><input type="text" id="pf-an-name" maxlength="120" autocomplete="name" required /></div>' +
+        '<div><label for="pf-an-funktion">Funktion</label><input type="text" id="pf-an-funktion" maxlength="120" autocomplete="organization-title" placeholder="z. B. Geschäftsführung" /></div></div>' +
+        '<div class="pf-zwei"><div><label for="pf-an-email">E-Mail für den Vertrag</label><input type="email" id="pf-an-email" maxlength="200" autocomplete="email" required /></div>' +
+        '<div><label for="pf-an-telefon">Telefon für Rückfragen</label><input type="tel" id="pf-an-telefon" maxlength="30" autocomplete="tel" required /></div></div>' +
+        '<label for="pf-an-rechnung">Rechnungsanschrift</label><textarea id="pf-an-rechnung" maxlength="500" rows="3" autocomplete="street-address"></textarea>' +
+        '<label for="pf-an-anmerkung">Anmerkung (optional)</label><textarea id="pf-an-anmerkung" maxlength="2000" rows="2"></textarea>' +
+        '<label class="pf-check"><input type="checkbox" id="pf-an-ok" required /> <span>' + T('Ich nehme das Angebot zu diesen Bedingungen an. Den Vertrag bekomme ich per E-Mail zur Unterschrift.', 'Ich nehme das Angebot zu diesen Bedingungen an. Den Vertrag erhalte ich per E-Mail zur Unterschrift.') + '</span></label>' +
+        '<div class="pf-fehler-box" id="pf-an-fehler" role="alert" hidden></div>' +
+        '<div class="ang-cta"><button type="submit" class="pf-cta" id="pf-an-senden">Angebot annehmen</button></div></fieldset>';
+      sb.appendChild(f);
     }
-    summe();
+    return { neu: zeichnen, form: f, box: sb };
+  }
+  function annahmePruefen() {
+    var fehler = function (m) { var e = $('pf-an-fehler'); e.hidden = false; e.textContent = m; return false; };
+    $('pf-an-fehler').hidden = true;
+    if (wert('pf-an-name').length < 3) return fehler('Bitte Vor- und Nachnamen angeben.');
+    if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(wert('pf-an-email'))) return fehler('Bitte eine gültige E-Mail-Adresse angeben. An sie geht der Vertrag zur Unterschrift.');
+    if (!/^[+0-9 ()\/.-]{6,30}$/.test(wert('pf-an-telefon'))) return fehler('Bitte eine Telefonnummer für Rückfragen zum Vertrag angeben.');
+    if (!$('pf-an-ok').checked) return fehler(T('Bitte bestätige, dass du das Angebot annimmst.', 'Bitte bestätigen Sie, dass Sie das Angebot annehmen.'));
+    return true;
+  }
+  function annahmeDaten() { return { name: wert('pf-an-name'), funktion: wert('pf-an-funktion'), email: wert('pf-an-email'), telefon: wert('pf-an-telefon'), rechnung_adresse: wert('pf-an-rechnung'), feedback: wert('pf-an-anmerkung'), bestaetigt: true }; }
+  function statusZeigen(box, a, tm, club) {
+    var st = neu('div', 'pf-angebot-status'); st.setAttribute('role', 'status');
+    if (a.status === 'angenommen') { st.className = 'pf-angebot-status gut'; st.textContent = T('Danke, du hast das Angebot angenommen. Den Vertrag bekommst du in den nächsten Tagen per E-Mail zur Unterschrift.', 'Vielen Dank, Sie haben das Angebot angenommen. Den Vertrag erhalten Sie in den nächsten Tagen per E-Mail zur Unterschrift.') + (club ? ' Willkommen im Löwen-Club der 100!' : ' Willkommen bei den Löwen!'); }
+    else { st.className = 'pf-angebot-status neutral'; st.textContent = T('Danke für deine Rückmeldung. ' + (tm.mit || 'André') + ' meldet sich noch einmal kurz bei dir.', 'Vielen Dank für Ihre Rückmeldung. ' + (tm.mit || 'André') + ' meldet sich noch einmal kurz bei Ihnen.'); }
+    box.insertBefore(st, box.firstChild); st.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  // Fragen oder Absage stehen unten im Abschnitt „Noch Fragen dazu?“
+  function nebenwegeUnten(tm, nachAntwort) {
+    var ziel = document.querySelector('#termin .pf-panel'); if (!ziel || ziel.querySelector('.pf-nebenwege')) return;
+    var neben = neu('div', 'pf-nebenwege');
+    var fb = neu('button', 'pf-link', 'Frage zum Angebot schreiben'); fb.type = 'button'; var nein = neu('button', 'pf-link', 'Passt gerade nicht'); nein.type = 'button';
+    neben.appendChild(fb); neben.appendChild(nein); ziel.appendChild(neben);
+    var klein = function (id, label, knopf) { var g = document.createElement('form'); g.className = 'pf-form'; g.noValidate = true; g.hidden = true;
+      g.innerHTML = '<label for="' + id + '-text">' + label + '</label><textarea id="' + id + '-text" maxlength="2000" rows="3"></textarea><div class="pf-fehler-box" id="' + id + '-fehler" role="alert" hidden></div><div class="pf-mitte"><button type="submit" class="btn btn-ghost" id="' + id + '-senden">' + knopf + '</button></div>';
+      ziel.appendChild(g); return g; };
+    var fbF = klein('pf-fb', T('Was möchtest du wissen oder anders haben?', 'Was möchten Sie wissen oder anders haben?'), 'Absenden');
+    var neinF = klein('pf-nein', T('Magst du uns sagen, warum? (optional)', 'Mögen Sie uns sagen, warum? (optional)'), 'Angebot ablehnen');
+    fb.addEventListener('click', function () { fbF.hidden = !fbF.hidden; neinF.hidden = true; if (!fbF.hidden) $('pf-fb-text').focus(); });
+    nein.addEventListener('click', function () { neinF.hidden = !neinF.hidden; fbF.hidden = true; if (!neinF.hidden) $('pf-nein-text').focus(); });
+    var fehler = function (id, m) { var e = $(id); e.hidden = false; e.textContent = m; };
+    fbF.addEventListener('submit', function (e) { e.preventDefault(); if (!wert('pf-fb-text')) return fehler('pf-fb-fehler', 'Bitte etwas schreiben.');
+      angebotSenden({ aktion: 'feedback', feedback: wert('pf-fb-text') }, function (r) { if (r && r.ok) { fbF.innerHTML = '<p class="pf-danke">' + T('Danke! ', 'Vielen Dank! ') + htmlEsc(tm.mit || 'André') + T(' meldet sich bei dir.', ' meldet sich bei Ihnen.') + '</p>'; return; } fehler('pf-fb-fehler', (r && r.meldung) || 'Das hat nicht geklappt.'); }); });
+    neinF.addEventListener('submit', function (e) { e.preventDefault();
+      angebotSenden({ aktion: 'ablehnen', grund: wert('pf-nein-text') }, function (r) { if (r && r.ok) { neben.remove(); neinF.remove(); fbF.remove(); nachAntwort(r); return; } fehler('pf-nein-fehler', (r && r.meldung) || 'Das hat nicht geklappt.'); }); });
+  }
+  function angebotZeigen(d, firma, gruss) {
+    if (d.paket_art === 'club100' || (d.angebot && d.angebot.paket === 'club100')) return angebotClub100(d, firma, gruss);
+    var a = d.angebot, P = d.paket || {}, box = $('pf-angebot'), tm = d.termin || {}, offen = a.status === 'offen';
+    angebotModus(d, firma, htmlEsc(firma) + ' wird löwenstarker <span>Partner</span>.', 'Löwenstarker Partner der Basketball Löwen' + (a.start_text ? ', ' + a.start_text : ''));
+    box.textContent = '';
+    if (a.persoenlich) box.appendChild(neu('p', 'pf-lead', a.persoenlich));
+    var b1 = neu('div', 'ang-block'); b1.appendChild(neu('h2', null, 'Ihre Leistungen')); b1.appendChild(liste(P.kern || [])); box.appendChild(b1);
+    var gew = (offen ? (a.zugaben && a.zugaben.length ? a.zugaben : a.vorschlag) : a.zugaben) || [];
+    var fs = document.createElement('fieldset'); fs.className = 'pf-zugaben ang-block';
+    fs.appendChild(neu('legend', null, offen ? T('Zwei Zugaben nach deiner Wahl', 'Zwei Zugaben nach Ihrer Wahl') : 'Zugaben'));
+    (P.zugaben || []).forEach(function (z) {
+      if (!offen && gew.indexOf(z.k) < 0) return;
+      var l = document.createElement('label'); l.className = 'pf-zugabe'; var cb = document.createElement('input'); cb.type = 'checkbox'; cb.value = z.k; cb.name = 'zugabe'; cb.checked = gew.indexOf(z.k) >= 0; cb.disabled = !offen;
+      var dv = document.createElement('div'); dv.appendChild(neu('b', null, z.name)); dv.appendChild(neu('span', null, W(z.text))); l.appendChild(cb); l.appendChild(dv); fs.appendChild(l);
+    });
+    box.appendChild(fs);
     var zug = function () { return Array.prototype.slice.call(fs.querySelectorAll('input[name=zugabe]:checked')).map(function (x) { return x.value; }); };
     fs.addEventListener('change', function () { var n = zug().length; fs.querySelectorAll('input[name=zugabe]').forEach(function (x) { x.disabled = !offen || (!x.checked && n >= 2); }); });
     fs.dispatchEvent(new Event('change'));
-    if (!offen) { fertigText(a); personKarte(box, tm); return; }
-
-    // Annehmen
-    var f = document.createElement('form'); f.className = 'pf-form'; f.noValidate = true; f.id = 'pf-annehmen'; f.style.maxWidth = 'none';
-    f.innerHTML = '<fieldset><legend>' + T('Angebot annehmen', 'Angebot annehmen') + '</legend>' +
-      '<div class="pf-zwei"><div><label for="pf-an-name">Vor- und Nachname</label><input type="text" id="pf-an-name" maxlength="120" autocomplete="name" required /></div>' +
-      '<div><label for="pf-an-funktion">Funktion</label><input type="text" id="pf-an-funktion" maxlength="120" autocomplete="organization-title" placeholder="z. B. Geschäftsführung" /></div></div>' +
-      '<div class="pf-zwei"><div><label for="pf-an-email">E-Mail für den Vertrag</label><input type="email" id="pf-an-email" maxlength="200" autocomplete="email" required /></div>' +
-      '<div><label for="pf-an-telefon">Telefon für Rückfragen</label><input type="tel" id="pf-an-telefon" maxlength="30" autocomplete="tel" required /></div></div>' +
-      '<label for="pf-an-rechnung">Rechnungsanschrift (wenn abweichend oder neu)</label><textarea id="pf-an-rechnung" maxlength="500" rows="3" autocomplete="street-address"></textarea>' +
-      '<label for="pf-an-anmerkung">Anmerkung (optional)</label><textarea id="pf-an-anmerkung" maxlength="2000" rows="2"></textarea>' +
-      '<label class="pf-check"><input type="checkbox" id="pf-an-ok" required /> <span>' + T('Ich nehme das Angebot an. Den Vertrag bekomme ich per E-Mail zur Unterschrift.', 'Ich nehme das Angebot an. Den Vertrag erhalte ich per E-Mail zur Unterschrift.') + '</span></label>' +
-      '<div class="pf-fehler-box" id="pf-an-fehler" role="alert" hidden></div>' +
-      '<div class="pf-mitte"><button type="submit" class="pf-cta" id="pf-an-senden">Angebot annehmen</button></div></fieldset>';
-    box.appendChild(f);
-    var neben = neu('div', 'pf-nebenwege');
-    var fbKnopf = neu('button', 'pf-link', T('Frage oder Wunsch zum Angebot?', 'Frage oder Wunsch zum Angebot?')); fbKnopf.type = 'button'; fbKnopf.setAttribute('aria-expanded', 'false');
-    var neinKnopf = neu('button', 'pf-link', T('Passt gerade nicht', 'Passt gerade nicht')); neinKnopf.type = 'button'; neinKnopf.setAttribute('aria-expanded', 'false');
-    neben.appendChild(fbKnopf); neben.appendChild(neinKnopf); box.appendChild(neben);
-    var klein = function (id, label, knopf) {
-      var g = document.createElement('form'); g.className = 'pf-form'; g.noValidate = true; g.hidden = true;
-      g.innerHTML = '<label for="' + id + '-text">' + label + '</label><textarea id="' + id + '-text" maxlength="2000" rows="3"></textarea><div class="pf-fehler-box" id="' + id + '-fehler" role="alert" hidden></div>' +
-        '<div class="pf-mitte"><button type="submit" class="btn btn-ghost" id="' + id + '-senden">' + knopf + '</button></div>';
-      box.appendChild(g); return g;
-    };
-    var fbForm = klein('pf-fb', T('Was möchtest du wissen oder anders haben?', 'Was möchten Sie wissen oder anders haben?'), 'Absenden');
-    var neinForm = klein('pf-nein', T('Magst du uns sagen, warum? (optional)', 'Mögen Sie uns sagen, warum? (optional)'), 'Angebot ablehnen');
-    fbKnopf.addEventListener('click', function () { fbForm.hidden = !fbForm.hidden; neinForm.hidden = true; fbKnopf.setAttribute('aria-expanded', String(!fbForm.hidden)); neinKnopf.setAttribute('aria-expanded', 'false'); if (!fbForm.hidden) $('pf-fb-text').focus(); });
-    neinKnopf.addEventListener('click', function () { neinForm.hidden = !neinForm.hidden; fbForm.hidden = true; neinKnopf.setAttribute('aria-expanded', String(!neinForm.hidden)); fbKnopf.setAttribute('aria-expanded', 'false'); if (!neinForm.hidden) $('pf-nein-text').focus(); });
-    personKarte(box, tm);
-    var fehlerZeigen = function (id, m) { var e = $(id); e.hidden = false; e.textContent = m; };
-    var abschluss = function (r) { if (r && r.angebot) { D.angebot = Object.assign({}, D.angebot, r.angebot); angebotZeigen(D, firma, gruss); var s2 = $('pf-angebot').querySelector('.pf-angebot-status'); if (s2) s2.scrollIntoView({ behavior: 'smooth', block: 'center' }); } };
-    f.addEventListener('submit', function (e) {
-      e.preventDefault(); $('pf-an-fehler').hidden = true;
-      var z = zug(); if (z.length !== 2) return fehlerZeigen('pf-an-fehler', T('Bitte wähle genau zwei Zugaben.', 'Bitte wählen Sie genau zwei Zugaben.'));
-      if (wert('pf-an-name').length < 3) return fehlerZeigen('pf-an-fehler', 'Bitte Vor- und Nachnamen angeben.');
-      if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(wert('pf-an-email'))) return fehlerZeigen('pf-an-fehler', 'Bitte eine gültige E-Mail-Adresse angeben. An sie geht der Vertrag zur Unterschrift.');
-      if (!/^[+0-9 ()\/.-]{6,30}$/.test(wert('pf-an-telefon'))) return fehlerZeigen('pf-an-fehler', 'Bitte eine Telefonnummer für Rückfragen zum Vertrag angeben.');
-      if (!$('pf-an-ok').checked) return fehlerZeigen('pf-an-fehler', T('Bitte bestätige, dass du das Angebot annimmst.', 'Bitte bestätigen Sie, dass Sie das Angebot annehmen.'));
+    var ziel = $('ang-preis'); ziel.textContent = ''; ziel.appendChild(neu('h2', 'pf-h2', 'Preis und Bedingungen'));
+    var pb = preisBox(ziel, [['Löwenstarker Partner, ' + (a.start_text || 'Saison 2026/27'), Number(a.preis || P.preis || 5000)]],
+      'Alle Preise netto zuzüglich Umsatzsteuer. Der Vertrag läuft ab Unterschrift bis zum Ende der folgenden Saison (30.06.) und verlängert sich danach jeweils um eine Saison, wenn er nicht 8 Wochen vor Ablauf gekündigt wird. Die Vergütung gilt je Saison.', offen);
+    var fertig = function (r) { if (r && r.angebot) { D.angebot = Object.assign({}, D.angebot, r.angebot); angebotZeigen(D, firma, gruss); statusZeigen($('pf-angebot'), D.angebot, tm, false); } };
+    if (!offen) { statusZeigen(box, a, tm, false); return; }
+    nebenwegeUnten(tm, fertig);
+    pb.form.addEventListener('submit', function (e) {
+      e.preventDefault(); if (zug().length !== 2) { var x = $('pf-an-fehler'); x.hidden = false; x.textContent = T('Bitte wähle genau zwei Zugaben.', 'Bitte wählen Sie genau zwei Zugaben.'); return; }
+      if (!annahmePruefen()) return;
       var btn = $('pf-an-senden'); btn.disabled = true; btn.textContent = 'Einen Moment …';
-      angebotSenden({ aktion: 'annehmen', zugaben: z, vip_extra: vipN, name: wert('pf-an-name'), funktion: wert('pf-an-funktion'), email: wert('pf-an-email'), telefon: wert('pf-an-telefon'), rechnung_adresse: wert('pf-an-rechnung'), feedback: wert('pf-an-anmerkung'), bestaetigt: true }, function (r) {
-        if (r && r.ok) return abschluss(r);
-        btn.disabled = false; btn.textContent = 'Angebot annehmen'; fehlerZeigen('pf-an-fehler', (r && r.meldung) || 'Das hat nicht geklappt. Bitte später noch einmal versuchen.');
-      });
-    });
-    fbForm.addEventListener('submit', function (e) {
-      e.preventDefault(); $('pf-fb-fehler').hidden = true;
-      if (!wert('pf-fb-text')) return fehlerZeigen('pf-fb-fehler', 'Bitte etwas schreiben.');
-      var btn = $('pf-fb-senden'); btn.disabled = true;
-      angebotSenden({ aktion: 'feedback', feedback: wert('pf-fb-text') }, function (r) {
-        btn.disabled = false;
-        if (r && r.ok) { fbForm.hidden = true; fbKnopf.setAttribute('aria-expanded', 'false'); st.hidden = false; st.className = 'pf-angebot-status gut'; st.textContent = T('Danke! ' + (tm.mit || 'André') + ' meldet sich bei dir.', 'Vielen Dank! ' + (tm.mit || 'André') + ' meldet sich bei Ihnen.'); return; }
-        fehlerZeigen('pf-fb-fehler', (r && r.meldung) || 'Das hat nicht geklappt. Bitte später noch einmal versuchen.');
-      });
-    });
-    neinForm.addEventListener('submit', function (e) {
-      e.preventDefault(); var btn = $('pf-nein-senden'); btn.disabled = true;
-      angebotSenden({ aktion: 'ablehnen', grund: wert('pf-nein-text') }, function (r) {
-        if (r && r.ok) return abschluss(r);
-        btn.disabled = false; fehlerZeigen('pf-nein-fehler', (r && r.meldung) || 'Das hat nicht geklappt. Bitte später noch einmal versuchen.');
-      });
+      angebotSenden(Object.assign({ aktion: 'annehmen', zugaben: zug(), vip_extra: 0 }, annahmeDaten()), function (r) { if (r && r.ok) return fertig(r); btn.disabled = false; btn.textContent = 'Angebot annehmen'; var x = $('pf-an-fehler'); x.hidden = false; x.textContent = (r && r.meldung) || 'Das hat nicht geklappt. Bitte später noch einmal versuchen.'; });
     });
     if (!(LOKAL || VORSCHAU)) angebotSenden({ aktion: 'ansicht', geraet: geraet() }, function () {});
   }
-  // Angebot „Club 100 Basismitgliedschaft“ (Migration 560): Standard, zwei Bausteine nach Wahl, Aufpreis, Preis der ersten Saison aufgeschlüsselt
+  // Club 100 Basismitgliedschaft (Migration 560)
   function angebotClub100(d, firma, gruss) {
-    var a = d.angebot, P = d.paket || {}, box = $('pf-angebot'), tm = d.termin || {}, rg = a.rechnung || {};
+    var a = d.angebot, P = d.paket || {}, box = $('pf-angebot'), tm = d.termin || {}, rg = a.rechnung || {}, offen = a.status === 'offen';
     var BS = P.bausteine || [], AP = P.aufpreis || [];
-    box.textContent = ''; $('angebot').hidden = false; terminImAngebot();
-    if (d.video) txt($('pf-lead'), gruss + ' hier ist noch einmal das Video vom Anfang.'); else $('pf-lead').hidden = true;
-    box.appendChild(neu('p', 'pf-eyebrow', T('Dein persönliches Angebot', 'Ihr persönliches Angebot')));
-    var h2 = neu('h2', 'pf-h2'); h2.id = 'pf-angebot-h2'; headline(h2, firma + ' im Löwen-Club der *100*.'); box.appendChild(h2);
+    angebotModus(d, firma, htmlEsc(firma) + ' im Löwen-Club der <span>100</span>.', 'Club 100 Basismitgliedschaft, Saison ' + (rg.saison || ''));
+    box.textContent = '';
     if (a.persoenlich) box.appendChild(neu('p', 'pf-lead', a.persoenlich));
-    var st = neu('div', 'pf-angebot-status'); st.setAttribute('role', 'status'); st.hidden = true; box.appendChild(st);
-    var offen = a.status === 'offen';
-    box.appendChild(neu('h3', 'pf-h2', 'Immer dabei')).style.fontSize = '20px';
-    box.appendChild(liste((P.standard || []).map(function (x) { return { name: x.titel }; })));
-    // Bausteine
+    var b1 = neu('div', 'ang-block'); b1.appendChild(neu('h2', null, 'Ihre Leistungen')); b1.appendChild(liste((P.standard || []).map(function (x) { return { name: x.titel }; }))); box.appendChild(b1);
     var gew = (a.bausteine && a.bausteine.length ? a.bausteine : (P.bausteine_standard || ['dk2', 'dk2'])).slice(0, 2);
-    var fs = document.createElement('fieldset'); fs.className = 'pf-bausteine';
+    var fs = document.createElement('fieldset'); fs.className = 'pf-bausteine ang-block';
     fs.appendChild(neu('legend', null, offen ? T('Zwei Bausteine nach deiner Wahl', 'Zwei Bausteine nach Ihrer Wahl') : 'Ihre Bausteine'));
     [0, 1].forEach(function (i) {
       var w = document.createElement('div'); var l = neu('label', null, 'Baustein ' + (i + 1)); l.htmlFor = 'pf-bs-' + i; var sel = document.createElement('select'); sel.id = 'pf-bs-' + i; sel.disabled = !offen;
-      BS.forEach(function (b) { var o = document.createElement('option'); o.value = b.k; o.textContent = b.titel + ' (Wert ' + euro(b.listenpreis) + ')'; if (gew[i] === b.k) o.selected = true; sel.appendChild(o); });
+      BS.forEach(function (b) { var o = document.createElement('option'); o.value = b.k; o.textContent = b.titel; if (gew[i] === b.k) o.selected = true; sel.appendChild(o); });
       w.appendChild(l); w.appendChild(sel); fs.appendChild(w);
     });
     box.appendChild(fs);
-    if (offen) box.appendChild(neu('p', 'pf-hinweis', T('Zum Beispiel zwei Dauerkarten, oder 20 Einzeltickets für dein Team (zweimal 10).', 'Zum Beispiel zwei Dauerkarten, oder 20 Einzeltickets für Ihr Team (zweimal 10).')));
-    // Aufpreis
     var ex = a.extras || {};
-    var fx = document.createElement('fieldset'); fx.className = 'pf-extras';
-    fx.appendChild(neu('legend', null, offen ? 'Mehr dazu, gegen Aufpreis' : 'Zusatzleistungen'));
-    var zeigeExtra = function (k) { return offen || Number(ex[k] || 0) > 0; };
+    var fx = document.createElement('fieldset'); fx.className = 'pf-extras ang-block';
+    fx.appendChild(neu('legend', null, offen ? 'Zusätzlich buchbar' : 'Zusatzleistungen'));
+    var zeigen2 = function (k) { return offen || Number(ex[k] || 0) > 0; };
     BS.forEach(function (b) {
-      if (!zeigeExtra(b.k)) return;
+      if (!zeigen2(b.k)) return;
       var r = neu('div', 'pf-extra'); var t = neu('div', 't'); t.appendChild(neu('b', null, 'Weiterer Baustein: ' + b.titel)); t.appendChild(neu('span', null, b.rabatt + ' % Rabatt für Club-Mitglieder'));
       var pr = neu('span', 'p'); pr.appendChild(neu('s', null, euro(b.listenpreis))); pr.appendChild(document.createTextNode(euro(b.aufpreis)));
       var inp = document.createElement('input'); inp.type = 'number'; inp.min = 0; inp.max = 10; inp.value = Number(ex[b.k] || 0); inp.setAttribute('data-ex', b.k); inp.disabled = !offen; inp.setAttribute('aria-label', 'Anzahl weiterer Bausteine: ' + b.titel);
       r.appendChild(t); r.appendChild(pr); r.appendChild(inp); fx.appendChild(r);
     });
     AP.forEach(function (x) {
-      if (!zeigeExtra(x.k)) return;
-      var r = neu('label', 'pf-extra'); var t = neu('div', 't'); t.appendChild(neu('b', null, x.titel)); if (x.hinweis) t.appendChild(neu('span', null, x.hinweis));
+      if (!zeigen2(x.k)) return;
+      var r = neu('label', 'pf-extra'); var cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = Number(ex[x.k] || 0) > 0; cb.setAttribute('data-ex', x.k); cb.disabled = !offen;
+      var t = neu('div', 't'); t.appendChild(neu('b', null, x.titel)); if (x.hinweis) t.appendChild(neu('span', null, x.hinweis));
       var pr = neu('span', 'p'); pr.appendChild(neu('s', null, euro(x.listenpreis))); pr.appendChild(document.createTextNode(euro(x.preis)));
-      var cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = Number(ex[x.k] || 0) > 0; cb.setAttribute('data-ex', x.k); cb.disabled = !offen;
       r.appendChild(cb); r.appendChild(t); r.appendChild(pr); fx.appendChild(r);
     });
     if (fx.querySelectorAll('.pf-extra').length) box.appendChild(fx);
     var extras = function () { var o = {}; fx.querySelectorAll('[data-ex]').forEach(function (e) { var n = e.type === 'checkbox' ? (e.checked ? 1 : 0) : Math.max(0, Math.min(10, parseInt(e.value, 10) || 0)); if (n) o[e.getAttribute('data-ex')] = n; }); return o; };
-    var bausteine = function () { return [$('pf-bs-0').value, $('pf-bs-1').value]; };
-    // Preis
-    var sb = neu('div', 'pf-summe'); box.appendChild(sb);
-    var summe = function () {
-      var monate = Number(rg.monate || 12), mitglied = 49 * monate, ges = mitglied, o = extras();
-      sb.innerHTML = '';
-      var tb = document.createElement('table'); var cap = document.createElement('caption'); cap.className = 'sr-only'; cap.textContent = 'Preis des Angebots'; tb.appendChild(cap);
-      var zeile = function (l, r, kl) { var tr = document.createElement('tr'); if (kl) tr.className = kl; tr.appendChild(neu('td', null, l)); tr.appendChild(neu('td', 'num', r)); tb.appendChild(tr); };
-      zeile('Club 100 Basismitgliedschaft, Saison ' + (rg.saison || '') + (monate < 12 ? ' (' + rg.ab_monat + ' bis Juni, ' + monate + ' × 49,00 €)' : ''), euro(mitglied));
-      zeile('Zwei Bausteine', 'inklusive');
-      BS.forEach(function (b) { var n = o[b.k] || 0; if (n) { zeile('Weiterer Baustein: ' + b.titel + (n > 1 ? ' × ' + n : ''), euro(n * b.aufpreis)); ges += n * b.aufpreis; } });
-      AP.forEach(function (x) { if (o[x.k]) { zeile(x.titel, euro(x.preis)); ges += Number(x.preis); } });
-      zeile('Summe netto für die Saison ' + (rg.saison || ''), euro(ges), 'ges');
-      sb.appendChild(tb);
-      var fj = rg.folgesaison_ab ? String(rg.folgesaison_ab).slice(8, 10) + '.' + String(rg.folgesaison_ab).slice(5, 7) + '.' + String(rg.folgesaison_ab).slice(0, 4) : '1. Juli';
-      sb.appendChild(neu('p', null, 'Alle Preise netto zuzüglich Umsatzsteuer. Abgerechnet wird pro Saison (1. Juli bis 30. Juni)' + (monate < 12 ? ', für die laufende Saison nur die restlichen Monate ab ' + rg.ab_monat : '') + '. Ab dem ' + fj + ' jeweils 588,00 € netto pro Saison für die Basismitgliedschaft. Die Mitgliedschaft verlängert sich jeweils um eine Saison, wenn sie nicht 8 Wochen vor Saisonende gekündigt wird. Zusatzleistungen gelten für die Saison ' + (rg.saison || '') + '.'));
+    var monate = Number(rg.monate || 12), zeitraum = datumKurz(rg.ab) + ' bis ' + datumKurz(rg.ende);
+    var zeilen = function () {
+      var o = extras(), z = [['Club 100 Basismitgliedschaft, ' + zeitraum + (monate < 12 ? ' (' + monate + ' × 49,00 €)' : ''), 49 * monate]];
+      BS.forEach(function (b) { var n = o[b.k] || 0; if (n) z.push(['Weiterer Baustein: ' + b.titel + (n > 1 ? ' × ' + n : ''), n * b.aufpreis]); });
+      AP.forEach(function (x) { if (o[x.k]) z.push([x.titel, Number(x.preis)]); });
+      return z;
     };
-    summe();
-    fx.addEventListener('input', summe); fx.addEventListener('change', summe);
-    if (!offen) {
-      st.hidden = false;
-      if (a.status === 'angenommen') { st.className = 'pf-angebot-status gut'; st.textContent = T('Danke, du hast das Angebot angenommen. Den Vertrag bekommst du in den nächsten Tagen per E-Mail zur Unterschrift. Willkommen im Löwen-Club der 100!', 'Vielen Dank, Sie haben das Angebot angenommen. Den Vertrag erhalten Sie in den nächsten Tagen per E-Mail zur Unterschrift. Willkommen im Löwen-Club der 100!'); }
-      else { st.className = 'pf-angebot-status neutral'; st.textContent = T('Danke für deine Rückmeldung. ' + (tm.mit || 'André') + ' meldet sich noch einmal kurz bei dir.', 'Vielen Dank für Ihre Rückmeldung. ' + (tm.mit || 'André') + ' meldet sich noch einmal kurz bei Ihnen.'); }
-      personKarte(box, tm); return;
-    }
-    var f = document.createElement('form'); f.className = 'pf-form'; f.noValidate = true; f.id = 'pf-annehmen'; f.style.maxWidth = 'none';
-    f.innerHTML = '<fieldset><legend>Angebot annehmen</legend>' +
-      '<div class="pf-zwei"><div><label for="pf-an-name">Vor- und Nachname</label><input type="text" id="pf-an-name" maxlength="120" autocomplete="name" required /></div>' +
-      '<div><label for="pf-an-funktion">Funktion</label><input type="text" id="pf-an-funktion" maxlength="120" autocomplete="organization-title" placeholder="z. B. Geschäftsführung" /></div></div>' +
-      '<div class="pf-zwei"><div><label for="pf-an-email">E-Mail für den Vertrag</label><input type="email" id="pf-an-email" maxlength="200" autocomplete="email" required /></div>' +
-      '<div><label for="pf-an-telefon">Telefon für Rückfragen</label><input type="tel" id="pf-an-telefon" maxlength="30" autocomplete="tel" required /></div></div>' +
-      '<label for="pf-an-rechnung">Rechnungsanschrift</label><textarea id="pf-an-rechnung" maxlength="500" rows="3" autocomplete="street-address"></textarea>' +
-      '<label for="pf-an-anmerkung">Anmerkung (optional)</label><textarea id="pf-an-anmerkung" maxlength="2000" rows="2"></textarea>' +
-      '<label class="pf-check"><input type="checkbox" id="pf-an-ok" required /> <span>' + T('Ich nehme das Angebot an. Den Vertrag bekomme ich per E-Mail zur Unterschrift.', 'Ich nehme das Angebot an. Den Vertrag erhalte ich per E-Mail zur Unterschrift.') + '</span></label>' +
-      '<div class="pf-fehler-box" id="pf-an-fehler" role="alert" hidden></div>' +
-      '<div class="pf-mitte"><button type="submit" class="pf-cta" id="pf-an-senden">Angebot annehmen</button></div></fieldset>';
-    box.appendChild(f);
-    personKarte(box, tm);
-    var fehler = function (m) { var e = $('pf-an-fehler'); e.hidden = false; e.textContent = m; };
-    f.addEventListener('submit', function (e) {
-      e.preventDefault(); $('pf-an-fehler').hidden = true;
-      if (wert('pf-an-name').length < 3) return fehler('Bitte Vor- und Nachnamen angeben.');
-      if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(wert('pf-an-email'))) return fehler('Bitte eine gültige E-Mail-Adresse angeben. An sie geht der Vertrag zur Unterschrift.');
-      if (!/^[+0-9 ()\/.-]{6,30}$/.test(wert('pf-an-telefon'))) return fehler('Bitte eine Telefonnummer für Rückfragen zum Vertrag angeben.');
-      if (!$('pf-an-ok').checked) return fehler(T('Bitte bestätige, dass du das Angebot annimmst.', 'Bitte bestätigen Sie, dass Sie das Angebot annehmen.'));
+    var ziel = $('ang-preis'); ziel.textContent = ''; ziel.appendChild(neu('h2', 'pf-h2', 'Preis und Bedingungen'));
+    var pb = preisBox(ziel, zeilen(), 'Alle Preise netto zuzüglich Umsatzsteuer. Abgerechnet wird pro Saison (1. Juli bis 30. Juni)' + (monate < 12 ? ', für die laufende Saison nur die Monate ' + zeitraum : '') +
+      '. Ab dem ' + datumKurz(rg.folgesaison_ab) + ' jeweils 588,00 € netto pro Saison für die Basismitgliedschaft. Die Mitgliedschaft verlängert sich jeweils um eine Saison, wenn sie nicht 8 Wochen vor Saisonende gekündigt wird. Zusatzleistungen gelten für die Saison ' + (rg.saison || '') + '.', offen);
+    var neuRechnen = function () { pb.neu(zeilen()); }; fx.addEventListener('input', neuRechnen); fx.addEventListener('change', neuRechnen);
+    var fertig = function (r) { if (r && r.angebot) { D.angebot = Object.assign({}, D.angebot, r.angebot); angebotClub100(D, firma, gruss); statusZeigen($('pf-angebot'), D.angebot, tm, true); } };
+    if (!offen) { statusZeigen(box, a, tm, true); return; }
+    nebenwegeUnten(tm, fertig);
+    pb.form.addEventListener('submit', function (e) {
+      e.preventDefault(); if (!annahmePruefen()) return;
       var btn = $('pf-an-senden'); btn.disabled = true; btn.textContent = 'Einen Moment …';
-      angebotSenden({ aktion: 'annehmen', bausteine: bausteine(), extras: extras(), name: wert('pf-an-name'), funktion: wert('pf-an-funktion'), email: wert('pf-an-email'), telefon: wert('pf-an-telefon'), rechnung_adresse: wert('pf-an-rechnung'), feedback: wert('pf-an-anmerkung'), bestaetigt: true }, function (r) {
-        if (r && r.ok && r.angebot) { D.angebot = Object.assign({}, D.angebot, r.angebot); angebotClub100(D, firma, gruss); var s2 = $('pf-angebot').querySelector('.pf-angebot-status'); if (s2) s2.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
-        btn.disabled = false; btn.textContent = 'Angebot annehmen'; fehler((r && r.meldung) || 'Das hat nicht geklappt. Bitte später noch einmal versuchen.');
-      });
+      angebotSenden(Object.assign({ aktion: 'annehmen', bausteine: [$('pf-bs-0').value, $('pf-bs-1').value], extras: extras() }, annahmeDaten()), function (r) { if (r && r.ok) return fertig(r); btn.disabled = false; btn.textContent = 'Angebot annehmen'; var x = $('pf-an-fehler'); x.hidden = false; x.textContent = (r && r.meldung) || 'Das hat nicht geklappt. Bitte später noch einmal versuchen.'; });
     });
     if (!(LOKAL || VORSCHAU)) angebotSenden({ aktion: 'ansicht', geraet: geraet() }, function () {});
-  }
-  // Unter dem Angebot bleibt der Termin wählbar, mit der Person aus 305 (Persönliche Seite › Termin mit); der Weg über die Tickets entfällt
-  function terminImAngebot() {
-    $('termin').hidden = false;
-    txt($('pf-termin-h2'), T('Fragen zum Angebot? Lass uns sprechen.', 'Fragen zum Angebot? Lassen Sie uns sprechen.'));
-    var ws = $('pf-weg-spiel'); if (ws) ws.hidden = true;
   }
   function personKarte(box, tm) {
     var p = neu('div', 'pf-angebot-person'); var im = document.createElement('img'); im.src = (tm.foto && /^\/assets\/img\//.test(tm.foto)) ? tm.foto : '/assets/img/verantwortliche/ag-1.webp'; im.alt = ''; im.width = 600; im.height = 894; im.loading = 'lazy';
