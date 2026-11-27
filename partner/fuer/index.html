@@ -1090,6 +1090,8 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     var BUDGET = Number(P.budget || 392), korb = [];
     (a.bausteine && a.bausteine.length ? a.bausteine : (P.bausteine_standard || [])).forEach(function (k) { korb.push({ k: k, inkl: true }); });
     Object.keys(a.extras || {}).forEach(function (k) { for (var n = 0; n < Number(a.extras[k] || 0); n++) korb.push({ k: k, inkl: false }); });
+    // Erklärung jeder Leistung aus dem Produktkatalog (Migration 572), damit Angebot und Vertrag dasselbe sagen
+    var erkl = function (x) { return (x && (x.beschreibung || x.text || x.hinweis)) || ''; };
     var bsK = function (k) { return BS.filter(function (b) { return b.k === k; })[0]; }, apK = function (k) { return AP.filter(function (x) { return x.k === k; })[0]; };
     var genutzt = function () { return korb.filter(function (e) { return e.inkl; }).reduce(function (s2, e) { return s2 + Number(bsK(e.k).listenpreis); }, 0); };
     var anzahl = function (k) { return korb.filter(function (e) { return e.k === k; }).length; };
@@ -1135,20 +1137,20 @@ main#main { background: #fff; color: var(--color-brand-navy); }
         r.appendChild(cb); r.appendChild(t); r.appendChild(preis); leistListe.appendChild(r);
       };
       var pText = function (txt2) { return neu('span', 'p', txt2); }, pRabatt = function (alt, neuP) { var x = neu('span', 'p'); if (Number(alt) === Number(neuP)) { x.textContent = euro(neuP); return x; } x.appendChild(neu('s', null, euro(alt))); x.appendChild(document.createTextNode(euro(neuP))); return x; };
-      (P.standard || []).forEach(function (x) { zeile(x.titel, '', pText('inklusive'), true); });
-      korb.forEach(function (e, idx) { var b = bsK(e.k); if (b && e.inkl) zeile(b.titel, (b.text ? b.text + ' · ' : '') + 'Wahlleistung im Paket', pText('Wert ' + euro(b.listenpreis)), false, idx); });
+      (P.standard || []).forEach(function (x) { zeile(x.titel, erkl(x), pText('inklusive'), true); });
+      korb.forEach(function (e, idx) { var b = bsK(e.k); if (b && e.inkl) zeile(b.titel, (erkl(b) ? erkl(b) + ' · ' : '') + 'Wahlleistung im Paket', pText('Wert ' + euro(b.listenpreis)), false, idx); });
       korb.forEach(function (e, idx) { var b = bsK(e.k); if (b && !e.inkl) zeile(b.titel, 'zusätzlich zum Paket, ' + b.rabatt + ' % Rabatt', pRabatt(b.listenpreis, b.aufpreis), false, idx); });
-      korb.forEach(function (e, idx) { var x = apK(e.k); if (x) zeile(x.titel, (x.hinweis ? x.hinweis + ' ' : '') + 'Einmalig für die Saison ' + (rg.saison || '') + '.', pRabatt(x.listenpreis, x.preis), false, idx); });
+      korb.forEach(function (e, idx) { var x = apK(e.k); if (x) zeile(x.titel, (erkl(x) ? erkl(x) + ' ' : '') + 'Einmalig für die Saison ' + (rg.saison || '') + '.', pRabatt(x.listenpreis, x.preis), false, idx); });
       wahlListe.innerHTML = ''; zusListe.innerHTML = '';
       BS.forEach(function (b) {
         var voll = b.max && anzahl(b.k) >= b.max;
-        var o = neu('div', 'ang-opt' + (voll ? ' aus' : '')); var t = neu('div', 't'); t.appendChild(neu('b', null, b.titel)); if (b.text) t.appendChild(neu('span', null, b.text)); o.appendChild(t);
+        var o = neu('div', 'ang-opt' + (voll ? ' aus' : '')); var t = neu('div', 't'); t.appendChild(neu('b', null, b.titel)); if (erkl(b)) t.appendChild(neu('span', null, erkl(b))); o.appendChild(t);
         o.appendChild(neu('span', 'p', 'Wert ' + euro(b.listenpreis)));
         var btn = neu('button', null, voll ? 'Im Angebot' : 'Hinzufügen'); btn.type = 'button'; btn.disabled = !!voll; btn.setAttribute('aria-label', b.titel + (voll ? ' ist im Angebot' : ' hinzufügen'));
         btn.addEventListener('click', function () { hinzufuegen(b); }); o.appendChild(btn); wahlListe.appendChild(o);
       });
       AP.forEach(function (x) {
-        var drin = anzahl(x.k) > 0; var o = neu('div', 'ang-opt' + (drin ? ' aus' : '')); var t = neu('div', 't'); t.appendChild(neu('b', null, x.titel)); if (x.hinweis) t.appendChild(neu('span', null, x.hinweis)); o.appendChild(t);
+        var drin = anzahl(x.k) > 0; var o = neu('div', 'ang-opt' + (drin ? ' aus' : '')); var t = neu('div', 't'); t.appendChild(neu('b', null, x.titel)); if (erkl(x)) t.appendChild(neu('span', null, erkl(x))); o.appendChild(t);
         o.appendChild(pRabatt(x.listenpreis, x.preis));
         var btn = neu('button', null, drin ? 'Im Angebot' : 'Hinzufügen'); btn.type = 'button'; btn.disabled = drin; btn.setAttribute('aria-label', x.titel + (drin ? ' ist im Angebot' : ' hinzufügen'));
         btn.addEventListener('click', function () { if (!anzahl(x.k)) { korb.push({ k: x.k, inkl: false }); zeichnenKorb(); } }); o.appendChild(btn); zusListe.appendChild(o);
