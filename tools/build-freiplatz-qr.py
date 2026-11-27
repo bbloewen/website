@@ -41,6 +41,9 @@ from pathlib import Path
 import qrcode
 import qrcode.image.svg
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from qr_loewe import qr_loewe_svg   # seit 27.11.2026 mit Löwe (Fehlerkorrektur H)
+
 REPO = Path(__file__).resolve().parent.parent
 DATEN = REPO / "data" / "freiplaetze.json"
 QR_WEG = REPO / "assets" / "img" / "freiplaetze"
@@ -49,16 +52,8 @@ BASIS = "https://basketball-loewen.com"
 
 
 def qr_svg(inhalt):
-    """QR als SVG-Pfad — Parameter wie beim ersten Satz vom 20.08.2026
-    (box_size=10, border=1), damit beide Sätze gleich aussehen."""
-    code = qrcode.QRCode(box_size=10, border=1)
-    code.add_data(inhalt)
-    code.make(fit=True)
-    bild = code.make_image(image_factory=qrcode.image.svg.SvgPathImage)
-    from io import BytesIO
-    puffer = BytesIO()
-    bild.save(puffer)
-    return puffer.getvalue().decode("utf-8")
+    """QR mit Löwe (tools/qr_loewe.py, wie Postkarten und Schilder). Bis 27.11.2026 schlichter SVG-Pfad."""
+    return qr_loewe_svg(inhalt, mm=26)
 
 
 def schreibe(pfad, inhalt, check):
