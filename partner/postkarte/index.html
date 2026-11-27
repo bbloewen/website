@@ -16,6 +16,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap" />
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script src="/js/qr-loewe.js?v=1795780000"></script>
 <style>
 :root { --navy: #00122D; --orange: #E5710B; --orange-text: #B55709; }
 * { box-sizing: border-box; }
@@ -142,10 +143,11 @@ body { margin: 0; background: #e9ecf1; color: var(--navy); font-family: 'Lexend'
     h.appendChild(neu('div', 'gedruckt', VON.name + ' · ' + VON.rolle + ', Basketball Löwen'));
     f('name').textContent = d.anrede_name || '';
     f('firma').textContent = firma;
-    var url = 'https://basketball-loewen.com/partner/fuer/?c=' + code + '&q=flyer';
+    // Kurzlink /g/<CODE> (Migration 554), sonst der lange Link
+    var url = d.kurz ? 'https://basketball-loewen.com/g/' + d.kurz : 'https://basketball-loewen.com/partner/fuer/?c=' + code + '&q=flyer';
     f('qr-text').textContent = T('Dein Video: einfach scannen', 'Ihr Video: einfach scannen');
-    f('qr-url').textContent = 'basketball-loewen.com/partner/fuer/?c=' + code;
-    try { var q = qrcode(0, 'M'); q.addData(url); q.make(); f('qr').innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true }); } catch (e) { f('qr').textContent = url; }
+    f('qr-url').textContent = url.replace('https://', '');
+    var qrBox = f('qr'); qrLoewe(url, 1040).then(function (src) { var im = document.createElement('img'); im.src = src; im.alt = ''; im.style.width = '100%'; im.style.height = '100%'; qrBox.appendChild(im); });
     var vorne = frag.querySelector('.vorne'); frag.querySelectorAll('.seite-titel').forEach(function (t) { t.textContent += ' · ' + firma; });
     $('seiten').appendChild(frag); $('seiten').hidden = false;
     var im = vorne.querySelector('img.halle'); if (im.complete) bandeSetzen(vorne); else im.addEventListener('load', function () { bandeSetzen(vorne); }); bandeSetzen(vorne);

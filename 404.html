@@ -17,6 +17,19 @@
      Weiterleitungen gibt es bewusst nicht (Markos Entscheidung, zweimal bestätigt),
      deshalb ist eine brauchbare Fehlerseite der einzige Hebel an dieser Stelle. -->
 <meta name="robots" content="noindex" />
+<!-- Kurzlinks /g/<CODE> (Migration 554, Marko 27.11.2026): QR-Codes auf Postkarten und Aushängen zeigen auf basketball-loewen.com/g/<CODE>.
+     GitHub Pages kennt diese Adressen nicht und liefert diese Seite; das Skript fragt das Ziel in 305 ab (zählt den Aufruf) und leitet weiter.
+     Das ist keine Weiterleitung alter Adressen (die gibt es weiterhin bewusst nicht), sondern der Kurzlink-Dienst. -->
+<script>(function () {
+  var m = location.pathname.match(/^\/g\/([A-Za-z0-9]{4,10})\/?$/); if (!m) return;
+  var root = document.documentElement; root.style.visibility = 'hidden';
+  var zeigen = function () { root.style.visibility = ''; };
+  fetch('https://ticketing.basketball-loewen.com/webhook/kurzlink?c=' + encodeURIComponent(m[1].toUpperCase()), { cache: 'no-store' })
+    .then(function (r) { return r.json(); })
+    .then(function (d) { if (d && d.ok && /^https:\/\//.test(d.ziel || '')) location.replace(d.ziel); else zeigen(); })
+    .catch(zeigen);
+  setTimeout(zeigen, 6000);
+})();</script>
 <link rel="icon" href="/assets/logo/loewen-logo-4c.svg" />
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png" />
 <link rel="icon" type="image/png" sizes="16x16" href="/assets/logo/favicon-16.png" />
