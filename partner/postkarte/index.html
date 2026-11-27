@@ -95,14 +95,14 @@ body { margin: 0; font-family: 'Lexend', sans-serif; color: #00122D; background:
   }
   function hinten(b, o, nr) {
     return '<div class="cd" style="width:' + (148 + 2 * o) + 'mm;height:' + (105 + 2 * o) + 'mm">' +
-      '<img src="/assets/postkarte/rueckseite.svg" alt="" style="position:absolute;left:' + (o ? 0 : -3) + 'mm;top:' + (o ? 0 : -3) + 'mm;width:154mm;height:111mm">' +
+      '<img src="/assets/postkarte/rueckseite.svg" width="154" height="111" alt="" style="position:absolute;left:' + (o ? 0 : -3) + 'mm;top:' + (o ? 0 : -3) + 'mm;width:154mm;height:111mm">' +
       '<div class="t" style="left:' + o + 'mm;top:' + o + 'mm">' +
       '<div class="f anrede">' + esc(b.anrede) + '</div><div class="f msg" data-pruefen="' + nr + '">' + esc(b.msg) + '</div>' +
       '<div class="f intro"></div><div class="f code"></div>' +
       '<div class="f abschied">' + esc(b.abschied) + '</div><div class="f sig">' + esc(b.sig) + '</div>' +
       '<div class="f adr" data-pruefen="' + nr + '">' + esc([b.adr1, b.adr2].filter(Boolean).join('\n')) + '</div><div class="f ql">' + esc(b.url) + '</div>' +
       '<img class="f qrimg" data-qr="' + esc('https://' + b.url) + '" alt="QR-Code zu ' + esc(b.url) + '"><div class="f url">' + esc(b.url) + '</div>' +
-      '<div class="f ft">Gemeinsam stark.</div><img class="f sw" src="/assets/postkarte/swoosh.webp" alt=""></div></div>';
+      '<div class="f ft">Gemeinsam stark.</div><img class="f sw" src="/assets/postkarte/swoosh.webp" width="384" height="41" alt=""></div></div>';
   }
   function marken(x0, y0) {
     var s = '', tx = x0 + 3, ty = y0 + 3;
