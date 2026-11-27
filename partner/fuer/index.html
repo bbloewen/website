@@ -1098,7 +1098,7 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     var bWahl = neu('div', 'ang-block'), bZus = neu('div', 'ang-block');
     if (offen) {
       bWahl.appendChild(neu('h2', null, 'Bausteine Ihrer Wahl'));
-      bWahl.appendChild(neu('p', 'ang-hinweis', 'Im Paket sind Wahlleistungen im Wert von ' + euro(BUDGET) + ' enthalten. Tauschen Sie oben ab oder wählen Sie hier dazu; was über das Paket hinausgeht, kostet den Club-Preis.'));
+      bWahl.appendChild(neu('p', 'ang-hinweis', 'Tauschen Sie oben ab oder wählen Sie hier dazu; was über das Paket hinausgeht, kostet den Club-Preis.'));
       bZus.appendChild(neu('h2', null, 'Einmalig für den Rest der Saison hinzubuchen'));
       bZus.appendChild(neu('p', 'ang-hinweis', 'Einmalige Leistungen außerhalb der Mitgliedschaft, nur für die Saison ' + (rg.saison || '') + ', zum Club-Preis.'));
       box.appendChild(bWahl); box.appendChild(bZus);
@@ -1139,7 +1139,6 @@ main#main { background: #fff; color: var(--color-brand-navy); }
       korb.forEach(function (e, idx) { var b = bsK(e.k); if (b && e.inkl) zeile(b.titel, (b.text ? b.text + ' · ' : '') + 'Wahlleistung im Paket', pText('Wert ' + euro(b.listenpreis)), false, idx); });
       korb.forEach(function (e, idx) { var b = bsK(e.k); if (b && !e.inkl) zeile(b.titel, 'zusätzlich zum Paket, ' + b.rabatt + ' % Rabatt', pRabatt(b.listenpreis, b.aufpreis), false, idx); });
       korb.forEach(function (e, idx) { var x = apK(e.k); if (x) zeile(x.titel, (x.hinweis ? x.hinweis + ' ' : '') + 'Einmalig für die Saison ' + (rg.saison || '') + '.', pRabatt(x.listenpreis, x.preis), false, idx); });
-      if (offen) { var fr = BUDGET - genutzt(); leistListe.appendChild(neu('p', 'ang-hinweis', 'Wahlleistungen im Paket: ' + euro(genutzt()) + ' von ' + euro(BUDGET) + (fr > 0 ? ', noch ' + euro(fr) + ' frei.' : '.'))); }
       wahlListe.innerHTML = ''; zusListe.innerHTML = '';
       BS.forEach(function (b) {
         var voll = b.max && anzahl(b.k) >= b.max;
