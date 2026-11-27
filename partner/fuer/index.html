@@ -950,7 +950,7 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     if ($('pf-nutzen-sek').hidden === false) { var h = $('pf-nutzen-h2'); h.textContent = ''; headline(h, 'Vorteile für *' + firma + '*.'); var eyb = $('pf-nutzen-sek').querySelector('.pf-eyebrow'); if (eyb) eyb.hidden = true; }
     // ganz unten: „Noch Fragen dazu?“ mit zwei Boxen (Online-Termin, Frage schreiben), ohne Person und ohne Ticket-Weg
     $('termin').hidden = false;
-    txt($('pf-termin-h2'), 'Noch Fragen dazu?');
+    txt($('pf-termin-h2'), 'Noch Fragen zu unserem Angebot?');
     var eb = document.querySelector('#termin .eyebrow'); if (eb) eb.hidden = true;
     var pp = document.querySelector('#termin .pf-person'); if (pp) pp.hidden = true;
     var ws = $('pf-weg-spiel'); if (ws) ws.remove();
