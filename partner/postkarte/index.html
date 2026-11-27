@@ -10,8 +10,8 @@
 <link rel="stylesheet" href="/css/colors_and_type.css?v=1785398309" />
 <!-- Postkarten nach dem neuen Standard (Migration 557, Marko 27.11.2026; Postkarten-Übergabe 2026-11-27, Referenz druck.py und felder.json).
      Interne Druckseite, nicht verlinkt. ?c=<code>,<code> (persönliche Seiten) holt je Karte die Felder aus 305 (Endpunkt postkarte, zählt nichts).
-     ?modus=einzel: je Karte A4 hoch, Seite 1 vorne, Seite 2 hinten, 148 × 105 mm mittig, ohne Schnittmarken.
-     ?modus=bogen (Standard): zwei Karten je A4 mit 3 mm Beschnitt und Schnittmarken, Seite 1 Vorderseiten, Seite 2 Rückseiten an denselben Stellen.
+     Standard (?modus=einzel, Marko 27.11.2026): je Karte zwei Seiten im Format A6 quer (148 × 105 mm), vorne und hinten, nichts ausschneiden.
+     ?modus=bogen: zwei Karten je A4 mit 3 mm Beschnitt und Schnittmarken, Seite 1 Vorderseiten, Seite 2 Rückseiten an denselben Stellen.
      Beidseitig drucken, Wenden an der langen Kante, Größe 100 %. ?von=marko|andre setzt den Absender (sonst der Absender der Kampagne).
      Motive: /assets/postkarte/motive/<Position>.webp, Standardtexte der Vorderseite: /data/postkarten.json. -->
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
@@ -65,11 +65,11 @@ body { margin: 0; font-family: 'Lexend', sans-serif; color: #00122D; background:
 <body>
 <div class="leiste" role="region" aria-label="Druck">
   <div class="knoepfe">
-    <a class="umschalten" id="m-bogen" href="#">Bogen mit Schnittmarken</a>
-    <a class="umschalten" id="m-einzel" href="#">Einzelkarte</a>
+    <a class="umschalten" id="m-einzel" href="#">A6-Karten</a>
+    <a class="umschalten" id="m-bogen" href="#">A4-Bogen mit Schnittmarken</a>
     <button type="button" class="druck" id="drucken">Drucken</button>
   </div>
-  <span class="hinweis" id="hinweis">A4, beidseitig, Wenden an der langen Kante, Größe 100 % (nicht „an Seite anpassen“). Papier 160 g.</span>
+  <span class="hinweis" id="hinweis">A6 quer, beidseitig, Größe 100 % (nicht „an Seite anpassen“).</span>
 </div>
 <div class="warnung" id="warnung" role="status"></div>
 <main class="seiten" id="seiten"><p class="leer">Lade …</p></main>
@@ -78,9 +78,10 @@ body { margin: 0; font-family: 'Lexend', sans-serif; color: #00122D; background:
   var API = 'https://ticketing.basketball-loewen.com/webhook/';
   var q = new URLSearchParams(location.search);
   var CODES = (q.get('c') || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean).slice(0, 40);
-  var MODUS = q.get('modus') === 'einzel' ? 'einzel' : 'bogen';
+  var MODUS = q.get('modus') === 'bogen' ? 'bogen' : 'einzel';   // Standard: A6-Karten
   var VON = { marko: 'Marko Fliege', andre: 'André Grenzdörffer' }[q.get('von') || ''] || '';
   var seiten = document.getElementById('seiten'), warnung = document.getElementById('warnung'), FEHLT = '';
+  if (MODUS === 'einzel') { var st = document.createElement('style'); st.textContent = '@page { size: 148mm 105mm; margin: 0; } .pg { width: 148mm; height: 105mm; }'; document.head.appendChild(st); }
   ['bogen', 'einzel'].forEach(function (m) {
     var a = document.getElementById('m-' + m), u = new URLSearchParams(location.search); u.set('modus', m);
     a.href = '?' + u.toString(); if (m === MODUS) a.setAttribute('aria-current', 'true');
@@ -116,8 +117,8 @@ body { margin: 0; font-family: 'Lexend', sans-serif; color: #00122D; background:
     var h = '';
     if (MODUS === 'einzel') {
       jobs.forEach(function (j, i) {
-        h += '<div class="pg" aria-label="Karte ' + (i + 1) + ' vorne"><div style="position:absolute;left:31mm;top:96mm">' + vorne(j.vorne, 0, false) + '</div></div>';
-        h += '<div class="pg" aria-label="Karte ' + (i + 1) + ' hinten"><div style="position:absolute;left:31mm;top:96mm">' + hinten(j.hinten, 0, i) + '</div></div>';
+        h += '<div class="pg" aria-label="Karte ' + (i + 1) + ' vorne"><div style="position:absolute;left:0;top:0">' + vorne(j.vorne, 0, false) + '</div></div>';
+        h += '<div class="pg" aria-label="Karte ' + (i + 1) + ' hinten"><div style="position:absolute;left:0;top:0">' + hinten(j.hinten, 0, i) + '</div></div>';
       });
     } else {
       var pos = [[28, 26], [28, 26 + 111 + 34]];
@@ -161,7 +162,7 @@ body { margin: 0; font-family: 'Lexend', sans-serif; color: #00122D; background:
     if (!jobs.length) { seiten.innerHTML = '<p class="leer">Zu diesen Codes gibt es keine Karte (mehr).</p>'; return; }
     if (fehlen.length) FEHLT = 'Ohne Karte (Seite abgeschaltet oder unbekannt): ' + fehlen.join(', ') + '.';
     setzen(jobs);
-    document.getElementById('hinweis').textContent = jobs.length + (jobs.length === 1 ? ' Karte' : ' Karten') + ' · ' + (MODUS === 'bogen' ? Math.ceil(jobs.length / 2) + ' A4-Bögen' : jobs.length + ' A4-Blätter') + ' · beidseitig, Wenden an der langen Kante, Größe 100 %, Papier 160 g.';
+    document.getElementById('hinweis').textContent = jobs.length + (jobs.length === 1 ? ' Karte' : ' Karten') + ' · ' + (MODUS === 'bogen' ? Math.ceil(jobs.length / 2) + ' A4-Bögen' : jobs.length * 2 + ' Seiten A6 quer (Karton A6 einlegen)') + ' · beidseitig, ' + (MODUS === 'bogen' ? 'Wenden an der langen Kante' : 'Wenden an der kurzen Kante (Querformat)') + ', Größe 100 %, ' + (MODUS === 'bogen' ? 'Papier 160 g.' : 'Postkartenkarton.');
   }).catch(function () { seiten.innerHTML = '<p class="leer">Die Karten konnten nicht geladen werden. Bitte später noch einmal versuchen.</p>'; });
 })();
 </script>
