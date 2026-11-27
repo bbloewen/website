@@ -1154,6 +1154,7 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     var monate = Number(rg.monate || 12), zeitraum = datumKurz(rg.ab) + ' bis ' + datumKurz(rg.ende);
     zeilen = function () {
       var w = auswahl(), z = [['Club 100 Basismitgliedschaft, ' + zeitraum + (monate < 12 ? ' (' + monate + ' × 49,00 €)' : ''), 49 * monate]];
+      if (rg.rabatt) z.push(['Rabatt für Mitglieder der ' + rg.rabatt.verband + ': ' + Number(rg.rabatt.prozent).toLocaleString('de-DE') + ' % auf die Basismitgliedschaft', -Math.round(49 * monate * Number(rg.rabatt.prozent)) / 100]);
       BS.forEach(function (b) { var n = w.extras[b.k] || 0; if (n) z.push(['Weiterer Baustein: ' + b.titel + (n > 1 ? ' × ' + n : ''), n * b.aufpreis]); });
       AP.forEach(function (x) { if (w.extras[x.k]) z.push([x.titel, Number(x.preis)]); });
       return z;
@@ -1162,7 +1163,7 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     zeichnenKorb();
     var ziel = $('ang-preis'); ziel.textContent = ''; ziel.appendChild(neu('h2', 'pf-h2', 'Preis und Bedingungen'));
     var pb = preisBox(ziel, zeilen(), 'Alle Preise netto zuzüglich Umsatzsteuer. Abgerechnet wird pro Saison (1. Juli bis 30. Juni)' + (monate < 12 ? ', für die laufende Saison nur die Monate ' + zeitraum : '') +
-      '. Ab dem ' + datumKurz(rg.folgesaison_ab) + ' jeweils 588,00 € netto pro Saison für die Basismitgliedschaft. Die Mitgliedschaft verlängert sich jeweils um eine Saison, wenn sie nicht 8 Wochen vor Saisonende gekündigt wird. Zusatzleistungen gelten für die Saison ' + (rg.saison || '') + '.', offen);
+      '. Ab dem ' + datumKurz(rg.folgesaison_ab) + ' jeweils ' + euro(rg.folgesaison || 588) + ' netto pro Saison für die Basismitgliedschaft' + (rg.rabatt ? ' (mit Rabatt, solange Sie Mitglied der ' + rg.rabatt.verband + ' sind; danach 588,00 €)' : '') + '. Die Mitgliedschaft verlängert sich jeweils um eine Saison, wenn sie nicht 8 Wochen vor Saisonende gekündigt wird. Zusatzleistungen gelten für die Saison ' + (rg.saison || '') + '.', offen);
     window.__angPreis = function () { pb.neu(zeilen()); };
     var fertig = function (r) { if (r && r.angebot) { D.angebot = Object.assign({}, D.angebot, r.angebot); angebotClub100(D, firma, gruss); statusZeigen($('pf-angebot'), D.angebot, tm, true); } };
     if (!offen) { statusZeigen(box, a, tm, true); return; }
