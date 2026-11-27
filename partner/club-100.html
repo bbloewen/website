@@ -273,6 +273,10 @@
         <h3 class="t-h4" style="margin:0 0 6px">Persönliches Angebot anfordern</h3>
         <p class="t-body-sm" style="margin:0 0 18px">Sie bekommen Ihr Angebot in wenigen Minuten per E-Mail und stellen die Leistungen dort selbst zusammen.</p>
         <div class="form-row">
+          <div class="field"><label for="c100-anrede">Anrede</label><select id="c100-anrede" name="anrede" required><option value="" disabled selected>Bitte wählen</option><option>Frau</option><option>Herr</option><option value="keine">Keine Angabe</option></select></div>
+          <div class="field"></div>
+        </div>
+        <div class="form-row">
           <div class="field"><label for="c100-name">Vor- und Nachname</label><input type="text" id="c100-name" name="name" required autocomplete="name" /></div>
           <div class="field"><label for="c100-firma">Firma</label><input type="text" id="c100-firma" name="firma" required autocomplete="organization" /></div>
         </div>
@@ -300,6 +304,7 @@
     f.addEventListener('submit', function (e) {
       e.preventDefault();
       var w = function (n) { return (f.elements[n].value || '').trim(); };
+      if (!w('anrede')) return zeig('error', 'Bitte die Anrede wählen.');
       if (!/\S+\s+\S+/.test(w('name'))) return zeig('error', 'Bitte Vor- und Nachnamen eintragen.');
       if (w('firma').length < 2) return zeig('error', 'Bitte die Firma eintragen.');
       if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(w('email'))) return zeig('error', 'Bitte eine gültige E-Mail-Adresse eintragen.');
@@ -307,7 +312,7 @@
       btn.disabled = true; btn.textContent = 'Einen Moment …';
       var seite = /sponsoring/.test(location.pathname) ? 'sponsoring' : 'club-100';
       fetch('https://ticketing.basketball-loewen.com/webhook/club100-anfrage', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: w('name'), firma: w('firma'), email: w('email'), telefon: w('telefon'), website: w('website'), seite: seite }) })
+        body: JSON.stringify({ anrede: w('anrede') === 'keine' ? '' : w('anrede'), name: w('name'), firma: w('firma'), email: w('email'), telefon: w('telefon'), website: w('website'), seite: seite }) })
         .then(function (r) { return r.json(); })
         .then(function (r) {
           if (r && r.ok) { f.querySelectorAll('.form-row, .c100-hp, #c100-senden').forEach(function (x) { x.hidden = true; x.style.display = 'none'; });
