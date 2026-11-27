@@ -799,6 +799,7 @@ main#main { background: #fff; color: var(--color-brand-navy); }
   // Zweiter Weg: zwei Plätze beim nächsten Heimspiel (vertrieb_spielbesuch). Spiele aus /data/heimspiele.json: ab morgen, höchstens 60 Tage, die nächsten drei.
   function isoAus(de) { var m = String(de || '').match(/^(\d{2})\.(\d{2})\.(\d{4})$/); return m ? m[3] + '-' + m[2] + '-' + m[1] : ''; }
   function spielVorbereiten(d, firma, mit) {
+    if (d.angebot) return;   // mit Angebot nur der Termin, keine Tickets
     var heute = new Date(); heute.setHours(0, 0, 0, 0);
     var morgen = new Date(heute.getTime() + 864e5), bis = new Date(heute.getTime() + 60 * 864e5);
     var text = T('Komm mit Begleitung zum Heimspiel. ' + mit + ' trifft euch in der Halbzeit.', 'Kommen Sie mit Begleitung zum Heimspiel. ' + mit + ' trifft Sie in der Halbzeit.');
@@ -883,7 +884,7 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     var a = d.angebot, P = d.paket || {}, box = $('pf-angebot'), tm = d.termin || {};
     box.textContent = ''; $('angebot').hidden = false;
     // Seite stellt das Angebot nach vorn: Termin-Bereich entfällt, der Ansprechpartner steht im Angebot
-    $('termin').hidden = true;
+    terminImAngebot();
     txt($('pf-lead'), gruss + ' ' + T('hier ist noch einmal das Video vom Anfang.', 'hier ist noch einmal das Video vom Anfang.'));
     box.appendChild(neu('p', 'pf-eyebrow', T('Dein Angebot', 'Ihr Angebot')));
     var h2 = neu('h2', 'pf-h2'); h2.id = 'pf-angebot-h2'; headline(h2, firma + ' wird löwenstarker *Partner*.'); box.appendChild(h2);
@@ -993,7 +994,7 @@ main#main { background: #fff; color: var(--color-brand-navy); }
   function angebotClub100(d, firma, gruss) {
     var a = d.angebot, P = d.paket || {}, box = $('pf-angebot'), tm = d.termin || {}, rg = a.rechnung || {};
     var BS = P.bausteine || [], AP = P.aufpreis || [];
-    box.textContent = ''; $('angebot').hidden = false; $('termin').hidden = true;
+    box.textContent = ''; $('angebot').hidden = false; terminImAngebot();
     txt($('pf-lead'), gruss + ' hier ist noch einmal das Video vom Anfang.');
     box.appendChild(neu('p', 'pf-eyebrow', T('Dein persönliches Angebot', 'Ihr persönliches Angebot')));
     var h2 = neu('h2', 'pf-h2'); h2.id = 'pf-angebot-h2'; headline(h2, firma + ' im Löwen-Club der *100*.'); box.appendChild(h2);
@@ -1086,6 +1087,12 @@ main#main { background: #fff; color: var(--color-brand-navy); }
       });
     });
     if (!(LOKAL || VORSCHAU)) angebotSenden({ aktion: 'ansicht', geraet: geraet() }, function () {});
+  }
+  // Unter dem Angebot bleibt der Termin wählbar, mit der Person aus 305 (Persönliche Seite › Termin mit); der Weg über die Tickets entfällt
+  function terminImAngebot() {
+    $('termin').hidden = false;
+    txt($('pf-termin-h2'), T('Fragen zum Angebot? Lass uns sprechen.', 'Fragen zum Angebot? Lassen Sie uns sprechen.'));
+    var ws = $('pf-weg-spiel'); if (ws) ws.hidden = true;
   }
   function personKarte(box, tm) {
     var p = neu('div', 'pf-angebot-person'); var im = document.createElement('img'); im.src = (tm.foto && /^\/assets\/img\//.test(tm.foto)) ? tm.foto : '/assets/img/verantwortliche/ag-1.webp'; im.alt = ''; im.width = 600; im.height = 894; im.loading = 'lazy';
