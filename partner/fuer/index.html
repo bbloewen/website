@@ -1040,13 +1040,16 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     g.addEventListener('submit', function (e) { e.preventDefault(); var fe = $('pf-fb-fehler'); fe.hidden = true; if (!wert('pf-fb-text')) { fe.hidden = false; fe.textContent = 'Bitte etwas schreiben.'; return; }
       angebotSenden({ aktion: 'feedback', feedback: wert('pf-fb-text') }, function (r) { if (r && r.ok) { g.innerHTML = '<p class="pf-danke">' + T('Danke! Wir melden uns bei dir.', 'Vielen Dank! Wir melden uns bei Ihnen.') + '</p>'; return; } fe.hidden = false; fe.textContent = (r && r.meldung) || 'Das hat nicht geklappt.'; }); });
   }
+  // Vollständiger Firmenname fürs Angebot: Rechnungsfirma aus dem CRM (z. B. „LINDIG Fördertechnik GmbH“), sonst der Anzeigename
+  function angFirma(d, firma) { return ((d && d.vorbelegung && d.vorbelegung.rechnung_firma) || firma || '').trim(); }
   function angebotZeigen(d, firma, gruss) {
     if (d.paket_art === 'club100' || (d.angebot && d.angebot.paket === 'club100')) return angebotClub100(d, firma, gruss);
     var a = d.angebot, P = d.paket || {}, box = $('pf-angebot'), tm = d.termin || {}, offen = a.status === 'offen';
     angebotModus(d, firma, htmlEsc(firma) + ' wird löwenstarker <span>Partner</span>.', 'Löwenstarker Partner der Basketball Löwen' + (a.start_text ? ', ' + a.start_text : ''));
     box.textContent = '';
-    if (a.persoenlich) box.appendChild(neu('p', 'pf-lead', a.persoenlich));
-    var b1 = neu('div', 'ang-block'); b1.appendChild(neu('h2', null, 'Ihre Leistungen')); b1.appendChild(liste(P.kern || [])); box.appendChild(b1);
+    box.appendChild(neu('p', 'pf-lead', 'Die Basketball Löwen unterbreiten der ' + angFirma(d, firma) + ' folgendes Angebot für eine Partnerschaft als löwenstarker Partner' + (a.start_text ? ' (' + a.start_text + ')' : '') + '.'));
+    if (a.persoenlich) box.appendChild(neu('p', null, a.persoenlich));
+    var b1 = neu('div', 'ang-block'); b1.appendChild(neu('h2', null, 'Vertraglich zugesicherte Leistungen')); b1.appendChild(liste(P.kern || [])); box.appendChild(b1);
     var gew = (offen ? (a.zugaben && a.zugaben.length ? a.zugaben : a.vorschlag) : a.zugaben) || [];
     var fs = document.createElement('fieldset'); fs.className = 'pf-zugaben ang-block';
     fs.appendChild(neu('legend', null, offen ? T('Zwei Zugaben nach deiner Wahl', 'Zwei Zugaben nach Ihrer Wahl') : 'Zugaben'));
@@ -1079,7 +1082,9 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     var BS = P.bausteine || [], AP = P.aufpreis || [];
     angebotModus(d, firma, htmlEsc(firma) + ' im Löwen-Club der <span>100</span>.', 'Club 100 Basismitgliedschaft, Saison ' + (rg.saison || ''));
     box.textContent = '';
-    if (a.persoenlich) box.appendChild(neu('p', 'pf-lead', a.persoenlich));
+    // Einleitung wie in einem richtigen Angebot, ohne Bezug auf vorherige Nachrichten (Marko 27.11.2026)
+    box.appendChild(neu('p', 'pf-lead', 'Die Basketball Löwen unterbreiten der ' + angFirma(d, firma) + ' folgendes Angebot für eine Mitgliedschaft im Löwen-Club der 100' + (rg.saison ? ' für die Saison ' + rg.saison : '') + '.'));
+    if (a.persoenlich) box.appendChild(neu('p', null, a.persoenlich));
     // Konfigurator: „Ihre Leistungen“ ist das Angebot. Feste Leistungen mit grünem Haken; Wahlleistungen im Paket bis zum Budget (inklusive, Wert steht dabei),
     // darüber hinaus zum Club-Preis. Passt eine neue Wahl nicht ins Budget, fragt ein Fenster, welche Wahloption dafür abgewählt wird (oder: zusätzlich buchen).
     var BUDGET = Number(P.budget || 392), korb = [];
@@ -1088,7 +1093,7 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     var bsK = function (k) { return BS.filter(function (b) { return b.k === k; })[0]; }, apK = function (k) { return AP.filter(function (x) { return x.k === k; })[0]; };
     var genutzt = function () { return korb.filter(function (e) { return e.inkl; }).reduce(function (s2, e) { return s2 + Number(bsK(e.k).listenpreis); }, 0); };
     var anzahl = function (k) { return korb.filter(function (e) { return e.k === k; }).length; };
-    var bLeist = neu('div', 'ang-block'); bLeist.appendChild(neu('h2', null, 'Ihre Leistungen')); box.appendChild(bLeist);
+    var bLeist = neu('div', 'ang-block'); bLeist.appendChild(neu('h2', null, 'Vertraglich zugesicherte Leistungen')); box.appendChild(bLeist);
     var leistListe = neu('div'); bLeist.appendChild(leistListe);
     var bWahl = neu('div', 'ang-block'), bZus = neu('div', 'ang-block');
     if (offen) {
@@ -1162,7 +1167,7 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     var extras = function () { return auswahl().extras; };
     zeichnenKorb();
     var ziel = $('ang-preis'); ziel.textContent = ''; ziel.appendChild(neu('h2', 'pf-h2', 'Preis und Bedingungen'));
-    var pb = preisBox(ziel, zeilen(), 'Alle Preise netto zuzüglich Umsatzsteuer. Abgerechnet wird pro Saison (1. Juli bis 30. Juni)' + (monate < 12 ? ', für die laufende Saison nur die Monate ' + zeitraum : '') +
+    var pb = preisBox(ziel, zeilen(), 'Alle Preise netto zuzüglich Umsatzsteuer. Abgerechnet wird pro Saison (1. Juli bis 30. Juni)' + (monate < 12 ? ', für die laufende Saison nur der Zeitraum vom ' + zeitraum : '') +
       '. Ab dem ' + datumKurz(rg.folgesaison_ab) + ' jeweils ' + euro(rg.folgesaison || 588) + ' netto pro Saison für die Basismitgliedschaft' + (rg.rabatt ? ' (mit Rabatt, solange Sie Mitglied der ' + rg.rabatt.verband + ' sind; danach 588,00 €)' : '') + '. Die Mitgliedschaft verlängert sich jeweils um eine Saison, wenn sie nicht 8 Wochen vor Saisonende gekündigt wird. Zusatzleistungen gelten für die Saison ' + (rg.saison || '') + '.', offen);
     window.__angPreis = function () { pb.neu(zeilen()); };
     var fertig = function (r) { if (r && r.angebot) { D.angebot = Object.assign({}, D.angebot, r.angebot); angebotClub100(D, firma, gruss); statusZeigen($('pf-angebot'), D.angebot, tm, true); } };
