@@ -265,8 +265,8 @@
       <div class="cta-panel">
         <span class="eyebrow">Mitmachen</span>
         <h2 class="t-h2">Mitglied im Löwen-Club der 100 werden</h2>
-        <p class="t-h3" style="margin:4px 0 4px;color:var(--text-primary)">49,00 € (zzgl. MwSt.) / Monat*</p>
-        <p class="t-caption" style="color:var(--text-muted);margin-bottom:20px">*Bei jährlicher Zahlung, 588,00 € (zzgl. MwSt.) pro Jahr.</p>
+        <p class="t-h3" style="margin:4px 0 4px;color:var(--text-primary)">49,00 € im Monat <span class="t-body-sm" style="color:var(--text-secondary)">(netto, zzgl. MwSt.)</span></p>
+        <p class="t-body-sm" style="max-width:52ch;margin:0 auto 20px;color:var(--text-secondary)">Abgerechnet einmal pro Saison: 588,00 € netto (1. Juli bis 30. Juni). Wer während der Saison eintritt, zahlt nur die restlichen Monate. Die Mitgliedschaft verlängert sich jeweils um eine Saison, wenn sie nicht 8 Wochen vor Saisonende gekündigt wird.</p>
         <p class="t-body-sm" style="max-width:52ch;margin:0 auto 24px;color:var(--text-secondary)">Dazu gehören ein Logo auf der Löwen-Club der 100-Seite, eine Verlinkung zur eigenen Website, die Möglichkeit, unser Logo und unseren Namen auf der eigenen Webseite zu benutzen, sowie ein Gutscheincode für 2 Dauerkarten Kategorie 2 (Hin- und Rückrunde) und eine Einladung zu unseren Netzwerkveranstaltungen.</p>
         <div>
           <button class="btn btn-primary" data-package="Löwen-Club der 100" data-price="588">Paket buchen</button>
@@ -446,8 +446,13 @@
 
   document.querySelectorAll('[data-package]').forEach(function (btn) {
     btn.addEventListener('click', function () {
-      var price = parseFloat(this.dataset.price);
-      var label = 'Löwen-Club der 100-Paket (pro Jahr)';
+      // Abrechnung pro Saison (1. Juli bis 30. Juni): wer während der Saison eintritt, zahlt die restlichen Monate ab dem Folgemonat (49,00 € netto je Monat); im Juni gilt die nächste Saison ganz
+      var MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+      var heute = new Date(), ab = (heute.getMonth() + 1) % 12, jahrAb = heute.getFullYear() + (heute.getMonth() === 11 ? 1 : 0);
+      var rest = ab >= 6 ? 18 - ab : 6 - ab;
+      var start = jahrAb - (ab >= 6 ? 0 : 1), saison = start + '/' + String(start + 1).slice(2);
+      var price = Math.round(parseFloat(this.dataset.price) / 12 * rest * 100) / 100;
+      var label = 'Löwen-Club der 100, Saison ' + saison + (rest < 12 ? ' (' + MONATE[ab] + ' bis Juni, ' + rest + ' × 49,00 €)' : '') + ', danach 588,00 € pro Saison';
       sessionStorage.setItem('bl_cart', JSON.stringify({
         productType: 'loewen-business-club',
         eventLabel: 'Löwen-Club der 100-Paket',
