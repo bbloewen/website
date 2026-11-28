@@ -819,7 +819,7 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     }
 
     if (d.logo && /^https:\/\//.test(d.logo)) { var lk = $('pf-logo-kunde'); lk.alt = firma; lk.onerror = function () { $('pf-logos').hidden = true; }; lk.src = d.logo; $('pf-logos').hidden = false; }
-    var CLUB = d.paket_art === 'club100';
+    var CLUB = d.paket_art === 'club100' && !(d.angebot && d.angebot.paket_code && d.angebot.paket_code !== 'club100');   // andere Bundles (crm-db 601) ohne Club-100-Texte
     if (CLUB) document.title = 'Löwen-Club der 100: ' + firma + ' — Basketball Löwen';
     headline($('pf-bande-titel'), CLUB ? T('Dein Logo in der *Club-100-Schleife*.', 'Ihr Logo in der *Club-100-Schleife*.') : T('Deine *LED-Bande* bei den Basketball Löwen.', 'Ihre *LED-Bande* bei den Basketball Löwen.'));
     var lauf = $('pf-bande-lauf'); var zeile = CLUB ? '' : (d.bande_zeile || '');
@@ -1080,10 +1080,12 @@ main#main { background: #fff; color: var(--color-brand-navy); }
   function angebotClub100(d, firma, gruss) {
     var a = d.angebot, P = d.paket || {}, box = $('pf-angebot'), tm = d.termin || {}, rg = a.rechnung || {}, offen = a.status === 'offen';
     var BS = P.bausteine || [], AP = P.aufpreis || [], ant = function (x, p) { return Number(p); };
-    angebotModus(d, firma, htmlEsc(firma) + ' im Löwen-Club der <span>100</span>.', 'Club 100 Basismitgliedschaft, Saison ' + (rg.saison || ''));
+    // Jedes Bundle mit Konfiguration läuft hier durch (crm-db Migration 601, Marko 28.11.2026); Club-100-Texte nur beim Club 100
+    var ECHT = !a.paket_code || a.paket_code === 'club100', NAME = a.paket_name && !ECHT ? a.paket_name : (P.name || 'Club 100 Basismitgliedschaft');
+    angebotModus(d, firma, ECHT ? htmlEsc(firma) + ' im Löwen-Club der <span>100</span>.' : htmlEsc(firma) + ' mit dem Paket <span>' + htmlEsc(NAME) + '</span>.', NAME + ', Saison ' + (rg.saison || ''));
     box.textContent = '';
     // Einleitung wie in einem richtigen Angebot, ohne Bezug auf vorherige Nachrichten (Marko 27.11.2026)
-    box.appendChild(neu('p', 'pf-lead', 'Die Basketball Löwen unterbreiten der ' + angFirma(d, firma) + ' folgendes Angebot für eine Mitgliedschaft im Löwen-Club der 100' + (rg.saison ? ' für die Saison ' + rg.saison : '') + '.'));
+    box.appendChild(neu('p', 'pf-lead', 'Die Basketball Löwen unterbreiten der ' + angFirma(d, firma) + ' folgendes Angebot ' + (ECHT ? 'für eine Mitgliedschaft im Löwen-Club der 100' : 'für das Paket „' + NAME + '“') + (rg.saison ? ' für die Saison ' + rg.saison : '') + '.'));
     if (a.persoenlich) box.appendChild(neu('p', null, a.persoenlich));
     // Konfigurator: „Ihre Leistungen“ ist das Angebot. Feste Leistungen mit grünem Haken; Wahlleistungen im Paket bis zum Budget (inklusive, Wert steht dabei),
     // darüber hinaus zum Club-Preis. Passt eine neue Wahl nicht ins Budget, fragt ein Fenster, welche Wahloption dafür abgewählt wird (oder: zusätzlich buchen).
@@ -1162,7 +1164,7 @@ main#main { background: #fff; color: var(--color-brand-navy); }
     var mp = Number(rg.monatspreis || 49);
     ant = function (x, p) { p = Number(p); return x && x.anteilig && monate < 12 ? Math.round(p * monate / 12 * 100) / 100 : p; };
     zeilen = function () {
-      var w = auswahl(), z = [['Club 100 Basismitgliedschaft, ' + zeitraum + (monate < 12 ? ' (' + monate + ' × ' + euro(mp) + ')' : ''), Math.round(mp * monate * 100) / 100]];
+      var w = auswahl(), z = [[NAME + ', ' + zeitraum + (monate < 12 ? ' (' + monate + ' × ' + euro(mp) + ')' : ''), Math.round(mp * monate * 100) / 100]];
       if (rg.rabatt) z.push(['Rabatt für Mitglieder der ' + rg.rabatt.verband + ': ' + Number(rg.rabatt.prozent).toLocaleString('de-DE') + ' % auf die Basismitgliedschaft', -Math.round(mp * monate * Number(rg.rabatt.prozent)) / 100]);
       BS.forEach(function (b) { var n = w.extras[b.k] || 0; if (n) z.push(['Weiterer Baustein: ' + b.titel + (b.anteilig && monate < 12 ? ' (anteilig, ' + monate + ' Monate)' : '') + (n > 1 ? ' × ' + n : ''), n * ant(b, b.aufpreis)]); });
       AP.forEach(function (x) { if (w.extras[x.k]) z.push([x.titel + (x.anteilig && monate < 12 ? ' (anteilig, ' + monate + ' Monate)' : ''), ant(x, x.preis)]); });
