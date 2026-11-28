@@ -1079,7 +1079,7 @@ main#main { background: #fff; color: var(--color-brand-navy); }
   // Club 100 Basismitgliedschaft (Migration 560)
   function angebotClub100(d, firma, gruss) {
     var a = d.angebot, P = d.paket || {}, box = $('pf-angebot'), tm = d.termin || {}, rg = a.rechnung || {}, offen = a.status === 'offen';
-    var BS = P.bausteine || [], AP = P.aufpreis || [];
+    var BS = P.bausteine || [], AP = P.aufpreis || [], ant = function (x, p) { return Number(p); };
     angebotModus(d, firma, htmlEsc(firma) + ' im Löwen-Club der <span>100</span>.', 'Club 100 Basismitgliedschaft, Saison ' + (rg.saison || ''));
     box.textContent = '';
     // Einleitung wie in einem richtigen Angebot, ohne Bezug auf vorherige Nachrichten (Marko 27.11.2026)
@@ -1117,7 +1117,7 @@ main#main { background: #fff; color: var(--color-brand-navy); }
       dialog.appendChild(neu('p', null, 'Das passt nicht mehr ins Paket. Welche der Wahloptionen wollen Sie hierfür abwählen?'));
       inkl.forEach(function (x) { var bb = bsK(x.e.k); var l = document.createElement('label'); var cb = document.createElement('input'); cb.type = 'checkbox'; cb.value = x.idx;
         l.appendChild(cb); l.appendChild(neu('span', null, bb.titel)); l.appendChild(neu('em', null, 'Wert ' + euro(bb.listenpreis))); dialog.appendChild(l); });
-      var kn = neu('div', 'knoepfe'); var ab = neu('button', null, 'Abbrechen'); ab.type = 'button'; var dazu = neu('button', null, 'Zusätzlich für ' + euro(b.aufpreis) + ' buchen'); dazu.type = 'button';
+      var kn = neu('div', 'knoepfe'); var ab = neu('button', null, 'Abbrechen'); ab.type = 'button'; var dazu = neu('button', null, 'Zusätzlich für ' + euro(ant(b, b.aufpreis)) + ' buchen'); dazu.type = 'button';
       var tausch = neu('button', 'haupt', 'Tauschen'); tausch.type = 'button'; tausch.disabled = true; kn.appendChild(ab); kn.appendChild(dazu); kn.appendChild(tausch); dialog.appendChild(kn);
       var gewaehlt = function () { return Array.prototype.slice.call(dialog.querySelectorAll('input:checked')).map(function (c) { return Number(c.value); }); };
       dialog.addEventListener('change', function () { var weg = gewaehlt().reduce(function (s2, idx) { return s2 + Number(bsK(korb[idx].k).listenpreis); }, 0); tausch.disabled = !(wertB <= frei + weg); });
@@ -1139,8 +1139,8 @@ main#main { background: #fff; color: var(--color-brand-navy); }
       var pText = function (txt2) { return neu('span', 'p', txt2); }, pRabatt = function (alt, neuP) { var x = neu('span', 'p'); if (Number(alt) === Number(neuP)) { x.textContent = euro(neuP); return x; } x.appendChild(neu('s', null, euro(alt))); x.appendChild(document.createTextNode(euro(neuP))); return x; };
       (P.standard || []).forEach(function (x) { zeile(x.titel, erkl(x), pText('inklusive'), true); });
       korb.forEach(function (e, idx) { var b = bsK(e.k); if (b && e.inkl) zeile(b.titel, (erkl(b) ? erkl(b) + ' · ' : '') + 'Wahlleistung im Paket', pText('Wert ' + euro(b.listenpreis)), false, idx); });
-      korb.forEach(function (e, idx) { var b = bsK(e.k); if (b && !e.inkl) zeile(b.titel, 'zusätzlich zum Paket, ' + b.rabatt + ' % Rabatt', pRabatt(b.listenpreis, b.aufpreis), false, idx); });
-      korb.forEach(function (e, idx) { var x = apK(e.k); if (x) zeile(x.titel, (erkl(x) ? erkl(x) + ' ' : '') + 'Einmalig für die Saison ' + (rg.saison || '') + '.', pRabatt(x.listenpreis, x.preis), false, idx); });
+      korb.forEach(function (e, idx) { var b = bsK(e.k); if (b && !e.inkl) zeile(b.titel, 'zusätzlich zum Paket, ' + b.rabatt + ' % Rabatt' + (b.anteilig && monate < 12 ? ', anteilig für ' + monate + ' Monate' : ''), pRabatt(ant(b, b.listenpreis), ant(b, b.aufpreis)), false, idx); });
+      korb.forEach(function (e, idx) { var x = apK(e.k); if (x) zeile(x.titel, (erkl(x) ? erkl(x) + ' ' : '') + (x.anteilig ? (monate < 12 ? 'Anteilig für ' + monate + ' Monate der Saison ' : 'Für die Saison ') : 'Einmalig für die Saison ') + (rg.saison || '') + '.', pRabatt(ant(x, x.listenpreis), ant(x, x.preis)), false, idx); });
       wahlListe.innerHTML = ''; zusListe.innerHTML = '';
       BS.forEach(function (b) {
         var voll = b.max && anzahl(b.k) >= b.max;
@@ -1151,18 +1151,21 @@ main#main { background: #fff; color: var(--color-brand-navy); }
       });
       AP.forEach(function (x) {
         var drin = anzahl(x.k) > 0; var o = neu('div', 'ang-opt' + (drin ? ' aus' : '')); var t = neu('div', 't'); t.appendChild(neu('b', null, x.titel)); if (erkl(x)) t.appendChild(neu('span', null, erkl(x))); o.appendChild(t);
-        o.appendChild(pRabatt(x.listenpreis, x.preis));
+        o.appendChild(pRabatt(ant(x, x.listenpreis), ant(x, x.preis)));
         var btn = neu('button', null, drin ? 'Im Angebot' : 'Hinzufügen'); btn.type = 'button'; btn.disabled = drin; btn.setAttribute('aria-label', x.titel + (drin ? ' ist im Angebot' : ' hinzufügen'));
         btn.addEventListener('click', function () { if (!anzahl(x.k)) { korb.push({ k: x.k, inkl: false }); zeichnenKorb(); } }); o.appendChild(btn); zusListe.appendChild(o);
       });
       if (window.__angPreis) window.__angPreis();
     };
     var monate = Number(rg.monate || 12), zeitraum = datumKurz(rg.ab) + ' bis ' + datumKurz(rg.ende);
+    // Monatspreis aus dem Saisonpreis, anteilige Leistungen nur für die restlichen Monate (crm-db Migration 597, Marko 28.11.2026)
+    var mp = Number(rg.monatspreis || 49);
+    ant = function (x, p) { p = Number(p); return x && x.anteilig && monate < 12 ? Math.round(p * monate / 12 * 100) / 100 : p; };
     zeilen = function () {
-      var w = auswahl(), z = [['Club 100 Basismitgliedschaft, ' + zeitraum + (monate < 12 ? ' (' + monate + ' × 49,00 €)' : ''), 49 * monate]];
-      if (rg.rabatt) z.push(['Rabatt für Mitglieder der ' + rg.rabatt.verband + ': ' + Number(rg.rabatt.prozent).toLocaleString('de-DE') + ' % auf die Basismitgliedschaft', -Math.round(49 * monate * Number(rg.rabatt.prozent)) / 100]);
-      BS.forEach(function (b) { var n = w.extras[b.k] || 0; if (n) z.push(['Weiterer Baustein: ' + b.titel + (n > 1 ? ' × ' + n : ''), n * b.aufpreis]); });
-      AP.forEach(function (x) { if (w.extras[x.k]) z.push([x.titel, Number(x.preis)]); });
+      var w = auswahl(), z = [['Club 100 Basismitgliedschaft, ' + zeitraum + (monate < 12 ? ' (' + monate + ' × ' + euro(mp) + ')' : ''), Math.round(mp * monate * 100) / 100]];
+      if (rg.rabatt) z.push(['Rabatt für Mitglieder der ' + rg.rabatt.verband + ': ' + Number(rg.rabatt.prozent).toLocaleString('de-DE') + ' % auf die Basismitgliedschaft', -Math.round(mp * monate * Number(rg.rabatt.prozent)) / 100]);
+      BS.forEach(function (b) { var n = w.extras[b.k] || 0; if (n) z.push(['Weiterer Baustein: ' + b.titel + (b.anteilig && monate < 12 ? ' (anteilig, ' + monate + ' Monate)' : '') + (n > 1 ? ' × ' + n : ''), n * ant(b, b.aufpreis)]); });
+      AP.forEach(function (x) { if (w.extras[x.k]) z.push([x.titel + (x.anteilig && monate < 12 ? ' (anteilig, ' + monate + ' Monate)' : ''), ant(x, x.preis)]); });
       return z;
     };
     var extras = function () { return auswahl().extras; };

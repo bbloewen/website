@@ -46,7 +46,7 @@ def liste(bausteine, preis_feld=None, praefix=""):
     for b in bausteine:
         preis = ""
         if preis_feld and b.get(preis_feld) not in (None, ""):
-            preis = f'<span class="paket-preis">{esc(praefix + euro(b[preis_feld]))}</span>'
+            preis = f'<span class="paket-preis">{esc(praefix + euro(b[preis_feld]) + (" pro Saison" if b.get("anteilig") else ""))}</span>'
         text = f'<span class="paket-text">{esc(b["text"])}</span>' if b.get("text") else ""
         zeilen.append(f'<li><span class="paket-kopf"><span class="paket-titel">{esc(b.get("titel", ""))}</span>{preis}</span>{text}</li>')
     return "<ul class=\"paket-liste\">" + "".join(zeilen) + "</ul>"
@@ -86,7 +86,7 @@ def abschnitt(p, stand):
         f'<p class="t-h4" style="margin:4px 0 0">{esc(p.get("name", ""))}</p>'
         + (f'<p class="t-body-sm">{esc(preis)} (netto, zzgl. MwSt.).</p>' if preis else "")
         + f'<div class="paket-raster">{k_html}</div>'
-        f'<p class="t-caption paket-stand">Alle Preise netto, zzgl. MwSt. Stand: {esc(datum(stand))}.</p>'
+        f'<p class="t-caption paket-stand">Alle Preise netto, zzgl. MwSt. Wer während der Saison einsteigt, zahlt das Paket und Leistungen „pro Saison“ nur für die restlichen Monate. Stand: {esc(datum(stand))}.</p>'
         '</div>'
         '<style>.paket-raster{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:16px}'
         '.paket-liste{list-style:none;margin:8px 0 0;padding:0}.paket-liste li{padding:8px 0;border-top:1px solid var(--border-subtle,#e5e7eb)}'
