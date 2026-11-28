@@ -66,8 +66,8 @@
       "lastmod": "2026-11-02"
     },
     "index.html": {
-      "hash": "eff082b4a328e2b850f28877e6762945159aa7e0",
-      "lastmod": "2026-11-24"
+      "hash": "a67d753810b3819d63a2d75f967a82a63db02811",
+      "lastmod": "2026-11-28"
     },
     "kontakt.html": {
       "hash": "bcdee5b2d09949e6743a2841214ca41fc525ff7f",
@@ -82,12 +82,12 @@
       "lastmod": "2026-08-08"
     },
     "news/aktuelles.html": {
-      "hash": "cb5a03d13a8aa5f77fb7ddf0a7f9084d2fdc4f8c",
-      "lastmod": "2026-11-24"
+      "hash": "ac33101bb5e5a1c70b788ffca2c2bedd051ce43f",
+      "lastmod": "2026-11-28"
     },
     "news/artikel/2025-04-22_profis_playoff-heimspiel-freitag.html": {
-      "hash": "dad3f4516527eeeb10bfd96e33d32125ed95c4bd",
-      "lastmod": "2026-11-24"
+      "hash": "02fb7acb41a5626009f54bc51152349692402660",
+      "lastmod": "2026-11-28"
     },
     "news/artikel/2025-04-29_profis_achtelfinale-aus.html": {
       "hash": "c38eb425968ac35de960a97abce9a1fde0a3192a",
@@ -266,8 +266,12 @@
       "lastmod": "2026-11-21"
     },
     "news/artikel/2026-11-24_club_mut-braucht-orte-basketball-loewen-bei-der-werkstatt-der-mut.html": {
-      "hash": "06bbdbb04c866f9e760bb02407c63f792f87b844",
-      "lastmod": "2026-11-25"
+      "hash": "d40b5859d38368a5a2060a530766a836c5a4cdea",
+      "lastmod": "2026-11-28"
+    },
+    "news/artikel/2026-11-28_profis_auswaertsspiel-in-speyer-basketball-loewen-erfurt-wollen-nac.html": {
+      "hash": "981875ad84cfcccaa494db6ab289c7dcaca9f011",
+      "lastmod": "2026-11-28"
     },
     "news/newsletter/index.html": {
       "hash": "15f905fd97b23911aaa45315344d4884b04d01fe",
@@ -318,8 +322,8 @@
       "lastmod": "2026-11-22"
     },
     "saison/profis.html": {
-      "hash": "a9dcb9f8bc7f8199b1c346df78513175e1e60a9d",
-      "lastmod": "2026-11-24"
+      "hash": "8d682e01b0042a663322028746703a59677e2d85",
+      "lastmod": "2026-11-28"
     },
     "saison/profis/gameday/2026-10-11-bba-ludwigsburg.html": {
       "hash": "ec65bc74b9fa6dbebf16bb7f4a85e73244bf1dc8",
