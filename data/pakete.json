@@ -1,0 +1,187 @@
+{
+  "stand": "2026-11-28T14:00:06",
+  "pakete": [
+    {
+      "art": "loewenstark",
+      "name": "Löwenstarker Partner",
+      "wahl": [
+        {
+          "text": "Ein zweiter VIP-Platz, etwa für Kundengespräche beim Spiel.",
+          "titel": "Weitere VIP-Dauerkarte",
+          "listenpreis": 1000
+        },
+        {
+          "text": "Wir stellen Ihr Unternehmen unseren Fans im Newsletter und im digitalen Spieltagsheft vor.",
+          "titel": "Partnervorstellung: Newsletter und Digitales Spieltagsheft"
+        },
+        {
+          "text": "Ihr Unternehmen wird bei einem Heimspiel auf dem Spielfeld vorgestellt, mit Hallensprecherin und Videowand.",
+          "titel": "Partnervorstellung: Spielfeld"
+        },
+        {
+          "text": "30 Tickets der Kategorie 2 für Mitarbeitende, Familien oder Kunden, frei auf die Heimspiele verteilbar.",
+          "titel": "Ticketpaket: Kategorie 2 - 30 Einzeltickets für die Saison",
+          "listenpreis": 330
+        }
+      ],
+      "preis": 5000,
+      "bundle": "BU-LOEWENSTARK",
+      "aufpreis": [],
+      "standard": [
+        {
+          "text": "Ihr Name läuft bei jedem Heimspiel auf der LED-Bande, vor den Zuschauern in der Halle und im Livestream.",
+          "titel": "LED-Bande (Unterstützergruppe)"
+        },
+        {
+          "text": "Ihr Logo auf der Sponsorenwand im Zuschauer- und VIP-Bereich.",
+          "titel": "Platz auf der Sponsorenwand"
+        },
+        {
+          "text": "Ihr Logo mit Link auf basketball-loewen.com.",
+          "titel": "Logo-Platzierung auf der Website (Bereich Sponsoring)"
+        },
+        {
+          "text": "Ein Platz im VIP-Bereich bei allen Heimspielen, mit Catering und den Entscheidern aus der Region.",
+          "titel": "1 VIP-Dauerkarte"
+        }
+      ],
+      "vip_preis": 700,
+      "wahl_anzahl": 2,
+      "beschreibung": "Paket der Simplified ILC-Methode: LED-Bande (Unterstützergruppe), Sponsorenwand, Logo auf der Website, 1 VIP-Dauerkarte und zwei Zugaben nach Wahl."
+    },
+    {
+      "art": "club100",
+      "name": "Club 100 Basismitgliedschaft",
+      "wahl": [
+        {
+          "max": 1,
+          "text": "Ihr Logo zusammen mit den Logos der anderen Club-100-Mitglieder in einer gemeinsamen Logoschleife auf der LED-Bande bei den Heimspielen.",
+          "titel": "LED-Bande: Logoschleife Club-100-Mitglieder",
+          "anteilig": true,
+          "aufpreis": 50,
+          "vorauswahl": 1,
+          "listenpreis": 100
+        },
+        {
+          "max": 1,
+          "text": "Ihr Logo zusammen mit den Logos der anderen Club-100-Mitglieder als Logoschleife im Livestream, einmal pro Spiel als Bauchbinde.",
+          "titel": "Livestream: Logoschleife Club-100-Mitglieder",
+          "anteilig": true,
+          "aufpreis": 50,
+          "listenpreis": 100
+        },
+        {
+          "text": "Übertragbare Dauerkarte der Kategorie 2 für alle Heimspiele der Saison.",
+          "titel": "1 Dauerkarte Kategorie 2",
+          "anteilig": true,
+          "aufpreis": 73,
+          "vorauswahl": 2,
+          "listenpreis": 146
+        },
+        {
+          "text": "Dauerkarte der Kategorie 1 für alle Heimspiele der Saison.",
+          "titel": "1 Dauerkarte Kategorie 1",
+          "anteilig": true,
+          "aufpreis": 97,
+          "listenpreis": 194
+        },
+        {
+          "text": "10 Einzeltickets der Kategorie 2 als Gutscheincodes, frei auf die Heimspiele der Saison verteilbar.",
+          "titel": "10 Einzeltickets Kategorie 2",
+          "aufpreis": 55,
+          "listenpreis": 110
+        },
+        {
+          "text": "10 Einzeltickets der Kategorie 1 als Gutscheincodes, frei auf die Heimspiele der Saison verteilbar.",
+          "titel": "10 Einzeltickets Kategorie 1",
+          "aufpreis": 75,
+          "listenpreis": 150
+        },
+        {
+          "max": 4,
+          "text": "Besuch eines Heimspiels im VIP-Bereich mit Catering, je Person.",
+          "titel": "1 VIP-Tageskarte",
+          "aufpreis": 90,
+          "listenpreis": 100
+        }
+      ],
+      "preis": 588,
+      "budget": 400,
+      "bundle": "BU-CLUB100",
+      "aufpreis": [
+        {
+          "max": 1,
+          "text": "Eigene Einblendung auf der LED-Bande bei 2 Heimspielen der laufenden Saison.",
+          "preis": 357.14,
+          "titel": "LED-Bande zum Kennenlernen: Eigene Einblendung bei 2 Heimspielen",
+          "listenpreis": 714.29
+        },
+        {
+          "max": 1,
+          "text": "Exklusive Präsentation eines Heimspieltags: „Präsentiert von …“ in der gesamten Spieltagskommunikation und in allen Medien, Präsenz im Foyer und im VIP-Bereich, Gewinnspiel möglich, 6 VIP-Tickets. Die Gestaltung des Heimspieltags stimmen wir im Vorfeld mit Ihnen ab.",
+          "preis": 2500,
+          "titel": "Spieltagspräsentator: Ein Heimspiel exklusiv präsentieren",
+          "listenpreis": 2500
+        },
+        {
+          "max": 1,
+          "text": "Hallensprecher, Livestream und Social Media nennen den besten Spieler eines Heimspiels mit Ihrem Namen.",
+          "preis": 125,
+          "titel": "Präsentation „Top Scorer des Spiels“ bei einem Heimspiel",
+          "listenpreis": 250
+        },
+        {
+          "max": 1,
+          "text": "Sie stellen eigene Werbemittel wie Aufsteller, Flyer oder Muster an einem Heimspieltag im Foyer oder im VIP-Bereich auf.",
+          "preis": 750,
+          "titel": "Eigene Werbemittel an einem Heimspieltag",
+          "listenpreis": 1500
+        },
+        {
+          "max": 1,
+          "text": "2 Posts und 4 Storys über Ihr Unternehmen auf den Social-Media-Kanälen der Basketball Löwen.",
+          "preis": 250,
+          "titel": "Social Media: 2 Posts und 4 Storys auf unseren Kanälen",
+          "listenpreis": 500
+        },
+        {
+          "max": 1,
+          "text": "Ihr Logo im regelmäßigen Newsletter der Basketball Löwen.",
+          "preis": 250,
+          "titel": "Logo im Newsletter",
+          "anteilig": true,
+          "listenpreis": 500
+        },
+        {
+          "max": 1,
+          "text": "Besuch eines Heimspiels im VIP-Bereich mit Catering, je Person.",
+          "preis": 90,
+          "titel": "Zusätzliche VIP-Tageskarte",
+          "listenpreis": 100
+        }
+      ],
+      "standard": [
+        {
+          "text": "Ihr Logo mit Link auf Ihre Website auf der Seite des Löwen-Clubs der 100 auf basketball-loewen.com.",
+          "titel": "Ihr Logo mit Link auf der Seite des Löwen-Clubs der 100"
+        },
+        {
+          "text": "Erlaubnis, den Namen und das Logo der Basketball Löwen auf der eigenen Website zu nutzen, zum Beispiel mit dem Hinweis auf die Mitgliedschaft im Löwen-Club der 100.",
+          "titel": "Erlaubnis, den Namen und das Logo der Basketball Löwen auf der eigenen Website zu nutzen"
+        },
+        {
+          "text": "Einladungen zu den Netzwerkveranstaltungen der Basketball Löwen während der Saison, mit exklusiven Kontakten zu potenziellen Kunden und Lieferanten außerhalb des Geschäftsalltags.",
+          "titel": "Einladung zu unseren Netzwerkveranstaltungen"
+        },
+        {
+          "text": "Besuch eines Heimspiels im VIP-Bereich mit Catering, je Person.",
+          "menge": 2,
+          "titel": "Besuch des VIP-Bereichs für bis zu zwei Personen zu einem Heimspiel Ihrer Wahl"
+        }
+      ],
+      "preis_monat": 49,
+      "beschreibung": "Löwen-Club der 100: Basismitgliedschaft mit Logo auf der Club-Seite, Nutzung von Name und Logo der Basketball Löwen, Einladungen zu den Netzwerkveranstaltungen, VIP-Besuch und Leistungen nach Wahl (einzeln aufgeführt)."
+    }
+  ],
+  "hinweis": "Alle Preise netto, zzgl. MwSt. Erzeugt von 305 (Produktkatalog › Konfiguration)."
+}
