@@ -610,8 +610,9 @@
        (PAYEE_ACCOUNT_RESTRICTED, Dokumente in Prüfung). Solange PAYPAL_PAUSE true ist,
        laden Einzelticket und Fanshop-Gutschein kein PayPal; Zahlart ist dann nur die Kartenzahlung
        über SumUp (sumupEinrichten). Kostenlose Bestellungen laufen weiter. Zum Freischalten
-       PAYPAL_PAUSE = false setzen, dann sind PayPal und Karte wählbar. */
-    var PAYPAL_PAUSE = true;
+       PAYPAL_PAUSE = false setzen, dann sind PayPal und Karte wählbar.
+       Wieder freigeschaltet (Marko 21.11.2026), nachdem eine Test-Order bei PayPal angenommen wurde. */
+    var PAYPAL_PAUSE = false;
 
     if (cart.productType === 'einzelticket' && !isFreeOrder) {
       document.getElementById('pay-btn').classList.add('hidden');
