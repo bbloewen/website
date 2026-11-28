@@ -1,0 +1,58 @@
+# Baut die Paketseiten neu, sobald 305 die Bundle-Konfiguration veröffentlicht (Marko 28.11.2026).
+#
+# Ablauf:
+#   1. In 305 › Produkte › Bundle › Konfiguration klickt jemand „Auf der Website veröffentlichen“ (crm-db Migration 596).
+#   2. n8n („305: Website“, alle 10 Minuten) schreibt data/pakete.json (bundle_pakete_website) und vermerkt den Auftrag.
+#   3. Dieser Lauf setzt die Leistungen und Preise in die Seiten (tools/build-pakete.py über tools/bauen.sh).
+
+name: Pakete veroeffentlichen
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - data/pakete.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pakete-veroeffentlichen
+  cancel-in-progress: false
+
+jobs:
+  veroeffentlichen:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Seiten bauen
+        run: |
+          pip install --quiet --disable-pip-version-check pillow
+          sh tools/bauen.sh
+          git checkout -- assets/presse/pakete/ 2>/dev/null || true
+
+      - name: Aenderungen committen
+        run: |
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nichts zu veroeffentlichen."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Pakete: Leistungen aus 305 in die Seiten gesetzt"
+          for versuch in 1 2 3 4; do
+            git push && exit 0
+            echo "Push abgelehnt (Versuch $versuch), hole Aenderungen und versuche es erneut."
+            git pull --rebase origin main || { git rebase --abort 2>/dev/null; exit 1; }
+          done
+          exit 1
